@@ -13,5 +13,8 @@
 		"svelte": "^3.54.0",
 		"vite": "^4.2.0"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@googlemaps/js-api-loader": "^1.15.1"
+	}
 }
