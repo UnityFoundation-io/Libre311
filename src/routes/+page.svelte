@@ -56,6 +56,7 @@
   $: if (reportNewIssueStep6)
     setTimeout(() => {
       reportNewIssueStep6 = false;
+      reduceBackGroundOpacity = true;
       scrollToTop();
     }, 5000);
 
@@ -259,6 +260,12 @@
     bind:this="{backgroundSelector}"
     class="background"
     class:background-opacity="{reduceBackGroundOpacity}"
+    class:background-opacity-report-issue="{reportNewIssue ||
+      reportNewIssueStep2 ||
+      reportNewIssueStep3 ||
+      reportNewIssueStep4 ||
+      reportNewIssueStep5 ||
+      reportNewIssueStep6}"
     transition:fade="{{ duration: 3000, quintOut, amount: 10 }}"
   >
     <div style="display: flex; align-items: center; z-index: 1">
@@ -338,9 +345,11 @@
 
             if (!reportNewIssue && !currentStep) {
               reportNewIssue = true;
+              reduceBackGroundOpacity = false;
               currentStep = 1;
             } else if (reportNewIssue) {
               reportNewIssue = false;
+              reduceBackGroundOpacity = true;
               currentStep = null;
             }
 
@@ -403,7 +412,7 @@
         <div
           id="stepIssueTypeAndDetail"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 55vw; border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 42.5vw; border-radius: 21px"
           class:visible="{reportNewIssueStep2}"
           class:hidden="{!reportNewIssueStep2}"
         >
@@ -571,7 +580,7 @@
         <div
           id="stepPhoto"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 55vw;border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 45vw;border-radius: 21px"
           class:visible="{reportNewIssueStep3}"
           class:hidden="{!reportNewIssueStep3}"
         >
@@ -579,12 +588,9 @@
             style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
           >
             Step
-            <button class="numbers">3</button>
-          </div>
-          <div
-            style="font-size: 1rem; margin-top: -0.5rem; margin-left: 3rem; margin-bottom: 0.5rem"
-          >
-            (optional)
+            <button class="numbers">3</button><span style="font-size: 1.2rem"
+              >(optional)</span
+            >
           </div>
 
           <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem"
@@ -667,13 +673,9 @@
             style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
           >
             Step
-            <button class="numbers">4</button>
-          </div>
-
-          <div
-            style="font-size: 1rem; margin-top: -0.5rem; margin-left: 3rem; margin-bottom: 0.5rem"
-          >
-            (optional)
+            <button class="numbers">4</button><span style="font-size: 1.2rem"
+              >(optional)</span
+            >
           </div>
 
           <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem"
@@ -885,7 +887,7 @@
             <span style="color:yellow">{$issueAddress}</span>
             <button
               class="button next-button"
-              style="margin-top: 2rem; margin-bottom: 1rem"
+              style="margin-top: 2rem; margin-bottom: 1rem; margin-right: 1rem"
               on:click="{() => {
                 reportNewIssueStep2 = true;
                 currentStep = 2;
@@ -942,7 +944,12 @@
 
   .background-opacity::before {
     filter: grayscale(70%) opacity(0.5);
-    transition: all 5s;
+    transition: all 4s;
+  }
+
+  .background-opacity-report-issue::before {
+    filter: grayscale(70%) opacity(0.25);
+    transition: all 4s;
   }
 
   .button {
@@ -1075,7 +1082,7 @@
     margin-top: 0.6rem;
     padding-left: 0.5rem;
     height: 2.18rem;
-    width: 19rem;
+    width: 23rem;
   }
 
   .hidden {
@@ -1100,13 +1107,13 @@
     font-size: 1.1rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    width: 85%;
+    width: 80%;
   }
 
   .upload-image {
     margin-top: 1rem;
     margin-left: 3rem;
-    width: 79%;
+    width: 74.5%;
     background-color: white;
     height: 3rem;
     border-style: dashed;
