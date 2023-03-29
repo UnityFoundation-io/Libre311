@@ -155,6 +155,17 @@
     return date.toLocaleString();
   };
 
+  const resetState = () => {
+    reduceBackGroundOpacity = true;
+    clearMarkers();
+    scrollToTop();
+    issueAddress.set();
+    issueDescription.set();
+    $issueDetail = null;
+    $issueType = null;
+    currentStep = null;
+  };
+
   onMount(() => {
     scrollToTop();
 
@@ -301,8 +312,8 @@
     >
       <div class="slogan-title">Empowering Cities Together:</div>
       <div class="slogan-text">
-        &nbsp;&nbsp; Notice, Report, and Enhance City Life with Our All-in-One
-        Mobile App!
+        &nbsp;&nbsp; Share the location of a walking, biking, or transit issue
+        with our mobile app
       </div>
 
       <div
@@ -342,7 +353,6 @@
       white 100%
     )"
           on:click="{() => {
-            console.log('currentStep', currentStep);
             scrollToSection();
 
             if (!reportNewIssue && !currentStep) {
@@ -351,36 +361,27 @@
               currentStep = 1;
             } else if (reportNewIssue) {
               reportNewIssue = false;
-              reduceBackGroundOpacity = true;
-              currentStep = null;
+              resetState();
             }
 
             if (!reportNewIssue && currentStep === 2) {
               reportNewIssueStep2 = false;
-              reduceBackGroundOpacity = true;
-              currentStep = null;
-              scrollToTop();
+              resetState();
             }
 
             if (!reportNewIssue && currentStep === 3) {
               reportNewIssueStep3 = false;
-              reduceBackGroundOpacity = true;
-              currentStep = null;
-              scrollToTop();
+              resetState();
             }
 
             if (!reportNewIssue && currentStep === 4) {
               reportNewIssueStep4 = false;
-              reduceBackGroundOpacity = true;
-              currentStep = null;
-              scrollToTop();
+              resetState();
             }
 
             if (!reportNewIssue && currentStep === 5) {
               reportNewIssueStep5 = false;
-              reduceBackGroundOpacity = true;
-              currentStep = null;
-              scrollToTop();
+              resetState();
             }
 
             // Ask for user's current location and center around it
@@ -1016,7 +1017,7 @@
     color: black;
     border: none;
     cursor: default;
-    margin-top: 2rem;
+    margin-top: 1.25rem;
     margin-left: 1rem;
     margin-right: 3rem;
     float: right;
