@@ -310,24 +310,26 @@
         style="display: flex; justify-content: space-around"
       >
         {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5}
-          <button
-            class="button"
-            style="background-image: radial-gradient(
+          <a sveltekit:prefetch href="/reported-issues">
+            <button
+              class="button"
+              style="background-image: radial-gradient(
       circle at 4% 60%,
       rgba(190, 212, 250, 0.9),
       rgba(190, 212, 250, 0.9) 14%,
       white 20%,
       white 100%
-    );"
+    )"
+            >
+              <img
+                src="{searchSVG}"
+                alt="search for reported issues"
+                style="vertical-align: -0.25rem; margin-right: 1.6rem; margin-left: -0.7rem"
+                height="23rem"
+              />
+              Find a Reported Issue
+            </button></a
           >
-            <img
-              src="{searchSVG}"
-              alt="search for reported issues"
-              style="vertical-align: -0.25rem; margin-right: 1.6rem; margin-left: -0.7rem"
-              height="23rem"
-            />
-            Find a Reported Issue
-          </button>
         {/if}
 
         <button
@@ -355,24 +357,28 @@
 
             if (!reportNewIssue && currentStep === 2) {
               reportNewIssueStep2 = false;
+              reduceBackGroundOpacity = true;
               currentStep = null;
               scrollToTop();
             }
 
             if (!reportNewIssue && currentStep === 3) {
               reportNewIssueStep3 = false;
+              reduceBackGroundOpacity = true;
               currentStep = null;
               scrollToTop();
             }
 
             if (!reportNewIssue && currentStep === 4) {
               reportNewIssueStep4 = false;
+              reduceBackGroundOpacity = true;
               currentStep = null;
               scrollToTop();
             }
 
             if (!reportNewIssue && currentStep === 5) {
               reportNewIssueStep5 = false;
+              reduceBackGroundOpacity = true;
               currentStep = null;
               scrollToTop();
             }
