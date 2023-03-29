@@ -65,11 +65,6 @@
   }
 
   function scrollToSection() {
-    // if (reportNewIssue) {
-    //   scrollToTop();
-    //   return;
-    // }
-
     const y =
       sectionNewReport.getBoundingClientRect().top + window.pageYOffset + 200;
     window.scrollTo({ top: y, behavior: "smooth" });
