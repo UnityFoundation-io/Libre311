@@ -37,7 +37,8 @@
     reportNewIssueStep3 = false,
     reportNewIssueStep4 = false,
     reportNewIssueStep5 = false,
-    reportNewIssueStep6 = false;
+    reportNewIssueStep6 = false,
+    currentStep = null;
 
   let backgroundSelector,
     sectionNewReport,
@@ -47,8 +48,7 @@
     bounds,
     inputIssueAddress,
     issueTypeSelector,
-    issueDetailSelector,
-    currentStep;
+    issueDetailSelector;
 
   let zoom = 15;
   let markers = [];
@@ -56,19 +56,19 @@
   $: if (reportNewIssueStep6)
     setTimeout(() => {
       reportNewIssueStep6 = false;
-      reduceBackGroundOpacity = true;
+      resetState();
       scrollToTop();
-    }, 5000);
+    }, 4000);
 
   function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function scrollToSection() {
-    if (reportNewIssue) {
-      scrollToTop();
-      return;
-    }
+    // if (reportNewIssue) {
+    //   scrollToTop();
+    //   return;
+    // }
 
     const y =
       sectionNewReport.getBoundingClientRect().top + window.pageYOffset + 200;
@@ -156,14 +156,15 @@
   };
 
   const resetState = () => {
+    setTimeout(() => scrollToTop(), 100);
     reduceBackGroundOpacity = true;
     clearMarkers();
-    scrollToTop();
     issueAddress.set();
     issueDescription.set();
     $issueDetail = null;
     $issueType = null;
-    currentStep = null;
+    // currentStep = null;
+    setTimeout(() => (currentStep = null), 700);
   };
 
   onMount(() => {
@@ -353,7 +354,9 @@
       white 100%
     )"
           on:click="{() => {
-            scrollToSection();
+            setTimeout(() => {
+              scrollToSection();
+            }, 10);
 
             if (!reportNewIssue && !currentStep) {
               reportNewIssue = true;
@@ -563,6 +566,7 @@
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
+            disabled="{$issueType === null || $issueDetail === null}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
               reportNewIssueStep2 = false;
@@ -929,8 +933,8 @@
   .background {
     width: 100vw;
     height: 100vh;
-    overflow: hidden;
     position: relative;
+    overflow: hidden;
     height: 1550px;
     background-repeat: no-repeat;
   }
@@ -939,7 +943,7 @@
     content: "";
     background-image: url("$lib/streetview16-9.png");
     background-repeat: no-repeat center center fixed;
-    background-position: 100% 42.5%;
+    background-position: 100% 67%;
     background-size: cover;
     position: absolute;
     top: 0;
