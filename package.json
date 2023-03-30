@@ -15,6 +15,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@googlemaps/js-api-loader": "^1.15.1"
+		"@googlemaps/js-api-loader": "^1.15.1",
+		"flatpickr": "^4.6.13"
 	}
 }

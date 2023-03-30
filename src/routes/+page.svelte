@@ -12,6 +12,7 @@
   import pageBackwardsSVG from "../icons/pagebackwards.svg";
   import pageLastSVG from "../icons/pagelast.svg";
   import cameraSVG from "../icons/camera.svg";
+  import imageSVG from "../icons/image.svg";
   import issueAddress from "../stores/issueAddress";
   import issueTime from "../stores/issueTime";
   import issueType from "../stores/issueType";
@@ -20,6 +21,8 @@
   import issueSubmitterName from "../stores/issueSubmitterName";
   import issueSubmitterContact from "../stores/issueSubmitterContact";
   import userCurrentLocation from "../stores/userCurrentLocation";
+  import resetDate from "../stores/resetDate";
+  import DateRangePicker from "../lib/DateRangePicker.svelte";
   import "$lib/global.css";
 
   let mockData = [
@@ -27,12 +30,12 @@
       service_request_id: 638344,
       status: "closed",
       status_notes: "Duplicate request.",
-      service_name: "Sidewalk and Curb Issues",
+      service_name: "Sidewalk",
       service_code: "006",
       description: "Sidewalk damaged",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-03-14T03:17:12-08:00",
+      requested_datetime: "2022-03-14T03:17:12-08:00",
       updated_datetime: "2010-04-14T06:37:38-08:00",
       expected_datetime: "2010-04-15T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -40,18 +43,19 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638344.jpg ",
+      media_url:
+        "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
       service_request_id: 638349,
       status: "open",
       status_notes: null,
-      service_name: "Sidewalk and Curb Issues",
+      service_name: "Sidewalk",
       service_code: "006",
       description: "Missing access ramp",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-04-22T01:31:28-08:00",
+      requested_datetime: "2022-04-22T01:31:28-08:00",
       updated_datetime: "2010-04-19T06:37:38-08:00",
       expected_datetime: "2010-04-19T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -59,7 +63,7 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638349.jpg",
+      media_url: null,
     },
     {
       service_request_id: 638349,
@@ -70,7 +74,7 @@
       description: "No audible aid",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-07-01T08:38:12-08:00",
+      requested_datetime: "2022-07-01T08:38:12-08:00",
       updated_datetime: "2010-04-19T06:37:38-08:00",
       expected_datetime: "2010-04-19T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -78,7 +82,8 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638349.jpg",
+      media_url:
+        "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
       service_request_id: 638349,
@@ -89,7 +94,7 @@
       description: "Bus is always late",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-06-29T05:12:28-08:00",
+      requested_datetime: "2022-06-29T05:12:28-08:00",
       updated_datetime: "2010-04-19T06:37:38-08:00",
       expected_datetime: "2010-04-19T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -97,18 +102,18 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638349.jpg",
+      media_url: null,
     },
     {
       service_request_id: 638349,
       status: "open",
       status_notes: null,
-      service_name: "Sidewalk and Curb Issues",
+      service_name: "Sidewalk",
       service_code: "006",
       description: "Missing access ramp",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-06-09T01:23:38-08:00",
+      requested_datetime: "2022-06-09T01:23:38-08:00",
       updated_datetime: "2010-06-9T06:37:38-08:00",
       expected_datetime: "2010-04-19T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -116,7 +121,8 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638349.jpg",
+      media_url:
+        "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
       service_request_id: 638349,
@@ -127,7 +133,7 @@
       description: "No audible aid",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-02-11T02:21:32-08:00",
+      requested_datetime: "2022-02-11T02:21:32-08:00",
       updated_datetime: "2010-02-11T06:37:38-08:00",
       expected_datetime: "2010-04-19T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -135,7 +141,8 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638349.jpg",
+      media_url:
+        "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
       service_request_id: 638349,
@@ -146,7 +153,7 @@
       description: "Bus is always late",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-03-01T06:12:13-08:00",
+      requested_datetime: "2022-03-01T06:12:13-08:00",
       updated_datetime: "2010-04-19T06:37:38-08:00",
       expected_datetime: "2010-04-19T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -154,7 +161,7 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638349.jpg",
+      media_url: null,
     },
     {
       service_request_id: 638349,
@@ -165,7 +172,7 @@
       description: "Too long",
       agency_responsible: null,
       service_notice: null,
-      requested_datetime: "2010-05-15T06:37:38-08:00",
+      requested_datetime: "2022-05-15T06:37:38-08:00",
       updated_datetime: "2010-04-19T06:37:38-08:00",
       expected_datetime: "2010-04-19T06:37:38-08:00",
       address: "8TH AVE and JUDAH ST",
@@ -173,9 +180,94 @@
       zipcode: 94122,
       lat: 37.762221815,
       long: -122.4651145,
-      media_url: "http://city.gov.s3.amazonaws.com/requests/media/638349.jpg",
+      media_url:
+        "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
+    },
+
+    {
+      service_request_id: 638349,
+      status: "open",
+      status_notes: null,
+      service_name: "Bus Stop",
+      service_code: "006",
+      description: "No shelter",
+      agency_responsible: null,
+      service_notice: null,
+      requested_datetime: "2022-06-19T03:27:32-08:00",
+      updated_datetime: "2010-02-11T06:37:38-08:00",
+      expected_datetime: "2010-04-19T06:37:38-08:00",
+      address: "8TH AVE and JUDAH ST",
+      address_id: 545483,
+      zipcode: 94122,
+      lat: 37.762221815,
+      long: -122.4651145,
+      media_url:
+        "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
+    },
+    {
+      service_request_id: 638349,
+      status: "open",
+      status_notes: null,
+      service_name: "Bike Lane",
+      service_code: "006",
+      description: "Not present",
+      agency_responsible: null,
+      service_notice: null,
+      requested_datetime: "2022-08-11T02:02:03-08:00",
+      updated_datetime: "2010-04-19T06:37:38-08:00",
+      expected_datetime: "2010-04-19T06:37:38-08:00",
+      address: "8TH AVE and JUDAH ST",
+      address_id: 545483,
+      zipcode: 94122,
+      lat: 37.762221815,
+      long: -122.4651145,
+      media_url: null,
+    },
+    {
+      service_request_id: 638349,
+      status: "closed",
+      status_notes: null,
+      service_name: "Bike Lane",
+      service_code: "006",
+      description: "Narrow",
+      agency_responsible: null,
+      service_notice: null,
+      requested_datetime: "2022-07-05T06:37:38-08:00",
+      updated_datetime: "2010-04-19T06:37:38-08:00",
+      expected_datetime: "2010-04-19T06:37:38-08:00",
+      address: "8TH AVE and JUDAH ST",
+      address_id: 545483,
+      zipcode: 94122,
+      lat: 37.762221815,
+      long: -122.4651145,
+      media_url:
+        "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
   ];
+
+  let filteredMockData = mockData;
+  let filterArray = [];
+
+  // Filtering Results
+  $: if (filterArray.find((filter) => filter.hasOwnProperty("issueType"))) {
+    filteredMockData = mockData;
+
+    const issueTypeFilter = filterArray.find((filter) =>
+      filter.hasOwnProperty("issueType")
+    )["issueType"];
+
+    filteredMockData = filteredMockData.filter(
+      (issue) => issue.service_name === issueTypeFilter
+    );
+
+    if (filterArray.length === 2) filterByDates();
+  } else if (
+    filterArray.length === 1 &&
+    filterArray.find((filter) => filter.hasOwnProperty("dates"))
+  ) {
+    filteredMockData = mockData;
+    filterByDates();
+  }
 
   const startRendering = 2000;
 
@@ -205,7 +297,8 @@
     bounds,
     inputIssueAddress,
     issueTypeSelector,
-    issueDetailSelector;
+    issueDetailSelector,
+    issueTypeSelectSelector;
 
   let zoom = 15;
   let markers = [];
@@ -217,17 +310,32 @@
       scrollToTop();
     }, 4000);
 
-  function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  const filterByDates = () => {
+    const selectedDates = filterArray.find((filter) =>
+      filter.hasOwnProperty("dates")
+    )["dates"];
 
-  function scrollToSection() {
+    const filterInitialDate = new Date(selectedDates[0]);
+    const filterEndingDate = new Date(selectedDates[1]);
+
+    filteredMockData = filteredMockData.filter(
+      (issue) =>
+        new Date(issue.requested_datetime) > filterInitialDate &&
+        new Date(issue.requested_datetime) < filterEndingDate
+    );
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const scrollToSection = () => {
     const y =
       sectionNewReport.getBoundingClientRect().top + window.pageYOffset + 200;
     window.scrollTo({ top: y, behavior: "smooth" });
-  }
+  };
 
-  function geocodeLatLng(lat, lng) {
+  const geocodeLatLng = (lat, lng) => {
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
     geocoder.geocode({ location: latlng }, (results, status) => {
@@ -242,7 +350,7 @@
         console.log(`Geocoder failed due to: ${status}`);
       }
     });
-  }
+  };
 
   const setNewCenter = (lat, lng) => {
     let newCenter = new google.maps.LatLng(lat, lng);
@@ -498,7 +606,7 @@
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
       out:fade="{{ duration: 300, quintOut }}"
     >
-      <div class="slogan-title">Empowering Cities Together:</div>
+      <div class="slogan-title">Empowering Communities Together:</div>
       <div class="slogan-text">
         &nbsp;&nbsp; Share the location of a walking, biking, or transit issue
         with our mobile app
@@ -1150,19 +1258,14 @@
             <span style="color: white; font-weight: 500; font-size: 1.3rem">
               Filters
             </span>
-            <select
-              on:change="{(e) => {
-                console.log(e.target.value);
-              }}"
-            >
-              <option disabled selected value="">Status</option>
-              <option value="Closed">Closed</option>
-              <option value="Open">Open</option>
-            </select>
 
             <select
+              bind:this="{issueTypeSelectSelector}"
               on:change="{(e) => {
-                console.log(e.target.value);
+                filterArray = filterArray.filter(
+                  (filter) => !filter.hasOwnProperty('issueType')
+                );
+                filterArray.push({ issueType: e.target.value });
               }}"
             >
               <option disabled selected value="">Issue Type</option>
@@ -1178,24 +1281,73 @@
               }}"
             >
               <option disabled selected value="">Reported By</option>
-              <option value="Sidewalk">Sidewalk</option>
-              <option value="Bike Lane">Bike Lane</option>
-              <option value="Bus Stop">Bus Stop</option>
-              <option value="Traffic Light">Traffic Light</option>
+              <option value="user1">User 1</option>
+              <option value="user2">User 2</option>
+              <option value="user3">User 3</option>
+              <option value="user4">User 4</option>
             </select>
 
-            <select
-              on:change="{(e) => {
-                console.log(e.target.value);
+            <DateRangePicker
+              on:datesSelected="{(e) => {
+                filterArray = filterArray.filter(
+                  (filter) => !filter.hasOwnProperty('dates')
+                );
+                if (e.detail.length === 2) {
+                  filterArray.push({ dates: e.detail });
+
+                  filterArray = filterArray; // Reactive statement to trigger the filter
+                }
               }}"
-            >
-              <option disabled selected value="">Date Range</option>
-              <option value="Sidewalk">Sidewalk</option>
-              <option value="Bike Lane">Bike Lane</option>
-              <option value="Bus Stop">Bus Stop</option>
-              <option value="Traffic Light">Traffic Light</option>
-            </select>
+            />
           </div>
+          {#if filterArray.find((filter) => filter.hasOwnProperty("issueType"))}
+            <div
+              style="color: white; font-size: 0.8rem; margin-left: 2.4rem; margin-top: 1rem"
+            >
+              {filterArray[filterArray.findIndex((obj) => "issueType" in obj)]
+                .issueType}
+
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <img
+                src="{closeSVG}"
+                class="white-closeSVG"
+                alt="remove filter"
+                width="14rem"
+                on:click="{() => {
+                  filterArray = filterArray.filter(
+                    (filter) => !filter.hasOwnProperty('issueType')
+                  );
+                  filteredMockData = mockData;
+                  issueTypeSelectSelector.selectedIndex = 0;
+                }}"
+              />
+            </div>
+          {/if}
+
+          {#if filterArray.find((filter) => filter.hasOwnProperty("dates"))}
+            <div
+              style="color: white; font-size: 0.8rem; margin-left: 2.4rem; margin-top: 1rem"
+            >
+              From {filterArray[filterArray.findIndex((obj) => "dates" in obj)]
+                .dates[0]} to {filterArray[
+                filterArray.findIndex((obj) => "dates" in obj)
+              ].dates[1]}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <img
+                src="{closeSVG}"
+                class="white-closeSVG"
+                alt="remove filter"
+                width="14rem"
+                on:click="{() => {
+                  filterArray = filterArray.filter(
+                    (filter) => !filter.hasOwnProperty('dates')
+                  );
+                  filteredMockData = mockData;
+                  resetDate.set(true);
+                }}"
+              />
+            </div>
+          {/if}
 
           <div
             style="font-size: 1.5rem; font-weight: 500; color: white; margin: 1rem 0 1rem 0; text-align: center"
@@ -1207,22 +1359,37 @@
           <table class="issues-table">
             <thead>
               <tr>
-                <th>Issue Type</th>
-                <th>Description</th>
-                <th>Media</th>
-                <th>Requested At</th>
-                <th>Status</th>
+                <th style="width: 14rem">Issue Type</th>
+                <th style="width: 12rem">Description</th>
+                <th style="width: 7rem">Media</th>
+                <th style="width: 14rem">Requested At</th>
               </tr>
             </thead>
 
             <tbody>
-              {#each mockData as issue}
+              {#each filteredMockData as issue}
                 <tr>
                   <td>{issue.service_name}</td>
                   <td>{issue.description}</td>
-                  <td>-</td>
+                  <td style="text-align:center">
+                    {#if issue.media_url !== null}
+                      <a href="{issue.media_url}" target="_blank">
+                        <img
+                          src="{imageSVG}"
+                          alt="issue media"
+                          width="15rem"
+                          style="margin-right: 3.7rem"
+                        />
+                      </a>
+                    {:else}
+                      <span style="margin-right: 3.6rem">-</span>
+                    {/if}
+                  </td>
                   <td>{formatDate(issue.requested_datetime)}</td>
-                  <td>{issue.status}</td>
+                </tr>
+              {:else}
+                <tr>
+                  <td>No Results Found</td>
                 </tr>
               {/each}
             </tbody>
@@ -1234,6 +1401,14 @@
 {/if}
 
 <style>
+  .white-closeSVG {
+    cursor: pointer;
+    margin-left: 0.2rem;
+    filter: brightness(5);
+    vertical-align: sub;
+    border: solid 1px white;
+  }
+
   .background {
     width: 100vw;
     height: 100vh;
@@ -1412,6 +1587,7 @@
     font-size: 1.1rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
+    border-radius: 10px;
   }
 
   textarea {
@@ -1441,8 +1617,11 @@
   }
 
   .issues-table {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: white;
     width: 55vw;
+    max-height: 200px;
+    overflow-y: auto;
+    display: block;
   }
 
   thead tr {
