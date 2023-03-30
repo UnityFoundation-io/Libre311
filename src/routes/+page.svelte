@@ -13,6 +13,10 @@
   import pageLastSVG from "../icons/pagelast.svg";
   import cameraSVG from "../icons/camera.svg";
   import imageSVG from "../icons/image.svg";
+  import sidewalkSVG from "../icons/sidewalk.svg";
+  import busstopSVG from "../icons/busstop.svg";
+  import bikelaneSVG from "../icons/bikelane.svg";
+  import trafficlightSVG from "../icons/trafficlight.svg";
   import issueAddress from "../stores/issueAddress";
   import issueTime from "../stores/issueTime";
   import issueType from "../stores/issueType";
@@ -260,13 +264,19 @@
       (issue) => issue.service_name === issueTypeFilter
     );
 
-    if (filterArray.length === 2) filterByDates();
+    if (filterArray.length === 1) addIssuesToMap();
+
+    if (filterArray.length === 2) {
+      filterByDates();
+      addIssuesToMap();
+    }
   } else if (
     filterArray.length === 1 &&
     filterArray.find((filter) => filter.hasOwnProperty("dates"))
   ) {
     filteredMockData = mockData;
     filterByDates();
+    addIssuesToMap();
   }
 
   const startRendering = 2000;
@@ -460,6 +470,64 @@
     return formattedDate;
   };
 
+  const addIssuesToMap = async () => {
+    clearMarkers();
+
+    if (filteredMockData && filteredMockData.length > 0) {
+      filteredMockData.forEach((issue) => {
+        let marker, urlIcon;
+
+        switch (issue.service_name) {
+          case "Sidewalk":
+            urlIcon = sidewalkSVG;
+            break;
+          case "Bus Stop":
+            urlIcon = busstopSVG;
+            break;
+          case "Traffic Light":
+            urlIcon = trafficlightSVG;
+            break;
+          case "Bike Lane":
+            urlIcon = bikelaneSVG;
+            break;
+        }
+
+        marker = new google.maps.Marker({
+          position: {
+            lat: parseFloat(issue.lat),
+            lng: parseFloat(issue.long),
+          },
+          map: map,
+          title: issue.name,
+          icon: {
+            scaledSize: new google.maps.Size(40, 40),
+            url: urlIcon,
+          },
+        });
+
+        markers.push(marker);
+      });
+
+      setTimeout(() => {
+        calculateBoundsAroundMarkers();
+      }, 100);
+    }
+  };
+
+  const calculateBoundsAroundMarkers = () => {
+    if (markers && bounds) {
+      let lat, lng;
+
+      for (let i = 0; i < markers.length; i++) {
+        lat = markers[i].position.lat();
+        lng = markers[i].position.lng();
+        bounds.extend({ lat, lng });
+      }
+      setNewCenter(bounds.getCenter());
+      map.fitBounds(bounds);
+    }
+  };
+
   onMount(() => {
     scrollToTop();
 
@@ -632,6 +700,7 @@
                   scrollToSection();
                 }, 10);
                 findReportedIssue = true;
+                addIssuesToMap();
               } else {
                 scrollToTop();
                 findReportedIssue = false;
@@ -1319,6 +1388,7 @@
                   );
                   filteredMockData = mockData;
                   issueTypeSelectSelector.selectedIndex = 0;
+                  addIssuesToMap();
                 }}"
               />
             </div>
@@ -1344,6 +1414,7 @@
                   );
                   filteredMockData = mockData;
                   resetDate.set(true);
+                  addIssuesToMap();
                 }}"
               />
             </div>
