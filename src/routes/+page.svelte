@@ -342,13 +342,7 @@
   const scrollToSection = (value) => {
     const y =
       sectionNewReport.getBoundingClientRect().top + window.pageYOffset + value;
-    console.log("y", y);
-    console.log(
-      "sectionNewReport.getBoundingClientRect().top",
-      sectionNewReport.getBoundingClientRect().top
-    );
-    console.log("window.pageYOffset", window.pageYOffset);
-    console.log("value", value);
+
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
