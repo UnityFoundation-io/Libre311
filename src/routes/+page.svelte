@@ -339,9 +339,16 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const scrollToSection = () => {
+  const scrollToSection = (value) => {
     const y =
-      sectionNewReport.getBoundingClientRect().top + window.pageYOffset + 200;
+      sectionNewReport.getBoundingClientRect().top + window.pageYOffset + value;
+    console.log("y", y);
+    console.log(
+      "sectionNewReport.getBoundingClientRect().top",
+      sectionNewReport.getBoundingClientRect().top
+    );
+    console.log("window.pageYOffset", window.pageYOffset);
+    console.log("value", value);
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
@@ -697,7 +704,7 @@
             on:click="{() => {
               if (!findReportedIssue) {
                 setTimeout(() => {
-                  scrollToSection();
+                  scrollToSection(-100);
                 }, 10);
                 findReportedIssue = true;
                 addIssuesToMap();
@@ -739,7 +746,7 @@
     )"
             on:click="{() => {
               setTimeout(() => {
-                scrollToSection();
+                scrollToSection(-380);
               }, 10);
 
               if (!reportNewIssue && !currentStep) {
@@ -1690,7 +1697,7 @@
   .issues-table {
     background-color: white;
     width: 55vw;
-    max-height: 200px;
+    max-height: 9rem;
     overflow-y: auto;
     display: block;
   }
