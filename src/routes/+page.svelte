@@ -313,12 +313,12 @@
   let zoom = 15;
   let markers = [];
 
-  $: if (reportNewIssueStep6)
+  $: if (reportNewIssueStep6) {
     setTimeout(() => {
-      reportNewIssueStep6 = false;
       resetState();
-      scrollToTop();
-    }, 4000);
+      reportNewIssueStep6 = false;
+    }, 3000);
+  }
 
   const filterByDates = () => {
     const selectedDates = filterArray.find((filter) =>
@@ -380,6 +380,7 @@
     };
 
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
+
     const marker = new google.maps.Marker({
       position: {
         lat: $userCurrentLocation.lat,
@@ -419,7 +420,6 @@
     });
     markers = [];
   };
-
   // From Unix Epoch to Current Time
   const convertDate = (unixTimestamp) => {
     const date = new Date(unixTimestamp);
@@ -432,9 +432,11 @@
     clearMarkers();
     issueAddress.set();
     issueDescription.set();
+    issueSubmitterContact.set();
+    issueSubmitterName.set();
     $issueDetail = null;
     $issueType = null;
-    // currentStep = null;
+    inputIssueAddress.value = "";
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -511,7 +513,7 @@
 
       setTimeout(() => {
         calculateBoundsAroundMarkers();
-      }, 100);
+      }, 400);
     }
   };
 
@@ -519,11 +521,14 @@
     if (markers && bounds) {
       let lat, lng;
 
+      bounds = new google.maps.LatLngBounds();
+
       for (let i = 0; i < markers.length; i++) {
         lat = markers[i].position.lat();
         lng = markers[i].position.lng();
         bounds.extend({ lat, lng });
       }
+
       setNewCenter(bounds.getCenter());
       map.fitBounds(bounds);
     }
@@ -597,6 +602,9 @@
 
           // Create a marker for each place.
           markers.push(marker);
+
+          setNewCenter(place.geometry.location);
+          calculateBoundsAroundMarkers();
 
           google.maps.event.addListener(marker, "dragend", function (evt) {
             const lat = evt.latLng.lat();
