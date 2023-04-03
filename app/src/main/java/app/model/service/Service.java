@@ -22,7 +22,7 @@ public class Service {
     @Enumerated(value = EnumType.STRING)
     private ServiceType type = ServiceType.REALTIME;
 
-    // todo this will likely need to be a distinct list and stored in a many-to-many relationship
+    // todo this will likely need to be a stored in a separate table, distinct, and associated as a many-to-many relationship
     @ElementCollection
     List<String> keywords = new ArrayList<String>();
 

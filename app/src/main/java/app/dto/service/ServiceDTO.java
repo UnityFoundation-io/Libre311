@@ -20,7 +20,7 @@ public class ServiceDTO {
 
     private ServiceType type;
 
-    List<String> keywords;
+//    String keywords;
 
     private String group;
 
@@ -30,8 +30,8 @@ public class ServiceDTO {
         this.description = service.getDescription();
         this.metadata = service.isMetadata();
         this.type = service.getType();
-//        this.keywords = service.getKeywords(); // todo - fix lazy loading issue
         this.group = service.getServiceGroup();
+//        this.keywords = service.getKeywords().toString(); // todo - fix lazy loading issue
     }
 
     public String getServiceCode() {
@@ -74,13 +74,13 @@ public class ServiceDTO {
         this.type = type;
     }
 
-    public List<String> getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
-    }
+//    public List<String> getKeywords() {
+//        return keywords;
+//    }
+//
+//    public void setKeywords(List<String> keywords) {
+//        this.keywords = keywords;
+//    }
 
     public String getGroup() {
         return group;

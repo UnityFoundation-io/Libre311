@@ -1,4 +1,4 @@
-package app.service;
+package app.service.service;
 
 import app.dto.service.ServiceDTO;
 import app.model.service.ServiceRepository;
