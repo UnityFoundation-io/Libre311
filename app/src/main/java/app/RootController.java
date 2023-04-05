@@ -2,13 +2,12 @@ package app;
 
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
-import app.dto.servicerequest.PostServiceRequestDTO;
-import app.dto.servicerequest.ServiceRequestDTO;
-import app.dto.servicerequest.ServiceRequestList;
+import app.dto.servicerequest.*;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
@@ -50,17 +49,35 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public ServiceRequestDTO createServiceRequestJson(@Valid @Body PostServiceRequestDTO requestDTO) {
-        return serviceRequestService.createServiceRequest(requestDTO);
+    public List<PostResponseServiceRequestDTO> createServiceRequestJson(@Valid @Body PostRequestServiceRequestDTO requestDTO) {
+        return List.of(serviceRequestService.createServiceRequest(requestDTO));
     }
 
     @Post("/requests.xml")
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public String createServiceRequestXml(@Valid @Body PostServiceRequestDTO requestDTO) throws JsonProcessingException {
+    public String createServiceRequestXml(@Valid @Body PostRequestServiceRequestDTO requestDTO) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(requestDTO)));
+
+        return xmlMapper.writeValueAsString(serviceRequestList);
+    }
+
+    @Get(uris = {"/requests", "/requests.json"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public List<ServiceRequestDTO> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO) {
+        return serviceRequestService.findAll(requestDTO);
+    }
+
+    @Get("/requests.xml")
+    @Produces(MediaType.TEXT_XML)
+    @ExecuteOn(TaskExecutors.IO)
+    public String getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO) throws JsonProcessingException {
+        XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
+        xmlMapper.registerModule(new JavaTimeModule());
+        ServiceRequestList serviceRequestList = new ServiceRequestList(serviceRequestService.findAll(requestDTO));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
     }

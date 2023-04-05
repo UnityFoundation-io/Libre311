@@ -1,7 +1,6 @@
 package app.dto.servicerequest;
 
 
-import app.dto.service.ServiceDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -11,17 +10,17 @@ import java.util.List;
 public class ServiceRequestList {
 
     @JsonProperty("request")
-    private List<ServiceRequestDTO> serviceRequests;
+    private List<? extends ServiceRequestResponseDTO> serviceRequests;
 
-    public ServiceRequestList(List<ServiceRequestDTO> serviceRequests) {
+    public ServiceRequestList(List<? extends ServiceRequestResponseDTO> serviceRequests) {
         this.serviceRequests = serviceRequests;
     }
 
-    public List<ServiceRequestDTO> getServiceRequests() {
+    public List<? extends ServiceRequestResponseDTO> getServiceRequests() {
         return serviceRequests;
     }
 
-    public void setServiceRequests(List<ServiceRequestDTO> serviceRequests) {
+    public void setServiceRequests(List<? extends ServiceRequestResponseDTO> serviceRequests) {
         this.serviceRequests = serviceRequests;
     }
 }

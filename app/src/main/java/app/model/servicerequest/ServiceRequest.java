@@ -1,11 +1,14 @@
 package app.model.servicerequest;
 
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.data.annotation.DateCreated;
+import io.micronaut.data.annotation.DateUpdated;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.time.Instant;
 
 @Entity
 @Table(name = "service_requests")
@@ -65,6 +68,32 @@ public class ServiceRequest {
 
     @Nullable
     private String mediaUrl;
+
+    @Enumerated(EnumType.STRING)
+    private ServiceRequestStatus status = ServiceRequestStatus.OPEN;
+
+    @Nullable
+    @Column(columnDefinition = "TEXT")
+    private String statusNotes;
+
+    @Nullable
+    private String agencyResponsible;
+
+    @Nullable
+    private String serviceNotice;
+
+    @Nullable
+    @Email(regexp = "^\\d{5}(?:[-\\s]\\d{4})?$")
+    private String zipCode;
+
+    @Nullable
+    private Instant expectedDate;
+
+    @DateCreated
+    private Instant dateCreated;
+
+    @DateUpdated
+    private Instant dateUpdated;
 
     public ServiceRequest() {
     }
@@ -191,5 +220,70 @@ public class ServiceRequest {
 
     public void setMediaUrl(@Nullable String mediaUrl) {
         this.mediaUrl = mediaUrl;
+    }
+
+    public ServiceRequestStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ServiceRequestStatus status) {
+        this.status = status;
+    }
+
+    @Nullable
+    public String getStatusNotes() {
+        return statusNotes;
+    }
+
+    public void setStatusNotes(@Nullable String statusNotes) {
+        this.statusNotes = statusNotes;
+    }
+
+    public Instant getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Instant dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Instant getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Instant dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    @Nullable
+    public Instant getExpectedDate() {
+        return expectedDate;
+    }
+
+    @Nullable
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(@Nullable String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    @Nullable
+    public String getAgencyResponsible() {
+        return agencyResponsible;
+    }
+
+    public void setAgencyResponsible(@Nullable String agencyResponsible) {
+        this.agencyResponsible = agencyResponsible;
+    }
+
+    @Nullable
+    public String getServiceNotice() {
+        return serviceNotice;
+    }
+
+    public void setServiceNotice(@Nullable String serviceNotice) {
+        this.serviceNotice = serviceNotice;
     }
 }

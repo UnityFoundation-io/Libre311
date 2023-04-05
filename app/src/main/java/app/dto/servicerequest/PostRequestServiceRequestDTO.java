@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Introspected
-public class PostServiceRequestDTO {
+public class PostRequestServiceRequestDTO {
 
     @NotBlank
     @JsonProperty("service_code")
@@ -60,7 +60,7 @@ public class PostServiceRequestDTO {
     @JsonProperty("media_url")
     private String mediaUrl;
 
-    public PostServiceRequestDTO(String serviceCode) {
+    public PostRequestServiceRequestDTO(String serviceCode) {
         this.serviceCode = serviceCode;
     }
 
