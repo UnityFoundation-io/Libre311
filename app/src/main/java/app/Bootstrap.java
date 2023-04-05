@@ -41,8 +41,6 @@ public class Bootstrap {
                     service.setDescription((String) orgMap.get("description"));
                     service.setMetadata((boolean) orgMap.get("metadata"));
                     service.setType(ServiceType.valueOf(((String) orgMap.get("type")).toUpperCase()));
-                    service.setServiceGroup((String) orgMap.get("group"));
-                    service.setKeywords((List<String>) orgMap.get("keywords"));
 
                     serviceRepository.save(service);
                 });

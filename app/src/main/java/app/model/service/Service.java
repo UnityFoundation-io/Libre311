@@ -22,13 +22,6 @@ public class Service {
     @Enumerated(value = EnumType.STRING)
     private ServiceType type = ServiceType.REALTIME;
 
-    // todo this will likely need to be a stored in a separate table, distinct, and associated as a many-to-many relationship
-    @ElementCollection
-    List<String> keywords = new ArrayList<String>();
-
-    // todo this will need to be a many-to-one relationship. The list of groups should be distinct
-    private String serviceGroup;
-
 
     public Service(String serviceName) {
         this.serviceName = serviceName;
@@ -74,21 +67,5 @@ public class Service {
 
     public void setType(ServiceType type) {
         this.type = type;
-    }
-
-    public List<String> getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
-    }
-
-    public String getServiceGroup() {
-        return serviceGroup;
-    }
-
-    public void setServiceGroup(String group) {
-        this.serviceGroup = group;
     }
 }
