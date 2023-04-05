@@ -282,7 +282,7 @@
   const startRendering = 2000;
 
   const loader = new Loader({
-    apiKey: "AIzaSyD3yaXnm9G-j8kgeL6ucQxtRAyjF5-h7ZE",
+    apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
     version: "weekly",
     libraries: ["places"],
   });
