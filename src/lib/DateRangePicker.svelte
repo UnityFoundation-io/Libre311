@@ -3,6 +3,7 @@
   import "flatpickr/dist/flatpickr.min.css";
   import flatpickr from "flatpickr";
   import resetDate from "../stores/resetDate";
+  import messages from "$lib/messages.json";
 
   const dispatch = createEventDispatcher();
 
@@ -60,7 +61,7 @@
   <input
     type="text"
     bind:this="{dateRangeInput}"
-    placeholder="Select Date Range"
+    placeholder="{messages['find.issue']['select.date.range.placeholder']}"
     readonly
   />
   <span id="caret">&#x25BE;</span>
