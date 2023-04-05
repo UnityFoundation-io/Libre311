@@ -140,4 +140,9 @@ public class ServiceRequestService {
 
         return serviceRequestRepository.findAll(pageable);
     }
+
+    public ServiceRequestDTO getServiceRequest(String serviceRequestId) {
+        Optional<ServiceRequest> byId = serviceRequestRepository.findById(serviceRequestId);
+        return byId.map(ServiceRequestDTO::new).orElse(null);
+    }
 }
