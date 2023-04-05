@@ -7,6 +7,7 @@ import io.micronaut.data.annotation.DateUpdated;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
@@ -67,6 +68,7 @@ public class ServiceRequest {
     private String description;
 
     @Nullable
+    @Column(columnDefinition = "TEXT")
     private String mediaUrl;
 
     @Enumerated(EnumType.STRING)
@@ -83,7 +85,7 @@ public class ServiceRequest {
     private String serviceNotice;
 
     @Nullable
-    @Email(regexp = "^\\d{5}(?:[-\\s]\\d{4})?$")
+    @Pattern(regexp = "^\\d{5}(?:[-\\s]\\d{4})?$")
     private String zipCode;
 
     @Nullable
