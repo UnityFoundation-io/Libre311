@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
 
-const issueDescription = writable(null);
+const issueDescription = writable('');
 
 export default issueDescription;
