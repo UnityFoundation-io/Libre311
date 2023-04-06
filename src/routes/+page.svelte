@@ -28,12 +28,18 @@
   import resetDate from "../stores/resetDate";
   import DateRangePicker from "../lib/DateRangePicker.svelte";
   import messages from "$lib/messages.json";
-  import color from "$lib/colors.json";
+  import colors from "$lib/colors.json";
   import "$lib/global.css";
 
   // Constants
   const maxCharactersLength = 4000;
   const startRendering = 2000;
+  const primaryOne = colors["primary.one"];
+  const primaryTwo = colors["primary.two"];
+  const secondaryOne = colors["secondary.one"];
+  const secondaryTwo = colors["secondary.two"];
+  const accentOne = colors["accent.one"];
+  const accentTwo = colors["accent.two"];
 
   let openLogo = false,
     fadeInBackground = false,
@@ -342,6 +348,14 @@
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
+  const hexToRGBA = (hex, alpha = 1) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const geocodeLatLng = (lat, lng) => {
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     geocoder.geocode({ location: latlng }, (results, status) => {
@@ -518,7 +532,25 @@
     }
   };
 
+  const loadColorPalette = () => {
+    const colorStyle = document.createElement("style");
+    colorStyle.textContent = `
+      :root {
+          --primary-color-one: ${primaryOne};
+          --primary-color-two: ${primaryTwo};
+          --secondary-color-one: ${secondaryOne};
+          --secondary-color-two: ${secondaryTwo};
+          --accent-color-one: ${accentOne};
+          --accent-color-two: ${accentTwo};
+
+        }
+    `;
+
+    document.head.appendChild(colorStyle);
+  };
+
   onMount(() => {
+    loadColorPalette();
     scrollToTop();
 
     // Trigger the Svelte Transitions
@@ -651,7 +683,7 @@
           }}"
         >
           {messages["home"]["title.one"]}
-          <span style="color: #f5b537; margin-left: 0.4rem">
+          <span style="color: {primaryTwo}; margin-left: 0.4rem">
             {messages["home"]["title.two"]}
           </span>
         </div>
@@ -794,7 +826,10 @@
         <div
           id="stepIssueTypeAndDetail"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 42.5vw; border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 42.5vw; border-radius: 21px"
           class:visible="{reportNewIssueStep2}"
           class:hidden="{!reportNewIssueStep2}"
         >
@@ -806,7 +841,9 @@
           </div>
           <span style="margin-left: 3rem; font-size: 1.3rem">
             {messages["report.issue"]["label.date"]}
-            <span style="color: yellow; margin-left: 0.5rem; font-size: 1.3rem">
+            <span
+              style="color: {primaryTwo}; margin-left: 0.5rem; font-size: 1.3rem"
+            >
               {$issueTime}
             </span></span
           >
@@ -1030,7 +1067,10 @@
         <div
           id="stepPhoto"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 45vw;border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 45vw;border-radius: 21px"
           class:visible="{reportNewIssueStep3}"
           class:hidden="{!reportNewIssueStep3}"
         >
@@ -1111,7 +1151,10 @@
         <div
           id="stepContactInfo"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 37vw; border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 37vw; border-radius: 21px"
           class:visible="{reportNewIssueStep4}"
           class:hidden="{!reportNewIssueStep4}"
         >
@@ -1193,7 +1236,10 @@
         <div
           id="stepReviewSubmit"
           class="describe-issue"
-          style="background-color:rgba(90,0,0,0.6); width: 55vw; border-radius: 21px"
+          style="background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 55vw; border-radius: 21px"
           class:visible="{reportNewIssueStep5}"
           class:hidden="{!reportNewIssueStep5}"
         >
@@ -1313,7 +1359,10 @@
         <div
           id="stepReviewSubmit"
           class="describe-issue"
-          style="background-color:rgba(90,0,0,0.6); width: 55vw; height: 7rem; font-size: 2rem; text-align: center; border-radius: 21px"
+          style="background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 55vw; height: 7rem; font-size: 2rem; text-align: center; border-radius: 21px"
           class:visible="{reportNewIssueStep6}"
           class:hidden="{!reportNewIssueStep6}"
         >
@@ -1328,7 +1377,10 @@
 
     <div style="display: flex; justify-content: center; margin-top: 1rem">
       <div
-        style="background-color:rgba(90,0,0,0.6); width: 55vw; border-radius: 21px"
+        style="background-color: {hexToRGBA(
+          secondaryOne,
+          0.6
+        )}; width: 55vw; border-radius: 21px"
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
         class:hidden="{!reportNewIssue && !findReportedIssue}"
@@ -1350,7 +1402,7 @@
             <div
               style="font-size: 1.3rem; margin-bottom: -1rem; margin-left: 3rem; margin-top: 2rem"
             >
-              <span style="color:yellow">{$issueAddress}</span>
+              <span style="color: {primaryTwo}">{$issueAddress}</span>
               <button
                 class="button next-button"
                 style="margin-top: 2rem; margin-bottom: 1rem; margin-right: 1rem"
@@ -1675,7 +1727,7 @@
     margin: 7rem 0 2.5rem 7.9rem;
     font-size: 2.5rem;
     font-weight: 600;
-    color: rgb(255, 255, 0);
+    color: var(--primary-color-two);
     text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
   }
 
