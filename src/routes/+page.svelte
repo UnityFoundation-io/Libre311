@@ -373,7 +373,9 @@
       lat: position.coords.latitude,
       lng: position.coords.longitude,
     };
+
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
+
     const marker = new google.maps.Marker({
       position: {
         lat: $userCurrentLocation.lat,
@@ -387,13 +389,16 @@
       draggable: true,
       title: "Issue's Location",
     });
+
     markers.push(marker);
+
     google.maps.event.addListener(marker, "dragend", function (evt) {
       const lat = evt.latLng.lat();
       const lng = evt.latLng.lng();
       setNewCenter(lat, lng);
       geocodeLatLng(lat, lng);
     });
+
     issueTime.set(convertDate(position.timestamp));
     geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
   };
@@ -492,6 +497,7 @@
         });
         markers.push(marker);
       });
+
       setTimeout(() => {
         calculateBoundsAroundMarkers();
       }, 400);
@@ -677,6 +683,8 @@
         white 100%
       )"
             on:click="{() => {
+              if (reportNewIssueStep6) return;
+
               if (!findReportedIssue) {
                 setTimeout(() => {
                   scrollToSection(-100);
@@ -719,6 +727,8 @@
         white 100%
       )"
             on:click="{() => {
+              if (reportNewIssueStep6) return;
+
               setTimeout(() => {
                 scrollToSection(-380);
               }, 10);
@@ -789,22 +799,22 @@
           class:hidden="{!reportNewIssueStep2}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; font-weight: 300"
           >
             {messages["report.issue"]["label.step"]}
             <button class="numbers">2</button>
           </div>
           <span style="margin-left: 3rem; font-size: 1.3rem">
             {messages["report.issue"]["label.date"]}
-            <span style="color: yellow; margin-left: 0.5rem; font-size: 1.3rem"
-              >{$issueTime}</span
-            ></span
+            <span style="color: yellow; margin-left: 0.5rem; font-size: 1.3rem">
+              {$issueTime}
+            </span></span
           >
           <div
             class="describe-issue"
             style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); font-size: 1.3rem"
           >
-            <span style="margin-left: 3rem">
+            <span style="margin-left: 3rem; font-size: 1.2rem">
               {messages["report.issue"]["label.feature.type"]}
             </span>
           </div>
@@ -814,45 +824,41 @@
               on:change="{(e) => {
                 issueType.set(e.target.value);
               }}"
-              style="margin-left: 3rem; margin-top: 2rem"
+              style="margin-left: 3rem; margin-top: 2rem; margin-bottom: 1rem"
             >
-              <option disabled selected value=""
-                >{messages["report.issue"][
+              <option disabled selected value="">
+                {messages["report.issue"][
                   "select.option.issue.type.placeholder"
-                ]}</option
-              >
+                ]}
+              </option>
               <option
                 value="{messages['report.issue'][
                   'select.option.issue.type.one'
                 ]}"
-                >{messages["report.issue"][
-                  "select.option.issue.type.one"
-                ]}</option
               >
+                {messages["report.issue"]["select.option.issue.type.one"]}
+              </option>
               <option
                 value="{messages['report.issue'][
                   'select.option.issue.type.two'
                 ]}"
-                >{messages["report.issue"][
-                  "select.option.issue.type.two"
-                ]}</option
               >
+                {messages["report.issue"]["select.option.issue.type.two"]}
+              </option>
               <option
                 value="{messages['report.issue'][
                   'select.option.issue.type.three'
                 ]}"
-                >{messages["report.issue"][
-                  "select.option.issue.type.three"
-                ]}</option
               >
+                {messages["report.issue"]["select.option.issue.type.three"]}
+              </option>
               <option
                 value="{messages['report.issue'][
                   'select.option.issue.type.four'
                 ]}"
-                >{messages["report.issue"][
-                  "select.option.issue.type.four"
-                ]}</option
               >
+                {messages["report.issue"]["select.option.issue.type.four"]}
+              </option>
             </select>
 
             {#if $issueType === messages["report.issue"]["select.option.issue.type.one"]}
@@ -863,21 +869,21 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >{messages["issue.one"]["select.option.placeholder"]}</option
-                >
-                <option value="{messages['issue.one']['select.option.one']}"
-                  >{messages["issue.one"]["select.option.one"]}</option
-                >
-                <option value="{messages['issue.one']['select.option.two']}"
-                  >{messages["issue.one"]["select.option.two"]}</option
-                >
-                <option value="{messages['issue.one']['select.option.three']}"
-                  >{messages["issue.one"]["select.option.three"]}</option
-                >
-                <option value="{messages['issue.one']['select.option.four']}"
-                  >{messages["issue.one"]["select.option.four"]}</option
-                >
+                <option disabled selected value="">
+                  {messages["issue.one"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.one']}">
+                  {messages["issue.one"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.two']}">
+                  {messages["issue.one"]["select.option.two"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.three']}">
+                  {messages["issue.one"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.four']}">
+                  {messages["issue.one"]["select.option.four"]}
+                </option>
               </select>
             {/if}
 
@@ -889,21 +895,21 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >{messages["issue.two"]["select.option.placeholder"]}</option
-                >
-                <option value="{messages['issue.two']['select.option.one']}"
-                  >{messages["issue.two"]["select.option.one"]}</option
-                >
-                <option value="{messages['issue.two']['select.option.two']}"
-                  >{messages["issue.two"]["select.option.two"]}</option
-                >
-                <option value="{messages['issue.two']['select.option.three']}"
-                  >{messages["issue.two"]["select.option.three"]}</option
-                >
-                <option value="{messages['issue.two']['select.option.four']}"
-                  >{messages["issue.two"]["select.option.four"]}</option
-                >
+                <option disabled selected value="">
+                  {messages["issue.two"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.one']}">
+                  {messages["issue.two"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.two']}">
+                  {messages["issue.two"]["select.option.two"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.three']}">
+                  {messages["issue.two"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.four']}">
+                  {messages["issue.two"]["select.option.four"]}
+                </option>
               </select>
             {/if}
             {#if $issueType === messages["report.issue"]["select.option.issue.type.three"]}
@@ -914,23 +920,23 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >{messages["issue.three"][
-                    "select.option.placeholder"
-                  ]}</option
+                <option disabled selected value="">
+                  {messages["issue.three"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.three']['select.option.one']}">
+                  {messages["issue.three"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.three']['select.option.two']}">
+                  {messages["issue.three"]["select.option.two"]}
+                </option>
+                <option
+                  value="{messages['issue.three']['select.option.three']}"
                 >
-                <option value="{messages['issue.three']['select.option.one']}"
-                  >{messages["issue.three"]["select.option.one"]}</option
-                >
-                <option value="{messages['issue.three']['select.option.two']}"
-                  >{messages["issue.three"]["select.option.two"]}</option
-                >
-                <option value="{messages['issue.three']['select.option.three']}"
-                  >{messages["issue.three"]["select.option.three"]}</option
-                >
-                <option value="{messages['issue.three']['select.option.four']}"
-                  >{messages["issue.three"]["select.option.four"]}</option
-                >
+                  {messages["issue.three"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.three']['select.option.four']}">
+                  {messages["issue.three"]["select.option.four"]}
+                </option>
               </select>
             {/if}
 
@@ -942,21 +948,21 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >{messages["issue.four"]["select.option.placeholder"]}</option
-                >
-                <option value="{messages['issue.four']['select.option.one']}"
-                  >{messages["issue.four"]["select.option.one"]}</option
-                >
-                <option value="{messages['issue.four']['select.option.two']}"
-                  >{messages["issue.four"]["select.option.two"]}</option
-                >
-                <option value="{messages['issue.four']['select.option.three']}"
-                  >{messages["issue.four"]["select.option.three"]}</option
-                >
-                <option value="{messages['issue.four']['select.option.four']}"
-                  >{messages["issue.four"]["select.option.four"]}</option
-                >
+                <option disabled selected value="">
+                  {messages["issue.four"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.one']}">
+                  {messages["issue.four"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.two']}">
+                  {messages["issue.four"]["select.option.two"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.three']}">
+                  {messages["issue.four"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.four']}">
+                  {messages["issue.four"]["select.option.four"]}
+                </option>
               </select>
             {/if}
             {#if $issueType !== null && $issueDetail !== null}
@@ -970,11 +976,11 @@
                   bind:value="{$issueDescription}"></textarea>
               </div>
 
-              <span
-                style="font-size: 0.75rem; float: right; margin-top: 0.2rem; margin-right: 3.3rem"
+              <div
+                style="font-size: 0.75rem; text-align: right; margin-top: 0.2rem; margin-right: 3.3rem"
               >
-                {$issueDescription?.length}/{maxCharactersLength}
-              </span>
+                {$issueDescription?.length ?? 0}/{maxCharactersLength}
+              </div>
             {/if}
           </div>
 
@@ -1018,6 +1024,7 @@
         </div>
       </div>
     {/if}
+
     {#if reportNewIssueStep3}
       <div style="display: flex; justify-content: center">
         <div
@@ -1028,19 +1035,20 @@
           class:hidden="{!reportNewIssueStep3}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; font-weight: 300"
           >
             {messages["report.issue"]["label.step"]}
-            <button class="numbers">3</button><span style="font-size: 1.2rem"
-              >{messages["report.issue"]["label.optional"]}</span
-            >
+            <button class="numbers">3</button><span style="font-size: 1.2rem">
+              {messages["report.issue"]["label.optional"]}
+            </span>
           </div>
-          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem"
-            >{messages["report.issue"]["label.add.media"]}
+          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem">
+            {messages["report.issue"]["label.add.media"]}
           </span>
           <div>
             <button class="upload-image">
-              >{messages["report.issue"]["lable.choose.image"]}
+              >
+              {messages["report.issue"]["lable.choose.image"]}
             </button>
             <button>
               <!-- svelte-ignore a11y-img-redundant-alt -->
@@ -1053,7 +1061,7 @@
             </button>
             <button
               class="button back-button"
-              style="margin-bottom: 1.25rem"
+              style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
                 reportNewIssueStep2 = true;
@@ -1072,12 +1080,13 @@
               />
               {messages["report.issue"]["button.back"]}
             </button>
+
             <button
               class="button"
               class:next-button="{$issueType && $issueDetail}"
               class:disabled-button="{$issueType === null ||
                 $issueDetail === null}"
-              style="margin-bottom: 1.25rem"
+              style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
                 currentStep = 4;
@@ -1107,20 +1116,20 @@
           class:hidden="{!reportNewIssueStep4}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; font-weight: 300"
           >
             {messages["report.issue"]["label.step"]}
-            <button class="numbers">4</button><span style="font-size: 1.2rem"
-              >{messages["report.issue"]["label.optional"]}</span
-            >
+            <button class="numbers">4</button><span style="font-size: 1.2rem">
+              {messages["report.issue"]["label.optional"]}
+            </span>
           </div>
-          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem"
-            >{messages["report.issue"]["label.submitter.name"]}
+          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem">
+            {messages["report.issue"]["label.submitter.name"]}
           </span>
           <div>
             <input
               bind:value="{$issueSubmitterName}"
-              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem"
+              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem; margin-bottom: 2rem"
               placeholder="{messages['report.issue'][
                 'placeholder.submitter.name'
               ]}"
@@ -1128,12 +1137,13 @@
           </div>
           <span
             style="font-size: 1.3rem; margin: 0 1rem 0 3rem; text-align:left"
-            >{messages["report.issue"]["label.contact.info"]}
+          >
+            {messages["report.issue"]["label.contact.info"]}
           </span>
           <div>
             <input
               bind:value="{$issueSubmitterContact}"
-              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem"
+              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem; margin-bottom: 2rem"
               placeholder="{messages['report.issue'][
                 'placeholder.contact.info'
               ]}"
@@ -1151,7 +1161,7 @@
               src="{pageBackwardsSVG}"
               alt="previous step"
               width="19rem"
-              style="vertical-align: -0.15rem; margin-left: -1rem"
+              style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1rem"
             />
             {messages["report.issue"]["button.back"]}
           </button>
@@ -1188,49 +1198,73 @@
           class:hidden="{!reportNewIssueStep5}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8)"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); font-weight: 300"
           >
             {messages["report.issue"]["label.review.title"]}
             <button class="numbers">5</button>
           </div>
-          <div style="font-size: 1.5rem; margin: 0 1rem 0 3rem">
+          <div
+            style="font-size: 1.5rem; margin: 0 1rem 0 3rem; font-weight: 300"
+          >
             {messages["report.issue"]["label.review.issue.location"]}
-            <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+            <div
+              style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+            >
               {$issueAddress}
             </div>
           </div>
-          <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
+          <div
+            style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+          >
             {messages["report.issue"]["label.review.issue.type"]}
-            <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+            <div
+              style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+            >
               {$issueType}
             </div>
           </div>
-          <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
+          <div
+            style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+          >
             {messages["report.issue"]["label.review.issue.detail"]}
-            <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+            <div
+              style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+            >
               {$issueDetail}
             </div>
           </div>
           {#if $issueDescription}
-            <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
+            <div
+              style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+            >
               {messages["report.issue"]["label.review.description"]}
-              <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+              <div
+                style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+              >
                 {$issueDescription}
               </div>
             </div>
           {/if}
           {#if $issueSubmitterName}
-            <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
+            <div
+              style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+            >
               {messages["report.issue"]["label.submitter.name"]}
-              <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+              <div
+                style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+              >
                 {$issueSubmitterName}
               </div>
             </div>
           {/if}
           {#if $issueSubmitterContact}
-            <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
+            <div
+              style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+            >
               {messages["report.issue"]["label.contact.info"]}
-              <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+              <div
+                style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+              >
                 {$issueSubmitterContact}
               </div>
             </div>
@@ -1247,7 +1281,7 @@
               src="{pageBackwardsSVG}"
               alt="previous step"
               width="19rem"
-              style="vertical-align: -0.15rem; margin-left: -1rem"
+              style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1rem"
             />
             {messages["report.issue"]["button.back"]}
           </button>
@@ -1302,17 +1336,15 @@
         {#if reportNewIssue}
           <div class="describe-issue">
             <div
-              style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 0.3rem"
+              style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 0.3rem; font-weight: 300"
             >
               {messages["report.issue"]["label.step"]}
               <button class="numbers">1</button>
             </div>
-            <span style="margin-left: 3rem"
-              >{messages["report.issue"]["label.issue.location"]}</span
-            >
-            <div
-              style="font-size: 1.1rem; margin-top: 1.5rem; margin-left: 3rem"
-            >
+            <span style="margin-left: 3rem">
+              {messages["report.issue"]["label.issue.location"]}
+            </span>
+            <div style="font-size: 1rem; margin-top: 1.5rem; margin-left: 3rem">
               {messages["report.issue"]["label.issue.location.subtext"]}
             </div>
             <div
@@ -1379,26 +1411,23 @@
               >
               <option
                 value="{messages['find.issue']['select.option.issue.type.two']}"
-                >{messages["find.issue"][
-                  "select.option.issue.type.two"
-                ]}</option
               >
+                {messages["find.issue"]["select.option.issue.type.two"]}
+              </option>
               <option
                 value="{messages['find.issue'][
                   'select.option.issue.type.three'
                 ]}"
-                >{messages["find.issue"][
-                  "select.option.issue.type.three"
-                ]}</option
               >
+                {messages["find.issue"]["select.option.issue.type.three"]}
+              </option>
               <option
                 value="{messages['find.issue'][
                   'select.option.issue.type.four'
                 ]}"
-                >{messages["find.issue"][
-                  "select.option.issue.type.four"
-                ]}</option
               >
+                {messages["find.issue"]["select.option.issue.type.four"]}
+              </option>
             </select>
             <select
               on:change="{(e) => {
@@ -1408,11 +1437,9 @@
               <option disabled selected value="">
                 {messages["find.issue"]["reported.by.placeholder"]}
               </option>
-              <option value="user1"
-                >{messages["find.issue"][
-                  "select.option.reported.by.one"
-                ]}</option
-              >
+              <option value="user1">
+                {messages["find.issue"]["select.option.reported.by.one"]}
+              </option>
             </select>
 
             <DateRangePicker
@@ -1484,18 +1511,18 @@
           <table class="issues-table">
             <thead>
               <tr>
-                <th style="width: 14rem"
-                  >{messages["find.issue"]["issues.table.column.one"]}</th
-                >
-                <th style="width: 12rem"
-                  >{messages["find.issue"]["issues.table.column.two"]}</th
-                >
-                <th style="width: 7rem"
-                  >{messages["find.issue"]["issues.table.column.three"]}</th
-                >
-                <th style="width: 14rem"
-                  >{messages["find.issue"]["issues.table.column.four"]}</th
-                >
+                <th style="width: 14rem">
+                  {messages["find.issue"]["issues.table.column.one"]}
+                </th>
+                <th style="width: 12rem">
+                  {messages["find.issue"]["issues.table.column.two"]}
+                </th>
+                <th style="width: 7rem">
+                  {messages["find.issue"]["issues.table.column.three"]}
+                </th>
+                <th style="width: 14rem">
+                  {messages["find.issue"]["issues.table.column.four"]}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -1540,6 +1567,7 @@
     vertical-align: sub;
     border: solid 1px white;
   }
+
   .background {
     width: 100vw;
     height: 100vh;
@@ -1548,6 +1576,7 @@
     height: 1650px;
     background-repeat: no-repeat;
   }
+
   .background::before {
     content: "";
     background-image: url("$lib/streetview16-9.png");
@@ -1561,18 +1590,21 @@
     height: 100%;
     z-index: -1;
   }
+
   .background-opacity::before {
     filter: grayscale(70%) opacity(0.5);
     transition: all 4s;
   }
+
   .background-opacity-report-issue::before {
     filter: grayscale(70%) opacity(0.25);
     transition: all 4s;
   }
+
   .button {
-    font-weight: 600;
-    font-family: Raleway;
-    font-size: 1.3rem;
+    font-weight: 500;
+    font-family: Gotham;
+    font-size: 1.2rem;
     display: inline-block;
     padding: 10px 30px;
     color: #27279c;
@@ -1586,6 +1618,7 @@
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
     z-index: 1;
   }
+
   .next-button {
     margin-top: 1.25rem;
     margin-right: 3rem;
@@ -1597,17 +1630,19 @@
       rgba(190, 212, 250, 0.9) 100%
     );
   }
+
   .review-button {
     margin-top: 1.25rem;
     margin-right: 2rem;
     float: right;
     background-image: radial-gradient(
-      circle at 42%,
-      rgba(255, 255, 255, 1) 60%,
-      rgba(190, 212, 250, 0.9) 74%,
+      circle at 37%,
+      rgba(255, 255, 255, 1) 64%,
+      rgba(190, 212, 250, 0.9) 78%,
       rgba(190, 212, 250, 0.9) 100%
     );
   }
+
   .back-button {
     margin-top: 1.25rem;
     margin-left: 3rem;
@@ -1619,6 +1654,7 @@
       white 100%
     );
   }
+
   .disabled-button {
     color: black;
     border: none;
@@ -1634,13 +1670,15 @@
       rgba(80, 80, 80, 0.9) 100%
     );
   }
+
   .slogan-title {
-    margin: 7rem 0 2.5rem 8.9rem;
+    margin: 7rem 0 2.5rem 7.9rem;
     font-size: 2.5rem;
     font-weight: 600;
     color: rgb(255, 255, 0);
     text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
   }
+
   .slogan-text {
     margin: 0 auto;
     font-size: 1.8rem;
@@ -1649,9 +1687,11 @@
     text-shadow: 2px 3px 2px rgba(0, 0, 0, 0.8);
     text-align: center;
   }
+
   .action-buttons {
     margin-top: 15rem;
   }
+
   .we-move {
     font-size: 4rem;
     font-weight: 600;
@@ -1660,16 +1700,20 @@
     border-radius: 25px;
     padding: 0.7rem 2rem 0.7rem 2rem;
   }
+
   #map {
     width: 55vw;
     height: 55vh;
     align-items: center;
   }
+
   .describe-issue {
+    font-weight: 200;
     margin-top: 1rem;
     font-size: 1.75rem;
     color: white;
   }
+
   .numbers {
     border-radius: 100%;
     background-color: white;
@@ -1682,18 +1726,22 @@
     margin-right: 1rem;
     margin-left: 0.5rem;
   }
+
   #pac-input {
     margin-top: 0.6rem;
     padding-left: 0.5rem;
     height: 2.18rem;
     width: 23rem;
   }
+
   .hidden {
     animation: fadeOut 0.4s forwards;
   }
+
   .visible {
     animation: fadeIn 0.4s forwards;
   }
+
   select {
     height: 2.5rem;
     font-size: 1.1rem;
@@ -1701,14 +1749,17 @@
     padding-right: 0.5rem;
     border-radius: 10px;
   }
+
   textarea {
     margin-top: 2rem;
     margin-left: 3rem;
+    margin-bottom: 1rem;
     font-size: 1rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     width: 80%;
   }
+
   .upload-image {
     margin-top: 1rem;
     margin-left: 3rem;
@@ -1717,6 +1768,7 @@
     height: 3rem;
     border-style: dashed;
   }
+
   .filters {
     display: flex;
     justify-content: space-around;
@@ -1724,6 +1776,7 @@
     margin: 0 auto;
     padding-top: 1rem;
   }
+
   .issues-table {
     background-color: white;
     width: 55vw;
@@ -1731,17 +1784,26 @@
     overflow-y: auto;
     display: block;
   }
+
   thead tr {
     text-align: left;
     font-weight: 600;
   }
+
+  tbody tr {
+    text-align: left;
+    font-weight: 100;
+  }
+
   td,
   th {
     padding: 0.1rem 0.3rem 0.1rem 0.3rem;
   }
+
   td {
     font-size: 0.9rem;
   }
+
   @keyframes fadeIn {
     0% {
       opacity: 0;
@@ -1755,6 +1817,7 @@
       visibility: visible;
     }
   }
+
   @keyframes fadeOut {
     0% {
       opacity: 1;
