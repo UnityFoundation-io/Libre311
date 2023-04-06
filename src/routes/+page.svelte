@@ -3,6 +3,7 @@
   import { fade, scale, blur } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
+  import { browser } from "$app/environment";
   import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
@@ -27,9 +28,46 @@
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
   import DateRangePicker from "../lib/DateRangePicker.svelte";
+  import messages from "$lib/messages.json";
+  import colors from "$lib/colors.json";
   import "$lib/global.css";
+
   // Constants
   const maxCharactersLength = 4000;
+  const startRendering = 2000;
+  const primaryOne = colors["primary.one"];
+  const primaryTwo = colors["primary.two"];
+  const secondaryOne = colors["secondary.one"];
+  const secondaryTwo = colors["secondary.two"];
+  const accentOne = colors["accent.one"];
+  const accentTwo = colors["accent.two"];
+
+  let openLogo = false,
+    fadeInBackground = false,
+    openWeMove = false,
+    reduceBackGroundOpacity = false,
+    reportNewIssue = false,
+    reportNewIssueStep2 = false,
+    reportNewIssueStep3 = false,
+    reportNewIssueStep4 = false,
+    reportNewIssueStep5 = false,
+    reportNewIssueStep6 = false,
+    currentStep = null,
+    findReportedIssue = false;
+
+  let backgroundSelector,
+    sectionNewReport,
+    map,
+    geocoder,
+    bounds,
+    inputIssueAddress,
+    issueTypeSelector,
+    issueDetailSelector,
+    issueTypeSelectSelector;
+
+  let zoom = 15;
+  let markers = [];
+
   let mockData = [
     {
       service_request_id: 638344,
@@ -248,8 +286,10 @@
         "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
   ];
+
   let filteredMockData = mockData;
   let filterArray = [];
+
   // Filtering Results
   $: if (filterArray.find((filter) => filter.hasOwnProperty("issueType"))) {
     filteredMockData = mockData;
@@ -272,41 +312,20 @@
     filterByDates();
     addIssuesToMap();
   }
-  const startRendering = 2000;
+
   const loader = new Loader({
     apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
     version: "weekly",
     libraries: ["places"],
   });
-  let openLogo = false,
-    fadeInBackground = false,
-    openWeMove = false,
-    reduceBackGroundOpacity = false,
-    reportNewIssue = false,
-    reportNewIssueStep2 = false,
-    reportNewIssueStep3 = false,
-    reportNewIssueStep4 = false,
-    reportNewIssueStep5 = false,
-    reportNewIssueStep6 = false,
-    currentStep = null,
-    findReportedIssue = false;
-  let backgroundSelector,
-    sectionNewReport,
-    map,
-    geocoder,
-    bounds,
-    inputIssueAddress,
-    issueTypeSelector,
-    issueDetailSelector,
-    issueTypeSelectSelector;
-  let zoom = 15;
-  let markers = [];
+
   $: if (reportNewIssueStep6) {
     setTimeout(() => {
       resetState();
       reportNewIssueStep6 = false;
     }, 3000);
   }
+
   const filterByDates = () => {
     const selectedDates = filterArray.find((filter) =>
       filter.hasOwnProperty("dates")
@@ -319,14 +338,25 @@
         new Date(issue.requested_datetime) < filterEndingDate
     );
   };
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   const scrollToSection = (value) => {
     const y =
       sectionNewReport.getBoundingClientRect().top + window.pageYOffset + value;
     window.scrollTo({ top: y, behavior: "smooth" });
   };
+
+  const hexToRGBA = (hex, alpha = 1) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const geocodeLatLng = (lat, lng) => {
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     geocoder.geocode({ location: latlng }, (results, status) => {
@@ -335,27 +365,32 @@
           issueAddress.set(results[0].formatted_address);
           inputIssueAddress.value = results[0].formatted_address;
         } else {
-          console.log("No results found");
+          console.log(messages["geocode"]["empty.results"]);
         }
       } else {
-        console.log(`Geocoder failed due to: ${status}`);
+        console.log(`${messages["geocode"]["error"]} ${status}`);
       }
     });
   };
+
   const setNewCenter = (lat, lng) => {
     let newCenter = new google.maps.LatLng(lat, lng);
     map.setCenter(newCenter);
     setNewZoom(15);
   };
+
   const setNewZoom = (zoomLevel) => {
     map.setZoom(zoomLevel);
   };
+
   const successCallback = (position) => {
     $userCurrentLocation = {
       lat: position.coords.latitude,
       lng: position.coords.longitude,
     };
+
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
+
     const marker = new google.maps.Marker({
       position: {
         lat: $userCurrentLocation.lat,
@@ -369,30 +404,37 @@
       draggable: true,
       title: "Issue's Location",
     });
+
     markers.push(marker);
+
     google.maps.event.addListener(marker, "dragend", function (evt) {
       const lat = evt.latLng.lat();
       const lng = evt.latLng.lng();
       setNewCenter(lat, lng);
       geocodeLatLng(lat, lng);
     });
+
     issueTime.set(convertDate(position.timestamp));
     geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
   };
+
   const errorCallback = (error) => {
     console.log(error);
   };
+
   const clearMarkers = () => {
     markers.forEach((marker) => {
       marker.setMap(null);
     });
     markers = [];
   };
+
   // From Unix Epoch to Current Time
   const convertDate = (unixTimestamp) => {
     const date = new Date(unixTimestamp);
     return date.toLocaleString();
   };
+
   const resetState = () => {
     setTimeout(() => scrollToTop(), 100);
     reduceBackGroundOpacity = true;
@@ -406,6 +448,7 @@
     inputIssueAddress.value = "";
     setTimeout(() => (currentStep = null), 700);
   };
+
   const formatDate = (dateString) => {
     const months = [
       "January",
@@ -435,22 +478,23 @@
       .padStart(2, "0")}`;
     return formattedDate;
   };
+
   const addIssuesToMap = async () => {
     clearMarkers();
     if (filteredMockData && filteredMockData.length > 0) {
       filteredMockData.forEach((issue) => {
         let marker, urlIcon;
         switch (issue.service_name) {
-          case "Sidewalk":
+          case messages["find.issue"]["select.option.issue.type.one"]:
             urlIcon = sidewalkSVG;
             break;
-          case "Bus Stop":
+          case messages["find.issue"]["select.option.issue.type.three"]:
             urlIcon = busstopSVG;
             break;
-          case "Traffic Light":
+          case messages["find.issue"]["select.option.issue.type.four"]:
             urlIcon = trafficlightSVG;
             break;
-          case "Bike Lane":
+          case messages["find.issue"]["select.option.issue.type.two"]:
             urlIcon = bikelaneSVG;
             break;
         }
@@ -468,11 +512,13 @@
         });
         markers.push(marker);
       });
+
       setTimeout(() => {
         calculateBoundsAroundMarkers();
       }, 400);
     }
   };
+
   const calculateBoundsAroundMarkers = () => {
     if (markers && bounds) {
       let lat, lng;
@@ -486,12 +532,41 @@
       map.fitBounds(bounds);
     }
   };
+
+  const loadColorPalette = () => {
+    const colorStyle = document.createElement("style");
+    colorStyle.textContent = `
+      :root {
+          --primary-color-one: ${primaryOne};
+          --primary-color-two: ${primaryTwo};
+          --secondary-color-one: ${secondaryOne};
+          --secondary-color-two: ${secondaryTwo};
+          --accent-color-one: ${accentOne};
+          --accent-color-two: ${accentTwo};
+        }
+    `;
+
+    document.head.appendChild(colorStyle);
+  };
+
+  const handleBeforeUnload = (event) => {
+    const message =
+      "Are you sure you want to leave? Your unsaved changes will be lost.";
+    event.preventDefault();
+    event.returnValue = message;
+    return message;
+  };
+
   onMount(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    loadColorPalette();
     scrollToTop();
+
     // Trigger the Svelte Transitions
     fadeInBackground = true;
     openLogo = true;
     openWeMove = true;
+
     loader.load().then(async (google) => {
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: zoom,
@@ -504,10 +579,12 @@
       map.controls[google.maps.ControlPosition.TOP_LEFT].push(
         inputIssueAddress
       );
+
       // Bias the SearchBox results towards current map's viewport.
       map.addListener("bounds_changed", () => {
         searchBox.setBounds(map.getBounds());
       });
+
       // Listen for the event fired when the user selects a prediction and retrieve
       // more details for that place.
       searchBox.addListener("places_changed", () => {
@@ -515,14 +592,17 @@
         if (places.length == 0) {
           return;
         }
+
         // Clear out the old markers.
         clearMarkers();
+
         places.forEach((place) => {
           issueAddress.set(place.formatted_address);
           if (!place.geometry || !place.geometry.location) {
-            console.log("Returned place contains no geometry");
+            console.log(messages["map"]["empty.geometry"]);
             return;
           }
+
           const icon = {
             url: currentLocationSVG,
             size: new google.maps.Size(71, 71),
@@ -530,24 +610,28 @@
             anchor: new google.maps.Point(17, 34),
             scaledSize: new google.maps.Size(55, 55),
           };
+
           const marker = new google.maps.Marker({
             map,
             icon,
             title: place.name,
             position: place.geometry.location,
             draggable: true,
-            title: "Issue's Location",
+            title: messages["map"]["marker.title"],
           });
+
           // Create a marker for each place.
           markers.push(marker);
           setNewCenter(place.geometry.location);
           calculateBoundsAroundMarkers();
+
           google.maps.event.addListener(marker, "dragend", function (evt) {
             const lat = evt.latLng.lat();
             const lng = evt.latLng.lng();
             setNewCenter(lat, lng);
             geocodeLatLng(lat, lng);
           });
+
           if (place.geometry.viewport) {
             // Only geocodes have viewport.
             bounds.union(place.geometry.viewport);
@@ -558,18 +642,17 @@
         map.fitBounds(bounds);
       });
     });
+
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
   });
 </script>
 
 <svelte:head>
-  <title>We Move</title>
-  <meta
-    name="description"
-    content="We Move Share the location of a walking, biking, or transit issues"
-  />
+  <title>{messages["home"]["title.header"]}</title>
+  <meta name="description" content="{messages['metadata']['content']}" />
 </svelte:head>
+
 {#if fadeInBackground}
   <div
     bind:this="{backgroundSelector}"
@@ -598,6 +681,7 @@
           style="filter: drop-shadow(3px 3px 3px black); margin-left: 2.5rem; margin-top: 2rem"
         />
       {/if}
+
       {#if openWeMove}
         <div
           class="we-move"
@@ -607,20 +691,24 @@
             quintOut,
           }}"
         >
-          We <span style="color: #f5b537; margin-left: 0.4rem">Move</span>
+          {messages["home"]["title.one"]}
+          <span style="color: {primaryTwo}; margin-left: 0.4rem">
+            {messages["home"]["title.two"]}
+          </span>
         </div>
       {/if}
     </div>
+
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
       out:fade="{{ duration: 300, quintOut }}"
     >
-      <div class="slogan-title">Empowering Communities Together:</div>
+      <div class="slogan-title">{messages["home"]["tagline.one"]}</div>
       <div class="slogan-text">
-        &nbsp;&nbsp; Share the location of a walking, biking, or transit issue
-        with our mobile app
+        &nbsp;&nbsp; {messages["home"]["tagline.two"]}
       </div>
+
       <div
         class="action-buttons"
         style="display: flex; justify-content: space-around"
@@ -636,6 +724,8 @@
         white 100%
       )"
             on:click="{() => {
+              if (reportNewIssueStep6) return;
+
               if (!findReportedIssue) {
                 setTimeout(() => {
                   scrollToSection(-100);
@@ -663,9 +753,10 @@
                 height="25rem"
               />
             {/if}
-            Find a Reported Issue
+            {messages["home"]["button.find.issue.label"]}
           </button>
         {/if}
+
         {#if !findReportedIssue}
           <button
             class="button"
@@ -677,6 +768,8 @@
         white 100%
       )"
             on:click="{() => {
+              if (reportNewIssueStep6) return;
+
               setTimeout(() => {
                 scrollToSection(-380);
               }, 10);
@@ -729,39 +822,46 @@
                 height="25rem"
               />
             {/if}
-            Report a New Issue
+            {messages["home"]["button.report.issue.label"]}
           </button>
         {/if}
       </div>
     </div>
+
     <!-- START Report New Issue Flow -->
+
     {#if reportNewIssueStep2}
       <div style="display: flex; justify-content: center">
         <div
           id="stepIssueTypeAndDetail"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 42.5vw; border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 42.5vw; border-radius: 21px"
           class:visible="{reportNewIssueStep2}"
           class:hidden="{!reportNewIssueStep2}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; font-weight: 300"
           >
-            Step
+            {messages["report.issue"]["label.step"]}
             <button class="numbers">2</button>
           </div>
           <span style="margin-left: 3rem; font-size: 1.3rem">
-            Date & Time: <span
-              style="color: yellow; margin-left: 0.5rem; font-size: 1.3rem"
-              >{$issueTime}</span
-            ></span
+            {messages["report.issue"]["label.date"]}
+            <span
+              style="color: {primaryTwo}; margin-left: 0.5rem; font-size: 1.3rem"
+            >
+              {$issueTime}
+            </span></span
           >
           <div
             class="describe-issue"
             style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); font-size: 1.3rem"
           >
-            <span style="margin-left: 3rem">
-              Select the Feature Type that you are reporting on:
+            <span style="margin-left: 3rem; font-size: 1.2rem">
+              {messages["report.issue"]["label.feature.type"]}
             </span>
           </div>
           <div style="margin-top: -1rem">
@@ -770,15 +870,44 @@
               on:change="{(e) => {
                 issueType.set(e.target.value);
               }}"
-              style="margin-left: 3rem; margin-top: 2rem"
+              style="margin-left: 3rem; margin-top: 2rem; margin-bottom: 1rem"
             >
-              <option disabled selected value="">Choose an Issue Type*</option>
-              <option value="Sidewalk">Sidewalk</option>
-              <option value="Bike Lane">Bike Lane</option>
-              <option value="Bus Stop">Bus Stop</option>
-              <option value="Traffic Light">Traffic Light</option>
+              <option disabled selected value="">
+                {messages["report.issue"][
+                  "select.option.issue.type.placeholder"
+                ]}
+              </option>
+              <option
+                value="{messages['report.issue'][
+                  'select.option.issue.type.one'
+                ]}"
+              >
+                {messages["report.issue"]["select.option.issue.type.one"]}
+              </option>
+              <option
+                value="{messages['report.issue'][
+                  'select.option.issue.type.two'
+                ]}"
+              >
+                {messages["report.issue"]["select.option.issue.type.two"]}
+              </option>
+              <option
+                value="{messages['report.issue'][
+                  'select.option.issue.type.three'
+                ]}"
+              >
+                {messages["report.issue"]["select.option.issue.type.three"]}
+              </option>
+              <option
+                value="{messages['report.issue'][
+                  'select.option.issue.type.four'
+                ]}"
+              >
+                {messages["report.issue"]["select.option.issue.type.four"]}
+              </option>
             </select>
-            {#if $issueType === "Sidewalk"}
+
+            {#if $issueType === messages["report.issue"]["select.option.issue.type.one"]}
               <select
                 bind:this="{issueDetailSelector}"
                 style="margin-left: 1rem; margin-top: 2rem"
@@ -786,16 +915,25 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >Choose Sidewalk details*</option
-                >
-                <option value="ADA Access">ADA Access</option>
-                <option value="Cracked">Cracked</option>
-                <option value="Missing">Missing</option>
-                <option value="Other">Other</option>
+                <option disabled selected value="">
+                  {messages["issue.one"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.one']}">
+                  {messages["issue.one"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.two']}">
+                  {messages["issue.one"]["select.option.two"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.three']}">
+                  {messages["issue.one"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.one']['select.option.four']}">
+                  {messages["issue.one"]["select.option.four"]}
+                </option>
               </select>
             {/if}
-            {#if $issueType === "Bike Lane"}
+
+            {#if $issueType === messages["report.issue"]["select.option.issue.type.two"]}
               <select
                 bind:this="{issueDetailSelector}"
                 style="margin-left: 1rem; margin-top: 2rem"
@@ -803,16 +941,24 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >Choose Bike Lane details*</option
-                >
-                <option value="Narrow Lanes">Narrow Lanes</option>
-                <option value="Uneven Surface">Uneven Surface</option>
-                <option value="Missing">Missing</option>
-                <option value="Other">Other</option>
+                <option disabled selected value="">
+                  {messages["issue.two"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.one']}">
+                  {messages["issue.two"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.two']}">
+                  {messages["issue.two"]["select.option.two"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.three']}">
+                  {messages["issue.two"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.two']['select.option.four']}">
+                  {messages["issue.two"]["select.option.four"]}
+                </option>
               </select>
             {/if}
-            {#if $issueType === "Bus Stop"}
+            {#if $issueType === messages["report.issue"]["select.option.issue.type.three"]}
               <select
                 bind:this="{issueDetailSelector}"
                 style="margin-left: 1rem; margin-top: 2rem"
@@ -820,16 +966,27 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >Choose Bus Stop details*</option
+                <option disabled selected value="">
+                  {messages["issue.three"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.three']['select.option.one']}">
+                  {messages["issue.three"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.three']['select.option.two']}">
+                  {messages["issue.three"]["select.option.two"]}
+                </option>
+                <option
+                  value="{messages['issue.three']['select.option.three']}"
                 >
-                <option value="Late Bus">Late Bus</option>
-                <option value="Inadequate Seating">Inadequate Seating</option>
-                <option value="Poor Shelter">Poor Shelter</option>
-                <option value="Other">Other</option>
+                  {messages["issue.three"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.three']['select.option.four']}">
+                  {messages["issue.three"]["select.option.four"]}
+                </option>
               </select>
             {/if}
-            {#if $issueType === "Traffic Light"}
+
+            {#if $issueType === messages["report.issue"]["select.option.issue.type.four"]}
               <select
                 bind:this="{issueDetailSelector}"
                 style="margin-left: 1rem; margin-top: 2rem"
@@ -837,29 +994,39 @@
                   issueDetail.set(e.target.value);
                 }}"
               >
-                <option disabled selected value=""
-                  >Choose Traffic Light details*</option
-                >
-                <option value="Long Wait Time">Long Wait Time</option>
-                <option value="Poor Visibility">Poor Visibility</option>
-                <option value="No Audible Signal">No Audible Signal</option>
-                <option value="Other">Other</option>
+                <option disabled selected value="">
+                  {messages["issue.four"]["select.option.placeholder"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.one']}">
+                  {messages["issue.four"]["select.option.one"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.two']}">
+                  {messages["issue.four"]["select.option.two"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.three']}">
+                  {messages["issue.four"]["select.option.three"]}
+                </option>
+                <option value="{messages['issue.four']['select.option.four']}">
+                  {messages["issue.four"]["select.option.four"]}
+                </option>
               </select>
             {/if}
             {#if $issueType !== null && $issueDetail !== null}
               <div>
                 <textarea
-                  placeholder="Additional Description Details"
+                  placeholder="{messages['report.issue'][
+                    'textarea.description.placeholder'
+                  ]}"
                   rows="3"
                   maxlength="{maxCharactersLength}"
                   bind:value="{$issueDescription}"></textarea>
               </div>
 
-              <span
-                style="font-size: 0.75rem; float: right; margin-top: 0.2rem; margin-right: 3.3rem"
+              <div
+                style="font-size: 0.75rem; text-align: right; margin-top: 0.2rem; margin-right: 3.3rem"
               >
-                {$issueDescription?.length}/{maxCharactersLength}
-              </span>
+                {$issueDescription?.length ?? 0}/{maxCharactersLength}
+              </div>
             {/if}
           </div>
 
@@ -877,7 +1044,7 @@
               width="19rem"
               style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1.1rem"
             />
-            Back
+            {messages["report.issue"]["button.back"]}
           </button>
           <button
             class="button"
@@ -892,7 +1059,7 @@
               reportNewIssueStep3 = true;
             }}"
           >
-            Next
+            {messages["report.issue"]["button.next"]}
             <img
               src="{pageForwardSVG}"
               alt="next step"
@@ -903,29 +1070,34 @@
         </div>
       </div>
     {/if}
+
     {#if reportNewIssueStep3}
       <div style="display: flex; justify-content: center">
         <div
           id="stepPhoto"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 45vw;border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 45vw;border-radius: 21px"
           class:visible="{reportNewIssueStep3}"
           class:hidden="{!reportNewIssueStep3}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; font-weight: 300"
           >
-            Step
-            <button class="numbers">3</button><span style="font-size: 1.2rem"
-              >(optional)</span
-            >
+            {messages["report.issue"]["label.step"]}
+            <button class="numbers">3</button><span style="font-size: 1.2rem">
+              {messages["report.issue"]["label.optional"]}
+            </span>
           </div>
-          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem"
-            >Press Here to Take Photo or Choose Image
+          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem">
+            {messages["report.issue"]["label.add.media"]}
           </span>
           <div>
             <button class="upload-image">
-              Press here to choose image file. (&lt;10MB)
+              >
+              {messages["report.issue"]["lable.choose.image"]}
             </button>
             <button>
               <!-- svelte-ignore a11y-img-redundant-alt -->
@@ -938,7 +1110,7 @@
             </button>
             <button
               class="button back-button"
-              style="margin-bottom: 1.25rem"
+              style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
                 reportNewIssueStep2 = true;
@@ -955,21 +1127,23 @@
                 width="19rem"
                 style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1.1rem"
               />
-              Back
+              {messages["report.issue"]["button.back"]}
             </button>
+
             <button
               class="button"
               class:next-button="{$issueType && $issueDetail}"
               class:disabled-button="{$issueType === null ||
                 $issueDetail === null}"
-              style="margin-bottom: 1.25rem"
+              style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
                 currentStep = 4;
                 reportNewIssueStep4 = true;
               }}"
             >
-              Next
+              {messages["report.issue"]["button.next"]}
+
               <img
                 src="{pageForwardSVG}"
                 alt="next step"
@@ -986,37 +1160,45 @@
         <div
           id="stepContactInfo"
           class="describe-issue"
-          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color:rgba(90,0,0,0.6); width: 37vw; border-radius: 21px"
+          style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 37vw; border-radius: 21px"
           class:visible="{reportNewIssueStep4}"
           class:hidden="{!reportNewIssueStep4}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; font-weight: 300"
           >
-            Step
-            <button class="numbers">4</button><span style="font-size: 1.2rem"
-              >(optional)</span
-            >
+            {messages["report.issue"]["label.step"]}
+            <button class="numbers">4</button><span style="font-size: 1.2rem">
+              {messages["report.issue"]["label.optional"]}
+            </span>
           </div>
-          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem"
-            >Name of Submitter:
+          <span style="font-size: 1.3rem; margin: 0 1rem 0 3rem">
+            {messages["report.issue"]["label.submitter.name"]}
           </span>
           <div>
             <input
               bind:value="{$issueSubmitterName}"
-              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem"
-              placeholder="ex: John Doe"
+              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem; margin-bottom: 2rem"
+              placeholder="{messages['report.issue'][
+                'placeholder.submitter.name'
+              ]}"
             />
           </div>
           <span
             style="font-size: 1.3rem; margin: 0 1rem 0 3rem; text-align:left"
-            >Contact Info:
+          >
+            {messages["report.issue"]["label.contact.info"]}
           </span>
           <div>
             <input
               bind:value="{$issueSubmitterContact}"
-              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem"
-              placeholder="ex: johndoe@gmail.com"
+              style="height: 2rem; padding-left: 0.3rem; width: 25rem; margin-left: 3rem; margin-bottom: 2rem"
+              placeholder="{messages['report.issue'][
+                'placeholder.contact.info'
+              ]}"
             />
           </div>
           <button
@@ -1031,9 +1213,9 @@
               src="{pageBackwardsSVG}"
               alt="previous step"
               width="19rem"
-              style="vertical-align: -0.15rem; margin-left: -1rem"
+              style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1rem"
             />
-            Back
+            {messages["report.issue"]["button.back"]}
           </button>
           <button
             class="button"
@@ -1047,7 +1229,7 @@
               reportNewIssueStep5 = true;
             }}"
           >
-            Review & Submit
+            {messages["report.issue"]["button.review.submit"]}
             <img
               src="{pageLastSVG}"
               alt="submit issue"
@@ -1063,54 +1245,81 @@
         <div
           id="stepReviewSubmit"
           class="describe-issue"
-          style="background-color:rgba(90,0,0,0.6); width: 55vw; border-radius: 21px"
+          style="background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 55vw; border-radius: 21px"
           class:visible="{reportNewIssueStep5}"
           class:hidden="{!reportNewIssueStep5}"
         >
           <div
-            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8)"
+            style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 1rem; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); font-weight: 300"
           >
-            Review
+            {messages["report.issue"]["label.review.title"]}
             <button class="numbers">5</button>
           </div>
-          <div style="font-size: 1.5rem; margin: 0 1rem 0 3rem">
-            Issue Location:
-            <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+          <div
+            style="font-size: 1.5rem; margin: 0 1rem 0 3rem; font-weight: 300"
+          >
+            {messages["report.issue"]["label.review.issue.location"]}
+            <div
+              style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+            >
               {$issueAddress}
             </div>
           </div>
-          <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
-            Issue Type:
-            <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+          <div
+            style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+          >
+            {messages["report.issue"]["label.review.issue.type"]}
+            <div
+              style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+            >
               {$issueType}
             </div>
           </div>
-          <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
-            Issue Detail:
-            <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+          <div
+            style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+          >
+            {messages["report.issue"]["label.review.issue.detail"]}
+            <div
+              style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+            >
               {$issueDetail}
             </div>
           </div>
           {#if $issueDescription}
-            <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
-              Description:
-              <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+            <div
+              style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+            >
+              {messages["report.issue"]["label.review.description"]}
+              <div
+                style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+              >
                 {$issueDescription}
               </div>
             </div>
           {/if}
           {#if $issueSubmitterName}
-            <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
-              Submitter Name:
-              <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+            <div
+              style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+            >
+              {messages["report.issue"]["label.submitter.name"]}
+              <div
+                style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+              >
                 {$issueSubmitterName}
               </div>
             </div>
           {/if}
           {#if $issueSubmitterContact}
-            <div style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem">
-              Contact Info:
-              <div style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0">
+            <div
+              style="font-size: 1.5rem; margin: 1rem 1rem 0 3rem; font-weight: 300"
+            >
+              {messages["report.issue"]["label.contact.info"]}
+              <div
+                style="font-size: 1.3rem; margin: 0.5 1rem 1rem 0; font-weight: 100"
+              >
                 {$issueSubmitterContact}
               </div>
             </div>
@@ -1127,9 +1336,9 @@
               src="{pageBackwardsSVG}"
               alt="previous step"
               width="19rem"
-              style="vertical-align: -0.15rem; margin-left: -1rem"
+              style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1rem"
             />
-            Back
+            {messages["report.issue"]["button.back"]}
           </button>
           <button
             class="button"
@@ -1143,7 +1352,7 @@
               reportNewIssueStep6 = true;
             }}"
           >
-            Submit
+            {messages["report.issue"]["button.submit"]}
             <img
               src="{pageLastSVG}"
               alt="submit issue"
@@ -1159,20 +1368,28 @@
         <div
           id="stepReviewSubmit"
           class="describe-issue"
-          style="background-color:rgba(90,0,0,0.6); width: 55vw; height: 7rem; font-size: 2rem; text-align: center; border-radius: 21px"
+          style="background-color: {hexToRGBA(
+            secondaryOne,
+            0.6
+          )}; width: 55vw; height: 7rem; font-size: 2rem; text-align: center; border-radius: 21px"
           class:visible="{reportNewIssueStep6}"
           class:hidden="{!reportNewIssueStep6}"
         >
           <div style="margin-top: 2.3rem">
-            Thank You! The issue has been reported.
+            {messages["report.issue"]["issue.reported.success.message"]}
           </div>
         </div>
       </div>
     {/if}
+
     <!-- Step 1 goes at the end because it has to be loaded due to the map and is hidden -->
+
     <div style="display: flex; justify-content: center; margin-top: 1rem">
       <div
-        style="background-color:rgba(90,0,0,0.6); width: 55vw; border-radius: 21px"
+        style="background-color: {hexToRGBA(
+          secondaryOne,
+          0.6
+        )}; width: 55vw; border-radius: 21px"
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
         class:hidden="{!reportNewIssue && !findReportedIssue}"
@@ -1180,22 +1397,21 @@
         {#if reportNewIssue}
           <div class="describe-issue">
             <div
-              style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 0.3rem"
+              style="margin-left: 3rem; margin-bottom: 1rem; padding-top: 0.3rem; font-weight: 300"
             >
-              Step
+              {messages["report.issue"]["label.step"]}
               <button class="numbers">1</button>
             </div>
-            <span style="margin-left: 3rem">Where is the issue located?</span>
-            <div
-              style="font-size: 1.1rem; margin-top: 1.5rem; margin-left: 3rem"
-            >
-              Place the marker in the position where the issue occurred or type
-              exact the address.
+            <span style="margin-left: 3rem">
+              {messages["report.issue"]["label.issue.location"]}
+            </span>
+            <div style="font-size: 1rem; margin-top: 1.5rem; margin-left: 3rem">
+              {messages["report.issue"]["label.issue.location.subtext"]}
             </div>
             <div
               style="font-size: 1.3rem; margin-bottom: -1rem; margin-left: 3rem; margin-top: 2rem"
             >
-              <span style="color:yellow">{$issueAddress}</span>
+              <span style="color: {primaryTwo}">{$issueAddress}</span>
               <button
                 class="button next-button"
                 style="margin-top: 2rem; margin-bottom: 1rem; margin-right: 1rem"
@@ -1212,7 +1428,8 @@
                   }, 100);
                 }}"
               >
-                Next
+                {messages["report.issue"]["button.next"]}
+
                 <img
                   src="{pageForwardSVG}"
                   alt="next step"
@@ -1223,14 +1440,18 @@
             </div>
           </div>
         {/if}
+
         <!-- END Report New Issue Flow -->
+
         <input id="pac-input" placeholder="Enter the address" type="text" />
         <div bind:this="{sectionNewReport}" id="map"></div>
+
         <!-- START Find Reported Issue -->
+
         {#if findReportedIssue}
           <div class="filters">
             <span style="color: white; font-weight: 500; font-size: 1.3rem">
-              Filters
+              {messages["find.issue"]["label.filter"]}
             </span>
             <select
               bind:this="{issueTypeSelectSelector}"
@@ -1241,23 +1462,47 @@
                 filterArray.push({ issueType: e.target.value });
               }}"
             >
-              <option disabled selected value="">Issue Type</option>
-              <option value="Sidewalk">Sidewalk</option>
-              <option value="Bike Lane">Bike Lane</option>
-              <option value="Bus Stop">Bus Stop</option>
-              <option value="Traffic Light">Traffic Light</option>
+              <option disabled selected value="">
+                {messages["find.issue"]["issue.type.placeholder"]}
+              </option>
+              <option
+                value="{messages['find.issue']['select.option.issue.type.one']}"
+              >
+                {messages["find.issue"]["select.option.issue.type.one"]}</option
+              >
+              <option
+                value="{messages['find.issue']['select.option.issue.type.two']}"
+              >
+                {messages["find.issue"]["select.option.issue.type.two"]}
+              </option>
+              <option
+                value="{messages['find.issue'][
+                  'select.option.issue.type.three'
+                ]}"
+              >
+                {messages["find.issue"]["select.option.issue.type.three"]}
+              </option>
+              <option
+                value="{messages['find.issue'][
+                  'select.option.issue.type.four'
+                ]}"
+              >
+                {messages["find.issue"]["select.option.issue.type.four"]}
+              </option>
             </select>
             <select
               on:change="{(e) => {
                 console.log(e.target.value);
               }}"
             >
-              <option disabled selected value="">Reported By</option>
-              <option value="user1">User 1</option>
-              <option value="user2">User 2</option>
-              <option value="user3">User 3</option>
-              <option value="user4">User 4</option>
+              <option disabled selected value="">
+                {messages["find.issue"]["reported.by.placeholder"]}
+              </option>
+              <option value="user1">
+                {messages["find.issue"]["select.option.reported.by.one"]}
+              </option>
             </select>
+
             <DateRangePicker
               on:datesSelected="{(e) => {
                 filterArray = filterArray.filter(
@@ -1322,15 +1567,23 @@
             style="font-size: 1.5rem; font-weight: 500; color: white; margin: 1rem 0 1rem 0; text-align: center"
           >
             <hr />
-            Reported Issues
+            {messages["find.issue"]["label.reported.issues"]}
           </div>
           <table class="issues-table">
             <thead>
               <tr>
-                <th style="width: 14rem">Issue Type</th>
-                <th style="width: 12rem">Description</th>
-                <th style="width: 7rem">Media</th>
-                <th style="width: 14rem">Requested At</th>
+                <th style="width: 14rem">
+                  {messages["find.issue"]["issues.table.column.one"]}
+                </th>
+                <th style="width: 12rem">
+                  {messages["find.issue"]["issues.table.column.two"]}
+                </th>
+                <th style="width: 7rem">
+                  {messages["find.issue"]["issues.table.column.three"]}
+                </th>
+                <th style="width: 14rem">
+                  {messages["find.issue"]["issues.table.column.four"]}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -1356,7 +1609,7 @@
                 </tr>
               {:else}
                 <tr>
-                  <td>No Results Found</td>
+                  <td>{messages["find.issue"]["empty.results"]}</td>
                 </tr>
               {/each}
             </tbody>
@@ -1375,6 +1628,7 @@
     vertical-align: sub;
     border: solid 1px white;
   }
+
   .background {
     width: 100vw;
     height: 100vh;
@@ -1383,6 +1637,7 @@
     height: 1650px;
     background-repeat: no-repeat;
   }
+
   .background::before {
     content: "";
     background-image: url("$lib/streetview16-9.png");
@@ -1396,18 +1651,21 @@
     height: 100%;
     z-index: -1;
   }
+
   .background-opacity::before {
     filter: grayscale(70%) opacity(0.5);
     transition: all 4s;
   }
+
   .background-opacity-report-issue::before {
     filter: grayscale(70%) opacity(0.25);
     transition: all 4s;
   }
+
   .button {
-    font-weight: 600;
-    font-family: Raleway;
-    font-size: 1.3rem;
+    font-weight: 500;
+    font-family: Gotham;
+    font-size: 1.2rem;
     display: inline-block;
     padding: 10px 30px;
     color: #27279c;
@@ -1421,6 +1679,7 @@
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
     z-index: 1;
   }
+
   .next-button {
     margin-top: 1.25rem;
     margin-right: 3rem;
@@ -1432,17 +1691,19 @@
       rgba(190, 212, 250, 0.9) 100%
     );
   }
+
   .review-button {
     margin-top: 1.25rem;
     margin-right: 2rem;
     float: right;
     background-image: radial-gradient(
-      circle at 42%,
-      rgba(255, 255, 255, 1) 60%,
-      rgba(190, 212, 250, 0.9) 74%,
+      circle at 37%,
+      rgba(255, 255, 255, 1) 64%,
+      rgba(190, 212, 250, 0.9) 78%,
       rgba(190, 212, 250, 0.9) 100%
     );
   }
+
   .back-button {
     margin-top: 1.25rem;
     margin-left: 3rem;
@@ -1454,6 +1715,7 @@
       white 100%
     );
   }
+
   .disabled-button {
     color: black;
     border: none;
@@ -1469,13 +1731,15 @@
       rgba(80, 80, 80, 0.9) 100%
     );
   }
+
   .slogan-title {
-    margin: 7rem 0 2.5rem 8.9rem;
+    margin: 7rem 0 2.5rem 7.9rem;
     font-size: 2.5rem;
     font-weight: 600;
-    color: rgb(255, 255, 0);
+    color: var(--primary-color-two);
     text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
   }
+
   .slogan-text {
     margin: 0 auto;
     font-size: 1.8rem;
@@ -1484,9 +1748,11 @@
     text-shadow: 2px 3px 2px rgba(0, 0, 0, 0.8);
     text-align: center;
   }
+
   .action-buttons {
     margin-top: 15rem;
   }
+
   .we-move {
     font-size: 4rem;
     font-weight: 600;
@@ -1495,16 +1761,20 @@
     border-radius: 25px;
     padding: 0.7rem 2rem 0.7rem 2rem;
   }
+
   #map {
     width: 55vw;
     height: 55vh;
     align-items: center;
   }
+
   .describe-issue {
+    font-weight: 200;
     margin-top: 1rem;
     font-size: 1.75rem;
     color: white;
   }
+
   .numbers {
     border-radius: 100%;
     background-color: white;
@@ -1517,18 +1787,22 @@
     margin-right: 1rem;
     margin-left: 0.5rem;
   }
+
   #pac-input {
     margin-top: 0.6rem;
     padding-left: 0.5rem;
     height: 2.18rem;
     width: 23rem;
   }
+
   .hidden {
     animation: fadeOut 0.4s forwards;
   }
+
   .visible {
     animation: fadeIn 0.4s forwards;
   }
+
   select {
     height: 2.5rem;
     font-size: 1.1rem;
@@ -1536,14 +1810,17 @@
     padding-right: 0.5rem;
     border-radius: 10px;
   }
+
   textarea {
     margin-top: 2rem;
     margin-left: 3rem;
+    margin-bottom: 1rem;
     font-size: 1rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     width: 80%;
   }
+
   .upload-image {
     margin-top: 1rem;
     margin-left: 3rem;
@@ -1552,6 +1829,7 @@
     height: 3rem;
     border-style: dashed;
   }
+
   .filters {
     display: flex;
     justify-content: space-around;
@@ -1559,6 +1837,7 @@
     margin: 0 auto;
     padding-top: 1rem;
   }
+
   .issues-table {
     background-color: white;
     width: 55vw;
@@ -1566,17 +1845,26 @@
     overflow-y: auto;
     display: block;
   }
+
   thead tr {
     text-align: left;
     font-weight: 600;
   }
+
+  tbody tr {
+    text-align: left;
+    font-weight: 100;
+  }
+
   td,
   th {
     padding: 0.1rem 0.3rem 0.1rem 0.3rem;
   }
+
   td {
     font-size: 0.9rem;
   }
+
   @keyframes fadeIn {
     0% {
       opacity: 0;
@@ -1590,6 +1878,7 @@
       visibility: visible;
     }
   }
+
   @keyframes fadeOut {
     0% {
       opacity: 1;
