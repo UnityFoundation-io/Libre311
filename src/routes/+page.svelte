@@ -3,6 +3,7 @@
   import { fade, scale, blur } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
+  import { browser } from "$app/environment";
   import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
@@ -542,14 +543,22 @@
           --secondary-color-two: ${secondaryTwo};
           --accent-color-one: ${accentOne};
           --accent-color-two: ${accentTwo};
-
         }
     `;
 
     document.head.appendChild(colorStyle);
   };
 
+  const handleBeforeUnload = (event) => {
+    const message =
+      "Are you sure you want to leave? Your unsaved changes will be lost.";
+    event.preventDefault();
+    event.returnValue = message;
+    return message;
+  };
+
   onMount(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
     loadColorPalette();
     scrollToTop();
 
