@@ -391,29 +391,6 @@
 
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
 
-    const marker = new google.maps.Marker({
-      position: {
-        lat: $userCurrentLocation.lat,
-        lng: $userCurrentLocation.lng,
-      },
-      icon: {
-        scaledSize: new google.maps.Size(55, 55),
-        url: currentLocationSVG,
-      },
-      map: map,
-      draggable: true,
-      title: "Issue's Location",
-    });
-
-    markers.push(marker);
-
-    google.maps.event.addListener(marker, "dragend", function (evt) {
-      const lat = evt.latLng.lat();
-      const lng = evt.latLng.lng();
-      setNewCenter(lat, lng);
-      geocodeLatLng(lat, lng);
-    });
-
     issueTime.set(convertDate(position.timestamp));
     geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
   };
@@ -558,8 +535,11 @@
   };
 
   onMount(() => {
+    // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
+
     loadColorPalette();
+
     scrollToTop();
 
     // Trigger the Svelte Transitions
@@ -572,13 +552,40 @@
         zoom: zoom,
         center: { lat: 38.6740015313782, lng: -90.453269188364 },
       });
+
       geocoder = new google.maps.Geocoder();
+
       bounds = new google.maps.LatLngBounds();
+
       inputIssueAddress = document.getElementById("pac-input");
+
       const searchBox = new google.maps.places.SearchBox(inputIssueAddress);
+
       map.controls[google.maps.ControlPosition.TOP_LEFT].push(
         inputIssueAddress
       );
+
+      const icon = {
+        url: currentLocationSVG,
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(55, 55),
+      };
+
+      const marker = new google.maps.Marker({
+        map,
+        icon,
+        position: map.getCenter(),
+        title: messages["map"]["marker.title"],
+      });
+
+      map.addListener("center_changed", async () => {
+        ///
+        const center = map.getCenter();
+        marker.setPosition(center);
+        geocodeLatLng(center.lat(), center.lng());
+      });
 
       // Bias the SearchBox results towards current map's viewport.
       map.addListener("bounds_changed", () => {
@@ -602,35 +609,6 @@
             console.log(messages["map"]["empty.geometry"]);
             return;
           }
-
-          const icon = {
-            url: currentLocationSVG,
-            size: new google.maps.Size(71, 71),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(17, 34),
-            scaledSize: new google.maps.Size(55, 55),
-          };
-
-          const marker = new google.maps.Marker({
-            map,
-            icon,
-            title: place.name,
-            position: place.geometry.location,
-            draggable: true,
-            title: messages["map"]["marker.title"],
-          });
-
-          // Create a marker for each place.
-          markers.push(marker);
-          setNewCenter(place.geometry.location);
-          calculateBoundsAroundMarkers();
-
-          google.maps.event.addListener(marker, "dragend", function (evt) {
-            const lat = evt.latLng.lat();
-            const lng = evt.latLng.lng();
-            setNewCenter(lat, lng);
-            geocodeLatLng(lat, lng);
-          });
 
           if (place.geometry.viewport) {
             // Only geocodes have viewport.
