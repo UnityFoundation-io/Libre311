@@ -3,7 +3,7 @@
   import { fade, scale, blur } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
-  import { browser } from "$app/environment";
+  import { inview } from "svelte-inview";
   import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
@@ -53,7 +53,9 @@
     reportNewIssueStep5 = false,
     reportNewIssueStep6 = false,
     currentStep = null,
-    findReportedIssue = false;
+    findReportedIssue = false,
+    issueDetailView = false,
+    hasMoreResults = true;
 
   let backgroundSelector,
     sectionNewReport,
@@ -109,7 +111,7 @@
       media_url: null,
     },
     {
-      service_request_id: 638349,
+      service_request_id: 631349,
       status: "closed",
       status_notes: null,
       service_name: "Traffic Light",
@@ -129,7 +131,7 @@
         "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
-      service_request_id: 638349,
+      service_request_id: 638339,
       status: "open",
       status_notes: null,
       service_name: "Bus Stop",
@@ -148,7 +150,7 @@
       media_url: null,
     },
     {
-      service_request_id: 638349,
+      service_request_id: 238349,
       status: "open",
       status_notes: null,
       service_name: "Sidewalk",
@@ -168,7 +170,7 @@
         "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
-      service_request_id: 638349,
+      service_request_id: 638398,
       status: "open",
       status_notes: null,
       service_name: "Traffic Light",
@@ -188,7 +190,7 @@
         "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
-      service_request_id: 638349,
+      service_request_id: 638309,
       status: "closed",
       status_notes: null,
       service_name: "Bus Stop",
@@ -207,7 +209,7 @@
       media_url: null,
     },
     {
-      service_request_id: 638349,
+      service_request_id: 672389,
       status: "open",
       status_notes: null,
       service_name: "Traffic Light",
@@ -227,7 +229,7 @@
         "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
-      service_request_id: 638349,
+      service_request_id: 630969,
       status: "open",
       status_notes: null,
       service_name: "Bus Stop",
@@ -247,7 +249,7 @@
         "https://images.pexels.com/photos/136739/pexels-photo-136739.jpeg",
     },
     {
-      service_request_id: 638349,
+      service_request_id: 765249,
       status: "open",
       status_notes: null,
       service_name: "Bike Lane",
@@ -266,7 +268,7 @@
       media_url: null,
     },
     {
-      service_request_id: 638349,
+      service_request_id: 6388723,
       status: "closed",
       status_notes: null,
       service_name: "Bike Lane",
@@ -325,6 +327,28 @@
       reportNewIssueStep6 = false;
     }, 3000);
   }
+
+  let visibleDetails = new Set();
+
+  const toggleDetails = (service_request_id) => {
+    if (visibleDetails.has(service_request_id)) {
+      visibleDetails.delete(service_request_id);
+    } else {
+      visibleDetails.add(service_request_id);
+    }
+    visibleDetails = new Set(visibleDetails);
+  };
+
+  const loadMoreResults = (e) => {
+    if (e.detail.inView && hasMoreResults) {
+      alert("more results loaded");
+    }
+  };
+
+  const options = {
+    rootMargin: "20px",
+    unobserveOnEnter: true,
+  };
 
   const filterByDates = () => {
     const selectedDates = filterArray.find((filter) =>
@@ -532,6 +556,10 @@
     event.preventDefault();
     event.returnValue = message;
     return message;
+  };
+
+  const openInNewWindow = (url) => {
+    window.open(url, "_blank");
   };
 
   onMount(() => {
@@ -1564,32 +1592,43 @@
                 </th>
               </tr>
             </thead>
+
             <tbody>
-              {#each filteredMockData as issue}
-                <tr>
-                  <td>{issue.service_name}</td>
-                  <td>{issue.description}</td>
+              {#each filteredMockData as issue (issue.service_request_id)}
+                <tr on:click="{() => toggleDetails(issue.service_request_id)}">
+                  <td style="cursor: pointer">{issue.service_name}</td>
+                  <td style="cursor: pointer">{issue.description}</td>
                   <td style="text-align:center">
                     {#if issue.media_url !== null}
-                      <a href="{issue.media_url}" target="_blank">
-                        <img
-                          src="{imageSVG}"
-                          alt="issue media"
-                          width="15rem"
-                          style="margin-right: 3.7rem"
-                        />
-                      </a>
+                      <!-- svelte-ignore a11y-click-events-have-key-events -->
+                      <img
+                        src="{imageSVG}"
+                        alt="issue media"
+                        width="15rem"
+                        style="margin-right: 3.7rem; cursor: pointer"
+                        on:click="{() => openInNewWindow(issue.media_url)}"
+                      />
                     {:else}
                       <span style="margin-right: 3.6rem">-</span>
                     {/if}
                   </td>
                   <td>{formatDate(issue.requested_datetime)}</td>
                 </tr>
+
+                {#if visibleDetails.has(issue.service_request_id)}
+                  <tr style="background-color: {secondaryTwo}">
+                    <div>Details 1</div>
+                  </tr>
+                {/if}
               {:else}
                 <tr>
                   <td>{messages["find.issue"]["empty.results"]}</td>
                 </tr>
               {/each}
+              <div
+                use:inview="{{ options }}"
+                on:change="{loadMoreResults}"
+              ></div>
             </tbody>
           </table>
         {/if}
