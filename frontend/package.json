@@ -5,7 +5,8 @@
 	"scripts": {
 		"dev": "vite dev --port=3000",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"start": "npm run dev -- --open"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
@@ -13,5 +14,9 @@
 		"svelte": "^3.54.0",
 		"vite": "^4.2.0"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@googlemaps/js-api-loader": "^1.15.1",
+		"flatpickr": "^4.6.13"
+	}
 }
