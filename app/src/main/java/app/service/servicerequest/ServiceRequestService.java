@@ -1,0 +1,148 @@
+package app.service.servicerequest;
+
+import app.dto.servicerequest.GetServiceRequestsDTO;
+import app.dto.servicerequest.PostRequestServiceRequestDTO;
+import app.dto.servicerequest.PostResponseServiceRequestDTO;
+import app.dto.servicerequest.ServiceRequestDTO;
+import app.model.service.Service;
+import app.model.service.ServiceRepository;
+import app.model.servicerequest.ServiceRequest;
+import app.model.servicerequest.ServiceRequestRepository;
+import app.model.servicerequest.ServiceRequestStatus;
+import io.micronaut.core.util.StringUtils;
+import io.micronaut.data.model.Page;
+import io.micronaut.data.model.Pageable;
+import jakarta.inject.Singleton;
+
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+
+@Singleton
+public class ServiceRequestService {
+
+    private final ServiceRequestRepository serviceRequestRepository;
+    private final ServiceRepository serviceRepository;
+
+    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository) {
+        this.serviceRequestRepository = serviceRequestRepository;
+        this.serviceRepository = serviceRepository;
+    }
+
+    public PostResponseServiceRequestDTO createServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO) {
+
+        // validate if a location is provided
+        boolean latLongProvided = StringUtils.hasText(serviceRequestDTO.getLatitude()) &&
+                StringUtils.hasText(serviceRequestDTO.getLongitude());
+
+        if (!latLongProvided &&
+                StringUtils.isEmpty(serviceRequestDTO.getAddressString()) &&
+                StringUtils.isEmpty(serviceRequestDTO.getAddressId())) {
+            return null; // todo throw exception
+        }
+
+        // validate if additional attributes are required
+        String serviceCode = serviceRequestDTO.getServiceCode();
+        Optional<Service> serviceOptional = serviceRepository.findById(serviceCode);
+        if (serviceOptional.isEmpty()) {
+            return null; // not found
+        }
+        Service service = serviceOptional.get();
+        if (service.isMetadata()) {
+            // todo query corresponding service definition and cross-validate if required attributes are provided
+        }
+
+
+        return new PostResponseServiceRequestDTO(serviceRequestRepository.save(transformDtoToServiceRequest(serviceRequestDTO)));
+    }
+
+    private ServiceRequest transformDtoToServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO) {
+        ServiceRequest serviceRequest = new ServiceRequest();
+        serviceRequest.setServiceCode(serviceRequestDTO.getServiceCode());
+        serviceRequest.setLatitude(serviceRequestDTO.getLatitude());
+        serviceRequest.setLongitude(serviceRequestDTO.getLongitude());
+        serviceRequest.setAddressString(serviceRequestDTO.getAddressString());
+        serviceRequest.setAddressId(serviceRequestDTO.getAddressId());
+        serviceRequest.setEmail(serviceRequestDTO.getEmail());
+        serviceRequest.setDeviceId(serviceRequestDTO.getDeviceId());
+        serviceRequest.setAccountId(serviceRequestDTO.getAccountId());
+        serviceRequest.setFirstName(serviceRequestDTO.getFirstName());
+        serviceRequest.setLastName(serviceRequestDTO.getLastName());
+        serviceRequest.setPhone(serviceRequestDTO.getPhone());
+        serviceRequest.setDescription(serviceRequestDTO.getDescription());
+        serviceRequest.setMediaUrl(serviceRequestDTO.getMediaUrl());
+        return serviceRequest;
+    }
+
+    public List<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO) {
+        return getServiceRequestPage(requestDTO).map(ServiceRequestDTO::new).getContent();
+    }
+
+    private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO) {
+        String serviceRequestIds = requestDTO.getId();
+        String serviceCode = requestDTO.getServiceCode();
+        ServiceRequestStatus status = requestDTO.getStatus();
+        Instant startDate = requestDTO.getStartDate();
+        Instant endDate = requestDTO.getEndDate();
+        Pageable pageable = requestDTO.getPageable();
+
+        if (StringUtils.hasText(serviceRequestIds)) {
+            List<String> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).collect(Collectors.toList());
+            return serviceRequestRepository.findByIdIn(requestIds, pageable);
+        }
+
+
+        if (StringUtils.hasText(serviceCode) && status != null) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByServiceCodeAndStatusAndDateCreatedBetween(serviceCode, status, startDate, endDate, pageable);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByServiceCodeAndStatusAndDateCreatedAfter(serviceCode, status, startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByServiceCodeAndStatusAndDateCreatedBefore(serviceCode, status, endDate, pageable);
+            }
+
+            return serviceRequestRepository.findByServiceCodeAndStatus(serviceCode, status, pageable);
+        } else if (StringUtils.hasText(serviceCode) && status == null) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByServiceCodeAndDateCreatedBetween(serviceCode, startDate, endDate, pageable);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByServiceCodeAndDateCreatedAfter(serviceCode, startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByServiceCodeAndDateCreatedBefore(serviceCode, endDate, pageable);
+            }
+
+            return serviceRequestRepository.findByServiceCode(serviceCode, pageable);
+        } else if (status != null && StringUtils.isEmpty(serviceCode)) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByStatusAndDateCreatedBetween(status, startDate, endDate, pageable);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByStatusAndDateCreatedAfter(status, startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByStatusAndDateCreatedBefore(status, endDate, pageable);
+            }
+
+            return serviceRequestRepository.findByStatus(status, pageable);
+        }
+
+
+        if (startDate != null && endDate != null) {
+            return serviceRequestRepository.findByDateCreatedBetween(startDate, endDate, pageable);
+        } else if (startDate != null && endDate == null) {
+            // just start
+            return serviceRequestRepository.findByDateCreatedAfter(startDate, pageable);
+        } else if (startDate == null && endDate != null) {
+            // just end
+            return serviceRequestRepository.findByDateCreatedBefore(endDate, pageable);
+        }
+
+        return serviceRequestRepository.findAll(pageable);
+    }
+
+    public ServiceRequestDTO getServiceRequest(String serviceRequestId) {
+        Optional<ServiceRequest> byId = serviceRequestRepository.findById(serviceRequestId);
+        return byId.map(ServiceRequestDTO::new).orElse(null);
+    }
+}
