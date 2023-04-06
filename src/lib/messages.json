@@ -42,6 +42,8 @@
             "label.review.issue.type": "Issue Type:",
             "label.review.issue.detail": "Issue Detail:",
             "label.review.description": "Description:",
+            "placeholder.submitter.name": "ex: John Doe",
+            "placeholder.contact.info": "ex: johndoe@gmail.com",
             "issue.reported.success.message": "Thank You! The issue has been reported."
         },
 
@@ -84,8 +86,8 @@
     "map":
         {
             "marker.title": "Issue's Location",
-            "input.address.placeholder": "Find address or place"
-
+            "input.address.placeholder": "Find address or place",
+            "empty.geometry": "Returned place contains no geometry"
         },
     
     "geocode":
