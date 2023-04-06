@@ -29,6 +29,9 @@
   import DateRangePicker from "../lib/DateRangePicker.svelte";
   import "$lib/global.css";
 
+  // Constants
+  const maxCharactersLength = 4000;
+
   let mockData = [
     {
       service_request_id: 638344,
@@ -935,8 +938,15 @@
                 <textarea
                   placeholder="Additional Description Details"
                   rows="3"
+                  maxlength="{maxCharactersLength}"
                   bind:value="{$issueDescription}"></textarea>
               </div>
+
+              <span
+                style="font-size: 0.75rem; float: right; margin-top: 0.2rem; margin-right: 3.3rem"
+              >
+                {$issueDescription?.length}/{maxCharactersLength}
+              </span>
             {/if}
           </div>
 
