@@ -1,15 +1,22 @@
 package app.model.service;
 
+import app.model.servicedefinition.ServiceDefinition;
+
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "services")
 public class Service {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
+
+    @Column(unique = true)
     private String serviceCode;
+
+    @OneToOne(mappedBy = "service")
+    private ServiceDefinition serviceDefinition;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
@@ -67,5 +74,21 @@ public class Service {
 
     public void setType(ServiceType type) {
         this.type = type;
+    }
+
+    public ServiceDefinition getServiceDefinition() {
+        return serviceDefinition;
+    }
+
+    public void setServiceDefinition(ServiceDefinition serviceDefinition) {
+        this.serviceDefinition = serviceDefinition;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

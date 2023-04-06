@@ -2,8 +2,10 @@ package app;
 
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
+import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.dto.servicerequest.*;
 import app.service.service.ServiceService;
+import app.service.servicedefinition.ServiceDefinitionService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -22,10 +24,12 @@ public class RootController {
 
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
+    private final ServiceDefinitionService serviceDefinitionService;
 
-    public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
+    public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService, ServiceDefinitionService serviceDefinitionService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
+        this.serviceDefinitionService = serviceDefinitionService;
     }
 
     @Get(uris = {"/services", "/services.json"})
@@ -44,6 +48,23 @@ public class RootController {
 
         return xmlMapper.writeValueAsString(serviceList);
     }
+
+    @Get(uris = {"/services/{serviceCode}", "/services/{serviceCode}.json"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public ServiceDefinitionDTO getServiceDefinitionJson(String serviceCode) {
+        return serviceDefinitionService.getServiceDefinition(serviceCode);
+    }
+
+//    @Get("/services.xml")
+//    @Produces(MediaType.TEXT_XML)
+//    @ExecuteOn(TaskExecutors.IO)
+//    public String getServiceDefinitionXml(@Valid Pageable pageable) throws JsonProcessingException {
+//        XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
+//        ServiceList serviceList = new ServiceList(serviceService.findAll(pageable));
+//
+//        return xmlMapper.writeValueAsString(serviceList);
+//    }
 
     @Post(uris = {"/requests", "/requests.json"})
     @Produces(MediaType.APPLICATION_JSON)

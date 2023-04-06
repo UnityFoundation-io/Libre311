@@ -3,9 +3,9 @@ package app.dto.service;
 import app.model.service.Service;
 import app.model.service.ServiceType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.micronaut.core.annotation.Introspected;
 
-import java.util.List;
-
+@Introspected
 public class ServiceDTO {
 
     @JsonProperty("service_code")

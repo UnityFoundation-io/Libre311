@@ -3,6 +3,7 @@ package app;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
+import app.model.servicedefinition.*;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
@@ -17,6 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Requires(property = "wemove.bootstrap.data.enabled", value = StringUtils.TRUE)
 @ConfigurationProperties("wemove.bootstrap")
@@ -27,11 +31,13 @@ public class Bootstrap {
 
     private final ServiceRepository serviceRepository;
     private final ServiceRequestRepository serviceRequestRepository;
+    private final ServiceDefinitionRepository serviceDefinitionRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, ServiceRequestRepository serviceRequestRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, ServiceRequestRepository serviceRequestRepository, ServiceDefinitionRepository serviceDefinitionRepository) {
         this.serviceRepository = serviceRepository;
         this.serviceRequestRepository = serviceRequestRepository;
+        this.serviceDefinitionRepository = serviceDefinitionRepository;
     }
 
     @EventListener
@@ -47,7 +53,40 @@ public class Bootstrap {
                     service.setMetadata((boolean) svc.get("metadata"));
                     service.setType(ServiceType.valueOf(((String) svc.get("type")).toUpperCase()));
 
-                    serviceRepository.save(service);
+                    Service savedService = serviceRepository.save(service);
+
+                    if (svc.containsKey("serviceDefinition")) {
+                        ServiceDefinition serviceDefinition = new ServiceDefinition();
+                        Map definitionMap = (Map) svc.get("serviceDefinition");
+//                        serviceDefinition.setId((String) definitionMap.get("serviceCode"));
+
+                        List<Map<String, Object>> attributes = (List<Map<String, Object>>) definitionMap.get("attributes");
+                        attributes.forEach(stringObjectMap -> {
+                            ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+                            serviceDefinitionAttribute.setServiceDefinition(serviceDefinition);
+                            serviceDefinitionAttribute.setVariable((Boolean) stringObjectMap.get("variable"));
+                            serviceDefinitionAttribute.setCode((String) stringObjectMap.get("code"));
+                            serviceDefinitionAttribute.setDatatype(AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase()));
+                            serviceDefinitionAttribute.setRequired((Boolean) stringObjectMap.get("required"));
+                            serviceDefinitionAttribute.setDatatypeDescription((String) stringObjectMap.get("datatypeDescription"));
+                            serviceDefinitionAttribute.setAttributeOrder((Integer) stringObjectMap.get("order"));
+                            serviceDefinitionAttribute.setDescription((String) stringObjectMap.get("description"));
+
+                            List<Map<String, String>> values = (List<Map<String, String>>) stringObjectMap.get("values");
+                            List<AttributeValue> attributeValues = values.stream()
+                                    .map(stringStringMap -> new AttributeValue(stringStringMap.get("key"), stringStringMap.get("name")))
+                                    .collect(Collectors.toList());
+                            serviceDefinitionAttribute.setValues(attributeValues);
+                        });
+
+
+                        serviceDefinition.setService(savedService);
+                        ServiceDefinition savedServiceDefinition = serviceDefinitionRepository.save(serviceDefinition);
+
+                        savedService.setServiceDefinition(savedServiceDefinition);
+                    }
+
+                    serviceRepository.save(savedService);
                 });
             }
 
