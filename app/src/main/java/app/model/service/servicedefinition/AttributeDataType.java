@@ -1,9 +1,9 @@
-package app.model.service;
+package app.model.service.servicedefinition;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ServiceType {
-    REALTIME, BATCH, BLACKBOX;
+public enum AttributeDataType {
+    STRING, NUMBER, DATETIME, TEXT, SINGLEVALUELIST, MULTIVALUELIST;
 
     @Override
     @JsonValue

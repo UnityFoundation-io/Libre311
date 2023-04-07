@@ -13,6 +13,33 @@ wemove:
             - sanitation
             - nuisance
           group: sanitation
+          serviceDefinition:
+            serviceCode: "001"
+            attributes:
+              - variable: true
+                code: "WHISHETN"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: This is a datatype description
+                order: 1
+                description: This is a description
+                values:
+                  - key: "123"
+                    name: "Ford"
+                  - key: "124"
+                    name: "Chrysler"
+              - variable: false
+                code: "WISH"
+                datatype: multivaluelist
+                required: false
+                datatypeDescription: This is a datatype description
+                order: 2
+                description: This is a description
+                values:
+                  - key: "125"
+                    name: "Chevrolet"
+                  - key: "126"
+                    name: "Dodge"
         - serviceCode: "002"
           serviceName: Construction plate shifted
           description: Metal construction plate covering the street or sidewalk has been moved.
