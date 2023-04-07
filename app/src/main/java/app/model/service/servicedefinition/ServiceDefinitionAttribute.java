@@ -1,49 +1,32 @@
-package app.model.servicedefinition;
+package app.model.service.servicedefinition;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import io.micronaut.core.annotation.Introspected;
+
 import java.util.List;
-import java.util.Map;
 
-@Entity
-@Table(name = "service_definition_attributes")
+@Introspected
 public class ServiceDefinitionAttribute {
 
-    @Id
     private String code;
-
-    @ManyToOne
-    @JoinColumn(name = "service_definition_id", nullable = false)
-    private ServiceDefinition serviceDefinition;
-
     private boolean variable;
     private AttributeDataType datatype;
     private boolean required;
-    private String datatypeDescription;
-    private int attributeOrder; // order is a sql keyword
     private String description;
 
-    @ElementCollection
-    @CollectionTable(name = "attribute_values",
-    joinColumns = @JoinColumn(name = "service_definition_attributes_id"))
+    @JsonProperty("order")
+    private int attributeOrder;
+
+    @JsonProperty("datatype_description")
+    private String datatypeDescription;
+
+    @JacksonXmlElementWrapper(localName = "values")
+    @JacksonXmlProperty(localName = "value")
     private List<AttributeValue> values;
 
     public ServiceDefinitionAttribute() {
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public ServiceDefinition getServiceDefinition() {
-        return serviceDefinition;
-    }
-
-    public void setServiceDefinition(ServiceDefinition serviceDefinition) {
-        this.serviceDefinition = serviceDefinition;
     }
 
     public boolean isVariable() {
@@ -100,5 +83,13 @@ public class ServiceDefinitionAttribute {
 
     public void setValues(List<AttributeValue> values) {
         this.values = values;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

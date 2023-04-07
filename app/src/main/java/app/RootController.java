@@ -2,12 +2,12 @@ package app;
 
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
-import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.dto.servicerequest.*;
+import app.model.service.servicedefinition.ServiceDefinition;
 import app.service.service.ServiceService;
-import app.service.servicedefinition.ServiceDefinitionService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.micronaut.data.model.Pageable;
@@ -24,12 +24,10 @@ public class RootController {
 
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
-    private final ServiceDefinitionService serviceDefinitionService;
 
-    public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService, ServiceDefinitionService serviceDefinitionService) {
+    public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
-        this.serviceDefinitionService = serviceDefinitionService;
     }
 
     @Get(uris = {"/services", "/services.json"})
@@ -52,19 +50,21 @@ public class RootController {
     @Get(uris = {"/services/{serviceCode}", "/services/{serviceCode}.json"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public ServiceDefinitionDTO getServiceDefinitionJson(String serviceCode) {
-        return serviceDefinitionService.getServiceDefinition(serviceCode);
+    public String getServiceDefinitionJson(String serviceCode) {
+        return serviceService.getServiceDefinition(serviceCode);
     }
 
-//    @Get("/services.xml")
-//    @Produces(MediaType.TEXT_XML)
-//    @ExecuteOn(TaskExecutors.IO)
-//    public String getServiceDefinitionXml(@Valid Pageable pageable) throws JsonProcessingException {
-//        XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-//        ServiceList serviceList = new ServiceList(serviceService.findAll(pageable));
-//
-//        return xmlMapper.writeValueAsString(serviceList);
-//    }
+    @Get("/services/{serviceCode}.xml")
+    @Produces(MediaType.TEXT_XML)
+    @ExecuteOn(TaskExecutors.IO)
+    public String getServiceDefinitionXml(String serviceCode) throws JsonProcessingException {
+        XmlMapper xmlMapper = XmlMapper.xmlBuilder().build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String serviceDefinitionStr = serviceService.getServiceDefinition(serviceCode);
+        ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionStr, ServiceDefinition.class);
+
+        return xmlMapper.writeValueAsString(serviceDefinition);
+    }
 
     @Post(uris = {"/requests", "/requests.json"})
     @Produces(MediaType.APPLICATION_JSON)

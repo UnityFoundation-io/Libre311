@@ -1,7 +1,5 @@
 package app.model.service;
 
-import app.model.servicedefinition.ServiceDefinition;
-
 import javax.persistence.*;
 
 @Entity
@@ -15,8 +13,8 @@ public class Service {
     @Column(unique = true)
     private String serviceCode;
 
-    @OneToOne(mappedBy = "service")
-    private ServiceDefinition serviceDefinition;
+    @Column(columnDefinition = "TEXT")
+    private String serviceDefinitionJson;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
@@ -76,12 +74,12 @@ public class Service {
         this.type = type;
     }
 
-    public ServiceDefinition getServiceDefinition() {
-        return serviceDefinition;
+    public String getServiceDefinitionJson() {
+        return serviceDefinitionJson;
     }
 
-    public void setServiceDefinition(ServiceDefinition serviceDefinition) {
-        this.serviceDefinition = serviceDefinition;
+    public void setServiceDefinitionJson(String serviceDefinitionJson) {
+        this.serviceDefinitionJson = serviceDefinitionJson;
     }
 
     public String getId() {

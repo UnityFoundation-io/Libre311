@@ -3,10 +3,12 @@ package app;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
-import app.model.servicedefinition.*;
+import app.model.service.servicedefinition.*;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.convert.format.MapFormat;
@@ -18,8 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Requires(property = "wemove.bootstrap.data.enabled", value = StringUtils.TRUE)
@@ -31,13 +31,11 @@ public class Bootstrap {
 
     private final ServiceRepository serviceRepository;
     private final ServiceRequestRepository serviceRequestRepository;
-    private final ServiceDefinitionRepository serviceDefinitionRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, ServiceRequestRepository serviceRequestRepository, ServiceDefinitionRepository serviceDefinitionRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, ServiceRequestRepository serviceRequestRepository) {
         this.serviceRepository = serviceRepository;
         this.serviceRequestRepository = serviceRequestRepository;
-        this.serviceDefinitionRepository = serviceDefinitionRepository;
     }
 
     @EventListener
@@ -53,17 +51,15 @@ public class Bootstrap {
                     service.setMetadata((boolean) svc.get("metadata"));
                     service.setType(ServiceType.valueOf(((String) svc.get("type")).toUpperCase()));
 
-                    Service savedService = serviceRepository.save(service);
-
                     if (svc.containsKey("serviceDefinition")) {
-                        ServiceDefinition serviceDefinition = new ServiceDefinition();
                         Map definitionMap = (Map) svc.get("serviceDefinition");
-//                        serviceDefinition.setId((String) definitionMap.get("serviceCode"));
+
+                        ServiceDefinition serviceDefinition = new ServiceDefinition();
+                        serviceDefinition.setServiceCode((String) definitionMap.get("serviceCode"));
 
                         List<Map<String, Object>> attributes = (List<Map<String, Object>>) definitionMap.get("attributes");
-                        attributes.forEach(stringObjectMap -> {
+                        serviceDefinition.setAttributes(attributes.stream().map(stringObjectMap -> {
                             ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-                            serviceDefinitionAttribute.setServiceDefinition(serviceDefinition);
                             serviceDefinitionAttribute.setVariable((Boolean) stringObjectMap.get("variable"));
                             serviceDefinitionAttribute.setCode((String) stringObjectMap.get("code"));
                             serviceDefinitionAttribute.setDatatype(AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase()));
@@ -77,16 +73,18 @@ public class Bootstrap {
                                     .map(stringStringMap -> new AttributeValue(stringStringMap.get("key"), stringStringMap.get("name")))
                                     .collect(Collectors.toList());
                             serviceDefinitionAttribute.setValues(attributeValues);
-                        });
+                            return serviceDefinitionAttribute;
+                        }).collect(Collectors.toList()));
 
-
-                        serviceDefinition.setService(savedService);
-                        ServiceDefinition savedServiceDefinition = serviceDefinitionRepository.save(serviceDefinition);
-
-                        savedService.setServiceDefinition(savedServiceDefinition);
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        try {
+                            service.setServiceDefinitionJson(objectMapper.writeValueAsString(serviceDefinition));
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
 
-                    serviceRepository.save(savedService);
+                    serviceRepository.save(service);
                 });
             }
 

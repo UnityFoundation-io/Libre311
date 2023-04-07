@@ -1,17 +1,18 @@
-package app.dto.servicedefinition;
+package app.model.service.servicedefinition;
 
-import app.model.servicedefinition.AttributeValue;
 import io.micronaut.core.annotation.Introspected;
 
 @Introspected
-public class AttributeValueDTO {
-
+public class AttributeValue {
     private String key;
     private String name;
 
-    public AttributeValueDTO(AttributeValue attributeValue) {
-        this.key = attributeValue.getKey();
-        this.name = attributeValue.getName();
+    public AttributeValue() {
+    }
+
+    public AttributeValue(String key, String name) {
+        this.key = key;
+        this.name = name;
     }
 
     public String getKey() {
