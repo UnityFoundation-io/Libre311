@@ -1,6 +1,12 @@
 package app.model.service;
 
+import app.model.servicerequest.ServiceRequest;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "services")
@@ -26,6 +32,10 @@ public class Service {
 
     @Enumerated(value = EnumType.STRING)
     private ServiceType type = ServiceType.REALTIME;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "service")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<ServiceRequest> serviceRequests = new ArrayList<>();
 
 
     public Service(String serviceName) {
@@ -88,5 +98,17 @@ public class Service {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public List<ServiceRequest> getServiceRequests() {
+        return serviceRequests;
+    }
+
+    public void setServiceRequests(List<ServiceRequest> serviceRequests) {
+        this.serviceRequests = serviceRequests;
+    }
+
+    public void addServiceRequest(ServiceRequest serviceRequest) {
+        serviceRequests.add(serviceRequest);
     }
 }
