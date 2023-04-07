@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.http.HttpRequest;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
@@ -70,17 +71,17 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public List<PostResponseServiceRequestDTO> createServiceRequestJson(@Valid @Body PostRequestServiceRequestDTO requestDTO) {
-        return List.of(serviceRequestService.createServiceRequest(requestDTO));
+    public List<PostResponseServiceRequestDTO> createServiceRequestJson(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) {
+        return List.of(serviceRequestService.createServiceRequest(request, requestDTO));
     }
 
     @Post("/requests.xml")
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public String createServiceRequestXml(@Valid @Body PostRequestServiceRequestDTO requestDTO) throws JsonProcessingException {
+    public String createServiceRequestXml(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(requestDTO)));
+        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(request, requestDTO)));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
     }

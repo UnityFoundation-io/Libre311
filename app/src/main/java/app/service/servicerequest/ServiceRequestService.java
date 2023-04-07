@@ -6,18 +6,21 @@ import app.dto.servicerequest.PostResponseServiceRequestDTO;
 import app.dto.servicerequest.ServiceRequestDTO;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
+import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.http.HttpRequest;
 import jakarta.inject.Singleton;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -32,7 +35,7 @@ public class ServiceRequestService {
         this.serviceRepository = serviceRepository;
     }
 
-    public PostResponseServiceRequestDTO createServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO) {
+    public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
 
         Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
 
@@ -52,17 +55,79 @@ public class ServiceRequestService {
 
         // validate if additional attributes are required
         String serviceCode = serviceRequestDTO.getServiceCode();
-        Optional<Service> serviceOptional = serviceRepository.findById(serviceCode);
+        Optional<Service> serviceOptional = serviceRepository.findByServiceCode(serviceCode);
         if (serviceOptional.isEmpty()) {
             return null; // not found
         }
         Service service = serviceOptional.get();
+
+        Map<String, List<String>> requestAttributes = collectAttributesFromRequest(request);
         if (service.isMetadata()) {
-            // todo query corresponding service definition and cross-validate if required attributes are provided
+            // get service definition
+            String serviceDefinitionJson = service.getServiceDefinitionJson();
+            if (serviceDefinitionJson == null || serviceDefinitionJson.isBlank()) {
+                // service definition does not exists despite service requiring it.
+                return null; // should not be in this state and admin needs to be aware.
+            }
+            if (requestAttributes.isEmpty()) {
+                return null; // todo throw exception - must provide attributes
+            }
+            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionJson, requestAttributes)); {
+                return null; // todo throw exception (validation)
+            }
         }
 
+        // TODO need to handle saving of attributes.
 
         return new PostResponseServiceRequestDTO(serviceRequestRepository.save(transformDtoToServiceRequest(serviceRequestDTO, serviceByServiceCodeOptional.get())));
+    }
+
+    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, Map<String, List<String>> requestAttributes) {
+        // deserialize
+        ObjectMapper objectMapper = new ObjectMapper();
+        boolean containsAllRequiredAttrs = false;
+        try {
+            // collect all required attributes
+            ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
+            List<String> requiredCodes = serviceDefinition.getAttributes().stream()
+                    .filter(ServiceDefinitionAttribute::isRequired)
+                    .map(ServiceDefinitionAttribute::getCode)
+                    .collect(Collectors.toList());
+
+            // for each attr, check if it exists in requestAttributes
+            Set<String> requestCodes = requestAttributes.keySet();
+            containsAllRequiredAttrs = requestCodes.containsAll(requiredCodes);
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return containsAllRequiredAttrs;
+    }
+
+    private Map<String, List<String>> collectAttributesFromRequest(HttpRequest<?> request) {
+        Optional<Map> body = request.getBody(Map.class);
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        if (body.isPresent()) {
+            Map<String, String> map = body.get();
+            map.forEach((k, v) -> {
+                if (k.startsWith("attribute[")) {
+                    String code = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
+                    if (attributes.containsKey(code)) {
+                        ArrayList<String> list = (ArrayList<String>) attributes.get(code);
+                        list.add(code);
+                        attributes.put(code, list);
+                    } else {
+                        ArrayList<String> list = new ArrayList<>();
+                        list.add(v);
+                        attributes.put(code, list);
+                    }
+                }
+            });
+        }
+
+        return attributes;
     }
 
     private ServiceRequest transformDtoToServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Service service) {
