@@ -13,6 +13,204 @@ wemove:
             - sanitation
             - nuisance
           group: sanitation
+          serviceDefinition:
+            serviceCode: "001"
+            attributes:
+              - variable: true
+                code: "WHISHETN"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: This is a datatype description
+                order: 1
+                description: This is a description
+                values:
+                  - key: "123"
+                    name: "Ford"
+                  - key: "124"
+                    name: "Chrysler"
+              - variable: false
+                code: "WISH"
+                datatype: multivaluelist
+                required: false
+                datatypeDescription: This is a datatype description
+                order: 2
+                description: This is a description
+                values:
+                  - key: "125"
+                    name: "Chevrolet"
+                  - key: "126"
+                    name: "Dodge"
+          serviceRequests:
+            - description: "City of New Haven stop posting automatic responses because people may think that when they post it gets immediate human  attention"
+              address: "200 Orange St New Haven, Connecticut, 06510"
+              lat: "41.3071110182325"
+              service_request_id: 14282821
+              requested_datetime: "2023-03-29T14:36:43-04:00"
+              long: "-72.9235610239783"
+              service_code: "51"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-31T08:04:22-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Traffic Signal / Pedestrian Signal"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Bus shelter on 270 Temple St. New Haven broken glass that could cause injury to a person. "
+              address: "270 Temple St New Haven, CT, 06511, USA"
+              lat: "41.3083092093462"
+              service_request_id: 14270506
+              requested_datetime: "2023-03-27T15:05:50-04:00"
+              long: "-72.9258607025516"
+              service_code: "22112"
+              status: "open"
+              zipcode: "06511"
+              updated_datetime: "2023-03-30T11:38:16-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Bus Shelter Repair"
+              media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMDJycmc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--0e11181caadcd8da758f96b7196a69f8d20f5388/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/Temple%20St.%20&%20Elm%20St%20Bus%20Stop%20Shelter%20Window%20Damage%20(4).jpg"
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Street lamp is out"
+              address: "950 Chapel St New Haven, CT, 06510, USA"
+              lat: "41.3067298619134"
+              service_request_id: 14256819
+              requested_datetime: "2023-03-24T10:34:58-04:00"
+              long: "-72.9277214850559"
+              service_code: "124"
+              status: "open"
+              zipcode: "06510"
+              updated_datetime: "2023-03-29T13:30:24-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Street Lamp"
+              media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMG5EclE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--7141205ed34545a04440e417df679bca3483df81/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lKYW5CbFp3WTZCa1ZVT2hCaGRYUnZYMjl5YVdWdWRGUTZDbk4wY21sd1ZEb0xjbVZ6YVhwbFNTSU1PREF3ZURZd01BWTdCbFE9IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--09f1d8a44f20164c6fe72999dd865d9ba60da451/3F112374-6E7A-4BC3-91C5-221A2251ADBA.jpeg"
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Test request, please acknowledge to test work order generation. "
+              address: "165 Church St New Haven, Connecticut, 06510"
+              lat: "41.307271992683"
+              service_request_id: 14247332
+              requested_datetime: "2023-03-22T15:43:33-04:00"
+              long: "-72.9245800119474"
+              service_code: "121"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-22T19:24:36-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Parking Violation/Abandoned Auto"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Pothole on Temple street in front of the library driveway. "
+              address: "311 Temple St New Haven, CT, 06511, USA"
+              lat: "41.3094345832896"
+              service_request_id: 14239727
+              requested_datetime: "2023-03-21T12:57:22-04:00"
+              long: "-72.9248903307891"
+              service_code: "116"
+              status: "closed"
+              zipcode: "06511"
+              updated_datetime: "2023-03-27T15:52:36-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Potholes"
+              media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMjdBckE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--dddf83507a4786c088754808eb3c2331da06616b/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lKYW5CbFp3WTZCa1ZVT2hCaGRYUnZYMjl5YVdWdWRGUTZDbk4wY21sd1ZEb0xjbVZ6YVhwbFNTSU1PREF3ZURZd01BWTdCbFE9IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--09f1d8a44f20164c6fe72999dd865d9ba60da451/A862317A-609F-47C7-9AE8-AC399375ED91.jpeg"
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Please remove trash from top of bus stop"
+              address: "81 Church St New Haven CT 06510, United States"
+              lat: "41.3053586761866"
+              service_request_id: 14204307
+              requested_datetime: "2023-03-14T10:50:24-04:00"
+              long: "-72.9261411818914"
+              service_code: "1966"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-16T11:03:52-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Trash & Recycling"
+              media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMXBhcWc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--22622ee87bb8465c72c24d38a39cbb3560a39d45/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/image.jpg"
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Any updates \nPlate is damaged on the bottom of light pole and wires are exposed, concern that a child may touch them, the police were called back in 2021\nDavid Agosta (Registered User)\nThe plate is now gone.\n11/13/2022 · Flag\nNEW COMMEN"
+              address: "770 Chapel St New Haven, Connecticut, 06510"
+              lat: "41.3047629956954"
+              service_request_id: 14194979
+              requested_datetime: "2023-03-12T12:56:44-04:00"
+              long: "-72.9238650356065"
+              service_code: "38388"
+              status: "open"
+              zipcode: "06510"
+              updated_datetime: "2023-03-12T15:07:51-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "NHFD - Wires"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Reported under public space back in 2021,who is happening with this?\nPlate is damaged on the bottom of light pole and wires are exposed, concern that a child may touch them\nPost a New Comment1 COMMENT\nDavid Agosta (Registered User)\nThe plate is now gone.\n11/13/2022 · Flag\n"
+              address: "770 Chapel St New Haven, Connecticut, 06510"
+              lat: "41.3047629956954"
+              service_request_id: 14194935
+              requested_datetime: "2023-03-12T12:41:22-04:00"
+              long: "-72.9238650356065"
+              service_code: "38388"
+              status: "open"
+              zipcode: "06510"
+              updated_datetime: "2023-03-12T13:18:31-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "NHFD - Wires"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Nama Nama Situs Judi Slot Online Lapak Pusat Terpercaya\n\nLink Daftar : https://litl.it/simonster\n\nSlot Online Lapak Pusat merupakan penyedia layanan situs judi slot online terpercaya yang sudah sangat diminati oleh masyarakat Indonesia. Judi slot lapak pusat online juga bisa kalian cari melalui nama nama situs judi slot online. Tidak hanya itu, judi slot online lapak pusat sangat mudah dimainkan dan diakses menggunakan smartphone.\n\nKalian bisa bermain melalui salah satu judi lapak pusat slot online di Indonesia. Sudah banyak slot online terpercaya yang memberikan bonus dan juga bantuan bagi para penggemar mesin slot online. Sehingga tidak perlu bingung agar bisa mencoba game slot online. Jadi mau nunggu apalagi? nunggu mak ijak ke mekah? ayo langsung aja mainkan sekarang supaya dapatin banyak keuntungan.\n\nDaftar Game Situs Judi Slot Lapak Pusat Online Terpercaya 2023\nDaftar judi slot online merupakan slot online situs lapak pusat yang sudah terpercaya oleh para pemain judi online di Indonesia. Sudah tidak perlu diragukan lagi, sebab disini Kalian bisa mencoba semua daftar game slot online dari seluruh provider terbesar.\n\nBerikut ini provider daftar game slot online terpercaya yang disediakan oleh situs slot online lapak pusat :\n\nPragmatic Play\nJoker123\nHabanero\nCQ9\nMicrogaming\nSpadegaming\nPlaytech\nPocket Games Soft (PG)\nFlow Gaming\nGlobal Gaming\nSlot88\nRTG Slots\nPlay’n Go\nLive22\nKumpulan Situs Agen Judi Slot Online24Jam Terpercaya 2023\nProses depo wd di Situs judi online24jam terpercaya sangat mudah dan tidak perlu menunggu lama. Karna kalian yang bakal dibantu dengan customer service yang paling ramah dan yang pasti selalu stay 24jam. Jadi tidak perlu membuang waktu lagi agar bisa bermain agen slot online lapak pusat.\n\nCara slot online gacor dengan bantuan cs slot online terpercaya lapak pusat sangat cepat. Kalian bisa langsung ke menu daftar untuk mengisi form register untuk mendapatkan ID. Bisa juga langsung menghubungi customer service agar dibantu proses selama 24Jam nonstop.\n\nBuruan untuk slot online gacor bersama agen situs judi slot online resmi untuk mendapatkan keuntungan dan kemenangan. Dapatkan juga Bonus bagi para member baru yang mendaftar di judi slot online jackpot terbesar lapak pusat Indonesia.\n\nSLOT ONLINE LAPAK PUSAT 2023\nWEBSITE RESMI:\tDAFTAR DISINI\nPROVIDER SLOT ONLINE:\tXL & TELKOMSEL\nSLOT TERBARU\tStarlight Christmas, Sweet Powernudge, Soju Bomb, Midas Fortune, Sugar Rush\nRATING:\t\n5⭐⭐⭐⭐⭐ ( 4567792 )\nDEPOSIT MINIMAL:\t\nRp10.000\nNama Link Situs Judi Slot Terbaik Dan Terpercaya NO 1 Gampang Menang 2023\nJika anda mencari situs judi slot terbaik dan terpercaya no 1, maka anda telah memasuki zona yang tepat untuk bermain judi bersama situs game slot online yang dapat terhubung dengan berbagai permainan situs judi slot online gampang menang. Situs judi slot online terbaik ini tidak akan anda temukan momen yang sangat membosankan ketika bermain bersama slot online terbaik.\n\nSeperti yang telah dipahami bersama, kalau situs judi slot online terpercaya 2023 mudah menang merupakan salah satu jenis judi yang cukup sering dimainkan kini ini. Bukan karena agen slot online terpercaya ataupun sulit, tetapi memang permainan ini di desain mengasyikkan untuk siapapun guna dimainkan.\n\nAda banyak cara supaya anda bisa menang ketika sedang bermain situs judi slot online gampang menang bonus new member 100 di indonesia menggunakan aplikasi terbaik. Untuk selengkapnya, anda bisa klik pada gambar jika ingin mencoba bermain judi online langsung dan merasakan betapa enaknya main slot online yang sering kasih jackpot, langsung dapat jackpot !!\n\nDaftar Situs Slot Bonus New Member 100 Di Awal TO Kecil 3x 7x 8x 10x 15x 18x\nSaat bermain slot bonus new member 100 di awal anda akan mendapatkan banyak keuntungan juga mendapatkan bonus yang sangat mengagumkan dari slot bonus new member 100 di awal to kecil dan bisa kalian lihat di slot bonus"
+              address: "926-974 Chapel St New Haven, CT, 06510, USA"
+              lat: "41.3069723777458"
+              service_request_id: 14194340
+              requested_datetime: "2023-03-12T03:05:00-04:00"
+              long: "-72.9279712301073"
+              service_code: "36793"
+              status: "open"
+              zipcode: "06511"
+              updated_datetime: "2023-03-12T03:05:04-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Environmental Health Concerns (Non-Covid Related)"
+              media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVNqcVE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--6ff4a1ae22d1b89ac14ed0842db8af1833cd31c3/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/rdyg.jpg"
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Please coordinate with UI to restore lighting to non functioning lights along Elm Street "
+              address: "175 Elm St New Haven CT 06511, United States"
+              lat: "41.3092489901679"
+              service_request_id: 14183041
+              requested_datetime: "2023-03-09T10:28:24-05:00"
+              long: "-72.9264821502176"
+              service_code: "124"
+              status: "open"
+              zipcode: "06511"
+              updated_datetime: "2023-03-22T08:30:16-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Street Lamp"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
         - serviceCode: "002"
           serviceName: Construction plate shifted
           description: Metal construction plate covering the street or sidewalk has been moved.
@@ -21,6 +219,126 @@ wemove:
           keywords:
             - hazard
           group: street
+          serviceRequests:
+            - description: "Tractor trailer parked on residential street.  Corner of Lighthouse and Marion Streets.  "
+              address: "New Haven Connecticut"
+              lat: "41.3080394785343"
+              service_request_id: 14181230
+              requested_datetime: "2023-03-08T21:07:22-05:00"
+              long: "-72.92432"
+              service_code: "121"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-30T19:44:02-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Parking Violation/Abandoned Auto"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "It seems people know that Parking Enforcement is closed on Sundays. This is 4pm on Temple next to the Green."
+              address: "219-225 Temple St New Haven, CT, 06510, USA"
+              lat: "41.3077123540702"
+              service_request_id: 14159990
+              requested_datetime: "2023-03-05T16:15:40-05:00"
+              long: "-72.9261046173266"
+              service_code: "121"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-15T15:22:56-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Parking Violation/Abandoned Auto"
+              media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNFpJcHc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--ad9b7dc797bf4ef7cd369d3bb43fecd759235cd2/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/IMG_20230305_160127.jpg"
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Green light out "
+              address: "103–117 Church St New Haven CT 06510, United States"
+              lat: "41.3059196554428"
+              service_request_id: 14156975
+              requested_datetime: "2023-03-04T17:43:25-05:00"
+              long: "-72.925858121188"
+              service_code: "51"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-17T07:36:50-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Traffic Signal / Pedestrian Signal"
+              media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNzRHcHc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--c2b3bb6211c238861860d8b44a137358e5d4c6e2/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/image.jpg"
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "The left turn green signal on the traffic light from Chapel to Temple street has been non-functional for a couple weeks now. This makes it hard to tell when the other side gets the right of way."
+              address: "Chapel St & Temple St New Haven, CT, 06510, USA"
+              lat: "41.3065574669818"
+              service_request_id: 14147872
+              requested_datetime: "2023-03-02T19:00:14-05:00"
+              long: "-72.9270106996671"
+              service_code: "51"
+              status: "open"
+              zipcode: "06510"
+              updated_datetime: "2023-03-08T07:56:49-05:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Traffic Signal / Pedestrian Signal"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "I am up early every morning in the East Rock section of New Haven and see vehicles parked on just about every corner past the red No Standing signs. I have yet to see one vehicle ticketed. I mentioned to someone pulling out one day that it’s not a legal spot, and he just laughed and said they never ticket. How much $ is NH throwing away by not ticketing? Now the fire hydrants are being blocked also. If you are not going to in force the signs please remove them so all residents can park there, not just the obnoxious ones. "
+              address: "New Haven Connecticut"
+              lat: "41.3080394785343"
+              service_request_id: 14140094
+              requested_datetime: "2023-03-01T14:34:27-05:00"
+              long: "-72.92432"
+              service_code: "121"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-22T19:26:29-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Parking Violation/Abandoned Auto"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "Trash has not been picked up on regular regular trash day but 3 times since thanksgiving. It was missed again February 24,2023. I have called Ryland repeatedly after they miss us. Now I try to call around 3pm before 5 pm on Fridays. I have called the day before pickup to remind them. Still it doesn’t do any good. 555 and 641 Bass Rd."
+              address: "186-198 Church St New Haven, CT, 06510, USA"
+              lat: "41.3081067103241"
+              service_request_id: 14124622
+              requested_datetime: "2023-02-27T07:44:39-05:00"
+              long: "-72.9245345767199"
+              service_code: "38051"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-03-10T08:52:58-05:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Missed Trash/Recycling"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "the pedestrian signal to cross church street on the north side of crown street does not last long enough for people with mobility issues to cross. the traffic light for cars lasts about 90 seconds, and pedestrians only get 10 seconds to cross five lanes. This is a major pedestrian intersection with multiple bus stops, shops, and gateway CC nearby, and should be safely usable by people of all ability levels."
+              address: "Church St & Crown St New Haven, CT, 06510, USA"
+              lat: "41.3047920324344"
+              service_request_id: 14112861
+              requested_datetime: "2023-02-23T16:44:00-05:00"
+              long: "-72.9267198476432"
+              service_code: "51"
+              status: "open"
+              zipcode: "06510"
+              updated_datetime: "2023-03-29T13:10:14-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Traffic Signal / Pedestrian Signal"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
         - serviceCode: "003"
           serviceName: Curb or curb ramp defect
           description: Sidewalk curb or ramp has problems such as cracking, missing pieces, holes, and/or chipped curb.
@@ -29,327 +347,38 @@ wemove:
           keywords:
             - hazard
           group: street
-      serviceRequests:
-        - description: "City of New Haven stop posting automatic responses because people may think that when they post it gets immediate human  attention"
-          address: "200 Orange St New Haven, Connecticut, 06510"
-          lat: "41.3071110182325"
-          service_request_id: 14282821
-          requested_datetime: "2023-03-29T14:36:43-04:00"
-          long: "-72.9235610239783"
-          service_code: "51"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-31T08:04:22-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Traffic Signal / Pedestrian Signal"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Bus shelter on 270 Temple St. New Haven broken glass that could cause injury to a person. "
-          address: "270 Temple St New Haven, CT, 06511, USA"
-          lat: "41.3083092093462"
-          service_request_id: 14270506
-          requested_datetime: "2023-03-27T15:05:50-04:00"
-          long: "-72.9258607025516"
-          service_code: "22112"
-          status: "open"
-          zipcode: "06511"
-          updated_datetime: "2023-03-30T11:38:16-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Bus Shelter Repair"
-          media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMDJycmc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--0e11181caadcd8da758f96b7196a69f8d20f5388/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/Temple%20St.%20&%20Elm%20St%20Bus%20Stop%20Shelter%20Window%20Damage%20(4).jpg"
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Street lamp is out"
-          address: "950 Chapel St New Haven, CT, 06510, USA"
-          lat: "41.3067298619134"
-          service_request_id: 14256819
-          requested_datetime: "2023-03-24T10:34:58-04:00"
-          long: "-72.9277214850559"
-          service_code: "124"
-          status: "open"
-          zipcode: "06510"
-          updated_datetime: "2023-03-29T13:30:24-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Street Lamp"
-          media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMG5EclE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--7141205ed34545a04440e417df679bca3483df81/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lKYW5CbFp3WTZCa1ZVT2hCaGRYUnZYMjl5YVdWdWRGUTZDbk4wY21sd1ZEb0xjbVZ6YVhwbFNTSU1PREF3ZURZd01BWTdCbFE9IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--09f1d8a44f20164c6fe72999dd865d9ba60da451/3F112374-6E7A-4BC3-91C5-221A2251ADBA.jpeg"
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Test request, please acknowledge to test work order generation. "
-          address: "165 Church St New Haven, Connecticut, 06510"
-          lat: "41.307271992683"
-          service_request_id: 14247332
-          requested_datetime: "2023-03-22T15:43:33-04:00"
-          long: "-72.9245800119474"
-          service_code: "121"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-22T19:24:36-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Parking Violation/Abandoned Auto"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Pothole on Temple street in front of the library driveway. "
-          address: "311 Temple St New Haven, CT, 06511, USA"
-          lat: "41.3094345832896"
-          service_request_id: 14239727
-          requested_datetime: "2023-03-21T12:57:22-04:00"
-          long: "-72.9248903307891"
-          service_code: "116"
-          status: "closed"
-          zipcode: "06511"
-          updated_datetime: "2023-03-27T15:52:36-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Potholes"
-          media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMjdBckE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--dddf83507a4786c088754808eb3c2331da06616b/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lKYW5CbFp3WTZCa1ZVT2hCaGRYUnZYMjl5YVdWdWRGUTZDbk4wY21sd1ZEb0xjbVZ6YVhwbFNTSU1PREF3ZURZd01BWTdCbFE9IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--09f1d8a44f20164c6fe72999dd865d9ba60da451/A862317A-609F-47C7-9AE8-AC399375ED91.jpeg"
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Please remove trash from top of bus stop"
-          address: "81 Church St New Haven CT 06510, United States"
-          lat: "41.3053586761866"
-          service_request_id: 14204307
-          requested_datetime: "2023-03-14T10:50:24-04:00"
-          long: "-72.9261411818914"
-          service_code: "1966"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-16T11:03:52-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Trash & Recycling"
-          media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMXBhcWc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--22622ee87bb8465c72c24d38a39cbb3560a39d45/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/image.jpg"
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Any updates \nPlate is damaged on the bottom of light pole and wires are exposed, concern that a child may touch them, the police were called back in 2021\nDavid Agosta (Registered User)\nThe plate is now gone.\n11/13/2022 · Flag\nNEW COMMEN"
-          address: "770 Chapel St New Haven, Connecticut, 06510"
-          lat: "41.3047629956954"
-          service_request_id: 14194979
-          requested_datetime: "2023-03-12T12:56:44-04:00"
-          long: "-72.9238650356065"
-          service_code: "38388"
-          status: "open"
-          zipcode: "06510"
-          updated_datetime: "2023-03-12T15:07:51-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "NHFD - Wires"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Reported under public space back in 2021,who is happening with this?\nPlate is damaged on the bottom of light pole and wires are exposed, concern that a child may touch them\nPost a New Comment1 COMMENT\nDavid Agosta (Registered User)\nThe plate is now gone.\n11/13/2022 · Flag\n"
-          address: "770 Chapel St New Haven, Connecticut, 06510"
-          lat: "41.3047629956954"
-          service_request_id: 14194935
-          requested_datetime: "2023-03-12T12:41:22-04:00"
-          long: "-72.9238650356065"
-          service_code: "38388"
-          status: "open"
-          zipcode: "06510"
-          updated_datetime: "2023-03-12T13:18:31-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "NHFD - Wires"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Nama Nama Situs Judi Slot Online Lapak Pusat Terpercaya\n\nLink Daftar : https://litl.it/simonster\n\nSlot Online Lapak Pusat merupakan penyedia layanan situs judi slot online terpercaya yang sudah sangat diminati oleh masyarakat Indonesia. Judi slot lapak pusat online juga bisa kalian cari melalui nama nama situs judi slot online. Tidak hanya itu, judi slot online lapak pusat sangat mudah dimainkan dan diakses menggunakan smartphone.\n\nKalian bisa bermain melalui salah satu judi lapak pusat slot online di Indonesia. Sudah banyak slot online terpercaya yang memberikan bonus dan juga bantuan bagi para penggemar mesin slot online. Sehingga tidak perlu bingung agar bisa mencoba game slot online. Jadi mau nunggu apalagi? nunggu mak ijak ke mekah? ayo langsung aja mainkan sekarang supaya dapatin banyak keuntungan.\n\nDaftar Game Situs Judi Slot Lapak Pusat Online Terpercaya 2023\nDaftar judi slot online merupakan slot online situs lapak pusat yang sudah terpercaya oleh para pemain judi online di Indonesia. Sudah tidak perlu diragukan lagi, sebab disini Kalian bisa mencoba semua daftar game slot online dari seluruh provider terbesar.\n\nBerikut ini provider daftar game slot online terpercaya yang disediakan oleh situs slot online lapak pusat :\n\nPragmatic Play\nJoker123\nHabanero\nCQ9\nMicrogaming\nSpadegaming\nPlaytech\nPocket Games Soft (PG)\nFlow Gaming\nGlobal Gaming\nSlot88\nRTG Slots\nPlay’n Go\nLive22\nKumpulan Situs Agen Judi Slot Online24Jam Terpercaya 2023\nProses depo wd di Situs judi online24jam terpercaya sangat mudah dan tidak perlu menunggu lama. Karna kalian yang bakal dibantu dengan customer service yang paling ramah dan yang pasti selalu stay 24jam. Jadi tidak perlu membuang waktu lagi agar bisa bermain agen slot online lapak pusat.\n\nCara slot online gacor dengan bantuan cs slot online terpercaya lapak pusat sangat cepat. Kalian bisa langsung ke menu daftar untuk mengisi form register untuk mendapatkan ID. Bisa juga langsung menghubungi customer service agar dibantu proses selama 24Jam nonstop.\n\nBuruan untuk slot online gacor bersama agen situs judi slot online resmi untuk mendapatkan keuntungan dan kemenangan. Dapatkan juga Bonus bagi para member baru yang mendaftar di judi slot online jackpot terbesar lapak pusat Indonesia.\n\nSLOT ONLINE LAPAK PUSAT 2023\nWEBSITE RESMI:\tDAFTAR DISINI\nPROVIDER SLOT ONLINE:\tXL & TELKOMSEL\nSLOT TERBARU\tStarlight Christmas, Sweet Powernudge, Soju Bomb, Midas Fortune, Sugar Rush\nRATING:\t\n5⭐⭐⭐⭐⭐ ( 4567792 )\nDEPOSIT MINIMAL:\t\nRp10.000\nNama Link Situs Judi Slot Terbaik Dan Terpercaya NO 1 Gampang Menang 2023\nJika anda mencari situs judi slot terbaik dan terpercaya no 1, maka anda telah memasuki zona yang tepat untuk bermain judi bersama situs game slot online yang dapat terhubung dengan berbagai permainan situs judi slot online gampang menang. Situs judi slot online terbaik ini tidak akan anda temukan momen yang sangat membosankan ketika bermain bersama slot online terbaik.\n\nSeperti yang telah dipahami bersama, kalau situs judi slot online terpercaya 2023 mudah menang merupakan salah satu jenis judi yang cukup sering dimainkan kini ini. Bukan karena agen slot online terpercaya ataupun sulit, tetapi memang permainan ini di desain mengasyikkan untuk siapapun guna dimainkan.\n\nAda banyak cara supaya anda bisa menang ketika sedang bermain situs judi slot online gampang menang bonus new member 100 di indonesia menggunakan aplikasi terbaik. Untuk selengkapnya, anda bisa klik pada gambar jika ingin mencoba bermain judi online langsung dan merasakan betapa enaknya main slot online yang sering kasih jackpot, langsung dapat jackpot !!\n\nDaftar Situs Slot Bonus New Member 100 Di Awal TO Kecil 3x 7x 8x 10x 15x 18x\nSaat bermain slot bonus new member 100 di awal anda akan mendapatkan banyak keuntungan juga mendapatkan bonus yang sangat mengagumkan dari slot bonus new member 100 di awal to kecil dan bisa kalian lihat di slot bonus"
-          address: "926-974 Chapel St New Haven, CT, 06510, USA"
-          lat: "41.3069723777458"
-          service_request_id: 14194340
-          requested_datetime: "2023-03-12T03:05:00-04:00"
-          long: "-72.9279712301073"
-          service_code: "36793"
-          status: "open"
-          zipcode: "06511"
-          updated_datetime: "2023-03-12T03:05:04-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Environmental Health Concerns (Non-Covid Related)"
-          media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVNqcVE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--6ff4a1ae22d1b89ac14ed0842db8af1833cd31c3/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/rdyg.jpg"
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Please coordinate with UI to restore lighting to non functioning lights along Elm Street "
-          address: "175 Elm St New Haven CT 06511, United States"
-          lat: "41.3092489901679"
-          service_request_id: 14183041
-          requested_datetime: "2023-03-09T10:28:24-05:00"
-          long: "-72.9264821502176"
-          service_code: "124"
-          status: "open"
-          zipcode: "06511"
-          updated_datetime: "2023-03-22T08:30:16-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Street Lamp"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Tractor trailer parked on residential street.  Corner of Lighthouse and Marion Streets.  "
-          address: "New Haven Connecticut"
-          lat: "41.3080394785343"
-          service_request_id: 14181230
-          requested_datetime: "2023-03-08T21:07:22-05:00"
-          long: "-72.92432"
-          service_code: "121"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-30T19:44:02-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Parking Violation/Abandoned Auto"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "It seems people know that Parking Enforcement is closed on Sundays. This is 4pm on Temple next to the Green."
-          address: "219-225 Temple St New Haven, CT, 06510, USA"
-          lat: "41.3077123540702"
-          service_request_id: 14159990
-          requested_datetime: "2023-03-05T16:15:40-05:00"
-          long: "-72.9261046173266"
-          service_code: "121"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-15T15:22:56-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Parking Violation/Abandoned Auto"
-          media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNFpJcHc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--ad9b7dc797bf4ef7cd369d3bb43fecd759235cd2/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/IMG_20230305_160127.jpg"
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Green light out "
-          address: "103–117 Church St New Haven CT 06510, United States"
-          lat: "41.3059196554428"
-          service_request_id: 14156975
-          requested_datetime: "2023-03-04T17:43:25-05:00"
-          long: "-72.925858121188"
-          service_code: "51"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-17T07:36:50-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Traffic Signal / Pedestrian Signal"
-          media_url: "https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNzRHcHc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--c2b3bb6211c238861860d8b44a137358e5d4c6e2/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/image.jpg"
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "The left turn green signal on the traffic light from Chapel to Temple street has been non-functional for a couple weeks now. This makes it hard to tell when the other side gets the right of way."
-          address: "Chapel St & Temple St New Haven, CT, 06510, USA"
-          lat: "41.3065574669818"
-          service_request_id: 14147872
-          requested_datetime: "2023-03-02T19:00:14-05:00"
-          long: "-72.9270106996671"
-          service_code: "51"
-          status: "open"
-          zipcode: "06510"
-          updated_datetime: "2023-03-08T07:56:49-05:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Traffic Signal / Pedestrian Signal"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "I am up early every morning in the East Rock section of New Haven and see vehicles parked on just about every corner past the red No Standing signs. I have yet to see one vehicle ticketed. I mentioned to someone pulling out one day that it’s not a legal spot, and he just laughed and said they never ticket. How much $ is NH throwing away by not ticketing? Now the fire hydrants are being blocked also. If you are not going to in force the signs please remove them so all residents can park there, not just the obnoxious ones. "
-          address: "New Haven Connecticut"
-          lat: "41.3080394785343"
-          service_request_id: 14140094
-          requested_datetime: "2023-03-01T14:34:27-05:00"
-          long: "-72.92432"
-          service_code: "121"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-22T19:26:29-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Parking Violation/Abandoned Auto"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Trash has not been picked up on regular regular trash day but 3 times since thanksgiving. It was missed again February 24,2023. I have called Ryland repeatedly after they miss us. Now I try to call around 3pm before 5 pm on Fridays. I have called the day before pickup to remind them. Still it doesn’t do any good. 555 and 641 Bass Rd."
-          address: "186-198 Church St New Haven, CT, 06510, USA"
-          lat: "41.3081067103241"
-          service_request_id: 14124622
-          requested_datetime: "2023-02-27T07:44:39-05:00"
-          long: "-72.9245345767199"
-          service_code: "38051"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-03-10T08:52:58-05:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Missed Trash/Recycling"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "the pedestrian signal to cross church street on the north side of crown street does not last long enough for people with mobility issues to cross. the traffic light for cars lasts about 90 seconds, and pedestrians only get 10 seconds to cross five lanes. This is a major pedestrian intersection with multiple bus stops, shops, and gateway CC nearby, and should be safely usable by people of all ability levels."
-          address: "Church St & Crown St New Haven, CT, 06510, USA"
-          lat: "41.3047920324344"
-          service_request_id: 14112861
-          requested_datetime: "2023-02-23T16:44:00-05:00"
-          long: "-72.9267198476432"
-          service_code: "51"
-          status: "open"
-          zipcode: "06510"
-          updated_datetime: "2023-03-29T13:10:14-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Traffic Signal / Pedestrian Signal"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "Two city buses parked obstructing the bike lane rather than using the bus lane"
-          address: "270 Temple St New Haven, CT, 06511, USA"
-          lat: "41.3089872153701"
-          service_request_id: 14104488
-          requested_datetime: "2023-02-22T10:19:39-05:00"
-          long: "-72.9260325905894"
-          service_code: "121"
-          status: "closed"
-          zipcode: "06511"
-          updated_datetime: "2023-03-21T10:27:45-04:00"
-          agency_responsible: "City of New Haven"
-          service_name: "Parking Violation/Abandoned Auto"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
-        - description: "йцукен"
-          address: "235 Church St New Haven, CT, 06510, USA"
-          lat: "41.3094508143787"
-          service_request_id: 14085576
-          requested_datetime: "2023-02-17T08:24:31-05:00"
-          long: "-72.9231510008909"
-          service_code: "22063"
-          status: "closed"
-          zipcode: "06510"
-          updated_datetime: "2023-02-22T08:49:01-05:00"
-          agency_responsible: "City of New Haven"
-          service_name: "NHFD - Fire Investigations"
-          media_url: null
-          expected_datetime: null
-          address_id: null
-          service_notice: null
-          status_notes: null
+          serviceRequests:
+          - description: "Two city buses parked obstructing the bike lane rather than using the bus lane"
+            address: "270 Temple St New Haven, CT, 06511, USA"
+            lat: "41.3089872153701"
+            service_request_id: 14104488
+            requested_datetime: "2023-02-22T10:19:39-05:00"
+            long: "-72.9260325905894"
+            service_code: "121"
+            status: "closed"
+            zipcode: "06511"
+            updated_datetime: "2023-03-21T10:27:45-04:00"
+            agency_responsible: "City of New Haven"
+            service_name: "Parking Violation/Abandoned Auto"
+            media_url: null
+            expected_datetime: null
+            address_id: null
+            service_notice: null
+            status_notes: null
+          - description: "йцукен"
+            address: "235 Church St New Haven, CT, 06510, USA"
+            lat: "41.3094508143787"
+            service_request_id: 14085576
+            requested_datetime: "2023-02-17T08:24:31-05:00"
+            long: "-72.9231510008909"
+            service_code: "22063"
+            status: "closed"
+            zipcode: "06510"
+            updated_datetime: "2023-02-22T08:49:01-05:00"
+            agency_responsible: "City of New Haven"
+            service_name: "NHFD - Fire Investigations"
+            media_url: null
+            expected_datetime: null
+            address_id: null
+            service_notice: null
+            status_notes: null

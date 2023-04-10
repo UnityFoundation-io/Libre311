@@ -3,9 +3,11 @@ package app;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
+import app.model.service.servicedefinition.ServiceDefinition;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.micronaut.data.model.Pageable;
@@ -43,6 +45,25 @@ public class RootController {
         ServiceList serviceList = new ServiceList(serviceService.findAll(pageable));
 
         return xmlMapper.writeValueAsString(serviceList);
+    }
+
+    @Get(uris = {"/services/{serviceCode}", "/services/{serviceCode}.json"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public String getServiceDefinitionJson(String serviceCode) {
+        return serviceService.getServiceDefinition(serviceCode);
+    }
+
+    @Get("/services/{serviceCode}.xml")
+    @Produces(MediaType.TEXT_XML)
+    @ExecuteOn(TaskExecutors.IO)
+    public String getServiceDefinitionXml(String serviceCode) throws JsonProcessingException {
+        XmlMapper xmlMapper = XmlMapper.xmlBuilder().build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String serviceDefinitionStr = serviceService.getServiceDefinition(serviceCode);
+        ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionStr, ServiceDefinition.class);
+
+        return xmlMapper.writeValueAsString(serviceDefinition);
     }
 
     @Post(uris = {"/requests", "/requests.json"})
