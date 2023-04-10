@@ -77,8 +77,8 @@ public class ServiceRequestService {
         return serviceRequest;
     }
 
-    public List<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO) {
-        return getServiceRequestPage(requestDTO).map(ServiceRequestDTO::new).getContent();
+    public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO) {
+        return getServiceRequestPage(requestDTO).map(ServiceRequestDTO::new);
     }
 
     private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO) {
