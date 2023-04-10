@@ -11,22 +11,9 @@
 
 <slot />
 
-<div class="footer" style="
-  background-color: #005687; 
-  display: flex;
-  height: 30vh;
-">
-  <div class="row" style="
-    display: flex; 
-    flex-direction: row; 
-    gap: 3rem;
-  ">
-    <div class="col" style="
-      display: flex; 
-      flex-direction: column; 
-      padding-right: 2rem;
-      padding-left: 2rem;
-    ">
+<div class="footer">
+  <div class="row">
+    <div class="col">
       <a href="https://lomocomo.org/we-move-app/">
         <h2>Mobile App</h2>
       </a>
@@ -35,10 +22,7 @@
       </a>
       
     </div>
-    <div class="col" style="
-      display: flex; 
-      flex-direction: column;
-    ">
+    <div class="col">
       <a href="https://lomocomo.org/?ct_template=advocacy"><h2>Advocacy</h2></a>
       <a href="https://lomocomo.org/advocacy/livable-streets/"><li>Livable Streets</li></a>
       <a href="https://lomocomo.org/advocacy/transportation-planning/"><li>Transportation Planning</li></a>
@@ -48,7 +32,7 @@
 
       <a href="https://lomocomo.org/consulting/"><h2>Consulting</h2></a>
     </div>
-    <div class="col" style="display: flex; flex-direction: column;">
+    <div class="col">
       <a href="https://lomocomo.org/events/"><h2>Events</h2></a>
       <a href="https://lomocomo.org/event/bike-walk-wheel-week/"><li>Bike, Walk, & Wheel Week</li></a>
       <a href="https://lomocomo.org/event/bikes-brews/"><li>Bikes & Brews</li></a>
@@ -60,13 +44,13 @@
       <a href="https://lomocomo.org/programs/bike-donations/"><li>Bike Donations</li></a>
       <a href="https://lomocomo.org/programs/giving-rides/"><li>Giving Rides</li></a>
     </div>
-    <div class="col" style="display: flex; flex-direction: column;">
+    <div class="col">
       <a href="https://lomocomo.org/get-involved/"><h2>Get Involved</h2></a>
       <a href="https://lomocomo.org/get-involved/membership/"><li>Membership</li></a>
       <a href="https://lomocomo.org/get-involved/volunteer/"><li>Volunteer</li></a>
       <a href="https://lomocomo.org/get-involved/sign-up-for-our-newsletter/"><li>Sign up for our newsletter</li></a>
     </div>
-    <div class="col" style="display: flex; flex-direction: column;">
+    <div class="col">
       <a href="https://lomocomo.org/about/"><h2>About</h2></a>
       <a href="https://lomocomo.org/about/staff/"><li>Staff</li></a>
       <a href="https://lomocomo.org/about/board-of-directors/"><li>Board of Directors</li></a>
@@ -78,13 +62,39 @@
 </div>
 
 <style>
-  li {
-    color: white;
+  .col {
+    display: flex; 
+    flex-direction: column; 
+    padding-right: 2rem;
+    padding-left: 2rem;
   }
+
+  .footer {
+    background-color: #005687; 
+    display: flex;
+    height: 30vh;
+    justify-content: space-between;
+  }
+
+  .row {
+    display: flex; 
+    flex-direction: row; 
+    gap: 3rem;
+  }
+
   a {
     text-decoration: none;
   }
+
   h2 {
+    color: #F2A900;
+  }
+
+  li {
+    color: white;
+    list-style-type: none;
+  }
+  li:hover {
     color: #F2A900;
   }
 </style>
