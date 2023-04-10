@@ -1,61 +1,81 @@
-  @font-face {
-    font-family: 'Gotham';
-    src: url('src/fonts/Gotham-Light.otf') format('opentype');
-    font-weight: 100;
-    font-style: normal;
+@font-face {
+  font-family: 'Gotham';
+  src: url('src/fonts/Gotham-Light.otf') format('opentype');
+  font-weight: 100;
+  font-stretch: 50% 200%;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('src/fonts/Gotham-Medium.otf') format('opentype');
+  font-weight: 300;
+  font-stretch: 50% 200%;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('src/fonts/Gotham-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-stretch: 50% 200%;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('src/fonts/RobotoFlex-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-stretch: 50% 200%;
+  font-style: normal;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    visibility: hidden;
   }
+  1% {
+    visibility: visible;
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  99% {
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
   
-  @font-face {
-    font-family: 'Gotham';
-    src: url('src/fonts/Gotham-Medium.otf') format('opentype');
-    font-weight: 300;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'Gotham';
-    src: url('src/fonts/Gotham-Bold.otf') format('opentype');
-    font-weight: 700;
-    font-style: normal;
-  }
-
-  @font-face {
-    font-family: 'Roboto';
-    src: url('src/fonts/RobotoFlex-Variable.ttf') format('truetype');
-    font-weight: 100 900;
-    font-stretch: 50% 200%;
-    font-style: normal;
-  }
-
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-      visibility: hidden;
-    }
-    1% {
-      visibility: visible;
-    }
-    100% {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-
-  @keyframes fadeOut {
-    0% {
-      opacity: 1;
-      visibility: visible;
-    }
-    99% {
-      visibility: visible;
-    }
-    100% {
-      opacity: 0;
-      visibility: hidden;
-    }
-  }
-
-  body {
+body {
     font-family: 'Gotham', sans-serif;
     background-color: black;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden; 
+  }
+
+  @media only screen and (max-height: 390px) {
+    body {
+      font-family: 'Gotham', sans-serif;
+      background-color: black;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: scroll; 
+    }
   }

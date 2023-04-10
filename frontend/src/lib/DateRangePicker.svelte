@@ -99,4 +99,15 @@
     transform: translateY(-50%);
     cursor: pointer;
   }
+
+  @media only screen and (min-width: 375px) and (max-width: 844px) {
+    input::placeholder {
+      font-size: 0.8rem;
+    }
+
+    input {
+      width: fit-content;
+      font-size: 0.8rem;
+    }
+  }
 </style>
