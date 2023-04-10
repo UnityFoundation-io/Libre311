@@ -72,14 +72,22 @@ public class ServiceRequestService {
             if (requestAttributes.isEmpty()) {
                 return null; // todo throw exception - must provide attributes
             }
-            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionJson, requestAttributes)); {
+            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionJson, requestAttributes)) {
                 return null; // todo throw exception (validation)
             }
         }
 
-        // TODO need to handle saving of attributes.
+        ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, serviceByServiceCodeOptional.get());
+        if (!requestAttributes.isEmpty()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                serviceRequest.setAttributesJson(objectMapper.writeValueAsString(requestAttributes));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-        return new PostResponseServiceRequestDTO(serviceRequestRepository.save(transformDtoToServiceRequest(serviceRequestDTO, serviceByServiceCodeOptional.get())));
+        return new PostResponseServiceRequestDTO(serviceRequestRepository.save(serviceRequest));
     }
 
     private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, Map<String, List<String>> requestAttributes) {
