@@ -25,6 +25,12 @@
   import issueSubmitterContact from "../stores/issueSubmitterContact";
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
+  import {
+    totalSize,
+    totalPages,
+    currentPage,
+    itemsPerPage,
+  } from "../stores/pagination";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
   import Modal from "$lib/Modal.svelte";
   import messages from "$lib/messages.json";
@@ -52,8 +58,10 @@
   const secondaryTwo = colors["secondary.two"];
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
-  let issueTypeTrimCharacters = 20;
   const issueDescriptionTrimCharacters = 36;
+  itemsPerPage.set(10);
+
+  let issueTypeTrimCharacters = 20;
 
   let openLogo = false,
     fadeInBackground = false,
@@ -67,7 +75,6 @@
     reportNewIssueStep6 = false,
     currentStep = null,
     findReportedIssue = false,
-    // issueDetailView = false,
     showFilters = false,
     hasMoreResults = true,
     showModal = false;
@@ -150,10 +157,17 @@
   };
 
   const getAllIssues = async () => {
-    const res = await axios.get("http://localhost:8080/api/requests");
-    issuesData = res.data;
-    filteredIssuesData = issuesData;
+    const res = await axios.get(
+      `http://localhost:8080/api/requests?size=${$itemsPerPage}`
+    );
     console.log("res", res);
+    if (res) {
+      issuesData = res.data;
+      filteredIssuesData = issuesData;
+      totalSize.set(res.headers["page-totalsize"]);
+      totalPages.set(res.headers["page-totalpages"]);
+      currentPage.set(res.headers["page-pagenumber"]);
+    }
   };
 
   const filterByDates = () => {
