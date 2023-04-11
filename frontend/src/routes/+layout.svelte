@@ -1,6 +1,9 @@
 <script>
   import colors from '$lib/colors.json';
 
+  import Fa from 'svelte-fa/src/fa.svelte';
+  import { faFacebookF, faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
+
   const primaryOne = colors["primary.one"];
   const primaryTwo = colors["primary.two"];
   const secondaryOne = colors["secondary.one"];
@@ -57,6 +60,17 @@
       <a href="https://lomocomo.org/about/annual-reports"><li>Annual Reports</li></a>
       <a href="https://lomocomo.org/about/legal-and-financial/"><li>Legal and Financial</li></a>
       <a href="https://lomocomo.org/about/the-rebrand-story/"><li>Our Rebrand Story</li></a>
+      <div class="socialButtons">
+        <a class="socialIcon" href="https://facebook.com/localmotioncomo">
+          <Fa icon={faFacebookF} size="xs"/>
+        </a>
+        <a class="socialIcon" href="https://facebook.com/localmotioncomo">
+          <Fa icon={faInstagram} size="xs"/>
+        </a>
+        <a class="socialIcon" href="https://facebook.com/localmotioncomo">
+          <Fa icon={faTwitter} size="xs"/>
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -72,7 +86,7 @@
   .footer {
     background-color: #005687; 
     display: flex;
-    height: 30vh;
+    height: 40vh;
     justify-content: space-between;
   }
 
@@ -80,6 +94,25 @@
     display: flex; 
     flex-direction: row; 
     gap: 3rem;
+  }
+
+  .socialButtons {
+    display: flex;
+    flex-direction: row;
+    padding-top: 1rem;
+  }
+
+  .socialIcon {
+    align-items: center;
+    background-color: #f2a900;
+    border-radius: 50%;
+    display: flex;
+    font-size: 1.5em;
+    height: 2rem;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
+    width: 2rem;
   }
 
   a {
