@@ -1,15 +1,7 @@
 <script>
-  import colors from '$lib/colors.json';
-
-  import Fa from 'svelte-fa/src/fa.svelte';
-  import { faFacebookF, faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
-
-  const primaryOne = colors["primary.one"];
-  const primaryTwo = colors["primary.two"];
-  const secondaryOne = colors["secondary.one"];
-  const secondaryTwo = colors["secondary.two"];
-  const accentOne = colors["accent.one"];
-  const accentTwo = colors["accent.two"];
+  import FacebookSVG from '../icons/facebook.svg';
+  import InstagramSVG from '../icons/instagram.svg';
+  import TwitterSVG from '../icons/twitter.svg';
 </script>
 
 <slot />
@@ -33,19 +25,6 @@
       <a href="https://lomocomo.org/advocacy/livable-streets/"><li>Livable Streets</li></a>
       <a href="https://lomocomo.org/advocacy/missourians-for-responsible-transportation/"><li>State-Level Advocacy</li></a>
 
-      <a href="https://lomocomo.org/consulting/"><h2>Consulting</h2></a>
-    </div>
-    <div class="col">
-      <a href="https://lomocomo.org/events/"><h2>Events</h2></a>
-      <a href="https://lomocomo.org/event/bike-walk-wheel-week/"><li>Bike, Walk, & Wheel Week</li></a>
-      <a href="https://lomocomo.org/event/bikes-brews/"><li>Bikes & Brews</li></a>
-      <a href="https://lomocomo.org/event/walk-audits/"><li>Walk Audits</li></a>
-      <a href="https://lomocomo.org/event/lets-chat/"><li>Let's Chat!</li></a>
-      <a href="https://lomocomo.org/event/velo-vini-vici/"><li>Vélo Vino Vici</li></a>
-
-      <a href="https://lomocomo.org/programs/"><h2>Programs</h2></a>
-      <a href="https://lomocomo.org/programs/bike-donations/"><li>Bike Donations</li></a>
-      <a href="https://lomocomo.org/programs/giving-rides/"><li>Giving Rides</li></a>
     </div>
     <div class="col">
       <a href="https://lomocomo.org/get-involved/"><h2>Get Involved</h2></a>
@@ -60,15 +39,15 @@
       <a href="https://lomocomo.org/about/annual-reports"><li>Annual Reports</li></a>
       <a href="https://lomocomo.org/about/legal-and-financial/"><li>Legal and Financial</li></a>
       <a href="https://lomocomo.org/about/the-rebrand-story/"><li>Our Rebrand Story</li></a>
-      <div class="socialButtons">
-        <a class="socialIcon" href="https://facebook.com/localmotioncomo">
-          <Fa icon={faFacebookF} size="xs"/>
+      <div class="socials">
+        <a class="socialButton" href="https://facebook.com/localmotioncomo">
+          <img src={FacebookSVG} alt="facebook" />
         </a>
-        <a class="socialIcon" href="https://facebook.com/localmotioncomo">
-          <Fa icon={faInstagram} size="xs"/>
+        <a class="socialButton" href="https://www.instagram.com/localmotioncomo/">
+          <img src={InstagramSVG} alt="instagram" style="scale:2.5%;"/>
         </a>
-        <a class="socialIcon" href="https://facebook.com/localmotioncomo">
-          <Fa icon={faTwitter} size="xs"/>
+        <a class="socialButton" href="https://twitter.com/localmotioncomo">
+          <img src={TwitterSVG} alt="twitter" style="scale:2.5%;"/>
         </a>
       </div>
     </div>
@@ -96,13 +75,13 @@
     gap: 3rem;
   }
 
-  .socialButtons {
+  .socials {
     display: flex;
     flex-direction: row;
     padding-top: 1rem;
   }
 
-  .socialIcon {
+  .socialButton {
     align-items: center;
     background-color: #f2a900;
     border-radius: 50%;
