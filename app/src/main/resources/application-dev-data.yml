@@ -214,7 +214,7 @@ wemove:
         - serviceCode: "002"
           serviceName: Construction plate shifted
           description: Metal construction plate covering the street or sidewalk has been moved.
-          metadata: true
+          metadata: false
           type: realtime
           keywords:
             - hazard
@@ -342,7 +342,7 @@ wemove:
         - serviceCode: "003"
           serviceName: Curb or curb ramp defect
           description: Sidewalk curb or ramp has problems such as cracking, missing pieces, holes, and/or chipped curb.
-          metadata: true
+          metadata: false
           type: realtime
           keywords:
             - hazard
