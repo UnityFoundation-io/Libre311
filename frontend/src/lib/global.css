@@ -68,14 +68,32 @@ body {
     overflow: hidden; 
   }
 
-  @media only screen and (max-height: 390px) {
-    body {
-      font-family: 'Gotham', sans-serif;
-      background-color: black;
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: scroll; 
-    }
+.button {
+  font-weight: 500;
+  font-family: Gotham;
+  font-size: 1.2rem;
+  display: inline-block;
+  padding: 10px 30px;
+  color: #27279c;
+  border: solid lightgray;
+  border-width: 1px;
+  border-radius: 25px;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  height: 3.5rem;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+@media only screen and (max-height: 390px) {
+  body {
+    font-family: 'Gotham', sans-serif;
+    background-color: black;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: scroll; 
+  }
   }

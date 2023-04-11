@@ -4,6 +4,7 @@
   import flatpickr from "flatpickr";
   import resetDate from "../stores/resetDate";
   import messages from "$lib/messages.json";
+  import expandSVG from "../icons/expand.svg";
 
   const dispatch = createEventDispatcher();
 
@@ -64,7 +65,7 @@
     placeholder="{messages['find.issue']['select.date.range.placeholder']}"
     readonly
   />
-  <span id="caret">&#x25BE;</span>
+  <img src="{expandSVG}" id="caret" alt="pick date range" width="18rem" />
 </div>
 
 <style>
@@ -102,12 +103,12 @@
 
   @media only screen and (min-width: 375px) and (max-width: 844px) {
     input::placeholder {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
     }
 
     input {
       width: fit-content;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
     }
   }
 </style>
