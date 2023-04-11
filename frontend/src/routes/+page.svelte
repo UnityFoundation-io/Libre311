@@ -158,7 +158,7 @@
 
   const getAllIssues = async () => {
     const res = await axios.get(
-      `http://localhost:8080/api/requests?size=${$itemsPerPage}`
+      `http://localhost:8080/api/requests?page_size=${$itemsPerPage}`
     );
     console.log("res", res);
     if (res) {
