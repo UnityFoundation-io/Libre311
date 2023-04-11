@@ -10,7 +10,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
@@ -18,6 +21,7 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @Controller("/api")
 public class RootController {
@@ -33,18 +37,37 @@ public class RootController {
     @Get(uris = {"/services", "/services.json"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public List<ServiceDTO> indexJson(@Valid Pageable pageable) {
-        return serviceService.findAll(pageable);
+    public HttpResponse<List<ServiceDTO>> indexJson(@Valid Pageable pageable) {
+        Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable);
+
+        return HttpResponse.ok(serviceDTOPage.getContent())
+                .headers(Map.of(
+                        "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
+                        "page-TotalSize", String.valueOf(serviceDTOPage.getTotalSize()),
+                        "page-TotalPages", String.valueOf(serviceDTOPage.getTotalPages()),
+                        "page-PageNumber", String.valueOf(serviceDTOPage.getPageNumber()),
+                        "page-Offset", String.valueOf(serviceDTOPage.getOffset()),
+                        "page-Size", String.valueOf(serviceDTOPage.getSize())
+                ));
     }
 
     @Get("/services.xml")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public String indexXml(@Valid Pageable pageable) throws JsonProcessingException {
+    public HttpResponse<String> indexXml(@Valid Pageable pageable) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-        ServiceList serviceList = new ServiceList(serviceService.findAll(pageable));
+        Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable);
+        ServiceList serviceList = new ServiceList(serviceDTOPage.getContent());
 
-        return xmlMapper.writeValueAsString(serviceList);
+        return HttpResponse.ok(xmlMapper.writeValueAsString(serviceList))
+                .headers(Map.of(
+                        "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
+                        "page-TotalSize", String.valueOf(serviceDTOPage.getTotalSize()),
+                        "page-TotalPages", String.valueOf(serviceDTOPage.getTotalPages()),
+                        "page-PageNumber", String.valueOf(serviceDTOPage.getPageNumber()),
+                        "page-Offset", String.valueOf(serviceDTOPage.getOffset()),
+                        "page-Size", String.valueOf(serviceDTOPage.getSize())
+                ));
     }
 
     @Get(uris = {"/services/{serviceCode}", "/services/{serviceCode}.json"})
@@ -70,17 +93,17 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public List<PostResponseServiceRequestDTO> createServiceRequestJson(@Valid @Body PostRequestServiceRequestDTO requestDTO) {
-        return List.of(serviceRequestService.createServiceRequest(requestDTO));
+    public List<PostResponseServiceRequestDTO> createServiceRequestJson(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) {
+        return List.of(serviceRequestService.createServiceRequest(request, requestDTO));
     }
 
     @Post("/requests.xml")
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public String createServiceRequestXml(@Valid @Body PostRequestServiceRequestDTO requestDTO) throws JsonProcessingException {
+    public String createServiceRequestXml(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(requestDTO)));
+        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(request, requestDTO)));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
     }
@@ -88,19 +111,37 @@ public class RootController {
     @Get(uris = {"/requests", "/requests.json"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public List<ServiceRequestDTO> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO) {
-        return serviceRequestService.findAll(requestDTO);
+    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO) {
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO);
+        return HttpResponse.ok(serviceRequestDTOPage.getContent())
+                .headers(Map.of(
+                        "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
+                        "page-TotalSize", String.valueOf(serviceRequestDTOPage.getTotalSize()),
+                        "page-TotalPages", String.valueOf(serviceRequestDTOPage.getTotalPages()),
+                        "page-PageNumber", String.valueOf(serviceRequestDTOPage.getPageNumber()),
+                        "page-Offset", String.valueOf(serviceRequestDTOPage.getOffset()),
+                        "page-Size", String.valueOf(serviceRequestDTOPage.getSize())
+                ));
     }
 
     @Get("/requests.xml")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO) throws JsonProcessingException {
+    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
-        ServiceRequestList serviceRequestList = new ServiceRequestList(serviceRequestService.findAll(requestDTO));
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO);
+        ServiceRequestList serviceRequestList = new ServiceRequestList(serviceRequestDTOPage.getContent());
 
-        return xmlMapper.writeValueAsString(serviceRequestList);
+        return HttpResponse.ok(xmlMapper.writeValueAsString(serviceRequestList))
+                .headers(Map.of(
+                        "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
+                        "page-TotalSize", String.valueOf(serviceRequestDTOPage.getTotalSize()),
+                        "page-TotalPages", String.valueOf(serviceRequestDTOPage.getTotalPages()),
+                        "page-PageNumber", String.valueOf(serviceRequestDTOPage.getPageNumber()),
+                        "page-Offset", String.valueOf(serviceRequestDTOPage.getOffset()),
+                        "page-Size", String.valueOf(serviceRequestDTOPage.getSize())
+                ));
     }
 
     @Get(uris = {"/requests/{serviceRequestId}", "/requests/{serviceRequestId}.json"})

@@ -16,10 +16,6 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("service_code")
     private String serviceCode;
 
-    // todo how to handle this?
-    // required only if service definition with required fields
-//    private String attribute;
-
     // optional
 
     @JsonProperty("lat")
