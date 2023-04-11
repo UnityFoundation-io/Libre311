@@ -1,12 +1,12 @@
 package app.model.servicerequest;
 
+import app.model.service.Service;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.DateCreated;
 import io.micronaut.data.annotation.DateUpdated;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.Instant;
@@ -19,8 +19,9 @@ public class ServiceRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
-    @NotBlank
-    private String serviceCode;
+    @ManyToOne
+    @JoinColumn(name = "services_id", nullable = false)
+    private Service service;
 
     // todo how to handle this?
     // required only if service definition with required fields
@@ -106,14 +107,6 @@ public class ServiceRequest {
 
     public String getId() {
         return id;
-    }
-
-    public String getServiceCode() {
-        return serviceCode;
-    }
-
-    public void setServiceCode(String serviceCode) {
-        this.serviceCode = serviceCode;
     }
 
     @Nullable
@@ -287,5 +280,13 @@ public class ServiceRequest {
 
     public void setServiceNotice(@Nullable String serviceNotice) {
         this.serviceNotice = serviceNotice;
+    }
+
+    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
     }
 }

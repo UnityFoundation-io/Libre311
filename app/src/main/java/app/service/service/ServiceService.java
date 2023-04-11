@@ -3,10 +3,13 @@ package app.service.service;
 import app.dto.service.ServiceDTO;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
+import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -18,8 +21,8 @@ public class ServiceService {
         this.serviceRepository = serviceRepository;
     }
 
-    public List<ServiceDTO> findAll(Pageable pageable) {
-        return serviceRepository.findAll(pageable).map(ServiceDTO::new).getContent();
+    public Page<ServiceDTO> findAll(Pageable pageable) {
+        return serviceRepository.findAll(pageable).map(ServiceDTO::new);
     }
 
     public String getServiceDefinition(String serviceCode) {
