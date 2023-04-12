@@ -6,8 +6,6 @@
   export let selectedIssue;
   export let color;
 
-  console.log("modal", selectedIssue);
-
   const dispatch = createEventDispatcher();
 
   function closeModal() {

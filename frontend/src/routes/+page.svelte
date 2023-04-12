@@ -63,6 +63,8 @@
 
   let issueTypeTrimCharacters = 20;
 
+  let serviceCodes = [];
+
   let openLogo = false,
     fadeInBackground = false,
     openWeMove = false,
@@ -92,33 +94,27 @@
 
   let zoom = 15;
   let markers = [];
+  let currentPositionMarker;
 
   let issuesData = [];
 
   let filteredIssuesData;
-  let filterArray = [];
+
+  let filterIssueType = { service_code: "", service_name: "" };
+  let filterStartDate = "",
+    filterEndDate = "";
 
   // Filtering Results
-  $: if (filterArray.find((filter) => filter.hasOwnProperty("issueType"))) {
-    filteredIssuesData = issuesData;
-    const issueTypeFilter = filterArray.find((filter) =>
-      filter.hasOwnProperty("issueType")
-    )["issueType"];
-    filteredIssuesData = filteredIssuesData.filter(
-      (issue) => issue.service_name === issueTypeFilter
+  $: if (filterIssueType.service_code !== "") {
+    const serviceName = serviceCodes.find(
+      (service) => filterIssueType.service_code === service.service_code
     );
-    if (filterArray.length === 1) addIssuesToMap();
-    if (filterArray.length === 2) {
-      filterByDates();
-      addIssuesToMap();
-    }
-  } else if (
-    filterArray.length === 1 &&
-    filterArray.find((filter) => filter.hasOwnProperty("dates"))
-  ) {
-    filteredIssuesData = issuesData;
-    filterByDates();
-    addIssuesToMap();
+    filterIssueType.service_name = serviceName.service_name;
+  }
+
+  $: if (filterStartDate !== "" && filterEndDate !== "") {
+    clearData();
+    getIssues();
   }
 
   const loader = new Loader({
@@ -145,9 +141,12 @@
     visibleDetails = new Set(visibleDetails);
   };
 
-  const loadMoreResults = (e) => {
+  const loadMoreResults = async (e) => {
     if (e.detail.inView && hasMoreResults) {
-      alert("more results loaded");
+      if (Number($currentPage) + 1 < $totalPages) {
+        $currentPage++;
+        await getIssues($currentPage);
+      }
     }
   };
 
@@ -156,31 +155,65 @@
     unobserveOnEnter: true,
   };
 
-  const getAllIssues = async () => {
-    const res = await axios.get(
-      `http://localhost:8080/api/requests?page_size=${$itemsPerPage}`
-    );
-    console.log("res", res);
-    if (res) {
-      issuesData = res.data;
-      filteredIssuesData = issuesData;
-      totalSize.set(res.headers["page-totalsize"]);
-      totalPages.set(res.headers["page-totalpages"]);
-      currentPage.set(res.headers["page-pagenumber"]);
+  const getAllServiceCodes = async () => {
+    const res = await axios.get(`/services`);
+    if (res.data) serviceCodes = res.data;
+  };
+
+  const populateIssueTypeSelectDropdown = () => {
+    const defaultOption = document.createElement("option");
+    defaultOption.text = "Issue Type";
+    defaultOption.value = "";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+
+    issueTypeSelectSelector.add(defaultOption);
+
+    for (let i = 0; i < serviceCodes.length; i++) {
+      const option = document.createElement("option");
+      option.text = serviceCodes[i].service_name;
+      option.value = serviceCodes[i].service_code;
+      issueTypeSelectSelector.add(option);
     }
   };
 
-  const filterByDates = () => {
-    const selectedDates = filterArray.find((filter) =>
-      filter.hasOwnProperty("dates")
-    )["dates"];
-    const filterInitialDate = new Date(selectedDates[0]);
-    const filterEndingDate = new Date(selectedDates[1]);
-    filteredIssuesData = filteredIssuesData.filter(
-      (issue) =>
-        new Date(issue.requested_datetime) > filterInitialDate &&
-        new Date(issue.requested_datetime) < filterEndingDate
+  const getIssues = async (page = 0) => {
+    let res;
+
+    res = await axios.get(
+      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
     );
+
+    if (
+      res.data?.length > 0 &&
+      JSON.stringify(issuesData) !== JSON.stringify(res.data)
+    ) {
+      if (issuesData) issuesData = [...issuesData, ...res.data];
+      else issuesData = [...res.data];
+
+      filteredIssuesData = issuesData;
+    }
+    totalSize.set(res.headers["page-totalsize"]);
+    totalPages.set(res.headers["page-totalpages"]);
+    currentPage.set(res.headers["page-pagenumber"]);
+
+    if (res.data && res.data?.length < Number($itemsPerPage)) {
+      hasMoreResults = false;
+    }
+  };
+
+  const clearData = () => {
+    issuesData = "";
+    filteredIssuesData = "";
+    totalPages.set(0);
+    currentPage.set(0);
+    hasMoreResults = true;
+  };
+
+  const clearFilters = () => {
+    filterStartDate = "";
+    filterEndDate = "";
+    filterIssueType = { service_code: "", service_name: "" };
   };
 
   const scrollToTop = () => {
@@ -290,6 +323,12 @@
     return formattedDate.trim();
   };
 
+  const formatSimpleDate = (dateString) => {
+    const [datePart, timePart] = dateString.split("T");
+    const [year, month, day] = datePart.split("-");
+    return `${month}-${day}-${year}`;
+  };
+
   const formatDate = (dateString) => {
     const months = [
       "January",
@@ -311,7 +350,7 @@
     const year = date.getFullYear();
     const hours = date.getHours();
     const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
+
     const formattedDate = `${
       months[monthIndex]
     } ${day}, ${year} ${hours}:${minutes.toString().padStart(2, "0")}`;
@@ -320,9 +359,10 @@
 
   const addIssuesToMap = async () => {
     clearMarkers();
+
     if (filteredIssuesData && filteredIssuesData.length > 0) {
       filteredIssuesData.forEach((issue) => {
-        let marker, urlIcon;
+        let marker;
 
         marker = new google.maps.Marker({
           position: {
@@ -395,7 +435,9 @@
 
     scrollToTop();
 
-    await getAllIssues();
+    await getAllServiceCodes();
+
+    await getIssues();
 
     // Trigger the Svelte Transitions
     fadeInBackground = true;
@@ -428,7 +470,7 @@
         scaledSize: new google.maps.Size(55, 55),
       };
 
-      const marker = new google.maps.Marker({
+      currentPositionMarker = new google.maps.Marker({
         map,
         icon,
         position: map.getCenter(),
@@ -437,7 +479,7 @@
 
       map.addListener("center_changed", async () => {
         const center = map.getCenter();
-        marker.setPosition(center);
+        currentPositionMarker.setPosition(center);
         geocodeLatLng(center.lat(), center.lng());
       });
 
@@ -547,18 +589,28 @@
             class:button-find-issue-disabled="{showModal}"
             disabled="{showModal}"
             id="button-find-issues"
-            on:click="{() => {
+            on:click="{async () => {
               if (reportNewIssueStep6) return;
+
+              // Clears the current position marker from the map
+              currentPositionMarker.setMap(null);
 
               if (!findReportedIssue) {
                 setTimeout(() => {
                   scrollToSection(-80);
                 }, 10);
+
                 findReportedIssue = true;
+                if (!filteredIssuesData) await getIssues();
+
                 addIssuesToMap();
               } else {
                 scrollToTop();
+
                 findReportedIssue = false;
+                showFilters = false;
+                clearData();
+                clearFilters();
               }
             }}"
           >
@@ -572,7 +624,7 @@
             {:else}
               <img
                 src="{closeSVG}"
-                alt="close report a new issue"
+                alt="close find an issue"
                 style="vertical-align: -0.3rem; margin-right: 1.3rem; margin-left: -0.7rem"
                 height="25rem"
               />
@@ -1260,141 +1312,127 @@
             {messages["find.issue"]["label.filter"]}
             {#if showFilters}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span on:click="{() => (showFilters = !showFilters)}">-</span>
+              <span
+                on:click="{() => (showFilters = !showFilters)}"
+                style="cursor: pointer"
+              >
+                -
+              </span>
             {:else}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span on:click="{() => (showFilters = !showFilters)}">+</span>
+              <span
+                style="cursor: pointer"
+                on:click="{() => {
+                  showFilters = !showFilters;
+                  // Wait for the DOM to render the Dropdown
+                  setTimeout(() => populateIssueTypeSelectDropdown(), 10);
+                }}"
+              >
+                +
+              </span>
             {/if}
           </div>
 
           {#if showFilters}
-            <div class="filters">
-              <select
-                bind:this="{issueTypeSelectSelector}"
-                on:change="{(e) => {
-                  filterArray = filterArray.filter(
-                    (filter) => !filter.hasOwnProperty('issueType')
-                  );
-                  filterArray.push({ issueType: e.target.value });
-                }}"
-              >
-                <option disabled selected value="">
-                  {messages["find.issue"]["issue.type.placeholder"]}
-                </option>
-                <option
-                  value="{messages['find.issue'][
-                    'select.option.issue.type.one'
-                  ]}"
-                >
-                  {messages["find.issue"][
-                    "select.option.issue.type.one"
-                  ]}</option
-                >
-                <option
-                  value="{messages['find.issue'][
-                    'select.option.issue.type.two'
-                  ]}"
-                >
-                  {messages["find.issue"]["select.option.issue.type.two"]}
-                </option>
-                <option
-                  value="{messages['find.issue'][
-                    'select.option.issue.type.three'
-                  ]}"
-                >
-                  {messages["find.issue"]["select.option.issue.type.three"]}
-                </option>
-                <option
-                  value="{messages['find.issue'][
-                    'select.option.issue.type.four'
-                  ]}"
-                >
-                  {messages["find.issue"]["select.option.issue.type.four"]}
-                </option>
-              </select>
+            <div class="filters-wrapper">
+              <div class="filters">
+                <select
+                  class="select-filter"
+                  bind:this="{issueTypeSelectSelector}"
+                  on:change="{async (e) => {
+                    clearData();
+                    filterIssueType = { service_code: e.target.value };
+                    await getIssues();
+                  }}"></select>
 
-              <select
-                on:change="{(e) => {
-                  console.log(e.target.value);
-                }}"
-              >
-                <option disabled selected value="">
-                  {messages["find.issue"]["reported.by.placeholder"]}
-                </option>
-                <option value="user1">
-                  {messages["find.issue"]["select.option.reported.by.one"]}
-                </option>
-              </select>
+                <select
+                  class="select-filter"
+                  on:change="{(e) => {
+                    console.log(e.target.value);
+                  }}"
+                >
+                  <option disabled selected value="">
+                    {messages["find.issue"]["reported.by.placeholder"]}
+                  </option>
+                  <option value="user1">
+                    {messages["find.issue"]["select.option.reported.by.one"]}
+                  </option>
+                </select>
 
-              <DateRangePicker
-                on:datesSelected="{(e) => {
-                  filterArray = filterArray.filter(
-                    (filter) => !filter.hasOwnProperty('dates')
-                  );
-                  if (e.detail.length === 2) {
-                    filterArray.push({ dates: e.detail });
-                    filterArray = filterArray; // Reactive statement to trigger the filter
-                  }
-                }}"
-              />
-              {#if filterArray.find( (filter) => filter.hasOwnProperty("issueType") )}
-                <div
-                  style="color: white; font-size: 0.8rem; margin-left: 2.4rem; margin-top: 1rem"
-                >
-                  {filterArray[
-                    filterArray.findIndex((obj) => "issueType" in obj)
-                  ].issueType}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <img
-                    src="{closeSVG}"
-                    class="white-closeSVG"
-                    alt="remove filter"
-                    width="14rem"
-                    on:click="{() => {
-                      filterArray = filterArray.filter(
-                        (filter) => !filter.hasOwnProperty('issueType')
-                      );
-                      filteredIssuesData = issuesData;
-                      issueTypeSelectSelector.selectedIndex = 0;
-                      addIssuesToMap();
-                    }}"
-                  />
-                </div>
-              {/if}
-              {#if filterArray.find((filter) => filter.hasOwnProperty("dates"))}
-                <div
-                  style="color: white; font-size: 0.8rem; margin-left: 2.4rem; margin-top: 1rem"
-                >
-                  From {filterArray[
-                    filterArray.findIndex((obj) => "dates" in obj)
-                  ].dates[0]} to {filterArray[
-                    filterArray.findIndex((obj) => "dates" in obj)
-                  ].dates[1]}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <img
-                    src="{closeSVG}"
-                    class="white-closeSVG"
-                    alt="remove filter"
-                    width="14rem"
-                    on:click="{() => {
-                      filterArray = filterArray.filter(
-                        (filter) => !filter.hasOwnProperty('dates')
-                      );
-                      filteredIssuesData = issuesData;
-                      resetDate.set(true);
-                      addIssuesToMap();
-                    }}"
-                  />
-                </div>
-              {/if}
+                <DateRangePicker
+                  on:datesSelected="{(e) => {
+                    if (e.detail.length === 2) {
+                      filterStartDate = e.detail[0];
+                      filterEndDate = e.detail[1];
+                    }
+                    scrollToSection(-80);
+                  }}"
+                />
+              </div>
+
+              <div class="filter-selection">
+                {#if filterIssueType.service_name !== ""}
+                  <div class="filter-selection-label">
+                    {filterIssueType.service_name}
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <img
+                      src="{closeSVG}"
+                      class="white-closeSVG"
+                      alt="remove filter"
+                      width="14rem"
+                      on:click="{async () => {
+                        filterIssueType = {
+                          service_code: '',
+                          service_name: '',
+                        };
+                        issuesData = '';
+                        hasMoreResults = true;
+                        await getIssues();
+                        issueTypeSelectSelector.selectedIndex = 0;
+                        addIssuesToMap();
+                      }}"
+                    />
+                  </div>
+                {/if}
+
+                {#if filterStartDate !== "" && filterEndDate !== ""}
+                  <div class="filter-selection-label">
+                    From {formatSimpleDate(filterStartDate)} to {formatSimpleDate(
+                      filterEndDate
+                    )}
+
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <img
+                      src="{closeSVG}"
+                      class="white-closeSVG"
+                      alt="remove filter"
+                      width="14rem"
+                      on:click="{async () => {
+                        filterStartDate = '';
+                        filterEndDate = '';
+
+                        clearData();
+
+                        resetDate.set(true);
+                        await getIssues();
+
+                        addIssuesToMap();
+                      }}"
+                    />
+                  </div>
+                {/if}
+              </div>
             </div>
           {/if}
 
           <div class="reported-issues-label">
-            <!-- <hr /> -->
             {messages["find.issue"]["label.reported.issues"]}
           </div>
-          <table class="issues-table">
+          <table
+            class="issues-table"
+            class:table-expanded="{!showFilters}"
+            class:table-contracted="{showFilters}"
+          >
             <thead>
               <tr>
                 <th>
@@ -1494,6 +1532,7 @@
           </table>
         {/if}
       </div>
+      <div id="position-element" style="display: none"></div>
     </div>
   </div>
 {/if}
@@ -1501,9 +1540,10 @@
 <style>
   .white-closeSVG {
     cursor: pointer;
-    margin-left: 0.2rem;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
     filter: brightness(5);
-    vertical-align: sub;
+    vertical-align: -0.25rem;
     border: solid 1px white;
   }
 
@@ -1698,10 +1738,15 @@
 
   select {
     height: 2.5rem;
+    width: fit-content;
     font-size: 1.1rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     border-radius: 10px;
+  }
+
+  .select-filter {
+    height: 1.7rem;
   }
 
   textarea {
@@ -1732,22 +1777,35 @@
     justify-content: space-around;
     width: 55vw;
     margin: 0 auto;
-    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: var(--secondary-color-two);
+  }
+
+  .filters-wrapper {
+    background-color: var(--secondary-color-two);
   }
 
   .filter-label {
     color: white;
     font-weight: 300;
     font-size: 1.1rem;
-    margin: 0.5rem 0 0 1rem;
+    padding: 0.25rem 0 0.25rem 0.5rem;
+    background-color: var(--secondary-color-two);
   }
 
   .issues-table {
     background-color: white;
     width: 55vw;
-    max-height: 15rem;
     overflow-y: auto;
     display: block;
+  }
+
+  .table-expanded {
+    max-height: 11.6rem;
+  }
+
+  .table-contracted {
+    max-height: 11.6rem;
   }
 
   .issue-detail-view {
@@ -1761,6 +1819,18 @@
     margin-bottom: 0.75rem;
     font-weight: 100;
     font-size: 1.2rem;
+  }
+
+  .filter-selection {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .filter-selection-label {
+    color: white;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   thead tr {
@@ -2130,10 +2200,17 @@
     .issues-table {
       background-color: white;
       width: 100vw;
-      max-height: 13rem;
       overflow-y: auto;
       display: block;
       font-size: 0.8rem;
+    }
+
+    .table-expanded {
+      max-height: 8rem;
+    }
+
+    .table-contracted {
+      max-height: 8rem;
     }
 
     .issue-detail-view {
@@ -2144,12 +2221,16 @@
       font-size: 0.85rem;
     }
 
+    .filter-selection-label {
+      font-size: 0.65rem;
+    }
+
     td {
       font-size: 0.7rem;
     }
 
     .td-description {
-      max-width: 6.5rem;
+      max-width: 6rem;
     }
 
     .find-issues {
@@ -2382,11 +2463,15 @@
 
     select {
       font-size: 0.75rem;
+      margin: 0 auto;
+      margin-bottom: 0.3rem;
     }
 
     .filters {
+      display: block;
       flex-wrap: wrap;
       width: 100vw;
+      text-align: center;
     }
 
     .filter-label {
