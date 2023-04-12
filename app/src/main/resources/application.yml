@@ -1,6 +1,9 @@
 micronaut:
   application:
     name: app
+  data:
+    pageable:
+      size-parameter-name: page_size
 datasources:
   default:
     url: jdbc:h2:mem:devDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
