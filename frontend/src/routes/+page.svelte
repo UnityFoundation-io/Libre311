@@ -1599,7 +1599,9 @@
         {/if}
       </div>
     </div>
-    {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5 && !findReportedIssue}
+    
+  </div>
+  {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5 && !findReportedIssue}
       <div class="footer">
         <div class="row">
           <div class="col">
@@ -1648,7 +1650,6 @@
         </div>
       </div>
     {/if}
-  </div>
 {/if}
 
 
