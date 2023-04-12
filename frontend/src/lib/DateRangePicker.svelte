@@ -4,6 +4,7 @@
   import flatpickr from "flatpickr";
   import resetDate from "../stores/resetDate";
   import messages from "$lib/messages.json";
+  import expandSVG from "../icons/expand.svg";
 
   const dispatch = createEventDispatcher();
 
@@ -18,7 +19,7 @@
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {
         const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d")
+          instance.formatDate(date, "Y-m-d\\TH:i:ss\\Z")
         );
 
         dispatch("datesSelected", formattedDates);
@@ -29,14 +30,16 @@
   }
 
   onMount(() => {
+    const positionElement = document.getElementById("position-element");
+
     picker = flatpickr(dateRangeInput, {
+      positionElement: positionElement,
       mode: "range",
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {
         const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d")
+          instance.formatDate(date, "Y-m-d\\TH:i:ss\\Z")
         );
-
         dispatch("datesSelected", formattedDates);
       },
     });
@@ -64,13 +67,13 @@
     placeholder="{messages['find.issue']['select.date.range.placeholder']}"
     readonly
   />
-  <span id="caret">&#x25BE;</span>
+  <img src="{expandSVG}" id="caret" alt="pick date range" width="18rem" />
 </div>
 
 <style>
   input {
     border-radius: 10px;
-    height: 2.2rem;
+    height: 1.3rem;
     width: 13rem;
     border: solid 1px black;
     padding-top: 0.15rem;
@@ -98,5 +101,17 @@
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
+  }
+
+  @media only screen and (min-width: 375px) and (max-width: 844px) {
+    input::placeholder {
+      font-size: 0.7rem;
+    }
+
+    input {
+      height: 1.3rem;
+      width: fit-content;
+      font-size: 0.7rem;
+    }
   }
 </style>

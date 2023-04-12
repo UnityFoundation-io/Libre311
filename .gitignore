@@ -1,3 +1,6 @@
+.history/
+app/bin/
+.DS_Store
 Thumbs.db
 .DS_Store
 .gradle
