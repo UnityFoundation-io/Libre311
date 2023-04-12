@@ -1,0 +1,19 @@
+plugins {
+    id "com.github.node-gradle.node" version "3.1.0"
+}
+
+npm_run {
+    args = ['dev']
+}
+
+task run {
+    dependsOn 'npm_run'
+}
+
+task build {
+    dependsOn (['npm_install', 'npm_run_build'])
+}
+
+npm_run_build {
+    args = ['--production']
+}

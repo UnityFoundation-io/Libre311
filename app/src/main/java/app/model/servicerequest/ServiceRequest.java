@@ -23,9 +23,8 @@ public class ServiceRequest {
     @JoinColumn(name = "services_id", nullable = false)
     private Service service;
 
-    // todo how to handle this?
-    // required only if service definition with required fields
-//    private String attribute;
+    @Nullable
+    private String attributesJson;
 
     // optional
 
@@ -288,5 +287,14 @@ public class ServiceRequest {
 
     public void setService(Service service) {
         this.service = service;
+    }
+
+    @Nullable
+    public String getAttributesJson() {
+        return attributesJson;
+    }
+
+    public void setAttributesJson(@Nullable String attributesJson) {
+        this.attributesJson = attributesJson;
     }
 }
