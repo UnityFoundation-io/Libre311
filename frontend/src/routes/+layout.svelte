@@ -41,13 +41,13 @@
       <a href="https://lomocomo.org/about/the-rebrand-story/"><li>Our Rebrand Story</li></a>
       <div class="socials">
         <a class="socialButton" href="https://facebook.com/localmotioncomo">
-          <img src={FacebookSVG} alt="facebook" />
+          <img src={FacebookSVG} alt="facebook" style="scale:4%;" />
         </a>
         <a class="socialButton" href="https://www.instagram.com/localmotioncomo/">
-          <img src={InstagramSVG} alt="instagram" style="scale:2.5%;"/>
+          <img src={InstagramSVG} alt="instagram" style="scale:2.5%;" />
         </a>
         <a class="socialButton" href="https://twitter.com/localmotioncomo">
-          <img src={TwitterSVG} alt="twitter" style="scale:2.5%;"/>
+          <img src={TwitterSVG} alt="twitter" style="scale:2.5%;" />
         </a>
       </div>
     </div>
@@ -65,13 +65,13 @@
   .footer {
     background-color: #005687; 
     display: flex;
-    height: 40vh;
     justify-content: space-between;
   }
 
   .row {
     display: flex; 
-    flex-direction: row; 
+    flex-direction: row;
+    flex-wrap: wrap; 
     gap: 3rem;
   }
 
