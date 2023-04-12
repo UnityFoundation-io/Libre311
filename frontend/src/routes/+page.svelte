@@ -1727,7 +1727,7 @@
     width: 100vw;
     height: 100vh;
     position: relative;
-    overflow: auto;
+    overflow: hidden;
     height: 1650px;
     background-repeat: no-repeat;
   }
