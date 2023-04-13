@@ -132,7 +132,9 @@
     setTimeout(() => {
       resetState();
       reportNewIssueStep6 = false;
+      backgroundSelector.style.height = $footerDivHeight + "px";
     }, 3000);
+
     setTimeout(() => (showFooter = true), 4000);
   }
 
