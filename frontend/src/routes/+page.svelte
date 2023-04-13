@@ -443,7 +443,7 @@
       );
 
       backgroundSelector.style.height = $footerDivHeight + "px";
-    }, 100);
+    }, 200);
 
     loadColorPalette();
 
