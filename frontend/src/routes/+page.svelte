@@ -95,7 +95,9 @@
     heatmap,
     geocoder,
     bounds,
-    inputIssueAddress,
+    inputIssueAddressSelector,
+    mapControlSelector,
+    satelliteControlSelector,
     issueTypeSelector,
     issueDetailSelector,
     issueTypeSelectSelector,
@@ -249,7 +251,7 @@
       if (status === "OK") {
         if (results[0]) {
           issueAddress.set(results[0].formatted_address);
-          inputIssueAddress.value = results[0].formatted_address;
+          inputIssueAddressSelector.value = results[0].formatted_address;
         } else {
           console.log(messages["geocode"]["empty.results"]);
         }
@@ -308,7 +310,7 @@
     issueSubmitterName.set();
     $issueDetail = null;
     $issueType = null;
-    inputIssueAddress.value = "";
+    inputIssueAddressSelector.value = "";
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -389,7 +391,7 @@
           map: map,
           title: issue.name,
           icon: {
-            scaledSize: new google.maps.Size(40, 40),
+            scaledSize: new google.maps.Size(25, 25),
             url: issuePinSVG,
             anchor: new google.maps.Point(20, 20),
           },
@@ -496,38 +498,61 @@
   };
 
   const toggleHeatmapControl = (controlDiv, map, heatmap) => {
-    const button = document.createElement("button");
-    button.id = "toggle-heatmap";
-    button.innerHTML = "Heatmap";
-    button.style.backgroundColor = "#fff";
-    button.style.border = "2px solid #fff";
-    button.style.borderRadius = "3px";
-    button.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
-    button.style.cursor = "pointer";
-    button.style.marginBottom = "0.3rem";
-    button.style.marginLeft = "0.3rem";
-    button.style.textAlign = "center";
-    button.style.width = "fit-content";
-    button.style.height = "40px";
-    button.title = "Click to toggle between heatmap and markers";
-    controlDiv.appendChild(button);
+    const buttonExists = document.getElementById("toggle-heatmap");
+    if (buttonExists) return;
+    else {
+      const button = document.createElement("button");
+      button.id = "toggle-heatmap";
+      button.innerHTML = "Markers";
+      button.style.backgroundColor = "#fff";
+      button.style.border = "2px solid #fff";
+      button.style.borderRadius = "3px";
+      button.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
+      button.style.cursor = "pointer";
+      button.style.marginBottom = "0.3rem";
+      button.style.marginLeft = "0.3rem";
+      button.style.textAlign = "center";
+      button.style.width = "fit-content";
+      button.style.height = "20px";
+      button.title = "Click to toggle between heatmap and markers";
+      controlDiv.appendChild(button);
 
-    button.addEventListener("click", function () {
-      heatmapVisible = !heatmapVisible;
-      if (heatmapVisible) {
-        const button = document.getElementById("toggle-heatmap");
-        button.innerHTML = "Heatmap";
+      button.addEventListener("click", function () {
+        heatmapVisible = !heatmapVisible;
+        if (heatmapVisible) {
+          const button = document.getElementById("toggle-heatmap");
+          button.innerHTML = "Markers";
 
-        heatmap.setMap(map);
-        toggleMarkers();
-      } else {
-        const button = document.getElementById("toggle-heatmap");
-        button.innerHTML = "Markers";
+          heatmap.setMap(map);
+          toggleMarkers();
+        } else {
+          const button = document.getElementById("toggle-heatmap");
+          button.innerHTML = "Heatmap";
 
-        heatmap.setMap(null);
-        toggleMarkers();
-      }
-    });
+          heatmap.setMap(null);
+          toggleMarkers();
+        }
+      });
+    }
+  };
+
+  const createCustomControl = (text, clickHandler) => {
+    const controlButton = document.createElement("button");
+    controlButton.id = text + "-control";
+    controlButton.style.backgroundColor = "#fff";
+    controlButton.style.border = "2px solid #fff";
+    controlButton.style.borderRadius = "3px";
+    controlButton.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
+    controlButton.style.cursor = "pointer";
+    controlButton.style.userSelect = "none";
+    controlButton.style.marginBottom = "0.3rem";
+    controlButton.style.marginLeft = "0.3rem";
+    controlButton.style.width = "fit-content";
+    controlButton.style.height = "20px";
+    controlButton.innerText = text;
+
+    controlButton.addEventListener("click", clickHandler);
+    return controlButton;
   };
 
   onMount(async () => {
@@ -562,18 +587,34 @@
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: zoom,
         center: { lat: 38.6740015313782, lng: -90.453269188364 },
+        mapTypeControl: false,
       });
 
       geocoder = new google.maps.Geocoder();
 
       bounds = new google.maps.LatLngBounds();
 
-      inputIssueAddress = document.getElementById("pac-input");
+      inputIssueAddressSelector = document.getElementById("pac-input");
 
-      const searchBox = new google.maps.places.SearchBox(inputIssueAddress);
+      const searchBox = new google.maps.places.SearchBox(
+        inputIssueAddressSelector
+      );
+
+      const mapControl = createCustomControl("Map", function () {
+        map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+      });
+
+      const satelliteControl = createCustomControl("Satellite", function () {
+        map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+      });
+
+      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
+      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
+        satelliteControl
+      );
 
       map.controls[google.maps.ControlPosition.TOP_LEFT].push(
-        inputIssueAddress
+        inputIssueAddressSelector
       );
 
       const icon = {
@@ -727,6 +768,7 @@
 
                 findReportedIssue = false;
                 showFilters = false;
+                showTable = true;
 
                 backgroundSelector.style.height = $footerDivHeight + 'px';
                 setTimeout(() => (showFooter = true), 400);
@@ -1837,6 +1879,24 @@
     align-items: center;
   }
 
+  /* .custom-map-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .custom-map-control {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    padding: 5px;
+    cursor: pointer;
+    user-select: none;
+  } */
+
   .describe-issue {
     font-weight: 200;
     margin-top: 1rem;
@@ -1870,9 +1930,10 @@
 
   #pac-input {
     margin-top: 0.6rem;
+    margin-left: 0.5rem;
     padding-left: 0.5rem;
     height: 2.18rem;
-    width: 23rem;
+    width: 50%;
   }
 
   .hidden {
@@ -2340,6 +2401,13 @@
 
   /* Styles for screen widths between 375px and 844px */
   @media only screen and (min-width: 375px) and (max-width: 844px) {
+    #Map-control {
+      margin-buttom: 0.9rem;
+    }
+
+    #Satellite-control {
+      margin-buttom: 0.9rem;
+    }
     .content {
       font-size: 0.5rem;
     }
@@ -2605,7 +2673,7 @@
     }
 
     #pac-input {
-      width: 5.5rem;
+      width: 75%;
     }
 
     select {
