@@ -101,6 +101,7 @@
     issueTypeSelector,
     issueDetailSelector,
     issueTypeSelectSelector,
+    logoSelector,
     selectedIssue;
 
   let zoom = 15;
@@ -223,6 +224,8 @@
     totalPages.set(0);
     currentPage.set(0);
     hasMoreResults = true;
+    clearMarkers();
+    heatmap.setMap(null);
   };
 
   const clearFilters = () => {
@@ -512,7 +515,7 @@
       button.style.marginBottom = "0.3rem";
       button.style.marginLeft = "0.3rem";
       button.style.textAlign = "center";
-      button.style.width = "fit-content";
+      button.style.width = "4.5rem";
       button.style.height = "20px";
       button.title = "Click to toggle between heatmap and markers";
       controlDiv.appendChild(button);
@@ -612,7 +615,6 @@
       map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
         satelliteControl
       );
-
       map.controls[google.maps.ControlPosition.TOP_LEFT].push(
         inputIssueAddressSelector
       );
@@ -700,6 +702,7 @@
     <div style="display: flex; align-items: center; z-index: 1" id="other">
       {#if openLogo}
         <img
+          bind:this="{logoSelector}"
           in:scale="{{
             delay: startRendering,
             duration: 1000,
@@ -754,9 +757,26 @@
 
               backgroundSelector.style.height = pageHeightIssues + 'px';
 
+              //If we are in small screen mode we move the buttons in the map up
+              if (logoSelector.clientHeight / 16 === 3) {
+                setTimeout(() => {
+                  const mapControl = document.getElementById('Map-control');
+                  const satelliteControl =
+                    document.getElementById('Satellite-control');
+                  const heatmapControl =
+                    document.getElementById('toggle-heatmap');
+
+                  mapControl.style.marginBottom = 1 + 'rem';
+                  satelliteControl.style.marginBottom = 1 + 'rem';
+                  heatmapControl.style.marginBottom = 1 + 'rem';
+                }, 700);
+              }
+
               if (!findReportedIssue) {
                 setTimeout(() => {
-                  scrollToSection(-80);
+                  if (logoSelector.clientHeight / 16 === 3)
+                    scrollToSection(-130);
+                  else scrollToSection(-80);
                 }, 10);
                 showFooter = false;
                 findReportedIssue = true;
@@ -1516,6 +1536,7 @@
                     clearData();
                     filterIssueType = { service_code: e.target.value };
                     await getIssues();
+                    setTimeout(async () => await addIssuesToMap(), 1000); ///
                   }}"></select>
 
                 <select
@@ -1880,24 +1901,6 @@
     height: 55vh;
     align-items: center;
   }
-
-  /* .custom-map-controls {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .custom-map-control {
-    background-color: white;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 2px;
-    padding: 5px;
-    cursor: pointer;
-    user-select: none;
-  } */
 
   .describe-issue {
     font-weight: 200;
@@ -2403,13 +2406,6 @@
 
   /* Styles for screen widths between 375px and 844px */
   @media only screen and (min-width: 375px) and (max-width: 844px) {
-    #Map-control {
-      margin-buttom: 0.9rem;
-    }
-
-    #Satellite-control {
-      margin-buttom: 0.9rem;
-    }
     .content {
       font-size: 0.5rem;
     }
@@ -2746,7 +2742,7 @@
     }
 
     .background::before {
-      background-position: 45%;
+      background-position: center calc(50% - 200px);
     }
 
     textarea {
