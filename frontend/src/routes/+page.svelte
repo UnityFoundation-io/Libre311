@@ -4,7 +4,6 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
-  import { browser } from "$app/environment";
   import axios from "axios";
   import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
@@ -427,24 +426,6 @@
     return message;
   };
 
-  // const handleScroll = () => {
-  //   console.log(
-  //     `${window.scrollY} ${document.documentElement.scrollHeight} ${window.innerHeight}`
-  //   );
-
-  //   // const footerDivHeight =
-  //   //   $footerSelector.offsetTop + $footerSelector.offsetHeight;
-
-  //   // backgroundSelector.style.height = footerDivHeight + "px";
-
-  //   // if (window.scrollY > heightFromTopRight)
-  //   //   window.scrollTo(0, heightFromTopRight);
-
-  //   // if (window.scrollY > document.documentElement.scrollHeight * 0.4) {
-  //   //   window.scrollTo(0, document.documentElement.scrollHeight * 0.4);
-  //   // }
-  // };
-
   const openInNewWindow = (url) => {
     window.open(url, "_blank");
   };
@@ -455,7 +436,6 @@
 
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
-    // window.addEventListener("scroll", handleScroll);
 
     setTimeout(() => {
       footerDivHeight.set(
