@@ -393,7 +393,7 @@
           icon: {
             scaledSize: new google.maps.Size(25, 25),
             url: issuePinSVG,
-            anchor: new google.maps.Point(20, 20),
+            anchor: new google.maps.Point(12, 12),
           },
         });
 
@@ -415,8 +415,8 @@
       );
 
       heatmap.setMap(map);
-      heatmap.set("radius", 30);
-      heatmap.set("opacity", 0.6);
+      heatmap.set("radius", 15);
+      heatmap.set("opacity", 0.8);
 
       toggleMarkers();
 
@@ -802,6 +802,8 @@
             id="button-report-issue"
             on:click="{() => {
               if (reportNewIssueStep6) return;
+
+              currentPositionMarker.setMap(map);
 
               backgroundSelector.style.height = pageHeightIssues + 'px';
 
