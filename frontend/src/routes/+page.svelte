@@ -25,14 +25,17 @@
   import issueSubmitterContact from "../stores/issueSubmitterContact";
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
+  import footerDivHeight from "../stores/footerDivHeight";
   import {
     totalSize,
     totalPages,
     currentPage,
     itemsPerPage,
   } from "../stores/pagination";
+  import footerSelector from "../stores/footerSelector";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
   import Modal from "$lib/Modal.svelte";
+  import Footer from "$lib/Footer.svelte";
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
@@ -59,6 +62,7 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
+  const pageHeightIssues = 1650;
   itemsPerPage.set(10);
 
   let issueTypeTrimCharacters = 20;
@@ -79,7 +83,8 @@
     findReportedIssue = false,
     showFilters = false,
     hasMoreResults = true,
-    showModal = false;
+    showModal = false,
+    showFooter = true;
 
   let backgroundSelector,
     sectionNewReport,
@@ -127,7 +132,10 @@
     setTimeout(() => {
       resetState();
       reportNewIssueStep6 = false;
+      backgroundSelector.style.height = $footerDivHeight + "px";
     }, 3000);
+
+    setTimeout(() => (showFooter = true), 4000);
   }
 
   let visibleDetails = new Set();
@@ -431,6 +439,14 @@
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
 
+    setTimeout(() => {
+      footerDivHeight.set(
+        $footerSelector.offsetTop + $footerSelector.offsetHeight
+      );
+
+      backgroundSelector.style.height = $footerDivHeight + "px";
+    }, 200);
+
     loadColorPalette();
 
     scrollToTop();
@@ -530,6 +546,7 @@
 {#if fadeInBackground}
   <div
     bind:this="{backgroundSelector}"
+    height="{pageHeightIssues}px"
     class="background"
     class:background-opacity="{reduceBackGroundOpacity}"
     class:background-opacity-report-issue="{reportNewIssue ||
@@ -541,7 +558,7 @@
     in:fade="{{ duration: 3000, quintOut, amount: 10 }}"
     out:fade="{{ duration: 300, quintOut, amount: 10 }}"
   >
-    <div style="display: flex; align-items: center; z-index: 1">
+    <div style="display: flex; align-items: center; z-index: 1" id="other">
       {#if openLogo}
         <img
           in:scale="{{
@@ -557,6 +574,7 @@
 
       {#if openWeMove}
         <div
+          id="test"
           class="we-move"
           in:blur="{{
             delay: startRendering,
@@ -595,11 +613,13 @@
               // Clears the current position marker from the map
               currentPositionMarker.setMap(null);
 
+              backgroundSelector.style.height = pageHeightIssues + 'px';
+
               if (!findReportedIssue) {
                 setTimeout(() => {
                   scrollToSection(-80);
                 }, 10);
-
+                showFooter = false;
                 findReportedIssue = true;
                 if (!filteredIssuesData) await getIssues();
 
@@ -609,6 +629,9 @@
 
                 findReportedIssue = false;
                 showFilters = false;
+
+                backgroundSelector.style.height = $footerDivHeight + 'px';
+                setTimeout(() => (showFooter = true), 400);
                 clearData();
                 clearFilters();
               }
@@ -640,16 +663,22 @@
             on:click="{() => {
               if (reportNewIssueStep6) return;
 
+              backgroundSelector.style.height = pageHeightIssues + 'px';
+
               setTimeout(() => {
                 scrollToSection(-380);
               }, 10);
               if (!reportNewIssue && !currentStep) {
+                showFooter = false;
                 reportNewIssue = true;
                 reduceBackGroundOpacity = false;
                 currentStep = 1;
               } else if (reportNewIssue) {
                 reportNewIssue = false;
                 resetState();
+
+                backgroundSelector.style.height = $footerDivHeight + 'px';
+                setTimeout(() => (showFooter = true), 400);
               }
               if (!reportNewIssue && currentStep === 2) {
                 reportNewIssueStep2 = false;
@@ -697,7 +726,9 @@
         {/if}
       </div>
     </div>
-
+    {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5 && !reportNewIssueStep6 && !findReportedIssue && showFooter}
+      <Footer bind:this="{$footerSelector}" />
+    {/if}
     <!-- START Report New Issue Flow -->
 
     {#if reportNewIssueStep2}
@@ -1552,7 +1583,7 @@
     height: 100%;
     position: relative;
     overflow: hidden;
-    height: 1650px;
+    /* height: 1650px; */
     background-repeat: no-repeat;
   }
 

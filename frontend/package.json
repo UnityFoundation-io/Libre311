@@ -8,7 +8,7 @@
 		"preview": "vite preview",
 		"start": "concurrently \"npm run start:frontend\" \"cross-env CONCURRENTLY_NEW_WINDOW=1 npm run start:backend\"",
 		"start:frontend": "npm run dev -- --open",
-		"start:backend": "cd .. && cd app && ./gradlew run"
+		"start:backend": "cd .. && ./gradlew run"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
