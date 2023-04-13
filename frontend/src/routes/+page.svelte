@@ -391,6 +391,7 @@
           icon: {
             scaledSize: new google.maps.Size(40, 40),
             url: issuePinSVG,
+            anchor: new google.maps.Point(20, 20),
           },
         });
 
