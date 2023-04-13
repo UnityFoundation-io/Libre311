@@ -16,6 +16,7 @@
   import cameraSVG from "../icons/camera.svg";
   import imageSVG from "../icons/image.svg";
   import detailSVG from "../icons/detail.svg";
+  import issuePinSVG from "../icons/issuepin.svg";
   import issueAddress from "../stores/issueAddress";
   import issueTime from "../stores/issueTime";
   import issueType from "../stores/issueType";
@@ -84,21 +85,28 @@
     showFilters = false,
     hasMoreResults = true,
     showModal = false,
-    showFooter = true;
+    showFooter = true,
+    showTable = true,
+    heatmapVisible = true;
 
   let backgroundSelector,
     sectionNewReport,
     map,
+    heatmap,
     geocoder,
     bounds,
-    inputIssueAddress,
+    inputIssueAddressSelector,
+    mapControlSelector,
+    satelliteControlSelector,
     issueTypeSelector,
     issueDetailSelector,
     issueTypeSelectSelector,
+    logoSelector,
     selectedIssue;
 
   let zoom = 15;
   let markers = [];
+  let heatmapData = [];
   let currentPositionMarker;
 
   let issuesData = [];
@@ -125,7 +133,7 @@
   const loader = new Loader({
     apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
     version: "weekly",
-    libraries: ["places"],
+    libraries: ["places", "visualization"],
   });
 
   $: if (reportNewIssueStep6) {
@@ -216,6 +224,8 @@
     totalPages.set(0);
     currentPage.set(0);
     hasMoreResults = true;
+    clearMarkers();
+    heatmap.setMap(null);
   };
 
   const clearFilters = () => {
@@ -234,13 +244,17 @@
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
+  const toggleTable = () => {
+    showTable = !showTable;
+  };
+
   const geocodeLatLng = (lat, lng) => {
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     geocoder.geocode({ location: latlng }, (results, status) => {
       if (status === "OK") {
         if (results[0]) {
           issueAddress.set(results[0].formatted_address);
-          inputIssueAddress.value = results[0].formatted_address;
+          inputIssueAddressSelector.value = results[0].formatted_address;
         } else {
           console.log(messages["geocode"]["empty.results"]);
         }
@@ -299,7 +313,7 @@
     issueSubmitterName.set();
     $issueDetail = null;
     $issueType = null;
-    inputIssueAddress.value = "";
+    inputIssueAddressSelector.value = "";
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -379,9 +393,53 @@
           },
           map: map,
           title: issue.name,
+          icon: {
+            scaledSize: new google.maps.Size(25, 25),
+            url: issuePinSVG,
+            anchor: new google.maps.Point(12, 12),
+          },
         });
+
         markers.push(marker);
+
+        heatmapData.push(
+          new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
+        );
       });
+
+      heatmap = new google.maps.visualization.HeatmapLayer({
+        data: heatmapData,
+      });
+      const toggleHeatmapControlDiv = document.createElement("div");
+      toggleHeatmapControl(toggleHeatmapControlDiv, map, heatmap);
+      toggleHeatmapControlDiv.index = 1;
+      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
+        toggleHeatmapControlDiv
+      );
+
+      heatmap.setMap(map);
+      heatmap.set("radius", 15);
+      heatmap.set("opacity", 0.8);
+
+      toggleMarkers();
+
+      const gradient = [
+        "rgba(0, 255, 255, 0)",
+        "rgba(0, 255, 255, 1)",
+        "rgba(0, 191, 255, 1)",
+        "rgba(0, 127, 255, 1)",
+        "rgba(0, 63, 255, 1)",
+        "rgba(0, 0, 255, 1)",
+        "rgba(0, 0, 223, 1)",
+        "rgba(0, 0, 191, 1)",
+        "rgba(0, 0, 159, 1)",
+        "rgba(0, 0, 127, 1)",
+        "rgba(63, 0, 91, 1)",
+        "rgba(127, 0, 63, 1)",
+        "rgba(191, 0, 31, 1)",
+        "rgba(255, 0, 0, 1)",
+      ];
+      heatmap.set("gradient", gradient);
 
       setTimeout(() => {
         calculateBoundsAroundMarkers();
@@ -432,6 +490,74 @@
     window.open(url, "_blank");
   };
 
+  const toggleMarkers = () => {
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].getMap() === null) {
+        markers[i].setMap(map);
+      } else {
+        markers[i].setMap(null);
+      }
+    }
+  };
+
+  const toggleHeatmapControl = (controlDiv, map, heatmap) => {
+    const buttonExists = document.getElementById("toggle-heatmap");
+    if (buttonExists) return;
+    else {
+      const button = document.createElement("button");
+      button.id = "toggle-heatmap";
+      button.innerHTML = "Markers";
+      button.style.backgroundColor = "#fff";
+      button.style.border = "2px solid #fff";
+      button.style.borderRadius = "3px";
+      button.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
+      button.style.cursor = "pointer";
+      button.style.marginBottom = "0.3rem";
+      button.style.marginLeft = "0.3rem";
+      button.style.textAlign = "center";
+      button.style.width = "4.5rem";
+      button.style.height = "20px";
+      button.title = "Click to toggle between heatmap and markers";
+      controlDiv.appendChild(button);
+
+      button.addEventListener("click", function () {
+        heatmapVisible = !heatmapVisible;
+        if (heatmapVisible) {
+          const button = document.getElementById("toggle-heatmap");
+          button.innerHTML = "Markers";
+
+          heatmap.setMap(map);
+          toggleMarkers();
+        } else {
+          const button = document.getElementById("toggle-heatmap");
+          button.innerHTML = "Heatmap";
+
+          heatmap.setMap(null);
+          toggleMarkers();
+        }
+      });
+    }
+  };
+
+  const createCustomControl = (text, clickHandler) => {
+    const controlButton = document.createElement("button");
+    controlButton.id = text + "-control";
+    controlButton.style.backgroundColor = "#fff";
+    controlButton.style.border = "2px solid #fff";
+    controlButton.style.borderRadius = "3px";
+    controlButton.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
+    controlButton.style.cursor = "pointer";
+    controlButton.style.userSelect = "none";
+    controlButton.style.marginBottom = "0.3rem";
+    controlButton.style.marginLeft = "0.3rem";
+    controlButton.style.width = "fit-content";
+    controlButton.style.height = "20px";
+    controlButton.innerText = text;
+
+    controlButton.addEventListener("click", clickHandler);
+    return controlButton;
+  };
+
   onMount(async () => {
     // We shorten the Issue Type number of characters for small screens
     if (window.innerWidth < 677) issueTypeTrimCharacters = 15;
@@ -464,18 +590,33 @@
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: zoom,
         center: { lat: 38.6740015313782, lng: -90.453269188364 },
+        mapTypeControl: false,
       });
 
       geocoder = new google.maps.Geocoder();
 
       bounds = new google.maps.LatLngBounds();
 
-      inputIssueAddress = document.getElementById("pac-input");
+      inputIssueAddressSelector = document.getElementById("pac-input");
 
-      const searchBox = new google.maps.places.SearchBox(inputIssueAddress);
+      const searchBox = new google.maps.places.SearchBox(
+        inputIssueAddressSelector
+      );
 
+      const mapControl = createCustomControl("Map", function () {
+        map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+      });
+
+      const satelliteControl = createCustomControl("Satellite", function () {
+        map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+      });
+
+      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
+      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
+        satelliteControl
+      );
       map.controls[google.maps.ControlPosition.TOP_LEFT].push(
-        inputIssueAddress
+        inputIssueAddressSelector
       );
 
       const icon = {
@@ -561,6 +702,7 @@
     <div style="display: flex; align-items: center; z-index: 1" id="other">
       {#if openLogo}
         <img
+          bind:this="{logoSelector}"
           in:scale="{{
             delay: startRendering,
             duration: 1000,
@@ -615,9 +757,26 @@
 
               backgroundSelector.style.height = pageHeightIssues + 'px';
 
+              //If we are in small screen mode we move the buttons in the map up
+              if (logoSelector.clientHeight / 16 === 3) {
+                setTimeout(() => {
+                  const mapControl = document.getElementById('Map-control');
+                  const satelliteControl =
+                    document.getElementById('Satellite-control');
+                  const heatmapControl =
+                    document.getElementById('toggle-heatmap');
+
+                  mapControl.style.marginBottom = 1 + 'rem';
+                  satelliteControl.style.marginBottom = 1 + 'rem';
+                  heatmapControl.style.marginBottom = 1 + 'rem';
+                }, 700);
+              }
+
               if (!findReportedIssue) {
                 setTimeout(() => {
-                  scrollToSection(-80);
+                  if (logoSelector.clientHeight / 16 === 3)
+                    scrollToSection(-130);
+                  else scrollToSection(-80);
                 }, 10);
                 showFooter = false;
                 findReportedIssue = true;
@@ -629,6 +788,7 @@
 
                 findReportedIssue = false;
                 showFilters = false;
+                showTable = true;
 
                 backgroundSelector.style.height = $footerDivHeight + 'px';
                 setTimeout(() => (showFooter = true), 400);
@@ -662,6 +822,8 @@
             id="button-report-issue"
             on:click="{() => {
               if (reportNewIssueStep6) return;
+
+              currentPositionMarker.setMap(map);
 
               backgroundSelector.style.height = pageHeightIssues + 'px';
 
@@ -1374,6 +1536,7 @@
                     clearData();
                     filterIssueType = { service_code: e.target.value };
                     await getIssues();
+                    setTimeout(async () => await addIssuesToMap(), 1000); ///
                   }}"></select>
 
                 <select
@@ -1458,109 +1621,127 @@
 
           <div class="reported-issues-label">
             {messages["find.issue"]["label.reported.issues"]}
+            {#if showTable}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <span on:click="{toggleTable}">-</span>
+            {:else}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <span on:click="{toggleTable}">+</span>
+            {/if}
           </div>
-          <table
-            class="issues-table"
-            class:table-expanded="{!showFilters}"
-            class:table-contracted="{showFilters}"
-          >
-            <thead>
-              <tr>
-                <th>
-                  {messages["find.issue"]["issues.table.column.one"]}
-                </th>
-                <th>
-                  {messages["find.issue"]["issues.table.column.two"]}
-                </th>
-                <th>
-                  {messages["find.issue"]["issues.table.column.three"]}
-                </th>
-                <th style="width: 14rem; text-align: center">
-                  {messages["find.issue"]["issues.table.column.four"]}
-                </th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {#each filteredIssuesData as issue (issue.service_request_id)}
+          {#if showTable}
+            <table
+              class="issues-table"
+              class:table-expanded="{!showFilters}"
+              class:table-contracted="{showFilters}"
+            >
+              <thead>
                 <tr>
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <td
-                    on:click="{() => {
-                      toggleDetails(issue.service_request_id);
-                      selectedIssue = issue;
-                    }}"
-                  >
-                    {#if issue.service_name.length > issueTypeTrimCharacters}
-                      {issue.service_name.slice(0, issueTypeTrimCharacters)}...
-                    {:else}
-                      {issue.service_name}
-                    {/if}
-                  </td>
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <td
-                    class="td-description"
-                    on:click="{() => {
-                      toggleDetails(issue.service_request_id);
-                      selectedIssue = issue;
-                    }}">{issue.description}</td
-                  >
-                  <td style="text-align: center">
-                    {#if issue.media_url !== undefined}
-                      <!-- svelte-ignore a11y-click-events-have-key-events -->
-                      <img
-                        src="{imageSVG}"
-                        alt="issue media"
-                        width="15rem"
-                        style="margin-right: 0 auto; cursor: pointer; text-align: center"
-                        on:click="{() => openInNewWindow(issue.media_url)}"
-                      />
-                    {:else}
-                      <span style="text-align: center">-</span>
-                    {/if}
-                  </td>
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <td
-                    style="text-align: center"
-                    on:click="{() => {
-                      toggleDetails(issue.service_request_id);
-                      selectedIssue = issue;
-                    }}"
-                  >
-                    {formatRelativeDate(issue.requested_datetime)}
-                  </td>
+                  <th>
+                    {messages["find.issue"]["issues.table.column.one"]}
+                  </th>
+                  <th>
+                    {messages["find.issue"]["issues.table.column.two"]}
+                  </th>
+                  <th>
+                    {messages["find.issue"]["issues.table.column.three"]}
+                  </th>
+                  <th style="width: 14rem; text-align: center">
+                    {messages["find.issue"]["issues.table.column.four"]}
+                  </th>
                 </tr>
+              </thead>
 
-                {#if visibleDetails.has(issue.service_request_id)}
-                  <tr style="background-color: {hexToRGBA(secondaryTwo, 0.1)}">
-                    <td class="issue-detail-view">{issue.service_name}</td>
-                    <td class="issue-detail-view">{issue.description}</td>
-                    <td style="text-align: center">
-                      <!-- svelte-ignore a11y-click-events-have-key-events -->
-                      <img
-                        src="{detailSVG}"
-                        alt="detail view"
-                        height="17rem"
-                        on:click="{() => {
-                          showModal = true;
-                          geocodeLatLng(selectedIssue.lat, selectedIssue.long);
-                        }}"
-                      />
+              <tbody>
+                {#each filteredIssuesData as issue (issue.service_request_id)}
+                  <tr>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <td
+                      on:click="{() => {
+                        toggleDetails(issue.service_request_id);
+                        selectedIssue = issue;
+                      }}"
+                    >
+                      {#if issue.service_name.length > issueTypeTrimCharacters}
+                        {issue.service_name.slice(
+                          0,
+                          issueTypeTrimCharacters
+                        )}...
+                      {:else}
+                        {issue.service_name}
+                      {/if}
                     </td>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <td
+                      class="td-description"
+                      on:click="{() => {
+                        toggleDetails(issue.service_request_id);
+                        selectedIssue = issue;
+                      }}">{issue.description}</td
+                    >
+                    <td style="text-align: center">
+                      {#if issue.media_url !== undefined}
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <img
+                          src="{imageSVG}"
+                          alt="issue media"
+                          width="15rem"
+                          style="margin-right: 0 auto; cursor: pointer; text-align: center"
+                          on:click="{() => openInNewWindow(issue.media_url)}"
+                        />
+                      {:else}
+                        <span style="text-align: center">-</span>
+                      {/if}
+                    </td>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <td
+                      style="text-align: center"
+                      on:click="{() => {
+                        toggleDetails(issue.service_request_id);
+                        selectedIssue = issue;
+                      }}"
+                    >
+                      {formatRelativeDate(issue.requested_datetime)}
+                    </td>
+                  </tr>
 
-                    <td></td>
-                  </tr>{/if}
-              {:else}
-                <tr>
-                  <td>{messages["find.issue"]["empty.results"]}</td>
-                </tr>
-              {/each}
-              <div
-                use:inview="{{ options }}"
-                on:change="{loadMoreResults}"
-              ></div>
-            </tbody>
-          </table>
+                  {#if visibleDetails.has(issue.service_request_id)}
+                    <tr
+                      style="background-color: {hexToRGBA(secondaryTwo, 0.1)}"
+                    >
+                      <td class="issue-detail-view">{issue.service_name}</td>
+                      <td class="issue-detail-view">{issue.description}</td>
+                      <td style="text-align: center">
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <img
+                          src="{detailSVG}"
+                          alt="detail view"
+                          height="17rem"
+                          on:click="{() => {
+                            showModal = true;
+                            geocodeLatLng(
+                              selectedIssue.lat,
+                              selectedIssue.long
+                            );
+                          }}"
+                        />
+                      </td>
+
+                      <td></td>
+                    </tr>{/if}
+                {:else}
+                  <tr>
+                    <td>{messages["find.issue"]["empty.results"]}</td>
+                  </tr>
+                {/each}
+                <div
+                  use:inview="{{ options }}"
+                  on:change="{loadMoreResults}"
+                ></div>
+              </tbody>
+            </table>
+          {/if}
         {/if}
       </div>
       <div id="position-element" style="display: none"></div>
@@ -1754,9 +1935,10 @@
 
   #pac-input {
     margin-top: 0.6rem;
+    margin-left: 0.5rem;
     padding-left: 0.5rem;
     height: 2.18rem;
-    width: 23rem;
+    width: 50%;
   }
 
   .hidden {
@@ -2489,7 +2671,7 @@
     }
 
     #pac-input {
-      width: 5.5rem;
+      width: 75%;
     }
 
     select {
@@ -2560,7 +2742,7 @@
     }
 
     .background::before {
-      background-position: 45%;
+      background-position: center calc(50% - 200px);
     }
 
     textarea {
