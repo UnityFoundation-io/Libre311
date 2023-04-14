@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Gotham';
-  src: url('src/fonts/Gotham-Light.otf') format('opentype');
+  src: url('/fonts/Gotham-Light.otf') format('opentype');
   font-weight: 100;
   font-stretch: 50% 200%;
   font-style: normal;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: 'Gotham';
-  src: url('src/fonts/Gotham-Medium.otf') format('opentype');
+  src: url('/fonts/Gotham-Medium.otf') format('opentype');
   font-weight: 300;
   font-stretch: 50% 200%;
   font-style: normal;
@@ -16,7 +16,7 @@
 
 @font-face {
   font-family: 'Gotham';
-  src: url('src/fonts/Gotham-Bold.otf') format('opentype');
+  src: url('/fonts/Gotham-Bold.otf') format('opentype');
   font-weight: 700;
   font-stretch: 50% 200%;
   font-style: normal;
@@ -24,7 +24,7 @@
 
 @font-face {
   font-family: 'Roboto';
-  src: url('src/fonts/RobotoFlex-Variable.ttf') format('truetype');
+  src: url('/fonts/RobotoFlex-Variable.ttf') format('truetype');
   font-weight: 100 900;
   font-stretch: 50% 200%;
   font-style: normal;
