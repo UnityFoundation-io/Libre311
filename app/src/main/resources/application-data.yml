@@ -1,0 +1,130 @@
+---
+wemove:
+  bootstrap:
+    data:
+      enabled: true
+      services:
+        - serviceCode: "001"
+          serviceName: Sidewalk
+          description: Sidewalk
+          metadata: true
+          type: realtime
+          #          keywords:
+          #            - sanitation
+          #            - nuisance
+          #          group: sanitation
+          serviceDefinition:
+            serviceCode: "001"
+            attributes:
+              - variable: true
+                code: "SDWLK"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "CRACKED"
+                    name: "Cracked"
+                  - key: "NARROW"
+                    name: "Too narrow"
+                  - key: "HEAVED_UNEVEN"
+                    name: "Heaved/Uneven Sidewalk"
+        - serviceCode: "002"
+          serviceName: Bus Stop
+          description: Bus Stop
+          metadata: true
+          type: realtime
+          serviceDefinition:
+            serviceCode: "002"
+            attributes:
+              - variable: true
+                code: "BUS_STOP"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue.
+                values:
+                  - key: "UNSAFE"
+                    name: "Unsafe location"
+                  - key: "NO_SDWLK"
+                    name: "No sidewalk"
+                  - key: "MISSING_SIGN"
+                    name: "Sign missing"
+                  - key: "NO_SHELTER"
+                    name: "No Shelter"
+        - serviceCode: "003"
+          serviceName: Bike Lane
+          description: Bike Lane
+          metadata: true
+          type: realtime
+          serviceDefinition:
+            serviceCode: "003"
+            attributes:
+              - variable: true
+                code: "BIKE_LANE"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "INCOMPLETE"
+                    name: "Incomplete"
+                  - key: "UNEVEN"
+                    name: "Uneven"
+                  - key: "UNSAFE"
+                    name: "Unsafe location"
+        - serviceCode: "004"
+          serviceName: Crosswalk
+          description: Crosswalk
+          metadata: true
+          type: realtime
+          serviceDefinition:
+            serviceCode: "004"
+            attributes:
+              - variable: true
+                code: "CRSWLK"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "MISSING"
+                    name: "Missing"
+                  - key: "FADED"
+                    name: "Faded or worn paint"
+                  - key: "DRIVERS"
+                    name: "Drivers failing to yield"
+        - serviceCode: "005"
+          serviceName: Intersection
+          description: Intersection
+          metadata: true
+          type: realtime
+          serviceDefinition:
+            serviceCode: "005"
+            attributes:
+              - variable: true
+                code: "INTSCTN"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "NOCRSWLK"
+                    name: "No crosswalk"
+                  - key: "LIGHTCHNG"
+                    name: "Light will not change"
+                  - key: "SHORTLIGHT"
+                    name: "Light too short"
