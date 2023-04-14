@@ -1623,10 +1623,10 @@
             {messages["find.issue"]["label.reported.issues"]}
             {#if showTable}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span on:click="{toggleTable}">-</span>
+              <span on:click="{toggleTable}" style="cursor: pointer">-</span>
             {:else}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span on:click="{toggleTable}">+</span>
+              <span on:click="{toggleTable}" style="cursor: pointer">+</span>
             {/if}
           </div>
 
