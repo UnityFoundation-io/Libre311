@@ -63,7 +63,11 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
-  const pageHeightIssues = 1650;
+
+  // Page Height
+  let pageHeightIssues = 1650;
+  let pageHeightIssuesSmallPortrait = 1150;
+
   itemsPerPage.set(10);
 
   let issueTypeTrimCharacters = 20;
@@ -96,13 +100,11 @@
     geocoder,
     bounds,
     inputIssueAddressSelector,
-    mapControlSelector,
-    satelliteControlSelector,
     issueTypeSelector,
     issueDetailSelector,
     issueTypeSelectSelector,
-    logoSelector,
-    selectedIssue;
+    selectedIssue,
+    heatmapControlIndex;
 
   let zoom = 15;
   let markers = [];
@@ -127,7 +129,9 @@
 
   $: if (filterStartDate !== "" && filterEndDate !== "") {
     clearData();
-    getIssues();
+    setTimeout(() => {
+      getIssues(0, true);
+    }, 100);
   }
 
   const loader = new Loader({
@@ -193,7 +197,7 @@
     }
   };
 
-  const getIssues = async (page = 0) => {
+  const getIssues = async (page = 0, displayIssuesInMap = false) => {
     let res;
 
     res = await axios.get(
@@ -216,6 +220,12 @@
     if (res.data && res.data?.length < Number($itemsPerPage)) {
       hasMoreResults = false;
     }
+
+    if (res.data?.length > 0) {
+      if (displayIssuesInMap) await addIssuesToMap();
+    } else {
+      setNewCenter("38.95180510457306", "-92.32740864543621", 12); // Columbia, Missouri
+    }
   };
 
   const clearData = () => {
@@ -225,7 +235,13 @@
     currentPage.set(0);
     hasMoreResults = true;
     clearMarkers();
+    clearHeatmap();
+  };
+
+  const clearHeatmap = () => {
     heatmap.setMap(null);
+    heatmapData = [];
+    heatmap.setData(heatmapData);
   };
 
   const clearFilters = () => {
@@ -264,10 +280,10 @@
     });
   };
 
-  const setNewCenter = (lat, lng) => {
+  const setNewCenter = (lat, lng, zoom = 15) => {
     let newCenter = new google.maps.LatLng(lat, lng);
     map.setCenter(newCenter);
-    setNewZoom(15);
+    setNewZoom(zoom);
   };
 
   const setNewZoom = (zoomLevel) => {
@@ -410,12 +426,37 @@
       heatmap = new google.maps.visualization.HeatmapLayer({
         data: heatmapData,
       });
-      const toggleHeatmapControlDiv = document.createElement("div");
-      toggleHeatmapControl(toggleHeatmapControlDiv, map, heatmap);
-      toggleHeatmapControlDiv.index = 1;
-      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
-        toggleHeatmapControlDiv
-      );
+
+      if (
+        map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
+        2
+      ) {
+        const heatmapControl = createCustomControl("Heatmap", function () {
+          heatmapVisible = !heatmapVisible;
+          if (heatmapVisible) {
+            for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(null);
+            }
+            const button = document.getElementById("Heatmap-control");
+            button.innerHTML = "Markers";
+
+            heatmap.setMap(map);
+          } else {
+            const button = document.getElementById("Heatmap-control");
+            button.innerHTML = "Heatmap";
+
+            heatmap.setMap(null);
+            for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(map);
+            }
+          }
+        });
+
+        heatmapControlIndex =
+          map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
+            heatmapControl
+          ) - 1;
+      }
 
       heatmap.setMap(map);
       heatmap.set("radius", 15);
@@ -500,45 +541,6 @@
     }
   };
 
-  const toggleHeatmapControl = (controlDiv, map, heatmap) => {
-    const buttonExists = document.getElementById("toggle-heatmap");
-    if (buttonExists) return;
-    else {
-      const button = document.createElement("button");
-      button.id = "toggle-heatmap";
-      button.innerHTML = "Markers";
-      button.style.backgroundColor = "#fff";
-      button.style.border = "2px solid #fff";
-      button.style.borderRadius = "3px";
-      button.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
-      button.style.cursor = "pointer";
-      button.style.marginBottom = "0.3rem";
-      button.style.marginLeft = "0.3rem";
-      button.style.textAlign = "center";
-      button.style.width = "4.5rem";
-      button.style.height = "20px";
-      button.title = "Click to toggle between heatmap and markers";
-      controlDiv.appendChild(button);
-
-      button.addEventListener("click", function () {
-        heatmapVisible = !heatmapVisible;
-        if (heatmapVisible) {
-          const button = document.getElementById("toggle-heatmap");
-          button.innerHTML = "Markers";
-
-          heatmap.setMap(map);
-          toggleMarkers();
-        } else {
-          const button = document.getElementById("toggle-heatmap");
-          button.innerHTML = "Heatmap";
-
-          heatmap.setMap(null);
-          toggleMarkers();
-        }
-      });
-    }
-  };
-
   const createCustomControl = (text, clickHandler) => {
     const controlButton = document.createElement("button");
     controlButton.id = text + "-control";
@@ -548,30 +550,37 @@
     controlButton.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
     controlButton.style.cursor = "pointer";
     controlButton.style.userSelect = "none";
-    controlButton.style.marginBottom = "0.3rem";
+    if (window.innerWidth < 677) controlButton.style.marginBottom = "1rem";
+    else controlButton.style.marginBottom = "0.3rem";
     controlButton.style.marginLeft = "0.3rem";
     controlButton.style.width = "fit-content";
     controlButton.style.height = "20px";
     controlButton.innerText = text;
 
     controlButton.addEventListener("click", clickHandler);
+
     return controlButton;
   };
 
   onMount(async () => {
-    // We shorten the Issue Type number of characters for small screens
-    if (window.innerWidth < 677) issueTypeTrimCharacters = 15;
-
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
 
-    setTimeout(() => {
-      footerDivHeight.set(
-        $footerSelector.offsetTop + $footerSelector.offsetHeight
-      );
+    // small screen adjustments
+    if (window.innerWidth < 677) {
+      pageHeightIssues = pageHeightIssuesSmallPortrait;
+      issueTypeTrimCharacters = 15;
+    }
 
-      backgroundSelector.style.height = $footerDivHeight + "px";
-    }, 200);
+    setTimeout(() => {
+      if ($footerSelector) {
+        footerDivHeight.set(
+          $footerSelector.offsetTop + $footerSelector.offsetHeight
+        );
+
+        backgroundSelector.style.height = $footerDivHeight + "px";
+      }
+    }, 300);
 
     loadColorPalette();
 
@@ -702,7 +711,6 @@
     <div style="display: flex; align-items: center; z-index: 1" id="other">
       {#if openLogo}
         <img
-          bind:this="{logoSelector}"
           in:scale="{{
             delay: startRendering,
             duration: 1000,
@@ -757,25 +765,9 @@
 
               backgroundSelector.style.height = pageHeightIssues + 'px';
 
-              //If we are in small screen mode we move the buttons in the map up
-              if (logoSelector.clientHeight / 16 === 3) {
-                setTimeout(() => {
-                  const mapControl = document.getElementById('Map-control');
-                  const satelliteControl =
-                    document.getElementById('Satellite-control');
-                  const heatmapControl =
-                    document.getElementById('toggle-heatmap');
-
-                  mapControl.style.marginBottom = 1 + 'rem';
-                  satelliteControl.style.marginBottom = 1 + 'rem';
-                  heatmapControl.style.marginBottom = 1 + 'rem';
-                }, 700);
-              }
-
               if (!findReportedIssue) {
                 setTimeout(() => {
-                  if (logoSelector.clientHeight / 16 === 3)
-                    scrollToSection(-130);
+                  if (window.innerWidth < 677) scrollToSection(-130);
                   else scrollToSection(-80);
                 }, 10);
                 showFooter = false;
@@ -822,6 +814,14 @@
             id="button-report-issue"
             on:click="{() => {
               if (reportNewIssueStep6) return;
+
+              if (
+                map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
+                  .length === 3
+              )
+                map.controls[
+                  window.google.maps.ControlPosition.BOTTOM_LEFT
+                ].removeAt(heatmapControlIndex);
 
               currentPositionMarker.setMap(map);
 
@@ -1536,7 +1536,7 @@
                     clearData();
                     filterIssueType = { service_code: e.target.value };
                     await getIssues();
-                    setTimeout(async () => await addIssuesToMap(), 1000); ///
+                    setTimeout(async () => await addIssuesToMap(), 1000);
                   }}"></select>
 
                 <select
@@ -1764,7 +1764,6 @@
     height: 100%;
     position: relative;
     overflow: hidden;
-    /* height: 1650px; */
     background-repeat: no-repeat;
   }
 
