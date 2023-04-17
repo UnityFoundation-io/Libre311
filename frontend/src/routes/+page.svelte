@@ -1581,6 +1581,8 @@
                         };
                         issuesData = '';
                         hasMoreResults = true;
+                        clearHeatmap();
+
                         await getIssues();
                         issueTypeSelectSelector.selectedIndex = 0;
                         addIssuesToMap();
