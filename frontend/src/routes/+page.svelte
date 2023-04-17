@@ -584,7 +584,7 @@
     pageHeightIssues = pageHeightIssues677Portrait;
     issueTypeTrimCharacters = 15;
     setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone SE");
+    console.log("iPhone SE Portrait");
   }
 
   $: if (
@@ -596,7 +596,7 @@
     pageHeightIssues = pageHeightIssues844Portrait;
     issueTypeTrimCharacters = 15;
     setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone 12 Pro");
+    console.log("iPhone 12 Pro Portrait");
   }
 
   $: if (
@@ -608,7 +608,7 @@
     pageHeightIssues = pageHeightIssues926Portrait;
     issueTypeTrimCharacters = 15;
     setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone 13 Pro Max");
+    console.log("iPhone 13 Pro Max Portrait");
   }
 
   $: if (browser && window.innerWidth > 926) {
