@@ -3,11 +3,21 @@
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
   import footerSelector from "../stores/footerSelector";
+
+  export let backgroundColor;
 </script>
 
-<div class="footer" bind:this="{$footerSelector}">
+<div
+  class="footer"
+  bind:this="{$footerSelector}"
+  style="background-color: {backgroundColor}"
+>
   <div class="row">
-    <div class="col">
+    <div
+      class="col"
+      class:tighten-portrait="{window.innerHeight <= 926 &&
+        window.innerWidth <= 428}"
+    >
       <a href="https://lomocomo.org/we-move-app/">
         <h2>Mobile App</h2>
       </a>
@@ -81,7 +91,7 @@
 
 <style>
   .footer {
-    background-color: #005687;
+    /* background-color: #005687; */
     display: flex;
     flex-wrap: wrap;
     height: auto;
@@ -94,6 +104,10 @@
     flex-direction: column;
     padding-right: 2rem;
     padding-left: 2rem;
+  }
+
+  .tighten-portrait {
+    margin-bottom: -3rem;
   }
 
   .row {
