@@ -48,14 +48,15 @@ public class Bootstrap {
                     Service service = new Service(serviceName);
                     service.setServiceCode((String) svc.get("serviceCode"));
                     service.setDescription((String) svc.get("description"));
-                    service.setMetadata((boolean) svc.get("metadata"));
                     service.setType(ServiceType.valueOf(((String) svc.get("type")).toUpperCase()));
 
                     if (svc.containsKey("serviceDefinition")) {
+                        service.setMetadata(true);
+
                         Map definitionMap = (Map) svc.get("serviceDefinition");
 
                         ServiceDefinition serviceDefinition = new ServiceDefinition();
-                        serviceDefinition.setServiceCode((String) definitionMap.get("serviceCode"));
+                        serviceDefinition.setServiceCode((String) svc.get("serviceCode"));
 
                         List<Map<String, Object>> attributes = (List<Map<String, Object>>) definitionMap.get("attributes");
                         serviceDefinition.setAttributes(attributes.stream().map(stringObjectMap -> {

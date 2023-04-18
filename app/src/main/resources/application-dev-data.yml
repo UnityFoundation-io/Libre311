@@ -5,41 +5,29 @@ wemove:
       enabled: true
       services:
         - serviceCode: "001"
-          serviceName: Cans left out 24x7
-          description: Garbage or recycling cans that have been left out for more than 24 hours after collection. Violators will be cited.
-          metadata: true
+          serviceName: Sidewalk
+          description: Sidewalk
           type: realtime
-          keywords:
-            - sanitation
-            - nuisance
-          group: sanitation
           serviceDefinition:
-            serviceCode: "001"
             attributes:
               - variable: true
-                code: "WHISHETN"
+                code: "SDWLK"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: This is a datatype description
+                datatypeDescription: Please select one or more items.
                 order: 1
-                description: This is a description
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
-                  - key: "123"
-                    name: "Ford"
-                  - key: "124"
-                    name: "Chrysler"
-              - variable: false
-                code: "WISH"
-                datatype: multivaluelist
-                required: false
-                datatypeDescription: This is a datatype description
-                order: 2
-                description: This is a description
-                values:
-                  - key: "125"
-                    name: "Chevrolet"
-                  - key: "126"
-                    name: "Dodge"
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "CRACKED"
+                    name: "Cracked"
+                  - key: "NARROW"
+                    name: "Too narrow"
+                  - key: "HEAVED_UNEVEN"
+                    name: "Heaved/Uneven Sidewalk"
+                  - key: "OTHER"
+                    name: "Other"
           serviceRequests:
             - description: "City of New Haven stop posting automatic responses because people may think that when they post it gets immediate human  attention"
               address: "200 Orange St New Haven, Connecticut, 06510"
@@ -212,13 +200,29 @@ wemove:
               service_notice: null
               status_notes: null
         - serviceCode: "002"
-          serviceName: Construction plate shifted
-          description: Metal construction plate covering the street or sidewalk has been moved.
-          metadata: false
+          serviceName: Bus Stop
+          description: Bus Stop
           type: realtime
-          keywords:
-            - hazard
-          group: street
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "BUS_STOP"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "UNSAFE"
+                    name: "Unsafe location"
+                  - key: "NO_SDWLK"
+                    name: "No sidewalk"
+                  - key: "MISSING_SIGN"
+                    name: "Sign missing"
+                  - key: "NO_SHELTER"
+                    name: "No Shelter"
+                  - key: "OTHER"
+                    name: "Other"
           serviceRequests:
             - description: "Tractor trailer parked on residential street.  Corner of Lighthouse and Marion Streets.  "
               address: "New Haven Connecticut"
@@ -340,13 +344,27 @@ wemove:
               service_notice: null
               status_notes: null
         - serviceCode: "003"
-          serviceName: Curb or curb ramp defect
-          description: Sidewalk curb or ramp has problems such as cracking, missing pieces, holes, and/or chipped curb.
-          metadata: false
+          serviceName: Bike Lane
+          description: Bike Lane
           type: realtime
-          keywords:
-            - hazard
-          group: street
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "BIKE_LANE"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "INCOMPLETE"
+                    name: "Incomplete"
+                  - key: "UNEVEN"
+                    name: "Uneven"
+                  - key: "UNSAFE"
+                    name: "Unsafe location"
           serviceRequests:
           - description: "Two city buses parked obstructing the bike lane rather than using the bus lane"
             address: "270 Temple St New Haven, CT, 06511, USA"
@@ -382,3 +400,47 @@ wemove:
             address_id: null
             service_notice: null
             status_notes: null
+        - serviceCode: "004"
+          serviceName: Crosswalk
+          description: Crosswalk
+          type: realtime
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "CRSWLK"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "MISSING"
+                    name: "Missing"
+                  - key: "FADED"
+                    name: "Faded or worn paint"
+                  - key: "DRIVERS"
+                    name: "Drivers failing to yield"
+        - serviceCode: "005"
+          serviceName: Intersection
+          description: Intersection
+          type: realtime
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "INTSCTN"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "NOCRSWLK"
+                    name: "No crosswalk"
+                  - key: "LIGHTCHNG"
+                    name: "Light will not change"
+                  - key: "SHORTLIGHT"
+                    name: "Light too short"
