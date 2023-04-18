@@ -71,7 +71,6 @@
   let pageHeightIssues677Portrait = 1150;
   let pageHeightIssues844Portrait = 1350;
   let pageHeightIssues926Portrait = 1550;
-  // let pageHeightIssues926Portrait = 1510;
 
   itemsPerPage.set(10);
 
@@ -949,7 +948,7 @@
       </div>
     </div>
     {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5 && !reportNewIssueStep6 && !findReportedIssue && showFooter}
-      <Footer bind:this="{$footerSelector}" />
+      <Footer bind:this="{$footerSelector}" backgroundColor="{secondaryOne}" />
     {/if}
     <!-- START Report New Issue Flow -->
 
