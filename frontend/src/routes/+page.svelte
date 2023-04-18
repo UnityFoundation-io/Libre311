@@ -160,7 +160,6 @@
   $: if (reportNewIssueStep6) {
     setTimeout(() => {
       const divSuccessMessage = document.getElementById("stepSubmitted");
-      console.log(divSuccessMessage);
       divSuccessMessage.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -667,7 +666,6 @@
     console.log("iPhone 13 Pro Max Landscape");
   }
 
-  $: console.log("pageHeightIssues", pageHeightIssues);
   ////////////// Screen Adjustments //////////////////////////////////////////////////////////////////////
 
   onMount(async () => {
