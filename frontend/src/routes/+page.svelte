@@ -72,6 +72,10 @@
   let pageHeightIssues844Portrait = 1350;
   let pageHeightIssues926Portrait = 1550;
 
+  let pageWidthIssues677Landscape = 1050;
+  let pageWidthIssues844Landscape = 1100;
+  let pageWidthIssues926Landscape = 1100;
+
   itemsPerPage.set(10);
 
   let issueTypeTrimCharacters = 20;
@@ -95,7 +99,8 @@
     showModal = false,
     showFooter = true,
     showTable = true,
-    heatmapVisible = true;
+    heatmapVisible = true,
+    landscapeMode = false;
 
   let map,
     heatmap,
@@ -125,6 +130,12 @@
   let filterStartDate = "",
     filterEndDate = "";
 
+  // Detect Landscape Mode
+  $: if (browser && (window.orientation === 90 || window.orientation === -90)) {
+    landscapeMode = true;
+    issueTypeTrimCharacters = 30;
+  }
+
   // Filtering Results
   $: if (filterIssueType.service_code !== "") {
     const serviceName = serviceCodes.find(
@@ -147,18 +158,22 @@
   });
 
   $: if (reportNewIssueStep6) {
-    const divSuccessMessage = document.getElementById("stepReviewSubmit");
-    divSuccessMessage.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
     setTimeout(() => {
-      resetState();
-      reportNewIssueStep6 = false;
-      backgroundSelector.style.height = $footerDivHeight + "px";
-    }, 3000);
+      const divSuccessMessage = document.getElementById("stepSubmitted");
+      console.log(divSuccessMessage);
+      divSuccessMessage.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
 
-    setTimeout(() => (showFooter = true), 4000);
+      setTimeout(() => {
+        resetState();
+        reportNewIssueStep6 = false;
+        backgroundSelector.style.height = $footerDivHeight + "px";
+      }, 3000);
+
+      setTimeout(() => (showFooter = true), 4000);
+    }, 100);
   }
 
   let visibleDetails = new Set();
@@ -625,12 +640,34 @@
   ////////////// Landscape //////////////////
 
   $: if (browser && window.innerWidth <= 677 && window.innerHeight <= 375) {
-    pageHeightIssues = pageHeightIssues677Portrait;
-    issueTypeTrimCharacters = 15;
+    pageHeightIssues = pageWidthIssues677Landscape;
     setTimeout(() => adjustFooter(), 300);
     console.log("iPhone SE Landscape");
   }
 
+  $: if (
+    browser &&
+    window.innerWidth <= 844 &&
+    window.innerWidth > 677 &&
+    window.innerHeight <= 390
+  ) {
+    pageHeightIssues = pageWidthIssues844Landscape;
+    setTimeout(() => adjustFooter(), 300);
+    console.log("iPhone 12 Pro Landscape");
+  }
+
+  $: if (
+    browser &&
+    window.innerWidth <= 926 &&
+    window.innerWidth > 844 &&
+    window.innerHeight <= 428
+  ) {
+    pageHeightIssues = pageWidthIssues926Landscape;
+    setTimeout(() => adjustFooter(), 300);
+    console.log("iPhone 13 Pro Max Landscape");
+  }
+
+  $: console.log("pageHeightIssues", pageHeightIssues);
   ////////////// Screen Adjustments //////////////////////////////////////////////////////////////////////
 
   onMount(async () => {
@@ -772,7 +809,7 @@
     in:fade="{{ duration: 3000, quintOut, amount: 10 }}"
     out:fade="{{ duration: 300, quintOut, amount: 10 }}"
   >
-    <div style="display: flex; align-items: center; z-index: 1" id="other">
+    <div style="display: flex; align-items: center; z-index: 1" id="logo-div">
       {#if openLogo}
         <img
           in:scale="{{
@@ -826,6 +863,8 @@
 
               // Clears the current position marker from the map
               currentPositionMarker.setMap(null);
+              inputIssueAddressSelector = document.getElementById('pac-input');
+              inputIssueAddressSelector.value = '';
 
               backgroundSelector.style.height = pageHeightIssues + 'px';
 
@@ -878,9 +917,19 @@
           <button
             bind:this="{reportIssuesButtonSelector}"
             class="button"
+            class:collapse-margin="{reportNewIssue ||
+              reportNewIssueStep2 ||
+              reportNewIssueStep3 ||
+              reportNewIssueStep4 ||
+              reportNewIssueStep5 ||
+              reportNewIssueStep6}"
             id="button-report-issue"
             on:click="{() => {
               if (reportNewIssueStep6) return;
+
+              const ReportIssueButton = document.getElementById(
+                'button-report-issue'
+              );
 
               if (
                 map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
@@ -1456,7 +1505,7 @@
     {#if reportNewIssueStep6}
       <div style="display: flex; justify-content: center; margin-top: 3rem">
         <div
-          id="stepReviewSubmit"
+          id="stepSubmitted"
           class="describe-issue success-message-div"
           class:visible="{reportNewIssueStep6}"
           class:hidden="{!reportNewIssueStep6}"
