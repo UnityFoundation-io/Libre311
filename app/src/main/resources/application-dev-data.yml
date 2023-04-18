@@ -7,14 +7,8 @@ wemove:
         - serviceCode: "001"
           serviceName: Sidewalk
           description: Sidewalk
-          metadata: true
           type: realtime
-#          keywords:
-#            - sanitation
-#            - nuisance
-#          group: sanitation
           serviceDefinition:
-            serviceCode: "001"
             attributes:
               - variable: true
                 code: "SDWLK"
@@ -22,7 +16,7 @@ wemove:
                 required: true
                 datatypeDescription: Please select one or more items.
                 order: 1
-                description: Please select one or more items that best describe the issue.
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
                   - key: "ADA_ACCESS"
                     name: "ADA Access"
@@ -32,6 +26,8 @@ wemove:
                     name: "Too narrow"
                   - key: "HEAVED_UNEVEN"
                     name: "Heaved/Uneven Sidewalk"
+                  - key: "OTHER"
+                    name: "Other"
           serviceRequests:
             - description: "City of New Haven stop posting automatic responses because people may think that when they post it gets immediate human  attention"
               address: "200 Orange St New Haven, Connecticut, 06510"
@@ -206,10 +202,8 @@ wemove:
         - serviceCode: "002"
           serviceName: Bus Stop
           description: Bus Stop
-          metadata: true
           type: realtime
           serviceDefinition:
-            serviceCode: "002"
             attributes:
               - variable: true
                 code: "BUS_STOP"
@@ -217,7 +211,7 @@ wemove:
                 required: true
                 datatypeDescription: Please select one or more items.
                 order: 1
-                description: Please select one or more items that best describe the issue.
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
                   - key: "UNSAFE"
                     name: "Unsafe location"
@@ -227,6 +221,8 @@ wemove:
                     name: "Sign missing"
                   - key: "NO_SHELTER"
                     name: "No Shelter"
+                  - key: "OTHER"
+                    name: "Other"
           serviceRequests:
             - description: "Tractor trailer parked on residential street.  Corner of Lighthouse and Marion Streets.  "
               address: "New Haven Connecticut"
@@ -350,10 +346,8 @@ wemove:
         - serviceCode: "003"
           serviceName: Bike Lane
           description: Bike Lane
-          metadata: true
           type: realtime
           serviceDefinition:
-            serviceCode: "003"
             attributes:
               - variable: true
                 code: "BIKE_LANE"
@@ -361,7 +355,7 @@ wemove:
                 required: true
                 datatypeDescription: Please select one or more items.
                 order: 1
-                description: Please select one or more items that best describe the issue.
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
                   - key: "ADA_ACCESS"
                     name: "ADA Access"
@@ -409,10 +403,8 @@ wemove:
         - serviceCode: "004"
           serviceName: Crosswalk
           description: Crosswalk
-          metadata: true
           type: realtime
           serviceDefinition:
-            serviceCode: "004"
             attributes:
               - variable: true
                 code: "CRSWLK"
@@ -420,7 +412,7 @@ wemove:
                 required: true
                 datatypeDescription: Please select one or more items.
                 order: 1
-                description: Please select one or more items that best describe the issue.
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
                   - key: "ADA_ACCESS"
                     name: "ADA Access"
@@ -433,10 +425,8 @@ wemove:
         - serviceCode: "005"
           serviceName: Intersection
           description: Intersection
-          metadata: true
           type: realtime
           serviceDefinition:
-            serviceCode: "005"
             attributes:
               - variable: true
                 code: "INTSCTN"
@@ -444,7 +434,7 @@ wemove:
                 required: true
                 datatypeDescription: Please select one or more items.
                 order: 1
-                description: Please select one or more items that best describe the issue.
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
                   - key: "ADA_ACCESS"
                     name: "ADA Access"
