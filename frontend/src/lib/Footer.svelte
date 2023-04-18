@@ -12,7 +12,10 @@
   bind:this="{$footerSelector}"
   style="background-color: {backgroundColor}"
 >
-  <div class="row">
+  <div
+    class="row"
+    class:row-wrap="{window.innerHeight <= 375 && window.innerWidth <= 667}"
+  >
     <div
       class="col"
       class:tighten-portrait="{window.innerHeight <= 926 &&
@@ -25,7 +28,11 @@
         <h2>Contact Us</h2>
       </a>
     </div>
-    <div class="col">
+    <div
+      class="col"
+      class:tighten-landscape="{window.innerWidth <= 677 &&
+        window.innerHeight <= 375}"
+    >
       <a href="https://lomocomo.org/?ct_template=advocacy"><h2>Advocacy</h2></a>
       <a href="https://lomocomo.org/advocacy/livable-streets/"
         ><li>Livable Streets</li></a
@@ -91,7 +98,6 @@
 
 <style>
   .footer {
-    /* background-color: #005687; */
     display: flex;
     flex-wrap: wrap;
     height: auto;
@@ -110,11 +116,18 @@
     margin-bottom: -3rem;
   }
 
+  .tighten-landscape {
+    margin-left: 4rem;
+  }
+
   .row {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     gap: 3rem;
+  }
+
+  .row-wrap {
+    flex-wrap: wrap;
   }
 
   .socials {

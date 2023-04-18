@@ -622,6 +622,17 @@
     console.log("Desktop");
   }
 
+  ////////////// Landscape //////////////////
+
+  $: if (browser && window.innerWidth <= 677 && window.innerHeight <= 375) {
+    pageHeightIssues = pageHeightIssues677Portrait;
+    issueTypeTrimCharacters = 15;
+    setTimeout(() => adjustFooter(), 300);
+    console.log("iPhone SE Landscape");
+  }
+
+  ////////////// Screen Adjustments //////////////////////////////////////////////////////////////////////
+
   onMount(async () => {
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
