@@ -178,6 +178,8 @@
       if (Number($currentPage) + 1 < $totalPages) {
         $currentPage++;
         await getIssues($currentPage);
+        clearHeatmap();
+        await addIssuesToMap();
       }
     }
   };
@@ -464,11 +466,12 @@
           ) - 1;
       }
 
-      heatmap.setMap(map);
+      if (heatmapVisible) heatmap.setMap(map);
+
       heatmap.set("radius", 15);
       heatmap.set("opacity", 0.8);
 
-      toggleMarkers();
+      if (heatmapVisible) toggleMarkers();
 
       const gradient = [
         "rgba(0, 255, 255, 0)",
