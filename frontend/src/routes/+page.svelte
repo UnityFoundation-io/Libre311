@@ -64,6 +64,7 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
+  const waitTime = 1000;
 
   // Page Height
   let pageHeightIssues = 1650;
@@ -103,6 +104,7 @@
     bounds,
     selectedIssue,
     heatmapControlIndex,
+    timer,
     backgroundSelector,
     inputIssueAddressSelector,
     issueTypeSelector,
@@ -686,9 +688,16 @@
       });
 
       map.addListener("center_changed", async () => {
-        const center = map.getCenter();
-        currentPositionMarker.setPosition(center);
-        geocodeLatLng(center.lat(), center.lng());
+        if (!findReportedIssue) {
+          const center = map.getCenter();
+          currentPositionMarker.setPosition(center);
+
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            geocodeLatLng(center.lat(), center.lng());
+            console.log("geocoding...");
+          }, waitTime);
+        }
       });
 
       // Bias the SearchBox results towards current map's viewport.
