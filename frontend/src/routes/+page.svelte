@@ -27,6 +27,7 @@
   import issueSubmitterContact from "../stores/issueSubmitterContact";
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
+  import issueDetailList from "../stores/issueDetailList";
   import footerDivHeight from "../stores/footerDivHeight";
   import {
     totalSize,
@@ -41,6 +42,7 @@
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
+  import { each } from "svelte/internal";
 
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -111,9 +113,9 @@
     timer,
     backgroundSelector,
     inputIssueAddressSelector,
-    issueTypeSelector,
     issueDetailSelector,
     issueTypeSelectSelector,
+    issueDetailSelectSelector,
     findIssuesButtonSelector,
     reportIssuesButtonSelector;
 
@@ -207,6 +209,11 @@
     if (res.data) serviceCodes = res.data;
   };
 
+  const getServiceDefinition = async (serviceId) => {
+    const res = await axios.get(`/services/${serviceId}`);
+    issueDetailList.set(res.data.attributes[0]);
+  };
+
   const populateIssueTypeSelectDropdown = () => {
     const defaultOption = document.createElement("option");
     defaultOption.text = "Issue Type";
@@ -221,6 +228,23 @@
       option.text = serviceCodes[i].service_name;
       option.value = serviceCodes[i].service_code;
       issueTypeSelectSelector.add(option);
+    }
+  };
+
+  const populateIssueDetailList = () => {
+    const defaultOption = document.createElement("option");
+    defaultOption.text = "Issue Detail";
+    defaultOption.value = "";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+
+    issueDetailSelectSelector.add(defaultOption);
+
+    for (let i = 0; i < $issueDetailList.values.length; i++) {
+      const option = document.createElement("option");
+      option.text = $issueDetailList.values[i].name;
+      option.value = $issueDetailList.values[i].key;
+      issueDetailSelectSelector.add(option);
     }
   };
 
@@ -253,6 +277,40 @@
     } else {
       setNewCenter("38.95180510457306", "-92.32740864543621", 12); // Columbia, Missouri
     }
+  };
+
+  const postIssue = async () => {
+    let attributes = `?service_code=${$issueType.id}&address_string=${$issueAddress}&lat=${$userCurrentLocation.lat}&long=${$userCurrentLocation.lng}`;
+
+    $issueDetail.forEach((attr) => {
+      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.id;
+    });
+
+    if ($issueDescription) attributes += "&description=" + $issueDescription;
+    if ($issueSubmitterName) {
+      const nameParts = $issueSubmitterName.trim().split(" ");
+      const first_name = nameParts[0];
+      const last_name = nameParts.slice(1).join(" ");
+
+      if (last_name)
+        attributes += "&first_name=" + first_name + "&last_name=" + last_name;
+      else attributes += "&first_name=" + first_name;
+    }
+
+    if ($issueSubmitterContact)
+      attributes += "&email=" + $issueSubmitterContact;
+
+    const data = new URLSearchParams(attributes);
+
+    // change once we can upload images
+    // const mediaUrl = '';
+    // if(mediaUrl) attributes += "&media_url=" + mediaUrl;
+
+    axios.post("/requests.json", data, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
   };
 
   const clearData = () => {
@@ -313,8 +371,8 @@
 
   const successCallback = (position) => {
     $userCurrentLocation = {
-      lat: position.coords.latitude,
-      lng: position.coords.longitude,
+      lat: position.coords.latitude ?? "38.95180510457306",
+      lng: position.coords.longitude ?? "-92.32740864543621",
     };
 
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
@@ -348,8 +406,9 @@
     issueDescription.set();
     issueSubmitterContact.set();
     issueSubmitterName.set();
-    $issueDetail = null;
+    $issueDetail = [];
     $issueType = null;
+    $issueDetailList = null;
     inputIssueAddressSelector.value = "";
     setTimeout(() => (currentStep = null), 700);
   };
@@ -1039,152 +1098,84 @@
           <div class="step-two-select-div">
             <select
               class="step-two-select"
-              bind:this="{issueTypeSelector}"
-              on:change="{(e) => {
-                issueType.set(e.target.value);
-              }}"
-            >
-              <option disabled selected value="">
-                {messages["report.issue"][
-                  "select.option.issue.type.placeholder"
-                ]}
-              </option>
-              <option
-                value="{messages['report.issue'][
-                  'select.option.issue.type.one'
-                ]}"
-              >
-                {messages["report.issue"]["select.option.issue.type.one"]}
-              </option>
-              <option
-                value="{messages['report.issue'][
-                  'select.option.issue.type.two'
-                ]}"
-              >
-                {messages["report.issue"]["select.option.issue.type.two"]}
-              </option>
-              <option
-                value="{messages['report.issue'][
-                  'select.option.issue.type.three'
-                ]}"
-              >
-                {messages["report.issue"]["select.option.issue.type.three"]}
-              </option>
-              <option
-                value="{messages['report.issue'][
-                  'select.option.issue.type.four'
-                ]}"
-              >
-                {messages["report.issue"]["select.option.issue.type.four"]}
-              </option>
-            </select>
+              bind:this="{issueTypeSelectSelector}"
+              on:change="{async (e) => {
+                issueType.set({
+                  id: e.target.value,
+                  name: e.target.options[e.target.selectedIndex].text,
+                });
 
-            {#if $issueType === messages["report.issue"]["select.option.issue.type.one"]}
-              <select
-                bind:this="{issueDetailSelector}"
-                style="margin-left: 1rem; margin-top: 2rem"
-                on:change="{(e) => {
-                  issueDetail.set(e.target.value);
-                }}"
-              >
-                <option disabled selected value="">
-                  {messages["issue.one"]["select.option.placeholder"]}
-                </option>
-                <option value="{messages['issue.one']['select.option.one']}">
-                  {messages["issue.one"]["select.option.one"]}
-                </option>
-                <option value="{messages['issue.one']['select.option.two']}">
-                  {messages["issue.one"]["select.option.two"]}
-                </option>
-                <option value="{messages['issue.one']['select.option.three']}">
-                  {messages["issue.one"]["select.option.three"]}
-                </option>
-                <option value="{messages['issue.one']['select.option.four']}">
-                  {messages["issue.one"]["select.option.four"]}
-                </option>
-              </select>
+                await getServiceDefinition(e.target.value);
+
+                // Remove any options
+                while (issueDetailSelectSelector.firstChild) {
+                  issueDetailSelectSelector.removeChild(
+                    issueDetailSelectSelector.firstChild
+                  );
+                }
+
+                populateIssueDetailList();
+              }}"></select>
+
+            {#if $issueDetailList?.description}
+              <div class="step-two-feature-type-label">
+                {$issueDetailList.description}
+              </div>
             {/if}
 
-            {#if $issueType === messages["report.issue"]["select.option.issue.type.two"]}
+            {#if $issueDetailList}
               <select
-                bind:this="{issueDetailSelector}"
-                style="margin-left: 1rem; margin-top: 2rem"
+                class="step-two-select-detail"
+                style="display: block"
+                bind:this="{issueDetailSelectSelector}"
+                on:load="{populateIssueDetailList}"
                 on:change="{(e) => {
-                  issueDetail.set(e.target.value);
-                }}"
-              >
-                <option disabled selected value="">
-                  {messages["issue.two"]["select.option.placeholder"]}
-                </option>
-                <option value="{messages['issue.two']['select.option.one']}">
-                  {messages["issue.two"]["select.option.one"]}
-                </option>
-                <option value="{messages['issue.two']['select.option.two']}">
-                  {messages["issue.two"]["select.option.two"]}
-                </option>
-                <option value="{messages['issue.two']['select.option.three']}">
-                  {messages["issue.two"]["select.option.three"]}
-                </option>
-                <option value="{messages['issue.two']['select.option.four']}">
-                  {messages["issue.two"]["select.option.four"]}
-                </option>
-              </select>
-            {/if}
-            {#if $issueType === messages["report.issue"]["select.option.issue.type.three"]}
-              <select
-                bind:this="{issueDetailSelector}"
-                style="margin-left: 1rem; margin-top: 2rem"
-                on:change="{(e) => {
-                  issueDetail.set(e.target.value);
-                }}"
-              >
-                <option disabled selected value="">
-                  {messages["issue.three"]["select.option.placeholder"]}
-                </option>
-                <option value="{messages['issue.three']['select.option.one']}">
-                  {messages["issue.three"]["select.option.one"]}
-                </option>
-                <option value="{messages['issue.three']['select.option.two']}">
-                  {messages["issue.three"]["select.option.two"]}
-                </option>
-                <option
-                  value="{messages['issue.three']['select.option.three']}"
-                >
-                  {messages["issue.three"]["select.option.three"]}
-                </option>
-                <option value="{messages['issue.three']['select.option.four']}">
-                  {messages["issue.three"]["select.option.four"]}
-                </option>
-              </select>
+                  if ($issueDetail) {
+                    if (
+                      !$issueDetail.find(
+                        (selection) => selection.id === e.target.value
+                      )
+                    )
+                      issueDetail.update((currentSelections) => [
+                        ...currentSelections,
+                        {
+                          name: e.target.options[e.target.selectedIndex].text,
+                          id: e.target.value,
+                        },
+                      ]);
+                  } else
+                    issueDetail.set({
+                      name: e.target.options[e.target.selectedIndex].text,
+                      id: e.target.value,
+                    });
+                  e.target.options[0].selected = true;
+                }}"></select>
             {/if}
 
-            {#if $issueType === messages["report.issue"]["select.option.issue.type.four"]}
-              <select
-                bind:this="{issueDetailSelector}"
-                style="margin-left: 1rem; margin-top: 2rem"
-                on:change="{(e) => {
-                  issueDetail.set(e.target.value);
-                }}"
-              >
-                <option disabled selected value="">
-                  {messages["issue.four"]["select.option.placeholder"]}
-                </option>
-                <option value="{messages['issue.four']['select.option.one']}">
-                  {messages["issue.four"]["select.option.one"]}
-                </option>
-                <option value="{messages['issue.four']['select.option.two']}">
-                  {messages["issue.four"]["select.option.two"]}
-                </option>
-                <option value="{messages['issue.four']['select.option.three']}">
-                  {messages["issue.four"]["select.option.three"]}
-                </option>
-                <option value="{messages['issue.four']['select.option.four']}">
-                  {messages["issue.four"]["select.option.four"]}
-                </option>
-              </select>
+            {#if $issueDetail?.length > 0}
+              {#each $issueDetail as selection}
+                <div class="issue-detail-selected">
+                  {selection.name}
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <img
+                    src="{closeSVG}"
+                    class="white-closeSVG"
+                    alt="remove issue detail"
+                    width="14rem"
+                    on:click="{async () => {
+                      $issueDetail = $issueDetail.filter(
+                        (issueDTL) => issueDTL.id !== selection.id
+                      );
+                    }}"
+                  />
+                </div>
+              {/each}
             {/if}
-            {#if $issueType !== null && $issueDetail !== null}
+
+            {#if $issueType !== null && $issueDetail.find((selection) => selection.name === "Other")}
               <div style="display: inline-block">
+                <div class="step-two-word-count">* Required field</div>
+
                 <textarea
                   placeholder="{messages['report.issue'][
                     'textarea.description.placeholder'
@@ -1278,7 +1269,8 @@
                 reportNewIssueStep3 = false;
                 reportNewIssueStep2 = true;
                 setTimeout(() => {
-                  if ($issueType !== null) issueTypeSelector.value = $issueType;
+                  if ($issueType !== null)
+                    issueTypeSelectSelector.value = $issueType.id;
                   if ($issueDetail !== null)
                     issueDetailSelector.value = $issueDetail;
                 }, 100);
@@ -1421,13 +1413,15 @@
           <div class="step-five-issue-type-label">
             {messages["report.issue"]["label.review.issue.type"]}
             <div class="step-five-issue-type">
-              {$issueType}
+              {$issueType.name}
             </div>
           </div>
           <div class="step-five-issue-detail-label">
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
-              {$issueDetail}
+              {#each $issueDetail as detail, i}
+                <span style="margin-right: 1rem">{i + 1}-{detail.name}</span>
+              {/each}
             </div>
           </div>
           {#if $issueDescription}
@@ -1484,6 +1478,7 @@
               $issueDetail === null}"
             on:click="{() => {
               reportNewIssueStep5 = false;
+              postIssue();
               currentStep = 6;
               reportNewIssueStep6 = true;
             }}"
@@ -1546,13 +1541,14 @@
                   reportNewIssueStep2 = true;
                   currentStep = 2;
                   reportNewIssue = false;
+                  setTimeout(() => populateIssueTypeSelectDropdown(), 10);
 
                   // We add delay to support the fade in
                   setTimeout(() => {
-                    if ($issueType !== null)
-                      issueTypeSelector.value = $issueType;
-                    if ($issueDetail !== null)
-                      issueDetailSelector.value = $issueDetail;
+                    if ($issueType !== null) {
+                      issueTypeSelectSelector.value = $issueType.id;
+                      populateIssueDetailList();
+                    }
                   }, 100);
                 }}"
               >
@@ -1800,7 +1796,7 @@
                       on:click="{() => {
                         toggleDetails(issue.service_request_id);
                         selectedIssue = issue;
-                      }}">{issue.description}</td
+                      }}">{issue.description ?? "-"}</td
                     >
                     <td style="text-align: center">
                       {#if issue.media_url !== undefined}
