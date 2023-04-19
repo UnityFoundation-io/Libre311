@@ -118,19 +118,18 @@ public class ServiceRequestService {
 
         Map<String, List<String>> attributes = new HashMap<>();
         if (body.isPresent()) {
-            Map<String, String> map = body.get();
+            Map<String, Object> map = body.get();
             map.forEach((k, v) -> {
                 if (k.startsWith("attribute[")) {
                     String code = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
-                    if (attributes.containsKey(code)) {
-                        ArrayList<String> list = (ArrayList<String>) attributes.get(code);
-                        list.add(code);
-                        attributes.put(code, list);
+
+                    List<String> list = new ArrayList<>();
+                    if (v instanceof ArrayList) {
+                        list.addAll((ArrayList) v);
                     } else {
-                        ArrayList<String> list = new ArrayList<>();
-                        list.add(v);
-                        attributes.put(code, list);
+                        list = Collections.singletonList(String.valueOf(v));
                     }
+                    attributes.put(code, list);
                 }
             });
         }
