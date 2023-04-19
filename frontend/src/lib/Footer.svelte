@@ -2,6 +2,7 @@
   import facebookSVG from "../icons/facebook.svg";
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
+  import localMotionLogo from "$lib/localmotionlogosmall.png";
   import footerSelector from "../stores/footerSelector";
 
   export let backgroundColor;
@@ -12,6 +13,12 @@
   bind:this="{$footerSelector}"
   style="background-color: {backgroundColor}"
 >
+  <img
+    src="{localMotionLogo}"
+    alt="local motion logo"
+    class="local-motion-logo"
+  />
+
   <div
     class="row"
     class:row-wrap="{window.innerHeight <= 375 && window.innerWidth <= 667}"
@@ -164,5 +171,70 @@
 
   .footer li:hover {
     color: #f2a900;
+  }
+
+  .local-motion-logo {
+    position: relative;
+    top: -6.4rem;
+    width: 150px;
+    height: 104px;
+  }
+
+  @media only screen and (min-width: 375px) and (max-width: 390px) and (orientation: portrait) {
+    .local-motion-logo {
+      margin-bottom: -5rem;
+      margin-left: 15rem;
+      height: 69px;
+      width: 100px;
+      top: -4.2rem;
+    }
+
+    .row {
+      flex-wrap: wrap;
+    }
+  }
+
+  @media only screen and (min-width: 390px) and (max-width: 428px) and (orientation: portrait) {
+    .local-motion-logo {
+      margin-left: 16rem;
+      margin-bottom: -5rem;
+      height: 69px;
+      width: 100px;
+      top: -4.2rem;
+    }
+
+    .row {
+      flex-wrap: wrap;
+    }
+  }
+
+  @media only screen and (min-width: 667px) and (max-width: 844px) and (max-height: 428px) and (orientation: landscape) {
+    .local-motion-logo {
+      margin-bottom: -5rem;
+      height: 69px;
+      width: 100px;
+      margin-left: 33rem;
+      top: -4.2rem;
+    }
+  }
+
+  @media only screen and (min-width: 844px) and (max-width: 925px) and (max-height: 428px) and (orientation: landscape) {
+    .local-motion-logo {
+      margin-bottom: -5rem;
+      height: 69px;
+      width: 100px;
+      left: -38.3rem;
+      top: -4.2rem;
+    }
+  }
+
+  @media only screen and (min-width: 845px) and (max-width: 926px) and (max-height: 428px) and (orientation: landscape) {
+    .local-motion-logo {
+      margin-bottom: -5rem;
+      height: 69px;
+      width: 100px;
+      left: -24.4rem;
+      top: -4.2rem;
+    }
   }
 </style>

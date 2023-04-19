@@ -30,58 +30,18 @@
             "label.add.media": "Press Here to Take Photo or Choose Image",
             "lable.choose.image": " Press here to choose image file. (<10MB)",
             "select.option.issue.type.placeholder": "Choose an Issue Type*",
-            "select.option.issue.type.one": "Sidewalk",
-            "select.option.issue.type.two": "Bike Lane",
-            "select.option.issue.type.three": "Bus Stop",
-            "select.option.issue.type.four": "Traffic Light",
-            "textarea.description.placeholder": "Additional Description Details",
+            "textarea.description.placeholder": "Additional Description Details*",
             "label.submitter.name": "Name of Submitter:",
             "label.contact.info": "Contact Info:",
             "label.review.title": "Review",
             "label.review.issue.location": "Issue Location:",
             "label.review.issue.type": "Issue Type:",
-            "label.review.issue.detail": "Issue Detail:",
+            "label.review.issue.detail": "Issue Details:",
             "label.review.description": "Description:",
             "placeholder.submitter.name": "ex: John Doe",
             "placeholder.contact.info": "ex: johndoe@gmail.com",
             "issue.reported.success.message.one": "Thank You!",
             "issue.reported.success.message.two": "The issue has been reported."
-        },
-
-    "issue.one":
-        {
-            "select.option.placeholder": "Choose Sidewalk details*",
-            "select.option.one": "ADA Access",
-            "select.option.two": "Cracked",
-            "select.option.three": "Missing",
-            "select.option.four": "Other"
-        },
-
-    "issue.two":
-        {
-            "select.option.placeholder": "Choose Bike Lane details*",
-            "select.option.one": "Narrow Lanes",
-            "select.option.two": "Uneven Surface",
-            "select.option.three": "Missing",
-            "select.option.four": "Other"
-        },
-
-    "issue.three":
-        {
-            "select.option.placeholder": "Choose Bus Stop details*",
-            "select.option.one": "Late Bus",
-            "select.option.two": "Inadequate Seating",
-            "select.option.three": "Poor Shelter",
-            "select.option.four": "Other"
-        },
-
-    "issue.four":
-        {
-            "select.option.placeholder": "Choose Traffic Light details*",
-            "select.option.one": "Long Wait Time",
-            "select.option.two": "Poor Visibility",
-            "select.option.three": "No Audible Signal",
-            "select.option.four": "Other"
         },
 
     "map":
@@ -101,10 +61,6 @@
         {
             "label.filter": "Filters",
             "issue.type.placeholder": "Issue Type",
-            "select.option.issue.type.one": "Sidewalk",
-            "select.option.issue.type.two": "Bike Lane",
-            "select.option.issue.type.three": "Bus Stop",
-            "select.option.issue.type.four": "Traffic Light",
             "reported.by.placeholder": "Reported By",
             "select.option.reported.by.one": "User 1",
             "select.date.range.placeholder": "Select Date Range",
