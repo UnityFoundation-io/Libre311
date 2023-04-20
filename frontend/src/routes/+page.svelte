@@ -518,6 +518,8 @@
     inputIssueAddressSelector.value = "";
     selectedFile = null;
     clearUploadMessages();
+    invalidSubmitterName = "";
+    invalidEmail = '';
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -1307,7 +1309,7 @@
                     10}"
                 >
                   {$issueDescription?.length ?? 0}
-                  </span>
+                </span>
                 /{maxCharactersLength}
               </div>
             {/if}
@@ -1558,6 +1560,7 @@
             on:click="{() => {
               reportNewIssueStep4 = false;
               reportNewIssueStep3 = true;
+              currentStep = 3;
             }}"
           >
             <img
@@ -1580,7 +1583,7 @@
                 return;
               }
 
-              validateEmail($issueSubmitterContact);
+              if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
               if (invalidEmail) return;
 
@@ -1670,6 +1673,7 @@
             on:click="{() => {
               reportNewIssueStep5 = false;
               reportNewIssueStep4 = true;
+              currentStep = 4;
             }}"
           >
             <img
