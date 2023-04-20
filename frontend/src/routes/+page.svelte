@@ -57,6 +57,8 @@
 
   // Constants
   const maxCharactersLength = 4000;
+  const minSubmitterNameLength = 3;
+  const minOtherDescriptionLength = 10;
   const startRendering = 2000;
   const primaryOne = colors["primary.one"];
   const primaryOneAlpha = hexToRGBA(primaryOne, 0.6);
@@ -103,7 +105,13 @@
     showFooter = true,
     showTable = true,
     heatmapVisible = true,
+    invalidOtherDescription = false,
+    invalidSubmitterName = false,
+    invalidEmail = false,
     landscapeMode = false;
+
+  let validRegex =
+    /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
 
   let map,
     heatmap,
@@ -367,6 +375,13 @@
       if (displayIssuesInMap) await addIssuesToMap();
     } else {
       setNewCenter("38.95180510457306", "-92.32740864543621", 12); // Columbia, Missouri
+    }
+  };
+
+  const validateEmail = (input) => {
+    if (input.match(validRegex)) invalidEmail = false;
+    else {
+      invalidEmail = true;
     }
   };
 
@@ -1275,10 +1290,25 @@
                   ]}"
                   rows="3"
                   maxlength="{maxCharactersLength}"
-                  bind:value="{$issueDescription}"></textarea>
+                  bind:value="{$issueDescription}"
+                  on:click="{() => (invalidOtherDescription = false)}"
+                ></textarea>
               </div>
+
+              {#if invalidOtherDescription}
+                <div class="step-two-word-count-error">
+                  {messages["report.issue"]["textarea.description.error"]}
+                </div>
+              {/if}
+
               <div class="step-two-word-count">
-                {$issueDescription?.length ?? 0}/{maxCharactersLength}
+                <span
+                  class:step-two-word-count-accent="{$issueDescription?.length <
+                    10}"
+                >
+                  {$issueDescription?.length ?? 0}
+                  </span>
+                /{maxCharactersLength}
               </div>
             {/if}
           </div>
@@ -1307,9 +1337,16 @@
             disabled="{$issueType === null || $issueDetail === null}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
-              reportNewIssueStep2 = false;
-              currentStep = 3;
-              reportNewIssueStep3 = true;
+              if (
+                $issueDetail.find((selection) => selection.name === 'Other') &&
+                $issueDescription?.length < minOtherDescriptionLength
+              )
+                invalidOtherDescription = true;
+              else {
+                reportNewIssueStep2 = false;
+                currentStep = 3;
+                reportNewIssueStep3 = true;
+              }
             }}"
           >
             {messages["report.issue"]["button.next"]}
@@ -1410,11 +1447,14 @@
               on:click="{() => {
                 reportNewIssueStep3 = false;
                 reportNewIssueStep2 = true;
+                currentStep = 2;
+                setTimeout(() => populateIssueTypeSelectDropdown(), 10);
+
                 setTimeout(() => {
-                  if ($issueType !== null)
+                  if ($issueType !== null) {
                     issueTypeSelectSelector.value = $issueType.id;
-                  if ($issueDetail !== null)
-                    issueDetailSelector.value = $issueDetail;
+                    populateIssueDetailList();
+                  }
                 }, 100);
               }}"
             >
@@ -1479,10 +1519,17 @@
             <input
               class="step-four-input-submitter-name"
               bind:value="{$issueSubmitterName}"
+              on:click="{() => (invalidSubmitterName = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.submitter.name'
               ]}"
             />
+
+            {#if invalidSubmitterName}
+              <div class="step-four-submitter-name-word-count-error">
+                {messages["report.issue"]["input.submitter.name.error"]}
+              </div>
+            {/if}
           </div>
 
           <div>
@@ -1492,10 +1539,17 @@
             <input
               class="step-four-input-contact-info"
               bind:value="{$issueSubmitterContact}"
+              on:click="{() => (invalidEmail = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.contact.info'
               ]}"
             />
+
+            {#if invalidEmail}
+              <div class="step-four-submitter-email-error">
+                {messages["report.issue"]["input.email.error"]}
+              </div>
+            {/if}
           </div>
 
           <button
@@ -1521,6 +1575,15 @@
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
             on:click="{() => {
+              if ($issueSubmitterName?.length < minSubmitterNameLength) {
+                invalidSubmitterName = true;
+                return;
+              }
+
+              validateEmail($issueSubmitterContact);
+
+              if (invalidEmail) return;
+
               reportNewIssueStep4 = false;
               currentStep = 5;
               reportNewIssueStep5 = true;

@@ -590,12 +590,30 @@ td {
   margin-bottom: 1rem;
 }
 
+.step-two-word-count-error {
+  justify-content: right;
+  font-size: 0.85rem;
+  text-align: right;
+  margin-bottom: 0.5rem;
+  margin-right: 3.3rem;
+  color: var(--primary-color-two);
+  text-shadow: none;
+  position: absolute;
+  top: 74.2rem;
+  left: 38.1rem;
+}
+
 .step-two-word-count {
   justify-content: right;
   font-size: 0.75rem;
   text-align: right;
   margin-top: 0.2rem;
   margin-right: 3.3rem;
+}
+
+.step-two-word-count-accent {
+  color: var(--accent-color-one);
+  filter:brightness(2);
 }
 
 #stepPhoto {
@@ -643,6 +661,32 @@ td {
   margin-left: 3rem;
   margin-bottom: 1rem;
   border-radius: 10px;
+}
+
+.step-four-submitter-name-word-count-error {
+  justify-content: right;
+  font-size: 0.85rem;
+  text-align: right;
+  margin-bottom: 0.5rem;
+  margin-right: 3.3rem;
+  color: var(--primary-color-two);
+  text-shadow: none;
+  position: absolute;
+  top: 54.3rem;
+  left: 39.8rem;
+}
+
+.step-four-submitter-email-error {
+  justify-content: right;
+  font-size: 0.85rem;
+  text-align: right;
+  margin-bottom: 0.5rem;
+  margin-right: 3.3rem;
+  color: var(--primary-color-two);
+  text-shadow: none;
+  position: absolute;
+  top: 60.2rem;
+  left: 39.6rem;
 }
 
 .step-four-contact-info-label {
