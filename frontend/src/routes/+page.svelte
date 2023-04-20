@@ -42,10 +42,10 @@
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
-  import { each } from "svelte/internal";
 
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 
   const hexToRGBA = (hex, alpha = 1) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -66,6 +66,7 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
+  const fileNameMaxLength = 35;
   const waitTime = 1000;
 
   // Page Height
@@ -132,6 +133,12 @@
   let filterStartDate = "",
     filterEndDate = "";
 
+  // Image Safe Search
+  let selectedFile = null,
+    messageSuccess = "",
+    messageRejectedOne = "",
+    messageRejectedTwo = "";
+
   // Detect Landscape Mode
   $: if (browser && (window.orientation === 90 || window.orientation === -90)) {
     landscapeMode = true;
@@ -186,6 +193,90 @@
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
+  };
+
+  const clearUploadMessages = () => {
+    messageSuccess = "";
+    messageRejectedOne = "";
+    messageRejectedTwo = "";
+  };
+
+  const handleFileChange = (event) => {
+    clearUploadMessages();
+    selectedFile = event.target.files[0];
+  };
+
+  const handleSubmit = async () => {
+    // Convert the selected image file to a data URL
+    const imageUrl = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => resolve(event.target.result);
+      reader.readAsDataURL(selectedFile);
+    });
+
+    // Call the detectExplicitContent function with the image data URL
+    const isExplicit = await detectExplicitContent(imageUrl, apiKey);
+
+    if (isExplicit) {
+      messageRejectedOne =
+        messages["report.issue"]["uploaded.message.rejected-one"];
+      messageRejectedTwo =
+        messages["report.issue"]["uploaded.message.rejected-two"];
+
+      selectedFile = null;
+    } else {
+      messageSuccess = messages["report.issue"]["uploaded.message.success"];
+      selectedFile = null;
+
+      // Save the image to the Server Locally
+    }
+  };
+
+  const detectExplicitContent = async (imageUrl, apiKey) => {
+    const apiEndpoint = "https://vision.googleapis.com/v1/images:annotate";
+    const base64Content = imageUrl.split(",")[1];
+
+    const requestBody = {
+      requests: [
+        {
+          image: {
+            content: base64Content,
+          },
+          features: [
+            {
+              type: "SAFE_SEARCH_DETECTION",
+            },
+          ],
+        },
+      ],
+    };
+
+    try {
+      const response = await fetch(`${apiEndpoint}?key=${apiKey}`, {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const safeSearch = result.responses[0].safeSearchAnnotation;
+
+      const explicitLevels = ["LIKELY", "VERY_LIKELY"];
+      const isExplicit =
+        explicitLevels.includes(safeSearch.adult) ||
+        explicitLevels.includes(safeSearch.violence) ||
+        explicitLevels.includes(safeSearch.racy);
+
+      return isExplicit;
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const loadMoreResults = async (e) => {
@@ -410,6 +501,8 @@
     $issueType = null;
     $issueDetailList = null;
     inputIssueAddressSelector.value = "";
+    selectedFile = null;
+    clearUploadMessages();
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -1249,19 +1342,68 @@
           <span class="step-three-add-media-label">
             {messages["report.issue"]["label.add.media"]}
           </span>
-          <div>
-            <button class="upload-image">
-              {messages["report.issue"]["lable.choose.image"]}
-            </button>
-            <button class="camera-icon">
+
+          <div style="margin-top: 1rem">
+            <form on:submit|preventDefault="{handleSubmit}">
+              <div style="display: flex">
+                <label
+                  for="image-uploads"
+                  class="upload-image"
+                  id="upload-image-label"
+                >
+                  {#if selectedFile}
+                    {#if selectedFile.name.length > fileNameMaxLength}
+                      {selectedFile.name.slice(0, fileNameMaxLength)}...
+                    {:else}
+                      {selectedFile.name}
+                    {/if}
+                  {:else}
+                    {messages["report.issue"]["label.choose.image"]}
+                  {/if}
+
+                  <!-- svelte-ignore a11y-img-redundant-alt -->
+                  <img
+                    src="{cameraSVG}"
+                    alt="take photo"
+                    width="37rem"
+                    style="padding: 0 0.3rem 0 0.3rem; vertical-align: middle; background-color: white; border-radius: 10px; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer"
+                  />
+                </label>
+                <input
+                  type="file"
+                  id="image-uploads"
+                  accept="image/*"
+                  capture="camera"
+                  style="display: none"
+                  on:change="{handleFileChange}"
+                />
+
+                <button
+                  type="submit"
+                  class="button"
+                  class:upload="{selectedFile}"
+                  class:disabled-button-upload="{!selectedFile}"
+                  disabled="{!selectedFile}">Upload</button
+                >
+              </div>
+            </form>
+
+            {#if messageRejectedOne}
+              <div class="upload-message">{messageRejectedOne}</div>
+              <div class="upload-message">{messageRejectedTwo}</div>
+            {:else if messageSuccess}
               <!-- svelte-ignore a11y-img-redundant-alt -->
-              <img
-                src="{cameraSVG}"
-                alt="take photo"
-                width="31rem"
-                style="height: 2.7rem; padding: 0 0.2rem 0 0.2rem; vertical-align:middle"
-              />
-            </button>
+              <div class="upload-message">
+                <img
+                  src="{imageSVG}"
+                  alt="issue image"
+                  height="25rem"
+                  style="vertical-align: -0.3rem; margin-right: 0.5rem"
+                  class="white-icon"
+                />{messageSuccess}
+              </div>
+            {/if}
+
             <button
               class="button back-button"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
@@ -1289,7 +1431,11 @@
               class="button"
               class:next-button="{$issueType && $issueDetail}"
               class:disabled-button="{$issueType === null ||
-                $issueDetail === null}"
+                $issueDetail === null ||
+                selectedFile}"
+              disabled="{$issueType === null ||
+                $issueDetail === null ||
+                selectedFile}"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
