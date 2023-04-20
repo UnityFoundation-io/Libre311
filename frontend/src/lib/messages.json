@@ -34,6 +34,7 @@
             "uploaded.message.success": "The uploaded image has been saved.",
             "select.option.issue.type.placeholder": "Choose an Issue Type*",
             "textarea.description.placeholder": "Additional Description Details*",
+            "textarea.description.error": "Minimum 10 characters required in the description.",
             "label.submitter.name": "Name of Submitter:",
             "label.contact.info": "Contact Info:",
             "label.review.title": "Review",
@@ -43,6 +44,8 @@
             "label.review.description": "Description:",
             "placeholder.submitter.name": "ex: John Doe",
             "placeholder.contact.info": "ex: johndoe@gmail.com",
+            "input.submitter.name.error": "The name should contain at least 3 characters.",
+            "input.email.error": "Invalid email, please make sure your email valid.",
             "issue.reported.success.message.one": "Thank You!",
             "issue.reported.success.message.two": "The issue has been reported."
         },
