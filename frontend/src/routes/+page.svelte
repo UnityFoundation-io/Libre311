@@ -1307,7 +1307,7 @@
                     10}"
                 >
                   {$issueDescription?.length ?? 0}
-                  </span>
+                </span>
                 /{maxCharactersLength}
               </div>
             {/if}
@@ -1580,7 +1580,7 @@
                 return;
               }
 
-              validateEmail($issueSubmitterContact);
+              if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
               if (invalidEmail) return;
 
