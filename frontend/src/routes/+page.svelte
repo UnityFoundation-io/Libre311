@@ -248,9 +248,15 @@
       selectedFile = null;
     } else {
       messageSuccess = messages["report.issue"]["uploaded.message.success"];
-      selectedFile = null;
+      // selectedFile = null;
 
       // Save the image to the Server Locally
+      // this worked for me in testing - max
+      await axios.post("/image", imageUrl.split(",")[1], {
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      });
     }
   };
 
