@@ -37,6 +37,7 @@
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
+  import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import messages from "$lib/messages.json";
@@ -201,6 +202,19 @@
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
+  };
+
+  // const applyFontStretch = (fontFamily, letterSpacing) => {
+  const applyFontStretch = () => {
+    const style = document.createElement("style");
+    style.textContent = `
+        * {
+          font-family: 'Roboto', 'Helvetica';
+          letter-spacing: 0.12rem;
+        }
+      `;
+
+    document.head.appendChild(style);
   };
 
   const clearUploadMessages = () => {
@@ -519,7 +533,7 @@
     selectedFile = null;
     clearUploadMessages();
     invalidSubmitterName = "";
-    invalidEmail = '';
+    invalidEmail = "";
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -840,7 +854,6 @@
   onMount(async () => {
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
-
     setTimeout(() => adjustFooter(), 300);
 
     loadColorPalette();
@@ -2079,3 +2092,5 @@
     </div>
   </div>
 {/if}
+
+<Font on:primaryFontNotAvailable="{applyFontStretch}" />
