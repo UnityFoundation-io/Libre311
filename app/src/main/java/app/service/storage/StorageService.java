@@ -26,6 +26,6 @@ public class StorageService {
         UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID().toString());
         UploadResponse<?> response = objectStorage.upload(request);
         Blob blob = (Blob) response.getNativeResponse();
-        return blob.getSelfLink();
+        return blob.getMediaLink();
     }
 }
