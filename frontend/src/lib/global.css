@@ -30,6 +30,27 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Helvetica';
+  src: url('/fonts/Helvetica-Light.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica';
+  src: url('/fonts/Helvetica-Medium.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica';
+  src: url('/fonts/Helvetica-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -57,9 +78,9 @@
     visibility: hidden;
   }
 }
-  
+
 body {
-    font-family: 'Gotham', sans-serif;
+    font-family: 'Gotham', 'Roboto', 'Helvetica';
     background-color: black;
     margin: 0;
     padding: 0;
@@ -87,7 +108,7 @@ body {
 
 @media only screen and (max-height: 390px) {
   body {
-    font-family: 'Gotham', sans-serif;
+    font-family: 'Gotham', 'Roboto', 'Helvetica';
     background-color: black;
     margin: 0;
     padding: 0;
