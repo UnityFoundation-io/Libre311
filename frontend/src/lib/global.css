@@ -347,7 +347,7 @@ select {
 }
 
 textarea {
-  margin: 0.5rem 3rem 1rem 3rem;
+  margin: 0.5rem 3rem 0 3rem;
   font-size: 1rem;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -612,16 +612,16 @@ td {
 }
 
 .step-two-word-count-error {
+  visibility: hidden;
   justify-content: right;
   font-size: 0.85rem;
   text-align: right;
-  margin-bottom: 0.5rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
   margin-right: 3.3rem;
   color: var(--primary-color-two);
   text-shadow: none;
-  position: absolute;
-  top: 74.2rem;
-  left: 38.1rem;
+  position: relative;
 }
 
 .step-two-word-count {
@@ -630,6 +630,10 @@ td {
   text-align: right;
   margin-top: 0.2rem;
   margin-right: 3.3rem;
+}
+
+.visible {
+  visibility: visible;
 }
 
 .step-two-word-count-accent {
@@ -685,6 +689,7 @@ td {
 }
 
 .step-four-submitter-name-word-count-error {
+  visibility: hidden;
   justify-content: right;
   font-size: 0.85rem;
   text-align: right;
@@ -698,6 +703,7 @@ td {
 }
 
 .step-four-submitter-email-error {
+  visibility: hidden;
   justify-content: right;
   font-size: 0.85rem;
   text-align: right;

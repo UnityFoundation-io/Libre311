@@ -7,7 +7,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"start": "concurrently \"npm run start:frontend\" \"cross-env CONCURRENTLY_NEW_WINDOW=1 npm run start:backend\"",
-		"start:frontend": "npm run dev -- --open",
+		"start:frontend": "npm run dev -- --open --host",
 		"start:backend": "cd .. && ./gradlew run"
 	},
 	"devDependencies": {
