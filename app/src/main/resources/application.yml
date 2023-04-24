@@ -1,6 +1,13 @@
+gcp:
+  project-id: local-motion-we-move
+
 micronaut:
   application:
     name: app
+  object-storage:
+    gcp:
+      default:
+        bucket: a69c003f-5281-4376-9875-ebac846ae7e9-wemove
   security:
     endpoints:
       introspection:

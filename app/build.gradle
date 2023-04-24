@@ -22,8 +22,8 @@ dependencies {
     implementation("io.micronaut.xml:micronaut-jackson-xml")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut.sql:micronaut-jdbc-tomcat")
+    implementation("io.micronaut.objectstorage:micronaut-object-storage-gcp")
     runtimeOnly("com.h2database:h2")
-
 }
 
 
