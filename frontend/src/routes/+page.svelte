@@ -387,8 +387,6 @@
 
     if (res.data?.length > 0) {
       if (displayIssuesInMap) await addIssuesToMap();
-    } else {
-      setNewCenter("38.95180510457306", "-92.32740864543621", 12); // Columbia, Missouri
     }
   };
 
@@ -444,9 +442,11 @@
   };
 
   const clearHeatmap = () => {
-    heatmap.setMap(null);
-    heatmapData = [];
-    heatmap.setData(heatmapData);
+    if (heatmap) {
+      heatmap.setMap(null);
+      heatmapData = [];
+      heatmap.setData(heatmapData);
+    }
   };
 
   const clearFilters = () => {
@@ -1997,88 +1997,94 @@
               </thead>
 
               <tbody>
-                {#each filteredIssuesData as issue (issue.service_request_id)}
-                  <tr>
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <td
-                      class="td-issue-type"
-                      on:click="{() => {
-                        toggleDetails(issue.service_request_id);
-                        selectedIssue = issue;
-                      }}"
-                    >
-                      {#if issue.service_name.length > issueTypeTrimCharacters}
-                        {issue.service_name.slice(
-                          0,
-                          issueTypeTrimCharacters
-                        )}...
-                      {:else}
-                        {issue.service_name}
-                      {/if}
-                    </td>
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <td
-                      class="td-description"
-                      on:click="{() => {
-                        toggleDetails(issue.service_request_id);
-                        selectedIssue = issue;
-                      }}">{issue.description ?? "-"}</td
-                    >
-                    <td style="text-align: center">
-                      {#if issue.media_url !== undefined}
-                        <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <img
-                          src="{imageSVG}"
-                          alt="issue media"
-                          width="15rem"
-                          style="margin-right: 0 auto; cursor: pointer; text-align: center"
-                          on:click="{() => openInNewWindow(issue.media_url)}"
-                        />
-                      {:else}
-                        <span style="text-align: center">-</span>
-                      {/if}
-                    </td>
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <td
-                      style="text-align: center"
-                      on:click="{() => {
-                        toggleDetails(issue.service_request_id);
-                        selectedIssue = issue;
-                      }}"
-                    >
-                      {formatRelativeDate(issue.requested_datetime)}
-                    </td>
-                  </tr>
-
-                  {#if visibleDetails.has(issue.service_request_id)}
-                    <tr
-                      style="background-color: {hexToRGBA(secondaryTwo, 0.1)}"
-                    >
-                      <td class="issue-detail-view">{issue.service_name}</td>
-                      <td class="issue-detail-view">{issue.description}</td>
-                      <td style="text-align: center">
-                        <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <img
-                          src="{detailSVG}"
-                          alt="detail view"
-                          height="17rem"
-                          on:click="{() => {
-                            showModal = true;
-                            geocodeLatLng(
-                              selectedIssue.lat,
-                              selectedIssue.long
-                            );
-                          }}"
-                        />
+                {#if filteredIssuesData}
+                  {#each filteredIssuesData as issue (issue.service_request_id)}
+                    <tr>
+                      <!-- svelte-ignore a11y-click-events-have-key-events -->
+                      <td
+                        class="td-issue-type"
+                        on:click="{() => {
+                          toggleDetails(issue.service_request_id);
+                          selectedIssue = issue;
+                        }}"
+                      >
+                        {#if issue.service_name.length > issueTypeTrimCharacters}
+                          {issue.service_name.slice(
+                            0,
+                            issueTypeTrimCharacters
+                          )}...
+                        {:else}
+                          {issue.service_name}
+                        {/if}
                       </td>
+                      <!-- svelte-ignore a11y-click-events-have-key-events -->
+                      <td
+                        class="td-description"
+                        on:click="{() => {
+                          toggleDetails(issue.service_request_id);
+                          selectedIssue = issue;
+                        }}">{issue.description ?? "-"}</td
+                      >
+                      <td style="text-align: center">
+                        {#if issue.media_url !== undefined}
+                          <!-- svelte-ignore a11y-click-events-have-key-events -->
+                          <img
+                            src="{imageSVG}"
+                            alt="issue media"
+                            width="15rem"
+                            style="margin-right: 0 auto; cursor: pointer; text-align: center"
+                            on:click="{() => openInNewWindow(issue.media_url)}"
+                          />
+                        {:else}
+                          <span style="text-align: center">-</span>
+                        {/if}
+                      </td>
+                      <!-- svelte-ignore a11y-click-events-have-key-events -->
+                      <td
+                        style="text-align: center"
+                        on:click="{() => {
+                          toggleDetails(issue.service_request_id);
+                          selectedIssue = issue;
+                        }}"
+                      >
+                        {formatRelativeDate(issue.requested_datetime)}
+                      </td>
+                    </tr>
 
-                      <td></td>
-                    </tr>{/if}
+                    {#if visibleDetails.has(issue.service_request_id)}
+                      <tr
+                        style="background-color: {hexToRGBA(secondaryTwo, 0.1)}"
+                      >
+                        <td class="issue-detail-view">{issue.service_name}</td>
+                        <td class="issue-detail-view">{issue.description}</td>
+                        <td style="text-align: center">
+                          <!-- svelte-ignore a11y-click-events-have-key-events -->
+                          <img
+                            src="{detailSVG}"
+                            alt="detail view"
+                            height="17rem"
+                            on:click="{() => {
+                              showModal = true;
+                              geocodeLatLng(
+                                selectedIssue.lat,
+                                selectedIssue.long
+                              );
+                            }}"
+                          />
+                        </td>
+
+                        <td></td>
+                      </tr>{/if}
+                  {:else}
+                    <tr>
+                      <td>{messages["find.issue"]["empty.results"]}</td>
+                    </tr>
+                  {/each}
                 {:else}
                   <tr>
                     <td>{messages["find.issue"]["empty.results"]}</td>
                   </tr>
-                {/each}
+                {/if}
                 <div
                   use:inview="{{ options }}"
                   on:change="{loadMoreResults}"
