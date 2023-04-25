@@ -21,7 +21,6 @@
     "svelte-inview": "^4.0.0",
     "vite": "^4.2.0"
   },
-  "type": "module",
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.15.1",
     "axios": "^1.3.5",
