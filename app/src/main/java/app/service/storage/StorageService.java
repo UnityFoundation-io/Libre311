@@ -1,6 +1,7 @@
 package app.service.storage;
 
 import com.google.cloud.storage.Blob;
+import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
@@ -22,10 +23,21 @@ public class StorageService {
     }
 
     public String upload(String base64Image) {
-        byte[] bytes = Base64.getDecoder().decode(base64Image);
-        UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID().toString());
+        String dataUri = base64Image.split(",")[0];
+        MediaType mediaType = MediaType.of(dataUri.substring(dataUri.indexOf(":")+1, dataUri.indexOf(";")));
+
+        if (mediaType != MediaType.IMAGE_JPEG_TYPE && mediaType != MediaType.IMAGE_PNG_TYPE) {
+            return null;
+        }
+        String extension = mediaType.getExtension();
+
+        String image = base64Image.split(",")[1];
+        byte[] bytes = Base64.getDecoder().decode(image);
+        UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
         UploadResponse<?> response = objectStorage.upload(request);
         Blob blob = (Blob) response.getNativeResponse();
-        return blob.getMediaLink();
+        String imageLink = "https://storage.cloud.google.com/" + blob.getBucket() + "/" + blob.getName();
+
+        return imageLink;
     }
 }
