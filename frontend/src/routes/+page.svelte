@@ -106,9 +106,18 @@
     showFooter = true,
     showTable = true,
     heatmapVisible = true,
-    invalidOtherDescription = false,
-    invalidSubmitterName = false,
-    invalidEmail = false,
+    invalidOtherDescription = {
+      message: messages["report.issue"]["textarea.description.error"],
+      visible: false,
+    },
+    invalidSubmitterName = {
+      message: messages["report.issue"]["input.submitter.name.error"],
+      visible: false,
+    },
+    invalidEmail = {
+      message: messages["report.issue"]["input.email.error"],
+      visible: false,
+    },
     landscapeMode = false;
 
   let validRegex =
@@ -146,7 +155,8 @@
   let selectedFile = null,
     messageSuccess = "",
     messageRejectedOne = "",
-    messageRejectedTwo = "";
+    messageRejectedTwo = "",
+    mediaUrl;
 
   // Detect Landscape Mode
   $: if (browser && (window.orientation === 90 || window.orientation === -90)) {
@@ -252,11 +262,13 @@
 
       // Save the image to the Server Locally
       // this worked for me in testing - max
-      await axios.post("/image", imageUrl.split(",")[1], {
+      const res = await axios.post("/image", imageUrl.split(",")[1], {
         headers: {
           "Content-Type": "text/plain",
         },
       });
+
+      if (res?.data) mediaUrl = res.data;
     }
   };
 
@@ -397,9 +409,9 @@
   };
 
   const validateEmail = (input) => {
-    if (input.match(validRegex)) invalidEmail = false;
+    if (input.match(validRegex)) invalidEmail.visible = false;
     else {
-      invalidEmail = true;
+      invalidEmail.visible = true;
     }
   };
 
@@ -424,11 +436,9 @@
     if ($issueSubmitterContact)
       attributes += "&email=" + $issueSubmitterContact;
 
-    const data = new URLSearchParams(attributes);
+    if (mediaUrl) attributes += "&media_url=" + mediaUrl;
 
-    // change once we can upload images
-    // const mediaUrl = '';
-    // if(mediaUrl) attributes += "&media_url=" + mediaUrl;
+    const data = new URLSearchParams(attributes);
 
     axios.post("/requests.json", data, {
       headers: {
@@ -538,8 +548,8 @@
     inputIssueAddressSelector.value = "";
     selectedFile = null;
     clearUploadMessages();
-    invalidSubmitterName = "";
-    invalidEmail = "";
+    invalidSubmitterName.visible = false;
+    invalidEmail.visible = false;
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -1312,15 +1322,9 @@
                   rows="3"
                   maxlength="{maxCharactersLength}"
                   bind:value="{$issueDescription}"
-                  on:click="{() => (invalidOtherDescription = false)}"
+                  on:click="{() => (invalidOtherDescription.visible = false)}"
                 ></textarea>
               </div>
-
-              {#if invalidOtherDescription}
-                <div class="step-two-word-count-error">
-                  {messages["report.issue"]["textarea.description.error"]}
-                </div>
-              {/if}
 
               <div class="step-two-word-count">
                 <span
@@ -1330,6 +1334,13 @@
                   {$issueDescription?.length ?? 0}
                 </span>
                 /{maxCharactersLength}
+              </div>
+
+              <div
+                class="step-two-word-count-error"
+                class:visible="{invalidOtherDescription.visible}"
+              >
+                {invalidOtherDescription.message}
               </div>
             {/if}
           </div>
@@ -1361,9 +1372,9 @@
               if (
                 $issueDetail.find((selection) => selection.name === 'Other') &&
                 $issueDescription?.length < minOtherDescriptionLength
-              )
-                invalidOtherDescription = true;
-              else {
+              ) {
+                invalidOtherDescription.visible = true;
+              } else {
                 reportNewIssueStep2 = false;
                 currentStep = 3;
                 reportNewIssueStep3 = true;
@@ -1441,7 +1452,8 @@
                   class="button"
                   class:upload="{selectedFile}"
                   class:disabled-button-upload="{!selectedFile}"
-                  disabled="{!selectedFile}">Upload</button
+                  disabled="{!selectedFile}"
+                  >{messages["report.issue"]["label.upload.image"]}</button
                 >
               </div>
             </form>
@@ -1449,16 +1461,17 @@
             {#if messageRejectedOne}
               <div class="upload-message">{messageRejectedOne}</div>
               <div class="upload-message">{messageRejectedTwo}</div>
-            {:else if messageSuccess}
+            {:else if messageSuccess && mediaUrl}
               <!-- svelte-ignore a11y-img-redundant-alt -->
               <div class="upload-message">
                 <img
-                  src="{imageSVG}"
+                  src="{mediaUrl}"
                   alt="issue image"
-                  height="25rem"
-                  style="vertical-align: -0.3rem; margin-right: 0.5rem"
-                  class="white-icon"
-                />{messageSuccess}
+                  height="75rem"
+                  width="75rem"
+                  style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
+                />
+                {messageSuccess}
               </div>
             {/if}
 
@@ -1493,10 +1506,10 @@
               class:next-button="{$issueType && $issueDetail}"
               class:disabled-button="{$issueType === null ||
                 $issueDetail === null ||
-                selectedFile}"
+                (selectedFile && !mediaUrl)}"
               disabled="{$issueType === null ||
                 $issueDetail === null ||
-                selectedFile}"
+                (selectedFile && !mediaUrl)}"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
@@ -1540,17 +1553,18 @@
             <input
               class="step-four-input-submitter-name"
               bind:value="{$issueSubmitterName}"
-              on:click="{() => (invalidSubmitterName = false)}"
+              on:click="{() => (invalidSubmitterName.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.submitter.name'
               ]}"
             />
 
-            {#if invalidSubmitterName}
-              <div class="step-four-submitter-name-word-count-error">
-                {messages["report.issue"]["input.submitter.name.error"]}
-              </div>
-            {/if}
+            <div
+              class="step-four-submitter-name-word-count-error"
+              class:visible="{invalidSubmitterName.visible}"
+            >
+              {invalidSubmitterName.message}
+            </div>
           </div>
 
           <div>
@@ -1560,17 +1574,18 @@
             <input
               class="step-four-input-contact-info"
               bind:value="{$issueSubmitterContact}"
-              on:click="{() => (invalidEmail = false)}"
+              on:click="{() => (invalidEmail.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.contact.info'
               ]}"
             />
 
-            {#if invalidEmail}
-              <div class="step-four-submitter-email-error">
-                {messages["report.issue"]["input.email.error"]}
-              </div>
-            {/if}
+            <div
+              class="step-four-submitter-email-error"
+              class:visible="{invalidEmail.visible}"
+            >
+              {invalidEmail.message}
+            </div>
           </div>
 
           <button
@@ -1598,13 +1613,13 @@
               $issueDetail === null}"
             on:click="{() => {
               if ($issueSubmitterName?.length < minSubmitterNameLength) {
-                invalidSubmitterName = true;
+                invalidSubmitterName.visible = true;
                 return;
               }
 
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
-              if (invalidEmail) return;
+              if (invalidEmail.visible) return;
 
               reportNewIssueStep4 = false;
               currentStep = 5;
@@ -1655,6 +1670,21 @@
               {/each}
             </div>
           </div>
+
+          {#if mediaUrl}
+            <div class="step-five-issue-detail-label">
+              {messages["report.issue"]["label.review.media"]}
+            </div>
+            <!-- svelte-ignore a11y-img-redundant-alt -->
+            <img
+              src="{mediaUrl}"
+              height="75rem"
+              width="75rem"
+              alt="uploaded image"
+              style="margin-left: 3rem; border-radius: 10px"
+            />
+          {/if}
+
           {#if $issueDescription}
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.description"]}
@@ -2062,7 +2092,9 @@
                         style="background-color: {hexToRGBA(secondaryTwo, 0.1)}"
                       >
                         <td class="issue-detail-view">{issue.service_name}</td>
-                        <td class="issue-detail-view">{issue.description}</td>
+                        <td class="issue-detail-view"
+                          >{issue.description ?? "-"}</td
+                        >
                         <td style="text-align: center">
                           <!-- svelte-ignore a11y-click-events-have-key-events -->
                           <img
