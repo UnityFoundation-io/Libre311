@@ -1,9 +1,8 @@
 package app.service.servicerequest;
 
-import app.dto.servicerequest.GetServiceRequestsDTO;
-import app.dto.servicerequest.PostRequestServiceRequestDTO;
-import app.dto.servicerequest.PostResponseServiceRequestDTO;
-import app.dto.servicerequest.ServiceRequestDTO;
+import app.dto.download.DownloadRequestsArgumentsDTO;
+import app.dto.download.DownloadServiceRequestDTO;
+import app.dto.servicerequest.*;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.ServiceDefinition;
@@ -13,14 +12,24 @@ import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
+import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.inject.Singleton;
 
+import java.io.*;
+import java.net.MalformedURLException;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -167,6 +176,10 @@ public class ServiceRequestService {
         Instant endDate = requestDTO.getEndDate();
         Pageable pageable = requestDTO.getPageable();
 
+        if(!pageable.isSorted()) {
+            pageable = pageable.order("dateCreated", Sort.Order.Direction.DESC);
+        }
+
         if (StringUtils.hasText(serviceRequestIds)) {
             List<String> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).collect(Collectors.toList());
             return serviceRequestRepository.findByIdIn(requestIds, pageable);
@@ -222,5 +235,108 @@ public class ServiceRequestService {
     public ServiceRequestDTO getServiceRequest(String serviceRequestId) {
         Optional<ServiceRequest> byId = serviceRequestRepository.findById(serviceRequestId);
         return byId.map(ServiceRequestDTO::new).orElse(null);
+    }
+
+    public StreamedFile  getAllServiceRequests(DownloadRequestsArgumentsDTO downloadRequestsArgumentsDTO) throws MalformedURLException {
+
+        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(downloadRequestsArgumentsDTO).stream()
+                .map(serviceRequest -> {
+                    DownloadServiceRequestDTO dto = new DownloadServiceRequestDTO(serviceRequest);
+
+                    if (serviceRequest.getAttributesJson() != null) {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        try {
+                            HashMap requestAttrs = objectMapper.readValue(serviceRequest.getAttributesJson(), HashMap.class);
+                            List<String> values = new ArrayList<>();
+                            requestAttrs.values().forEach(o -> values.addAll((ArrayList) o));
+
+                            dto.setServiceSubtype(String.join(",", values));
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+
+        File tmpFile;
+        Instant now = Instant.now();
+        try {
+            tmpFile = File.createTempFile(now.toString(), ".csv");
+            try (Writer writer  = new FileWriter(tmpFile)) {
+
+                StatefulBeanToCsv<DownloadServiceRequestDTO> sbc = new StatefulBeanToCsvBuilder<DownloadServiceRequestDTO>(writer)
+                        .build();
+
+                sbc.write(downloadServiceRequestDTOS);
+            }
+        } catch (CsvRequiredFieldEmptyException | CsvDataTypeMismatchException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new StreamedFile(tmpFile.toURI().toURL()).attach(now + ".csv");
+    }
+
+    private List<ServiceRequest> getServiceRequests(DownloadRequestsArgumentsDTO requestDTO) {
+        String serviceName = requestDTO.getServiceName();
+        ServiceRequestStatus status = requestDTO.getStatus();
+        Instant startDate = requestDTO.getStartDate();
+        Instant endDate = requestDTO.getEndDate();
+
+        Optional<ServiceRequest> byServiceName;
+        if (serviceName == null) {
+            byServiceName = Optional.empty();
+        } else {
+            byServiceName = serviceRequestRepository.findByServiceServiceNameIlike(serviceName);
+        }
+
+        String serviceCode;
+        if (byServiceName.isPresent() && status != null) {
+            serviceCode = byServiceName.get().getService().getServiceCode();
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByServiceServiceCodeAndStatusAndDateCreatedBetween(serviceCode, status, startDate, endDate);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByServiceServiceCodeAndStatusAndDateCreatedAfter(serviceCode, status, startDate);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByServiceServiceCodeAndStatusAndDateCreatedBefore(serviceCode, status, endDate);
+            }
+
+            return serviceRequestRepository.findByServiceServiceCodeAndStatus(serviceCode, status);
+        } else if (byServiceName.isPresent() && status == null) {
+            serviceCode = byServiceName.get().getService().getServiceCode();
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByServiceServiceCodeAndDateCreatedBetween(serviceCode, startDate, endDate);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByServiceServiceCodeAndDateCreatedAfter(serviceCode, startDate);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByServiceServiceCodeAndDateCreatedBefore(serviceCode, endDate);
+            }
+
+            return serviceRequestRepository.findByServiceServiceCode(serviceCode);
+        } else if (status != null && byServiceName.isEmpty()) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByStatusAndDateCreatedBetween(status, startDate, endDate);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByStatusAndDateCreatedAfter(status, startDate);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByStatusAndDateCreatedBefore(status, endDate);
+            }
+
+            return serviceRequestRepository.findByStatus(status);
+        }
+
+        if (startDate != null && endDate != null) {
+            return serviceRequestRepository.findByDateCreatedBetween(startDate, endDate);
+        } else if (startDate != null && endDate == null) {
+            // just start
+            return serviceRequestRepository.findByDateCreatedAfter(startDate);
+        } else if (startDate == null && endDate != null) {
+            // just end
+            return serviceRequestRepository.findByDateCreatedBefore(endDate);
+        }
+
+        return (List<ServiceRequest>) serviceRequestRepository.findAll();
     }
 }

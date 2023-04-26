@@ -1,5 +1,6 @@
 package app;
 
+import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
@@ -16,10 +17,12 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
+import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 
 import javax.validation.Valid;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -160,5 +163,11 @@ public class RootController {
         ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.getServiceRequest(serviceRequestId)));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
+    }
+
+    @Get(value =  "/requests/download")
+    @ExecuteOn(TaskExecutors.IO)
+    public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO) throws MalformedURLException {
+        return serviceRequestService.getAllServiceRequests(requestDTO);
     }
 }

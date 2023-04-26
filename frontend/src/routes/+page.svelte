@@ -313,7 +313,7 @@
 
       // Save the image to the Server Locally
       // this worked for me in testing - max
-      const res = await axios.post("/image", imageUrl.split(",")[1], {
+      const res = await axios.post("/image", imageUrl, {
         headers: {
           "Content-Type": "text/plain",
         },
