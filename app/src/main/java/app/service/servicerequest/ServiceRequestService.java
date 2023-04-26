@@ -19,6 +19,7 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.inject.Singleton;
@@ -174,6 +175,10 @@ public class ServiceRequestService {
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
         Pageable pageable = requestDTO.getPageable();
+
+        if(!pageable.isSorted()) {
+            pageable = pageable.order("dateCreated", Sort.Order.Direction.DESC);
+        }
 
         if (StringUtils.hasText(serviceRequestIds)) {
             List<String> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).collect(Collectors.toList());
