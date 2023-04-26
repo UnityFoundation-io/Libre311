@@ -33,7 +33,6 @@
     const positionElement = document.getElementById("position-element");
 
     picker = flatpickr(dateRangeInput, {
-      // positionElement: positionElement,
       mode: "range",
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {

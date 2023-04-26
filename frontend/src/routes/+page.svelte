@@ -309,7 +309,6 @@
       selectedFile = null;
     } else {
       messageSuccess = messages["report.issue"]["uploaded.message.success"];
-      // selectedFile = null;
 
       // Save the image to the Server Locally
       // this worked for me in testing - max
@@ -1709,6 +1708,7 @@
               </div>
             </div>
           {/if}
+
           {#if $issueSubmitterName}
             <div class="step-five-submitter-name-label">
               {messages["report.issue"]["label.submitter.name"]}
@@ -1717,6 +1717,7 @@
               </div>
             </div>
           {/if}
+
           {#if $issueSubmitterContact}
             <div class="step-five-contact-info-label">
               {messages["report.issue"]["label.contact.info"]}
@@ -1725,6 +1726,11 @@
               </div>
             </div>
           {/if}
+
+          {#if mediaUrl && !$issueDescription && !$issueSubmitterName && !$issueSubmitterContact}
+            <div></div>
+          {/if}
+
           <button
             class="button back-button"
             style="margin-bottom: 1.25rem; margin-top: 2rem"
