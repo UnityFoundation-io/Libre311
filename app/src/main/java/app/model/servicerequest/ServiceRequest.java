@@ -91,6 +91,9 @@ public class ServiceRequest {
     @Nullable
     private Instant expectedDate;
 
+    @Nullable
+    private Instant closedDate;
+
     @DateCreated
     private Instant dateCreated;
 
@@ -296,5 +299,14 @@ public class ServiceRequest {
 
     public void setAttributesJson(@Nullable String attributesJson) {
         this.attributesJson = attributesJson;
+    }
+
+    @Nullable
+    public Instant getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(@Nullable Instant closedDate) {
+        this.closedDate = closedDate;
     }
 }
