@@ -531,6 +531,7 @@
   };
 
   const geocodeLatLng = (lat, lng) => {
+    console.log("geocodeLatLng");
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     geocoder.geocode({ location: latlng }, (results, status) => {
       if (status === "OK") {
@@ -952,6 +953,7 @@
       // more details for that place.
       searchBox.addListener("places_changed", () => {
         const places = searchBox.getPlaces();
+        console.log("places", places);
         if (places.length == 0) {
           return;
         }
@@ -966,14 +968,12 @@
             return;
           }
 
-          if (place.geometry.viewport) {
-            // Only geocodes have viewport.
-            bounds.union(place.geometry.viewport);
-          } else {
-            bounds.extend(place.geometry.location);
-          }
+          setNewCenter(
+            place.geometry.location.lat(),
+            place.geometry.location.lng(),
+            17
+          );
         });
-        map.fitBounds(bounds);
       });
     });
 
