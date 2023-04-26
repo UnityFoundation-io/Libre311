@@ -4,7 +4,6 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
-  import { browser } from "$app/environment";
   import axios from "axios";
   import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
@@ -19,6 +18,7 @@
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
   import issueAddress from "../stores/issueAddress";
+  import issueAddressCoordinates from "../stores/issueAddressCoordinates";
   import issueTime from "../stores/issueTime";
   import issueType from "../stores/issueType";
   import issueDetail from "../stores/issueDetail";
@@ -73,14 +73,9 @@
   const waitTime = 1000;
 
   // Page Height
-  let pageHeightIssues = 1650;
-  let pageHeightIssues677Portrait = 1150;
-  let pageHeightIssues844Portrait = 1350;
-  let pageHeightIssues926Portrait = 1550;
-
-  let pageWidthIssues677Landscape = 1050;
-  let pageWidthIssues844Landscape = 1100;
-  let pageWidthIssues926Landscape = 1100;
+  let orientation = "unknown";
+  let phone = "";
+  let pageHeight = 1650;
 
   itemsPerPage.set(10);
 
@@ -117,8 +112,7 @@
     invalidEmail = {
       message: messages["report.issue"]["input.email.error"],
       visible: false,
-    },
-    landscapeMode = false;
+    };
 
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
@@ -133,10 +127,17 @@
     backgroundSelector,
     inputIssueAddressSelector,
     issueDetailSelector,
+    tableSelector,
     issueTypeSelectSelector,
     issueDetailSelectSelector,
     findIssuesButtonSelector,
     reportIssuesButtonSelector;
+
+  $: if (issueTypeSelectSelector !== undefined)
+    setTimeout(() => {
+      if (issueTypeSelectSelector?.options?.length === 0)
+        populateIssueTypeSelectDropdown();
+    }, 100);
 
   let zoom = 15;
   let markers = [];
@@ -158,11 +159,58 @@
     messageRejectedTwo = "",
     mediaUrl;
 
-  // Detect Landscape Mode
-  $: if (browser && (window.orientation === 90 || window.orientation === -90)) {
-    landscapeMode = true;
-    issueTypeTrimCharacters = 30;
-  }
+  const writeInfo = (innerWidth, innerHeight) => {
+    orientation =
+      innerWidth > innerHeight
+        ? "Landscape " +
+          innerWidth.toString() +
+          "px " +
+          innerHeight.toString() +
+          "px"
+        : "Portrait " +
+          innerWidth.toString() +
+          "px " +
+          innerHeight.toString() +
+          "px";
+  };
+
+  const getOrientation = () => {
+    let previousState;
+    scrollToTop();
+
+    if (reportNewIssue) previousState = "reportNewIssue";
+    if (findReportedIssue) previousState = "findReportedIssue";
+
+    const { innerWidth, innerHeight } = window;
+    orientation = innerWidth > innerHeight ? "Landscape" : "Portrait";
+
+    if (reportNewIssue) reportNewIssue = false;
+    if (findReportedIssue) findReportedIssue = false;
+    footerDivHeight.set();
+
+    setTimeout(() => {
+      showFooter = true;
+      setTimeout(() => {
+        adjustFooter();
+      }, 50);
+    }, 400);
+
+    writeInfo(innerWidth, innerHeight);
+
+    if (previousState === "reportNewIssue") {
+      setTimeout(() => {
+        reportNewIssue = true;
+        adjustMap();
+      }, 400);
+    }
+
+    if (previousState === "findReportedIssue") {
+      setTimeout(() => {
+        findReportedIssue = true;
+        setTimeout(() => adjustTable(), 100);
+      }, 400);
+    }
+  };
 
   // Filtering Results
   $: if (filterIssueType.service_code !== "") {
@@ -208,13 +256,16 @@
   const toggleDetails = (service_request_id) => {
     if (visibleDetails.has(service_request_id)) {
       visibleDetails.delete(service_request_id);
+
+      setTimeout(() => {
+        calculateBoundsAroundMarkers();
+      }, 100);
     } else {
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
   };
 
-  // const applyFontStretch = (fontFamily, letterSpacing) => {
   const applyFontStretch = () => {
     const style = document.createElement("style");
     style.textContent = `
@@ -416,7 +467,7 @@
   };
 
   const postIssue = async () => {
-    let attributes = `?service_code=${$issueType.id}&address_string=${$issueAddress}&lat=${$userCurrentLocation.lat}&long=${$userCurrentLocation.lng}`;
+    let attributes = `?service_code=${$issueType.id}&address_string=${$issueAddress}&lat=${$issueAddressCoordinates.lat}&long=${$issueAddressCoordinates.lng}`;
 
     $issueDetail.forEach((attr) => {
       attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.id;
@@ -485,6 +536,7 @@
       if (status === "OK") {
         if (results[0]) {
           issueAddress.set(results[0].formatted_address);
+          issueAddressCoordinates.set({ lat: lat, lng: lng });
           inputIssueAddressSelector.value = results[0].formatted_address;
         } else {
           console.log(messages["geocode"]["empty.results"]);
@@ -550,6 +602,7 @@
     clearUploadMessages();
     invalidSubmitterName.visible = false;
     invalidEmail.visible = false;
+    mediaUrl = undefined;
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -651,18 +704,18 @@
         map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
         2
       ) {
-        const heatmapControl = createCustomControl("Heatmap", function () {
+        const heatmapControl = createCustomControl("Markers", function () {
           heatmapVisible = !heatmapVisible;
           if (heatmapVisible) {
             for (var i = 0; i < markers.length; i++) {
               markers[i].setMap(null);
             }
-            const button = document.getElementById("Heatmap-control");
+            const button = document.getElementById("Markers-control");
             button.innerHTML = "Markers";
 
             heatmap.setMap(map);
           } else {
-            const button = document.getElementById("Heatmap-control");
+            const button = document.getElementById("Markers-control");
             button.innerHTML = "Heatmap";
 
             heatmap.setMap(null);
@@ -771,8 +824,7 @@
     controlButton.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.3)";
     controlButton.style.cursor = "pointer";
     controlButton.style.userSelect = "none";
-    if (window.innerWidth < 677) controlButton.style.marginBottom = "1rem";
-    else controlButton.style.marginBottom = "0.3rem";
+    controlButton.style.marginBottom = "1rem";
     controlButton.style.marginLeft = "0.3rem";
     controlButton.style.width = "fit-content";
     controlButton.style.height = "20px";
@@ -784,93 +836,39 @@
   };
 
   const adjustFooter = () => {
-    if ($footerSelector) {
+    if (!$footerDivHeight && $footerSelector) {
       footerDivHeight.set(
         $footerSelector.offsetTop + $footerSelector.offsetHeight
       );
+    }
 
-      backgroundSelector.style.height = $footerDivHeight + "px";
+    backgroundSelector.style.height = $footerDivHeight + "px";
+  };
+
+  const adjustTable = () => {
+    if (tableSelector) {
+      let addExtra = 90;
+
+      const tableHeight = tableSelector.offsetTop + tableSelector.offsetHeight;
+      backgroundSelector.style.height = tableHeight + addExtra + "px";
     }
   };
 
-  ////////////// Screen Adjustments //////////////////////////////////////////////////////////////////////
-
-  ////////////// Portrait //////////////////
-
-  $: if (browser && window.innerHeight <= 677 && window.innerWidth <= 375) {
-    pageHeightIssues = pageHeightIssues677Portrait;
-    issueTypeTrimCharacters = 15;
-    setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone SE Portrait");
-  }
-
-  $: if (
-    browser &&
-    window.innerHeight <= 844 &&
-    window.innerHeight > 677 &&
-    window.innerWidth <= 390
-  ) {
-    pageHeightIssues = pageHeightIssues844Portrait;
-    issueTypeTrimCharacters = 15;
-    setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone 12 Pro Portrait");
-  }
-
-  $: if (
-    browser &&
-    window.innerHeight <= 926 &&
-    window.innerHeight > 844 &&
-    window.innerWidth <= 428
-  ) {
-    pageHeightIssues = pageHeightIssues926Portrait;
-    issueTypeTrimCharacters = 15;
-    setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone 13 Pro Max Portrait");
-  }
-
-  $: if (browser && window.innerWidth > 926) {
-    pageHeightIssues = pageHeightIssues;
-    issueTypeTrimCharacters = 20;
-    setTimeout(() => adjustFooter(), 300);
-    console.log("Desktop");
-  }
-
-  ////////////// Landscape //////////////////
-
-  $: if (browser && window.innerWidth <= 677 && window.innerHeight <= 375) {
-    pageHeightIssues = pageWidthIssues677Landscape;
-    setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone SE Landscape");
-  }
-
-  $: if (
-    browser &&
-    window.innerWidth <= 844 &&
-    window.innerWidth > 677 &&
-    window.innerHeight <= 390
-  ) {
-    pageHeightIssues = pageWidthIssues844Landscape;
-    setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone 12 Pro Landscape");
-  }
-
-  $: if (
-    browser &&
-    window.innerWidth <= 926 &&
-    window.innerWidth > 844 &&
-    window.innerHeight <= 428
-  ) {
-    pageHeightIssues = pageWidthIssues926Landscape;
-    setTimeout(() => adjustFooter(), 300);
-    console.log("iPhone 13 Pro Max Landscape");
-  }
-
-  ////////////// Screen Adjustments //////////////////////////////////////////////////////////////////////
+  const adjustMap = () => {
+    const addExtra = 100;
+    const mapSelector = document.getElementById("map");
+    const mapHeight = mapSelector.offsetTop + mapSelector.offsetHeight;
+    backgroundSelector.style.height = mapHeight + addExtra + "px";
+  };
 
   onMount(async () => {
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
-    setTimeout(() => adjustFooter(), 300);
+
+    // Listen for Device Orientation changes
+    window.addEventListener("orientationchange", getOrientation);
+
+    getOrientation();
 
     loadColorPalette();
 
@@ -941,7 +939,6 @@
           clearTimeout(timer);
           timer = setTimeout(() => {
             geocodeLatLng(center.lat(), center.lng());
-            console.log("geocoding...");
           }, waitTime);
         }
       });
@@ -993,7 +990,7 @@
 {#if fadeInBackground}
   <div
     bind:this="{backgroundSelector}"
-    height="{pageHeightIssues}px"
+    height="{pageHeight}px"
     class="background"
     class:background-opacity="{reduceBackGroundOpacity}"
     class:background-opacity-report-issue="{reportNewIssue ||
@@ -1035,7 +1032,14 @@
         </div>
       {/if}
     </div>
-
+    <div id="context" style="color: white; text-align: center">
+      {phone}
+      {orientation}
+      {#if backgroundSelector}
+        Page Height: {backgroundSelector.style.height}
+      {/if}
+    </div>
+    <div></div>
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
@@ -1059,20 +1063,25 @@
 
               // Clears the current position marker from the map
               currentPositionMarker.setMap(null);
+
+              // Clears the value of the input field inside the map
               inputIssueAddressSelector = document.getElementById('pac-input');
               inputIssueAddressSelector.value = '';
 
-              backgroundSelector.style.height = pageHeightIssues + 'px';
-
               if (!findReportedIssue) {
-                setTimeout(() => {
-                  findIssuesButtonSelector.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start',
-                  });
-                }, 10);
                 showFooter = false;
                 findReportedIssue = true;
+                setTimeout(() => {
+                  adjustTable();
+
+                  setTimeout(() => {
+                    findIssuesButtonSelector.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'start',
+                    });
+                  }, 10);
+                }, 100);
+
                 if (!filteredIssuesData) await getIssues();
 
                 addIssuesToMap();
@@ -1081,9 +1090,10 @@
 
                 findReportedIssue = false;
                 showFilters = false;
-                showTable = true;
+                showTable = false;
 
-                backgroundSelector.style.height = $footerDivHeight + 'px';
+                adjustFooter();
+
                 setTimeout(() => (showFooter = true), 400);
                 clearData();
                 clearFilters();
@@ -1123,10 +1133,6 @@
             on:click="{() => {
               if (reportNewIssueStep6) return;
 
-              const ReportIssueButton = document.getElementById(
-                'button-report-issue'
-              );
-
               if (
                 map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
                   .length === 3
@@ -1137,17 +1143,19 @@
 
               currentPositionMarker.setMap(map);
 
-              backgroundSelector.style.height = pageHeightIssues + 'px';
-
-              setTimeout(() => {
-                reportIssuesButtonSelector.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'start',
-                });
-              }, 10);
               if (!reportNewIssue && !currentStep) {
                 showFooter = false;
                 reportNewIssue = true;
+                setTimeout(() => {
+                  adjustMap();
+                  setTimeout(() => {
+                    reportIssuesButtonSelector.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'start',
+                    });
+                  }, 10);
+                }, 100);
+
                 reduceBackGroundOpacity = false;
                 currentStep = 1;
               } else if (reportNewIssue) {
@@ -1204,7 +1212,7 @@
       </div>
     </div>
     {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5 && !reportNewIssueStep6 && !findReportedIssue && showFooter}
-      <Footer bind:this="{$footerSelector}" backgroundColor="{secondaryOne}" />
+      <Footer bind:this="{$footerSelector}" backgroundColor="{primaryOne}" />
     {/if}
     <!-- START Report New Issue Flow -->
 
@@ -1223,7 +1231,7 @@
           <span class="step-two-date-label">
             {messages["report.issue"]["label.date"]}
             <span class="step-two-date-timestamp">
-              {$issueTime}
+              {$issueTime ?? convertDate(new Date().getTime())}
             </span>
           </span>
           <div
@@ -1257,7 +1265,7 @@
               }}"></select>
 
             {#if $issueDetailList?.description}
-              <div class="step-two-feature-type-label">
+              <div class="step-two-feature-type-helper">
                 {$issueDetailList.description}
               </div>
             {/if}
@@ -1313,7 +1321,7 @@
 
             {#if $issueType !== null && $issueDetail.find((selection) => selection.name === "Other")}
               <div style="display: inline-block">
-                <div class="step-two-word-count">* Required field</div>
+                <div class="step-two-required">* Required field</div>
 
                 <textarea
                   placeholder="{messages['report.issue'][
@@ -1450,8 +1458,9 @@
                 <button
                   type="submit"
                   class="button"
-                  class:upload="{selectedFile}"
-                  class:disabled-button-upload="{!selectedFile}"
+                  class:upload="{selectedFile && !messageSuccess}"
+                  class:disabled-button-upload="{!selectedFile ||
+                    messageSuccess}"
                   disabled="{!selectedFile}"
                   >{messages["report.issue"]["label.upload.image"]}</button
                 >
@@ -1467,7 +1476,7 @@
                 <img
                   src="{mediaUrl}"
                   alt="issue image"
-                  height="75rem"
+                  height="auto"
                   width="75rem"
                   style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
                 />
@@ -1678,10 +1687,10 @@
             <!-- svelte-ignore a11y-img-redundant-alt -->
             <img
               src="{mediaUrl}"
-              height="75rem"
+              height="auto"
               width="75rem"
               alt="uploaded image"
-              style="margin-left: 3rem; border-radius: 10px"
+              class="image-review"
             />
           {/if}
 
@@ -1796,9 +1805,17 @@
               {messages["report.issue"]["label.issue.location.subtext"]}
             </div>
             <div class="step-one-issue-address">
-              <span style="color: {primaryTwo}">{$issueAddress}</span>
+              <span style="color: {primaryTwo}"
+                >{$issueAddress ??
+                  messages["report.issue"]["location.services.disabled"]}</span
+              >
               <button
-                class="button next-button step-one-button-next"
+                class="button"
+                class:next-button="{$issueAddress}"
+                step-one-button-next="{$issueAddress}"
+                class:disabled-button="{!$issueAddress}"
+                disabled="{!$issueAddress}"
+                style="margin-bottom: 0.5rem"
                 on:click="{() => {
                   reportNewIssueStep2 = true;
                   currentStep = 2;
@@ -1848,7 +1865,7 @@
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Description:</span
-              >{selectedIssue.description}
+              >{selectedIssue.description ?? "-"}
             </div>
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
@@ -1858,7 +1875,7 @@
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Location:</span
-              >{$issueAddress}
+              >{selectedIssue.address}
             </div>
             {#if selectedIssue.media_url !== undefined}
               <!-- svelte-ignore a11y-img-redundant-alt -->
@@ -1880,7 +1897,9 @@
             {#if showFilters}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <span
-                on:click="{() => (showFilters = !showFilters)}"
+                on:click="{() => {
+                  showFilters = !showFilters;
+                }}"
                 style="cursor: pointer"
               >
                 -
@@ -1892,7 +1911,9 @@
                 on:click="{() => {
                   showFilters = !showFilters;
                   // Wait for the DOM to render the Dropdown
-                  setTimeout(() => populateIssueTypeSelectDropdown(), 10);
+                  setTimeout(() => {
+                    populateIssueTypeSelectDropdown();
+                  }, 10);
                 }}"
               >
                 +
@@ -1909,6 +1930,7 @@
                   on:change="{async (e) => {
                     clearData();
                     filterIssueType = { service_code: e.target.value };
+
                     await getIssues();
                     setTimeout(async () => await addIssuesToMap(), 1000);
                   }}"></select>
@@ -2010,11 +2032,7 @@
           </div>
 
           {#if showTable}
-            <table
-              class="issues-table"
-              class:table-expanded="{!showFilters}"
-              class:table-contracted="{showFilters}"
-            >
+            <table bind:this="{tableSelector}" class="issues-table">
               <thead>
                 <tr>
                   <th>
@@ -2035,7 +2053,15 @@
               <tbody>
                 {#if filteredIssuesData}
                   {#each filteredIssuesData as issue (issue.service_request_id)}
-                    <tr>
+                    <tr
+                      on:click="{() => setNewCenter(issue.lat, issue.long, 17)}"
+                      style="background-color: {visibleDetails.has(
+                        issue.service_request_id
+                      )
+                        ? hexToRGBA(secondaryTwo, 0.1)
+                        : 'white'}
+                      "
+                    >
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
                         class="td-issue-type"
@@ -2053,14 +2079,48 @@
                           {issue.service_name}
                         {/if}
                       </td>
+
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
                         class="td-description"
+                        style="height: {visibleDetails.has(
+                          issue.service_request_id
+                        )
+                          ? '4rem'
+                          : '1rem'};
+                          
+                          white-space: {visibleDetails.has(
+                          issue.service_request_id
+                        )
+                          ? 'normal'
+                          : 'nowrap'};
+                          
+                          overflow: {visibleDetails.has(
+                          issue.service_request_id
+                        )
+                          ? 'unset'
+                          : 'hidden'}
+                          "
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
                           selectedIssue = issue;
-                        }}">{issue.description ?? "-"}</td
+                        }}"
                       >
+                        {issue.description ?? "-"}
+                        {#if visibleDetails.has(issue.service_request_id)}
+                          <!-- svelte-ignore a11y-click-events-have-key-events -->
+                          <img
+                            src="{detailSVG}"
+                            style="background-color: {accentTwo}; vertical-align: middle"
+                            alt="detail view"
+                            height="17rem"
+                            on:click|stopPropagation="{(e) => {
+                              showModal = true;
+                            }}"
+                          />
+                        {/if}
+                      </td>
+
                       <td style="text-align: center">
                         {#if issue.media_url !== undefined}
                           <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -2086,33 +2146,6 @@
                         {formatRelativeDate(issue.requested_datetime)}
                       </td>
                     </tr>
-
-                    {#if visibleDetails.has(issue.service_request_id)}
-                      <tr
-                        style="background-color: {hexToRGBA(secondaryTwo, 0.1)}"
-                      >
-                        <td class="issue-detail-view">{issue.service_name}</td>
-                        <td class="issue-detail-view"
-                          >{issue.description ?? "-"}</td
-                        >
-                        <td style="text-align: center">
-                          <!-- svelte-ignore a11y-click-events-have-key-events -->
-                          <img
-                            src="{detailSVG}"
-                            alt="detail view"
-                            height="17rem"
-                            on:click="{() => {
-                              showModal = true;
-                              geocodeLatLng(
-                                selectedIssue.lat,
-                                selectedIssue.long
-                              );
-                            }}"
-                          />
-                        </td>
-
-                        <td></td>
-                      </tr>{/if}
                   {:else}
                     <tr>
                       <td>{messages["find.issue"]["empty.results"]}</td>

@@ -30,6 +30,7 @@
             "label.add.media": "Add an Image",
             "label.choose.image": " Press here to choose image file. (<10MB)",
             "label.upload.image": "Upload",
+            "location.services.disabled": "Enable Location Services on your Device",
             "uploaded.message.rejected-one": "Our policy prohibits storage of explicit images.",
             "uploaded.message.rejected-two": "Please upload a different photo.",
             "uploaded.message.success": "The uploaded image has been saved.",

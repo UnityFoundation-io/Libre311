@@ -21,12 +21,12 @@
 
   <div
     class="row"
-    class:row-wrap="{window.innerHeight <= 375 && window.innerWidth <= 667}"
+    class:row-wrap="{window.innerHeight <= 375 && window.innerWidth <= 513}"
   >
     <div
       class="col"
       class:tighten-portrait="{window.innerHeight <= 926 &&
-        window.innerWidth <= 428}"
+        window.innerWidth <= 430}"
     >
       <a href="https://lomocomo.org/we-move-app/">
         <h2>Mobile App</h2>
@@ -49,9 +49,6 @@
       >
       <a href="https://lomocomo.org/advocacy/grassroots-organizing/"
         ><li>Grassroots Organizing</li></a
-      >
-      <a href="https://lomocomo.org/advocacy/livable-streets/"
-        ><li>Livable Streets</li></a
       >
       <a
         href="https://lomocomo.org/advocacy/missourians-for-responsible-transportation/"
@@ -180,7 +177,7 @@
     height: 104px;
   }
 
-  @media only screen and (min-width: 375px) and (max-width: 390px) and (orientation: portrait) {
+  @media only screen and (min-width: 375px) and (max-width: 389px) and (orientation: portrait) {
     .local-motion-logo {
       margin-bottom: -5rem;
       margin-left: 15rem;
@@ -194,7 +191,7 @@
     }
   }
 
-  @media only screen and (min-width: 390px) and (max-width: 428px) and (orientation: portrait) {
+  @media only screen and (min-width: 390px) and (max-width: 430px) and (orientation: portrait) {
     .local-motion-logo {
       margin-left: 16rem;
       margin-bottom: -5rem;
@@ -208,7 +205,7 @@
     }
   }
 
-  @media only screen and (min-width: 667px) and (max-width: 844px) and (max-height: 428px) and (orientation: landscape) {
+  @media only screen and (min-width: 513px) and (max-width: 749px) and (max-height: 340px) and (orientation: landscape) {
     .local-motion-logo {
       margin-bottom: -5rem;
       height: 69px;
@@ -218,22 +215,28 @@
     }
   }
 
-  @media only screen and (min-width: 844px) and (max-width: 925px) and (max-height: 428px) and (orientation: landscape) {
+  @media only screen and (min-width: 750px) and (max-width: 813px) and (max-height: 340px) and (orientation: landscape) {
     .local-motion-logo {
       margin-bottom: -5rem;
       height: 69px;
       width: 100px;
-      left: -38.3rem;
       top: -4.2rem;
+      margin-left: 2.5rem;
+    }
+
+    .col {
+      padding-left: 0;
+      padding-right: 0;
+      margin: 0 0.3rem 0 0.3rem;
     }
   }
 
-  @media only screen and (min-width: 845px) and (max-width: 926px) and (max-height: 428px) and (orientation: landscape) {
+  @media only screen and (min-width: 750px) and (max-width: 814px) and (max-height: 450px) and (orientation: landscape) {
     .local-motion-logo {
       margin-bottom: -5rem;
       height: 69px;
       width: 100px;
-      left: -24.4rem;
+      left: -21.4rem;
       top: -4.2rem;
     }
   }
