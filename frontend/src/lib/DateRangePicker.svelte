@@ -72,16 +72,17 @@
 <style>
   input {
     border-radius: 10px;
-    height: 1.3rem;
+    height: 1.4rem;
     width: 13rem;
-    border: solid 1px black;
-    padding-top: 0.15rem;
+    border: 0.01rem solid black;
+    border-style: inset;
     padding-left: 0.5rem;
     font-size: 1.1rem;
+    color: #3478f6;
   }
 
   input::placeholder {
-    color: black;
+    color: #3478f6;
     font-size: 1.1rem;
   }
 
@@ -102,15 +103,41 @@
     cursor: pointer;
   }
 
+  @media only screen and (min-width: 320px) and (max-width: 374px) {
+    input::placeholder {
+      font-size: 0.5rem;
+    }
+
+    input {
+      height: 1.43rem;
+      width: fit-content;
+      font-size: 0.5rem;
+    }
+  }
+
   @media only screen and (min-width: 375px) and (max-width: 844px) {
+    input::placeholder {
+      font-size: 0.8rem;
+    }
+
+    input {
+      height: 1.33rem;
+      width: fit-content;
+      font-size: 0.7rem;
+      vertical-align: 0.05rem;
+    }
+  }
+
+  @media only screen and (min-width: 390px) and (max-height: 669px) and (orientation: portrait) {
     input::placeholder {
       font-size: 0.7rem;
     }
 
     input {
-      height: 1.3rem;
+      height: 1.4rem;
       width: fit-content;
       font-size: 0.7rem;
+      vertical-align: -0.03rem;
     }
   }
 </style>

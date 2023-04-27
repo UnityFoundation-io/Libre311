@@ -177,6 +177,20 @@
     height: 104px;
   }
 
+  @media only screen and (min-width: 320px) and (max-width: 375px) and (orientation: portrait) {
+    .local-motion-logo {
+      margin-bottom: -5rem;
+      margin-left: 13rem;
+      height: 69px;
+      width: 100px;
+      top: -4.2rem;
+    }
+
+    .row {
+      flex-wrap: wrap;
+    }
+  }
+
   @media only screen and (min-width: 375px) and (max-width: 389px) and (orientation: portrait) {
     .local-motion-logo {
       margin-bottom: -5rem;
