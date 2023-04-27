@@ -5,6 +5,7 @@ import app.dto.download.DownloadServiceRequestDTO;
 import app.dto.servicerequest.*;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
+import app.model.service.servicedefinition.AttributeValue;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
@@ -28,9 +29,9 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Singleton
@@ -63,14 +64,8 @@ public class ServiceRequestService {
         }
 
         // validate if additional attributes are required
-        String serviceCode = serviceRequestDTO.getServiceCode();
-        Optional<Service> serviceOptional = serviceRepository.findByServiceCode(serviceCode);
-        if (serviceOptional.isEmpty()) {
-            return null; // not found
-        }
-        Service service = serviceOptional.get();
-
-        Map<String, List<String>> requestAttributes = collectAttributesFromRequest(request);
+        List<ServiceDefinitionAttribute> requestAttributes = null;
+        Service service = serviceByServiceCodeOptional.get();
         if (service.isMetadata()) {
             // get service definition
             String serviceDefinitionJson = service.getServiceDefinitionJson();
@@ -78,6 +73,8 @@ public class ServiceRequestService {
                 // service definition does not exists despite service requiring it.
                 return null; // should not be in this state and admin needs to be aware.
             }
+
+            requestAttributes = buildAttributesFromRequest(request, service);
             if (requestAttributes.isEmpty()) {
                 return null; // todo throw exception - must provide attributes
             }
@@ -86,8 +83,8 @@ public class ServiceRequestService {
             }
         }
 
-        ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, serviceByServiceCodeOptional.get());
-        if (!requestAttributes.isEmpty()) {
+        ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
+        if (requestAttributes != null) {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 serviceRequest.setAttributesJson(objectMapper.writeValueAsString(requestAttributes));
@@ -99,7 +96,7 @@ public class ServiceRequestService {
         return new PostResponseServiceRequestDTO(serviceRequestRepository.save(serviceRequest));
     }
 
-    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, Map<String, List<String>> requestAttributes) {
+    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, List<ServiceDefinitionAttribute> requestAttributes) {
         // deserialize
         ObjectMapper objectMapper = new ObjectMapper();
         boolean containsAllRequiredAttrs = false;
@@ -112,7 +109,9 @@ public class ServiceRequestService {
                     .collect(Collectors.toList());
 
             // for each attr, check if it exists in requestAttributes
-            Set<String> requestCodes = requestAttributes.keySet();
+            List<String> requestCodes = requestAttributes.stream()
+                    .map(ServiceDefinitionAttribute::getCode)
+                    .collect(Collectors.toList());
             containsAllRequiredAttrs = requestCodes.containsAll(requiredCodes);
 
         } catch (JsonProcessingException e) {
@@ -122,28 +121,56 @@ public class ServiceRequestService {
         return containsAllRequiredAttrs;
     }
 
-    private Map<String, List<String>> collectAttributesFromRequest(HttpRequest<?> request) {
+    private List<ServiceDefinitionAttribute> buildAttributesFromRequest(HttpRequest<?> request, Service service) {
         Optional<Map> body = request.getBody(Map.class);
 
-        Map<String, List<String>> attributes = new HashMap<>();
+        List<ServiceDefinitionAttribute> attributes = new ArrayList<>();
         if (body.isPresent()) {
             Map<String, Object> map = body.get();
             map.forEach((k, v) -> {
                 if (k.startsWith("attribute[")) {
                     String code = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
 
-                    List<String> list = new ArrayList<>();
+                    ServiceDefinitionAttribute sda = new ServiceDefinitionAttribute();
+                    sda.setCode(code);
+                    List<AttributeValue> values = new ArrayList<>();
                     if (v instanceof ArrayList) {
-                        list.addAll((ArrayList) v);
+                        ((ArrayList<?>) v).forEach(s -> {
+                            values.add(new AttributeValue((String) s, getAttributeValueName(code, (String) s, service)));
+                        });
                     } else {
-                        list = Collections.singletonList(String.valueOf(v));
+                        values.add(new AttributeValue((String) v, getAttributeValueName(code, (String) v, service)));
                     }
-                    attributes.put(code, list);
+                    sda.setValues(values);
+
+                    attributes.add(sda);
                 }
             });
         }
 
         return attributes;
+    }
+
+    private String getAttributeValueName(String code, String valueKey, Service service) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String valueName = null;
+        try {
+            String serviceDefinitionJson = service.getServiceDefinitionJson();
+            if (serviceDefinitionJson != null) {
+                ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
+                Optional<AttributeValue> attributeValueOptional = serviceDefinition.getAttributes().stream()
+                        .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals(code))
+                        .flatMap((Function<ServiceDefinitionAttribute, Stream<AttributeValue>>) serviceDefinitionAttribute -> serviceDefinitionAttribute.getValues().stream())
+                        .filter(attributeValue -> attributeValue.getKey().equals(valueKey)).findFirst();
+
+                if (attributeValueOptional.isPresent()) {
+                    valueName = attributeValueOptional.get().getName();
+                }
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return valueName;
     }
 
     private ServiceRequest transformDtoToServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Service service) {
@@ -165,7 +192,22 @@ public class ServiceRequestService {
     }
 
     public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO) {
-        return getServiceRequestPage(requestDTO).map(ServiceRequestDTO::new);
+        return getServiceRequestPage(requestDTO).map(serviceRequest -> {
+            ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String attributesJson = serviceRequest.getAttributesJson();
+            if (attributesJson != null) {
+                try {
+                    ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
+                    serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            return serviceRequestDTO;
+        });
     }
 
     private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO) {
@@ -184,7 +226,6 @@ public class ServiceRequestService {
             List<String> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).collect(Collectors.toList());
             return serviceRequestRepository.findByIdIn(requestIds, pageable);
         }
-
 
         if (StringUtils.hasText(serviceCode) && status != null) {
             if (startDate != null && endDate != null) {
@@ -234,7 +275,22 @@ public class ServiceRequestService {
 
     public ServiceRequestDTO getServiceRequest(String serviceRequestId) {
         Optional<ServiceRequest> byId = serviceRequestRepository.findById(serviceRequestId);
-        return byId.map(ServiceRequestDTO::new).orElse(null);
+        return byId.map(serviceRequest -> {
+            ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String attributesJson = serviceRequest.getAttributesJson();
+            if (attributesJson != null) {
+                try {
+                    ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
+                    serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            return serviceRequestDTO;
+        }).orElse(null);
     }
 
     public StreamedFile  getAllServiceRequests(DownloadRequestsArgumentsDTO downloadRequestsArgumentsDTO) throws MalformedURLException {
@@ -246,9 +302,11 @@ public class ServiceRequestService {
                     if (serviceRequest.getAttributesJson() != null) {
                         ObjectMapper objectMapper = new ObjectMapper();
                         try {
-                            HashMap requestAttrs = objectMapper.readValue(serviceRequest.getAttributesJson(), HashMap.class);
-                            List<String> values = new ArrayList<>();
-                            requestAttrs.values().forEach(o -> values.addAll((ArrayList) o));
+                            ServiceDefinitionAttribute[] serviceDefinitionAttributes =
+                                    objectMapper.readValue(serviceRequest.getAttributesJson(), ServiceDefinitionAttribute[].class);
+                            List<String> values = Arrays.stream(serviceDefinitionAttributes)
+                                    .flatMap(serviceDefinitionAttribute -> serviceDefinitionAttribute.getValues().stream())
+                                    .map(AttributeValue::getKey).collect(Collectors.toList());
 
                             dto.setServiceSubtype(String.join(",", values));
                         } catch (JsonProcessingException e) {

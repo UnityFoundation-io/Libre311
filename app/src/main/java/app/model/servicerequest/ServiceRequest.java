@@ -24,6 +24,7 @@ public class ServiceRequest {
     private Service service;
 
     @Nullable
+    @Column(columnDefinition = "TEXT")
     private String attributesJson;
 
     // optional
