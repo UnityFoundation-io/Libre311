@@ -10,6 +10,7 @@
     setTimeout(async () => {
       primaryFontAvailable = await checkPrimaryFontAvailability();
       if (!primaryFontAvailable) dispatch("primaryFontNotAvailable");
+      else dispatch("primaryFontAvailable");
     }, 100);
   });
 
