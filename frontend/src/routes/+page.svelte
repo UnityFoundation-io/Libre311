@@ -546,7 +546,6 @@
   };
 
   const geocodeLatLng = (lat, lng) => {
-    console.log("geocodeLatLng");
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     geocoder.geocode({ location: latlng }, (results, status) => {
       if (status === "OK") {
@@ -879,7 +878,6 @@
 
   const reportCSV = async () => {
     try {
-     
       const res = await axios.get(
         `/requests/download?service_name=${filterIssueType.service_name}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
         {
@@ -888,7 +886,7 @@
           },
           responseType: "blob",
         }
-      ); //$
+      );
 
       const blob = new Blob([res.data], { type: "text/csv" });
       const blobUrl = URL.createObjectURL(blob);
@@ -994,7 +992,6 @@
       // more details for that place.
       searchBox.addListener("places_changed", () => {
         const places = searchBox.getPlaces();
-        console.log("places", places);
         if (places.length == 0) {
           return;
         }
