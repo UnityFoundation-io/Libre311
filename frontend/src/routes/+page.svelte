@@ -112,7 +112,8 @@
     invalidEmail = {
       message: messages["report.issue"]["input.email.error"],
       visible: false,
-    };
+    },
+    fileName = "report.csv";
 
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
@@ -267,6 +268,8 @@
   };
 
   const applyFontStretch = () => {
+    console.log("primary font not available");
+
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -279,6 +282,7 @@
   };
 
   const restoreFontStretch = () => {
+    console.log("primary font available");
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -871,6 +875,32 @@
     const mapSelector = document.getElementById("map");
     const mapHeight = mapSelector.offsetTop + mapSelector.offsetHeight;
     backgroundSelector.style.height = mapHeight + addExtra + "px";
+  };
+
+  const reportCSV = async () => {
+    try {
+     
+      const res = await axios.get(
+        `/requests/download?service_name=${filterIssueType.service_name}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
+        {
+          headers: {
+            "Content-Type": "text/csv",
+          },
+          responseType: "blob",
+        }
+      ); //$
+
+      const blob = new Blob([res.data], { type: "text/csv" });
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(messages["find.issue"]["CSV.download.error"], err);
+    }
   };
 
   onMount(async () => {
@@ -1910,32 +1940,42 @@
 
         {#if findReportedIssue}
           <div class="filter-label">
-            {messages["find.issue"]["label.filter"]}
-            {#if showFilters}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span
-                on:click="{() => {
-                  showFilters = !showFilters;
-                }}"
-                style="cursor: pointer"
-              >
-                -
-              </span>
-            {:else}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span
-                style="cursor: pointer"
-                on:click="{() => {
-                  showFilters = !showFilters;
-                  // Wait for the DOM to render the Dropdown
-                  setTimeout(() => {
-                    populateIssueTypeSelectDropdown();
-                  }, 10);
-                }}"
-              >
-                +
-              </span>
-            {/if}
+            <div>
+              {messages["find.issue"]["label.filter"]}
+              {#if showFilters}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <span
+                  on:click="{() => {
+                    showFilters = !showFilters;
+                  }}"
+                  style="cursor: pointer"
+                >
+                  -
+                </span>
+              {:else}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <span
+                  style="cursor: pointer"
+                  on:click="{() => {
+                    showFilters = !showFilters;
+                    // Wait for the DOM to render the Dropdown
+                    setTimeout(() => {
+                      populateIssueTypeSelectDropdown();
+                    }, 10);
+                  }}"
+                >
+                  +
+                </span>
+              {/if}
+            </div>
+
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div
+              style="margin-right: 1rem; cursor: pointer"
+              on:click="{reportCSV}"
+            >
+              {messages["find.issue"]["label.download.csv"]}
+            </div>
           </div>
 
           {#if showFilters}

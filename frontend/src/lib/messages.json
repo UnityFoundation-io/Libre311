@@ -69,6 +69,8 @@
     "find.issue":
         {
             "label.filter": "Filters",
+            "label.download.csv": "CSV Report",
+            "CSV.download.error": "Unable to download CSV file",
             "issue.type.placeholder": "Issue Type",
             "reported.by.placeholder": "Reported By",
             "select.option.reported.by.one": "User 1",
