@@ -870,7 +870,7 @@
   };
 
   const adjustMap = () => {
-    const addExtra = 100;
+    const addExtra = 190;
     const mapSelector = document.getElementById("map");
     const mapHeight = mapSelector.offsetTop + mapSelector.offsetHeight;
     backgroundSelector.style.height = mapHeight + addExtra + "px";
@@ -1070,14 +1070,7 @@
         </div>
       {/if}
     </div>
-    <div id="context" style="color: white; text-align: center">
-      {phone}
-      {orientation}
-      {#if backgroundSelector}
-        Page Height: {backgroundSelector.style.height}
-      {/if}
-    </div>
-    <div></div>
+
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
@@ -1129,9 +1122,10 @@
                 findReportedIssue = false;
                 showFilters = false;
 
-                adjustFooter();
-
-                setTimeout(() => (showFooter = true), 400);
+                setTimeout(() => {
+                  showFooter = true;
+                  adjustFooter();
+                }, 500);
                 clearData();
                 clearFilters();
               }
@@ -1141,7 +1135,7 @@
               <img
                 src="{searchSVG}"
                 alt="search for reported issues"
-                style="vertical-align: -0.25rem; margin-right: 1.6rem; margin-left: -0.7rem"
+                class="search-svg"
                 height="23rem"
               />
             {:else}
@@ -1362,14 +1356,14 @@
 
             {#if $issueType !== null}
               <div style="display: inline-block">
-                {#if $issueDetail.find((selection) => selection.name === "Other")}
+                {#if $issueDetail.find((selection) => selection.name === "Other") || $issueType.name === "Other"}
                   <div class="step-two-required">* Required field</div>
                 {/if}
 
                 <textarea
                   placeholder="{$issueDetail.find(
                     (selection) => selection.name === 'Other'
-                  )
+                  ) || $issueType.name === 'Other'
                     ? messages['report.issue'][
                         'textarea.description.placeholder'
                       ]
@@ -1387,9 +1381,10 @@
                 <span
                   class:step-two-word-count-accent="{$issueDescription?.length <
                     10 &&
-                    $issueDetail.find(
+                    ($issueDetail.find(
                       (selection) => selection.name === 'Other'
-                    )}"
+                    ) ||
+                      $issueType.name === 'Other')}"
                 >
                   {$issueDescription?.length ?? 0}
                 </span>
@@ -1430,7 +1425,10 @@
             style="margin-bottom: 1.25rem"
             on:click="{() => {
               if (
-                $issueDetail.find((selection) => selection.name === 'Other') &&
+                ($issueType.name === 'Other' ||
+                  $issueDetail.find(
+                    (selection) => selection.name === 'Other'
+                  )) &&
                 $issueDescription?.length < minOtherDescriptionLength
               ) {
                 invalidOtherDescription.visible = true;
@@ -1438,6 +1436,9 @@
                 reportNewIssueStep2 = false;
                 currentStep = 3;
                 reportNewIssueStep3 = true;
+                setTimeout(() => {
+                  reportIssuesButtonSelector.scrollIntoView();
+                }, 100);
               }
             }}"
           >
@@ -1514,8 +1515,9 @@
                   class:disabled-button-upload="{!selectedFile ||
                     messageSuccess}"
                   disabled="{!selectedFile}"
-                  >{messages["report.issue"]["label.upload.image"]}</button
                 >
+                  {messages["report.issue"]["label.upload.image"]}
+                </button>
               </div>
             </form>
 
