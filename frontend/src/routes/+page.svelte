@@ -278,6 +278,18 @@
     document.head.appendChild(style);
   };
 
+  const restoreFontStretch = () => {
+    const style = document.createElement("style");
+    style.textContent = `
+        * {
+          font-family: 'Gotham', 'Roboto', 'Helvetica';
+          letter-spacing: 0;
+        }
+      `;
+
+    document.head.appendChild(style);
+  };
+
   const clearUploadMessages = () => {
     messageSuccess = "";
     messageRejectedOne = "";
@@ -1089,7 +1101,6 @@
 
                 findReportedIssue = false;
                 showFilters = false;
-                showTable = false;
 
                 adjustFooter();
 
@@ -2176,4 +2187,7 @@
   </div>
 {/if}
 
-<Font on:primaryFontNotAvailable="{applyFontStretch}" />
+<Font
+  on:primaryFontNotAvailable="{applyFontStretch}"
+  on:primaryFontAvailable="{restoreFontStretch}"
+/>
