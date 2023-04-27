@@ -36,6 +36,7 @@
             "uploaded.message.success": "The uploaded image has been saved.",
             "select.option.issue.type.placeholder": "Choose an Issue Type*",
             "textarea.description.placeholder": "Additional Description Details*",
+            "textarea.description.not.required.placeholder": "Additional Description Details",
             "textarea.description.error": "Minimum 10 characters required in the description.",
             "label.submitter.name": "Name of Submitter:",
             "label.contact.info": "Contact Info:",
