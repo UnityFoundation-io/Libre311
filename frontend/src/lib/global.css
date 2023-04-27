@@ -445,6 +445,7 @@ textarea::placeholder {
   display: inline-flex; 
   font-size: 0.8rem; 
   margin-left: 3.2rem;
+  margin-bottom: 1rem;
 }
 
 .filter-selection {

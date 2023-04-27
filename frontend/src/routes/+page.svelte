@@ -138,7 +138,7 @@
     setTimeout(() => {
       if (issueTypeSelectSelector?.options?.length === 0)
         populateIssueTypeSelectDropdown();
-    }, 100);
+    }, 200);
 
   let zoom = 15;
   let markers = [];
@@ -1284,21 +1284,25 @@
               class="step-two-select"
               bind:this="{issueTypeSelectSelector}"
               on:change="{async (e) => {
+                if ($issueDetail) issueDetail.set([]);
+
                 issueType.set({
                   id: e.target.value,
                   name: e.target.options[e.target.selectedIndex].text,
                 });
 
-                await getServiceDefinition(e.target.value);
+                if ($issueType.name !== 'Other') {
+                  await getServiceDefinition(e.target.value);
 
-                // Remove any options
-                while (issueDetailSelectSelector.firstChild) {
-                  issueDetailSelectSelector.removeChild(
-                    issueDetailSelectSelector.firstChild
-                  );
+                  // Remove any options
+                  while (issueDetailSelectSelector.firstChild) {
+                    issueDetailSelectSelector.removeChild(
+                      issueDetailSelectSelector.firstChild
+                    );
+                  }
+
+                  populateIssueDetailList();
                 }
-
-                populateIssueDetailList();
               }}"></select>
 
             {#if $issueDetailList?.description}
@@ -1307,7 +1311,7 @@
               </div>
             {/if}
 
-            {#if $issueDetailList}
+            {#if $issueDetailList && issueType.name !== "Other"}
               <select
                 class="step-two-select-detail"
                 style="display: block"
@@ -1356,14 +1360,22 @@
               {/each}
             {/if}
 
-            {#if $issueType !== null && $issueDetail.find((selection) => selection.name === "Other")}
+            {#if $issueType !== null}
               <div style="display: inline-block">
-                <div class="step-two-required">* Required field</div>
+                {#if $issueDetail.find((selection) => selection.name === "Other")}
+                  <div class="step-two-required">* Required field</div>
+                {/if}
 
                 <textarea
-                  placeholder="{messages['report.issue'][
-                    'textarea.description.placeholder'
-                  ]}"
+                  placeholder="{$issueDetail.find(
+                    (selection) => selection.name === 'Other'
+                  )
+                    ? messages['report.issue'][
+                        'textarea.description.placeholder'
+                      ]
+                    : messages['report.issue'][
+                        'textarea.description.not.required.placeholder'
+                      ]}"
                   rows="3"
                   maxlength="{maxCharactersLength}"
                   bind:value="{$issueDescription}"
@@ -1374,7 +1386,10 @@
               <div class="step-two-word-count">
                 <span
                   class:step-two-word-count-accent="{$issueDescription?.length <
-                    10}"
+                    10 &&
+                    $issueDetail.find(
+                      (selection) => selection.name === 'Other'
+                    )}"
                 >
                   {$issueDescription?.length ?? 0}
                 </span>
@@ -1906,21 +1921,31 @@
               <span style="font-weight: 300; margin-right: 0.3rem">Type:</span>
               {selectedIssue.service_name}
             </div>
+
+            <div class="issue-detail-line">
+              <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
+              >
+              {selectedIssue.service_name}//$
+            </div>
+
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Description:</span
               >{selectedIssue.description ?? "-"}
             </div>
+
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Requested At:</span
               >{formatDate(selectedIssue.requested_datetime)}
             </div>
+
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Location:</span
               >{selectedIssue.address}
             </div>
+
             {#if selectedIssue.media_url !== undefined}
               <!-- svelte-ignore a11y-img-redundant-alt -->
               <!-- svelte-ignore a11y-click-events-have-key-events -->
