@@ -16,7 +16,7 @@ test('report new issue', async ({ page }) => {
   await page.getByRole('combobox').nth(1).selectOption('INCOMPLETE');
   await page.getByRole('button', { name: 'Next next step' }).click();
 
-  // Upload picture (skipped this test)
+  // Upload picture (skipped because of photo upload bug; actual test to follow)
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Enter contact information
@@ -34,3 +34,9 @@ test('report new issue', async ({ page }) => {
   await page.getByText('Contact Info: johndoe@gmail.com').click();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
 });
+
+/* Template for possible future tests */
+// test('test name', async ({ page }) => {
+//   await page.goto('http://localhost:3000/');
+//   await page.getByRole('button', { name: 'report a new issue Report a New Issue' }).click();
+// });
