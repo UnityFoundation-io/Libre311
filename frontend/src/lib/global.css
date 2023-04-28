@@ -915,7 +915,7 @@ td {
 
 /*/////// Android S10+ Portrait////////*/
 
-@media only screen and (min-width: 320px) and (orientation: portrait) {
+@media only screen and (min-width: 320px) and (max-width: 374px) and (orientation: portrait) {
   .content {
     font-size: 0.5rem;
   }
