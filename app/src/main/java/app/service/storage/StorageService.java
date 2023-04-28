@@ -36,7 +36,7 @@ public class StorageService {
         UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
         UploadResponse<?> response = objectStorage.upload(request);
         Blob blob = (Blob) response.getNativeResponse();
-        String imageLink = "https://storage.cloud.google.com/" + blob.getBucket() + "/" + blob.getName();
+        String imageLink = "https://storage.googleapis.com/" + blob.getBucket() + "/" + blob.getName();
 
         return imageLink;
     }
