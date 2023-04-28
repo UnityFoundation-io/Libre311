@@ -69,7 +69,7 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
-  const fileNameMaxLength = 20;
+  const fileNameMaxLength320Width = 20;
   const waitTime = 1000;
 
   // Page Height
@@ -892,6 +892,18 @@
     backgroundSelector.style.height = mapHeight + addExtra + "px";
   };
 
+  const truncateStringMiddle = (str, maxLength) => {
+    if (str.length <= maxLength) {
+      return str;
+    }
+
+    const halfLength = (maxLength - 3) / 2;
+    const start = str.slice(0, Math.ceil(halfLength));
+    const end = str.slice(-Math.floor(halfLength));
+
+    return `${start}...${end}`;
+  };
+
   const reportCSV = async () => {
     try {
       const res = await axios.get(
@@ -1498,11 +1510,12 @@
                   id="upload-image-label"
                 >
                   {#if selectedFile}
-                    {#if selectedFile.name.length > fileNameMaxLength}
-                      {selectedFile.name.slice(0, fileNameMaxLength)}...
-                    {:else}
-                      {selectedFile.name}
-                    {/if}
+                    {truncateStringMiddle(
+                      selectedFile.name,
+                      window.innerWidth >= 320 && window.innerWidth < 375
+                        ? 19
+                        : 25
+                    )}
                   {:else}
                     {messages["report.issue"]["label.choose.image"]}
                   {/if}
@@ -1511,7 +1524,8 @@
                   <img
                     src="{cameraSVG}"
                     alt="take photo"
-                    width="37rem"
+                    max-width="37rem"
+                    max-height="37rem"
                     style="padding: 0 0.3rem 0 0.3rem; vertical-align: middle; background-color: white; border-radius: 10px; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer"
                   />
                 </label>
