@@ -365,6 +365,8 @@ wemove:
                     name: "Uneven"
                   - key: "UNSAFE"
                     name: "Unsafe location"
+                  - key: "OTHER"
+                    name: "Other"
           serviceRequests:
             - description: "Two city buses parked obstructing the bike lane rather than using the bus lane"
               address: "270 Temple St New Haven, CT, 06511, USA"
@@ -422,6 +424,8 @@ wemove:
                     name: "Faded or worn paint"
                   - key: "DRIVERS"
                     name: "Drivers failing to yield"
+                  - key: "OTHER"
+                    name: "Other"
         - serviceCode: "005"
           serviceName: Intersection
           description: Intersection
@@ -444,6 +448,8 @@ wemove:
                     name: "Light will not change"
                   - key: "SHORTLIGHT"
                     name: "Light too short"
+                  - key: "OTHER"
+                    name: "Other"
         - serviceCode: "006"
           serviceName: Other
           description: Other
