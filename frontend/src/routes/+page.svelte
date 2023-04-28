@@ -48,9 +48,6 @@
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 
-  $: if (filteredIssuesData)
-    console.log("filteredIssuesData", filteredIssuesData);
-
   const hexToRGBA = (hex, alpha = 1) => {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -72,7 +69,7 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
-  const fileNameMaxLength = 35;
+  const fileNameMaxLength = 20;
   const waitTime = 1000;
 
   // Page Height
