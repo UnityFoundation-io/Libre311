@@ -48,6 +48,9 @@
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 
+  $: if (filteredIssuesData)
+    console.log("filteredIssuesData", filteredIssuesData);
+
   const hexToRGBA = (hex, alpha = 1) => {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -511,6 +514,22 @@
         "Content-Type": "application/x-www-form-urlencoded",
       },
     });
+
+    const marker = new google.maps.Marker({
+      position: {
+        lat: parseFloat($issueAddressCoordinates.lat),
+        lng: parseFloat($issueAddressCoordinates.lng),
+      },
+      map: map,
+      title: $issueType.name,
+      icon: {
+        scaledSize: new google.maps.Size(25, 25),
+        url: issuePinSVG,
+        anchor: new google.maps.Point(12, 12),
+      },
+    });
+
+    markers.push(marker);
   };
 
   const clearData = () => {
@@ -1915,7 +1934,6 @@
         {#if showModal}
           <Modal
             title="Issue Details"
-            selectedIssue="{selectedIssue}"
             color="{primaryOne}"
             on:cancel="{() => (showModal = false)}"
           >
@@ -1927,7 +1945,7 @@
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
               >
-              {selectedIssue.service_name}//$
+              {selectedIssue.service_name} (working on this)
             </div>
 
             <div class="issue-detail-line">
