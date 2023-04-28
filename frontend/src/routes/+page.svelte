@@ -1332,7 +1332,7 @@
               </div>
             {/if}
 
-            {#if $issueDetailList && issueType.name !== "Other"}
+            {#if $issueDetailList && $issueType.name !== "Other"}
               <select
                 class="step-two-select-detail"
                 style="display: block"
