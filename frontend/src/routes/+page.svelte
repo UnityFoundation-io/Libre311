@@ -1632,6 +1632,8 @@
             <input
               class="step-four-input-submitter-name"
               bind:value="{$issueSubmitterName}"
+              on:blur="{() =>
+                ($issueSubmitterName = $issueSubmitterName.trim())}"
               on:click="{() => (invalidSubmitterName.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.submitter.name'
@@ -1653,6 +1655,8 @@
             <input
               class="step-four-input-contact-info"
               bind:value="{$issueSubmitterContact}"
+              on:blur="{() =>
+                ($issueSubmitterContact = $issueSubmitterContact.trim())}"
               on:click="{() => (invalidEmail.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.contact.info'
