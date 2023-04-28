@@ -69,7 +69,6 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
-  const fileNameMaxLength320Width = 20;
   const waitTime = 1000;
 
   // Page Height
