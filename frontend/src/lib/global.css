@@ -856,7 +856,7 @@ td {
 }
 
 .success-message {
-  margin-top: 1.3rem;
+  margin-top: 1rem;
 }
 
 #button-find-issues {
@@ -1014,7 +1014,7 @@ td {
             }
 
                 .step-two-date-timestamp {
-                  font-size: 0.95rem;
+                  font-size: 0.9rem;
                   margin-left: 0rem;
                   filter: brightness(120%);
                 }
