@@ -219,13 +219,17 @@
     }
   }
 
-  @media only screen and (min-width: 513px) and (max-width: 749px) and (max-height: 340px) and (orientation: landscape) {
+  @media only screen and (min-width: 596px) and (max-width: 749px) and (max-height: 340px) and (orientation: landscape) {
     .local-motion-logo {
       margin-bottom: -5rem;
       height: 69px;
       width: 100px;
-      margin-left: 33rem;
+      margin-left: 30rem;
       top: -4.2rem;
+    }
+
+    .row {
+      flex-wrap: wrap;
     }
   }
 
