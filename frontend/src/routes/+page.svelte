@@ -69,7 +69,6 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
-  const fileNameMaxLength = 35;
   const waitTime = 1000;
 
   // Page Height
@@ -112,7 +111,8 @@
     invalidEmail = {
       message: messages["report.issue"]["input.email.error"],
       visible: false,
-    };
+    },
+    fileName = "report.csv";
 
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
@@ -137,7 +137,7 @@
     setTimeout(() => {
       if (issueTypeSelectSelector?.options?.length === 0)
         populateIssueTypeSelectDropdown();
-    }, 100);
+    }, 200);
 
   let zoom = 15;
   let markers = [];
@@ -267,6 +267,8 @@
   };
 
   const applyFontStretch = () => {
+    console.log("primary font not available");
+
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -279,6 +281,7 @@
   };
 
   const restoreFontStretch = () => {
+    console.log("primary font available");
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -507,6 +510,22 @@
         "Content-Type": "application/x-www-form-urlencoded",
       },
     });
+
+    const marker = new google.maps.Marker({
+      position: {
+        lat: parseFloat($issueAddressCoordinates.lat),
+        lng: parseFloat($issueAddressCoordinates.lng),
+      },
+      map: map,
+      title: $issueType.name,
+      icon: {
+        scaledSize: new google.maps.Size(25, 25),
+        url: issuePinSVG,
+        anchor: new google.maps.Point(12, 12),
+      },
+    });
+
+    markers.push(marker);
   };
 
   const clearData = () => {
@@ -542,7 +561,6 @@
   };
 
   const geocodeLatLng = (lat, lng) => {
-    console.log("geocodeLatLng");
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     geocoder.geocode({ location: latlng }, (results, status) => {
       if (status === "OK") {
@@ -867,10 +885,47 @@
   };
 
   const adjustMap = () => {
-    const addExtra = 100;
+    const addExtra = 190;
     const mapSelector = document.getElementById("map");
     const mapHeight = mapSelector.offsetTop + mapSelector.offsetHeight;
     backgroundSelector.style.height = mapHeight + addExtra + "px";
+  };
+
+  const truncateStringMiddle = (str, maxLength) => {
+    if (str.length <= maxLength) {
+      return str;
+    }
+
+    const halfLength = (maxLength - 3) / 2;
+    const start = str.slice(0, Math.ceil(halfLength));
+    const end = str.slice(-Math.floor(halfLength));
+
+    return `${start}...${end}`;
+  };
+
+  const reportCSV = async () => {
+    try {
+      const res = await axios.get(
+        `/requests/download?service_name=${filterIssueType.service_name}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
+        {
+          headers: {
+            "Content-Type": "text/csv",
+          },
+          responseType: "blob",
+        }
+      );
+
+      const blob = new Blob([res.data], { type: "text/csv" });
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(messages["find.issue"]["CSV.download.error"], err);
+    }
   };
 
   onMount(async () => {
@@ -964,7 +1019,6 @@
       // more details for that place.
       searchBox.addListener("places_changed", () => {
         const places = searchBox.getPlaces();
-        console.log("places", places);
         if (places.length == 0) {
           return;
         }
@@ -1043,14 +1097,7 @@
         </div>
       {/if}
     </div>
-    <div id="context" style="color: white; text-align: center">
-      {phone}
-      {orientation}
-      {#if backgroundSelector}
-        Page Height: {backgroundSelector.style.height}
-      {/if}
-    </div>
-    <div></div>
+
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
@@ -1102,9 +1149,10 @@
                 findReportedIssue = false;
                 showFilters = false;
 
-                adjustFooter();
-
-                setTimeout(() => (showFooter = true), 400);
+                setTimeout(() => {
+                  showFooter = true;
+                  adjustFooter();
+                }, 500);
                 clearData();
                 clearFilters();
               }
@@ -1114,7 +1162,7 @@
               <img
                 src="{searchSVG}"
                 alt="search for reported issues"
-                style="vertical-align: -0.25rem; margin-right: 1.6rem; margin-left: -0.7rem"
+                class="search-svg"
                 height="23rem"
               />
             {:else}
@@ -1257,30 +1305,38 @@
               class="step-two-select"
               bind:this="{issueTypeSelectSelector}"
               on:change="{async (e) => {
+                if ($issueDetail) issueDetail.set([]);
+
                 issueType.set({
                   id: e.target.value,
                   name: e.target.options[e.target.selectedIndex].text,
                 });
 
-                await getServiceDefinition(e.target.value);
+                if ($issueType.name !== 'Other') {
+                  await getServiceDefinition(e.target.value);
 
-                // Remove any options
-                while (issueDetailSelectSelector.firstChild) {
-                  issueDetailSelectSelector.removeChild(
-                    issueDetailSelectSelector.firstChild
-                  );
+                  // Remove any options
+                  while (issueDetailSelectSelector.firstChild) {
+                    issueDetailSelectSelector.removeChild(
+                      issueDetailSelectSelector.firstChild
+                    );
+                  }
+
+                  populateIssueDetailList();
                 }
-
-                populateIssueDetailList();
               }}"></select>
 
-            {#if $issueDetailList?.description}
+            {#if $issueDetailList?.description && $issueType?.name !== "Other"}
               <div class="step-two-feature-type-helper">
                 {$issueDetailList.description}
               </div>
+            {:else if $issueType?.name === "Other"}
+              <div class="step-two-feature-type-helper">
+                {messages["report.issue"]["selection.other.description"]}
+              </div>
             {/if}
 
-            {#if $issueDetailList}
+            {#if $issueDetailList && $issueType.name !== "Other"}
               <select
                 class="step-two-select-detail"
                 style="display: block"
@@ -1329,14 +1385,22 @@
               {/each}
             {/if}
 
-            {#if $issueType !== null && $issueDetail.find((selection) => selection.name === "Other")}
+            {#if $issueType !== null}
               <div style="display: inline-block">
-                <div class="step-two-required">* Required field</div>
+                {#if $issueDetail.find((selection) => selection.name === "Other") || $issueType.name === "Other"}
+                  <div class="step-two-required">* Required field</div>
+                {/if}
 
                 <textarea
-                  placeholder="{messages['report.issue'][
-                    'textarea.description.placeholder'
-                  ]}"
+                  placeholder="{$issueDetail.find(
+                    (selection) => selection.name === 'Other'
+                  ) || $issueType.name === 'Other'
+                    ? messages['report.issue'][
+                        'textarea.description.placeholder'
+                      ]
+                    : messages['report.issue'][
+                        'textarea.description.not.required.placeholder'
+                      ]}"
                   rows="3"
                   maxlength="{maxCharactersLength}"
                   bind:value="{$issueDescription}"
@@ -1347,7 +1411,11 @@
               <div class="step-two-word-count">
                 <span
                   class:step-two-word-count-accent="{$issueDescription?.length <
-                    10}"
+                    10 &&
+                    ($issueDetail.find(
+                      (selection) => selection.name === 'Other'
+                    ) ||
+                      $issueType.name === 'Other')}"
                 >
                   {$issueDescription?.length ?? 0}
                 </span>
@@ -1388,7 +1456,10 @@
             style="margin-bottom: 1.25rem"
             on:click="{() => {
               if (
-                $issueDetail.find((selection) => selection.name === 'Other') &&
+                ($issueType.name === 'Other' ||
+                  $issueDetail.find(
+                    (selection) => selection.name === 'Other'
+                  )) &&
                 $issueDescription?.length < minOtherDescriptionLength
               ) {
                 invalidOtherDescription.visible = true;
@@ -1396,6 +1467,9 @@
                 reportNewIssueStep2 = false;
                 currentStep = 3;
                 reportNewIssueStep3 = true;
+                setTimeout(() => {
+                  reportIssuesButtonSelector.scrollIntoView();
+                }, 100);
               }
             }}"
           >
@@ -1439,11 +1513,12 @@
                   id="upload-image-label"
                 >
                   {#if selectedFile}
-                    {#if selectedFile.name.length > fileNameMaxLength}
-                      {selectedFile.name.slice(0, fileNameMaxLength)}...
-                    {:else}
-                      {selectedFile.name}
-                    {/if}
+                    {truncateStringMiddle(
+                      selectedFile.name,
+                      window.innerWidth >= 320 && window.innerWidth < 375
+                        ? 19
+                        : 25
+                    )}
                   {:else}
                     {messages["report.issue"]["label.choose.image"]}
                   {/if}
@@ -1452,7 +1527,8 @@
                   <img
                     src="{cameraSVG}"
                     alt="take photo"
-                    width="37rem"
+                    max-width="37rem"
+                    max-height="37rem"
                     style="padding: 0 0.3rem 0 0.3rem; vertical-align: middle; background-color: white; border-radius: 10px; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer"
                   />
                 </label>
@@ -1472,8 +1548,9 @@
                   class:disabled-button-upload="{!selectedFile ||
                     messageSuccess}"
                   disabled="{!selectedFile}"
-                  >{messages["report.issue"]["label.upload.image"]}</button
                 >
+                  {messages["report.issue"]["label.upload.image"]}
+                </button>
               </div>
             </form>
 
@@ -1572,6 +1649,8 @@
             <input
               class="step-four-input-submitter-name"
               bind:value="{$issueSubmitterName}"
+              on:blur="{() =>
+                ($issueSubmitterName = $issueSubmitterName.trim())}"
               on:click="{() => (invalidSubmitterName.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.submitter.name'
@@ -1593,6 +1672,8 @@
             <input
               class="step-four-input-contact-info"
               bind:value="{$issueSubmitterContact}"
+              on:blur="{() =>
+                ($issueSubmitterContact = $issueSubmitterContact.trim())}"
               on:click="{() => (invalidEmail.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.contact.info'
@@ -1871,7 +1952,6 @@
         {#if showModal}
           <Modal
             title="Issue Details"
-            selectedIssue="{selectedIssue}"
             color="{primaryOne}"
             on:cancel="{() => (showModal = false)}"
           >
@@ -1879,21 +1959,31 @@
               <span style="font-weight: 300; margin-right: 0.3rem">Type:</span>
               {selectedIssue.service_name}
             </div>
+
+            <div class="issue-detail-line">
+              <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
+              >
+              {selectedIssue.service_name} (working on this)
+            </div>
+
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Description:</span
               >{selectedIssue.description ?? "-"}
             </div>
+
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Requested At:</span
               >{formatDate(selectedIssue.requested_datetime)}
             </div>
+
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >Location:</span
               >{selectedIssue.address}
             </div>
+
             {#if selectedIssue.media_url !== undefined}
               <!-- svelte-ignore a11y-img-redundant-alt -->
               <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -1910,32 +2000,42 @@
 
         {#if findReportedIssue}
           <div class="filter-label">
-            {messages["find.issue"]["label.filter"]}
-            {#if showFilters}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span
-                on:click="{() => {
-                  showFilters = !showFilters;
-                }}"
-                style="cursor: pointer"
-              >
-                -
-              </span>
-            {:else}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span
-                style="cursor: pointer"
-                on:click="{() => {
-                  showFilters = !showFilters;
-                  // Wait for the DOM to render the Dropdown
-                  setTimeout(() => {
-                    populateIssueTypeSelectDropdown();
-                  }, 10);
-                }}"
-              >
-                +
-              </span>
-            {/if}
+            <div>
+              {messages["find.issue"]["label.filter"]}
+              {#if showFilters}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <span
+                  on:click="{() => {
+                    showFilters = !showFilters;
+                  }}"
+                  style="cursor: pointer"
+                >
+                  -
+                </span>
+              {:else}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <span
+                  style="cursor: pointer"
+                  on:click="{() => {
+                    showFilters = !showFilters;
+                    // Wait for the DOM to render the Dropdown
+                    setTimeout(() => {
+                      populateIssueTypeSelectDropdown();
+                    }, 10);
+                  }}"
+                >
+                  +
+                </span>
+              {/if}
+            </div>
+
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div
+              style="margin-right: 1rem; cursor: pointer"
+              on:click="{reportCSV}"
+            >
+              {messages["find.issue"]["label.download.csv"]}
+            </div>
           </div>
 
           {#if showFilters}

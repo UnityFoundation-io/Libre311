@@ -27,8 +27,9 @@
             "label.optional": "(optional)",
             "label.date": "Date & Time:",
             "label.feature.type": "Select the Feature Type that you are reporting on:",
+            "selection.other.description": "Please elaborate in the Description field below.",
             "label.add.media": "Add an Image",
-            "label.choose.image": " Press here to choose image file. (<10MB)",
+            "label.choose.image": "Press here to choose image file. (<10MB)",
             "label.upload.image": "Upload",
             "location.services.disabled": "Enable Location Services on your Device",
             "uploaded.message.rejected-one": "Our policy prohibits storage of explicit images.",
@@ -36,6 +37,7 @@
             "uploaded.message.success": "The uploaded image has been saved.",
             "select.option.issue.type.placeholder": "Choose an Issue Type*",
             "textarea.description.placeholder": "Additional Description Details*",
+            "textarea.description.not.required.placeholder": "Additional Description Details",
             "textarea.description.error": "Minimum 10 characters required in the description.",
             "label.submitter.name": "Name of Submitter:",
             "label.contact.info": "Contact Info:",
@@ -69,6 +71,8 @@
     "find.issue":
         {
             "label.filter": "Filters",
+            "label.download.csv": "CSV Report",
+            "CSV.download.error": "Unable to download CSV file",
             "issue.type.placeholder": "Issue Type",
             "reported.by.placeholder": "Reported By",
             "select.option.reported.by.one": "User 1",

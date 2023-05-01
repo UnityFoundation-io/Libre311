@@ -270,6 +270,12 @@ body {
   margin-left: -2.1rem;
 }
 
+.search-svg {
+  vertical-align: -0.25rem; 
+  margin-right: 1.6rem; 
+  margin-left: -0.7rem;
+}
+
 .we-move {
   font-size: 6rem;
   font-weight: 600;
@@ -338,6 +344,8 @@ select {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   border-radius: 10px;
+  background-color: white;
+  color: #3478f6;
 }
 
 .select-filter {
@@ -411,6 +419,8 @@ textarea::placeholder {
 }
 
 .filter-label {
+  display: flex;
+  justify-content: space-between;
   color: white;
   font-weight: 300;
   font-size: 1.1rem;
@@ -443,6 +453,7 @@ textarea::placeholder {
   display: inline-flex; 
   font-size: 0.8rem; 
   margin-left: 3.2rem;
+  margin-bottom: 1rem;
 }
 
 .filter-selection {
@@ -831,6 +842,10 @@ td {
   font-weight: 100;
 }
 
+#stepSubmitted {
+  width: 50vw;
+}
+
 .success-message-div {
   background-color: var(--primary-color-one);
   width: 55vw;
@@ -841,7 +856,7 @@ td {
 }
 
 .success-message {
-  margin-top: 1.3rem;
+  margin-top: 1rem;
 }
 
 #button-find-issues {
@@ -898,6 +913,451 @@ td {
 
 /*//////// End Desktop Style ////////*/
 
+/*/////// Android S10+ Portrait////////*/
+
+@media only screen and (min-width: 320px) and (max-width: 374px) and (orientation: portrait) {
+  .content {
+    font-size: 0.5rem;
+  }
+
+  .numbers {
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+
+  .issues-table {
+    background-color: white;
+    width: 100vw;
+    overflow-y: auto;
+    display: block;
+    font-size: 0.8rem;
+    max-height: 9.6rem;
+  }
+
+  .table-expanded {
+    max-height: 8rem;
+  }
+
+  .table-contracted {
+    max-height: 8rem;
+  }
+
+  .issue-detail-view {
+    font-size: 0.65rem;
+  }
+
+  .issue-detail-line {
+    font-size: 0.85rem;
+  }
+
+  .filter-selection-label {
+    font-size: 0.65rem;
+  }
+
+  td {
+    font-size: 0.7rem;
+  }
+
+                  .td-description {
+                    max-width: 4.7rem;
+                    min-width: 4.7rem;
+                    font-size: 0.7rem;
+                  }
+
+                  .td-issue-type {
+                    max-width: 4rem;
+                    min-width: 4rem;
+                  }
+
+  .find-issues {
+    justify-content: left;
+  }
+
+  #stepOne {
+    width: 100vw;
+  }
+
+                  .step-one-issue-location-label {
+                    margin-top: -1rem;
+                    margin-left: 1rem;
+                    font-size: 1.3rem;
+                  }
+
+                .step-one-label {
+                  margin-left: 1rem;
+                }
+
+              .step-one-instruction {
+                margin-top: 0;
+                margin-left: 1rem;
+                font-size: 0.82rem;
+              }
+
+              .step-one-issue-address {
+                font-size: 1rem;
+                font-weight: 300;
+                margin: 0.5rem 0.5rem 0 1rem;
+                filter: brightness(120%);
+              }
+
+  .step-one-button-next {
+    margin-right: 0;
+  }
+
+              .step-two-label {
+                margin-left: 1rem;
+              }
+
+            .step-two-date-label {
+              font-size: 1.2rem;
+              margin-left: 1rem;
+            }
+
+                .step-two-date-timestamp {
+                  font-size: 0.9rem;
+                  margin-left: 0rem;
+                  filter: brightness(120%);
+                }
+
+              .step-two-feature-type-label {
+                font-size: 0.8rem;
+                letter-spacing: -0.03rem;
+                margin-left: 1rem;
+              }
+
+              .step-two-feature-type-helper {
+                font-size: 0.8rem;
+                letter-spacing: -0.03rem;
+                margin-left: 0;
+                margin-right: 0.5rem;
+              }
+
+            .step-two-select-div {
+              margin-left: 1rem;
+            }
+
+  .step-two-select-detail {
+    margin-left: 0;
+  }
+
+  .step-two-select {
+    margin-left: 0;
+  }
+
+              .issue-detail-selected {
+                margin-left: 0.2rem;
+                margin-right: 0.5rem;
+              }
+
+  .step-two-required {
+    margin-top: 0;
+    margin-right: 3.5rem;
+  }
+
+                .step-two-word-count {
+                  margin-top: 0;
+                  margin-right: 1.1rem;
+                  margin-bottom: 0.5rem;
+                }
+
+              .step-two-word-count-error {
+                margin-right: 1.1rem;
+                font-size: 0.7rem;
+              }
+
+  #stepPhoto {
+    width: 100vw;
+  }
+
+  .step-three-label {
+    margin-left: 0.5rem;
+  }
+
+  .step-three-add-media-label {
+    font-size: 1.045rem;
+    margin: 0 1rem 0 0.5rem;
+  }
+
+  #stepContactInfo {
+    width: 100vw;
+  }
+
+  .step-four-label {
+    margin-left: 0.5rem;
+  }
+
+  .step-four-submitter-name-label {
+    font-size: 1.3rem;
+    margin: 0 1rem 0 0.5rem;
+  }
+
+            .step-four-input-submitter-name {
+              margin-left: 0.5rem;
+              width: 91vw;
+            }
+
+  .step-four-contact-info-label {
+    margin-left: 0.5rem;
+    font-size: 1.3rem;
+  }
+
+              .step-four-input-contact-info {
+                margin-left: 0.5rem;
+                width: 91vw;
+              }
+
+              .step-four-submitter-name-word-count-error {
+                margin-right: 0.25rem;
+              }
+  
+            .step-four-submitter-email-error {
+              font-size: 0.8rem;
+              margin-right: 0.7rem;
+            }
+
+  #stepReviewSubmit {
+    width: 100vw;
+  }
+
+  .image-review {
+    margin-left: 0.5rem;
+  }
+
+  .step-five-label {
+    margin-left: 0.5rem;
+  }
+
+  .step-five-issue-location-label {
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .step-five-issue-location-address {
+    font-size: 1rem;
+  }
+
+  .step-five-issue-type-label {
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .step-five-issue-type {
+    font-size: 1rem;
+  }
+
+  .step-five-issue-detail-label {
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .step-five-issue-detail {
+    font-size: 1rem;
+  }
+
+  .step-five-issue-description-label {
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .step-five-issue-description {
+    font-size: 1rem;
+  }
+
+  .step-five-submitter-name-label {
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .step-five-submitter-name {
+    font-size: 1rem;
+  }
+
+  .step-five-contact-info-label {
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .step-five-contact-info {
+    font-size: 1rem;
+  }
+
+  #stepSubmitted {
+    width: 100vw;
+  }
+
+                    .success-message-div {
+                      width: 100vw;
+                      font-size: 1.2rem;
+                      height: 4.5rem;
+                    }
+
+  .success-message {
+    margin-top: 1rem;
+  }
+
+              .upload-image {
+                margin: 0 0.5rem 0 0.5rem;
+                font-size: 0.7rem;
+                min-height: 2.7rem;
+              }
+
+  .describe-issue {
+    width: 100vw;
+  }
+
+  .describe-issue-two {
+    width: 100vw;
+  }
+
+  .next-button {
+    margin-right: 0.5rem;
+  }
+
+  .back-button {
+    margin-left: 0.5rem;
+    letter-spacing: -0.08rem;
+
+  }
+
+              .review-button {
+                margin-right: 0.5rem;
+                letter-spacing: -0.05rem;
+
+              }
+
+  .review-submit {
+    margin-right: 0.5rem;
+  }
+
+  .submit-button {
+    margin-right: 0.5rem;
+  }
+
+  .disabled-button {
+    margin-right: 0.5rem;
+  }
+
+            .disabled-button-upload {
+              margin-right: 0.5rem;
+              padding: 0 3rem 0 1.5rem !important;
+            }
+
+            .upload {
+              margin-right: 0.5rem;
+              padding: 0 3rem 0 1.5rem !important;
+            }
+
+        .upload-message {
+          font-size: 0.73rem;
+          margin: 1rem 0.5rem 0 0.5rem;
+        }
+
+  #map {
+    width: 100vw;
+    height: 40vh;
+  }
+
+  #pac-input {
+    width: 75%;
+  }
+
+                  select {
+                    font-size: 0.5rem;
+                    margin: 0 auto;
+                  }
+
+  .filters {
+    display: block;
+    flex-wrap: wrap;
+    width: 100vw;
+    text-align: center;
+    color: #3478f6;
+  }
+
+                  .filter-label {
+                    flex-basis: 100%;
+                    text-align: center;
+                    font-size: 0.9rem;
+                  }
+
+                .reported-issues-label {
+                  font-size: 1rem;
+                }
+
+            .button {
+              font-size: 0.91rem;
+              padding: 10px 27px;
+            }
+
+            .logo {
+              margin-top: 1rem;
+              height: 2.4rem;
+            }
+
+            .we-move {
+              margin-top: 1rem;
+              font-size: 2.1rem;
+            }
+
+            .slogan-title {
+              margin: 2rem 0.5rem 2.5rem 0.5rem;
+              font-size: 1.35rem;
+              letter-spacing: 0.01rem;
+              text-align: center;
+            }
+
+            .slogan-text {
+              font-size: 0.9rem;
+              margin: 0 0.5rem 0 0.5rem;
+            }
+
+            .action-buttons {
+              display: block;
+              text-align: center;
+              margin-top: 5rem;
+            }
+
+            #button-report-issue {
+              margin-top: 12vh;
+              width: 18rem;
+            }
+
+            .add-svg {
+              vertical-align: -0.4rem;
+              margin-right: 2.4rem;
+              margin-left: -2.2rem;
+            }
+
+            .search-svg {
+              vertical-align: -0.3rem; 
+              margin-right: 2rem; 
+              margin-left: -2rem;
+            }
+
+          #button-find-issues {
+            width: 18rem;
+          }
+
+  .background {
+    height: 1200px;
+  }
+
+                .background::before {
+                  background-position: calc(30% - 100px) calc(50% - 300px);
+                }
+
+              textarea {
+                margin-left: 0.1rem;
+                margin-bottom: 0.1rem;
+                width: 84vw;
+                font-size: 0.75rem;
+              }
+
+              textarea::placeholder {
+                font-size: 0.75rem;
+              }
+}
+/* /////////////////// */
 
 /*/////// iPhone SE Portrait////////*/
 
@@ -1164,6 +1624,10 @@ td {
     font-size: 1rem;
   }
 
+  #stepSubmitted {
+    width: 100vw;
+  }
+
   .success-message-div {
     width: 100vw;
     font-size: 1.5rem;
@@ -1236,9 +1700,8 @@ td {
   }
 
   select {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     margin: 0 auto;
-    margin-bottom: 0.3rem;
   }
 
   .filters {
@@ -1246,6 +1709,7 @@ td {
     flex-wrap: wrap;
     width: 100vw;
     text-align: center;
+    color: #3478f6;
   }
 
   .filter-label {
@@ -1368,6 +1832,28 @@ td {
     min-width: 10rem;
   }
 
+  .upload {
+    margin-right: 0.5rem;
+    padding: 0 2.1rem 0 1.5rem;
+  }
+
+  .disabled-button-upload {
+    margin-right: 0.5rem;
+    padding: 0 2.1rem 0 1.5rem;
+  }
+
+  .step-two-word-count-error {
+    margin-right: 1.2rem;
+}
+
+  .upload-message {
+    font-size: 0.9rem;
+  }
+  
+  .issue-detail-selected {
+    margin-left: 0.2rem;
+  }
+
 }
 
 /*/////// iPhone 14 Pro Max Portrait ////////*/
@@ -1446,6 +1932,11 @@ td {
 
     .issue-detail-line {
       font-size: 0.85rem;
+    }
+
+    .issue-detail-selected {
+      margin-left: 1rem;
+      margin-right: 0.5rem;
     }
 
     .filter-selection-label {
@@ -1527,14 +2018,26 @@ td {
       margin-left: 0.5rem;
     }
 
+    .step-two-feature-type-helper {
+      margin-left: 0.5rem;
+    }
+  
+    .step-two-select-detail {
+      margin-left: 0.5rem;
+    }
+
     .step-two-word-count {
       margin-top: 0;
       margin-right: 1rem;
       margin-bottom: 1rem;
     }
 
+    .step-two-word-count-error {
+      margin-right: 0.5rem;
+    }
+
     #stepPhoto {
-      width: 100vw;
+      width: 70vw;
     }
 
     .step-three-label {
@@ -1546,8 +2049,24 @@ td {
       margin: 0 1rem 0 0.5rem;
     }
 
+    .upload {
+      margin-right: 0.5rem;
+      padding: 0 3.2rem 0 1.5rem;
+    }
+
+    .disabled-button-upload {
+      margin-right: 0.5rem;
+      padding: 0 3.2rem 0 1.5rem;
+    }
+
+    .upload-message {
+      font-size: 1rem;
+      margin: 1rem 0.5rem 0 0.5rem;
+    }
+
     #stepContactInfo {
-      width: 100vw;
+      width: 70vw;
+      /* width: 100vw; */
     }
 
     .step-four-label {
@@ -1574,8 +2093,16 @@ td {
       width: 96vw;
     }
 
+    .step-four-submitter-name-word-count-error {
+      margin-right: 0.5rem;
+    }
+    
+    .step-four-submitter-email-error {
+      margin-right: 0.5rem;
+    }
+
     #stepReviewSubmit {
-      width: 100vw;
+      width: 75vw;
     }
 
     .step-five-label {
@@ -1636,6 +2163,14 @@ td {
       font-size: 1rem;
     }
 
+    #stepSubmitted {
+      width: 70vw;
+    }
+
+    .image-review {
+      margin-left: 0.5rem;
+    }
+
     .success-message-div {
       width: 100vw;
       font-size: 1.5rem;
@@ -1661,7 +2196,7 @@ td {
     }
 
     .describe-issue-two {
-      width: 100vw;
+      width: 75vw;
     }
 
     .next-button {
@@ -1877,7 +2412,7 @@ td {
         }
 
         textarea {
-          width: 96vw;
+          width: 71vw;
         }
 
         .upload-image {
@@ -1886,11 +2421,11 @@ td {
 
         .step-four-input-submitter-name {
           margin-left: 0.5rem;
-          width: 97vw;
+          width: 66.5vw;
         }
     
         .step-four-input-contact-info {
           margin-left: 0.5rem;
-          width: 97vw;
+          width: 66.5vw;
         }
        }
