@@ -885,7 +885,7 @@
   };
 
   const adjustMap = () => {
-    const addExtra = 190;
+    const addExtra = 210;
     const mapSelector = document.getElementById("map");
     const mapHeight = mapSelector.offsetTop + mapSelector.offsetHeight;
     backgroundSelector.style.height = mapHeight + addExtra + "px";
