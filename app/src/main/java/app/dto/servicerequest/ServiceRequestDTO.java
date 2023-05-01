@@ -1,5 +1,6 @@
 package app.dto.servicerequest;
 
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,6 +9,7 @@ import io.micronaut.core.annotation.Introspected;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Introspected
@@ -65,6 +67,9 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     @JsonProperty("media_url")
     private String mediaUrl;
+
+    @JsonProperty("selected_values")
+    private List<ServiceDefinitionAttribute> selectedValues;
 
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
@@ -227,5 +232,13 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         Map<String, Object> m = new HashMap<>();
         m.put("service_code", getServiceCode());
         return m;
+    }
+
+    public List<ServiceDefinitionAttribute> getSelectedValues() {
+        return selectedValues;
+    }
+
+    public void setSelectedValues(List<ServiceDefinitionAttribute> selectedValues) {
+        this.selectedValues = selectedValues;
     }
 }
