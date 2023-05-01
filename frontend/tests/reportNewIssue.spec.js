@@ -8,12 +8,15 @@ test('report new issue', async ({ page }) => {
   await page.getByPlaceholder('Enter the address').click();
   await page.getByPlaceholder('Enter the address').fill('12140 Woodcrest Executive Drive');
   await page.getByPlaceholder('Enter the address').press('Enter');
+  await page.getByText('12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA').click();
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Enter issue details
-  await page.getByRole('combobox').selectOption('003');
-  await page.getByRole('combobox').nth(1).selectOption('UNSAFE');
-  await page.getByRole('combobox').nth(1).selectOption('INCOMPLETE');
+  await page.getByRole('combobox').selectOption('001');
+  await page.getByRole('combobox').nth(1).selectOption('CRACKED');
+  await page.getByRole('combobox').nth(1).selectOption('NARROW');
+  await page.getByPlaceholder('Additional Description Details').click();
+  await page.getByPlaceholder('Additional Description Details').fill('Additional description details');
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Upload picture (skipped because of photo upload bug; actual test to follow)
@@ -28,8 +31,8 @@ test('report new issue', async ({ page }) => {
 
   // Review information
   await page.getByText('Issue Location: 12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA').click();
-  await page.getByText('Issue Type: Bike Lane').click();
-  await page.getByText('Issue Details: 1-Unsafe location2-Incomplete').click();
+  await page.getByText('Issue Type: Sidewalk').click();
+  await page.getByText('Issue Details: 1-Cracked2-Too narrow').click();
   await page.getByText('Name of Submitter: John Doe').click();
   await page.getByText('Contact Info: johndoe@gmail.com').click();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
