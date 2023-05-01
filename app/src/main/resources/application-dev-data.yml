@@ -365,41 +365,43 @@ wemove:
                     name: "Uneven"
                   - key: "UNSAFE"
                     name: "Unsafe location"
+                  - key: "OTHER"
+                    name: "Other"
           serviceRequests:
-          - description: "Two city buses parked obstructing the bike lane rather than using the bus lane"
-            address: "270 Temple St New Haven, CT, 06511, USA"
-            lat: "41.3089872153701"
-            service_request_id: 14104488
-            requested_datetime: "2023-02-22T10:19:39-05:00"
-            long: "-72.9260325905894"
-            service_code: "121"
-            status: "closed"
-            zipcode: "06511"
-            updated_datetime: "2023-03-21T10:27:45-04:00"
-            agency_responsible: "City of New Haven"
-            service_name: "Parking Violation/Abandoned Auto"
-            media_url: null
-            expected_datetime: null
-            address_id: null
-            service_notice: null
-            status_notes: null
-          - description: "йцукен"
-            address: "235 Church St New Haven, CT, 06510, USA"
-            lat: "41.3094508143787"
-            service_request_id: 14085576
-            requested_datetime: "2023-02-17T08:24:31-05:00"
-            long: "-72.9231510008909"
-            service_code: "22063"
-            status: "closed"
-            zipcode: "06510"
-            updated_datetime: "2023-02-22T08:49:01-05:00"
-            agency_responsible: "City of New Haven"
-            service_name: "NHFD - Fire Investigations"
-            media_url: null
-            expected_datetime: null
-            address_id: null
-            service_notice: null
-            status_notes: null
+            - description: "Two city buses parked obstructing the bike lane rather than using the bus lane"
+              address: "270 Temple St New Haven, CT, 06511, USA"
+              lat: "41.3089872153701"
+              service_request_id: 14104488
+              requested_datetime: "2023-02-22T10:19:39-05:00"
+              long: "-72.9260325905894"
+              service_code: "121"
+              status: "closed"
+              zipcode: "06511"
+              updated_datetime: "2023-03-21T10:27:45-04:00"
+              agency_responsible: "City of New Haven"
+              service_name: "Parking Violation/Abandoned Auto"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
+            - description: "йцукен"
+              address: "235 Church St New Haven, CT, 06510, USA"
+              lat: "41.3094508143787"
+              service_request_id: 14085576
+              requested_datetime: "2023-02-17T08:24:31-05:00"
+              long: "-72.9231510008909"
+              service_code: "22063"
+              status: "closed"
+              zipcode: "06510"
+              updated_datetime: "2023-02-22T08:49:01-05:00"
+              agency_responsible: "City of New Haven"
+              service_name: "NHFD - Fire Investigations"
+              media_url: null
+              expected_datetime: null
+              address_id: null
+              service_notice: null
+              status_notes: null
         - serviceCode: "004"
           serviceName: Crosswalk
           description: Crosswalk
@@ -422,6 +424,8 @@ wemove:
                     name: "Faded or worn paint"
                   - key: "DRIVERS"
                     name: "Drivers failing to yield"
+                  - key: "OTHER"
+                    name: "Other"
         - serviceCode: "005"
           serviceName: Intersection
           description: Intersection
@@ -444,3 +448,9 @@ wemove:
                     name: "Light will not change"
                   - key: "SHORTLIGHT"
                     name: "Light too short"
+                  - key: "OTHER"
+                    name: "Other"
+        - serviceCode: "006"
+          serviceName: Other
+          description: Other
+          type: realtime

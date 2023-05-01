@@ -3,7 +3,6 @@
   import { createEventDispatcher } from "svelte";
 
   export let title;
-  export let selectedIssue;
   export let color;
 
   const dispatch = createEventDispatcher();

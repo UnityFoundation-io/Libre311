@@ -124,3 +124,7 @@ wemove:
                     name: "Light too short"
                   - key: "OTHER"
                     name: "Other"
+        - serviceCode: "006"
+          serviceName: Other
+          description: Other
+          type: realtime

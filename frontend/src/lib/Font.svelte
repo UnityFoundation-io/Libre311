@@ -11,7 +11,7 @@
       primaryFontAvailable = await checkPrimaryFontAvailability();
       if (!primaryFontAvailable) dispatch("primaryFontNotAvailable");
       else dispatch("primaryFontAvailable");
-    }, 100);
+    }, 500);
   });
 
   async function checkPrimaryFontAvailability(testText = "WgQqy@#%|") {
