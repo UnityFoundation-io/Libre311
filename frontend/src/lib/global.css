@@ -1898,9 +1898,9 @@ td {
 }
 
 
-   /*/////// Style: Landscape iPhone SE ///////*/
+   /*/////// Style: Landscape Galaxy S10+ ///////*/
 
-   @media only screen and (min-width: 513px) and (max-width: 814px) and (orientation: landscape){
+   @media only screen and (min-width: 596px) and (max-width: 814px) and (orientation: landscape){
     .content {
       font-size: 0.5rem;
     }
@@ -1948,14 +1948,14 @@ td {
     }
 
     .td-description {
-      max-width: 20rem;
-      min-width: 20rem;
+      max-width: 17rem;
+      min-width: 17rem;
       font-size: 0.7rem;
     }
 
     .td-issue-type {
-      max-width: 13rem;
-      min-width: 13rem;
+      max-width: 7rem;
+      min-width: 7rem;
     }
 
     .find-issues {
@@ -2019,7 +2019,8 @@ td {
     }
 
     .step-two-feature-type-helper {
-      margin-left: 0.5rem;
+      margin-left: 0.6rem;
+      font-size: 0.9rem;
     }
   
     .step-two-select-detail {
@@ -2066,7 +2067,6 @@ td {
 
     #stepContactInfo {
       width: 70vw;
-      /* width: 100vw; */
     }
 
     .step-four-label {
@@ -2080,7 +2080,7 @@ td {
 
     .step-four-input-submitter-name {
       margin-left: 0.5rem;
-      width: 96vw;
+      width: 65.5vw;
     }
 
     .step-four-contact-info-label {
@@ -2090,15 +2090,15 @@ td {
 
     .step-four-input-contact-info {
       margin-left: 0.5rem;
-      width: 96vw;
+      width: 65.5vw;
     }
 
     .step-four-submitter-name-word-count-error {
-      margin-right: 0.5rem;
+      margin-right: 0.6rem;
     }
     
     .step-four-submitter-email-error {
-      margin-right: 0.5rem;
+      margin-right: 0.6rem;
     }
 
     #stepReviewSubmit {
@@ -2225,11 +2225,11 @@ td {
 
     #map {
       width: 100vw;
-      height: 70vh;
+      height: 85vh;
     }
 
     #pac-input {
-      width: 50%;
+      width: 60%;
     }
 
     select {
@@ -2259,13 +2259,13 @@ td {
     }
 
     .logo {
-      margin-top: 2rem;
-      height: 5rem;
+      margin-top: 1rem;
+      height: 4rem;
     }
 
     .we-move {
-      margin-top: 3rem;
-      font-size: 4.5rem;
+      margin-top: 1rem;
+      font-size: 3.5rem;
     }
 
     #logo-div {
@@ -2273,16 +2273,16 @@ td {
     }
 
     .slogan-title {
-      margin: 5rem 0.5rem 2.5rem 0.5rem;
-      font-size: 2.1rem;
+      margin: 1rem 0.5rem 2rem 0.5rem;
+      font-size: 1.3rem;
       font-weight: 600;
       letter-spacing: 0.01rem;
       text-align: center;
     }
 
     .slogan-text {
-      font-size: 1.4rem;
-      margin-left: 1rem;
+      font-size: 1rem;
+      margin: 0 0.5rem 0 0.5rem;
     }
 
     .action-buttons {
@@ -2292,12 +2292,14 @@ td {
     }
 
     #button-report-issue {
-      margin-top: 2.5rem;
-      margin-left: 2rem;
       width: 18rem;
+      margin-top: 4rem;
     }
 
     #button-find-issues {
+      display: block;
+      margin: 0 auto;
+      text-align: center;
       width: 18rem;
     }
 
@@ -2312,7 +2314,7 @@ td {
     textarea {
       margin-left: 0.5rem;
       margin-bottom: 0.1rem;
-      width: 94vw;
+      width: 69.5vw;
       font-size: 0.85rem;
       border-radius: 10px;
     }
@@ -2363,7 +2365,33 @@ td {
       }
 
       textarea {
-        width: 96vw;
+        width: 70.5vw;
+      }
+
+      .step-four-input-submitter-name {
+        width: 66.5vw;
+      }
+
+      .step-four-input-contact-info {
+        width: 66.5vw;
+      }
+
+      .step-four-submitter-name-word-count-error {
+        margin-right: 0.6rem
+      }
+
+      .step-four-submitter-email-error {
+        margin-right: 0.6rem;
+      }
+
+      .td-description {
+        max-width: 22rem;
+        min-width: 22rem;
+      }
+  
+      .td-issue-type {
+        max-width: 11rem;
+        min-width: 11rem;
       }
      }
 
