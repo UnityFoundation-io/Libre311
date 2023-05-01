@@ -1326,9 +1326,13 @@
                 }
               }}"></select>
 
-            {#if $issueDetailList?.description}
+            {#if $issueDetailList?.description && $issueType?.name !== "Other"}
               <div class="step-two-feature-type-helper">
                 {$issueDetailList.description}
+              </div>
+            {:else if $issueType?.name === "Other"}
+              <div class="step-two-feature-type-helper">
+                {messages["report.issue"]["selection.other.description"]}
               </div>
             {/if}
 
