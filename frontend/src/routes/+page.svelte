@@ -40,6 +40,7 @@
   import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
+  import Recaptcha from "$lib/Recaptcha.svelte";
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
@@ -471,6 +472,8 @@
     if (res.data?.length > 0) {
       if (displayIssuesInMap) await addIssuesToMap();
     }
+
+    console.log("filteredIssuesData", filteredIssuesData);
   };
 
   const validateEmail = (input) => {
@@ -928,6 +931,40 @@
     }
   };
 
+  const onSubmit = (token) => {
+    console.log("token", token);
+    reportNewIssueStep5 = false;
+    postIssue();
+    currentStep = 6;
+    reportNewIssueStep6 = true;
+  };
+
+  async function loadRecaptcha() {
+    await new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src =
+        "https://www.google.com/recaptcha/enterprise.js?render=6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc";
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      document.head.appendChild(script);
+
+      // Load Google Recaptcha in the background of the page
+      grecaptcha.enterprise.ready(async () => {
+        const token = await grecaptcha.enterprise.execute(
+          "6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc",
+          { action: "homepage" }
+        );
+
+        console.log("token", token);
+        // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
+        // reCAPTCHA Enterprise to the end user's browser.
+        // This token must be validated by creating an assessment.
+        // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
+      });
+    });
+  }
+
   onMount(async () => {
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -1044,6 +1081,8 @@
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
+
+    loadRecaptcha();
   });
 </script>
 
@@ -1841,16 +1880,13 @@
             {messages["report.issue"]["button.back"]}
           </button>
           <button
-            class="button submit-button"
+            class="button submit-button g-recaptcha"
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
-            on:click="{() => {
-              reportNewIssueStep5 = false;
-              postIssue();
-              currentStep = 6;
-              reportNewIssueStep6 = true;
-            }}"
+            data-sitekey="6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc"
+            data-callback="onSubmit"
+            data-action="submit"
           >
             {messages["report.issue"]["button.submit"]}
             <img
@@ -1963,7 +1999,15 @@
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
               >
-              {selectedIssue.service_name} (working on this)
+              {#if selectedIssue?.selected_values}
+                {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
+                  <span style="margin-right:1rem"
+                    >{i + 1}-{issueDetail.name}</span
+                  >
+                {/each}
+              {:else}
+                -
+              {/if}
             </div>
 
             <div class="issue-detail-line">
