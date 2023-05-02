@@ -48,6 +48,7 @@
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const sitekey = import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY;
 
   const hexToRGBA = (hex, alpha = 1) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -125,6 +126,8 @@
     selectedIssue,
     heatmapControlIndex,
     timer,
+    recaptcha,
+    token,
     backgroundSelector,
     inputIssueAddressSelector,
     issueDetailSelector,
@@ -472,8 +475,6 @@
     if (res.data?.length > 0) {
       if (displayIssuesInMap) await addIssuesToMap();
     }
-
-    console.log("filteredIssuesData", filteredIssuesData);
   };
 
   const validateEmail = (input) => {
@@ -505,6 +506,8 @@
       attributes += "&email=" + $issueSubmitterContact;
 
     if (mediaUrl) attributes += "&media_url=" + mediaUrl;
+
+    attributes += "&g-recaptcha-response=" + token;
 
     const data = new URLSearchParams(attributes);
 
@@ -931,39 +934,54 @@
     }
   };
 
-  const onSubmit = (token) => {
-    console.log("token", token);
+  const initRecaptcha = async () => {
+    if (typeof grecaptcha === "undefined") {
+      await new Promise((resolve) => {
+        const checkRecaptcha = setInterval(() => {
+          if (typeof grecaptcha !== "undefined") {
+            clearInterval(checkRecaptcha);
+            resolve();
+          }
+        }, 100);
+      });
+    }
+
+    // Load Google Recaptcha in the background of the page
+    grecaptcha.enterprise.ready(async () => {
+      const token = await grecaptcha.enterprise.execute(sitekey, {
+        action: "homepage",
+      });
+
+      console.log("token", token);
+      // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
+      // reCAPTCHA Enterprise to the end user's browser.
+      // This token must be validated by creating an assessment.
+      // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
+    });
+  };
+
+  const loadRecaptcha = async () => {
+    await new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/enterprise.js?render=${sitekey}`;
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      document.head.appendChild(script);
+    });
+
+    // Call the initRecaptcha function to execute your reCAPTCHA logic
+    await initRecaptcha();
+  };
+
+  const handleToken = (recaptchaToken) => {
+    console.log("recaptchaToken", recaptchaToken);
+    token = recaptchaToken;
     reportNewIssueStep5 = false;
     postIssue();
     currentStep = 6;
     reportNewIssueStep6 = true;
   };
-
-  async function loadRecaptcha() {
-    await new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src =
-        "https://www.google.com/recaptcha/enterprise.js?render=6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc";
-      script.async = true;
-      script.defer = true;
-      script.onload = resolve;
-      document.head.appendChild(script);
-
-      // Load Google Recaptcha in the background of the page
-      grecaptcha.enterprise.ready(async () => {
-        const token = await grecaptcha.enterprise.execute(
-          "6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc",
-          { action: "homepage" }
-        );
-
-        console.log("token", token);
-        // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
-        // reCAPTCHA Enterprise to the end user's browser.
-        // This token must be validated by creating an assessment.
-        // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
-      });
-    });
-  }
 
   onMount(async () => {
     // Warn user before leaving the website
@@ -1861,6 +1879,7 @@
           {#if mediaUrl && !$issueDescription && !$issueSubmitterName && !$issueSubmitterContact}
             <div></div>
           {/if}
+          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
 
           <button
             class="button back-button"
@@ -1887,6 +1906,9 @@
             data-sitekey="6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc"
             data-callback="onSubmit"
             data-action="submit"
+            on:click="{() => {
+              recaptcha.renderRecaptcha(handleToken);
+            }}"
           >
             {messages["report.issue"]["button.submit"]}
             <img
