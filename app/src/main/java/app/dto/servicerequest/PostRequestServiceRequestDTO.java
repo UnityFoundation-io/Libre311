@@ -56,6 +56,9 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("media_url")
     private String mediaUrl;
 
+    @JsonProperty("g-recaptcha-response")
+    private String gRecaptchaResponse;
+
     public PostRequestServiceRequestDTO(String serviceCode) {
         this.serviceCode = serviceCode;
     }
@@ -169,5 +172,13 @@ public class PostRequestServiceRequestDTO {
         Map<String, Object> m = new HashMap<>();
         m.put("service_code", getServiceCode());
         return m;
+    }
+
+    public String getgRecaptchaResponse() {
+        return gRecaptchaResponse;
+    }
+
+    public void setgRecaptchaResponse(String gRecaptchaResponse) {
+        this.gRecaptchaResponse = gRecaptchaResponse;
     }
 }
