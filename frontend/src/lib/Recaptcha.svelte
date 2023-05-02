@@ -1,12 +1,24 @@
 <script>
-  import { onMount } from "svelte";
-
   export let sitekey;
   let recaptchaElement;
 
-  onMount(() => {
-    window.grecaptcha.render(recaptchaElement, { sitekey });
-  });
+  export function renderRecaptcha(callback) {
+    if (typeof grecaptcha !== "undefined") {
+      grecaptcha.enterprise.ready(async () => {
+        const token = await grecaptcha.enterprise.execute(sitekey, {
+          action: "submit",
+        });
+
+        if (typeof callback === "function") {
+          callback(token);
+        }
+      });
+    } else {
+      setTimeout(renderRecaptcha, 100);
+    }
+  }
+
+  window.onRecaptchaLoad = renderRecaptcha;
 </script>
 
 <div
