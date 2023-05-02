@@ -143,7 +143,7 @@ body {
 
 .background::before {
   content: "";
-  background-image: url("$lib/streetview16-9.png");
+  background-image: url("$lib/columbiaBackground.png");
   background-repeat: no-repeat;
   background-position: 100% 67%;
   background-size: cover;
