@@ -223,7 +223,7 @@ public class ServiceRequestService {
         }
 
         if (StringUtils.hasText(serviceRequestIds)) {
-            List<String> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).collect(Collectors.toList());
+            List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
             return serviceRequestRepository.findByIdIn(requestIds, pageable);
         }
 
@@ -273,7 +273,7 @@ public class ServiceRequestService {
         return serviceRequestRepository.findAll(pageable);
     }
 
-    public ServiceRequestDTO getServiceRequest(String serviceRequestId) {
+    public ServiceRequestDTO getServiceRequest(Long serviceRequestId) {
         Optional<ServiceRequest> byId = serviceRequestRepository.findById(serviceRequestId);
         return byId.map(serviceRequest -> {
             ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
