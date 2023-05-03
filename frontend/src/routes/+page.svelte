@@ -310,7 +310,7 @@
     selectedFile = event.target.files[0];
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (recaptchaToken) => {
     // Convert the selected image file to a data URL
     const imageUrl = await new Promise((resolve) => {
       const reader = new FileReader();
@@ -333,10 +333,10 @@
 
       // Save the image to the Server Locally
       // this worked for me in testing - max
-      const res = await axios.post("/image", imageUrl, {
-        headers: {
-          "Content-Type": "text/plain",
-        },
+
+      const res = await axios.post("/image", {
+        g_recaptcha_response: recaptchaToken,
+        image: imageUrl,
       });
 
       if (res?.data) mediaUrl = res.data;
@@ -981,10 +981,6 @@
       });
 
       console.log("token", token);
-      // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
-      // reCAPTCHA Enterprise to the end user's browser.
-      // This token must be validated by creating an assessment.
-      // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
     });
   };
 
@@ -998,7 +994,6 @@
       document.head.appendChild(script);
     });
 
-    // Call the initRecaptcha function to execute your reCAPTCHA logic
     await initRecaptcha();
   };
 
@@ -1603,7 +1598,15 @@
           </span>
 
           <div style="margin-top: 1rem">
-            <form on:submit|preventDefault="{handleSubmit}">
+            <form
+              data-sitekey="{sitekey}"
+              data-callback="onSubmit"
+              data-action="submit"
+              class="g-recaptcha"
+              on:submit|preventDefault="{() => {
+                recaptcha.renderRecaptcha(handleSubmit);
+              }}"
+            >
               <div style="display: flex">
                 <label
                   for="image-uploads"
@@ -1638,6 +1641,8 @@
                   style="display: none"
                   on:change="{handleFileChange}"
                 />
+
+                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
 
                 <button
                   type="submit"
@@ -1944,8 +1949,8 @@
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
-            data-sitekey="6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc"
-            data-callback="onSubmit"
+            data-sitekey="{sitekey}"
+            data-callback="handleToken"
             data-action="submit"
             on:click="{() => {
               recaptcha.renderRecaptcha(handleToken);
@@ -2104,9 +2109,6 @@
             {/if}
           </Modal>
         {/if}
-
-
-    
 
         {#if findReportedIssue}
           <div class="filter-label">
