@@ -93,3 +93,6 @@ netty:
   default:
     allocator:
       max-order: 3
+wemove:
+  recaptcha:
+    secret: "6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc"

@@ -1,10 +1,13 @@
 package app;
 
+import app.dto.storage.PhotoUploadDTO;
 import app.service.storage.StorageService;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+
+import javax.validation.Valid;
 
 @Controller("/api/image")
 public class ImageStorageController {
@@ -17,7 +20,7 @@ public class ImageStorageController {
 
     @Post(produces = MediaType.APPLICATION_JSON, consumes = MediaType.TEXT_PLAIN)
     @ExecuteOn(TaskExecutors.IO)
-    public String upload(String base64Image) {
-        return storageService.upload(base64Image);
+    public String upload(@Valid @Body PhotoUploadDTO photoUploadDTO) {
+        return storageService.upload(photoUploadDTO);
     }
 }

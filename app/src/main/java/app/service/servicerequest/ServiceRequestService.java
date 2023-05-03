@@ -11,6 +11,7 @@ import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
+import app.recaptcha.ReCaptchaService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -39,13 +40,18 @@ public class ServiceRequestService {
 
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRepository serviceRepository;
+    private final ReCaptchaService reCaptchaService;
 
-    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository) {
+    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
+        this.reCaptchaService = reCaptchaService;
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
+        if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
+            return null;
+        }
 
         Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
 

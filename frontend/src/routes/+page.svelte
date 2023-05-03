@@ -509,7 +509,7 @@
 
     if (mediaUrl) attributes += "&media_url=" + mediaUrl;
 
-    attributes += "&g-recaptcha-response=" + token;
+    attributes += "&g_recaptcha_response=" + token;
 
     const data = new URLSearchParams(attributes);
 
