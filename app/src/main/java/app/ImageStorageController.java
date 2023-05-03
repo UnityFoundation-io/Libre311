@@ -18,9 +18,11 @@ public class ImageStorageController {
         this.storageService = storageService;
     }
 
-    @Post(produces = MediaType.APPLICATION_JSON, consumes = MediaType.TEXT_PLAIN)
+    @Post
     @ExecuteOn(TaskExecutors.IO)
     public String upload(@Valid @Body PhotoUploadDTO photoUploadDTO) {
+        System.out.println("photoUploadDTO.getImage() " + photoUploadDTO.getImage());
+        System.out.println("photoUploadDTO.getgRecaptchaResponse() " + photoUploadDTO.getgRecaptchaResponse());
         return storageService.upload(photoUploadDTO);
     }
 }
