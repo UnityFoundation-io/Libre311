@@ -1231,13 +1231,11 @@ td {
   .back-button {
     margin-left: 0.5rem;
     letter-spacing: -0.08rem;
-
   }
 
   .review-button {
     margin-right: 0.5rem;
     letter-spacing: -0.05rem;
-
   }
 
   .review-submit {
@@ -1305,30 +1303,41 @@ td {
   }
 
   .logo {
-    margin-top: 1rem;
-    height: 7rem;
+    height: 8rem;
   }
 
   .slogan-title {
-    margin: 2rem 0.5rem 2.5rem 0.5rem;
+    margin: 2rem 0.5rem 1.5rem 0.5rem;
     font-size: 1.35rem;
     letter-spacing: 0.01rem;
     text-align: center;
   }
 
   .slogan-text {
+    margin: 1rem auto;
     font-size: 0.9rem;
-    margin: 0 0.5rem 0 0.5rem;
+  }
+
+  .see-more {
+    font-size: 1rem;
+  }
+
+  .see-more-title {
+    font-size: 1.15rem;
+  }
+  
+  .see-more-description {
+    font-size: 0.9rem;
   }
 
   .action-buttons {
     display: block;
     text-align: center;
-    margin-top: 5rem;
+    margin-top: 2rem;
   }
 
   #button-report-issue {
-    margin-top: 12vh;
+    margin-top: 7vh;
     width: 18rem;
   }
 
@@ -1353,7 +1362,7 @@ td {
   }
 
   .background::before {
-    background-position: calc(30% - 100px) calc(50% - 300px);
+    background-position: calc(40% - 100px) calc(50% - 500px);
   }
 
   textarea {
@@ -1736,26 +1745,39 @@ td {
   }
 
   .logo {
-    margin-top: 1rem;
-    height: 8rem;
+    height: 10rem;
   }
 
   .slogan-title {
-    margin: 3rem 0.5rem 2.5rem 0.5rem;
-    font-size: 1.65rem;
+    margin: 1.5rem 0.5rem 2.5rem 0.5rem;
+    font-size: 1.55rem;
     font-weight: 600;
     letter-spacing: 0.01rem;
     text-align: center;
   }
 
   .slogan-text {
+    margin: 1rem auto;
+    font-size: 1.1rem;
+  }
+
+  .see-more {
     font-size: 1.3rem;
+  }
+
+  .see-more-title {
+    font-size: 1.55rem;
+  }
+  
+  .see-more-description {
+    font-size: 1.1rem;
+    width: unset;
   }
 
   .action-buttons {
     display: block;
     text-align: center;
-    margin-top: 4rem;
+    margin-top: 3rem;
   }
 
   #button-report-issue {
@@ -1772,7 +1794,7 @@ td {
   }
 
   .background::before {
-    background-position: center calc(50% - 200px);
+    background-position: center calc(50% - 300px);
   }
 
   textarea {
@@ -1792,10 +1814,14 @@ td {
 
 /*/////// iPhone 13 Pro Portrait////////*/
 
-@media only screen and (min-width: 375px) and (min-height: 669px) and (max-height: 749px) and (orientation: portrait) {
-  /* .we-move {
-    font-size: 2.8rem;
-  } */
+@media only screen and (min-width: 375px) and (min-height: 669px) and (max-height: 739px) and (orientation: portrait) {
+  .background::before {
+    background-position: center calc(50% - 400px);
+  }
+
+  .logo {
+    height: 10rem;
+  }
 
   .slogan-title {
     font-size: 1.6rem;
@@ -1803,19 +1829,29 @@ td {
 
   .slogan-text {
     font-size: 1.1rem;
-    margin-left: 0.3rem;
-    margin-right: 0.3rem;
+  }
 
+  .see-more {
+    font-size: 1.1rem;
+  }
+
+  .see-more-title {
+    font-size: 1.6rem;
+  }
+  
+  .see-more-description {
+    font-size: 1.1rem;
+    width: unset;
   }
 
   .action-buttons {
     display: block;
     text-align: center;
-    margin-top: 5rem;
+    margin-top: 4rem;
   }
 
   #button-report-issue {
-    margin-top: 4rem;
+    margin-top: 3rem;
     width: 18rem;
   }
 
@@ -1863,18 +1899,34 @@ td {
 
 /*/////// iPhone 14 Pro Max Portrait ////////*/
 
-@media only screen and (min-width: 375px) and (min-height: 670px) and (max-height: 716px) and (orientation: portrait) {
-  /* .we-move {
-    font-size: 3.4rem;
-  } */
+@media only screen and (min-width: 400px) and (min-height: 670px) and (max-height: 750px) and (orientation: portrait) {
+  .background::before {
+    background-position: center calc(50% - 400px);
+  }
+
+  .logo {
+    height: 11rem;
+  }
 
   .slogan-title {
-    font-size: 1.85rem;
+    font-size: 1.75rem;
   }
 
   .slogan-text {
-    font-size: 1.5rem;
-    margin: 0 0.3rem 0 0.3rem;
+    font-size: 1.35rem;
+  }
+
+  .see-more {
+    font-size: 1.35rem;
+  }
+
+  .see-more-title {
+    font-size: 1.75rem;
+  }
+  
+  .see-more-description {
+    font-size: 1.35rem;
+    width: unset;
   }
 
   #button-report-issue {
@@ -2284,7 +2336,19 @@ td {
     .slogan-text {
       font-size: 1rem;
       margin: 0 auto;
-      width: 75vw;
+    }
+
+    .see-more {
+      font-size: 1rem;
+    }
+  
+    .see-more-title {
+      font-size: 1.15rem;
+    }
+    
+    .see-more-description {
+      font-size: 0.9rem;
+      width: unset;
     }
 
     .action-buttons {
@@ -2310,7 +2374,7 @@ td {
     }
 
     .background::before {
-      background-position: center calc(50% - 200px);
+      background-position: center calc(50% - 400px);
     }
 
     textarea {
@@ -2340,7 +2404,7 @@ td {
 
       .slogan-title {
         margin: 2rem 0.5rem 2.5rem 0.5rem;
-        font-size: 2.1rem;
+        font-size: 1.7rem;
         font-weight: 600;
         letter-spacing: 0.01rem;
         text-align: center;
@@ -2391,6 +2455,23 @@ td {
         max-width: 11rem;
         min-width: 11rem;
       }
+
+      .see-more {
+        font-size: 1.3rem;
+      }
+    
+      .see-more-title {
+        font-size: 1.7rem;
+      }
+      
+      .see-more-description {
+        font-size: 1.3rem;
+        width: unset;
+      }
+
+      .background::before {
+        background-position: center calc(50% - 275px);
+      }
      }
 
        /*/////// Style: Landscape iPhone 14 Pro Max ///////*/
@@ -2404,14 +2485,31 @@ td {
         .slogan-title {
           margin: 3rem 0.5rem 2.5rem 0.5rem;
           text-align: center;
-          font-size: 2.3rem;
+          font-size: 2.1rem;
         }
 
         .slogan-text {
-          font-size: 1.6rem;
+          font-size: 1.3rem;
           letter-spacing: 0.05rem;
           margin: 0 auto;
           width: 85vw;
+        }
+
+        .see-more {
+          font-size: 1.3rem;
+        }
+      
+        .see-more-title {
+          font-size: 2.1rem;
+        }
+        
+        .see-more-description {
+          font-size: 1.3rem;
+          width: unset;
+        }
+  
+        .background::before {
+          background-position: center calc(50% - 300px);
         }
 
         #button-report-issue {

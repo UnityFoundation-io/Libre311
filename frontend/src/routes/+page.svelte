@@ -1319,7 +1319,7 @@
                 resetState();
 
                 backgroundSelector.style.height = $footerDivHeight + 'px';
-                setTimeout(() => (showFooter = true), 400);
+                setTimeout(() => (showFooter = true), 700);
               }
               if (!reportNewIssue && currentStep === 2) {
                 reportNewIssueStep2 = false;
@@ -2104,6 +2104,9 @@
             {/if}
           </Modal>
         {/if}
+
+
+    
 
         {#if findReportedIssue}
           <div class="filter-label">
