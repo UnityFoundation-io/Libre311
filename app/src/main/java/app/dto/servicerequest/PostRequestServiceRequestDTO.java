@@ -56,7 +56,8 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("media_url")
     private String mediaUrl;
 
-    @JsonProperty("g-recaptcha-response")
+    @NotBlank
+    @JsonProperty("g_recaptcha_response")
     private String gRecaptchaResponse;
 
     public PostRequestServiceRequestDTO(String serviceCode) {

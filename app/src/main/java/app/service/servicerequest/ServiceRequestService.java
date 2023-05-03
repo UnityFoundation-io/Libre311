@@ -49,7 +49,7 @@ public class ServiceRequestService {
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
-        if (serviceRequestDTO.getgRecaptchaResponse() != null  && !reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
+        if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
             return null;
         }
 

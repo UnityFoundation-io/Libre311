@@ -1,5 +1,7 @@
 package app.service.storage;
 
+import app.dto.storage.PhotoUploadDTO;
+import app.recaptcha.ReCaptchaService;
 import com.google.cloud.storage.Blob;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
@@ -9,6 +11,7 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.Valid;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -16,13 +19,20 @@ import java.util.UUID;
 public class StorageService {
     private static final Logger LOG = LoggerFactory.getLogger(StorageService.class);
     private final ObjectStorageOperations<?, ?, ?> objectStorage;
+    private final ReCaptchaService reCaptchaService;
 
 
-    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage) {
+    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService) {
         this.objectStorage = objectStorage;
+        this.reCaptchaService = reCaptchaService;
     }
 
-    public String upload(String base64Image) {
+    public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
+        if (photoUploadDTO.getgRecaptchaResponse() == null  || !reCaptchaService.verifyReCaptcha(photoUploadDTO.getgRecaptchaResponse())) {
+            return null;
+        }
+
+        String base64Image = photoUploadDTO.getImage();
         String dataUri = base64Image.split(",")[0];
         MediaType mediaType = MediaType.of(dataUri.substring(dataUri.indexOf(":")+1, dataUri.indexOf(";")));
 

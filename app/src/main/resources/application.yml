@@ -95,4 +95,4 @@ netty:
       max-order: 3
 wemove:
   recaptcha:
-    key: "6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc"
+    secret: "6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc"
