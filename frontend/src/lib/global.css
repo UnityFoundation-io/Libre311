@@ -276,15 +276,6 @@ body {
   margin-left: -0.7rem;
 }
 
-.we-move {
-  font-size: 6rem;
-  font-weight: 600;
-  color: white;
-  text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.8);
-  border-radius: 25px;
-  padding: 0.7rem 2rem 0.7rem 2rem;
-}
-
 #map {
   width: 55vw;
   height: 55vh;
@@ -514,9 +505,8 @@ td {
 
 .logo {
   filter: drop-shadow(3px 3px 3px black);
-  margin-left: 2.5rem;
-  margin-top: 2rem;
-  height: 10rem;
+  margin: 2rem 0 0 calc(8%);
+  height: 14rem;
 }
 
 .action-buttons {
@@ -958,16 +948,16 @@ td {
     font-size: 0.7rem;
   }
 
-                  .td-description {
-                    max-width: 4.7rem;
-                    min-width: 4.7rem;
-                    font-size: 0.7rem;
-                  }
+  .td-description {
+    max-width: 4.7rem;
+    min-width: 4.7rem;
+    font-size: 0.7rem;
+  }
 
-                  .td-issue-type {
-                    max-width: 4rem;
-                    min-width: 4rem;
-                  }
+  .td-issue-type {
+    max-width: 4rem;
+    min-width: 4rem;
+  }
 
   .find-issues {
     justify-content: left;
@@ -977,64 +967,64 @@ td {
     width: 100vw;
   }
 
-                  .step-one-issue-location-label {
-                    margin-top: -1rem;
-                    margin-left: 1rem;
-                    font-size: 1.3rem;
-                  }
+  .step-one-issue-location-label {
+    margin-top: -1rem;
+    margin-left: 1rem;
+    font-size: 1.3rem;
+  }
 
-                .step-one-label {
-                  margin-left: 1rem;
-                }
+  .step-one-label {
+    margin-left: 1rem;
+  }
 
-              .step-one-instruction {
-                margin-top: 0;
-                margin-left: 1rem;
-                font-size: 0.82rem;
-              }
+  .step-one-instruction {
+    margin-top: 0;
+    margin-left: 1rem;
+    font-size: 0.82rem;
+  }
 
-              .step-one-issue-address {
-                font-size: 1rem;
-                font-weight: 300;
-                margin: 0.5rem 0.5rem 0 1rem;
-                filter: brightness(120%);
-              }
+  .step-one-issue-address {
+    font-size: 1rem;
+    font-weight: 300;
+    margin: 0.5rem 0.5rem 0 1rem;
+    filter: brightness(120%);
+  }
 
   .step-one-button-next {
     margin-right: 0;
   }
 
-              .step-two-label {
-                margin-left: 1rem;
-              }
+  .step-two-label {
+    margin-left: 1rem;
+  }
 
-            .step-two-date-label {
-              font-size: 1.2rem;
-              margin-left: 1rem;
-            }
+  .step-two-date-label {
+    font-size: 1.2rem;
+    margin-left: 1rem;
+  }
 
-                .step-two-date-timestamp {
-                  font-size: 0.9rem;
-                  margin-left: 0rem;
-                  filter: brightness(120%);
-                }
+  .step-two-date-timestamp {
+    font-size: 0.9rem;
+    margin-left: 0rem;
+    filter: brightness(120%);
+  }
 
-              .step-two-feature-type-label {
-                font-size: 0.8rem;
-                letter-spacing: -0.03rem;
-                margin-left: 1rem;
-              }
+  .step-two-feature-type-label {
+    font-size: 0.8rem;
+    letter-spacing: -0.03rem;
+    margin-left: 1rem;
+  }
 
-              .step-two-feature-type-helper {
-                font-size: 0.8rem;
-                letter-spacing: -0.03rem;
-                margin-left: 0;
-                margin-right: 0.5rem;
-              }
+  .step-two-feature-type-helper {
+    font-size: 0.8rem;
+    letter-spacing: -0.03rem;
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
 
-            .step-two-select-div {
-              margin-left: 1rem;
-            }
+  .step-two-select-div {
+    margin-left: 1rem;
+  }
 
   .step-two-select-detail {
     margin-left: 0;
@@ -1044,26 +1034,26 @@ td {
     margin-left: 0;
   }
 
-              .issue-detail-selected {
-                margin-left: 0.2rem;
-                margin-right: 0.5rem;
-              }
+  .issue-detail-selected {
+    margin-left: 0.2rem;
+    margin-right: 0.5rem;
+  }
 
   .step-two-required {
     margin-top: 0;
     margin-right: 3.5rem;
   }
 
-                .step-two-word-count {
-                  margin-top: 0;
-                  margin-right: 1.1rem;
-                  margin-bottom: 0.5rem;
-                }
+  .step-two-word-count {
+    margin-top: 0;
+    margin-right: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
 
-              .step-two-word-count-error {
-                margin-right: 1.1rem;
-                font-size: 0.7rem;
-              }
+  .step-two-word-count-error {
+    margin-right: 1.1rem;
+    font-size: 0.7rem;
+  }
 
   #stepPhoto {
     width: 100vw;
@@ -1091,29 +1081,29 @@ td {
     margin: 0 1rem 0 0.5rem;
   }
 
-            .step-four-input-submitter-name {
-              margin-left: 0.5rem;
-              width: 91vw;
-            }
+  .step-four-input-submitter-name {
+    margin-left: 0.5rem;
+    width: 91vw;
+  }
 
   .step-four-contact-info-label {
     margin-left: 0.5rem;
     font-size: 1.3rem;
   }
 
-              .step-four-input-contact-info {
-                margin-left: 0.5rem;
-                width: 91vw;
-              }
+  .step-four-input-contact-info {
+    margin-left: 0.5rem;
+    width: 91vw;
+  }
 
-              .step-four-submitter-name-word-count-error {
-                margin-right: 0.25rem;
-              }
-  
-            .step-four-submitter-email-error {
-              font-size: 0.8rem;
-              margin-right: 0.7rem;
-            }
+  .step-four-submitter-name-word-count-error {
+    margin-right: 0.25rem;
+  }
+
+  .step-four-submitter-email-error {
+    font-size: 0.8rem;
+    margin-right: 0.7rem;
+  }
 
   #stepReviewSubmit {
     width: 100vw;
@@ -1185,21 +1175,21 @@ td {
     width: 100vw;
   }
 
-                    .success-message-div {
-                      width: 100vw;
-                      font-size: 1.2rem;
-                      height: 4.5rem;
-                    }
+  .success-message-div {
+    width: 100vw;
+    font-size: 1.2rem;
+    height: 4.5rem;
+  }
 
   .success-message {
     margin-top: 1rem;
   }
 
-              .upload-image {
-                margin: 0 0.5rem 0 0.5rem;
-                font-size: 0.7rem;
-                min-height: 2.7rem;
-              }
+  .upload-image {
+    margin: 0 0.5rem 0 0.5rem;
+    font-size: 0.7rem;
+    min-height: 2.7rem;
+  }
 
   .describe-issue {
     width: 100vw;
@@ -1219,11 +1209,11 @@ td {
 
   }
 
-              .review-button {
-                margin-right: 0.5rem;
-                letter-spacing: -0.05rem;
+  .review-button {
+    margin-right: 0.5rem;
+    letter-spacing: -0.05rem;
 
-              }
+  }
 
   .review-submit {
     margin-right: 0.5rem;
@@ -1237,20 +1227,20 @@ td {
     margin-right: 0.5rem;
   }
 
-            .disabled-button-upload {
-              margin-right: 0.5rem;
-              padding: 0 3rem 0 1.5rem !important;
-            }
+  .disabled-button-upload {
+    margin-right: 0.5rem;
+    padding: 0 3rem 0 1.5rem !important;
+  }
 
-            .upload {
-              margin-right: 0.5rem;
-              padding: 0 3rem 0 1.5rem !important;
-            }
+  .upload {
+    margin-right: 0.5rem;
+    padding: 0 3rem 0 1.5rem !important;
+  }
 
-        .upload-message {
-          font-size: 0.73rem;
-          margin: 1rem 0.5rem 0 0.5rem;
-        }
+  .upload-message {
+    font-size: 0.73rem;
+    margin: 1rem 0.5rem 0 0.5rem;
+  }
 
   #map {
     width: 100vw;
@@ -1261,10 +1251,10 @@ td {
     width: 75%;
   }
 
-                  select {
-                    font-size: 0.5rem;
-                    margin: 0 auto;
-                  }
+  select {
+    font-size: 0.5rem;
+    margin: 0 auto;
+  }
 
   .filters {
     display: block;
@@ -1274,88 +1264,83 @@ td {
     color: #3478f6;
   }
 
-                  .filter-label {
-                    flex-basis: 100%;
-                    text-align: center;
-                    font-size: 0.9rem;
-                  }
+  .filter-label {
+    flex-basis: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+  }
 
-                .reported-issues-label {
-                  font-size: 1rem;
-                }
+  .reported-issues-label {
+    font-size: 1rem;
+  }
 
-            .button {
-              font-size: 0.91rem;
-              padding: 10px 27px;
-            }
+  .button {
+    font-size: 0.91rem;
+    padding: 10px 27px;
+  }
 
-            .logo {
-              margin-top: 1rem;
-              height: 2.4rem;
-            }
+  .logo {
+    margin-top: 1rem;
+    height: 7rem;
+  }
 
-            .we-move {
-              margin-top: 1rem;
-              font-size: 2.1rem;
-            }
+  .slogan-title {
+    margin: 2rem 0.5rem 2.5rem 0.5rem;
+    font-size: 1.35rem;
+    letter-spacing: 0.01rem;
+    text-align: center;
+  }
 
-            .slogan-title {
-              margin: 2rem 0.5rem 2.5rem 0.5rem;
-              font-size: 1.35rem;
-              letter-spacing: 0.01rem;
-              text-align: center;
-            }
+  .slogan-text {
+    font-size: 0.9rem;
+    margin: 0 0.5rem 0 0.5rem;
+  }
 
-            .slogan-text {
-              font-size: 0.9rem;
-              margin: 0 0.5rem 0 0.5rem;
-            }
+  .action-buttons {
+    display: block;
+    text-align: center;
+    margin-top: 5rem;
+  }
 
-            .action-buttons {
-              display: block;
-              text-align: center;
-              margin-top: 5rem;
-            }
+  #button-report-issue {
+    margin-top: 12vh;
+    width: 18rem;
+  }
 
-            #button-report-issue {
-              margin-top: 12vh;
-              width: 18rem;
-            }
+  .add-svg {
+    vertical-align: -0.4rem;
+    margin-right: 2.4rem;
+    margin-left: -2.2rem;
+  }
 
-            .add-svg {
-              vertical-align: -0.4rem;
-              margin-right: 2.4rem;
-              margin-left: -2.2rem;
-            }
+  .search-svg {
+    vertical-align: -0.3rem; 
+    margin-right: 2rem; 
+    margin-left: -2rem;
+  }
 
-            .search-svg {
-              vertical-align: -0.3rem; 
-              margin-right: 2rem; 
-              margin-left: -2rem;
-            }
-
-          #button-find-issues {
-            width: 18rem;
-          }
+  #button-find-issues {
+    width: 18rem;
+  }
 
   .background {
     height: 1200px;
   }
 
-                .background::before {
-                  background-position: calc(30% - 100px) calc(50% - 300px);
-                }
+  .background::before {
+    background-position: calc(30% - 100px) calc(50% - 300px);
+  }
 
-              textarea {
-                margin-left: 0.1rem;
-                margin-bottom: 0.1rem;
-                width: 84vw;
-                font-size: 0.75rem;
-              }
+  textarea {
+    margin-left: 0.1rem;
+    margin-bottom: 0.1rem;
+    width: 84vw;
+    font-size: 0.75rem;
+  }
 
-              textarea::placeholder {
-                font-size: 0.75rem;
-              }
+  textarea::placeholder {
+    font-size: 0.75rem;
+  }
 }
 /* /////////////////// */
 
@@ -1726,17 +1711,12 @@ td {
   }
 
   .logo {
-    margin-top: 2rem;
-    height: 3rem;
-  }
-
-  .we-move {
-    margin-top: 3rem;
-    font-size: 2.65rem;
+    margin-top: 1rem;
+    height: 8rem;
   }
 
   .slogan-title {
-    margin: 5rem 0.5rem 2.5rem 0.5rem;
+    margin: 3rem 0.5rem 2.5rem 0.5rem;
     font-size: 1.65rem;
     font-weight: 600;
     letter-spacing: 0.01rem;
@@ -1788,9 +1768,9 @@ td {
 /*/////// iPhone 13 Pro Portrait////////*/
 
 @media only screen and (min-width: 375px) and (min-height: 669px) and (max-height: 749px) and (orientation: portrait) {
-  .we-move {
+  /* .we-move {
     font-size: 2.8rem;
-  }
+  } */
 
   .slogan-title {
     font-size: 1.6rem;
@@ -1859,9 +1839,9 @@ td {
 /*/////// iPhone 14 Pro Max Portrait ////////*/
 
 @media only screen and (min-width: 375px) and (min-height: 670px) and (max-height: 716px) and (orientation: portrait) {
-  .we-move {
+  /* .we-move {
     font-size: 3.4rem;
-  }
+  } */
 
   .slogan-title {
     font-size: 1.85rem;
@@ -2260,12 +2240,8 @@ td {
 
     .logo {
       margin-top: 1rem;
-      height: 4rem;
-    }
-
-    .we-move {
-      margin-top: 1rem;
-      font-size: 3.5rem;
+      margin: 0 auto;
+      height: 9rem;
     }
 
     #logo-div {
@@ -2282,7 +2258,8 @@ td {
 
     .slogan-text {
       font-size: 1rem;
-      margin: 0 0.5rem 0 0.5rem;
+      margin: 0 auto;
+      width: 75vw;
     }
 
     .action-buttons {
@@ -2331,18 +2308,13 @@ td {
         justify-content: center;
       }
 
-      .we-move {
-        margin-top: 2rem;
-        font-size: 4.9rem;
-      }
-  
       .logo {
-        margin-top: 2rem;
-        height: 7rem;
+        margin-top: 0;
+        height: 14rem;
       }
 
       .slogan-title {
-        margin: 4rem 0.5rem 2.5rem 0.5rem;
+        margin: 2rem 0.5rem 2.5rem 0.5rem;
         font-size: 2.1rem;
         font-weight: 600;
         letter-spacing: 0.01rem;
@@ -2352,7 +2324,8 @@ td {
       .slogan-text {
         font-size: 1.3rem;
         letter-spacing: 0.05rem;
-        margin-left: 1.5rem;
+        margin: 0 auto;
+        width: 85vw;
       }
 
       #map {
@@ -2398,15 +2371,9 @@ td {
        /*/////// Style: Landscape iPhone 14 Pro Max ///////*/
 
        @media only screen and (min-width: 814px) and (max-height: 450px) and (orientation: landscape){
-
-        .we-move {
-          margin-top: 3rem;
-          font-size: 5rem;
-        }
-
         .logo {
-          margin-top: 2rem;
-          height: 7rem;
+          margin-top: 0;
+          height: 15rem;
         }
 
         .slogan-title {
@@ -2418,7 +2385,8 @@ td {
         .slogan-text {
           font-size: 1.6rem;
           letter-spacing: 0.05rem;
-          margin: 0 0.5rem 0 0.5rem;
+          margin: 0 auto;
+          width: 85vw;
         }
 
         #button-report-issue {

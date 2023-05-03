@@ -1137,22 +1137,6 @@
           class="logo"
         />
       {/if}
-
-      {#if openWeMove}
-        <div
-          class="we-move"
-          in:blur="{{
-            delay: startRendering,
-            duration: 1000,
-            quintOut,
-          }}"
-        >
-          {messages["home"]["title.one"]}
-          <span style="color: {primaryTwo}; margin-left: 0.4rem">
-            {messages["home"]["title.two"]}
-          </span>
-        </div>
-      {/if}
     </div>
 
     <div
