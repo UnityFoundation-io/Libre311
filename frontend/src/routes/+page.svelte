@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
   import axios from "axios";
-  import logo from "$lib/logo.png";
+  import logo from "$lib/logo2.png";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -18,6 +18,7 @@
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
   import issueAddress from "../stores/issueAddress";
+  import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
   import issueTime from "../stores/issueTime";
   import issueType from "../stores/issueType";
@@ -101,6 +102,7 @@
     showModal = false,
     showFooter = true,
     showTable = true,
+    seeMore = false,
     heatmapVisible = true,
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
@@ -871,6 +873,32 @@
     return controlButton;
   };
 
+  const adjustSeeMore = () => {
+    if (seeMore) {
+      const seeMoreDiv = document.getElementById("see-more");
+      seeMoreHeight.set(seeMoreDiv.offsetHeight + 10);
+      backgroundSelector.style.height =
+        Number(
+          backgroundSelector.style.height.slice(
+            0,
+            backgroundSelector.style.height.length - 2
+          )
+        ) +
+        $seeMoreHeight +
+        "px";
+    } else {
+      backgroundSelector.style.height =
+        Number(
+          backgroundSelector.style.height.slice(
+            0,
+            backgroundSelector.style.height.length - 2
+          )
+        ) -
+        $seeMoreHeight +
+        "px";
+    }
+  };
+
   const adjustFooter = () => {
     if (!$footerDivHeight && $footerSelector) {
       footerDivHeight.set(
@@ -1145,8 +1173,37 @@
       out:fade="{{ duration: 300, quintOut }}"
     >
       <div class="slogan-title">{messages["home"]["tagline.one"]}</div>
+
       <div class="slogan-text">
         {messages["home"]["tagline.two"]}
+
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <span
+          class="see-more"
+          on:click="{() => {
+            seeMore = !seeMore;
+            setTimeout(() => {
+              adjustSeeMore();
+            }, 50);
+          }}"
+        >
+          {#if seeMore}
+            -
+          {:else}
+            +
+          {/if}
+        </span>
+
+        {#if seeMore}
+          <div id="see-more">
+            <div class="see-more-title">
+              {messages["home"]["see.more.title"]}
+            </div>
+            <div class="see-more-description">
+              {messages["home"]["see.more.description"]}
+            </div>
+          </div>
+        {/if}
       </div>
 
       <div class="action-buttons">
@@ -1178,7 +1235,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 10);
+                  }, 250);
                 }, 100);
 
                 if (!filteredIssuesData) await getIssues();
@@ -1252,7 +1309,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 10);
+                  }, 250);
                 }, 100);
 
                 reduceBackGroundOpacity = false;
