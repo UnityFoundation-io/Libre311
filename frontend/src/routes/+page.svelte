@@ -40,6 +40,7 @@
   import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
+  import Recaptcha from "$lib/Recaptcha.svelte";
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
@@ -47,6 +48,7 @@
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const sitekey = import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY;
 
   const hexToRGBA = (hex, alpha = 1) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -124,6 +126,8 @@
     selectedIssue,
     heatmapControlIndex,
     timer,
+    recaptcha,
+    token,
     backgroundSelector,
     inputIssueAddressSelector,
     issueDetailSelector,
@@ -502,6 +506,8 @@
       attributes += "&email=" + $issueSubmitterContact;
 
     if (mediaUrl) attributes += "&media_url=" + mediaUrl;
+
+    attributes += "&g-recaptcha-response=" + token;
 
     const data = new URLSearchParams(attributes);
 
@@ -928,6 +934,55 @@
     }
   };
 
+  const initRecaptcha = async () => {
+    if (typeof grecaptcha === "undefined") {
+      await new Promise((resolve) => {
+        const checkRecaptcha = setInterval(() => {
+          if (typeof grecaptcha !== "undefined") {
+            clearInterval(checkRecaptcha);
+            resolve();
+          }
+        }, 100);
+      });
+    }
+
+    // Load Google Recaptcha in the background of the page
+    grecaptcha.enterprise.ready(async () => {
+      const token = await grecaptcha.enterprise.execute(sitekey, {
+        action: "homepage",
+      });
+
+      console.log("token", token);
+      // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
+      // reCAPTCHA Enterprise to the end user's browser.
+      // This token must be validated by creating an assessment.
+      // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
+    });
+  };
+
+  const loadRecaptcha = async () => {
+    await new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/enterprise.js?render=${sitekey}`;
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      document.head.appendChild(script);
+    });
+
+    // Call the initRecaptcha function to execute your reCAPTCHA logic
+    await initRecaptcha();
+  };
+
+  const handleToken = (recaptchaToken) => {
+    console.log("recaptchaToken", recaptchaToken);
+    token = recaptchaToken;
+    reportNewIssueStep5 = false;
+    postIssue();
+    currentStep = 6;
+    reportNewIssueStep6 = true;
+  };
+
   onMount(async () => {
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -1044,6 +1099,8 @@
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
+
+    loadRecaptcha();
   });
 </script>
 
@@ -1079,22 +1136,6 @@
           alt="we move logo"
           class="logo"
         />
-      {/if}
-
-      {#if openWeMove}
-        <div
-          class="we-move"
-          in:blur="{{
-            delay: startRendering,
-            duration: 1000,
-            quintOut,
-          }}"
-        >
-          {messages["home"]["title.one"]}
-          <span style="color: {primaryTwo}; margin-left: 0.4rem">
-            {messages["home"]["title.two"]}
-          </span>
-        </div>
       {/if}
     </div>
 
@@ -1822,6 +1863,7 @@
           {#if mediaUrl && !$issueDescription && !$issueSubmitterName && !$issueSubmitterContact}
             <div></div>
           {/if}
+          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
 
           <button
             class="button back-button"
@@ -1841,15 +1883,15 @@
             {messages["report.issue"]["button.back"]}
           </button>
           <button
-            class="button submit-button"
+            class="button submit-button g-recaptcha"
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
+            data-sitekey="6LfY3tMlAAAAAINZV-mXAu7anqwvWWNwNSVgpSuc"
+            data-callback="onSubmit"
+            data-action="submit"
             on:click="{() => {
-              reportNewIssueStep5 = false;
-              postIssue();
-              currentStep = 6;
-              reportNewIssueStep6 = true;
+              recaptcha.renderRecaptcha(handleToken);
             }}"
           >
             {messages["report.issue"]["button.submit"]}
@@ -1963,7 +2005,15 @@
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
               >
-              {selectedIssue.service_name} (working on this)
+              {#if selectedIssue?.selected_values}
+                {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
+                  <span style="margin-right:1rem"
+                    >{i + 1}-{issueDetail.name}</span
+                  >
+                {/each}
+              {:else}
+                -
+              {/if}
             </div>
 
             <div class="issue-detail-line">
