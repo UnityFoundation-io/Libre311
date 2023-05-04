@@ -21,8 +21,6 @@ public class ImageStorageController {
     @Post
     @ExecuteOn(TaskExecutors.IO)
     public String upload(@Valid @Body PhotoUploadDTO photoUploadDTO) {
-        System.out.println("photoUploadDTO.getImage() " + photoUploadDTO.getImage());
-        System.out.println("photoUploadDTO.getgRecaptchaResponse() " + photoUploadDTO.getgRecaptchaResponse());
         return storageService.upload(photoUploadDTO);
     }
 }
