@@ -299,7 +299,7 @@ public class ServiceRequestService {
         }).orElse(null);
     }
 
-    public StreamedFile  getAllServiceRequests(DownloadRequestsArgumentsDTO downloadRequestsArgumentsDTO) throws MalformedURLException {
+    public StreamedFile getAllServiceRequests(DownloadRequestsArgumentsDTO downloadRequestsArgumentsDTO) throws MalformedURLException {
 
         List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(downloadRequestsArgumentsDTO).stream()
                 .map(serviceRequest -> {

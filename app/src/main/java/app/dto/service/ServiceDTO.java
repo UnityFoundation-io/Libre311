@@ -20,6 +20,9 @@ public class ServiceDTO {
 
     private ServiceType type;
 
+    public ServiceDTO() {
+    }
+
     public ServiceDTO(Service service) {
         this.serviceCode = service.getServiceCode();
         this.serviceName = service.getServiceName();

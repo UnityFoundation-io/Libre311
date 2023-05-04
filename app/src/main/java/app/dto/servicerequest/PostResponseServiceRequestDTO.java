@@ -17,6 +17,9 @@ public class PostResponseServiceRequestDTO implements ServiceRequestResponseDTO 
     @JsonProperty("account_id")
     private String accountId;
 
+    public PostResponseServiceRequestDTO() {
+    }
+
     public PostResponseServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
     }
