@@ -14,7 +14,7 @@ public class Service {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @Column(unique = true)
     private String serviceCode;
@@ -92,11 +92,11 @@ public class Service {
         this.serviceDefinitionJson = serviceDefinitionJson;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PostResponseServiceRequestDTO implements ServiceRequestResponseDTO {
 
     @JsonProperty("service_request_id")
-    private String id;
+    private Long id;
 
     private String token;
 
@@ -21,11 +21,11 @@ public class PostResponseServiceRequestDTO implements ServiceRequestResponseDTO 
         this.id = serviceRequest.getId();
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

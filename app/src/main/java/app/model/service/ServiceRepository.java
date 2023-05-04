@@ -6,6 +6,6 @@ import io.micronaut.data.repository.PageableRepository;
 import java.util.Optional;
 
 @Repository
-public interface ServiceRepository extends PageableRepository<Service, String> {
+public interface ServiceRepository extends PageableRepository<Service, Long> {
     Optional<Service> findByServiceCode(String serviceCode);
 }

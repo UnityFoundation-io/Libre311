@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ServiceRequestRepository extends PageableRepository<ServiceRequest, String> {
-    Page<ServiceRequest> findByIdIn(List<String> serviceRequestIds, Pageable pageable);
+public interface ServiceRequestRepository extends PageableRepository<ServiceRequest, Long> {
+    Page<ServiceRequest> findByIdIn(List<Long> serviceRequestIds, Pageable pageable);
 
     Page<ServiceRequest> findByServiceServiceCode(String serviceCode, Pageable pageable);
     List<ServiceRequest> findByServiceServiceCode(String serviceCode);
