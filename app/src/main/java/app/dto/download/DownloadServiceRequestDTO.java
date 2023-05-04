@@ -11,7 +11,7 @@ import java.time.Instant;
 public class DownloadServiceRequestDTO {
 
     @CsvBindByName(column = "service_request_id")
-    private String id;
+    private Long id;
 
     @CsvDate(value = "yyyy-MM-dd'T'HH:mm'Z'")
     @CsvBindByName(column = "requested_datetime")
@@ -87,11 +87,11 @@ public class DownloadServiceRequestDTO {
         this.mediaUrl = serviceRequest.getMediaUrl();
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -18,7 +18,7 @@ public class ImageStorageController {
         this.storageService = storageService;
     }
 
-    @Post(produces = MediaType.APPLICATION_JSON, consumes = MediaType.TEXT_PLAIN)
+    @Post
     @ExecuteOn(TaskExecutors.IO)
     public String upload(@Valid @Body PhotoUploadDTO photoUploadDTO) {
         return storageService.upload(photoUploadDTO);

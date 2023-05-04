@@ -16,7 +16,7 @@ public class ReCaptchaService {
     protected String secret;
 
     public Boolean verifyReCaptcha(String response) {
-        Map map = client.verifyReCaptcha(new ReCaptchaPayload(this.secret, response));
+        Map map = client.verifyReCaptcha(this.secret, response);
         Boolean success = (Boolean) map.get("success");
         return success;
     }

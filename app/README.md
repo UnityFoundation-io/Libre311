@@ -1,14 +1,33 @@
-## Micronaut 3.8.6 Documentation
+### The Database
 
-- [User Guide](https://docs.micronaut.io/3.8.6/guide/index.html)
-- [API Reference](https://docs.micronaut.io/3.8.6/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/3.8.6/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
----
+Currently, the DDS Permissions Manager supports the following Databases:
 
-- [Shadow Gradle Plugin](https://plugins.gradle.org/plugin/com.github.johnrengelman.shadow)
-## Feature http-client documentation
+| Database     | Versions     | Driver                   | Reference                                                                                                                 |
+|--------------|--------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| MySQL Server | 8.0 and 5.7  | com.mysql.cj.jdbc.Driver | [link](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-versions.html)                                            |
+| PostgreSQL   | 8.2 or newer | org.postgresql.Driver    | [link](https://jdbc.postgresql.org/documentation/#:~:text=The%20current%20version%20of%20the,(JDBC%204.2)%20and%20above.) |
 
-- [Micronaut HTTP Client documentation](https://docs.micronaut.io/latest/guide/index.html#httpClient)
+To connect to a database, the following environment variables must be set for the Web API:
+
+* WEMOVE_JDBC_URL - The JDBC URL of the database
+* WEMOVE_JDBC_DRIVER - The driver to use. See Driver column for values.
+* WEMOVE_JDBC_USER - The database user name.
+* WEMOVE_JDBC_PASSWORD - The database user password.
+* WEMOVE_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
+
+The following describes the options for WEMOVE_AUTO_SCHEMA_GEN environment variable in detail:
+
+* *none** - No action will be performed.
+* *create-only** - Database creation will be generated.
+* *drop** - Database dropping will be generated.
+* *create** - Database dropping will be generated followed by database creation.
+* *create-drop** - Drop the schema and recreate it on SessionFactory startup. Additionally, drop the schema on SessionFactory shutdown.
+* *validate** - Validate the database schema.
+* *update** - Update the database schema.
+
+The WEMOVE_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
+Examples include `mysql:mysql-connector-java:8.0.31` and `org.postgresql:postgresql:42.4.2`.
+Multiple drivers can be specified.
+For example, `mysql:mysql-connector-java:8.0.31,com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2`.
 
 
