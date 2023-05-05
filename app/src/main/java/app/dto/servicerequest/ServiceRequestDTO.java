@@ -18,7 +18,7 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("service_request_id")
     private Long id;
 
-    private String status;
+    private ServiceRequestStatus status;
 
     @JsonProperty("status_notes")
     private String statusNotes;
@@ -71,9 +71,12 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("selected_values")
     private List<ServiceDefinitionAttribute> selectedValues;
 
+    public ServiceRequestDTO() {
+    }
+
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
-        this.status = serviceRequest.getStatus().toString();
+        this.status = serviceRequest.getStatus();
         this.statusNotes = serviceRequest.getStatusNotes();
         this.serviceName = serviceRequest.getService().getServiceName();
         this.serviceCode = serviceRequest.getService().getServiceCode();
@@ -99,12 +102,12 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         this.id = id;
     }
 
-    public String getStatus() {
+    public ServiceRequestStatus getStatus() {
         return status;
     }
 
     public void setStatus(ServiceRequestStatus status) {
-        this.status = status.toString();
+        this.status = status;
     }
 
     public String getStatusNotes() {
