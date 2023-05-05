@@ -75,8 +75,6 @@
   const waitTime = 1000;
 
   // Page Height
-  let orientation = "unknown";
-  let phone = "";
   let pageHeight = 1650;
 
   itemsPerPage.set(10);
@@ -87,7 +85,7 @@
 
   let openLogo = false,
     fadeInBackground = false,
-    openWeMove = false,
+    // openWeMove = false,
     reduceBackGroundOpacity = false,
     reportNewIssue = false,
     reportNewIssueStep2 = false,
@@ -165,21 +163,6 @@
     messageRejectedTwo = "",
     mediaUrl;
 
-  const writeInfo = (innerWidth, innerHeight) => {
-    orientation =
-      innerWidth > innerHeight
-        ? "Landscape " +
-          innerWidth.toString() +
-          "px " +
-          innerHeight.toString() +
-          "px"
-        : "Portrait " +
-          innerWidth.toString() +
-          "px " +
-          innerHeight.toString() +
-          "px";
-  };
-
   const getOrientation = () => {
     let previousState;
     scrollToTop();
@@ -187,8 +170,8 @@
     if (reportNewIssue) previousState = "reportNewIssue";
     if (findReportedIssue) previousState = "findReportedIssue";
 
-    const { innerWidth, innerHeight } = window;
-    orientation = innerWidth > innerHeight ? "Landscape" : "Portrait";
+    // const { innerWidth, innerHeight } = window;
+    // orientation = innerWidth > innerHeight ? "Landscape" : "Portrait";
 
     if (reportNewIssue) reportNewIssue = false;
     if (findReportedIssue) findReportedIssue = false;
@@ -200,8 +183,6 @@
         adjustFooter();
       }, 50);
     }, 400);
-
-    writeInfo(innerWidth, innerHeight);
 
     if (previousState === "reportNewIssue") {
       setTimeout(() => {
@@ -251,6 +232,7 @@
         resetState();
         reportNewIssueStep6 = false;
         backgroundSelector.style.height = $footerDivHeight + "px";
+        clearLocalStorage();
       }, 3000);
 
       setTimeout(() => (showFooter = true), 4000);
@@ -258,6 +240,17 @@
   }
 
   let visibleDetails = new Set();
+
+  const clearLocalStorage = () => {
+    localStorage.removeItem("issueAddress");
+    localStorage.removeItem("issueTime");
+    localStorage.removeItem("issueType");
+    localStorage.removeItem("issueDetail");
+    localStorage.removeItem("issueDescription");
+    localStorage.removeItem("mediaUrl");
+    localStorage.removeItem("issueSubmitterName");
+    localStorage.removeItem("issueSubmitterContact");
+  };
 
   const toggleDetails = (service_request_id) => {
     if (visibleDetails.has(service_request_id)) {
@@ -273,8 +266,6 @@
   };
 
   const applyFontStretch = () => {
-    console.log("primary font not available");
-
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -287,7 +278,6 @@
   };
 
   const restoreFontStretch = () => {
-    console.log("primary font available");
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -305,9 +295,11 @@
     messageRejectedTwo = "";
   };
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     clearUploadMessages();
     selectedFile = event.target.files[0];
+    const base64Image = await readFileAsDataURL(selectedFile);
+    localStorage.setItem("mediaUrl", base64Image);
   };
 
   const handleSubmit = async (recaptchaToken) => {
@@ -979,8 +971,6 @@
       const token = await grecaptcha.enterprise.execute(sitekey, {
         action: "homepage",
       });
-
-      console.log("token", token);
     });
   };
 
@@ -998,12 +988,20 @@
   };
 
   const handleToken = (recaptchaToken) => {
-    console.log("recaptchaToken", recaptchaToken);
     token = recaptchaToken;
     reportNewIssueStep5 = false;
     postIssue();
     currentStep = 6;
     reportNewIssueStep6 = true;
+  };
+
+  const readFileAsDataURL = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => resolve(event.target.result);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
   };
 
   onMount(async () => {
@@ -1026,7 +1024,7 @@
     // Trigger the Svelte Transitions
     fadeInBackground = true;
     openLogo = true;
-    openWeMove = true;
+    // openWeMove = true;
 
     loader.load().then(async (google) => {
       map = new google.maps.Map(document.getElementById("map"), {
@@ -1544,10 +1542,21 @@
             class="button"
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
-              $issueDetail?.length < 1}"
-            disabled="{$issueType === null || $issueDetail?.length < 1}"
+              ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
+            disabled="{$issueType === null ||
+              ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
+              localStorage.setItem('issueTime', $issueTime);
+              localStorage.setItem('issueType', $issueType.name);
+              if ($issueDetail)
+                localStorage.setItem(
+                  'issueDetail',
+                  JSON.stringify($issueDetail)
+                );
+              if ($issueDescription)
+                localStorage.setItem('issueDescription', $issueDescription);
+
               if (
                 ($issueType.name === 'Other' ||
                   $issueDetail.find(
@@ -1815,6 +1824,14 @@
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
             on:click="{() => {
+              if ($issueSubmitterName)
+                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+              if ($issueSubmitterContact)
+                localStorage.setItem(
+                  'issueSubmitterContact',
+                  $issueSubmitterContact
+                );
+
               if ($issueSubmitterName?.length < minSubmitterNameLength) {
                 invalidSubmitterName.visible = true;
                 return;
@@ -2019,6 +2036,8 @@
                 disabled="{!$issueAddress}"
                 style="margin-bottom: 0.5rem"
                 on:click="{() => {
+                  localStorage.setItem('issueAddress', $issueAddress); // for offline mode
+
                   reportNewIssueStep2 = true;
                   currentStep = 2;
                   reportNewIssue = false;
