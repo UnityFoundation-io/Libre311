@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
   import axios from "axios";
-  import logo from "$lib/logo2.png";
+  import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
