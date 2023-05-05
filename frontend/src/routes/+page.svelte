@@ -1544,8 +1544,8 @@
             class="button"
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
-              $issueDetail === null}"
-            disabled="{$issueType === null || $issueDetail === null}"
+              $issueDetail?.length < 1}"
+            disabled="{$issueType === null || $issueDetail?.length < 1}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
               if (
