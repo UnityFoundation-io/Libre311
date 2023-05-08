@@ -253,6 +253,7 @@
   };
 
   const toggleDetails = (service_request_id) => {
+    console.log("visibleDetails", visibleDetails);
     if (visibleDetails.has(service_request_id)) {
       visibleDetails.delete(service_request_id);
 
@@ -260,6 +261,7 @@
         calculateBoundsAroundMarkers();
       }, 100);
     } else {
+      visibleDetails.clear();
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
@@ -1387,9 +1389,9 @@
             class="describe-issue"
             style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); font-size: 1.3rem"
           >
-            <span class="step-two-feature-type-label">
+            <div class="step-two-feature-type-label">
               {messages["report.issue"]["label.feature.type"]}
-            </span>
+            </div>
           </div>
           <div class="step-two-select-div">
             <select
