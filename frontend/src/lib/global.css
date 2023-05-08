@@ -1035,13 +1035,13 @@ td {
   }
 
   .step-two-feature-type-label {
-    font-size: 0.8rem;
+    font-size: 1rem;
     letter-spacing: -0.03rem;
     margin-left: 1rem;
   }
 
   .step-two-feature-type-helper {
-    font-size: 0.8rem;
+    font-size: 1rem;
     letter-spacing: -0.03rem;
     margin-left: 0;
     margin-right: 0.5rem;
@@ -1485,13 +1485,13 @@ td {
   }
 
   .step-two-feature-type-label {
-    font-size: 0.97rem;
+    font-size: 1.1rem;
     letter-spacing: -0.03rem;
     margin-left: 1.5rem;
   }
 
   .step-two-feature-type-helper {
-    font-size: 0.97rem;
+    font-size: 1.1rem;
     letter-spacing: -0.03rem;
     margin-left: 0;
   }
@@ -2066,7 +2066,7 @@ td {
     }
 
     .step-two-feature-type-label {
-      font-size: 0.97rem;
+      font-size: 1.1rem;
       letter-spacing: -0.03rem;
       margin-left: 0.5rem;
     }
@@ -2077,7 +2077,7 @@ td {
 
     .step-two-feature-type-helper {
       margin-left: 0.6rem;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
     }
   
     .step-two-select-detail {
