@@ -72,6 +72,7 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
+  const waitTime = 1000;
 
   // Page Height
   let pageHeight = 1650;

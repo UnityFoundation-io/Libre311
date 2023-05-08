@@ -636,6 +636,7 @@ td {
   margin-left: 3rem;
   margin-top: 1rem;
   margin-bottom: 1rem;
+  font-size: 1.1rem;
 }
 
 .step-two-word-count-error {
@@ -1053,6 +1054,7 @@ td {
 
   .step-two-select-detail {
     margin-left: 0;
+    font-size: 0.8rem;
   }
 
   .step-two-select {
@@ -1503,6 +1505,7 @@ td {
 
   .step-two-select-detail {
     margin-left: 0;
+    font-size: 0.8rem;
   }
 
   .step-two-select {
@@ -2084,6 +2087,7 @@ td {
   
     .step-two-select-detail {
       margin-left: 0.5rem;
+      font-size: 0.75rem;
     }
 
     .step-two-word-count {
