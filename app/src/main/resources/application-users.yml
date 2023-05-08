@@ -1,0 +1,14 @@
+---
+wemove:
+  bootstrap:
+    data:
+      enabled: true
+      users:
+        - jeff@unityfoundation.io
+        - kevin@unityfoundation.io
+        - wilsonj@unityfoundation.io
+        - belloned@objectcomputing.com
+        - montesm@objectcomputing.com
+        - unity-admin-test@unityfoundation.io
+        - lawrence@lomocomo.org
+        - rikki@lomocomo.org

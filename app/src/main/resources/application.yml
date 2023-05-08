@@ -9,6 +9,28 @@ micronaut:
       default:
         bucket: a69c003f-5281-4376-9875-ebac846ae7e9-wemove
   security:
+    authentication: cookie
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: WeMoveChangeThisSecretForANewOne
+    redirect:
+      login-success: http://localhost:3000
+      login-failure: http://localhost:8080/failed-auth
+      logout: http://localhost:8080
+    oauth2:
+      login-uri: "/api/oauth/login{/provider}"
+      callback-uri: "/api/oauth/callback{/provider}"
+      clients:
+        google:
+          client-id: "867150944261-toegpflg674bdoikca22l6bm5aaqm5kj.apps.googleusercontent.com"
+          client-secret: "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"
+          openid:
+            authorization:
+              prompt: select_account
+            issuer: "https://accounts.google.com"
     endpoints:
       introspection:
         path: /api/token_info

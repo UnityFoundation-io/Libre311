@@ -7,7 +7,9 @@ import app.dto.servicerequest.ServiceRequestDTO;
 import app.model.service.ServiceRepository;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.util.DbCleanup;
+import app.util.MockAuthenticationFetcher;
 import app.util.MockReCaptchaService;
+import app.util.MockSecurityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpRequest;
@@ -30,7 +32,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static io.micronaut.http.HttpStatus.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest(environments={"app-api-test-data"})
@@ -50,11 +52,21 @@ public class RootControllerTest {
     ServiceRequestRepository serviceRequestRepository;
 
     @Inject
+    MockSecurityService mockSecurityService;
+
+    @Inject
+    MockAuthenticationFetcher mockAuthenticationFetcher;
+
+    @Inject
     DbCleanup dbCleanup;
 
     @BeforeEach
     void setup() {
         dbCleanup.cleanup();
+    }
+
+    void login() {
+        mockAuthenticationFetcher.setAuthentication(mockSecurityService.getAuthentication().get());
     }
 
     // create
@@ -186,6 +198,14 @@ public class RootControllerTest {
 
         // create service requests
         HttpRequest<?> request = HttpRequest.GET("/requests/download");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, byte[].class);
+        });
+        assertEquals(UNAUTHORIZED, exception.getStatus());
+
+        login();
+
         response = client.toBlocking().exchange(request, byte[].class);
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<byte[]> body = response.getBody(byte[].class);
