@@ -72,7 +72,6 @@
   const accentOne = colors["accent.one"];
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
-  const waitTime = 1000;
 
   // Page Height
   let pageHeight = 1650;
@@ -85,7 +84,6 @@
 
   let openLogo = false,
     fadeInBackground = false,
-    // openWeMove = false,
     reduceBackGroundOpacity = false,
     reportNewIssue = false,
     reportNewIssueStep2 = false,
@@ -169,9 +167,6 @@
 
     if (reportNewIssue) previousState = "reportNewIssue";
     if (findReportedIssue) previousState = "findReportedIssue";
-
-    // const { innerWidth, innerHeight } = window;
-    // orientation = innerWidth > innerHeight ? "Landscape" : "Portrait";
 
     if (reportNewIssue) reportNewIssue = false;
     if (findReportedIssue) findReportedIssue = false;
@@ -1026,7 +1021,6 @@
     // Trigger the Svelte Transitions
     fadeInBackground = true;
     openLogo = true;
-    // openWeMove = true;
 
     loader.load().then(async (google) => {
       map = new google.maps.Map(document.getElementById("map"), {
