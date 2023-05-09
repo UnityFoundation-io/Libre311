@@ -18,6 +18,7 @@
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
   import issueAddress from "../stores/issueAddress";
+  import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
   import issueTime from "../stores/issueTime";
   import issueType from "../stores/issueType";
@@ -40,6 +41,7 @@
   import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
+  import Recaptcha from "$lib/Recaptcha.svelte";
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
@@ -47,6 +49,7 @@
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const sitekey = import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY;
 
   const hexToRGBA = (hex, alpha = 1) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -72,8 +75,6 @@
   const waitTime = 1000;
 
   // Page Height
-  let orientation = "unknown";
-  let phone = "";
   let pageHeight = 1650;
 
   itemsPerPage.set(10);
@@ -84,7 +85,6 @@
 
   let openLogo = false,
     fadeInBackground = false,
-    openWeMove = false,
     reduceBackGroundOpacity = false,
     reportNewIssue = false,
     reportNewIssueStep2 = false,
@@ -99,6 +99,7 @@
     showModal = false,
     showFooter = true,
     showTable = true,
+    seeMore = false,
     heatmapVisible = true,
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
@@ -124,6 +125,8 @@
     selectedIssue,
     heatmapControlIndex,
     timer,
+    recaptcha,
+    token,
     backgroundSelector,
     inputIssueAddressSelector,
     issueDetailSelector,
@@ -159,30 +162,12 @@
     messageRejectedTwo = "",
     mediaUrl;
 
-  const writeInfo = (innerWidth, innerHeight) => {
-    orientation =
-      innerWidth > innerHeight
-        ? "Landscape " +
-          innerWidth.toString() +
-          "px " +
-          innerHeight.toString() +
-          "px"
-        : "Portrait " +
-          innerWidth.toString() +
-          "px " +
-          innerHeight.toString() +
-          "px";
-  };
-
   const getOrientation = () => {
     let previousState;
     scrollToTop();
 
     if (reportNewIssue) previousState = "reportNewIssue";
     if (findReportedIssue) previousState = "findReportedIssue";
-
-    const { innerWidth, innerHeight } = window;
-    orientation = innerWidth > innerHeight ? "Landscape" : "Portrait";
 
     if (reportNewIssue) reportNewIssue = false;
     if (findReportedIssue) findReportedIssue = false;
@@ -194,8 +179,6 @@
         adjustFooter();
       }, 50);
     }, 400);
-
-    writeInfo(innerWidth, innerHeight);
 
     if (previousState === "reportNewIssue") {
       setTimeout(() => {
@@ -245,6 +228,7 @@
         resetState();
         reportNewIssueStep6 = false;
         backgroundSelector.style.height = $footerDivHeight + "px";
+        clearLocalStorage();
       }, 3000);
 
       setTimeout(() => (showFooter = true), 4000);
@@ -253,7 +237,19 @@
 
   let visibleDetails = new Set();
 
+  const clearLocalStorage = () => {
+    localStorage.removeItem("issueAddress");
+    localStorage.removeItem("issueTime");
+    localStorage.removeItem("issueType");
+    localStorage.removeItem("issueDetail");
+    localStorage.removeItem("issueDescription");
+    localStorage.removeItem("mediaUrl");
+    localStorage.removeItem("issueSubmitterName");
+    localStorage.removeItem("issueSubmitterContact");
+  };
+
   const toggleDetails = (service_request_id) => {
+    console.log("visibleDetails", visibleDetails);
     if (visibleDetails.has(service_request_id)) {
       visibleDetails.delete(service_request_id);
 
@@ -261,14 +257,13 @@
         calculateBoundsAroundMarkers();
       }, 100);
     } else {
+      visibleDetails.clear();
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
   };
 
   const applyFontStretch = () => {
-    console.log("primary font not available");
-
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -281,7 +276,6 @@
   };
 
   const restoreFontStretch = () => {
-    console.log("primary font available");
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -299,12 +293,14 @@
     messageRejectedTwo = "";
   };
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     clearUploadMessages();
     selectedFile = event.target.files[0];
+    const base64Image = await readFileAsDataURL(selectedFile);
+    localStorage.setItem("mediaUrl", base64Image);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (recaptchaToken) => {
     // Convert the selected image file to a data URL
     const imageUrl = await new Promise((resolve) => {
       const reader = new FileReader();
@@ -327,10 +323,10 @@
 
       // Save the image to the Server Locally
       // this worked for me in testing - max
-      const res = await axios.post("/image", imageUrl, {
-        headers: {
-          "Content-Type": "text/plain",
-        },
+
+      const res = await axios.post("/image", {
+        g_recaptcha_response: recaptchaToken,
+        image: imageUrl,
       });
 
       if (res?.data) mediaUrl = res.data;
@@ -502,6 +498,8 @@
       attributes += "&email=" + $issueSubmitterContact;
 
     if (mediaUrl) attributes += "&media_url=" + mediaUrl;
+
+    attributes += "&g_recaptcha_response=" + token;
 
     const data = new URLSearchParams(attributes);
 
@@ -865,6 +863,32 @@
     return controlButton;
   };
 
+  const adjustSeeMore = () => {
+    if (seeMore) {
+      const seeMoreDiv = document.getElementById("see-more");
+      seeMoreHeight.set(seeMoreDiv.offsetHeight + 10);
+      backgroundSelector.style.height =
+        Number(
+          backgroundSelector.style.height.slice(
+            0,
+            backgroundSelector.style.height.length - 2
+          )
+        ) +
+        $seeMoreHeight +
+        "px";
+    } else {
+      backgroundSelector.style.height =
+        Number(
+          backgroundSelector.style.height.slice(
+            0,
+            backgroundSelector.style.height.length - 2
+          )
+        ) -
+        $seeMoreHeight +
+        "px";
+    }
+  };
+
   const adjustFooter = () => {
     if (!$footerDivHeight && $footerSelector) {
       footerDivHeight.set(
@@ -885,7 +909,7 @@
   };
 
   const adjustMap = () => {
-    const addExtra = 190;
+    const addExtra = 210;
     const mapSelector = document.getElementById("map");
     const mapHeight = mapSelector.offsetTop + mapSelector.offsetHeight;
     backgroundSelector.style.height = mapHeight + addExtra + "px";
@@ -928,6 +952,56 @@
     }
   };
 
+  const initRecaptcha = async () => {
+    if (typeof grecaptcha === "undefined") {
+      await new Promise((resolve) => {
+        const checkRecaptcha = setInterval(() => {
+          if (typeof grecaptcha !== "undefined") {
+            clearInterval(checkRecaptcha);
+            resolve();
+          }
+        }, 100);
+      });
+    }
+
+    // Load Google Recaptcha in the background of the page
+    grecaptcha.enterprise.ready(async () => {
+      const token = await grecaptcha.enterprise.execute(sitekey, {
+        action: "homepage",
+      });
+    });
+  };
+
+  const loadRecaptcha = async () => {
+    await new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/enterprise.js?render=${sitekey}`;
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      document.head.appendChild(script);
+    });
+
+    await initRecaptcha();
+  };
+
+  const handleToken = (recaptchaToken) => {
+    token = recaptchaToken;
+    reportNewIssueStep5 = false;
+    postIssue();
+    currentStep = 6;
+    reportNewIssueStep6 = true;
+  };
+
+  const readFileAsDataURL = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => resolve(event.target.result);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  };
+
   onMount(async () => {
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -948,7 +1022,6 @@
     // Trigger the Svelte Transitions
     fadeInBackground = true;
     openLogo = true;
-    openWeMove = true;
 
     loader.load().then(async (google) => {
       map = new google.maps.Map(document.getElementById("map"), {
@@ -1044,6 +1117,8 @@
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
+
+    loadRecaptcha();
   });
 </script>
 
@@ -1080,22 +1155,6 @@
           class="logo"
         />
       {/if}
-
-      {#if openWeMove}
-        <div
-          class="we-move"
-          in:blur="{{
-            delay: startRendering,
-            duration: 1000,
-            quintOut,
-          }}"
-        >
-          {messages["home"]["title.one"]}
-          <span style="color: {primaryTwo}; margin-left: 0.4rem">
-            {messages["home"]["title.two"]}
-          </span>
-        </div>
-      {/if}
     </div>
 
     <div
@@ -1104,8 +1163,37 @@
       out:fade="{{ duration: 300, quintOut }}"
     >
       <div class="slogan-title">{messages["home"]["tagline.one"]}</div>
+
       <div class="slogan-text">
         {messages["home"]["tagline.two"]}
+
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <span
+          class="see-more"
+          on:click="{() => {
+            seeMore = !seeMore;
+            setTimeout(() => {
+              adjustSeeMore();
+            }, 50);
+          }}"
+        >
+          {#if seeMore}
+            -
+          {:else}
+            +
+          {/if}
+        </span>
+
+        {#if seeMore}
+          <div id="see-more">
+            <div class="see-more-title">
+              {messages["home"]["see.more.title"]}
+            </div>
+            <div class="see-more-description">
+              {messages["home"]["see.more.description"]}
+            </div>
+          </div>
+        {/if}
       </div>
 
       <div class="action-buttons">
@@ -1137,7 +1225,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 10);
+                  }, 250);
                 }, 100);
 
                 if (!filteredIssuesData) await getIssues();
@@ -1211,7 +1299,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 10);
+                  }, 250);
                 }, 100);
 
                 reduceBackGroundOpacity = false;
@@ -1221,7 +1309,7 @@
                 resetState();
 
                 backgroundSelector.style.height = $footerDivHeight + 'px';
-                setTimeout(() => (showFooter = true), 400);
+                setTimeout(() => (showFooter = true), 700);
               }
               if (!reportNewIssue && currentStep === 2) {
                 reportNewIssueStep2 = false;
@@ -1296,9 +1384,9 @@
             class="describe-issue"
             style="text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8); font-size: 1.3rem"
           >
-            <span class="step-two-feature-type-label">
+            <div class="step-two-feature-type-label">
               {messages["report.issue"]["label.feature.type"]}
-            </span>
+            </div>
           </div>
           <div class="step-two-select-div">
             <select
@@ -1451,10 +1539,21 @@
             class="button"
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
-              $issueDetail === null}"
-            disabled="{$issueType === null || $issueDetail === null}"
+              ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
+            disabled="{$issueType === null ||
+              ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
+              localStorage.setItem('issueTime', $issueTime);
+              localStorage.setItem('issueType', $issueType.name);
+              if ($issueDetail)
+                localStorage.setItem(
+                  'issueDetail',
+                  JSON.stringify($issueDetail)
+                );
+              if ($issueDescription)
+                localStorage.setItem('issueDescription', $issueDescription);
+
               if (
                 ($issueType.name === 'Other' ||
                   $issueDetail.find(
@@ -1505,7 +1604,15 @@
           </span>
 
           <div style="margin-top: 1rem">
-            <form on:submit|preventDefault="{handleSubmit}">
+            <form
+              data-sitekey="{sitekey}"
+              data-callback="onSubmit"
+              data-action="submit"
+              class="g-recaptcha"
+              on:submit|preventDefault="{() => {
+                recaptcha.renderRecaptcha(handleSubmit);
+              }}"
+            >
               <div style="display: flex">
                 <label
                   for="image-uploads"
@@ -1540,6 +1647,8 @@
                   style="display: none"
                   on:change="{handleFileChange}"
                 />
+
+                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
 
                 <button
                   type="submit"
@@ -1712,6 +1821,14 @@
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
             on:click="{() => {
+              if ($issueSubmitterName)
+                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+              if ($issueSubmitterContact)
+                localStorage.setItem(
+                  'issueSubmitterContact',
+                  $issueSubmitterContact
+                );
+
               if ($issueSubmitterName?.length < minSubmitterNameLength) {
                 invalidSubmitterName.visible = true;
                 return;
@@ -1822,6 +1939,7 @@
           {#if mediaUrl && !$issueDescription && !$issueSubmitterName && !$issueSubmitterContact}
             <div></div>
           {/if}
+          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
 
           <button
             class="button back-button"
@@ -1841,15 +1959,15 @@
             {messages["report.issue"]["button.back"]}
           </button>
           <button
-            class="button submit-button"
+            class="button submit-button g-recaptcha"
             class:next-button="{$issueType && $issueDetail}"
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
+            data-sitekey="{sitekey}"
+            data-callback="handleToken"
+            data-action="submit"
             on:click="{() => {
-              reportNewIssueStep5 = false;
-              postIssue();
-              currentStep = 6;
-              reportNewIssueStep6 = true;
+              recaptcha.renderRecaptcha(handleToken);
             }}"
           >
             {messages["report.issue"]["button.submit"]}
@@ -1915,6 +2033,8 @@
                 disabled="{!$issueAddress}"
                 style="margin-bottom: 0.5rem"
                 on:click="{() => {
+                  localStorage.setItem('issueAddress', $issueAddress); // for offline mode
+
                   reportNewIssueStep2 = true;
                   currentStep = 2;
                   reportNewIssue = false;
@@ -1963,7 +2083,15 @@
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
               >
-              {selectedIssue.service_name} (working on this)
+              {#if selectedIssue?.selected_values}
+                {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
+                  <span style="margin-right:1rem"
+                    >{i + 1}-{issueDetail.name}</span
+                  >
+                {/each}
+              {:else}
+                -
+              {/if}
             </div>
 
             <div class="issue-detail-line">

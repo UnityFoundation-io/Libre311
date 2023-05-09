@@ -1,5 +1,6 @@
 package app.dto.servicerequest;
 
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,15 +9,16 @@ import io.micronaut.core.annotation.Introspected;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Introspected
 public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     @JsonProperty("service_request_id")
-    private String id;
+    private Long id;
 
-    private String status;
+    private ServiceRequestStatus status;
 
     @JsonProperty("status_notes")
     private String statusNotes;
@@ -66,9 +68,15 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("media_url")
     private String mediaUrl;
 
+    @JsonProperty("selected_values")
+    private List<ServiceDefinitionAttribute> selectedValues;
+
+    public ServiceRequestDTO() {
+    }
+
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
-        this.status = serviceRequest.getStatus().toString();
+        this.status = serviceRequest.getStatus();
         this.statusNotes = serviceRequest.getStatusNotes();
         this.serviceName = serviceRequest.getService().getServiceName();
         this.serviceCode = serviceRequest.getService().getServiceCode();
@@ -86,20 +94,20 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         this.mediaUrl = serviceRequest.getMediaUrl();
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getStatus() {
+    public ServiceRequestStatus getStatus() {
         return status;
     }
 
     public void setStatus(ServiceRequestStatus status) {
-        this.status = status.toString();
+        this.status = status;
     }
 
     public String getStatusNotes() {
@@ -227,5 +235,13 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         Map<String, Object> m = new HashMap<>();
         m.put("service_code", getServiceCode());
         return m;
+    }
+
+    public List<ServiceDefinitionAttribute> getSelectedValues() {
+        return selectedValues;
+    }
+
+    public void setSelectedValues(List<ServiceDefinitionAttribute> selectedValues) {
+        this.selectedValues = selectedValues;
     }
 }

@@ -13,6 +13,7 @@ repositories {
 dependencies {
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
     annotationProcessor("io.micronaut:micronaut-http-validation")
+    annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
@@ -23,8 +24,18 @@ dependencies {
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut.sql:micronaut-jdbc-tomcat")
     implementation("io.micronaut.objectstorage:micronaut-object-storage-gcp")
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.security:micronaut-security-oauth2")
     implementation('com.opencsv:opencsv:5.7.1')
-    runtimeOnly("com.h2database:h2")
+
+    String databaseSelection = System.getenv("WEMOVE_DATABASE_DEPENDENCY")
+    if (databaseSelection != null) {
+        databaseSelection.split(',').each {part ->
+            runtimeOnly(part)
+        }
+    } else {
+        runtimeOnly("com.h2database:h2")
+    }
 }
 
 

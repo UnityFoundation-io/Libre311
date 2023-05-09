@@ -20,6 +20,8 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 
 import javax.validation.Valid;
 import java.net.MalformedURLException;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller("/api")
+@Secured(SecurityRule.IS_ANONYMOUS)
 public class RootController {
 
     private final ServiceService serviceService;
@@ -150,14 +153,14 @@ public class RootController {
     @Get(uris = {"/requests/{serviceRequestId}", "/requests/{serviceRequestId}.json"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public List<ServiceRequestDTO> getServiceRequestJson(String serviceRequestId) {
+    public List<ServiceRequestDTO> getServiceRequestJson(Long serviceRequestId) {
         return List.of(serviceRequestService.getServiceRequest(serviceRequestId));
     }
 
     @Get("/requests/{serviceRequestId}.xml")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceRequestXml(String serviceRequestId) throws JsonProcessingException {
+    public String getServiceRequestXml(Long serviceRequestId) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
         ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.getServiceRequest(serviceRequestId)));
@@ -166,6 +169,7 @@ public class RootController {
     }
 
     @Get(value =  "/requests/download")
+    @Secured(SecurityRule.IS_AUTHENTICATED)
     @ExecuteOn(TaskExecutors.IO)
     public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO) throws MalformedURLException {
         return serviceRequestService.getAllServiceRequests(requestDTO);
