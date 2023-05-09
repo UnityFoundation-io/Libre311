@@ -7,6 +7,7 @@ import app.model.service.servicedefinition.*;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
+import app.model.user.User;
 import app.model.user.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,15 +32,25 @@ public class Bootstrap {
     private Map<String, Object> data;
 
     private final ServiceRepository serviceRepository;
+    private final ServiceRequestRepository serviceRequestRepository;
+    private final UserRepository userRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, ServiceRequestRepository serviceRequestRepository, UserRepository userRepository) {
         this.serviceRepository = serviceRepository;
+        this.serviceRequestRepository = serviceRequestRepository;
+        this.userRepository = userRepository;
     }
 
     @EventListener
     public void devData(ServerStartupEvent event) {
         if(data != null) {
+            if(data.containsKey("users")) {
+                ((List<String>) data.get("users")).stream().forEach(email -> {
+                    LOG.info(email + " is now an admin");
+                    userRepository.save(new User(email));
+                });
+            }
 
             if(data.containsKey("services")) {
                 ((List<Map<String, ?>>) data.get("services")).stream().forEach(svc -> {
