@@ -571,7 +571,7 @@
 
     setTimeout(async () => {
       await postIssue();
-    }, 5000);
+    }, 10000);
 
     console.log("issue posted");
   };
@@ -1377,7 +1377,27 @@
                 currentPositionMarker.setMap(map);
               } else {
                 const stepOneDiv = document.getElementById('stepOne');
-                if (stepOneDiv) stepOneDiv.style.height = '17.5rem';
+
+                if (
+                  window.innerWidth >= 320 &&
+                  window.innerWidth <= 374 &&
+                  screen.orientation.type.includes('portrait')
+                ) {
+                  if (stepOneDiv) stepOneDiv.style.height = '16rem';
+                } else if (
+                  window.innerWidth >= 596 &&
+                  window.innerWidth <= 814 &&
+                  screen.orientation.type.includes('portrait')
+                ) {
+                  if (stepOneDiv) stepOneDiv.style.height = '15.5rem';
+                } else if (
+                  window.innerWidth >= 375 &&
+                  screen.orientation.type.includes('portrait')
+                ) {
+                  if (stepOneDiv) stepOneDiv.style.height = '14.5rem';
+                } else {
+                  if (stepOneDiv) stepOneDiv.style.height = '18rem';
+                }
               }
 
               if (!reportNewIssue && !currentStep) {

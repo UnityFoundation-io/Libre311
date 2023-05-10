@@ -1019,6 +1019,10 @@ td {
     width: 100vw;
   }
 
+  .offline-address-input {
+    margin-left: 1rem;
+  }
+
   .step-one-issue-location-label {
     margin-top: -1rem;
     margin-left: 1rem;
@@ -1237,6 +1241,11 @@ td {
 
   .success-message {
     margin-top: 1rem;
+  }
+
+  .success-message-two-offline {
+    font-size: 0.9rem;
+    letter-spacing: -0.04rem;
   }
 
   .upload-image {
@@ -1498,6 +1507,11 @@ td {
     margin-right: 0;
   }
 
+  .offline-address-input {
+    margin-left: 1.5rem;
+    width: 85%;
+  }
+
   .step-two-label {
     margin-left: 1.5rem;
   }
@@ -1517,6 +1531,7 @@ td {
     font-size: 1.1rem;
     letter-spacing: -0.03rem;
     margin-left: 1.5rem;
+    margin-right: 0.5rem;
   }
 
   .step-two-feature-type-helper {
@@ -1688,9 +1703,15 @@ td {
     margin-top: 1rem;
   }
 
+  .success-message-two-offline {
+    font-size: 1.15rem;
+    letter-spacing: -0.07rem;
+  }
+
   .upload-image {
     margin-left: 0.5rem;
-    width: 17.5rem;
+    width: 13rem;
+    /* width: 17.5rem; */
     font-size: 0.8rem;
   }
 
@@ -1737,7 +1758,6 @@ td {
   .upload-message {
     font-size: 1rem;
     margin: 1rem 0.5rem 0 0.5rem;
-
   }
 
   #map {
@@ -1896,7 +1916,8 @@ td {
   }
 
   .upload-image {
-    width: 19.5rem;
+    width: 14rem;
+    /* width: 19.5rem; */
   }
 
   .td-description {
@@ -1926,6 +1947,10 @@ td {
     margin-left: 0.2rem;
   }
 
+  .success-message-two-offline {
+    font-size: 1.1rem;
+    letter-spacing: -0.04rem;
+  }
 }
 
 /*/////// iPhone 14 Pro Max Portrait ////////*/
@@ -1982,6 +2007,11 @@ td {
 
   .camera-icon {
     margin-left: 0.3rem;
+  }
+
+  .success-message-two-offline {
+    font-size: 1.2rem;
+    letter-spacing: -0.03rem;
   }
 }
 
@@ -2081,6 +2111,11 @@ td {
       margin-right: 0;
     }
 
+    .offline-address-input {
+      margin-left: 0.5rem;
+      width: 95%;
+    }
+
     .step-two-label {
       margin-left: 0.5rem;
     }
@@ -2108,6 +2143,7 @@ td {
 
     .step-two-feature-type-helper {
       margin-left: 0.6rem;
+      margin-right: 0.6rem;
       font-size: 1.1rem;
     }
   
@@ -2268,6 +2304,11 @@ td {
 
     .success-message {
       margin-top: 1rem;
+    }
+
+    .success-message-two-offline {
+      font-size: 1.2rem;
+      letter-spacing: -0.05rem;
     }
 
     .upload-image {
