@@ -12,6 +12,7 @@ import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
+import app.service.storage.StorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -25,6 +26,8 @@ import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -37,7 +40,7 @@ import java.util.stream.Stream;
 
 @Singleton
 public class ServiceRequestService {
-
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceRequestService.class);
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRepository serviceRepository;
     private final ReCaptchaService reCaptchaService;
@@ -50,12 +53,14 @@ public class ServiceRequestService {
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
         if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
+            LOG.error("ReCaptcha verification failed.");
             return null;
         }
 
         Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
 
         if (serviceByServiceCodeOptional.isEmpty()) {
+            LOG.error("Corresponding service not found.");
             return null; // todo return 'corresponding service not found
         }
 
@@ -66,6 +71,7 @@ public class ServiceRequestService {
         if (!latLongProvided &&
                 StringUtils.isEmpty(serviceRequestDTO.getAddressString()) &&
                 StringUtils.isEmpty(serviceRequestDTO.getAddressId())) {
+            LOG.error("Address or lat/long not provided.");
             return null; // todo throw exception
         }
 
@@ -76,15 +82,17 @@ public class ServiceRequestService {
             // get service definition
             String serviceDefinitionJson = service.getServiceDefinitionJson();
             if (serviceDefinitionJson == null || serviceDefinitionJson.isBlank()) {
-                // service definition does not exists despite service requiring it.
+                LOG.error("Service definition does not exists despite service requiring it.");
                 return null; // should not be in this state and admin needs to be aware.
             }
 
             requestAttributes = buildAttributesFromRequest(request, service);
             if (requestAttributes.isEmpty()) {
+                LOG.error("Submitted Service Request does not contain any attribute values.");
                 return null; // todo throw exception - must provide attributes
             }
             if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionJson, requestAttributes)) {
+                LOG.error("Submitted Service Request does not contain required attribute values.");
                 return null; // todo throw exception (validation)
             }
         }

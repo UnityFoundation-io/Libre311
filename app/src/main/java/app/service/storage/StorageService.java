@@ -29,6 +29,7 @@ public class StorageService {
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
         if (photoUploadDTO.getgRecaptchaResponse() == null  || !reCaptchaService.verifyReCaptcha(photoUploadDTO.getgRecaptchaResponse())) {
+            LOG.error("ReCaptcha verification failed.");
             return null;
         }
 
@@ -37,6 +38,7 @@ public class StorageService {
         MediaType mediaType = MediaType.of(dataUri.substring(dataUri.indexOf(":")+1, dataUri.indexOf(";")));
 
         if (mediaType != MediaType.IMAGE_JPEG_TYPE && mediaType != MediaType.IMAGE_PNG_TYPE) {
+            LOG.error("File must be jpeg or png.");
             return null;
         }
         String extension = mediaType.getExtension();
