@@ -345,6 +345,14 @@ body {
   width: 50%;
 }
 
+.offline-address-input {
+    margin-top: 0.6rem;
+    margin-left: 3rem;
+    padding-left: 0.5rem;
+    height: 2.18rem;
+    width: 85%;
+}
+
 .hidden {
   animation: fadeOut 0.4s forwards;
 }
@@ -398,7 +406,6 @@ textarea::placeholder {
   text-shadow: none;
   align-items: center;
   display: flex;
-  cursor: pointer;
   justify-content: space-between;
 }
 
@@ -580,6 +587,21 @@ td {
   margin-bottom: -1rem;
   margin-left: 3rem;
   margin-top: 2rem;
+  padding-right: 3rem;
+  width: 80%;
+}
+
+.step-one-invalid-offline-address {
+  visibility: hidden;
+  justify-content: right;
+  font-size: 0.85rem;
+  text-align: right;
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+  margin-right: 3.3rem;
+  color: var(--primary-color-two);
+  text-shadow: none;
+  position: relative;
 }
 
 .step-one-button-next {
@@ -869,6 +891,10 @@ td {
   font-size: 2rem;
   text-align: center;
   border-radius: 21px;
+}
+
+.success-message-two-offline {
+  font-size: 1.82rem;
 }
 
 .success-message {
