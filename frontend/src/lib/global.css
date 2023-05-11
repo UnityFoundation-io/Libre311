@@ -88,6 +88,10 @@ body {
     width: 100%;
   }
 
+.grecaptcha-badge {
+  z-index: -100;
+}
+
 .button {
   font-weight: 500;
   font-family: Gotham;
@@ -605,7 +609,7 @@ td {
   text-align: right;
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
-  margin-right: 1rem;
+  margin-right: 3rem;
   color: var(--primary-color-two);
   text-shadow: none;
   position: relative;
@@ -1055,6 +1059,10 @@ td {
 
   .step-one-button-next {
     margin-right: 0;
+  }
+
+  .step-one-invalid-offline-address {
+    margin-right: 1rem;
   }
 
   .step-two-label {

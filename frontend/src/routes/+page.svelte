@@ -141,7 +141,8 @@
     issueDetailSelectSelector,
     findIssuesButtonSelector,
     reportIssuesButtonSelector,
-    isOnline;
+    isOnline,
+    wasOnline;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -237,7 +238,7 @@
 
   let visibleDetails = new Set();
 
-  const clearLocalStorage = () => {
+  const clearLocalStorage = (bypassClearForm = false) => {
     localStorage.removeItem("completed");
     localStorage.removeItem("issueTypeId");
     localStorage.removeItem("issueAddress");
@@ -247,7 +248,7 @@
     localStorage.removeItem("issueDescription");
     localStorage.removeItem("issueSubmitterName");
     localStorage.removeItem("issueSubmitterContact");
-    clearForm();
+    if (!bypassClearForm) clearForm();
   };
 
   const toggleDetails = (service_request_id) => {
@@ -482,8 +483,8 @@
     let attributes = `?service_code=${
       $issueType.id
     }&address_string=${$issueAddress}&lat=${
-      navigator.onLine ? $issueAddressCoordinates.lat : ""
-    }&long=${navigator.onLine ? $issueAddressCoordinates.lng : ""}`;
+      isOnline ? $issueAddressCoordinates.lat : ""
+    }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
 
     $issueDetail.forEach((attr) => {
       attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.id;
@@ -522,7 +523,7 @@
       console.error(err);
     }
 
-    if (navigator.onLine) {
+    if (isOnline) {
       const marker = new google.maps.Marker({
         position: {
           lat: parseFloat($issueAddressCoordinates.lat),
@@ -1091,13 +1092,198 @@
     });
   };
 
+  const populateAddress = () => {
+    if ($issueAddress && offlineAddressInputSelector) {
+      offlineAddressInputSelector.value = $issueAddress;
+    }
+  };
+
+  const initGoogleMaps = async () => {
+    import("@googlemaps/js-api-loader").then((module) => {
+      const Loader = module.Loader;
+
+      const loader = new Loader({
+        apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
+        version: "weekly",
+        libraries: ["places", "visualization"],
+      });
+
+      loader.load().then(async (google) => {
+        map = new google.maps.Map(document.getElementById("map"), {
+          zoom: zoom,
+          center: { lat: 38.6740015313782, lng: -90.453269188364 },
+          mapTypeControl: false,
+        });
+
+        geocoder = new google.maps.Geocoder();
+
+        bounds = new google.maps.LatLngBounds();
+
+        inputIssueAddressSelector = document.getElementById("pac-input");
+
+        const searchBox = new google.maps.places.SearchBox(
+          inputIssueAddressSelector
+        );
+
+        const mapControl = createCustomControl("Map", function () {
+          map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+        });
+
+        const satelliteControl = createCustomControl("Satellite", function () {
+          map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+        });
+
+        map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
+        map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
+          satelliteControl
+        );
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(
+          inputIssueAddressSelector
+        );
+
+        const icon = {
+          url: currentLocationSVG,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(55, 55),
+        };
+
+        currentPositionMarker = new google.maps.Marker({
+          map,
+          icon,
+          position: map.getCenter(),
+          title: messages["map"]["marker.title"],
+        });
+
+        map.addListener("center_changed", async () => {
+          if (!findReportedIssue) {
+            const center = map.getCenter();
+            currentPositionMarker.setPosition(center);
+
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+              geocodeLatLng(center.lat(), center.lng());
+            }, waitTime);
+          }
+        });
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener("bounds_changed", () => {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener("places_changed", () => {
+          const places = searchBox.getPlaces();
+          if (places.length == 0) {
+            return;
+          }
+
+          // Clear out the old markers.
+          clearMarkers();
+
+          places.forEach((place) => {
+            issueAddress.set(place.formatted_address);
+            if (!place.geometry || !place.geometry.location) {
+              console.log(messages["map"]["empty.geometry"]);
+              return;
+            }
+
+            setNewCenter(
+              place.geometry.location.lat(),
+              place.geometry.location.lng(),
+              17
+            );
+          });
+        });
+
+        if (localStorage.getItem("completed")) await postOfflineIssue();
+      });
+    });
+
+    loadRecaptcha();
+  };
+
+  const updateOnlineStatus = async () => {
+    wasOnline = isOnline;
+    isOnline = navigator.onLine;
+
+    if (wasOnline && !isOnline) {
+      // We are now offline
+      if (findReportedIssue) resetFindIssue();
+
+      if (
+        reportNewIssue ||
+        reportNewIssueStep2 ||
+        reportNewIssueStep3 ||
+        reportNewIssueStep4 ||
+        reportNewIssueStep5
+      )
+        resetReportIssue();
+
+      setTimeout(() => scrollToTop(), 500);
+
+      reduceBackGroundOpacity = true;
+    } else if (!wasOnline && isOnline) {
+      // We are back online
+
+      if (findReportedIssue) resetFindIssue();
+      if (
+        reportNewIssue ||
+        reportNewIssueStep2 ||
+        reportNewIssueStep3 ||
+        reportNewIssueStep4 ||
+        reportNewIssueStep5
+      )
+        resetReportIssue();
+
+      setTimeout(() => scrollToTop(), 500);
+
+      await initGoogleMaps();
+
+      reduceBackGroundOpacity = true;
+    }
+  };
+
+  const resetReportIssue = () => {
+    if (reportNewIssue) reportNewIssue = false;
+    if (reportNewIssueStep2) reportNewIssueStep2 = false;
+    if (reportNewIssueStep3) reportNewIssueStep3 = false;
+    if (reportNewIssueStep4) reportNewIssueStep4 = false;
+    if (reportNewIssueStep5) reportNewIssueStep5 = false;
+    if (reportNewIssueStep6) reportNewIssueStep6 = false;
+
+    currentStep = null;
+  };
+
+  const resetFindIssue = () => {
+    scrollToTop();
+
+    findReportedIssue = false;
+    showFilters = false;
+
+    setTimeout(() => {
+      showFooter = true;
+      adjustFooter();
+    }, 500);
+
+    clearData();
+    clearFilters();
+  };
+
   onMount(async () => {
-    
+    isOnline = navigator.onLine;
+
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Listen for Device Orientation changes
     window.addEventListener("orientationchange", getOrientation);
+
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
 
     getOrientation();
 
@@ -1113,118 +1299,7 @@
     fadeInBackground = true;
     openLogo = true;
 
-    if (navigator.onLine) {
-      import("@googlemaps/js-api-loader").then((module) => {
-        const Loader = module.Loader;
-
-        const loader = new Loader({
-          apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
-          version: "weekly",
-          libraries: ["places", "visualization"],
-        });
-
-        loader.load().then(async (google) => {
-          map = new google.maps.Map(document.getElementById("map"), {
-            zoom: zoom,
-            center: { lat: 38.6740015313782, lng: -90.453269188364 },
-            mapTypeControl: false,
-          });
-
-          geocoder = new google.maps.Geocoder();
-
-          bounds = new google.maps.LatLngBounds();
-
-          inputIssueAddressSelector = document.getElementById("pac-input");
-
-          const searchBox = new google.maps.places.SearchBox(
-            inputIssueAddressSelector
-          );
-
-          const mapControl = createCustomControl("Map", function () {
-            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-          });
-
-          const satelliteControl = createCustomControl(
-            "Satellite",
-            function () {
-              map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
-            }
-          );
-
-          map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
-            mapControl
-          );
-          map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
-            satelliteControl
-          );
-          map.controls[google.maps.ControlPosition.TOP_LEFT].push(
-            inputIssueAddressSelector
-          );
-
-          const icon = {
-            url: currentLocationSVG,
-            size: new google.maps.Size(71, 71),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(17, 34),
-            scaledSize: new google.maps.Size(55, 55),
-          };
-
-          currentPositionMarker = new google.maps.Marker({
-            map,
-            icon,
-            position: map.getCenter(),
-            title: messages["map"]["marker.title"],
-          });
-
-          map.addListener("center_changed", async () => {
-            if (!findReportedIssue) {
-              const center = map.getCenter();
-              currentPositionMarker.setPosition(center);
-
-              clearTimeout(timer);
-              timer = setTimeout(() => {
-                geocodeLatLng(center.lat(), center.lng());
-              }, waitTime);
-            }
-          });
-
-          // Bias the SearchBox results towards current map's viewport.
-          map.addListener("bounds_changed", () => {
-            searchBox.setBounds(map.getBounds());
-          });
-
-          // Listen for the event fired when the user selects a prediction and retrieve
-          // more details for that place.
-          searchBox.addListener("places_changed", () => {
-            const places = searchBox.getPlaces();
-            if (places.length == 0) {
-              return;
-            }
-
-            // Clear out the old markers.
-            clearMarkers();
-
-            places.forEach((place) => {
-              issueAddress.set(place.formatted_address);
-              if (!place.geometry || !place.geometry.location) {
-                console.log(messages["map"]["empty.geometry"]);
-                return;
-              }
-
-              setNewCenter(
-                place.geometry.location.lat(),
-                place.geometry.location.lng(),
-                17
-              );
-            });
-          });
-
-          if (localStorage.getItem("completed")) await postOfflineIssue();
-        });
-      });
-
-      loadRecaptcha();
-    }
+    if (isOnline) await initGoogleMaps();
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
@@ -1264,6 +1339,9 @@
           class="logo"
         />
       {/if}
+    </div>
+    <div style="color:yellow; text-align: center">
+      You are currently: {isOnline ? "online" : "offline"}
     </div>
 
     {#if notifyOfflineIssuePosted}
@@ -1338,11 +1416,11 @@
           <button
             bind:this="{findIssuesButtonSelector}"
             class="button"
-            class:button-find-issue-disabled="{showModal || !navigator.onLine}"
-            disabled="{showModal || !navigator.onLine}"
+            class:button-find-issue-disabled="{showModal || !isOnline}"
+            disabled="{showModal || !isOnline}"
             id="button-find-issues"
             on:click="{async () => {
-              if (reportNewIssueStep6 || !navigator.onLine) return;
+              if (reportNewIssueStep6 || !isOnline) return;
 
               // Clears the current position marker from the map
               currentPositionMarker.setMap(null);
@@ -1368,19 +1446,7 @@
                 if (!filteredIssuesData) await getIssues();
 
                 addIssuesToMap();
-              } else {
-                scrollToTop();
-
-                findReportedIssue = false;
-                showFilters = false;
-
-                setTimeout(() => {
-                  showFooter = true;
-                  adjustFooter();
-                }, 500);
-                clearData();
-                clearFilters();
-              }
+              } else resetFindIssue();
             }}"
           >
             {#if !findReportedIssue}
@@ -1414,9 +1480,10 @@
               reportNewIssueStep6}"
             id="button-report-issue"
             on:click="{() => {
+              if (!localStorage.getItem('completed')) clearLocalStorage(true);
               if (reportNewIssueStep6) return;
 
-              if (navigator.onLine) {
+              if (isOnline) {
                 if (
                   map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
                     .length === 3
@@ -1455,8 +1522,11 @@
                 showFooter = false;
                 reportNewIssue = true;
                 setTimeout(() => {
-                  if (navigator.onLine) adjustMap();
-                  else adjustOffline();
+                  if (isOnline) adjustMap();
+                  else {
+                    adjustOffline();
+                    setTimeout(() => populateAddress(), 100);
+                  }
 
                   setTimeout(() => {
                     reportIssuesButtonSelector.scrollIntoView({
@@ -1492,7 +1562,7 @@
                 resetState();
               }
               // Ask for user's current location and center around it
-              if (navigator.onLine) {
+              if (isOnline) {
                 navigator.geolocation.getCurrentPosition(
                   successCallback,
                   errorCallback,
@@ -1711,7 +1781,7 @@
               ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
-              if (!navigator.onLine) issueTime.set(convertDate(new Date()));
+              if (!isOnline) issueTime.set(convertDate(new Date()));
 
               localStorage.setItem('issueTime', $issueTime);
               localStorage.setItem('issueTypeId', $issueType.id);
@@ -1783,7 +1853,7 @@
               data-action="submit"
               class="g-recaptcha"
               on:submit|preventDefault="{() => {
-                if (navigator.onLine) recaptcha.renderRecaptcha(handleSubmit);
+                if (isOnline) recaptcha.renderRecaptcha(handleSubmit);
                 else handleSubmit('');
               }}"
             >
@@ -1800,9 +1870,9 @@
                         ? 19
                         : 25
                     )}
-                  {:else if navigator.onLine}
+                  {:else if isOnline}
                     {messages["report.issue"]["label.choose.image"]}
-                  {:else if !navigator.onLine}
+                  {:else if !isOnline}
                     {messages["report.issue"]["image.upload.disabled"]}
                   {/if}
 
@@ -1820,12 +1890,12 @@
                   id="image-uploads"
                   accept="image/*"
                   capture="camera"
-                  style="display: none; cursor: {navigator.onLine
+                  style="display: none; cursor: {isOnline
                     ? 'pointer'
                     : 'default'}"
-                  disabled="{!navigator.onLine}"
+                  disabled="{!isOnline}"
                   on:change="{(e) => {
-                    if (navigator.onLine) handleFileChange(e);
+                    if (isOnline) handleFileChange(e);
                   }}"
                 />
 
@@ -1834,13 +1904,11 @@
                 <button
                   type="submit"
                   class="button"
-                  class:upload="{navigator.onLine &&
-                    selectedFile &&
-                    !messageSuccess}"
-                  class:disabled-button-upload="{!navigator.onLine ||
+                  class:upload="{isOnline && selectedFile && !messageSuccess}"
+                  class:disabled-button-upload="{!isOnline ||
                     !selectedFile ||
                     messageSuccess}"
-                  disabled="{!navigator.onLine || !selectedFile}"
+                  disabled="{!isOnline || !selectedFile}"
                 >
                   {messages["report.issue"]["label.upload.image"]}
                 </button>
@@ -2161,7 +2229,7 @@
             data-callback="handleToken"
             data-action="submit"
             on:click="{() => {
-              if (navigator.onLine) recaptcha.renderRecaptcha(handleToken);
+              if (isOnline) recaptcha.renderRecaptcha(handleToken);
               else handleToken('');
             }}"
           >
@@ -2189,8 +2257,8 @@
             {messages["report.issue"]["issue.reported.success.message.one"]}
           </div>
 
-          <div class:success-message-two-offline="{!navigator.onLine}">
-            {#if navigator.onLine}
+          <div class:success-message-two-offline="{!isOnline}">
+            {#if isOnline}
               {messages["report.issue"]["issue.reported.success.message.two"]}
             {:else}
               {messages["report.issue"][
@@ -2220,7 +2288,7 @@
               {messages["report.issue"]["label.issue.location"]}
             </div>
 
-            {#if navigator.onLine}
+            {#if isOnline}
               <div class="step-one-instruction">
                 {messages["report.issue"]["label.issue.location.subtext"]}
               </div>
@@ -2241,7 +2309,7 @@
             {/if}
 
             <div class="step-one-issue-address">
-              {#if navigator.onLine}
+              {#if isOnline}
                 <span style="color: {primaryTwo}">
                   {$issueAddress ??
                     messages["report.issue"]["location.services.disabled"]}
@@ -2252,11 +2320,11 @@
               <button
                 class="button next-button"
                 step-one-button-next="{$issueAddress}"
-                class:disabled-button="{!$issueAddress && navigator.onLine}"
-                disabled="{!$issueAddress && navigator.onLine}"
+                class:disabled-button="{!$issueAddress && isOnline}"
+                disabled="{!$issueAddress && isOnline}"
                 style="margin-bottom: 0.5rem"
                 on:click="{() => {
-                  if (!navigator.onLine) {
+                  if (!isOnline) {
                     if (
                       offlineAddressInputSelector?.value?.length >=
                       minAddressCharacters
@@ -2298,7 +2366,7 @@
         {/if}
 
         <!-- END Report New Issue Flow -->
-        {#if navigator.onLine}
+        {#if isOnline}
           <input
             id="pac-input"
             placeholder="{messages['map']['pac-input-placeholder']}"
