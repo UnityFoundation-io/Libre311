@@ -21,7 +21,7 @@ jobs:
       working-directory: ./frontend
     - name: Run Playwright tests
       run: npx playwright test
-      working-directory: ./frontend
+      working-directory: ./frontend/tests
     - uses: actions/upload-artifact@v3
       if: always()
       with:
