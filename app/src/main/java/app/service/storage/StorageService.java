@@ -2,6 +2,7 @@ package app.service.storage;
 
 import app.dto.storage.PhotoUploadDTO;
 import app.recaptcha.ReCaptchaService;
+import app.safesearch.GoogleImageSafeSearchService;
 import com.google.cloud.storage.Blob;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
@@ -20,11 +21,13 @@ public class StorageService {
     private static final Logger LOG = LoggerFactory.getLogger(StorageService.class);
     private final ObjectStorageOperations<?, ?, ?> objectStorage;
     private final ReCaptchaService reCaptchaService;
+    private final GoogleImageSafeSearchService googleImageClassificationService;
 
 
-    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService) {
+    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService) {
         this.objectStorage = objectStorage;
         this.reCaptchaService = reCaptchaService;
+        this.googleImageClassificationService = googleImageClassificationService;
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
@@ -44,6 +47,12 @@ public class StorageService {
         String extension = mediaType.getExtension();
 
         String image = base64Image.split(",")[1];
+
+        if (googleImageClassificationService.imageIsExplicit(image)) {
+            LOG.error("Image does not meet SafeSearch criteria.");
+            return null;
+        }
+
         byte[] bytes = Base64.getDecoder().decode(image);
         UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
         UploadResponse<?> response = objectStorage.upload(request);

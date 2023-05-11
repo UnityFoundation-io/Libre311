@@ -2,16 +2,13 @@ package app.util;
 
 import app.dto.storage.PhotoUploadDTO;
 import app.recaptcha.ReCaptchaService;
+import app.safesearch.GoogleImageSafeSearchService;
 import app.service.storage.StorageService;
-import com.google.cloud.storage.Blob;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
-import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
 import java.util.Base64;
@@ -22,8 +19,8 @@ import java.util.UUID;
 public class MockStorageService extends StorageService {
 
 
-    public MockStorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService) {
-        super(objectStorage, reCaptchaService);
+    public MockStorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService) {
+        super(objectStorage, reCaptchaService, googleImageClassificationService);
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
