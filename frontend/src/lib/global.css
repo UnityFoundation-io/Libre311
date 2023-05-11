@@ -120,6 +120,13 @@ body {
 
 /*//////// Desktop Style ////////*/
 
+.reported-offline-issue-success {
+  text-align: center; 
+  color: var(--secondary-color-one);
+  font-size: 1rem;
+  letter-spacing: -0.05rem;
+}
+
 .white-closeSVG {
   cursor: pointer;
   margin-left: 0.25rem;
@@ -598,7 +605,7 @@ td {
   text-align: right;
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
-  margin-right: 3.3rem;
+  margin-right: 1rem;
   color: var(--primary-color-two);
   text-shadow: none;
   position: relative;
@@ -1711,7 +1718,6 @@ td {
   .upload-image {
     margin-left: 0.5rem;
     width: 13rem;
-    /* width: 17.5rem; */
     font-size: 0.8rem;
   }
 
@@ -1916,8 +1922,7 @@ td {
   }
 
   .upload-image {
-    width: 14rem;
-    /* width: 19.5rem; */
+    width: 18rem;
   }
 
   .td-description {
@@ -1950,6 +1955,10 @@ td {
   .success-message-two-offline {
     font-size: 1.1rem;
     letter-spacing: -0.04rem;
+  }
+
+  .step-one-invalid-offline-address {
+    margin-right: 1.2rem;
   }
 }
 
@@ -2002,7 +2011,7 @@ td {
   }
 
   .upload-image {
-    width: 21.5rem;
+    width: 17.5rem;
   }
 
   .camera-icon {
@@ -2012,6 +2021,14 @@ td {
   .success-message-two-offline {
     font-size: 1.2rem;
     letter-spacing: -0.03rem;
+  }
+
+  .offline-address-input {
+    width: 86%;
+  }
+
+  .step-one-invalid-offline-address {
+    margin-right: 1.3rem;
   }
 }
 
@@ -2111,6 +2128,10 @@ td {
       margin-right: 0;
     }
 
+    .step-one-invalid-offline-address {
+      margin-right: 0.5rem;
+    }
+
     .offline-address-input {
       margin-left: 0.5rem;
       width: 95%;
@@ -2182,7 +2203,7 @@ td {
 
     .disabled-button-upload {
       margin-right: 0.5rem;
-      padding: 0 3.2rem 0 1.5rem;
+      padding: 0 2rem 0 1.5rem;
     }
 
     .upload-message {
@@ -2314,7 +2335,7 @@ td {
     .upload-image {
       margin-left: 0.5rem;
       border-radius: 10px;
-      width: 36.7rem;
+      width: 18.5rem;
     }
 
     .camera-icon {
@@ -2496,7 +2517,7 @@ td {
       }
 
       .upload-image {
-      width: 47.8rem;
+        width: 29rem;
       }
 
       textarea {
@@ -2544,6 +2565,11 @@ td {
 
       .background::before {
         background-position: center calc(50% - 275px);
+      }
+
+      .offline-address-input {
+        margin-left: 0.5rem;
+        width: 96%;
       }
      }
 
@@ -2608,7 +2634,7 @@ td {
         }
 
         .upload-image {
-          width: 53rem;
+          width: 32rem;
           }
 
         .step-four-input-submitter-name {
@@ -2620,4 +2646,18 @@ td {
           margin-left: 0.5rem;
           width: 66.5vw;
         }
+
+        .offline-address-input {
+          width: 96%;
+        }
+
+        .step-one-invalid-offline-address {
+          margin-right: 0.7rem;
+        }
        }
+       
+       @media only screen and (min-width: 1000px){
+        .reported-offline-issue-success {
+        font-size: 1.4rem;   
+        }
+      }

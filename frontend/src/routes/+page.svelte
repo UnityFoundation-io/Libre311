@@ -95,6 +95,9 @@
     reportNewIssueStep6 = false,
     currentStep = null,
     findReportedIssue = false,
+    postingOfflineIssue = false,
+    notifyOfflineIssuePosted = false,
+    geocodeError = false,
     showFilters = false,
     hasMoreResults = true,
     showModal = false,
@@ -137,7 +140,8 @@
     issueTypeSelectSelector,
     issueDetailSelectSelector,
     findIssuesButtonSelector,
-    reportIssuesButtonSelector;
+    reportIssuesButtonSelector,
+    isOnline;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -234,8 +238,6 @@
   let visibleDetails = new Set();
 
   const clearLocalStorage = () => {
-    console.log("Clearing LocalStorage");
-
     localStorage.removeItem("completed");
     localStorage.removeItem("issueTypeId");
     localStorage.removeItem("issueAddress");
@@ -245,6 +247,7 @@
     localStorage.removeItem("issueDescription");
     localStorage.removeItem("issueSubmitterName");
     localStorage.removeItem("issueSubmitterContact");
+    clearForm();
   };
 
   const toggleDetails = (service_request_id) => {
@@ -294,7 +297,7 @@
   const handleFileChange = async (event) => {
     clearUploadMessages();
     selectedFile = event.target.files[0];
-    const base64Image = await readFileAsDataURL(selectedFile);
+    await readFileAsDataURL(selectedFile);
   };
 
   const handleSubmit = async (recaptchaToken) => {
@@ -513,7 +516,8 @@
         },
       });
 
-      clearLocalStorage();
+      if (postingOfflineIssue) notifyOfflineIssuePosted = true;
+      setTimeout(() => clearLocalStorage(), 2000);
     } catch (err) {
       console.error(err);
     }
@@ -542,19 +546,27 @@
 
     issueType.set({ id: localStorage.getItem("issueTypeId") });
     issueAddress.set(localStorage.getItem("issueAddress"));
+    try {
+      await geocoder.geocode({ address: $issueAddress }, (results, status) => {
+        if (status === "OK") {
+          const lat = results[0].geometry.location.lat();
+          const lng = results[0].geometry.location.lng();
 
-    await geocoder.geocode({ address: $issueAddress }, (results, status) => {
-      if (status === "OK") {
-        const lat = results[0].geometry.location.lat();
-        const lng = results[0].geometry.location.lng();
-
-        issueAddressCoordinates.set({ lat: lat, lng: lng });
-      } else {
-        console.error(
-          `Geocode was not successful for the following reason: ${status}`
-        );
-      }
-    });
+          issueAddressCoordinates.set({ lat: lat, lng: lng });
+        } else {
+          geocodeError = true;
+          clearLocalStorage();
+          clearForm();
+          console.error(
+            `Geocode was not successful for the following reason: ${status}`
+          );
+          return;
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      return;
+    }
 
     issueDetailList.set({ code: localStorage.getItem("issueDetailListCode") });
 
@@ -570,10 +582,9 @@
       issueSubmitterContact.set(localStorage.getItem("issueSubmitterContact"));
 
     setTimeout(async () => {
+      postingOfflineIssue = true;
       await postIssue();
-    }, 10000);
-
-    console.log("issue posted");
+    }, 5000);
   };
 
   const clearData = () => {
@@ -681,6 +692,22 @@
     invalidEmail.visible = false;
     mediaUrl = undefined;
     setTimeout(() => (currentStep = null), 700);
+  };
+
+  const clearForm = () => {
+    issueAddress.set();
+    issueDescription.set();
+    issueSubmitterContact.set();
+    issueSubmitterName.set();
+    $issueDetail = [];
+    $issueType = null;
+    $issueDetailList = null;
+    if (inputIssueAddressSelector) inputIssueAddressSelector.value = "";
+    selectedFile = null;
+    clearUploadMessages();
+    invalidSubmitterName.visible = false;
+    invalidEmail.visible = false;
+    mediaUrl = undefined;
   };
 
   const formatRelativeDate = (dateString) => {
@@ -1065,6 +1092,7 @@
   };
 
   onMount(async () => {
+    
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
 
@@ -1086,8 +1114,6 @@
     openLogo = true;
 
     if (navigator.onLine) {
-      alert("online");
-
       import("@googlemaps/js-api-loader").then((module) => {
         const Loader = module.Loader;
 
@@ -1193,15 +1219,12 @@
             });
           });
 
-          if (localStorage.getItem("completed")) {
-            alert("found an issue to post");
-            await postOfflineIssue();
-          }
+          if (localStorage.getItem("completed")) await postOfflineIssue();
         });
       });
 
       loadRecaptcha();
-    } else alert("offline");
+    }
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
@@ -1242,6 +1265,34 @@
         />
       {/if}
     </div>
+
+    {#if notifyOfflineIssuePosted}
+      <Modal
+        title="{messages['report.issue']['modal.offline.issue.posted.title']}"
+        color="{primaryOne}"
+        on:cancel="{() => (notifyOfflineIssuePosted = false)}"
+      >
+        <div class="reported-offline-issue-success">
+          {messages["report.issue"]["modal.offline.issue.posted.description"]}
+        </div>
+      </Modal>
+    {/if}
+
+    {#if geocodeError}
+      <Modal
+        title="{messages['report.issue'][
+          'modal.offline.issue.posted.title.error'
+        ]}"
+        color="{primaryOne}"
+        on:cancel="{() => (geocodeError = false)}"
+      >
+        <div class="reported-offline-issue-success">
+          {messages["report.issue"][
+            "modal.offline.issue.posted.description.error"
+          ]}
+        </div>
+      </Modal>
+    {/if}
 
     <div
       class="content"
@@ -1579,6 +1630,7 @@
                     alt="remove issue detail"
                     width="14rem"
                     on:click="{async () => {
+                      invalidOtherDescription.visible = false;
                       $issueDetail = $issueDetail.filter(
                         (issueDTL) => issueDTL.id !== selection.id
                       );
@@ -1772,8 +1824,8 @@
                     ? 'pointer'
                     : 'default'}"
                   disabled="{!navigator.onLine}"
-                  on:change="{() => {
-                    if (navigator.onLine) handleFileChange();
+                  on:change="{(e) => {
+                    if (navigator.onLine) handleFileChange(e);
                   }}"
                 />
 
@@ -1959,15 +2011,10 @@
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
             on:click="{() => {
-              if ($issueSubmitterName)
-                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
-              if ($issueSubmitterContact)
-                localStorage.setItem(
-                  'issueSubmitterContact',
-                  $issueSubmitterContact
-                );
-
-              if ($issueSubmitterName?.length < minSubmitterNameLength) {
+              if (
+                $issueSubmitterName?.length < minSubmitterNameLength &&
+                $issueSubmitterName?.length !== 0
+              ) {
                 invalidSubmitterName.visible = true;
                 return;
               }
@@ -1975,6 +2022,15 @@
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
               if (invalidEmail.visible) return;
+
+              if ($issueSubmitterName)
+                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+
+              if ($issueSubmitterContact)
+                localStorage.setItem(
+                  'issueSubmitterContact',
+                  $issueSubmitterContact
+                );
 
               reportNewIssueStep4 = false;
               currentStep = 5;

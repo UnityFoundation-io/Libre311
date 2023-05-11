@@ -55,7 +55,11 @@
             "input.email.error": "Invalid email, please make sure your email valid.",
             "issue.reported.success.message.one": "Thank You!",
             "issue.reported.success.message.two": "The issue has been reported.",
-            "issue.reported.success.message.two.offline": "The issue will be reported when you go online."
+            "issue.reported.success.message.two.offline": "The issue will be reported when you go online.",
+            "modal.offline.issue.posted.title": "Issue Reported",
+            "modal.offline.issue.posted.description": "Your pending offline issue was successfully reported.",
+            "modal.offline.issue.posted.title.error": "Unable to Report Issue",
+            "modal.offline.issue.posted.description.error": "The address provided is invalid."
         },
 
     "map":
