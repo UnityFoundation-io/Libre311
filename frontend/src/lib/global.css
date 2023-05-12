@@ -88,6 +88,10 @@ body {
     width: 100%;
   }
 
+.grecaptcha-badge {
+  z-index: -100;
+}
+
 .button {
   font-weight: 500;
   font-family: Gotham;
@@ -119,6 +123,13 @@ body {
 }
 
 /*//////// Desktop Style ////////*/
+
+.reported-offline-issue-success {
+  text-align: center; 
+  color: var(--secondary-color-one);
+  font-size: 1rem;
+  letter-spacing: -0.05rem;
+}
 
 .white-closeSVG {
   cursor: pointer;
@@ -345,6 +356,14 @@ body {
   width: 50%;
 }
 
+.offline-address-input {
+    margin-top: 0.6rem;
+    margin-left: 3rem;
+    padding-left: 0.5rem;
+    height: 2.18rem;
+    width: 85%;
+}
+
 .hidden {
   animation: fadeOut 0.4s forwards;
 }
@@ -398,7 +417,6 @@ textarea::placeholder {
   text-shadow: none;
   align-items: center;
   display: flex;
-  cursor: pointer;
   justify-content: space-between;
 }
 
@@ -580,6 +598,21 @@ td {
   margin-bottom: -1rem;
   margin-left: 3rem;
   margin-top: 2rem;
+  padding-right: 3rem;
+  width: 80%;
+}
+
+.step-one-invalid-offline-address {
+  visibility: hidden;
+  justify-content: right;
+  font-size: 0.85rem;
+  text-align: right;
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+  margin-right: 3rem;
+  color: var(--primary-color-two);
+  text-shadow: none;
+  position: relative;
 }
 
 .step-one-button-next {
@@ -871,6 +904,10 @@ td {
   border-radius: 21px;
 }
 
+.success-message-two-offline {
+  font-size: 1.82rem;
+}
+
 .success-message {
   margin-top: 1rem;
 }
@@ -993,6 +1030,10 @@ td {
     width: 100vw;
   }
 
+  .offline-address-input {
+    margin-left: 1rem;
+  }
+
   .step-one-issue-location-label {
     margin-top: -1rem;
     margin-left: 1rem;
@@ -1018,6 +1059,10 @@ td {
 
   .step-one-button-next {
     margin-right: 0;
+  }
+
+  .step-one-invalid-offline-address {
+    margin-right: 1rem;
   }
 
   .step-two-label {
@@ -1211,6 +1256,11 @@ td {
 
   .success-message {
     margin-top: 1rem;
+  }
+
+  .success-message-two-offline {
+    font-size: 0.9rem;
+    letter-spacing: -0.04rem;
   }
 
   .upload-image {
@@ -1472,6 +1522,11 @@ td {
     margin-right: 0;
   }
 
+  .offline-address-input {
+    margin-left: 1.5rem;
+    width: 85%;
+  }
+
   .step-two-label {
     margin-left: 1.5rem;
   }
@@ -1491,6 +1546,7 @@ td {
     font-size: 1.1rem;
     letter-spacing: -0.03rem;
     margin-left: 1.5rem;
+    margin-right: 0.5rem;
   }
 
   .step-two-feature-type-helper {
@@ -1662,9 +1718,14 @@ td {
     margin-top: 1rem;
   }
 
+  .success-message-two-offline {
+    font-size: 1.15rem;
+    letter-spacing: -0.07rem;
+  }
+
   .upload-image {
     margin-left: 0.5rem;
-    width: 17.5rem;
+    width: 13rem;
     font-size: 0.8rem;
   }
 
@@ -1711,7 +1772,6 @@ td {
   .upload-message {
     font-size: 1rem;
     margin: 1rem 0.5rem 0 0.5rem;
-
   }
 
   #map {
@@ -1870,7 +1930,7 @@ td {
   }
 
   .upload-image {
-    width: 19.5rem;
+    width: 18rem;
   }
 
   .td-description {
@@ -1900,6 +1960,14 @@ td {
     margin-left: 0.2rem;
   }
 
+  .success-message-two-offline {
+    font-size: 1.1rem;
+    letter-spacing: -0.04rem;
+  }
+
+  .step-one-invalid-offline-address {
+    margin-right: 1.2rem;
+  }
 }
 
 /*/////// iPhone 14 Pro Max Portrait ////////*/
@@ -1951,11 +2019,24 @@ td {
   }
 
   .upload-image {
-    width: 21.5rem;
+    width: 17.5rem;
   }
 
   .camera-icon {
     margin-left: 0.3rem;
+  }
+
+  .success-message-two-offline {
+    font-size: 1.2rem;
+    letter-spacing: -0.03rem;
+  }
+
+  .offline-address-input {
+    width: 86%;
+  }
+
+  .step-one-invalid-offline-address {
+    margin-right: 1.3rem;
   }
 }
 
@@ -2055,6 +2136,15 @@ td {
       margin-right: 0;
     }
 
+    .step-one-invalid-offline-address {
+      margin-right: 0.5rem;
+    }
+
+    .offline-address-input {
+      margin-left: 0.5rem;
+      width: 95%;
+    }
+
     .step-two-label {
       margin-left: 0.5rem;
     }
@@ -2082,6 +2172,7 @@ td {
 
     .step-two-feature-type-helper {
       margin-left: 0.6rem;
+      margin-right: 0.6rem;
       font-size: 1.1rem;
     }
   
@@ -2120,7 +2211,7 @@ td {
 
     .disabled-button-upload {
       margin-right: 0.5rem;
-      padding: 0 3.2rem 0 1.5rem;
+      padding: 0 2rem 0 1.5rem;
     }
 
     .upload-message {
@@ -2244,10 +2335,15 @@ td {
       margin-top: 1rem;
     }
 
+    .success-message-two-offline {
+      font-size: 1.2rem;
+      letter-spacing: -0.05rem;
+    }
+
     .upload-image {
       margin-left: 0.5rem;
       border-radius: 10px;
-      width: 36.7rem;
+      width: 18.5rem;
     }
 
     .camera-icon {
@@ -2429,7 +2525,7 @@ td {
       }
 
       .upload-image {
-      width: 47.8rem;
+        width: 29rem;
       }
 
       textarea {
@@ -2477,6 +2573,11 @@ td {
 
       .background::before {
         background-position: center calc(50% - 275px);
+      }
+
+      .offline-address-input {
+        margin-left: 0.5rem;
+        width: 96%;
       }
      }
 
@@ -2541,7 +2642,7 @@ td {
         }
 
         .upload-image {
-          width: 53rem;
+          width: 32rem;
           }
 
         .step-four-input-submitter-name {
@@ -2553,4 +2654,18 @@ td {
           margin-left: 0.5rem;
           width: 66.5vw;
         }
+
+        .offline-address-input {
+          width: 96%;
+        }
+
+        .step-one-invalid-offline-address {
+          margin-right: 0.7rem;
+        }
        }
+       
+       @media only screen and (min-width: 1000px){
+        .reported-offline-issue-success {
+        font-size: 1.4rem;   
+        }
+      }

@@ -49,8 +49,8 @@
   .modal {
     position: fixed;
     top: 10vh;
-    left: 10%;
-    width: 80%;
+    width: 70vw;
+    left: 15vw;
     max-height: 80vh;
     background: white;
     border-radius: 15px;

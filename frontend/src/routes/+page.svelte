@@ -1,5 +1,5 @@
 <script>
-  import { Loader } from "@googlemaps/js-api-loader";
+  // import { Loader } from "@googlemaps/js-api-loader";
   import { fade, scale, blur } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
@@ -73,6 +73,7 @@
   const accentTwo = colors["accent.two"];
   const issueDescriptionTrimCharacters = 36;
   const waitTime = 1000;
+  const minAddressCharacters = 15;
 
   // Page Height
   let pageHeight = 1650;
@@ -94,6 +95,9 @@
     reportNewIssueStep6 = false,
     currentStep = null,
     findReportedIssue = false,
+    postingOfflineIssue = false,
+    notifyOfflineIssuePosted = false,
+    geocodeError = false,
     showFilters = false,
     hasMoreResults = true,
     showModal = false,
@@ -113,7 +117,8 @@
       message: messages["report.issue"]["input.email.error"],
       visible: false,
     },
-    fileName = "report.csv";
+    fileName = "report.csv",
+    invalidOfflineAddress = false;
 
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
@@ -130,11 +135,14 @@
     backgroundSelector,
     inputIssueAddressSelector,
     issueDetailSelector,
+    offlineAddressInputSelector,
     tableSelector,
     issueTypeSelectSelector,
     issueDetailSelectSelector,
     findIssuesButtonSelector,
-    reportIssuesButtonSelector;
+    reportIssuesButtonSelector,
+    isOnline,
+    wasOnline;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -210,12 +218,6 @@
     }, 100);
   }
 
-  const loader = new Loader({
-    apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
-    version: "weekly",
-    libraries: ["places", "visualization"],
-  });
-
   $: if (reportNewIssueStep6) {
     setTimeout(() => {
       const divSuccessMessage = document.getElementById("stepSubmitted");
@@ -228,7 +230,6 @@
         resetState();
         reportNewIssueStep6 = false;
         backgroundSelector.style.height = $footerDivHeight + "px";
-        clearLocalStorage();
       }, 3000);
 
       setTimeout(() => (showFooter = true), 4000);
@@ -237,19 +238,20 @@
 
   let visibleDetails = new Set();
 
-  const clearLocalStorage = () => {
+  const clearLocalStorage = (bypassClearForm = false) => {
+    localStorage.removeItem("completed");
+    localStorage.removeItem("issueTypeId");
     localStorage.removeItem("issueAddress");
     localStorage.removeItem("issueTime");
-    localStorage.removeItem("issueType");
+    localStorage.removeItem("issueDetailListCode");
     localStorage.removeItem("issueDetail");
     localStorage.removeItem("issueDescription");
-    localStorage.removeItem("mediaUrl");
     localStorage.removeItem("issueSubmitterName");
     localStorage.removeItem("issueSubmitterContact");
+    if (!bypassClearForm) clearForm();
   };
 
   const toggleDetails = (service_request_id) => {
-    console.log("visibleDetails", visibleDetails);
     if (visibleDetails.has(service_request_id)) {
       visibleDetails.delete(service_request_id);
 
@@ -296,8 +298,7 @@
   const handleFileChange = async (event) => {
     clearUploadMessages();
     selectedFile = event.target.files[0];
-    const base64Image = await readFileAsDataURL(selectedFile);
-    localStorage.setItem("mediaUrl", base64Image);
+    await readFileAsDataURL(selectedFile);
   };
 
   const handleSubmit = async (recaptchaToken) => {
@@ -309,27 +310,29 @@
     });
 
     // Call the detectExplicitContent function with the image data URL
-    const isExplicit = await detectExplicitContent(imageUrl, apiKey);
+    if (recaptchaToken) {
+      const isExplicit = await detectExplicitContent(imageUrl, apiKey);
 
-    if (isExplicit) {
-      messageRejectedOne =
-        messages["report.issue"]["uploaded.message.rejected-one"];
-      messageRejectedTwo =
-        messages["report.issue"]["uploaded.message.rejected-two"];
+      if (isExplicit) {
+        messageRejectedOne =
+          messages["report.issue"]["uploaded.message.rejected-one"];
+        messageRejectedTwo =
+          messages["report.issue"]["uploaded.message.rejected-two"];
 
-      selectedFile = null;
-    } else {
-      messageSuccess = messages["report.issue"]["uploaded.message.success"];
+        selectedFile = null;
+      } else {
+        messageSuccess = messages["report.issue"]["uploaded.message.success"];
 
-      // Save the image to the Server Locally
-      // this worked for me in testing - max
+        // Save the image to the Server Locally
+        // this worked for me in testing - max
 
-      const res = await axios.post("/image", {
-        g_recaptcha_response: recaptchaToken,
-        image: imageUrl,
-      });
+        const res = await axios.post("/image", {
+          g_recaptcha_response: recaptchaToken,
+          image: imageUrl,
+        });
 
-      if (res?.data) mediaUrl = res.data;
+        if (res?.data) mediaUrl = res.data;
+      }
     }
   };
 
@@ -477,7 +480,11 @@
   };
 
   const postIssue = async () => {
-    let attributes = `?service_code=${$issueType.id}&address_string=${$issueAddress}&lat=${$issueAddressCoordinates.lat}&long=${$issueAddressCoordinates.lng}`;
+    let attributes = `?service_code=${
+      $issueType.id
+    }&address_string=${$issueAddress}&lat=${
+      isOnline ? $issueAddressCoordinates.lat : ""
+    }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
 
     $issueDetail.forEach((attr) => {
       attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.id;
@@ -503,27 +510,82 @@
 
     const data = new URLSearchParams(attributes);
 
-    axios.post("/requests.json", data, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
+    try {
+      await axios.post("/requests.json", data, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
 
-    const marker = new google.maps.Marker({
-      position: {
-        lat: parseFloat($issueAddressCoordinates.lat),
-        lng: parseFloat($issueAddressCoordinates.lng),
-      },
-      map: map,
-      title: $issueType.name,
-      icon: {
-        scaledSize: new google.maps.Size(25, 25),
-        url: issuePinSVG,
-        anchor: new google.maps.Point(12, 12),
-      },
-    });
+      if (postingOfflineIssue) notifyOfflineIssuePosted = true;
+      setTimeout(() => clearLocalStorage(), 2000);
+    } catch (err) {
+      console.error(err);
+    }
 
-    markers.push(marker);
+    if (isOnline) {
+      const marker = new google.maps.Marker({
+        position: {
+          lat: parseFloat($issueAddressCoordinates.lat),
+          lng: parseFloat($issueAddressCoordinates.lng),
+        },
+        map: map,
+        title: $issueType.name,
+        icon: {
+          scaledSize: new google.maps.Size(25, 25),
+          url: issuePinSVG,
+          anchor: new google.maps.Point(12, 12),
+        },
+      });
+
+      markers.push(marker);
+    }
+  };
+
+  const postOfflineIssue = async () => {
+    if (!localStorage.getItem("completed")) return;
+
+    issueType.set({ id: localStorage.getItem("issueTypeId") });
+    issueAddress.set(localStorage.getItem("issueAddress"));
+    try {
+      await geocoder.geocode({ address: $issueAddress }, (results, status) => {
+        if (status === "OK") {
+          const lat = results[0].geometry.location.lat();
+          const lng = results[0].geometry.location.lng();
+
+          issueAddressCoordinates.set({ lat: lat, lng: lng });
+        } else {
+          geocodeError = true;
+          clearLocalStorage();
+          clearForm();
+          console.error(
+            `Geocode was not successful for the following reason: ${status}`
+          );
+          return;
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      return;
+    }
+
+    issueDetailList.set({ code: localStorage.getItem("issueDetailListCode") });
+
+    issueDetail.set(JSON.parse(localStorage.getItem("issueDetail")));
+
+    if (localStorage.getItem("issueDescription"))
+      issueDescription.set(localStorage.getItem("issueDescription"));
+
+    if (localStorage.getItem("issueSubmitterName"))
+      issueSubmitterName.set(localStorage.getItem("issueSubmitterName"));
+
+    if (localStorage.getItem("issueSubmitterContact"))
+      issueSubmitterContact.set(localStorage.getItem("issueSubmitterContact"));
+
+    setTimeout(async () => {
+      postingOfflineIssue = true;
+      await postIssue();
+    }, 5000);
   };
 
   const clearData = () => {
@@ -592,8 +654,7 @@
     };
 
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
-
-    issueTime.set(convertDate(position.timestamp));
+    issueTime.set(convertDate(new Date()));
     geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
   };
 
@@ -625,13 +686,29 @@
     $issueDetail = [];
     $issueType = null;
     $issueDetailList = null;
-    inputIssueAddressSelector.value = "";
+    if (inputIssueAddressSelector) inputIssueAddressSelector.value = "";
     selectedFile = null;
     clearUploadMessages();
     invalidSubmitterName.visible = false;
     invalidEmail.visible = false;
     mediaUrl = undefined;
     setTimeout(() => (currentStep = null), 700);
+  };
+
+  const clearForm = () => {
+    issueAddress.set();
+    issueDescription.set();
+    issueSubmitterContact.set();
+    issueSubmitterName.set();
+    $issueDetail = [];
+    $issueType = null;
+    $issueDetailList = null;
+    if (inputIssueAddressSelector) inputIssueAddressSelector.value = "";
+    selectedFile = null;
+    clearUploadMessages();
+    invalidSubmitterName.visible = false;
+    invalidEmail.visible = false;
+    mediaUrl = undefined;
   };
 
   const formatRelativeDate = (dateString) => {
@@ -915,6 +992,18 @@
     backgroundSelector.style.height = mapHeight + addExtra + "px";
   };
 
+  const adjustOffline = () => {
+    backgroundSelector.style.height =
+      Number(
+        backgroundSelector.style.height.slice(
+          0,
+          backgroundSelector.style.height.length - 2
+        )
+      ) +
+      300 +
+      "px";
+  };
+
   const truncateStringMiddle = (str, maxLength) => {
     if (str.length <= maxLength) {
       return str;
@@ -966,7 +1055,7 @@
 
     // Load Google Recaptcha in the background of the page
     grecaptcha.enterprise.ready(async () => {
-      const token = await grecaptcha.enterprise.execute(sitekey, {
+      token = await grecaptcha.enterprise.execute(sitekey, {
         action: "homepage",
       });
     });
@@ -986,11 +1075,12 @@
   };
 
   const handleToken = (recaptchaToken) => {
-    token = recaptchaToken;
+    if (recaptchaToken) token = recaptchaToken;
     reportNewIssueStep5 = false;
     postIssue();
     currentStep = 6;
     reportNewIssueStep6 = true;
+    localStorage.setItem("completed", "true");
   };
 
   const readFileAsDataURL = (file) => {
@@ -1002,12 +1092,198 @@
     });
   };
 
+  const populateAddress = () => {
+    if ($issueAddress && offlineAddressInputSelector) {
+      offlineAddressInputSelector.value = $issueAddress;
+    }
+  };
+
+  const initGoogleMaps = async () => {
+    import("@googlemaps/js-api-loader").then((module) => {
+      const Loader = module.Loader;
+
+      const loader = new Loader({
+        apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
+        version: "weekly",
+        libraries: ["places", "visualization"],
+      });
+
+      loader.load().then(async (google) => {
+        map = new google.maps.Map(document.getElementById("map"), {
+          zoom: zoom,
+          center: { lat: 38.6740015313782, lng: -90.453269188364 },
+          mapTypeControl: false,
+        });
+
+        geocoder = new google.maps.Geocoder();
+
+        bounds = new google.maps.LatLngBounds();
+
+        inputIssueAddressSelector = document.getElementById("pac-input");
+
+        const searchBox = new google.maps.places.SearchBox(
+          inputIssueAddressSelector
+        );
+
+        const mapControl = createCustomControl("Map", function () {
+          map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+        });
+
+        const satelliteControl = createCustomControl("Satellite", function () {
+          map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+        });
+
+        map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
+        map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
+          satelliteControl
+        );
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(
+          inputIssueAddressSelector
+        );
+
+        const icon = {
+          url: currentLocationSVG,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(55, 55),
+        };
+
+        currentPositionMarker = new google.maps.Marker({
+          map,
+          icon,
+          position: map.getCenter(),
+          title: messages["map"]["marker.title"],
+        });
+
+        map.addListener("center_changed", async () => {
+          if (!findReportedIssue) {
+            const center = map.getCenter();
+            currentPositionMarker.setPosition(center);
+
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+              geocodeLatLng(center.lat(), center.lng());
+            }, waitTime);
+          }
+        });
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener("bounds_changed", () => {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener("places_changed", () => {
+          const places = searchBox.getPlaces();
+          if (places.length == 0) {
+            return;
+          }
+
+          // Clear out the old markers.
+          clearMarkers();
+
+          places.forEach((place) => {
+            issueAddress.set(place.formatted_address);
+            if (!place.geometry || !place.geometry.location) {
+              console.log(messages["map"]["empty.geometry"]);
+              return;
+            }
+
+            setNewCenter(
+              place.geometry.location.lat(),
+              place.geometry.location.lng(),
+              17
+            );
+          });
+        });
+
+        if (localStorage.getItem("completed")) await postOfflineIssue();
+      });
+    });
+
+    loadRecaptcha();
+  };
+
+  const updateOnlineStatus = async () => {
+    wasOnline = isOnline;
+    isOnline = navigator.onLine;
+
+    if (wasOnline && !isOnline) {
+      // We are now offline
+      if (findReportedIssue) resetFindIssue();
+
+      if (
+        reportNewIssue ||
+        reportNewIssueStep2 ||
+        reportNewIssueStep3 ||
+        reportNewIssueStep4 ||
+        reportNewIssueStep5
+      )
+        resetReportIssue();
+
+      setTimeout(() => scrollToTop(), 500);
+
+      reduceBackGroundOpacity = true;
+    } else if (!wasOnline && isOnline) {
+      // We are back online
+
+      if (findReportedIssue) resetFindIssue();
+      if (
+        reportNewIssue ||
+        reportNewIssueStep2 ||
+        reportNewIssueStep3 ||
+        reportNewIssueStep4 ||
+        reportNewIssueStep5
+      )
+        resetReportIssue();
+
+      setTimeout(() => scrollToTop(), 500);
+
+      await initGoogleMaps();
+
+      reduceBackGroundOpacity = true;
+    }
+  };
+
+  const resetReportIssue = () => {
+    if (reportNewIssue) reportNewIssue = false;
+    if (reportNewIssueStep2) reportNewIssueStep2 = false;
+    if (reportNewIssueStep3) reportNewIssueStep3 = false;
+    if (reportNewIssueStep4) reportNewIssueStep4 = false;
+    if (reportNewIssueStep5) reportNewIssueStep5 = false;
+    if (reportNewIssueStep6) reportNewIssueStep6 = false;
+
+    currentStep = null;
+  };
+
+  const resetFindIssue = () => {
+    scrollToTop();
+
+    findReportedIssue = false;
+    showFilters = false;
+
+    setTimeout(() => {
+      showFooter = true;
+      adjustFooter();
+    }, 500);
+
+    clearData();
+    clearFilters();
+  };
+
   onMount(async () => {
+    isOnline = navigator.onLine;
+
     // Warn user before leaving the website
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Listen for Device Orientation changes
     window.addEventListener("orientationchange", getOrientation);
+
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
 
     getOrientation();
 
@@ -1023,102 +1299,10 @@
     fadeInBackground = true;
     openLogo = true;
 
-    loader.load().then(async (google) => {
-      map = new google.maps.Map(document.getElementById("map"), {
-        zoom: zoom,
-        center: { lat: 38.6740015313782, lng: -90.453269188364 },
-        mapTypeControl: false,
-      });
-
-      geocoder = new google.maps.Geocoder();
-
-      bounds = new google.maps.LatLngBounds();
-
-      inputIssueAddressSelector = document.getElementById("pac-input");
-
-      const searchBox = new google.maps.places.SearchBox(
-        inputIssueAddressSelector
-      );
-
-      const mapControl = createCustomControl("Map", function () {
-        map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-      });
-
-      const satelliteControl = createCustomControl("Satellite", function () {
-        map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
-      });
-
-      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
-      map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
-        satelliteControl
-      );
-      map.controls[google.maps.ControlPosition.TOP_LEFT].push(
-        inputIssueAddressSelector
-      );
-
-      const icon = {
-        url: currentLocationSVG,
-        size: new google.maps.Size(71, 71),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(55, 55),
-      };
-
-      currentPositionMarker = new google.maps.Marker({
-        map,
-        icon,
-        position: map.getCenter(),
-        title: messages["map"]["marker.title"],
-      });
-
-      map.addListener("center_changed", async () => {
-        if (!findReportedIssue) {
-          const center = map.getCenter();
-          currentPositionMarker.setPosition(center);
-
-          clearTimeout(timer);
-          timer = setTimeout(() => {
-            geocodeLatLng(center.lat(), center.lng());
-          }, waitTime);
-        }
-      });
-
-      // Bias the SearchBox results towards current map's viewport.
-      map.addListener("bounds_changed", () => {
-        searchBox.setBounds(map.getBounds());
-      });
-
-      // Listen for the event fired when the user selects a prediction and retrieve
-      // more details for that place.
-      searchBox.addListener("places_changed", () => {
-        const places = searchBox.getPlaces();
-        if (places.length == 0) {
-          return;
-        }
-
-        // Clear out the old markers.
-        clearMarkers();
-
-        places.forEach((place) => {
-          issueAddress.set(place.formatted_address);
-          if (!place.geometry || !place.geometry.location) {
-            console.log(messages["map"]["empty.geometry"]);
-            return;
-          }
-
-          setNewCenter(
-            place.geometry.location.lat(),
-            place.geometry.location.lng(),
-            17
-          );
-        });
-      });
-    });
+    if (isOnline) await initGoogleMaps();
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
-
-    loadRecaptcha();
   });
 </script>
 
@@ -1156,6 +1340,37 @@
         />
       {/if}
     </div>
+    <div style="color:yellow; text-align: center">
+      You are currently: {isOnline ? "online" : "offline"}
+    </div>
+
+    {#if notifyOfflineIssuePosted}
+      <Modal
+        title="{messages['report.issue']['modal.offline.issue.posted.title']}"
+        color="{primaryOne}"
+        on:cancel="{() => (notifyOfflineIssuePosted = false)}"
+      >
+        <div class="reported-offline-issue-success">
+          {messages["report.issue"]["modal.offline.issue.posted.description"]}
+        </div>
+      </Modal>
+    {/if}
+
+    {#if geocodeError}
+      <Modal
+        title="{messages['report.issue'][
+          'modal.offline.issue.posted.title.error'
+        ]}"
+        color="{primaryOne}"
+        on:cancel="{() => (geocodeError = false)}"
+      >
+        <div class="reported-offline-issue-success">
+          {messages["report.issue"][
+            "modal.offline.issue.posted.description.error"
+          ]}
+        </div>
+      </Modal>
+    {/if}
 
     <div
       class="content"
@@ -1201,11 +1416,11 @@
           <button
             bind:this="{findIssuesButtonSelector}"
             class="button"
-            class:button-find-issue-disabled="{showModal}"
-            disabled="{showModal}"
+            class:button-find-issue-disabled="{showModal || !isOnline}"
+            disabled="{showModal || !isOnline}"
             id="button-find-issues"
             on:click="{async () => {
-              if (reportNewIssueStep6) return;
+              if (reportNewIssueStep6 || !isOnline) return;
 
               // Clears the current position marker from the map
               currentPositionMarker.setMap(null);
@@ -1231,19 +1446,7 @@
                 if (!filteredIssuesData) await getIssues();
 
                 addIssuesToMap();
-              } else {
-                scrollToTop();
-
-                findReportedIssue = false;
-                showFilters = false;
-
-                setTimeout(() => {
-                  showFooter = true;
-                  adjustFooter();
-                }, 500);
-                clearData();
-                clearFilters();
-              }
+              } else resetFindIssue();
             }}"
           >
             {#if !findReportedIssue}
@@ -1277,23 +1480,54 @@
               reportNewIssueStep6}"
             id="button-report-issue"
             on:click="{() => {
+              if (!localStorage.getItem('completed')) clearLocalStorage(true);
               if (reportNewIssueStep6) return;
 
-              if (
-                map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
-                  .length === 3
-              )
-                map.controls[
-                  window.google.maps.ControlPosition.BOTTOM_LEFT
-                ].removeAt(heatmapControlIndex);
+              if (isOnline) {
+                if (
+                  map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
+                    .length === 3
+                )
+                  map.controls[
+                    window.google.maps.ControlPosition.BOTTOM_LEFT
+                  ].removeAt(heatmapControlIndex);
 
-              currentPositionMarker.setMap(map);
+                currentPositionMarker.setMap(map);
+              } else {
+                const stepOneDiv = document.getElementById('stepOne');
+
+                if (
+                  window.innerWidth >= 320 &&
+                  window.innerWidth <= 374 &&
+                  screen.orientation.type.includes('portrait')
+                ) {
+                  if (stepOneDiv) stepOneDiv.style.height = '16rem';
+                } else if (
+                  window.innerWidth >= 596 &&
+                  window.innerWidth <= 814 &&
+                  screen.orientation.type.includes('portrait')
+                ) {
+                  if (stepOneDiv) stepOneDiv.style.height = '15.5rem';
+                } else if (
+                  window.innerWidth >= 375 &&
+                  screen.orientation.type.includes('portrait')
+                ) {
+                  if (stepOneDiv) stepOneDiv.style.height = '14.5rem';
+                } else {
+                  if (stepOneDiv) stepOneDiv.style.height = '18rem';
+                }
+              }
 
               if (!reportNewIssue && !currentStep) {
                 showFooter = false;
                 reportNewIssue = true;
                 setTimeout(() => {
-                  adjustMap();
+                  if (isOnline) adjustMap();
+                  else {
+                    adjustOffline();
+                    setTimeout(() => populateAddress(), 100);
+                  }
+
                   setTimeout(() => {
                     reportIssuesButtonSelector.scrollIntoView({
                       behavior: 'smooth',
@@ -1328,13 +1562,15 @@
                 resetState();
               }
               // Ask for user's current location and center around it
-              navigator.geolocation.getCurrentPosition(
-                successCallback,
-                errorCallback,
-                {
-                  enableHighAccuracy: true,
-                }
-              );
+              if (isOnline) {
+                navigator.geolocation.getCurrentPosition(
+                  successCallback,
+                  errorCallback,
+                  {
+                    enableHighAccuracy: true,
+                  }
+                );
+              }
             }}"
           >
             {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5}
@@ -1464,6 +1700,7 @@
                     alt="remove issue detail"
                     width="14rem"
                     on:click="{async () => {
+                      invalidOtherDescription.visible = false;
                       $issueDetail = $issueDetail.filter(
                         (issueDTL) => issueDTL.id !== selection.id
                       );
@@ -1544,13 +1781,19 @@
               ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
+              if (!isOnline) issueTime.set(convertDate(new Date()));
+
               localStorage.setItem('issueTime', $issueTime);
-              localStorage.setItem('issueType', $issueType.name);
+              localStorage.setItem('issueTypeId', $issueType.id);
               if ($issueDetail)
                 localStorage.setItem(
                   'issueDetail',
                   JSON.stringify($issueDetail)
                 );
+              localStorage.setItem(
+                'issueDetailListCode',
+                $issueDetailList.code
+              );
               if ($issueDescription)
                 localStorage.setItem('issueDescription', $issueDescription);
 
@@ -1610,7 +1853,8 @@
               data-action="submit"
               class="g-recaptcha"
               on:submit|preventDefault="{() => {
-                recaptcha.renderRecaptcha(handleSubmit);
+                if (isOnline) recaptcha.renderRecaptcha(handleSubmit);
+                else handleSubmit('');
               }}"
             >
               <div style="display: flex">
@@ -1626,8 +1870,10 @@
                         ? 19
                         : 25
                     )}
-                  {:else}
+                  {:else if isOnline}
                     {messages["report.issue"]["label.choose.image"]}
+                  {:else if !isOnline}
+                    {messages["report.issue"]["image.upload.disabled"]}
                   {/if}
 
                   <!-- svelte-ignore a11y-img-redundant-alt -->
@@ -1643,9 +1889,13 @@
                   type="file"
                   id="image-uploads"
                   accept="image/*"
-                  capture="camera"
-                  style="display: none"
-                  on:change="{handleFileChange}"
+                  style="display: none; cursor: {isOnline
+                    ? 'pointer'
+                    : 'default'}"
+                  disabled="{!isOnline}"
+                  on:change="{(e) => {
+                    if (isOnline) handleFileChange(e);
+                  }}"
                 />
 
                 <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
@@ -1653,10 +1903,11 @@
                 <button
                   type="submit"
                   class="button"
-                  class:upload="{selectedFile && !messageSuccess}"
-                  class:disabled-button-upload="{!selectedFile ||
+                  class:upload="{isOnline && selectedFile && !messageSuccess}"
+                  class:disabled-button-upload="{!isOnline ||
+                    !selectedFile ||
                     messageSuccess}"
-                  disabled="{!selectedFile}"
+                  disabled="{!isOnline || !selectedFile}"
                 >
                   {messages["report.issue"]["label.upload.image"]}
                 </button>
@@ -1758,8 +2009,11 @@
             <input
               class="step-four-input-submitter-name"
               bind:value="{$issueSubmitterName}"
-              on:blur="{() =>
-                ($issueSubmitterName = $issueSubmitterName.trim())}"
+              on:blur="{() => {
+                if ($issueSubmitterName) {
+                  $issueSubmitterName = $issueSubmitterName.trim();
+                }
+              }}"
               on:click="{() => (invalidSubmitterName.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.submitter.name'
@@ -1781,8 +2035,11 @@
             <input
               class="step-four-input-contact-info"
               bind:value="{$issueSubmitterContact}"
-              on:blur="{() =>
-                ($issueSubmitterContact = $issueSubmitterContact.trim())}"
+              on:blur="{() => {
+                if ($issueSubmitterContact) {
+                  $issueSubmitterContact = $issueSubmitterContact.trim();
+                }
+              }}"
               on:click="{() => (invalidEmail.visible = false)}"
               placeholder="{messages['report.issue'][
                 'placeholder.contact.info'
@@ -1821,15 +2078,10 @@
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
             on:click="{() => {
-              if ($issueSubmitterName)
-                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
-              if ($issueSubmitterContact)
-                localStorage.setItem(
-                  'issueSubmitterContact',
-                  $issueSubmitterContact
-                );
-
-              if ($issueSubmitterName?.length < minSubmitterNameLength) {
+              if (
+                $issueSubmitterName?.length < minSubmitterNameLength &&
+                $issueSubmitterName?.length !== 0
+              ) {
                 invalidSubmitterName.visible = true;
                 return;
               }
@@ -1837,6 +2089,15 @@
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
               if (invalidEmail.visible) return;
+
+              if ($issueSubmitterName)
+                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+
+              if ($issueSubmitterContact)
+                localStorage.setItem(
+                  'issueSubmitterContact',
+                  $issueSubmitterContact
+                );
 
               reportNewIssueStep4 = false;
               currentStep = 5;
@@ -1967,7 +2228,8 @@
             data-callback="handleToken"
             data-action="submit"
             on:click="{() => {
-              recaptcha.renderRecaptcha(handleToken);
+              if (isOnline) recaptcha.renderRecaptcha(handleToken);
+              else handleToken('');
             }}"
           >
             {messages["report.issue"]["button.submit"]}
@@ -1993,8 +2255,15 @@
           <div class="success-message">
             {messages["report.issue"]["issue.reported.success.message.one"]}
           </div>
-          <div class="success-message-two">
-            {messages["report.issue"]["issue.reported.success.message.two"]}
+
+          <div class:success-message-two-offline="{!isOnline}">
+            {#if isOnline}
+              {messages["report.issue"]["issue.reported.success.message.two"]}
+            {:else}
+              {messages["report.issue"][
+                "issue.reported.success.message.two.offline"
+              ]}
+            {/if}
           </div>
         </div>
       </div>
@@ -2017,22 +2286,55 @@
             <div class="step-one-issue-location-label">
               {messages["report.issue"]["label.issue.location"]}
             </div>
-            <div class="step-one-instruction">
-              {messages["report.issue"]["label.issue.location.subtext"]}
-            </div>
-            <div class="step-one-issue-address">
-              <span style="color: {primaryTwo}"
-                >{$issueAddress ??
-                  messages["report.issue"]["location.services.disabled"]}</span
+
+            {#if isOnline}
+              <div class="step-one-instruction">
+                {messages["report.issue"]["label.issue.location.subtext"]}
+              </div>
+            {:else}
+              <input
+                bind:this="{offlineAddressInputSelector}"
+                class="offline-address-input"
+                placeholder="{messages['map']['pac-input-placeholder']}"
+                on:click="{() => (invalidOfflineAddress = false)}"
+              />
+
+              <div
+                class="step-one-invalid-offline-address"
+                class:visible="{invalidOfflineAddress}"
               >
+                {messages["report.issue"]["invalid.offline.address"]}
+              </div>
+            {/if}
+
+            <div class="step-one-issue-address">
+              {#if isOnline}
+                <span style="color: {primaryTwo}">
+                  {$issueAddress ??
+                    messages["report.issue"]["location.services.disabled"]}
+                </span>
+              {/if}
+            </div>
+            <div>
               <button
-                class="button"
-                class:next-button="{$issueAddress}"
+                class="button next-button"
                 step-one-button-next="{$issueAddress}"
-                class:disabled-button="{!$issueAddress}"
-                disabled="{!$issueAddress}"
+                class:disabled-button="{!$issueAddress && isOnline}"
+                disabled="{!$issueAddress && isOnline}"
                 style="margin-bottom: 0.5rem"
                 on:click="{() => {
+                  if (!isOnline) {
+                    if (
+                      offlineAddressInputSelector?.value?.length >=
+                      minAddressCharacters
+                    ) {
+                      issueAddress.set(offlineAddressInputSelector.value);
+                    } else {
+                      invalidOfflineAddress = true;
+                      return;
+                    }
+                  }
+
                   localStorage.setItem('issueAddress', $issueAddress); // for offline mode
 
                   reportNewIssueStep2 = true;
@@ -2063,10 +2365,15 @@
         {/if}
 
         <!-- END Report New Issue Flow -->
+        {#if isOnline}
+          <input
+            id="pac-input"
+            placeholder="{messages['map']['pac-input-placeholder']}"
+            type="text"
+          />
 
-        <input id="pac-input" placeholder="Enter the address" type="text" />
-        <div id="map"></div>
-
+          <div id="map"></div>
+        {/if}
         <!-- START Find Reported Issue -->
 
         {#if showModal}
