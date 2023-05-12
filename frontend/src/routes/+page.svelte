@@ -1889,7 +1889,6 @@
                   type="file"
                   id="image-uploads"
                   accept="image/*"
-                  capture="camera"
                   style="display: none; cursor: {isOnline
                     ? 'pointer'
                     : 'default'}"
