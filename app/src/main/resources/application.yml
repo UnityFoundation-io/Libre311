@@ -118,3 +118,5 @@ netty:
 wemove:
   recaptcha:
     secret: "6LfY3tMlAAAAAAxsA68VyjGMkbIkBqql3gDLG-Hs"
+  safesearch:
+    key: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk"
