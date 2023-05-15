@@ -239,6 +239,17 @@
 
   let visibleDetails = new Set();
 
+  const getTokenInfo = async () => {
+    let res;
+
+    try {
+      res = await axios.get("/token_info", { withCredentials: true });
+    } catch (err) {
+      console.error(err);
+    }
+    if (res?.status === 200) isAuthenticated = true;
+  };
+
   const clearLocalStorage = (bypassClearForm = false) => {
     localStorage.removeItem("completed");
     localStorage.removeItem("issueTypeId");
@@ -1026,6 +1037,7 @@
             "Content-Type": "text/csv",
           },
           responseType: "blob",
+          withCredentials: true,
         }
       );
 
@@ -1275,6 +1287,8 @@
   };
 
   onMount(async () => {
+    await getTokenInfo();
+
     isOnline = navigator.onLine;
 
     // Warn user before leaving the website
