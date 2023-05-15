@@ -24,6 +24,7 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
@@ -117,8 +118,9 @@ public class RootController {
     @Get(uris = {"/requests", "/requests.json"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO) {
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO);
+    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
+                                                                        @NotBlank @Header("X-G-RECAPTCHA-RESPONSE") String gRecaptchaResponse) {
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, gRecaptchaResponse);
         return HttpResponse.ok(serviceRequestDTOPage.getContent())
                 .headers(Map.of(
                         "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
@@ -133,10 +135,11 @@ public class RootController {
     @Get("/requests.xml")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO) throws JsonProcessingException {
+    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
+                                                      @NotBlank @Header("X-G-RECAPTCHA-RESPONSE") String gRecaptchaResponse) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO);
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, gRecaptchaResponse);
         ServiceRequestList serviceRequestList = new ServiceRequestList(serviceRequestDTOPage.getContent());
 
         return HttpResponse.ok(xmlMapper.writeValueAsString(serviceRequestList))
