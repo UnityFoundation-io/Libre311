@@ -444,10 +444,13 @@
   };
 
   const getIssues = async (page = 0, displayIssuesInMap = false) => {
-    let res;
-
-    res = await axios.get(
-      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
+    const res = await axios.get(
+      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
+      {
+        headers: {
+          "X-G-RECAPTCHA-RESPONSE": token,
+        },
+      }
     );
 
     if (
@@ -1202,8 +1205,6 @@
         if (localStorage.getItem("completed")) await postOfflineIssue();
       });
     });
-
-    loadRecaptcha();
   };
 
   const updateOnlineStatus = async () => {
@@ -1273,7 +1274,11 @@
     clearFilters();
   };
 
+  $: if (token) getIssues();
+
   onMount(async () => {
+    loadRecaptcha();
+
     isOnline = navigator.onLine;
 
     // Warn user before leaving the website
@@ -1292,8 +1297,6 @@
     scrollToTop();
 
     await getAllServiceCodes();
-
-    await getIssues();
 
     // Trigger the Svelte Transitions
     fadeInBackground = true;
