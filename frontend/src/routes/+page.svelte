@@ -445,13 +445,15 @@
     defaultOption.disabled = true;
     defaultOption.selected = true;
 
-    issueDetailSelectSelector.add(defaultOption);
+    if ($issueType.name !== "Other") {
+      issueDetailSelectSelector.add(defaultOption);
 
-    for (let i = 0; i < $issueDetailList.values.length; i++) {
-      const option = document.createElement("option");
-      option.text = $issueDetailList.values[i].name;
-      option.value = $issueDetailList.values[i].key;
-      issueDetailSelectSelector.add(option);
+      for (let i = 0; i < $issueDetailList.values.length; i++) {
+        const option = document.createElement("option");
+        option.text = $issueDetailList.values[i].name;
+        option.value = $issueDetailList.values[i].key;
+        issueDetailSelectSelector.add(option);
+      }
     }
   };
 
@@ -1805,10 +1807,14 @@
                   'issueDetail',
                   JSON.stringify($issueDetail)
                 );
-              localStorage.setItem(
-                'issueDetailListCode',
-                $issueDetailList.code
-              );
+
+              if ($issueType.name !== 'Other') {
+                localStorage.setItem(
+                  'issueDetailListCode',
+                  $issueDetailList.code
+                );
+              }
+
               if ($issueDescription)
                 localStorage.setItem('issueDescription', $issueDescription);
 
