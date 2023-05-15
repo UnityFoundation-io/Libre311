@@ -118,7 +118,8 @@
       visible: false,
     },
     fileName = "report.csv",
-    invalidOfflineAddress = false;
+    invalidOfflineAddress = false,
+    isAuthenticated = false;
 
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
@@ -2469,7 +2470,9 @@
               style="margin-right: 1rem; cursor: pointer"
               on:click="{reportCSV}"
             >
-              {messages["find.issue"]["label.download.csv"]}
+              {#if isAuthenticated}
+                {messages["find.issue"]["label.download.csv"]}
+              {/if}
             </div>
           </div>
 
