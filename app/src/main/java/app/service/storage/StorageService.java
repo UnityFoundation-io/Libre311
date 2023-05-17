@@ -30,6 +30,12 @@ public class StorageService {
         this.googleImageClassificationService = googleImageClassificationService;
     }
 
+    public StorageService() {
+        this.objectStorage = null;
+        this.reCaptchaService = null;
+        this.googleImageClassificationService = null;
+    }
+
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
         if (photoUploadDTO.getgRecaptchaResponse() == null  || !reCaptchaService.verifyReCaptcha(photoUploadDTO.getgRecaptchaResponse())) {
             LOG.error("ReCaptcha verification failed.");
