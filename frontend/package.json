@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "start": "concurrently \"npm run start:frontend\" \"cross-env CONCURRENTLY_NEW_WINDOW=1 npm run start:backend\"",
     "start:frontend": "npm run dev -- --open --host",
-    "start:backend": "cd .. && ./gradlew run"
+    "start:backend": "cd .. && MICRONAUT_ENVIRONMENTS=dev-data ./gradlew app:run"
   },
   "devDependencies": {
     "@playwright/test": "^1.32.3",
