@@ -79,6 +79,17 @@
   }
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner {
+  animation: spin 2s linear infinite;
+  width: 100px;
+  height: 100px;
+}
+
 body {
     font-family: 'Gotham', 'Roboto', 'Helvetica';
     background-color: black;
@@ -107,7 +118,7 @@ body {
   overflow: hidden;
   height: 3.5rem;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
-  z-index: 1;
+  z-index: 0;
 }
 
 @media only screen and (max-height: 390px) {
@@ -122,7 +133,35 @@ body {
   }
 }
 
+.image-container {
+  position: relative;
+  display: inline-block; /* So it will take only as much space as needed. */
+}
+
+.image-container img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.2rem;
+  background: #fff;
+  color: #000;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
 /*//////// Desktop Style ////////*/
+
+.fobidden-icon {
+  vertical-align: middle; 
+  margin-left: 2.5rem; 
+  margin-top: 1rem; 
+  border-radius: 10px;
+}
 
 .reported-offline-issue-success {
   text-align: center; 
@@ -150,14 +189,14 @@ body {
   position: relative;
   overflow: hidden;
   background-repeat: no-repeat;
-  transition: height 0.5s ease;
+  transition: height 0.75s ease;
 }
 
 .background::before {
   content: "";
-  background-image: url("$lib/columbiaBackground.png");
+  background-image: url("$lib/columbiaBackgroundE.png");
   background-repeat: no-repeat;
-  background-position: 100% 67%;
+  background-position: 100% 27%;
   background-size: cover;
   position: absolute;
   top: 0;
@@ -165,7 +204,7 @@ body {
   width: 100%;
   height: 100%;
   z-index: -1;
-  transition: height 0.5s ease;
+  transition: height 0.75s ease;
 }
 
 .background-opacity::before {
@@ -258,6 +297,7 @@ body {
 .button-find-issue-disabled {
   filter: grayscale(100%);
   cursor: default;
+  z-index: 0;
 }
 
 .slogan-title {
@@ -407,7 +447,7 @@ textarea::placeholder {
   font-size: 1rem;
   margin-left: 3rem;
   padding: 0.3rem;
-  width: 24rem;
+  width: 33.3rem;
   background-color: white;
   height: 2.7rem;
   border-style: dashed;
@@ -969,6 +1009,10 @@ td {
 /*/////// Android S10+ Portrait////////*/
 
 @media only screen and (min-width: 320px) and (max-width: 374px) and (orientation: portrait) {
+  .fobidden-icon {
+    margin-left: 0.3rem;
+  }
+
   .content {
     font-size: 0.5rem;
   }
@@ -1415,7 +1459,7 @@ td {
   }
 
   .background::before {
-    background-position: calc(40% - 100px) calc(50% - 500px);
+    background-position: 45% 50%;
   }
 
   textarea {
@@ -1881,7 +1925,7 @@ td {
 
 @media only screen and (min-width: 375px) and (min-height: 669px) and (max-height: 739px) and (orientation: portrait) {
   .background::before {
-    background-position: center calc(50% - 400px);
+    background-position: 45% 10%;
   }
 
   .logo {
@@ -1930,7 +1974,7 @@ td {
   }
 
   .upload-image {
-    width: 18rem;
+    width: 22.7rem;
   }
 
   .td-description {
@@ -1968,13 +2012,21 @@ td {
   .step-one-invalid-offline-address {
     margin-right: 1.2rem;
   }
+
+  .fobidden-icon {
+    margin-left: 0.3rem;
+  }
 }
 
 /*/////// iPhone 14 Pro Max Portrait ////////*/
 
 @media only screen and (min-width: 400px) and (min-height: 670px) and (max-height: 750px) and (orientation: portrait) {
+  .fobidden-icon {
+    margin-left: 0.3rem;
+  }
+
   .background::before {
-    background-position: center calc(50% - 400px);
+    background-position: 50% 10%;
   }
 
   .logo {
@@ -2019,7 +2071,7 @@ td {
   }
 
   .upload-image {
-    width: 17.5rem;
+    width: 25.2rem;
   }
 
   .camera-icon {
@@ -2343,7 +2395,11 @@ td {
     .upload-image {
       margin-left: 0.5rem;
       border-radius: 10px;
-      width: 18.5rem;
+      width: 24.5rem;
+    }
+
+    .fobidden-icon {
+      margin-left: 0.3rem;
     }
 
     .camera-icon {
@@ -2476,7 +2532,7 @@ td {
     }
 
     .background::before {
-      background-position: center calc(50% - 400px);
+      background-position: center calc(10% -300px);
     }
 
     textarea {
@@ -2525,7 +2581,7 @@ td {
       }
 
       .upload-image {
-        width: 29rem;
+        width: 31rem;
       }
 
       textarea {
@@ -2572,7 +2628,7 @@ td {
       }
 
       .background::before {
-        background-position: center calc(50% - 275px);
+        background-position: center 50%;
       }
 
       .offline-address-input {
@@ -2616,7 +2672,7 @@ td {
         }
   
         .background::before {
-          background-position: center calc(50% - 300px);
+          background-position: center 50%;
         }
 
         #button-report-issue {
@@ -2642,8 +2698,8 @@ td {
         }
 
         .upload-image {
-          width: 32rem;
-          }
+          width: 34rem;
+        }
 
         .step-four-input-submitter-name {
           margin-left: 0.5rem;

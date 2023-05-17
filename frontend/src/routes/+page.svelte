@@ -1,5 +1,4 @@
 <script>
-  // import { Loader } from "@googlemaps/js-api-loader";
   import { fade, scale, blur } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
@@ -17,6 +16,7 @@
   import imageSVG from "../icons/image.svg";
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
+  import forbiddenSVG from "../icons/forbidden.svg";
   import issueAddress from "../stores/issueAddress";
   import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
@@ -45,6 +45,7 @@
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
+  import "$lib/spinner.css";
 
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -104,6 +105,7 @@
     showFooter = true,
     showTable = true,
     seeMore = false,
+    spinner = false,
     heatmapVisible = true,
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
@@ -143,7 +145,8 @@
     findIssuesButtonSelector,
     reportIssuesButtonSelector,
     isOnline,
-    wasOnline;
+    wasOnline,
+    imageData;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -166,6 +169,7 @@
 
   // Image Safe Search
   let selectedFile = null,
+    selectedFileSrc = null,
     messageSuccess = "",
     messageRejectedOne = "",
     messageRejectedTwo = "",
@@ -310,41 +314,65 @@
   const handleFileChange = async (event) => {
     clearUploadMessages();
     selectedFile = event.target.files[0];
-    await readFileAsDataURL(selectedFile);
+    spinner = true;
+    selectedFileSrc = await readFileAsDataURL(selectedFile);
+
+    await handleSubmit();
   };
 
-  const handleSubmit = async (recaptchaToken) => {
+  const handleSubmit = async () => {
     // Convert the selected image file to a data URL
-    const imageUrl = await new Promise((resolve) => {
+    imageData = await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (event) => resolve(event.target.result);
       reader.readAsDataURL(selectedFile);
     });
 
     // Call the detectExplicitContent function with the image data URL
-    if (recaptchaToken) {
-      const isExplicit = await detectExplicitContent(imageUrl, apiKey);
+    const isExplicit = await detectExplicitContent(imageData, apiKey);
 
-      if (isExplicit) {
-        messageRejectedOne =
-          messages["report.issue"]["uploaded.message.rejected-one"];
-        messageRejectedTwo =
-          messages["report.issue"]["uploaded.message.rejected-two"];
+    if (isExplicit) {
+      messageRejectedOne =
+        messages["report.issue"]["uploaded.message.rejected-one"];
+      messageRejectedTwo =
+        messages["report.issue"]["uploaded.message.rejected-two"];
 
-        selectedFile = null;
-      } else {
-        messageSuccess = messages["report.issue"]["uploaded.message.success"];
+      imageData = null;
+      selectedFileSrc = null;
+      selectedFile = null;
+      spinner = false;
+    } else {
+      messageSuccess = messages["report.issue"]["uploaded.message.success"];
+      spinner = false;
+    }
+  };
 
-        // Save the image to the Server Locally
-        // this worked for me in testing - max
-
+  const postImage = async (recaptchaToken) => {
+    return new Promise(async (resolve, reject) => {
+      try {
         const res = await axios.post("/image", {
           g_recaptcha_response: recaptchaToken,
-          image: imageUrl,
+          image: imageData,
         });
 
-        if (res?.data) mediaUrl = res.data;
+        mediaUrl = res.data;
+        resolve();
+      } catch (err) {
+        reject(err);
       }
+    });
+  };
+
+  const executeRecaptchaAndPostIssue = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        recaptcha.renderRecaptcha((recaptchaToken) => {
+          postImage(recaptchaToken).then(resolve).catch(reject);
+        });
+      });
+      await postIssue();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -706,6 +734,9 @@
     invalidSubmitterName.visible = false;
     invalidEmail.visible = false;
     mediaUrl = undefined;
+    imageData = "";
+    selectedFileSrc = "";
+    selectedFile = "";
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -1089,10 +1120,14 @@
     await initRecaptcha();
   };
 
-  const handleToken = (recaptchaToken) => {
+  const handleToken = async (recaptchaToken) => {
     if (recaptchaToken) token = recaptchaToken;
     reportNewIssueStep5 = false;
-    postIssue();
+
+    if (imageData) {
+      executeRecaptchaAndPostIssue();
+    } else await postIssue();
+
     currentStep = 6;
     reportNewIssueStep6 = true;
     localStorage.setItem("completed", "true");
@@ -1357,9 +1392,6 @@
         />
       {/if}
     </div>
-    <div style="color:yellow; text-align: center">
-      You are currently: {isOnline ? "online" : "offline"}
-    </div>
 
     {#if notifyOfflineIssuePosted}
       <Modal
@@ -1457,7 +1489,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 250);
+                  }, 500);
                 }, 100);
 
                 if (!filteredIssuesData) await getIssues();
@@ -1550,7 +1582,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 250);
+                  }, 500);
                 }, 100);
 
                 reduceBackGroundOpacity = false;
@@ -1819,11 +1851,12 @@
                 localStorage.setItem('issueDescription', $issueDescription);
 
               if (
-                ($issueType.name === 'Other' ||
+                (($issueType.name === 'Other' ||
                   $issueDetail.find(
                     (selection) => selection.name === 'Other'
                   )) &&
-                $issueDescription?.length < minOtherDescriptionLength
+                  $issueDescription?.length < minOtherDescriptionLength) ||
+                $issueDescription === null
               ) {
                 invalidOtherDescription.visible = true;
               } else {
@@ -1873,10 +1906,6 @@
               data-callback="onSubmit"
               data-action="submit"
               class="g-recaptcha"
-              on:submit|preventDefault="{() => {
-                if (isOnline) recaptcha.renderRecaptcha(handleSubmit);
-                else handleSubmit('');
-              }}"
             >
               <div style="display: flex">
                 <label
@@ -1916,39 +1945,60 @@
                   disabled="{!isOnline}"
                   on:change="{(e) => {
                     if (isOnline) handleFileChange(e);
+                    e.target.value = '';
                   }}"
                 />
 
                 <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
-
-                <button
-                  type="submit"
-                  class="button"
-                  class:upload="{isOnline && selectedFile && !messageSuccess}"
-                  class:disabled-button-upload="{!isOnline ||
-                    !selectedFile ||
-                    messageSuccess}"
-                  disabled="{!isOnline || !selectedFile}"
-                >
-                  {messages["report.issue"]["label.upload.image"]}
-                </button>
               </div>
             </form>
 
+            {#if spinner}
+              <div class="loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            {/if}
+
             {#if messageRejectedOne}
+              <!-- svelte-ignore a11y-img-redundant-alt -->
+              <img
+                src="{forbiddenSVG}"
+                alt="rejected image"
+                height="auto"
+                width="50rem"
+                class="fobidden-icon"
+              />
               <div class="upload-message">{messageRejectedOne}</div>
               <div class="upload-message">{messageRejectedTwo}</div>
-            {:else if messageSuccess && mediaUrl}
+            {:else if messageSuccess && imageData}
               <!-- svelte-ignore a11y-img-redundant-alt -->
               <div class="upload-message">
-                <img
-                  src="{mediaUrl}"
-                  alt="issue image"
-                  height="auto"
-                  width="75rem"
-                  style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
-                />
-                {messageSuccess}
+                <div class="image-container">
+                  <img
+                    src="{selectedFileSrc}"
+                    alt="issue image"
+                    height="auto"
+                    width="75rem"
+                    style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
+                  />
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <div
+                    class="remove-btn"
+                    on:click="{(e) => {
+                      e.target.parentElement.style.display = 'none';
+                      selectedFile = null;
+                      selectedFileSrc = null;
+                      imageData = null;
+                      messageSuccess = '';
+                    }}"
+                  >
+                    X
+                  </div>
+                </div>
+                <div style="margin-top: 1rem">{messageSuccess}</div>
               </div>
             {/if}
 
@@ -1979,14 +2029,7 @@
             </button>
 
             <button
-              class="button"
-              class:next-button="{$issueType && $issueDetail}"
-              class:disabled-button="{$issueType === null ||
-                $issueDetail === null ||
-                (selectedFile && !mediaUrl)}"
-              disabled="{$issueType === null ||
-                $issueDetail === null ||
-                (selectedFile && !mediaUrl)}"
+              class="button next-button"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
@@ -2170,13 +2213,13 @@
             </div>
           </div>
 
-          {#if mediaUrl}
+          {#if selectedFileSrc}
             <div class="step-five-issue-detail-label">
               {messages["report.issue"]["label.review.media"]}
             </div>
             <!-- svelte-ignore a11y-img-redundant-alt -->
             <img
-              src="{mediaUrl}"
+              src="{selectedFileSrc}"
               height="auto"
               width="75rem"
               alt="uploaded image"
