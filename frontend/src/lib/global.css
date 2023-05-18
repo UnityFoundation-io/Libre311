@@ -810,6 +810,10 @@ td {
   border-radius: 10px;
 }
 
+.step-four-input-submitter-name::placeholder {
+  font-size: 0.85rem;
+}
+
 .step-four-submitter-name-word-count-error {
   visibility: hidden;
   justify-content: right;
@@ -1479,11 +1483,11 @@ td {
     margin-left: 0.1rem;
     margin-bottom: 0.1rem;
     width: 84vw;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 
   textarea::placeholder {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 }
 /* /////////////////// */
