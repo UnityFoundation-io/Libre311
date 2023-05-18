@@ -17,6 +17,7 @@
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
   import forbiddenSVG from "../icons/forbidden.svg";
+  import mylocationSVG from "../icons/mylocation.svg";
   import issueAddress from "../stores/issueAddress";
   import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
@@ -262,8 +263,6 @@
     localStorage.removeItem("issueDetailListCode");
     localStorage.removeItem("issueDetail");
     localStorage.removeItem("issueDescription");
-    localStorage.removeItem("issueSubmitterName");
-    localStorage.removeItem("issueSubmitterContact");
     if (!bypassClearForm) clearForm();
   };
 
@@ -560,7 +559,10 @@
       });
 
       if (postingOfflineIssue) notifyOfflineIssuePosted = true;
-      setTimeout(() => clearLocalStorage(), 2000);
+      setTimeout(async () => {
+        clearLocalStorage();
+        await getIssues();
+      }, 2000);
     } catch (err) {
       console.error(err);
     }
@@ -840,6 +842,11 @@
         });
 
         markers.push(marker);
+
+        google.maps.event.addListener(marker, "click", function () {
+          toggleDetails(issue.service_request_id);
+          selectedIssue = issue;
+        });
 
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
@@ -1148,6 +1155,14 @@
     }
   };
 
+  function createCenterAroundMeControl(controlText, clickHandler) {
+    const controlDiv = document.createElement("div");
+    controlDiv.className = "centerAroundMeControl";
+    controlDiv.addEventListener("click", clickHandler);
+    controlDiv.title = controlText;
+    return controlDiv;
+  }
+
   const initGoogleMaps = async () => {
     import("@googlemaps/js-api-loader").then((module) => {
       const Loader = module.Loader;
@@ -1183,12 +1198,28 @@
           map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
         });
 
+        const centerAroundMeControl = createCenterAroundMeControl(
+          "CenterAroundMe",
+          function () {
+            navigator.geolocation.getCurrentPosition(
+              successCallback,
+              errorCallback,
+              {
+                enableHighAccuracy: true,
+              }
+            );
+          }
+        );
+
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
           satelliteControl
         );
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(
           inputIssueAddressSelector
+        );
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(
+          centerAroundMeControl
         );
 
         const icon = {
@@ -1447,9 +1478,9 @@
           }}"
         >
           {#if seeMore}
-            -
+            less...
           {:else}
-            +
+            more...
           {/if}
         </span>
 
@@ -2040,6 +2071,14 @@
                 reportNewIssueStep3 = false;
                 currentStep = 4;
                 reportNewIssueStep4 = true;
+
+                if (localStorage.getItem('issueSubmitterName'))
+                  $issueSubmitterName =
+                    localStorage.getItem('issueSubmitterName');
+                if (localStorage.getItem('issueSubmitterContact'))
+                  $issueSubmitterContact = localStorage.getItem(
+                    'issueSubmitterContact'
+                  );
               }}"
             >
               {messages["report.issue"]["button.next"]}
@@ -2159,14 +2198,12 @@
 
               if (invalidEmail.visible) return;
 
-              if ($issueSubmitterName)
-                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+              localStorage.setItem('issueSubmitterName', $issueSubmitterName);
 
-              if ($issueSubmitterContact)
-                localStorage.setItem(
-                  'issueSubmitterContact',
-                  $issueSubmitterContact
-                );
+              localStorage.setItem(
+                'issueSubmitterContact',
+                $issueSubmitterContact
+              );
 
               reportNewIssueStep4 = false;
               currentStep = 5;
