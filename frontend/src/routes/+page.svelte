@@ -1421,6 +1421,11 @@
       </Modal>
     {/if}
 
+    {#if window.innerHeight}
+      <div style="text-align: center; color: yellow">
+        Height:{window.innerHeight} Width: {window.innerWidth}
+      </div>
+    {/if}
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
