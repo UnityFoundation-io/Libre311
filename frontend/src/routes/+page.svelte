@@ -108,6 +108,7 @@
     seeMore = false,
     spinner = false,
     heatmapVisible = true,
+    issuesRefs = {},
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
       visible: false,
@@ -846,6 +847,7 @@
         google.maps.event.addListener(marker, "click", function () {
           toggleDetails(issue.service_request_id);
           selectedIssue = issue;
+          scrollToIssue(issue.service_request_id);
         });
 
         heatmapData.push(
@@ -1162,6 +1164,13 @@
     controlDiv.title = controlText;
     return controlDiv;
   }
+
+  const scrollToIssue = (id) => {
+    console.log("id", id);
+    if (issuesRefs[id]) {
+      issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const initGoogleMaps = async () => {
     import("@googlemaps/js-api-loader").then((module) => {
@@ -2714,6 +2723,7 @@
                 {#if filteredIssuesData}
                   {#each filteredIssuesData as issue (issue.service_request_id)}
                     <tr
+                      bind:this="{issuesRefs[issue.service_request_id]}"
                       on:click="{() => setNewCenter(issue.lat, issue.long, 17)}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id
