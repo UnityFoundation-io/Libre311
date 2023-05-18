@@ -89,7 +89,7 @@
             "issues.table.column.one": "Issue Type",
             "issues.table.column.two": "Description",
             "issues.table.column.three": "Media",
-            "issues.table.column.four": "Requested At",
+            "issues.table.column.four": "Reported At",
             "empty.results": "No Results Found"
         }
 }

@@ -561,7 +561,10 @@
       });
 
       if (postingOfflineIssue) notifyOfflineIssuePosted = true;
-      setTimeout(() => clearLocalStorage(), 2000);
+      setTimeout(async() => {
+        clearLocalStorage();
+        await getIssues();
+      }, 2000);
     } catch (err) {
       console.error(err);
     }
