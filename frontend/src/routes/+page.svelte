@@ -17,6 +17,7 @@
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
   import forbiddenSVG from "../icons/forbidden.svg";
+  import mylocationSVG from "../icons/mylocation.svg";
   import issueAddress from "../stores/issueAddress";
   import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
@@ -1148,6 +1149,14 @@
     }
   };
 
+  function createCenterAroundMeControl(controlText, clickHandler) {
+    const controlDiv = document.createElement("div");
+    controlDiv.className = "centerAroundMeControl";
+    controlDiv.addEventListener("click", clickHandler);
+    controlDiv.title = controlText;
+    return controlDiv;
+  }
+
   const initGoogleMaps = async () => {
     import("@googlemaps/js-api-loader").then((module) => {
       const Loader = module.Loader;
@@ -1183,6 +1192,19 @@
           map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
         });
 
+        const centerAroundMeControl = createCenterAroundMeControl(
+          "CenterAroundMe",
+          function () {
+            navigator.geolocation.getCurrentPosition(
+              successCallback,
+              errorCallback,
+              {
+                enableHighAccuracy: true,
+              }
+            );
+          }
+        );
+
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
           satelliteControl
@@ -1190,6 +1212,11 @@
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(
           inputIssueAddressSelector
         );
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(
+          centerAroundMeControl
+        );
+
+        
 
         const icon = {
           url: currentLocationSVG,
@@ -1447,9 +1474,9 @@
           }}"
         >
           {#if seeMore}
-            -
+            less...
           {:else}
-            +
+            more...
           {/if}
         </span>
 

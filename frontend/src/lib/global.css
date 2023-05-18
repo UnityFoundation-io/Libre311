@@ -84,6 +84,19 @@
   100% { transform: rotate(360deg); }
 }
 
+.centerAroundMeControl {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.6rem;
+  margin-left: 0.6rem;
+  background-image: url('../icons/mylocation.svg');
+  background-color: white;
+  cursor: pointer;
+  background-size: cover;
+  padding: 0.5rem;
+  box-shadow: 0.1rem 0.1rem 0.1rem rgba(0, 0, 0, 0.3);
+}
+
 .spinner {
   animation: spin 2s linear infinite;
   width: 100px;
@@ -321,7 +334,7 @@ body {
 
 .see-more {
   color:var(--primary-color-two); 
-  font-size: 2rem;
+  font-size: 1.3rem;
   cursor: pointer;
 }
 
@@ -1416,7 +1429,7 @@ td {
   }
 
   .see-more {
-    font-size: 1rem;
+    font-size: 0.75rem;
   }
 
   .see-more-title {
@@ -1941,7 +1954,7 @@ td {
   }
 
   .see-more {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
   }
 
   .see-more-title {
@@ -2042,7 +2055,7 @@ td {
   }
 
   .see-more {
-    font-size: 1.35rem;
+    font-size: 1rem;
   }
 
   .see-more-title {
@@ -2497,7 +2510,7 @@ td {
     }
 
     .see-more {
-      font-size: 1rem;
+      font-size: 0.8rem;
     }
   
     .see-more-title {
@@ -2615,7 +2628,7 @@ td {
       }
 
       .see-more {
-        font-size: 1.3rem;
+        font-size: 1rem;
       }
     
       .see-more-title {
@@ -2659,7 +2672,7 @@ td {
         }
 
         .see-more {
-          font-size: 1.3rem;
+          font-size: 1rem;
         }
       
         .see-more-title {
