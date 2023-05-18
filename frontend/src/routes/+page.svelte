@@ -85,6 +85,8 @@
 
   let serviceCodes = [];
 
+  let phoneHeight, phoneWidth;
+
   let openLogo = false,
     fadeInBackground = false,
     reduceBackGroundOpacity = false,
@@ -1324,6 +1326,9 @@
   };
 
   onMount(async () => {
+    phoneHeight = window.innerHeight;
+    phoneWidth = window.innerWidth;
+
     await getTokenInfo();
 
     isOnline = navigator.onLine;
@@ -1421,6 +1426,9 @@
       </Modal>
     {/if}
 
+    {#if phoneHeight}
+    <div style="text-align: center; color: yellow">Height:{phoneHeight} Width: {phoneWidth}</div>
+{/if}
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
