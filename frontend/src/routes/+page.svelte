@@ -842,6 +842,12 @@
 
         markers.push(marker);
 
+        google.maps.event.addListener(marker, 'click', function () {
+         
+         toggleDetails(issue.service_request_id);
+                          selectedIssue = issue;
+        })
+
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
         );
@@ -1215,8 +1221,6 @@
         map.controls[google.maps.ControlPosition.LEFT_TOP].push(
           centerAroundMeControl
         );
-
-        
 
         const icon = {
           url: currentLocationSVG,
@@ -2716,6 +2720,7 @@
                       <td
                         class="td-issue-type"
                         on:click="{() => {
+                          
                           toggleDetails(issue.service_request_id);
                           selectedIssue = issue;
                         }}"
