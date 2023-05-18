@@ -1991,8 +1991,8 @@ td {
   }
 
   .td-description {
-    max-width: 10rem;
-    min-width: 10rem;
+    max-width: 8.5rem;
+    min-width: 8.5rem;
   }
 
   .upload {
@@ -2102,6 +2102,11 @@ td {
 
   .step-one-invalid-offline-address {
     margin-right: 1.3rem;
+  }
+
+  .td-description {
+    max-width: 10rem;
+    min-width: 10rem;
   }
 }
 
