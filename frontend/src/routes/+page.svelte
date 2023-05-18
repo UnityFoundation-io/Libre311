@@ -263,8 +263,6 @@
     localStorage.removeItem("issueDetailListCode");
     localStorage.removeItem("issueDetail");
     localStorage.removeItem("issueDescription");
-    localStorage.removeItem("issueSubmitterName");
-    localStorage.removeItem("issueSubmitterContact");
     if (!bypassClearForm) clearForm();
   };
 
@@ -2074,6 +2072,9 @@
                 reportNewIssueStep3 = false;
                 currentStep = 4;
                 reportNewIssueStep4 = true;
+
+                if(localStorage.getItem("issueSubmitterName")) $issueSubmitterName = localStorage.getItem("issueSubmitterName");
+                if(localStorage.getItem("issueSubmitterContact")) $issueSubmitterContact = localStorage.getItem("issueSubmitterContact");
               }}"
             >
               {messages["report.issue"]["button.next"]}
