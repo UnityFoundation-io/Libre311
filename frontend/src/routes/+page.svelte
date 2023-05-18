@@ -559,7 +559,7 @@
       });
 
       if (postingOfflineIssue) notifyOfflineIssuePosted = true;
-      setTimeout(async() => {
+      setTimeout(async () => {
         clearLocalStorage();
         await getIssues();
       }, 2000);
@@ -843,11 +843,10 @@
 
         markers.push(marker);
 
-        google.maps.event.addListener(marker, 'click', function () {
-         
-         toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
-        })
+        google.maps.event.addListener(marker, "click", function () {
+          toggleDetails(issue.service_request_id);
+          selectedIssue = issue;
+        });
 
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
@@ -2073,8 +2072,13 @@
                 currentStep = 4;
                 reportNewIssueStep4 = true;
 
-                if(localStorage.getItem("issueSubmitterName")) $issueSubmitterName = localStorage.getItem("issueSubmitterName");
-                if(localStorage.getItem("issueSubmitterContact")) $issueSubmitterContact = localStorage.getItem("issueSubmitterContact");
+                if (localStorage.getItem('issueSubmitterName'))
+                  $issueSubmitterName =
+                    localStorage.getItem('issueSubmitterName');
+                if (localStorage.getItem('issueSubmitterContact'))
+                  $issueSubmitterContact = localStorage.getItem(
+                    'issueSubmitterContact'
+                  );
               }}"
             >
               {messages["report.issue"]["button.next"]}
@@ -2194,14 +2198,12 @@
 
               if (invalidEmail.visible) return;
 
-              if ($issueSubmitterName)
-                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+              localStorage.setItem('issueSubmitterName', $issueSubmitterName);
 
-              if ($issueSubmitterContact)
-                localStorage.setItem(
-                  'issueSubmitterContact',
-                  $issueSubmitterContact
-                );
+              localStorage.setItem(
+                'issueSubmitterContact',
+                $issueSubmitterContact
+              );
 
               reportNewIssueStep4 = false;
               currentStep = 5;
@@ -2724,7 +2726,6 @@
                       <td
                         class="td-issue-type"
                         on:click="{() => {
-                          
                           toggleDetails(issue.service_request_id);
                           selectedIssue = issue;
                         }}"
