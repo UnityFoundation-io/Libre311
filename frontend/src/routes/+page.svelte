@@ -193,8 +193,8 @@
 
     setTimeout(() => {
       showFooter = true;
-      setTimeout(() => {
-        adjustFooter();
+      setTimeout(async () => {
+        await adjustFooter();
       }, 50);
     }, 400);
 
@@ -208,7 +208,7 @@
     if (previousState === "findReportedIssue") {
       setTimeout(() => {
         findReportedIssue = true;
-        setTimeout(() => adjustTable(), 100);
+        setTimeout(async () => await adjustTable(), 100);
       }, 400);
     }
   };
@@ -483,7 +483,11 @@
     multiSelectOptions = multiSelectOptions;
   };
 
-  const getIssues = async (page = 0, displayIssuesInMap = false) => {
+  const getIssues = async (
+    page = 0,
+    displayIssuesInMap = false,
+    issuePosted = false
+  ) => {
     let res;
 
     res = await axios.get(
@@ -491,14 +495,16 @@
     );
 
     if (
+      !issuePosted &&
       res.data?.length > 0 &&
       JSON.stringify(issuesData) !== JSON.stringify(res.data)
     ) {
-      if (issuesData) issuesData = [...issuesData, ...res.data];
+      if (issuesData?.length > 0) issuesData = [...issuesData, ...res.data];
       else issuesData = [...res.data];
+    } else issuesData = [...res.data];
 
-      filteredIssuesData = issuesData;
-    }
+    filteredIssuesData = issuesData;
+
     totalSize.set(res.headers["page-totalsize"]);
     totalPages.set(res.headers["page-totalpages"]);
     currentPage.set(res.headers["page-pagenumber"]);
@@ -558,9 +564,10 @@
       });
 
       if (postingOfflineIssue) notifyOfflineIssuePosted = true;
+
       setTimeout(async () => {
         clearLocalStorage();
-        await getIssues();
+        await getIssues(0, false, true);
       }, 2000);
     } catch (err) {
       console.error(err);
@@ -1019,22 +1026,31 @@
   };
 
   const adjustFooter = () => {
-    if (!$footerDivHeight && $footerSelector) {
-      footerDivHeight.set(
-        $footerSelector.offsetTop + $footerSelector.offsetHeight
-      );
-    }
+    return new Promise((resolve, reject) => {
+      if (!$footerDivHeight && $footerSelector) {
+        footerDivHeight.set(
+          $footerSelector.offsetTop + $footerSelector.offsetHeight
+        );
+      }
 
-    backgroundSelector.style.height = $footerDivHeight + "px";
+      backgroundSelector.style.height = $footerDivHeight + "px";
+
+      resolve();
+    });
   };
 
   const adjustTable = () => {
-    if (tableSelector) {
-      let addExtra = 90;
+    return new Promise((resolve, reject) => {
+      if (tableSelector) {
+        let addExtra = 90;
 
-      const tableHeight = tableSelector.offsetTop + tableSelector.offsetHeight;
-      backgroundSelector.style.height = tableHeight + addExtra + "px";
-    }
+        const tableHeight =
+          tableSelector.offsetTop + tableSelector.offsetHeight;
+        backgroundSelector.style.height = tableHeight + addExtra + "px";
+
+        resolve();
+      }
+    });
   };
 
   const adjustMap = () => {
@@ -1351,9 +1367,9 @@
     findReportedIssue = false;
     showFilters = false;
 
-    setTimeout(() => {
+    setTimeout(async () => {
       showFooter = true;
-      adjustFooter();
+      await adjustFooter();
     }, 500);
 
     clearData();
@@ -1364,6 +1380,7 @@
   };
 
   onMount(async () => {
+    console.clear();
     await getTokenInfo();
 
     isOnline = navigator.onLine;
@@ -1526,8 +1543,8 @@
               if (!findReportedIssue) {
                 showFooter = false;
                 findReportedIssue = true;
-                setTimeout(() => {
-                  adjustTable();
+                setTimeout(async () => {
+                  await adjustTable();
 
                   setTimeout(() => {
                     findIssuesButtonSelector.scrollIntoView({
@@ -2163,11 +2180,14 @@
 
               if (invalidEmail.visible) return;
 
-              localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+              localStorage.setItem(
+                'issueSubmitterName',
+                $issueSubmitterName ?? ''
+              );
 
               localStorage.setItem(
                 'issueSubmitterContact',
-                $issueSubmitterContact
+                $issueSubmitterContact ?? ''
               );
 
               reportNewIssueStep4 = false;
