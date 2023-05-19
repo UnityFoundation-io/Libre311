@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
   import axios from "axios";
+  import MultiSelect from "svelte-multiselect";
   import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
@@ -109,6 +110,7 @@
     spinner = false,
     heatmapVisible = true,
     issuesRefs = {},
+    multiSelectOptions = [],
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
       visible: false,
@@ -146,6 +148,7 @@
     issueDetailSelectSelector,
     findIssuesButtonSelector,
     reportIssuesButtonSelector,
+    selected,
     isOnline,
     wasOnline,
     imageData;
@@ -467,22 +470,17 @@
   };
 
   const populateIssueDetailList = () => {
-    const defaultOption = document.createElement("option");
-    defaultOption.text = "Issue Detail";
-    defaultOption.value = "";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
+    multiSelectOptions = [];
 
-    if ($issueType.name !== "Other") {
-      issueDetailSelectSelector.add(defaultOption);
-
-      for (let i = 0; i < $issueDetailList.values.length; i++) {
-        const option = document.createElement("option");
-        option.text = $issueDetailList.values[i].name;
-        option.value = $issueDetailList.values[i].key;
-        issueDetailSelectSelector.add(option);
-      }
+    for (let i = 0; i < $issueDetailList.values.length; i++) {
+      let obj = {
+        label: $issueDetailList.values[i].name,
+        value: $issueDetailList.values[i].key,
+      };
+      multiSelectOptions.push(obj);
     }
+    // Reactive statement for arrays
+    multiSelectOptions = multiSelectOptions;
   };
 
   const getIssues = async (page = 0, displayIssuesInMap = false) => {
@@ -529,7 +527,7 @@
     }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
 
     $issueDetail.forEach((attr) => {
-      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.id;
+      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
     });
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
@@ -1166,7 +1164,6 @@
   }
 
   const scrollToIssue = (id) => {
-    console.log("id", id);
     if (issuesRefs[id]) {
       issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -1361,6 +1358,9 @@
 
     clearData();
     clearFilters();
+
+    if (selectedIssue) toggleDetails(selectedIssue.service_request_id);
+    selectedIssue = null;
   };
 
   onMount(async () => {
@@ -1461,11 +1461,11 @@
       </Modal>
     {/if}
 
-    {#if window.innerHeight}
+    <!-- {#if window.innerHeight}
       <div style="text-align: center; color: yellow">
         Height:{window.innerHeight} Width: {window.innerWidth}
       </div>
-    {/if}
+    {/if} -->
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
@@ -1723,6 +1723,8 @@
               class="step-two-select"
               bind:this="{issueTypeSelectSelector}"
               on:change="{async (e) => {
+                selected = [];
+
                 if ($issueDetail) issueDetail.set([]);
 
                 issueType.set({
@@ -1732,13 +1734,6 @@
 
                 if ($issueType.name !== 'Other') {
                   await getServiceDefinition(e.target.value);
-
-                  // Remove any options
-                  while (issueDetailSelectSelector.firstChild) {
-                    issueDetailSelectSelector.removeChild(
-                      issueDetailSelectSelector.firstChild
-                    );
-                  }
 
                   populateIssueDetailList();
                 }
@@ -1754,54 +1749,16 @@
               </div>
             {/if}
 
-            {#if $issueDetailList && $issueType.name !== "Other"}
-              <select
-                class="step-two-select-detail"
-                style="display: block"
-                bind:this="{issueDetailSelectSelector}"
-                on:load="{populateIssueDetailList}"
-                on:change="{(e) => {
-                  if ($issueDetail) {
-                    if (
-                      !$issueDetail.find(
-                        (selection) => selection.id === e.target.value
-                      )
-                    )
-                      issueDetail.update((currentSelections) => [
-                        ...currentSelections,
-                        {
-                          name: e.target.options[e.target.selectedIndex].text,
-                          id: e.target.value,
-                        },
-                      ]);
-                  } else
-                    issueDetail.set({
-                      name: e.target.options[e.target.selectedIndex].text,
-                      id: e.target.value,
-                    });
-                  e.target.options[0].selected = true;
-                }}"></select>
-            {/if}
-
-            {#if $issueDetail?.length > 0}
-              {#each $issueDetail as selection}
-                <div class="issue-detail-selected">
-                  {selection.name}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <img
-                    src="{closeSVG}"
-                    class="white-closeSVG"
-                    alt="remove issue detail"
-                    width="14rem"
-                    on:click="{async () => {
-                      invalidOtherDescription.visible = false;
-                      $issueDetail = $issueDetail.filter(
-                        (issueDTL) => issueDTL.id !== selection.id
-                      );
-                    }}"
-                  />
-                </div>
-              {/each}
+            {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
+              <div class="multiselect">
+                <MultiSelect
+                  id="issue-details"
+                  placeholder="Issue Details"
+                  bind:selected="{selected}"
+                  options="{multiSelectOptions}"
+                  on:change="{() => issueDetail.set(selected)}"
+                />
+              </div>
             {/if}
 
             {#if $issueType !== null}
@@ -2083,11 +2040,10 @@
 
                 if (localStorage.getItem('issueSubmitterName'))
                   $issueSubmitterName =
-                    localStorage.getItem('issueSubmitterName');
+                    localStorage.getItem('issueSubmitterName') ?? '';
                 if (localStorage.getItem('issueSubmitterContact'))
-                  $issueSubmitterContact = localStorage.getItem(
-                    'issueSubmitterContact'
-                  );
+                  $issueSubmitterContact =
+                    localStorage.getItem('issueSubmitterContact') ?? '';
               }}"
             >
               {messages["report.issue"]["button.next"]}
@@ -2259,7 +2215,7 @@
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
               {#each $issueDetail as detail, i}
-                <span style="margin-right: 1rem">{i + 1}-{detail.name}</span>
+                <span style="margin-right: 1rem">{i + 1}-{detail.label}</span>
               {/each}
             </div>
           </div>

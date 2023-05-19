@@ -24,7 +24,7 @@
         }
 
         const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d\\TH:i:ss\\Z")
+          instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
         );
 
         dispatch("datesSelected", formattedDates);
@@ -47,7 +47,7 @@
         }
 
         const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d\\TH:i:ss\\Z")
+          instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
         );
 
         dispatch("datesSelected", formattedDates);
