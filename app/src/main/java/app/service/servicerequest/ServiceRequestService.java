@@ -12,7 +12,6 @@ import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
-import app.service.storage.StorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -29,6 +28,7 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.NotBlank;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.time.Instant;
@@ -205,7 +205,12 @@ public class ServiceRequestService {
         return serviceRequest;
     }
 
-    public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO) {
+    public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO, @NotBlank String gRecaptchaResponse) {
+        if (!reCaptchaService.verifyReCaptcha(gRecaptchaResponse)) {
+            LOG.error("ReCaptcha verification failed.");
+            return null;
+        }
+
         return getServiceRequestPage(requestDTO).map(serviceRequest -> {
             ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
 

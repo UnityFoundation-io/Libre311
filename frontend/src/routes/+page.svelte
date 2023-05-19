@@ -491,7 +491,12 @@
     let res;
 
     res = await axios.get(
-      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
+      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
+      {
+        headers: {
+          "X-G-RECAPTCHA-RESPONSE": token,
+        },
+      }
     );
 
     if (
@@ -1305,8 +1310,6 @@
         if (localStorage.getItem("completed")) await postOfflineIssue();
       });
     });
-
-    loadRecaptcha();
   };
 
   const updateOnlineStatus = async () => {
@@ -1379,9 +1382,12 @@
     selectedIssue = null;
   };
 
+  $: if (token) getIssues();
+
   onMount(async () => {
-    console.clear();
     await getTokenInfo();
+
+    loadRecaptcha();
 
     isOnline = navigator.onLine;
 
@@ -1401,8 +1407,6 @@
     scrollToTop();
 
     await getAllServiceCodes();
-
-    await getIssues();
 
     // Trigger the Svelte Transitions
     fadeInBackground = true;
