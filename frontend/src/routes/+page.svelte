@@ -166,7 +166,7 @@
 
   let issuesData = [];
 
-  let filteredIssuesData;
+  let filteredIssuesData = [];
 
   let filterIssueType = { service_code: "", service_name: "" };
   let filterStartDate = "",
@@ -195,7 +195,7 @@
       showFooter = true;
       setTimeout(async () => {
         await adjustFooter();
-      }, 50);
+      }, 100);
     }, 400);
 
     if (previousState === "reportNewIssue") {
@@ -521,6 +521,8 @@
     if (res.data?.length > 0) {
       if (displayIssuesInMap) await addIssuesToMap();
     }
+
+    token = null;
   };
 
   const validateEmail = (input) => {
@@ -572,7 +574,9 @@
 
       setTimeout(async () => {
         clearLocalStorage();
-        await getIssues(0, false, true);
+        issuesData = [];
+        filteredIssuesData = [];
+        token = null;
       }, 2000);
     } catch (err) {
       console.error(err);
@@ -644,8 +648,8 @@
   };
 
   const clearData = () => {
-    issuesData = "";
-    filteredIssuesData = "";
+    issuesData = [];
+    filteredIssuesData = [];
     totalPages.set(0);
     currentPage.set(0);
     hasMoreResults = true;
@@ -1161,6 +1165,10 @@
     localStorage.setItem("completed", "true");
   };
 
+  const handleTokenGetIssues = async (recaptchaToken) => {
+    if (recaptchaToken) token = recaptchaToken;
+  };
+
   const readFileAsDataURL = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1365,6 +1373,7 @@
   };
 
   const resetFindIssue = () => {
+    token = null;
     scrollToTop();
 
     findReportedIssue = false;
@@ -1382,12 +1391,14 @@
     selectedIssue = null;
   };
 
-  $: if (token) getIssues();
+  const getIssuesWithToken = async () => {
+    if (token) await getIssues();
+    else setTimeout(getIssuesWithToken, 100);
+  };
 
   onMount(async () => {
+    await loadRecaptcha();
     await getTokenInfo();
-
-    loadRecaptcha();
 
     isOnline = navigator.onLine;
 
@@ -1548,6 +1559,7 @@
                 showFooter = false;
                 findReportedIssue = true;
                 setTimeout(async () => {
+                  if (!token) recaptcha.renderRecaptcha(handleTokenGetIssues);
                   await adjustTable();
 
                   setTimeout(() => {
@@ -1558,7 +1570,7 @@
                   }, 500);
                 }, 100);
 
-                if (!filteredIssuesData) await getIssues();
+                if (filteredIssuesData?.length === 0) getIssuesWithToken();
 
                 addIssuesToMap();
               } else resetFindIssue();
@@ -2529,6 +2541,8 @@
         {/if}
 
         {#if findReportedIssue}
+          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
+
           <div class="filter-label">
             <div>
               {messages["find.issue"]["label.filter"]}
