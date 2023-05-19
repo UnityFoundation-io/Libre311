@@ -1,10 +1,10 @@
 <script>
-  // import { Loader } from "@googlemaps/js-api-loader";
   import { fade, scale, blur } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
   import axios from "axios";
+  import MultiSelect from "svelte-multiselect";
   import logo from "$lib/logo.png";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
@@ -17,6 +17,8 @@
   import imageSVG from "../icons/image.svg";
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
+  import forbiddenSVG from "../icons/forbidden.svg";
+  import mylocationSVG from "../icons/mylocation.svg";
   import issueAddress from "../stores/issueAddress";
   import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
@@ -45,6 +47,7 @@
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
+  import "$lib/spinner.css";
 
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -104,7 +107,10 @@
     showFooter = true,
     showTable = true,
     seeMore = false,
+    spinner = false,
     heatmapVisible = true,
+    issuesRefs = {},
+    multiSelectOptions = [],
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
       visible: false,
@@ -118,7 +124,8 @@
       visible: false,
     },
     fileName = "report.csv",
-    invalidOfflineAddress = false;
+    invalidOfflineAddress = false,
+    isAuthenticated = false;
 
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
@@ -141,8 +148,10 @@
     issueDetailSelectSelector,
     findIssuesButtonSelector,
     reportIssuesButtonSelector,
+    selected,
     isOnline,
-    wasOnline;
+    wasOnline,
+    imageData;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -165,6 +174,7 @@
 
   // Image Safe Search
   let selectedFile = null,
+    selectedFileSrc = null,
     messageSuccess = "",
     messageRejectedOne = "",
     messageRejectedTwo = "",
@@ -183,8 +193,8 @@
 
     setTimeout(() => {
       showFooter = true;
-      setTimeout(() => {
-        adjustFooter();
+      setTimeout(async () => {
+        await adjustFooter();
       }, 50);
     }, 400);
 
@@ -198,7 +208,7 @@
     if (previousState === "findReportedIssue") {
       setTimeout(() => {
         findReportedIssue = true;
-        setTimeout(() => adjustTable(), 100);
+        setTimeout(async () => await adjustTable(), 100);
       }, 400);
     }
   };
@@ -238,6 +248,17 @@
 
   let visibleDetails = new Set();
 
+  const getTokenInfo = async () => {
+    let res;
+
+    try {
+      res = await axios.get("/token_info", { withCredentials: true });
+    } catch (err) {
+      console.error(err);
+    }
+    if (res?.status === 200) isAuthenticated = true;
+  };
+
   const clearLocalStorage = (bypassClearForm = false) => {
     localStorage.removeItem("completed");
     localStorage.removeItem("issueTypeId");
@@ -246,8 +267,6 @@
     localStorage.removeItem("issueDetailListCode");
     localStorage.removeItem("issueDetail");
     localStorage.removeItem("issueDescription");
-    localStorage.removeItem("issueSubmitterName");
-    localStorage.removeItem("issueSubmitterContact");
     if (!bypassClearForm) clearForm();
   };
 
@@ -298,41 +317,65 @@
   const handleFileChange = async (event) => {
     clearUploadMessages();
     selectedFile = event.target.files[0];
-    await readFileAsDataURL(selectedFile);
+    spinner = true;
+    selectedFileSrc = await readFileAsDataURL(selectedFile);
+
+    await handleSubmit();
   };
 
-  const handleSubmit = async (recaptchaToken) => {
+  const handleSubmit = async () => {
     // Convert the selected image file to a data URL
-    const imageUrl = await new Promise((resolve) => {
+    imageData = await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (event) => resolve(event.target.result);
       reader.readAsDataURL(selectedFile);
     });
 
     // Call the detectExplicitContent function with the image data URL
-    if (recaptchaToken) {
-      const isExplicit = await detectExplicitContent(imageUrl, apiKey);
+    const isExplicit = await detectExplicitContent(imageData, apiKey);
 
-      if (isExplicit) {
-        messageRejectedOne =
-          messages["report.issue"]["uploaded.message.rejected-one"];
-        messageRejectedTwo =
-          messages["report.issue"]["uploaded.message.rejected-two"];
+    if (isExplicit) {
+      messageRejectedOne =
+        messages["report.issue"]["uploaded.message.rejected-one"];
+      messageRejectedTwo =
+        messages["report.issue"]["uploaded.message.rejected-two"];
 
-        selectedFile = null;
-      } else {
-        messageSuccess = messages["report.issue"]["uploaded.message.success"];
+      imageData = null;
+      selectedFileSrc = null;
+      selectedFile = null;
+      spinner = false;
+    } else {
+      messageSuccess = messages["report.issue"]["uploaded.message.success"];
+      spinner = false;
+    }
+  };
 
-        // Save the image to the Server Locally
-        // this worked for me in testing - max
-
+  const postImage = async (recaptchaToken) => {
+    return new Promise(async (resolve, reject) => {
+      try {
         const res = await axios.post("/image", {
           g_recaptcha_response: recaptchaToken,
-          image: imageUrl,
+          image: imageData,
         });
 
-        if (res?.data) mediaUrl = res.data;
+        mediaUrl = res.data;
+        resolve();
+      } catch (err) {
+        reject(err);
       }
+    });
+  };
+
+  const executeRecaptchaAndPostIssue = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        recaptcha.renderRecaptcha((recaptchaToken) => {
+          postImage(recaptchaToken).then(resolve).catch(reject);
+        });
+      });
+      await postIssue();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -427,24 +470,27 @@
   };
 
   const populateIssueDetailList = () => {
-    const defaultOption = document.createElement("option");
-    defaultOption.text = "Issue Detail";
-    defaultOption.value = "";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-
-    issueDetailSelectSelector.add(defaultOption);
+    multiSelectOptions = [];
 
     for (let i = 0; i < $issueDetailList.values.length; i++) {
-      const option = document.createElement("option");
-      option.text = $issueDetailList.values[i].name;
-      option.value = $issueDetailList.values[i].key;
-      issueDetailSelectSelector.add(option);
+      let obj = {
+        label: $issueDetailList.values[i].name,
+        value: $issueDetailList.values[i].key,
+      };
+      multiSelectOptions.push(obj);
     }
+    // Reactive statement for arrays
+    multiSelectOptions = multiSelectOptions;
   };
 
-  const getIssues = async (page = 0, displayIssuesInMap = false) => {
-    const res = await axios.get(
+  const getIssues = async (
+    page = 0,
+    displayIssuesInMap = false,
+    issuePosted = false
+  ) => {
+    let res;
+
+    res = await axios.get(
       `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
       {
         headers: {
@@ -454,14 +500,16 @@
     );
 
     if (
+      !issuePosted &&
       res.data?.length > 0 &&
       JSON.stringify(issuesData) !== JSON.stringify(res.data)
     ) {
-      if (issuesData) issuesData = [...issuesData, ...res.data];
+      if (issuesData?.length > 0) issuesData = [...issuesData, ...res.data];
       else issuesData = [...res.data];
+    } else issuesData = [...res.data];
 
-      filteredIssuesData = issuesData;
-    }
+    filteredIssuesData = issuesData;
+
     totalSize.set(res.headers["page-totalsize"]);
     totalPages.set(res.headers["page-totalpages"]);
     currentPage.set(res.headers["page-pagenumber"]);
@@ -490,7 +538,7 @@
     }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
 
     $issueDetail.forEach((attr) => {
-      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.id;
+      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
     });
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
@@ -521,7 +569,11 @@
       });
 
       if (postingOfflineIssue) notifyOfflineIssuePosted = true;
-      setTimeout(() => clearLocalStorage(), 2000);
+
+      setTimeout(async () => {
+        clearLocalStorage();
+        await getIssues(0, false, true);
+      }, 2000);
     } catch (err) {
       console.error(err);
     }
@@ -695,6 +747,9 @@
     invalidSubmitterName.visible = false;
     invalidEmail.visible = false;
     mediaUrl = undefined;
+    imageData = "";
+    selectedFileSrc = "";
+    selectedFile = "";
     setTimeout(() => (currentStep = null), 700);
   };
 
@@ -798,6 +853,12 @@
         });
 
         markers.push(marker);
+
+        google.maps.event.addListener(marker, "click", function () {
+          toggleDetails(issue.service_request_id);
+          selectedIssue = issue;
+          scrollToIssue(issue.service_request_id);
+        });
 
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
@@ -970,22 +1031,31 @@
   };
 
   const adjustFooter = () => {
-    if (!$footerDivHeight && $footerSelector) {
-      footerDivHeight.set(
-        $footerSelector.offsetTop + $footerSelector.offsetHeight
-      );
-    }
+    return new Promise((resolve, reject) => {
+      if (!$footerDivHeight && $footerSelector) {
+        footerDivHeight.set(
+          $footerSelector.offsetTop + $footerSelector.offsetHeight
+        );
+      }
 
-    backgroundSelector.style.height = $footerDivHeight + "px";
+      backgroundSelector.style.height = $footerDivHeight + "px";
+
+      resolve();
+    });
   };
 
   const adjustTable = () => {
-    if (tableSelector) {
-      let addExtra = 90;
+    return new Promise((resolve, reject) => {
+      if (tableSelector) {
+        let addExtra = 90;
 
-      const tableHeight = tableSelector.offsetTop + tableSelector.offsetHeight;
-      backgroundSelector.style.height = tableHeight + addExtra + "px";
-    }
+        const tableHeight =
+          tableSelector.offsetTop + tableSelector.offsetHeight;
+        backgroundSelector.style.height = tableHeight + addExtra + "px";
+
+        resolve();
+      }
+    });
   };
 
   const adjustMap = () => {
@@ -1028,6 +1098,7 @@
             "Content-Type": "text/csv",
           },
           responseType: "blob",
+          withCredentials: true,
         }
       );
 
@@ -1077,10 +1148,14 @@
     await initRecaptcha();
   };
 
-  const handleToken = (recaptchaToken) => {
+  const handleToken = async (recaptchaToken) => {
     if (recaptchaToken) token = recaptchaToken;
     reportNewIssueStep5 = false;
-    postIssue();
+
+    if (imageData) {
+      executeRecaptchaAndPostIssue();
+    } else await postIssue();
+
     currentStep = 6;
     reportNewIssueStep6 = true;
     localStorage.setItem("completed", "true");
@@ -1098,6 +1173,20 @@
   const populateAddress = () => {
     if ($issueAddress && offlineAddressInputSelector) {
       offlineAddressInputSelector.value = $issueAddress;
+    }
+  };
+
+  function createCenterAroundMeControl(controlText, clickHandler) {
+    const controlDiv = document.createElement("div");
+    controlDiv.className = "centerAroundMeControl";
+    controlDiv.addEventListener("click", clickHandler);
+    controlDiv.title = controlText;
+    return controlDiv;
+  }
+
+  const scrollToIssue = (id) => {
+    if (issuesRefs[id]) {
+      issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -1136,12 +1225,28 @@
           map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
         });
 
+        const centerAroundMeControl = createCenterAroundMeControl(
+          "CenterAroundMe",
+          function () {
+            navigator.geolocation.getCurrentPosition(
+              successCallback,
+              errorCallback,
+              {
+                enableHighAccuracy: true,
+              }
+            );
+          }
+        );
+
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
           satelliteControl
         );
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(
           inputIssueAddressSelector
+        );
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(
+          centerAroundMeControl
         );
 
         const icon = {
@@ -1265,18 +1370,23 @@
     findReportedIssue = false;
     showFilters = false;
 
-    setTimeout(() => {
+    setTimeout(async () => {
       showFooter = true;
-      adjustFooter();
+      await adjustFooter();
     }, 500);
 
     clearData();
     clearFilters();
+
+    if (selectedIssue) toggleDetails(selectedIssue.service_request_id);
+    selectedIssue = null;
   };
 
   $: if (token) getIssues();
 
   onMount(async () => {
+    await getTokenInfo();
+
     loadRecaptcha();
 
     isOnline = navigator.onLine;
@@ -1343,9 +1453,6 @@
         />
       {/if}
     </div>
-    <div style="color:yellow; text-align: center">
-      You are currently: {isOnline ? "online" : "offline"}
-    </div>
 
     {#if notifyOfflineIssuePosted}
       <Modal
@@ -1375,6 +1482,11 @@
       </Modal>
     {/if}
 
+    <!-- {#if window.innerHeight}
+      <div style="text-align: center; color: yellow">
+        Height:{window.innerHeight} Width: {window.innerWidth}
+      </div>
+    {/if} -->
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
@@ -1396,9 +1508,9 @@
           }}"
         >
           {#if seeMore}
-            -
+            less...
           {:else}
-            +
+            more...
           {/if}
         </span>
 
@@ -1435,15 +1547,15 @@
               if (!findReportedIssue) {
                 showFooter = false;
                 findReportedIssue = true;
-                setTimeout(() => {
-                  adjustTable();
+                setTimeout(async () => {
+                  await adjustTable();
 
                   setTimeout(() => {
                     findIssuesButtonSelector.scrollIntoView({
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 250);
+                  }, 500);
                 }, 100);
 
                 if (!filteredIssuesData) await getIssues();
@@ -1536,7 +1648,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 250);
+                  }, 500);
                 }, 100);
 
                 reduceBackGroundOpacity = false;
@@ -1632,6 +1744,8 @@
               class="step-two-select"
               bind:this="{issueTypeSelectSelector}"
               on:change="{async (e) => {
+                selected = [];
+
                 if ($issueDetail) issueDetail.set([]);
 
                 issueType.set({
@@ -1641,13 +1755,6 @@
 
                 if ($issueType.name !== 'Other') {
                   await getServiceDefinition(e.target.value);
-
-                  // Remove any options
-                  while (issueDetailSelectSelector.firstChild) {
-                    issueDetailSelectSelector.removeChild(
-                      issueDetailSelectSelector.firstChild
-                    );
-                  }
 
                   populateIssueDetailList();
                 }
@@ -1663,54 +1770,16 @@
               </div>
             {/if}
 
-            {#if $issueDetailList && $issueType.name !== "Other"}
-              <select
-                class="step-two-select-detail"
-                style="display: block"
-                bind:this="{issueDetailSelectSelector}"
-                on:load="{populateIssueDetailList}"
-                on:change="{(e) => {
-                  if ($issueDetail) {
-                    if (
-                      !$issueDetail.find(
-                        (selection) => selection.id === e.target.value
-                      )
-                    )
-                      issueDetail.update((currentSelections) => [
-                        ...currentSelections,
-                        {
-                          name: e.target.options[e.target.selectedIndex].text,
-                          id: e.target.value,
-                        },
-                      ]);
-                  } else
-                    issueDetail.set({
-                      name: e.target.options[e.target.selectedIndex].text,
-                      id: e.target.value,
-                    });
-                  e.target.options[0].selected = true;
-                }}"></select>
-            {/if}
-
-            {#if $issueDetail?.length > 0}
-              {#each $issueDetail as selection}
-                <div class="issue-detail-selected">
-                  {selection.name}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <img
-                    src="{closeSVG}"
-                    class="white-closeSVG"
-                    alt="remove issue detail"
-                    width="14rem"
-                    on:click="{async () => {
-                      invalidOtherDescription.visible = false;
-                      $issueDetail = $issueDetail.filter(
-                        (issueDTL) => issueDTL.id !== selection.id
-                      );
-                    }}"
-                  />
-                </div>
-              {/each}
+            {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
+              <div class="multiselect">
+                <MultiSelect
+                  id="issue-details"
+                  placeholder="Issue Details"
+                  bind:selected="{selected}"
+                  options="{multiSelectOptions}"
+                  on:change="{() => issueDetail.set(selected)}"
+                />
+              </div>
             {/if}
 
             {#if $issueType !== null}
@@ -1793,19 +1862,24 @@
                   'issueDetail',
                   JSON.stringify($issueDetail)
                 );
-              localStorage.setItem(
-                'issueDetailListCode',
-                $issueDetailList.code
-              );
+
+              if ($issueType.name !== 'Other') {
+                localStorage.setItem(
+                  'issueDetailListCode',
+                  $issueDetailList.code
+                );
+              }
+
               if ($issueDescription)
                 localStorage.setItem('issueDescription', $issueDescription);
 
               if (
-                ($issueType.name === 'Other' ||
+                (($issueType.name === 'Other' ||
                   $issueDetail.find(
                     (selection) => selection.name === 'Other'
                   )) &&
-                $issueDescription?.length < minOtherDescriptionLength
+                  $issueDescription?.length < minOtherDescriptionLength) ||
+                $issueDescription === null
               ) {
                 invalidOtherDescription.visible = true;
               } else {
@@ -1855,10 +1929,6 @@
               data-callback="onSubmit"
               data-action="submit"
               class="g-recaptcha"
-              on:submit|preventDefault="{() => {
-                if (isOnline) recaptcha.renderRecaptcha(handleSubmit);
-                else handleSubmit('');
-              }}"
             >
               <div style="display: flex">
                 <label
@@ -1898,39 +1968,60 @@
                   disabled="{!isOnline}"
                   on:change="{(e) => {
                     if (isOnline) handleFileChange(e);
+                    e.target.value = '';
                   }}"
                 />
 
                 <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
-
-                <button
-                  type="submit"
-                  class="button"
-                  class:upload="{isOnline && selectedFile && !messageSuccess}"
-                  class:disabled-button-upload="{!isOnline ||
-                    !selectedFile ||
-                    messageSuccess}"
-                  disabled="{!isOnline || !selectedFile}"
-                >
-                  {messages["report.issue"]["label.upload.image"]}
-                </button>
               </div>
             </form>
 
+            {#if spinner}
+              <div class="loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            {/if}
+
             {#if messageRejectedOne}
+              <!-- svelte-ignore a11y-img-redundant-alt -->
+              <img
+                src="{forbiddenSVG}"
+                alt="rejected image"
+                height="auto"
+                width="50rem"
+                class="fobidden-icon"
+              />
               <div class="upload-message">{messageRejectedOne}</div>
               <div class="upload-message">{messageRejectedTwo}</div>
-            {:else if messageSuccess && mediaUrl}
+            {:else if messageSuccess && imageData}
               <!-- svelte-ignore a11y-img-redundant-alt -->
               <div class="upload-message">
-                <img
-                  src="{mediaUrl}"
-                  alt="issue image"
-                  height="auto"
-                  width="75rem"
-                  style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
-                />
-                {messageSuccess}
+                <div class="image-container">
+                  <img
+                    src="{selectedFileSrc}"
+                    alt="issue image"
+                    height="auto"
+                    width="75rem"
+                    style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
+                  />
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <div
+                    class="remove-btn"
+                    on:click="{(e) => {
+                      e.target.parentElement.style.display = 'none';
+                      selectedFile = null;
+                      selectedFileSrc = null;
+                      imageData = null;
+                      messageSuccess = '';
+                    }}"
+                  >
+                    X
+                  </div>
+                </div>
+                <div style="margin-top: 1rem">{messageSuccess}</div>
               </div>
             {/if}
 
@@ -1961,19 +2052,19 @@
             </button>
 
             <button
-              class="button"
-              class:next-button="{$issueType && $issueDetail}"
-              class:disabled-button="{$issueType === null ||
-                $issueDetail === null ||
-                (selectedFile && !mediaUrl)}"
-              disabled="{$issueType === null ||
-                $issueDetail === null ||
-                (selectedFile && !mediaUrl)}"
+              class="button next-button"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
                 currentStep = 4;
                 reportNewIssueStep4 = true;
+
+                if (localStorage.getItem('issueSubmitterName'))
+                  $issueSubmitterName =
+                    localStorage.getItem('issueSubmitterName') ?? '';
+                if (localStorage.getItem('issueSubmitterContact'))
+                  $issueSubmitterContact =
+                    localStorage.getItem('issueSubmitterContact') ?? '';
               }}"
             >
               {messages["report.issue"]["button.next"]}
@@ -2093,14 +2184,15 @@
 
               if (invalidEmail.visible) return;
 
-              if ($issueSubmitterName)
-                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+              localStorage.setItem(
+                'issueSubmitterName',
+                $issueSubmitterName ?? ''
+              );
 
-              if ($issueSubmitterContact)
-                localStorage.setItem(
-                  'issueSubmitterContact',
-                  $issueSubmitterContact
-                );
+              localStorage.setItem(
+                'issueSubmitterContact',
+                $issueSubmitterContact ?? ''
+              );
 
               reportNewIssueStep4 = false;
               currentStep = 5;
@@ -2147,18 +2239,18 @@
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
               {#each $issueDetail as detail, i}
-                <span style="margin-right: 1rem">{i + 1}-{detail.name}</span>
+                <span style="margin-right: 1rem">{i + 1}-{detail.label}</span>
               {/each}
             </div>
           </div>
 
-          {#if mediaUrl}
+          {#if selectedFileSrc}
             <div class="step-five-issue-detail-label">
               {messages["report.issue"]["label.review.media"]}
             </div>
             <!-- svelte-ignore a11y-img-redundant-alt -->
             <img
-              src="{mediaUrl}"
+              src="{selectedFileSrc}"
               height="auto"
               width="75rem"
               alt="uploaded image"
@@ -2472,7 +2564,9 @@
               style="margin-right: 1rem; cursor: pointer"
               on:click="{reportCSV}"
             >
-              {messages["find.issue"]["label.download.csv"]}
+              {#if isAuthenticated}
+                {messages["find.issue"]["label.download.csv"]}
+              {/if}
             </div>
           </div>
 
@@ -2609,6 +2703,7 @@
                 {#if filteredIssuesData}
                   {#each filteredIssuesData as issue (issue.service_request_id)}
                     <tr
+                      bind:this="{issuesRefs[issue.service_request_id]}"
                       on:click="{() => setNewCenter(issue.lat, issue.long, 17)}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id

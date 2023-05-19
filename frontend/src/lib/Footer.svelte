@@ -1,4 +1,5 @@
 <script>
+  import { goto } from "$app/navigation";
   import facebookSVG from "../icons/facebook.svg";
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
@@ -6,6 +7,8 @@
   import footerSelector from "../stores/footerSelector";
 
   export let backgroundColor;
+
+  const URL_PREFIX = import.meta.env.VITE_BACKEND_URL;
 </script>
 
 <div
@@ -28,9 +31,14 @@
       class:tighten-portrait="{window.innerHeight <= 926 &&
         window.innerWidth <= 430}"
     >
-      <a href="https://lomocomo.org/we-move-app/">
-        <h2>Mobile App</h2>
-      </a>
+      <!-- svelte-ignore missing-declaration -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <h2
+        style="cursor: pointer"
+        on:click="{() => goto(`${URL_PREFIX}/oauth/login/google`, true)}"
+      >
+        Admin Login
+      </h2>
       <a href="https://lomocomo.org/about/contact-us/">
         <h2>Contact Us</h2>
       </a>

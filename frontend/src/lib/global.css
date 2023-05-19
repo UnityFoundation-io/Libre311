@@ -79,6 +79,30 @@
   }
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.centerAroundMeControl {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.6rem;
+  margin-left: 0.6rem;
+  background-image: url('../icons/mylocation.svg');
+  background-color: white;
+  cursor: pointer;
+  background-size: cover;
+  padding: 0.5rem;
+  box-shadow: 0.1rem 0.1rem 0.1rem rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+  animation: spin 2s linear infinite;
+  width: 100px;
+  height: 100px;
+}
+
 body {
     font-family: 'Gotham', 'Roboto', 'Helvetica';
     background-color: black;
@@ -107,7 +131,7 @@ body {
   overflow: hidden;
   height: 3.5rem;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
-  z-index: 1;
+  z-index: 0;
 }
 
 @media only screen and (max-height: 390px) {
@@ -122,7 +146,46 @@ body {
   }
 }
 
+.image-container {
+  position: relative;
+  display: inline-block; /* So it will take only as much space as needed. */
+}
+
+.image-container img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.2rem;
+  background: #fff;
+  color: #000;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
 /*//////// Desktop Style ////////*/
+
+.multiselect {
+  color: #3478f6;
+  background-color: white;
+  width: 39.4vw;
+  height: 3rem;
+  margin: 1rem 0 1rem 3rem;
+  text-shadow: none !important;
+  border-radius: 10px;
+  border: none !important;
+}
+
+.fobidden-icon {
+  vertical-align: middle; 
+  margin-left: 2.5rem; 
+  margin-top: 1rem; 
+  border-radius: 10px;
+}
 
 .reported-offline-issue-success {
   text-align: center; 
@@ -150,14 +213,14 @@ body {
   position: relative;
   overflow: hidden;
   background-repeat: no-repeat;
-  transition: height 0.5s ease;
+  transition: height 0.75s ease;
 }
 
 .background::before {
   content: "";
-  background-image: url("$lib/columbiaBackground.png");
+  background-image: url("$lib/columbiaBackgroundE.png");
   background-repeat: no-repeat;
-  background-position: 100% 67%;
+  background-position: 100% 27%;
   background-size: cover;
   position: absolute;
   top: 0;
@@ -165,7 +228,7 @@ body {
   width: 100%;
   height: 100%;
   z-index: -1;
-  transition: height 0.5s ease;
+  transition: height 0.75s ease;
 }
 
 .background-opacity::before {
@@ -258,6 +321,7 @@ body {
 .button-find-issue-disabled {
   filter: grayscale(100%);
   cursor: default;
+  z-index: 0;
 }
 
 .slogan-title {
@@ -281,7 +345,7 @@ body {
 
 .see-more {
   color:var(--primary-color-two); 
-  font-size: 2rem;
+  font-size: 1.3rem;
   cursor: pointer;
 }
 
@@ -328,7 +392,6 @@ body {
 .describe-issue-two {
   font-weight: 200;
   margin-top: 1rem;
-  font-size: 1.75rem;
   color: white;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
   background-color: var(--primary-color-one);
@@ -390,8 +453,7 @@ select {
 textarea {
   margin: 0.5rem 3rem 0 3rem;
   font-size: 1rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+  padding: 0.65rem;
   width: 32.3rem;
   resize: none;
   float: right;
@@ -407,7 +469,7 @@ textarea::placeholder {
   font-size: 1rem;
   margin-left: 3rem;
   padding: 0.3rem;
-  width: 24rem;
+  width: 33.3rem;
   background-color: white;
   height: 2.7rem;
   border-style: dashed;
@@ -652,6 +714,7 @@ td {
 
 .step-two-feature-type-helper {
   margin-left: 3rem;
+  margin-right: 3rem;
   font-size: 1.2rem;
 }
 
@@ -670,6 +733,8 @@ td {
   margin-top: 1rem;
   margin-bottom: 1rem;
   font-size: 1.1rem;
+  height: 8.2rem;
+  padding-top: 0.6rem;
 }
 
 .step-two-word-count-error {
@@ -755,6 +820,10 @@ td {
   margin-left: 3rem;
   margin-bottom: 1rem;
   border-radius: 10px;
+}
+
+.step-four-input-submitter-name::placeholder {
+  font-size: 0.85rem;
 }
 
 .step-four-submitter-name-word-count-error {
@@ -969,6 +1038,17 @@ td {
 /*/////// Android S10+ Portrait////////*/
 
 @media only screen and (min-width: 320px) and (max-width: 374px) and (orientation: portrait) {
+  .multiselect {
+    margin: 1rem 0 1rem 0;
+    width: 90vw;
+    font-size: 0.8rem;
+    height: 4.1rem;
+  }
+
+  .fobidden-icon {
+    margin-left: 0.3rem;
+  }
+
   .content {
     font-size: 0.5rem;
   }
@@ -1372,7 +1452,7 @@ td {
   }
 
   .see-more {
-    font-size: 1rem;
+    font-size: 0.75rem;
   }
 
   .see-more-title {
@@ -1415,18 +1495,18 @@ td {
   }
 
   .background::before {
-    background-position: calc(40% - 100px) calc(50% - 500px);
+    background-position: 45% 50%;
   }
 
   textarea {
-    margin-left: 0.1rem;
+    margin-left: 0rem;
     margin-bottom: 0.1rem;
-    width: 84vw;
-    font-size: 0.75rem;
+    width: 83vw;
+    font-size: 0.85rem;
   }
 
   textarea::placeholder {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 }
 /* /////////////////// */
@@ -1543,7 +1623,7 @@ td {
   }
 
   .step-two-feature-type-label {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     letter-spacing: -0.03rem;
     margin-left: 1.5rem;
     margin-right: 0.5rem;
@@ -1570,7 +1650,7 @@ td {
   }
 
   .issue-detail-selected {
-    margin-left: 0rem;
+    margin-left: 0.3rem;
     margin-right: 0.5rem;
   }
 
@@ -1863,7 +1943,7 @@ td {
   }
 
   textarea {
-    margin-left: 0.1rem;
+    margin-left: 0rem;
     margin-bottom: 0.1rem;
     width: 84vw;
     font-size: 0.85rem;
@@ -1880,8 +1960,15 @@ td {
 /*/////// iPhone 13 Pro Portrait////////*/
 
 @media only screen and (min-width: 375px) and (min-height: 669px) and (max-height: 739px) and (orientation: portrait) {
+  .multiselect {
+    margin: 1rem 0 1rem 0;
+    width: 90vw;
+    font-size: 0.8rem;
+    height: 4.1rem;
+  }
+
   .background::before {
-    background-position: center calc(50% - 400px);
+    background-position: 45% 10%;
   }
 
   .logo {
@@ -1897,7 +1984,7 @@ td {
   }
 
   .see-more {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
   }
 
   .see-more-title {
@@ -1930,12 +2017,12 @@ td {
   }
 
   .upload-image {
-    width: 18rem;
+    width: 22.7rem;
   }
 
   .td-description {
-    max-width: 10rem;
-    min-width: 10rem;
+    max-width: 8.5rem;
+    min-width: 8.5rem;
   }
 
   .upload {
@@ -1957,7 +2044,7 @@ td {
   }
   
   .issue-detail-selected {
-    margin-left: 0.2rem;
+    margin-left: 0.3rem;
   }
 
   .success-message-two-offline {
@@ -1968,13 +2055,28 @@ td {
   .step-one-invalid-offline-address {
     margin-right: 1.2rem;
   }
+
+  .fobidden-icon {
+    margin-left: 0.3rem;
+  }
 }
 
 /*/////// iPhone 14 Pro Max Portrait ////////*/
 
 @media only screen and (min-width: 400px) and (min-height: 670px) and (max-height: 750px) and (orientation: portrait) {
+  .multiselect {
+    margin: 1rem 0 1rem 0;
+    width: 90vw;
+    font-size: 0.8rem;
+    height: 4.1rem;
+  }
+
+  .fobidden-icon {
+    margin-left: 0.3rem;
+  }
+
   .background::before {
-    background-position: center calc(50% - 400px);
+    background-position: 50% 10%;
   }
 
   .logo {
@@ -1990,7 +2092,7 @@ td {
   }
 
   .see-more {
-    font-size: 1.35rem;
+    font-size: 1rem;
   }
 
   .see-more-title {
@@ -2019,7 +2121,7 @@ td {
   }
 
   .upload-image {
-    width: 17.5rem;
+    width: 25.2rem;
   }
 
   .camera-icon {
@@ -2038,12 +2140,24 @@ td {
   .step-one-invalid-offline-address {
     margin-right: 1.3rem;
   }
+
+  .td-description {
+    max-width: 10rem;
+    min-width: 10rem;
+  }
 }
 
 
    /*/////// Style: Landscape Galaxy S10+ ///////*/
 
    @media only screen and (min-width: 596px) and (max-width: 814px) and (orientation: landscape){
+    .multiselect {
+      margin: 1rem 0 1rem 0.5rem;
+      width: 72.5vw;
+      font-size: 0.8rem;
+      height: 4.1rem;
+    }
+
     .content {
       font-size: 0.5rem;
     }
@@ -2343,7 +2457,11 @@ td {
     .upload-image {
       margin-left: 0.5rem;
       border-radius: 10px;
-      width: 18.5rem;
+      width: 24.5rem;
+    }
+
+    .fobidden-icon {
+      margin-left: 0.3rem;
     }
 
     .camera-icon {
@@ -2441,7 +2559,7 @@ td {
     }
 
     .see-more {
-      font-size: 1rem;
+      font-size: 0.8rem;
     }
   
     .see-more-title {
@@ -2476,13 +2594,13 @@ td {
     }
 
     .background::before {
-      background-position: center calc(50% - 400px);
+      background-position: center calc(10% -300px);
     }
 
     textarea {
       margin-left: 0.5rem;
       margin-bottom: 0.1rem;
-      width: 69.5vw;
+      width: 68.75vw;
       font-size: 0.85rem;
       border-radius: 10px;
     }
@@ -2525,11 +2643,11 @@ td {
       }
 
       .upload-image {
-        width: 29rem;
+        width: 31rem;
       }
 
       textarea {
-        width: 70.5vw;
+        width: 70vw;
       }
 
       .step-four-input-submitter-name {
@@ -2559,7 +2677,7 @@ td {
       }
 
       .see-more {
-        font-size: 1.3rem;
+        font-size: 1rem;
       }
     
       .see-more-title {
@@ -2572,7 +2690,7 @@ td {
       }
 
       .background::before {
-        background-position: center calc(50% - 275px);
+        background-position: center 50%;
       }
 
       .offline-address-input {
@@ -2603,7 +2721,7 @@ td {
         }
 
         .see-more {
-          font-size: 1.3rem;
+          font-size: 1rem;
         }
       
         .see-more-title {
@@ -2616,7 +2734,7 @@ td {
         }
   
         .background::before {
-          background-position: center calc(50% - 300px);
+          background-position: center 50%;
         }
 
         #button-report-issue {
@@ -2638,12 +2756,12 @@ td {
         }
 
         textarea {
-          width: 71vw;
+          width: 70.3vw;
         }
 
         .upload-image {
-          width: 32rem;
-          }
+          width: 34rem;
+        }
 
         .step-four-input-submitter-name {
           margin-left: 0.5rem;

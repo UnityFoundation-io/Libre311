@@ -18,8 +18,13 @@
       mode: "range",
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {
+        if (selectedDates.length == 2) {
+          let endDate = selectedDates[1];
+          endDate.setHours(23, 59, 59);
+        }
+
         const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d\\TH:i:ss\\Z")
+          instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
         );
 
         dispatch("datesSelected", formattedDates);
@@ -36,9 +41,15 @@
       mode: "range",
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {
+        if (selectedDates.length == 2) {
+          let endDate = selectedDates[1];
+          endDate.setHours(23, 59, 59);
+        }
+
         const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d\\TH:i:ss\\Z")
+          instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
         );
+
         dispatch("datesSelected", formattedDates);
       },
     });
