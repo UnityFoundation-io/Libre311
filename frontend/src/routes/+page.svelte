@@ -862,6 +862,7 @@
           toggleDetails(issue.service_request_id);
           selectedIssue = issue;
           scrollToIssue(issue.service_request_id);
+          setNewCenter(issue.lat, issue.long, 17);
         });
 
         heatmapData.push(
