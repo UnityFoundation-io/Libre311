@@ -1392,7 +1392,7 @@
   };
 
   const getIssuesWithToken = async () => {
-    if (token) await getIssues();
+    if (token) await getIssues(0,true);
     else setTimeout(getIssuesWithToken, 100);
   };
 
@@ -1567,7 +1567,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 500);
+                  }, 600);
                 }, 100);
 
                 if (filteredIssuesData?.length === 0) getIssuesWithToken();
