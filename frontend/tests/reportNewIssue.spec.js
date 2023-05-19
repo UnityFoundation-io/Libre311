@@ -25,7 +25,6 @@ test('report new issue with image', async ({ page }) => {
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles('./tests/fixtures/logo.png');
   await page.getByRole('button', { name: 'Upload' }).click();
-  await page.getByText('The uploaded image has been saved.').click();
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Enter contact information
@@ -40,6 +39,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByText('Issue Type: Sidewalk').click();
   await page.getByText('Issue Details: 1-Cracked2-Too narrow').click();
   await page.getByRole('img', { name: 'uploaded image' }).click();
+  await page.getByText('Description: Additional description details').click();
   await page.getByText('Name of Submitter: John Doe').click();
   await page.getByText('Contact Info: johndoe@gmail.com').click();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
