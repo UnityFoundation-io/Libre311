@@ -234,4 +234,18 @@
       min-width: 11rem;
     }
   }
+
+  @media only screen and (min-width: 815px) {
+    .col {
+      min-width: 12rem;
+      max-width: 12rem;
+    }
+  }
+
+  @media only screen and (min-width: 930px) {
+    .col {
+      min-width: 13.5rem;
+      max-width: 13.5rem;
+    }
+  }
 </style>
