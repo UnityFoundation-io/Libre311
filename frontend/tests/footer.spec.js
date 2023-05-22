@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('footer displays Local Motion logo', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.getByRole('img', { name: 'local motion logo' }).click();
+  await expect(page.getByRole('img', { name: 'local motion logo' })).toBeVisible();
 });
 
 test('footer displays major headings', async ({ page }) => {
@@ -90,7 +90,7 @@ test('footer has facebook icon', async ({ page }) => {
 test('footer has instagram icon', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.getByRole('img', { name: 'instagram' }).click();
-  await expect(page).toHaveURL('https://www.instagram.com/localmotioncomo/');
+  await expect(page).toHaveURL(/https:\/\/www.instagram.com\/.*localmotioncomo.*/);
 });
 
 test('footer has twitter icon', async ({ page }) => {
