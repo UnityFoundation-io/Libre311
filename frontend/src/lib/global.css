@@ -148,7 +148,7 @@ body {
 
 .image-container {
   position: relative;
-  display: inline-block; /* So it will take only as much space as needed. */
+  display: inline-block;
 }
 
 .image-container img {
@@ -345,7 +345,7 @@ body {
 
 .see-more {
   color:var(--primary-color-two); 
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
@@ -1907,7 +1907,7 @@ td {
   }
 
   .see-more {
-    font-size: 1.3rem;
+    font-size: 0.9rem;
   }
 
   .see-more-title {
@@ -1920,7 +1920,8 @@ td {
   }
 
   .action-buttons {
-    display: block;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
     margin-top: 3rem;
   }
@@ -2150,7 +2151,7 @@ td {
 
    /*/////// Style: Landscape Galaxy S10+ ///////*/
 
-   @media only screen and (min-width: 596px) and (max-width: 814px) and (orientation: landscape){
+   @media only screen and (min-width: 530px) and (max-width: 814px) and (orientation: landscape){
     .multiselect {
       margin: 1rem 0 1rem 0.5rem;
       width: 72.5vw;
@@ -2572,8 +2573,10 @@ td {
     }
 
     .action-buttons {
-      display: block;
-      text-align: center;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
       margin-top: 4rem;
     }
 
@@ -2583,8 +2586,6 @@ td {
     }
 
     #button-find-issues {
-      display: block;
-      margin: 0 auto;
       text-align: center;
       width: 18rem;
     }
@@ -2791,21 +2792,14 @@ td {
 
       /* In between brakpoints */
 
-
-      @media only screen and (min-width: 375px) and (max-width: 529px) {
-
-        see-more {
-          font-size: 1rem;
-        }
-
-      }
-
       @media only screen and (min-width: 522px) and (max-width: 578px) {
         .action-buttons{
-          display: block;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          align-content: center;
           text-align: center;
           margin-top: 5rem;
-          margin-right: 1rem;
         }
 
         #button-report-issue {
@@ -2823,6 +2817,6 @@ td {
         }
 
         #button-report-issue {
-          margin-top: 8vh;
+          margin-top: 3rem;
         }
       }
