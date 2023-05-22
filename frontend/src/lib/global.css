@@ -2787,3 +2787,42 @@ td {
         font-size: 1.4rem;   
         }
       }
+
+
+      /* In between brakpoints */
+
+
+      @media only screen and (min-width: 375px) and (max-width: 529px) {
+
+        see-more {
+          font-size: 1rem;
+        }
+
+      }
+
+      @media only screen and (min-width: 522px) and (max-width: 578px) {
+        .action-buttons{
+          display: block;
+          text-align: center;
+          margin-top: 5rem;
+          margin-right: 1rem;
+        }
+
+        #button-report-issue {
+          margin-top: 8vh;
+        }
+
+      }
+
+      @media only screen and (min-width: 579px) and (max-width: 739px) {
+        .action-buttons{
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          margin-top: 5rem;
+        }
+
+        #button-report-issue {
+          margin-top: 8vh;
+        }
+      }

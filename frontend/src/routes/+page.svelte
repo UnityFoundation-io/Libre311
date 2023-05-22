@@ -254,7 +254,7 @@
     try {
       res = await axios.get("/token_info", { withCredentials: true });
     } catch (err) {
-      console.error(err);
+      console.info(err);
     }
     if (res?.status === 200) isAuthenticated = true;
   };
