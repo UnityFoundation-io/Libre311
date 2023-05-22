@@ -108,7 +108,7 @@
     showTable = true,
     seeMore = false,
     spinner = false,
-    heatmapVisible = true,
+    heatmapVisible = false,
     issuesRefs = {},
     multiSelectOptions = [],
     invalidOtherDescription = {
@@ -878,18 +878,18 @@
         map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
         2
       ) {
-        const heatmapControl = createCustomControl("Markers", function () {
+        const heatmapControl = createCustomControl("Heatmap", function () {
           heatmapVisible = !heatmapVisible;
           if (heatmapVisible) {
             for (var i = 0; i < markers.length; i++) {
               markers[i].setMap(null);
             }
-            const button = document.getElementById("Markers-control");
+            const button = document.getElementById("Heatmap-control");
             button.innerHTML = "Markers";
 
             heatmap.setMap(map);
           } else {
-            const button = document.getElementById("Markers-control");
+            const button = document.getElementById("Heatmap-control");
             button.innerHTML = "Heatmap";
 
             heatmap.setMap(null);
@@ -1393,7 +1393,7 @@
   };
 
   const getIssuesWithToken = async () => {
-    if (token) await getIssues(0,true);
+    if (token) await getIssues(0, true);
     else setTimeout(getIssuesWithToken, 100);
   };
 
@@ -1770,6 +1770,13 @@
                   await getServiceDefinition(e.target.value);
 
                   populateIssueDetailList();
+
+                  setTimeout(() => {
+                    let inputElement = document.querySelector('#issue-details');
+                    console.log('inputElement', inputElement);
+                    if (inputElement)
+                      inputElement.setAttribute('readonly', 'readonly');
+                  }, 1000);
                 }
               }}"></select>
 
