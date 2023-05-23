@@ -377,7 +377,7 @@ body {
 }
 
 #map {
-  width: 55vw;
+  /* width: 55vw; */
   height: 55vh;
   align-items: center;
 }
@@ -504,7 +504,7 @@ textarea::placeholder {
 .filters {
   display: flex;
   justify-content: space-around;
-  width: 55vw;
+  /* width: 55vw; */
   margin: 0 auto;
   padding-bottom: 0.5rem;
   background-color: var(--secondary-color-two);
@@ -526,8 +526,8 @@ textarea::placeholder {
 
 .issues-table {
   background-color: white;
-  width: 55vw;
-  overflow-y: auto;
+  /* width: 55vw; */
+  /* overflow-y: auto; */
   display: block;
   max-height: 15rem;
 }
@@ -576,7 +576,7 @@ tbody tr {
 
 td,
 th {
-  padding: 0.1rem 0.3rem 0.1rem 0.3rem;
+  /* padding: 0.1rem 0.3rem 0.1rem 0.3rem; */
   white-space: nowrap;
 }
 
@@ -587,19 +587,6 @@ td {
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
-}
-
-.td-issue-type {
-  max-width: 11rem;
-  min-width: 11rem;
-}
-
-.td-description {
-  max-width: 22rem;
-  min-width: 22rem;
-  font-size: 0.9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .find-issues {
@@ -634,7 +621,8 @@ td {
 
 #stepOne {
   background-color: var(--primary-color-one);
-  width: 55vw;
+  /* width: 55vw; */
+  width: 100vw;
   border-radius: 21px;
 }
 
@@ -982,6 +970,7 @@ td {
 }
 
 #button-find-issues {
+  min-width: max-content;
   width: 20rem;
 
   background-image: radial-gradient(
@@ -994,6 +983,7 @@ td {
 }
 
 #button-report-issue {
+  min-width: max-content;
   width: 20rem;
 
   background-image: radial-gradient(
@@ -1061,10 +1051,13 @@ td {
   .issues-table {
     background-color: white;
     width: 100vw;
+    table-layout: fixed;
     overflow-y: auto;
+    overflow-x: hidden;
     display: block;
     font-size: 0.8rem;
     max-height: 9.6rem;
+    box-sizing: border-box;
   }
 
   .table-expanded {
@@ -1092,6 +1085,8 @@ td {
   }
 
   .td-description {
+    /* max-width: 10%;
+    min-width: 10%; */
     max-width: 4.7rem;
     min-width: 4.7rem;
     font-size: 0.7rem;
@@ -1523,14 +1518,14 @@ td {
     font-weight: 500;
   }
 
-  .issues-table {
+  /* .issues-table {
     background-color: white;
     width: 100vw;
     overflow-y: auto;
     display: block;
     font-size: 0.8rem;
     max-height: 9.6rem;
-  }
+  } */
 
   .table-expanded {
     max-height: 8rem;
@@ -2168,13 +2163,13 @@ td {
       font-weight: 500;
     }
 
-    .issues-table {
+    /* .issues-table {
       background-color: white;
       width: 100vw;
       overflow-y: auto;
       display: block;
       font-size: 0.8rem;
-    }
+    } */
 
     .table-expanded {
       max-height: 8rem;
@@ -2792,7 +2787,7 @@ td {
 
       /* In between brakpoints */
 
-      @media only screen and (min-width: 522px) and (max-width: 578px) {
+      @media only screen and (min-width: 478px) and (max-width: 578px) {
         .action-buttons{
           flex-direction: column;
           justify-content: center;
@@ -2820,3 +2815,107 @@ td {
           margin-top: 3rem;
         }
       }
+
+      @media only screen and (min-width: 320px) and (max-width: 379px) {
+        th {
+          font-size: 0.7rem;
+        }
+
+        td {
+          font-size: 0.7rem;
+        }
+
+        #td-issue-type {
+          max-width: 20vw; min-width: 20vw;
+        }
+
+        #td-description {
+          max-width: 40vw; min-width: 40vw;
+        }
+
+        #td-media {
+          max-width: 5vw; min-width: 5vw; 
+        }
+
+        #td-reported-time {
+          max-width: 25vw; min-width: 25vw;
+        }
+    }
+
+    @media only screen and (min-width: 380px) and (max-width: 479px){
+      th {
+        font-size: 0.75rem;
+      }
+
+      td {
+        font-size: 0.75rem;
+      }
+
+      #td-issue-type {
+        max-width: 20vw; min-width: 20vw;
+      }
+
+      #td-description {
+        max-width: 42vw; min-width: 42vw;
+      }
+
+      #td-media {
+        max-width: 5vw; min-width: 5vw; 
+      }
+
+      #td-reported-time {
+        max-width: 25vw; min-width: 25vw;
+      }
+    }
+
+    @media only screen and (min-width: 480px) and (max-width: 649px){
+      th {
+        font-size: 0.8rem;
+      }
+
+      td {
+        font-size: 0.8rem;
+      }
+
+      #td-issue-type {
+        max-width: 20vw; min-width: 20vw;
+      }
+
+      #td-description {
+        max-width: 47vw; min-width: 47vw;
+      }
+
+      #td-media {
+        max-width: 5vw; min-width: 5vw; 
+      }
+
+      #td-reported-time {
+        max-width: 25vw; min-width: 25vw;
+      }
+    }
+
+    @media only screen and (min-width: 650px){
+      th {
+        font-size: 1rem;
+      }
+
+      td {
+        font-size: 1rem;
+      }
+
+      #td-issue-type {
+        max-width: 20vw; min-width: 20vw;
+      }
+
+      #td-description {
+        max-width: 50vw; min-width: 50vw;
+      }
+
+      #td-media {
+        max-width: 5vw; min-width: 5vw; 
+      }
+
+      #td-reported-time {
+        max-width: 25vw; min-width: 25vw;
+      }
+    }

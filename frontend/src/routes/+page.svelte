@@ -366,6 +366,19 @@
     });
   };
 
+  const lazyLoadIssuesWithRecaptcha = async () => {
+    return new Promise((resolve, reject) => {
+      try {
+        recaptcha.renderRecaptcha((token) => {
+          handleTokenGetIssues(token);
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
   const executeRecaptchaAndPostIssue = async () => {
     try {
       await new Promise((resolve, reject) => {
@@ -430,6 +443,7 @@
     if (e.detail.inView && hasMoreResults) {
       if (Number($currentPage) + 1 < $totalPages) {
         $currentPage++;
+        await lazyLoadIssuesWithRecaptcha();
         await getIssues($currentPage);
         clearHeatmap();
         await addIssuesToMap();
@@ -2712,10 +2726,10 @@
                   <th>
                     {messages["find.issue"]["issues.table.column.two"]}
                   </th>
-                  <th>
+                  <th style="text-align: center">
                     {messages["find.issue"]["issues.table.column.three"]}
                   </th>
-                  <th style="width: 14rem; text-align: center">
+                  <th style="text-align: center">
                     {messages["find.issue"]["issues.table.column.four"]}
                   </th>
                 </tr>
@@ -2736,7 +2750,7 @@
                     >
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
-                        class="td-issue-type"
+                        id="td-issue-type"
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
                           selectedIssue = issue;
@@ -2754,7 +2768,7 @@
 
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
-                        class="td-description"
+                        id="td-description"
                         style="height: {visibleDetails.has(
                           issue.service_request_id
                         )
@@ -2771,7 +2785,7 @@
                           issue.service_request_id
                         )
                           ? 'unset'
-                          : 'hidden'}
+                          : 'hidden'}; 
                           "
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
@@ -2793,7 +2807,7 @@
                         {/if}
                       </td>
 
-                      <td style="text-align: center">
+                      <td id="td-media" style="text-align: center">
                         {#if issue.media_url !== undefined}
                           <!-- svelte-ignore a11y-click-events-have-key-events -->
                           <img
@@ -2809,6 +2823,7 @@
                       </td>
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
+                        id="td-reported-time"
                         style="text-align: center"
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
@@ -2828,6 +2843,7 @@
                     <td>{messages["find.issue"]["empty.results"]}</td>
                   </tr>
                 {/if}
+                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
                 <div
                   use:inview="{{ options }}"
                   on:change="{loadMoreResults}"
