@@ -11,43 +11,21 @@
   const URL_PREFIX = import.meta.env.VITE_BACKEND_URL;
 </script>
 
+<img
+  src="{localMotionLogo}"
+  alt="local motion logo"
+  class="local-motion-logo"
+/>
 <div
   class="footer"
   bind:this="{$footerSelector}"
   style="background-color: {backgroundColor}"
 >
-  <img
-    src="{localMotionLogo}"
-    alt="local motion logo"
-    class="local-motion-logo"
-  />
-
   <div
     class="row"
     class:row-wrap="{window.innerHeight <= 375 && window.innerWidth <= 513}"
   >
-    <div
-      class="col"
-      class:tighten-portrait="{window.innerHeight <= 926 &&
-        window.innerWidth <= 430}"
-    >
-      <!-- svelte-ignore missing-declaration -->
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <h2
-        style="cursor: pointer"
-        on:click="{() => goto(`${URL_PREFIX}/oauth/login/google`, true)}"
-      >
-        Admin Login
-      </h2>
-      <a href="https://lomocomo.org/about/contact-us/">
-        <h2>Contact Us</h2>
-      </a>
-    </div>
-    <div
-      class="col"
-      class:tighten-landscape="{window.innerWidth <= 677 &&
-        window.innerHeight <= 375}"
-    >
+    <div class="col">
       <a href="https://lomocomo.org/?ct_template=advocacy"><h2>Advocacy</h2></a>
       <a href="https://lomocomo.org/advocacy/livable-streets/"
         ><li>Livable Streets</li></a
@@ -63,8 +41,14 @@
         ><li>State-Level Advocacy</li></a
       >
     </div>
-    <div class="col">
-      <a href="https://lomocomo.org/get-involved/"><h2>Get Involved</h2></a>
+    <div
+      class="col"
+      class:add-padding-top="{window.innerWidth >= 431 &&
+        window.innerWidth < 700}"
+    >
+      <a href="https://lomocomo.org/get-involved/"
+        ><h2 style="min-width: max-content">Get Involved</h2></a
+      >
       <a href="https://lomocomo.org/get-involved/membership/"
         ><li>Membership</li></a
       >
@@ -75,6 +59,7 @@
         ><li>Sign up for our newsletter</li></a
       >
     </div>
+
     <div class="col">
       <a href="https://lomocomo.org/about/"><h2>About</h2></a>
       <a href="https://lomocomo.org/about/staff/"><li>Staff</li></a>
@@ -90,6 +75,20 @@
       <a href="https://lomocomo.org/about/the-rebrand-story/"
         ><li>Our Rebrand Story</li></a
       >
+    </div>
+    <div class="col">
+      <!-- svelte-ignore missing-declaration -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <h2
+        style="cursor: pointer; min-width: max-content"
+        on:click="{() => goto(`${URL_PREFIX}/oauth/login/google`, true)}"
+      >
+        Admin Login
+      </h2>
+      <a href="https://lomocomo.org/about/contact-us/">
+        <h2>Contact Us</h2>
+      </a>
+
       <div class="socials">
         <a class="socialButton" href="https://facebook.com/localmotioncomo">
           <img src="{facebookSVG}" alt="facebook" style="scale:4%;" />
@@ -109,12 +108,26 @@
 </div>
 
 <style>
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  li {
+    font-size: 0.85rem;
+  }
+
+  .local-motion-logo {
+    margin-top: 5rem;
+    margin-bottom: -0.4rem;
+    height: 69px;
+    width: 100px;
+  }
+
   .footer {
     display: flex;
     flex-wrap: wrap;
     height: auto;
     justify-content: space-evenly;
-    margin-top: 17.5rem;
   }
 
   .col {
@@ -122,20 +135,14 @@
     flex-direction: column;
     padding-right: 2rem;
     padding-left: 2rem;
-  }
-
-  .tighten-portrait {
-    margin-bottom: -3rem;
-  }
-
-  .tighten-landscape {
-    margin-left: 4rem;
+    min-width: 10rem;
+    max-width: 10rem;
   }
 
   .row {
     display: flex;
     flex-direction: row;
-    gap: 3rem;
+    justify-content: center;
   }
 
   .row-wrap {
@@ -145,7 +152,6 @@
   .socials {
     display: flex;
     flex-direction: row;
-    padding-top: 1rem;
   }
 
   .socialButton {
@@ -178,78 +184,13 @@
     color: #f2a900;
   }
 
-  .local-motion-logo {
-    position: relative;
-    top: -6.4rem;
-    width: 150px;
-    height: 104px;
-  }
-
-  @media only screen and (min-width: 320px) and (max-width: 375px) and (orientation: portrait) {
-    .local-motion-logo {
-      margin-bottom: -5rem;
-      margin-left: 13rem;
-      height: 69px;
-      width: 100px;
-      top: -4.2rem;
-    }
-
-    .row {
-      flex-wrap: wrap;
-    }
-  }
-
-  @media only screen and (min-width: 375px) and (max-width: 389px) and (orientation: portrait) {
-    .local-motion-logo {
-      margin-bottom: -5rem;
-      margin-left: 15rem;
-      height: 69px;
-      width: 100px;
-      top: -4.2rem;
-    }
-
-    .row {
-      flex-wrap: wrap;
-    }
-  }
-
-  @media only screen and (min-width: 390px) and (max-width: 430px) and (orientation: portrait) {
-    .local-motion-logo {
-      margin-left: 16rem;
-      margin-bottom: -5rem;
-      height: 69px;
-      width: 100px;
-      top: -4.2rem;
-    }
-
-    .row {
-      flex-wrap: wrap;
-    }
-  }
-
-  @media only screen and (min-width: 596px) and (max-width: 749px) and (max-height: 340px) and (orientation: landscape) {
-    .local-motion-logo {
-      margin-bottom: -5rem;
-      height: 69px;
-      width: 100px;
-      margin-left: 30rem;
-      top: -4.2rem;
-    }
-
+  @media only screen and (min-width: 320px) {
     .row {
       flex-wrap: wrap;
     }
   }
 
   @media only screen and (min-width: 750px) and (max-width: 813px) and (max-height: 340px) and (orientation: landscape) {
-    .local-motion-logo {
-      margin-bottom: -5rem;
-      height: 69px;
-      width: 100px;
-      top: -4.2rem;
-      margin-left: 2.5rem;
-    }
-
     .col {
       padding-left: 0;
       padding-right: 0;
@@ -257,13 +198,54 @@
     }
   }
 
-  @media only screen and (min-width: 750px) and (max-width: 814px) and (max-height: 450px) and (orientation: landscape) {
-    .local-motion-logo {
-      margin-bottom: -5rem;
-      height: 69px;
-      width: 100px;
-      left: -21.4rem;
-      top: -4.2rem;
+  @media only screen and (min-width: 700px) {
+    .row {
+      flex-wrap: nowrap;
+      gap: 0;
+    }
+
+    .col {
+      padding-left: 0.4rem;
+      padding-right: 0.4rem;
+    }
+  }
+
+  @media only screen and (min-width: 770px) {
+    .col {
+      min-width: 10.3rem;
+    }
+  }
+
+  @media only screen and (min-width: 320px) and (max-width: 415px) {
+    .row {
+      justify-content: left;
+    }
+  }
+
+  @media only screen and (min-width: 415px) and (max-width: 447px) {
+    .col {
+      min-width: 9rem;
+      max-width: 9rem;
+    }
+  }
+
+  @media only screen and (min-width: 624px) and (max-width: 699px) {
+    .col {
+      min-width: 11rem;
+    }
+  }
+
+  @media only screen and (min-width: 815px) {
+    .col {
+      min-width: 12rem;
+      max-width: 12rem;
+    }
+  }
+
+  @media only screen and (min-width: 930px) {
+    .col {
+      min-width: 13.5rem;
+      max-width: 13.5rem;
     }
   }
 </style>

@@ -108,7 +108,7 @@
     showTable = true,
     seeMore = false,
     spinner = false,
-    heatmapVisible = true,
+    heatmapVisible = false,
     issuesRefs = {},
     multiSelectOptions = [],
     invalidOtherDescription = {
@@ -254,7 +254,7 @@
     try {
       res = await axios.get("/token_info", { withCredentials: true });
     } catch (err) {
-      console.error(err);
+      console.info(err);
     }
     if (res?.status === 200) isAuthenticated = true;
   };
@@ -366,6 +366,19 @@
     });
   };
 
+  const lazyLoadIssuesWithRecaptcha = async () => {
+    return new Promise((resolve, reject) => {
+      try {
+        recaptcha.renderRecaptcha((token) => {
+          handleTokenGetIssues(token);
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
   const executeRecaptchaAndPostIssue = async () => {
     try {
       await new Promise((resolve, reject) => {
@@ -430,6 +443,7 @@
     if (e.detail.inView && hasMoreResults) {
       if (Number($currentPage) + 1 < $totalPages) {
         $currentPage++;
+        await lazyLoadIssuesWithRecaptcha();
         await getIssues($currentPage);
         clearHeatmap();
         await addIssuesToMap();
@@ -878,18 +892,18 @@
         map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
         2
       ) {
-        const heatmapControl = createCustomControl("Markers", function () {
+        const heatmapControl = createCustomControl("Heatmap", function () {
           heatmapVisible = !heatmapVisible;
           if (heatmapVisible) {
             for (var i = 0; i < markers.length; i++) {
               markers[i].setMap(null);
             }
-            const button = document.getElementById("Markers-control");
+            const button = document.getElementById("Heatmap-control");
             button.innerHTML = "Markers";
 
             heatmap.setMap(map);
           } else {
-            const button = document.getElementById("Markers-control");
+            const button = document.getElementById("Heatmap-control");
             button.innerHTML = "Heatmap";
 
             heatmap.setMap(null);
@@ -1052,10 +1066,11 @@
   const adjustTable = () => {
     return new Promise((resolve, reject) => {
       if (tableSelector) {
-        let addExtra = 90;
+        let addExtra = 140;
 
         const tableHeight =
           tableSelector.offsetTop + tableSelector.offsetHeight;
+
         backgroundSelector.style.height = tableHeight + addExtra + "px";
 
         resolve();
@@ -1383,7 +1398,7 @@
     setTimeout(async () => {
       showFooter = true;
       await adjustFooter();
-    }, 500);
+    }, 600);
 
     clearData();
     clearFilters();
@@ -1393,7 +1408,7 @@
   };
 
   const getIssuesWithToken = async () => {
-    if (token) await getIssues(0,true);
+    if (token) await getIssues(0, true);
     else setTimeout(getIssuesWithToken, 100);
   };
 
@@ -1494,11 +1509,6 @@
       </Modal>
     {/if}
 
-    <!-- {#if window.innerHeight}
-      <div style="text-align: center; color: yellow">
-        Height:{window.innerHeight} Width: {window.innerWidth}
-      </div>
-    {/if} -->
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
@@ -1569,7 +1579,7 @@
                       block: 'start',
                     });
                   }, 600);
-                }, 100);
+                }, 150);
 
                 if (filteredIssuesData?.length === 0) getIssuesWithToken();
 
@@ -1770,6 +1780,12 @@
                   await getServiceDefinition(e.target.value);
 
                   populateIssueDetailList();
+
+                  setTimeout(() => {
+                    let inputElement = document.querySelector('#issue-details');
+                    if (inputElement)
+                      inputElement.setAttribute('readonly', 'readonly');
+                  }, 1000);
                 }
               }}"></select>
 
@@ -1796,7 +1812,7 @@
             {/if}
 
             {#if $issueType !== null}
-              <div style="display: inline-block">
+              <div class="textarea">
                 {#if $issueDetail.find((selection) => selection.name === "Other") || $issueType.name === "Other"}
                   <div class="step-two-required">* Required field</div>
                 {/if}
@@ -1928,7 +1944,7 @@
           <div class="step-three-label">
             {messages["report.issue"]["label.step"]}
             <button class="numbers">3</button>
-            <span style="font-size: 1.2rem">
+            <span style="font-size: 1.2rem; margin-left: 0.3rem">
               {messages["report.issue"]["label.optional"]}
             </span>
           </div>
@@ -2104,12 +2120,12 @@
           <div class="step-four-label">
             {messages["report.issue"]["label.step"]}
             <button class="numbers">4</button>
-            <span style="font-size: 1.2rem">
+            <span style="font-size: 1.2rem; margin-left: 0.3rem">
               {messages["report.issue"]["label.optional"]}
             </span>
           </div>
 
-          <div>
+          <div class="submitter-name-div">
             <span class="step-four-submitter-name-label">
               {messages["report.issue"]["label.submitter.name"]}
             </span>
@@ -2135,7 +2151,7 @@
             </div>
           </div>
 
-          <div>
+          <div class="contact-div">
             <span class="step-four-contact-info-label">
               {messages["report.issue"]["label.contact.info"]}
             </span>
@@ -2364,7 +2380,10 @@
             {messages["report.issue"]["issue.reported.success.message.one"]}
           </div>
 
-          <div class:success-message-two-offline="{!isOnline}">
+          <div
+            class:success-message-two-offline="{!isOnline}"
+            style="margin-bottom: 0.5rem"
+          >
             {#if isOnline}
               {messages["report.issue"]["issue.reported.success.message.two"]}
             {:else}
@@ -2400,12 +2419,14 @@
                 {messages["report.issue"]["label.issue.location.subtext"]}
               </div>
             {:else}
-              <input
-                bind:this="{offlineAddressInputSelector}"
-                class="offline-address-input"
-                placeholder="{messages['map']['pac-input-placeholder']}"
-                on:click="{() => (invalidOfflineAddress = false)}"
-              />
+              <div class="offline-input">
+                <input
+                  bind:this="{offlineAddressInputSelector}"
+                  class="offline-address-input"
+                  placeholder="{messages['map']['pac-input-placeholder']}"
+                  on:click="{() => (invalidOfflineAddress = false)}"
+                />
+              </div>
 
               <div
                 class="step-one-invalid-offline-address"
@@ -2705,10 +2726,10 @@
                   <th>
                     {messages["find.issue"]["issues.table.column.two"]}
                   </th>
-                  <th>
+                  <th style="text-align: center">
                     {messages["find.issue"]["issues.table.column.three"]}
                   </th>
-                  <th style="width: 14rem; text-align: center">
+                  <th style="text-align: center">
                     {messages["find.issue"]["issues.table.column.four"]}
                   </th>
                 </tr>
@@ -2729,7 +2750,7 @@
                     >
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
-                        class="td-issue-type"
+                        id="td-issue-type"
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
                           selectedIssue = issue;
@@ -2747,7 +2768,7 @@
 
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
-                        class="td-description"
+                        id="td-description"
                         style="height: {visibleDetails.has(
                           issue.service_request_id
                         )
@@ -2764,7 +2785,7 @@
                           issue.service_request_id
                         )
                           ? 'unset'
-                          : 'hidden'}
+                          : 'hidden'}; 
                           "
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
@@ -2786,7 +2807,7 @@
                         {/if}
                       </td>
 
-                      <td style="text-align: center">
+                      <td id="td-media" style="text-align: center">
                         {#if issue.media_url !== undefined}
                           <!-- svelte-ignore a11y-click-events-have-key-events -->
                           <img
@@ -2802,6 +2823,7 @@
                       </td>
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
+                        id="td-reported-time"
                         style="text-align: center"
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
@@ -2821,6 +2843,7 @@
                     <td>{messages["find.issue"]["empty.results"]}</td>
                   </tr>
                 {/if}
+                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
                 <div
                   use:inview="{{ options }}"
                   on:change="{loadMoreResults}"

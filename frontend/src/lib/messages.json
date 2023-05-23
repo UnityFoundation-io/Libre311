@@ -23,7 +23,7 @@
             "button.back": "Back",
             "label.step": "Step",
             "label.issue.location": "Where is the issue located?",
-            "label.issue.location.subtext": "Place the marker or type exact the address.",
+            "label.issue.location.subtext": "Place the marker or type the exact address.",
             "invalid.offline.address": "Please verify that the address is valid.",
             "label.optional": "(optional)",
             "label.date": "Date & Time:",
