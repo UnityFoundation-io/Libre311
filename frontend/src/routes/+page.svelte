@@ -1066,10 +1066,11 @@
   const adjustTable = () => {
     return new Promise((resolve, reject) => {
       if (tableSelector) {
-        let addExtra = 90;
+        let addExtra = 140;
 
         const tableHeight =
           tableSelector.offsetTop + tableSelector.offsetHeight;
+
         backgroundSelector.style.height = tableHeight + addExtra + "px";
 
         resolve();
