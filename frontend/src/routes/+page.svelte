@@ -1398,7 +1398,7 @@
     setTimeout(async () => {
       showFooter = true;
       await adjustFooter();
-    }, 500);
+    }, 600);
 
     clearData();
     clearFilters();
@@ -1579,7 +1579,7 @@
                       block: 'start',
                     });
                   }, 600);
-                }, 100);
+                }, 150);
 
                 if (filteredIssuesData?.length === 0) getIssuesWithToken();
 
