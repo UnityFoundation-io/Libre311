@@ -1509,11 +1509,6 @@
       </Modal>
     {/if}
 
-    <!-- {#if window.innerHeight}
-      <div style="text-align: center; color: yellow">
-        Height:{window.innerHeight} Width: {window.innerWidth}
-      </div>
-    {/if} -->
     <div
       class="content"
       in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
@@ -1788,7 +1783,6 @@
 
                   setTimeout(() => {
                     let inputElement = document.querySelector('#issue-details');
-                    console.log('inputElement', inputElement);
                     if (inputElement)
                       inputElement.setAttribute('readonly', 'readonly');
                   }, 1000);
@@ -1818,7 +1812,7 @@
             {/if}
 
             {#if $issueType !== null}
-              <div style="display: inline-block">
+              <div class="textarea">
                 {#if $issueDetail.find((selection) => selection.name === "Other") || $issueType.name === "Other"}
                   <div class="step-two-required">* Required field</div>
                 {/if}
@@ -1950,7 +1944,7 @@
           <div class="step-three-label">
             {messages["report.issue"]["label.step"]}
             <button class="numbers">3</button>
-            <span style="font-size: 1.2rem">
+            <span style="font-size: 1.2rem; margin-left: 0.3rem">
               {messages["report.issue"]["label.optional"]}
             </span>
           </div>
@@ -2126,12 +2120,12 @@
           <div class="step-four-label">
             {messages["report.issue"]["label.step"]}
             <button class="numbers">4</button>
-            <span style="font-size: 1.2rem">
+            <span style="font-size: 1.2rem; margin-left: 0.3rem">
               {messages["report.issue"]["label.optional"]}
             </span>
           </div>
 
-          <div>
+          <div class="submitter-name-div">
             <span class="step-four-submitter-name-label">
               {messages["report.issue"]["label.submitter.name"]}
             </span>
@@ -2157,7 +2151,7 @@
             </div>
           </div>
 
-          <div>
+          <div class="contact-div">
             <span class="step-four-contact-info-label">
               {messages["report.issue"]["label.contact.info"]}
             </span>
@@ -2386,7 +2380,10 @@
             {messages["report.issue"]["issue.reported.success.message.one"]}
           </div>
 
-          <div class:success-message-two-offline="{!isOnline}">
+          <div
+            class:success-message-two-offline="{!isOnline}"
+            style="margin-bottom: 0.5rem"
+          >
             {#if isOnline}
               {messages["report.issue"]["issue.reported.success.message.two"]}
             {:else}
@@ -2422,12 +2419,14 @@
                 {messages["report.issue"]["label.issue.location.subtext"]}
               </div>
             {:else}
-              <input
-                bind:this="{offlineAddressInputSelector}"
-                class="offline-address-input"
-                placeholder="{messages['map']['pac-input-placeholder']}"
-                on:click="{() => (invalidOfflineAddress = false)}"
-              />
+              <div class="offline-input">
+                <input
+                  bind:this="{offlineAddressInputSelector}"
+                  class="offline-address-input"
+                  placeholder="{messages['map']['pac-input-placeholder']}"
+                  on:click="{() => (invalidOfflineAddress = false)}"
+                />
+              </div>
 
               <div
                 class="step-one-invalid-offline-address"
