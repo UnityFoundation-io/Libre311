@@ -3,8 +3,8 @@ import { expect, test } from '@playwright/test';
 test('open reported issues screen', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
-  await expect(page.locator('#map')).toBeVisible();
-  await expect(page.getByRole('table')).toBeVisible();
+  await page.locator('#map').isVisible();
+  await page.getByRole('table').isVisible();
 });
 
 test('apply filters to reported issues table', async ({ page }) => {
@@ -13,8 +13,8 @@ test('apply filters to reported issues table', async ({ page }) => {
   // Opens filters
   await page.locator('div').filter({ hasText: /\+$/ }).locator('span').click();
   // Filters to only display Bike Lane issues submitted by User 1
-  await page.getByRole('combobox').first().selectOption('003');
-  await page.getByRole('combobox').nth(1).selectOption('user1');
+  await page.getByRole('combobox').first().selectOption({ index:2 });
+  await page.getByRole('combobox').nth(1).selectOption({ index:0 });
 });
 
 test('view expanded issue details from reported issues table', async ({ page }) => {

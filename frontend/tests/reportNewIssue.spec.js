@@ -63,7 +63,7 @@ test('report new issue with other issue type', async ({ page }) => {
 
   // Issue type "other" selected
   await expect(page.getByRole('combobox')).toBeVisible();
-  await page.getByRole('combobox').selectOption('006');
+  await page.getByRole('combobox').selectOption({ index: 5 });
   // Confirms text denoting a required description is present
   await page.getByRole('button', { name: 'Next next step' }).click();
   await expect(page.getByText('Minimum 10 characters required in the description.')).toBeVisible();
