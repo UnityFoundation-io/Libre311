@@ -1715,7 +1715,7 @@ td {
     }
 
     #button-report-issue {
-      width: 18rem;
+      width: 20rem;
       margin-top: 4rem;
     }
 
@@ -1870,6 +1870,7 @@ td {
 
         #button-report-issue {
           margin-top: 8vh;
+          width: 20rem;
         }
 
       }
@@ -2005,6 +2006,20 @@ td {
       }
     }
 
-    @media only screen and (min-width: 815px) {
+    @media only screen and (min-width: 375px) and (max-width: 415px) {
+      .button {
+        font-size: 1rem;
+      }
+    }
 
+    @media only screen and (min-width: 416px) and (max-width: 477px) {
+      #button-report-issue {
+        width: 20rem;
+      }
+    }
+
+    @media only screen and (min-width: 530px) and (max-width: 585px) {
+      .button {
+        font-size: 1rem;
+      }
     }
