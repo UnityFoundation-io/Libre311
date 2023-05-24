@@ -39,6 +39,7 @@
     itemsPerPage,
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
+  import tableHeight from "../stores/tableHeight";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
   import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
@@ -1068,10 +1069,11 @@
       if (tableSelector) {
         let addExtra = 140;
 
-        const tableHeight =
-          tableSelector.offsetTop + tableSelector.offsetHeight;
+        if(!$tableHeight)
+        tableHeight.set(tableSelector.offsetTop + tableSelector.offsetHeight);
+          
+        backgroundSelector.style.height = $tableHeight + addExtra + "px";
 
-        backgroundSelector.style.height = tableHeight + addExtra + "px";
 
         resolve();
       }
