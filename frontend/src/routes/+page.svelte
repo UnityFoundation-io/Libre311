@@ -2620,20 +2620,6 @@
                     setTimeout(async () => await addIssuesToMap(), 1000);
                   }}"></select>
 
-                <select
-                  class="select-filter"
-                  on:change="{(e) => {
-                    console.log(e.target.value);
-                  }}"
-                >
-                  <option disabled selected value="">
-                    {messages["find.issue"]["reported.by.placeholder"]}
-                  </option>
-                  <option value="user1">
-                    {messages["find.issue"]["select.option.reported.by.one"]}
-                  </option>
-                </select>
-
                 <DateRangePicker
                   on:datesSelected="{(e) => {
                     if (e.detail.length === 2) {
