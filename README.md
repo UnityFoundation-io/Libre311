@@ -1,4 +1,4 @@
-# TODO:  Write a title.
+# WeMove
 
 TODO:  Write introduction
 
@@ -17,7 +17,7 @@ TODO: write.
                                               +->| Auth Provider |
                                                  +---------------+
 
-The TODO consists of
+The WeMove application consists of
 
 * A Web App UI that can either be served by the Web API or independently
 * A Web API that serves data to the UI
@@ -38,13 +38,13 @@ Currently, the DDS Permissions Manager supports the following Databases:
 
 To connect to a database, the following environment variables must be set for the Web API:
 
-* TODO_JDBC_URL - The JDBC URL of the database
-* TODO_JDBC_DRIVER - The driver to use. See Driver column for values.
-* TODO_JDBC_USER - The database user name.
-* TODO_JDBC_PASSWORD - The database user password.
-* TODO_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
+* WEMOVE_JDBC_URL - The JDBC URL of the database
+* WEMOVE_JDBC_DRIVER - The driver to use. See Driver column for values.
+* WEMOVE_JDBC_USER - The database user name.
+* WEMOVE_JDBC_PASSWORD - The database user password.
+* WEMOVE_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
 
-The following describes the options for TODO_AUTO_SCHEMA_GEN environment variable in detail:
+The following describes the options for WEMOVE_AUTO_SCHEMA_GEN environment variable in detail:
 
 * *none** - No action will be performed.
 * *create-only** - Database creation will be generated.
@@ -54,7 +54,7 @@ The following describes the options for TODO_AUTO_SCHEMA_GEN environment variabl
 * *validate** - Validate the database schema.
 * *update** - Update the database schema.
 
-The TODO_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
+The WEMOVE_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
 Examples include `mysql:mysql-connector-java:8.0.31` and `org.postgresql:postgresql:42.4.2`.
 Multiple drivers can be specified.
 For example, `mysql:mysql-connector-java:8.0.31,com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2`.
@@ -65,8 +65,8 @@ The database contains a table listing the email addresses of users that are auth
 To authorize a user for this activity, insert their email address as follows:
 
 ```sql
-USE TODO;
-INSERT INTO TODO_user (email)
+USE wemove;
+INSERT INTO wemove_user (email)
 VALUES ('$EMAIL');
 ```
 
