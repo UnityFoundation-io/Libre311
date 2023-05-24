@@ -1069,11 +1069,10 @@
       if (tableSelector) {
         let addExtra = 140;
 
-        if(!$tableHeight)
-        tableHeight.set(tableSelector.offsetTop + tableSelector.offsetHeight);
-          
-        backgroundSelector.style.height = $tableHeight + addExtra + "px";
+        if (!$tableHeight)
+          tableHeight.set(tableSelector.offsetTop + tableSelector.offsetHeight);
 
+        backgroundSelector.style.height = $tableHeight + addExtra + "px";
 
         resolve();
       }
@@ -1391,6 +1390,7 @@
   };
 
   const resetFindIssue = () => {
+    if(heatmapVisible) toggleMarkers();
     token = null;
     scrollToTop();
 
