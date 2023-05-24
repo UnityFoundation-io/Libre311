@@ -575,6 +575,10 @@ td {
   cursor: pointer;
 }
 
+th {
+  min-width: 5rem;
+}
+
 .find-issues {
   display: flex;
   justify-content: center;
@@ -1252,7 +1256,7 @@ td {
 
 /*/////// iPhone SE Portrait////////*/
 
-  @media only screen and (min-width: 375px) and (orientation: portrait) {
+  @media only screen and (min-width: 375px) and (max-width: 586px) and (orientation: portrait) {
   .content {
     font-size: 0.5rem;
   }
@@ -2027,3 +2031,16 @@ td {
         width: 18rem;
       }
     }
+
+
+    @media only screen and (min-width: 320px) and (max-width: 585px) and (max-height: 320px) {
+    .action-buttons {
+      display: block;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    #button-report-issue {
+     margin-top: 2rem;
+    }
+  }
