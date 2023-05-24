@@ -39,6 +39,7 @@
     itemsPerPage,
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
+  import tableHeight from "../stores/tableHeight";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
   import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
@@ -1068,10 +1069,11 @@
       if (tableSelector) {
         let addExtra = 140;
 
-        const tableHeight =
-          tableSelector.offsetTop + tableSelector.offsetHeight;
+        if(!$tableHeight)
+        tableHeight.set(tableSelector.offsetTop + tableSelector.offsetHeight);
+          
+        backgroundSelector.style.height = $tableHeight + addExtra + "px";
 
-        backgroundSelector.style.height = tableHeight + addExtra + "px";
 
         resolve();
       }
@@ -1578,8 +1580,8 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 600);
-                }, 150);
+                  }, 650);
+                }, 250);
 
                 if (filteredIssuesData?.length === 0) getIssuesWithToken();
 
@@ -2402,6 +2404,7 @@
       <div
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
+        style="width:{!isOnline ? '50vw' : '100vw'} "
         class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
@@ -2619,20 +2622,6 @@
                     await getIssues();
                     setTimeout(async () => await addIssuesToMap(), 1000);
                   }}"></select>
-
-                <select
-                  class="select-filter"
-                  on:change="{(e) => {
-                    console.log(e.target.value);
-                  }}"
-                >
-                  <option disabled selected value="">
-                    {messages["find.issue"]["reported.by.placeholder"]}
-                  </option>
-                  <option value="user1">
-                    {messages["find.issue"]["select.option.reported.by.one"]}
-                  </option>
-                </select>
 
                 <DateRangePicker
                   on:datesSelected="{(e) => {

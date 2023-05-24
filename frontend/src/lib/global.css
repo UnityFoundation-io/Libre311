@@ -1830,14 +1830,6 @@ td {
           background-position: center 50%;
         }
 
-        #button-report-issue {
-          width: 17.5rem;
-        }
-
-        #button-find-issues {
-          width: 17.5rem;
-        }
-
         .td-description {
           max-width: 27rem;
           min-width: 27rem;
@@ -1858,7 +1850,7 @@ td {
 
       /* In between brakpoints */
 
-      @media only screen and (min-width: 478px) and (max-width: 578px) {
+      @media only screen and (min-width: 412px) and (max-width: 578px) {
         .action-buttons{
           flex-direction: column;
           justify-content: center;
@@ -1870,6 +1862,10 @@ td {
 
         #button-report-issue {
           margin-top: 8vh;
+          width: 20rem;
+        }
+
+        #button-find-issues {
           width: 20rem;
         }
 
@@ -2021,5 +2017,13 @@ td {
     @media only screen and (min-width: 530px) and (max-width: 585px) {
       .button {
         font-size: 1rem;
+      }
+
+      #button-report-issue {
+        width: 18rem;
+      }
+
+      #button-find-issues {
+        width: 18rem;
       }
     }
