@@ -853,6 +853,13 @@
   const addIssuesToMap = async () => {
     clearMarkers();
 
+    if (heatmapVisible) {
+      setTimeout(() => {
+        const button = document.getElementById("Heatmap-control");
+        if (button) button.innerHTML = "Markers";
+      }, 200);
+    }
+
     if (filteredIssuesData && filteredIssuesData.length > 0) {
       filteredIssuesData.forEach((issue) => {
         let marker;
@@ -1390,7 +1397,6 @@
   };
 
   const resetFindIssue = () => {
-    if(heatmapVisible) toggleMarkers();
     token = null;
     scrollToTop();
 
