@@ -1578,8 +1578,8 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 600);
-                }, 150);
+                  }, 650);
+                }, 250);
 
                 if (filteredIssuesData?.length === 0) getIssuesWithToken();
 
@@ -2402,6 +2402,7 @@
       <div
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
+        style="width:{!isOnline ? '50vw' : '100vw'} "
         class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
