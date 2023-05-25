@@ -512,11 +512,13 @@ textarea::placeholder {
 
 .issues-table {
   background-color: white;
+  width: 100vw;
   display: block;
   max-height: 15rem;
   table-layout: fixed;
   overflow-y: auto;
   overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .issue-detail-view {
@@ -1042,15 +1044,8 @@ th {
   }
 
   .issues-table {
-    background-color: white;
-    width: 100vw;
-    table-layout: fixed;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: block;
     font-size: 0.8rem;
     max-height: 9.6rem;
-    box-sizing: border-box;
   }
 
   .table-expanded {
