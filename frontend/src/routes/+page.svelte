@@ -1555,7 +1555,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 650);
+                  }, 800);
                 }, 250);
 
                 if (filteredIssuesData?.length === 0) await getIssues();
