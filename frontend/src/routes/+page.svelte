@@ -367,19 +367,6 @@
     });
   };
 
-  const lazyLoadIssuesWithRecaptcha = async () => {
-    return new Promise((resolve, reject) => {
-      try {
-        recaptcha.renderRecaptcha((token) => {
-          handleTokenGetIssues(token);
-          resolve();
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  };
-
   const executeRecaptchaAndPostIssue = async () => {
     try {
       await new Promise((resolve, reject) => {
@@ -444,7 +431,6 @@
     if (e.detail.inView && hasMoreResults) {
       if (Number($currentPage) + 1 < $totalPages) {
         $currentPage++;
-        await lazyLoadIssuesWithRecaptcha();
         await getIssues($currentPage);
         clearHeatmap();
         await addIssuesToMap();
@@ -506,12 +492,7 @@
     let res;
 
     res = await axios.get(
-      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
-      {
-        headers: {
-          "X-G-RECAPTCHA-RESPONSE": token,
-        },
-      }
+      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
     );
 
     if (
@@ -536,8 +517,6 @@
     if (res.data?.length > 0) {
       if (displayIssuesInMap) await addIssuesToMap();
     }
-
-    token = null;
   };
 
   const validateEmail = (input) => {
@@ -1189,10 +1168,6 @@
     localStorage.setItem("completed", "true");
   };
 
-  const handleTokenGetIssues = async (recaptchaToken) => {
-    if (recaptchaToken) token = recaptchaToken;
-  };
-
   const readFileAsDataURL = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1415,11 +1390,6 @@
     selectedIssue = null;
   };
 
-  const getIssuesWithToken = async () => {
-    if (token) await getIssues(0, true);
-    else setTimeout(getIssuesWithToken, 100);
-  };
-
   onMount(async () => {
     await loadRecaptcha();
     await getTokenInfo();
@@ -1578,7 +1548,6 @@
                 showFooter = false;
                 findReportedIssue = true;
                 setTimeout(async () => {
-                  if (!token) recaptcha.renderRecaptcha(handleTokenGetIssues);
                   await adjustTable();
 
                   setTimeout(() => {
@@ -1589,7 +1558,7 @@
                   }, 650);
                 }, 250);
 
-                if (filteredIssuesData?.length === 0) getIssuesWithToken();
+                if (filteredIssuesData?.length === 0) await getIssues();
 
                 addIssuesToMap();
               } else resetFindIssue();
@@ -2572,8 +2541,6 @@
         {/if}
 
         {#if findReportedIssue}
-          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
-
           <div class="filter-label">
             <div>
               {messages["find.issue"]["label.filter"]}
@@ -2838,7 +2805,6 @@
                     <td>{messages["find.issue"]["empty.results"]}</td>
                   </tr>
                 {/if}
-                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
                 <div
                   use:inview="{{ options }}"
                   on:change="{loadMoreResults}"
