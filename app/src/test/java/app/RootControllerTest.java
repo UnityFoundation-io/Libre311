@@ -151,9 +151,7 @@ public class RootControllerTest {
                 Map.of("attribute[SDWLK]", "NARROW"));
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        HttpRequest getServiceRequests = HttpRequest.GET("/requests")
-                .header("X-G-RECAPTCHA-RESPONSE", "somevalue");
-        response = client.toBlocking().exchange(getServiceRequests, ServiceRequestDTO[].class);
+        response = client.toBlocking().exchange("/requests", ServiceRequestDTO[].class);
         assertEquals(HttpStatus.OK, response.status());
 
         Optional<ServiceRequestDTO[]> bodyOptional = response.getBody(ServiceRequestDTO[].class);
