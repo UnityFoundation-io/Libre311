@@ -62,7 +62,7 @@
 
     <div class="col">
       <a href="https://lomocomo.org/about/"><h2>About</h2></a>
-      <a href="https://lomocomo.org/about/staff/"><li>Staff</li></a>
+      <a href="https://lomocomo.org/about/staff/"><li>Staff v0.1</li></a>
       <a href="https://lomocomo.org/about/board-of-directors/"
         ><li>Board of Directors</li></a
       >
