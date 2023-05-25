@@ -576,7 +576,7 @@ td {
 }
 
 th {
-  min-width: 5rem;
+  min-width: 2rem;
 }
 
 .find-issues {
@@ -1893,7 +1893,7 @@ th {
         }
 
         #td-issue-type {
-          max-width: 20vw; min-width: 20vw;
+          max-width: 20vw; min-width: 20vw; 
         }
 
         #td-description {
@@ -1901,7 +1901,7 @@ th {
         }
 
         #td-media {
-          max-width: 5vw; min-width: 5vw; 
+          max-width: 5vw; min-width: 5vw;
         }
 
         #td-reported-time {
