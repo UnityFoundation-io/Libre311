@@ -2682,7 +2682,7 @@
             <table bind:this="{tableSelector}" class="issues-table">
               <thead>
                 <tr>
-                  <th>
+                  <th id="issue-type-header">
                     {messages["find.issue"]["issues.table.column.one"]}
                   </th>
                   <th>
