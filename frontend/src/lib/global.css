@@ -512,12 +512,13 @@ textarea::placeholder {
 
 .issues-table {
   background-color: white;
-  width: 100vw;
+  width: 100%;
   display: block;
   max-height: 15rem;
   table-layout: fixed;
   overflow-y: auto;
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
+  overflow-x: scroll;
   box-sizing: border-box;
 }
 
@@ -1892,7 +1893,7 @@ th {
         }
 
         #td-description {
-          max-width: 40vw; min-width: 40vw;
+          max-width: 35vw; min-width: 35vw;
         }
 
         #td-media {
@@ -1913,11 +1914,11 @@ th {
 
     @media only screen and (min-width: 380px) and (max-width: 479px){
       th {
-        font-size: 0.75rem;
+        font-size: 0.73rem;
       }
 
       td {
-        font-size: 0.75rem;
+        font-size: 0.73rem;
       }
 
       #td-issue-type {
@@ -1925,7 +1926,7 @@ th {
       }
 
       #td-description {
-        max-width: 42vw; min-width: 42vw;
+        max-width: 40vw; min-width: 40vw;
       }
 
       #td-media {
@@ -1951,7 +1952,7 @@ th {
       }
 
       #td-description {
-        max-width: 47vw; min-width: 47vw;
+        max-width: 42vw; min-width: 42vw;
       }
 
       #td-media {
@@ -1977,7 +1978,7 @@ th {
       }
 
       #td-description {
-        max-width: 50vw; min-width: 50vw;
+        max-width: 42vw; min-width: 42vw;
       }
 
       #td-media {
