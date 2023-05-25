@@ -517,8 +517,7 @@ textarea::placeholder {
   max-height: 15rem;
   table-layout: fixed;
   overflow-y: auto;
-  /* overflow-x: hidden; */
-  overflow-x: scroll;
+  overflow-x: hidden;
   box-sizing: border-box;
 }
 
@@ -1978,7 +1977,7 @@ th {
       }
 
       #td-description {
-        max-width: 42vw; min-width: 42vw;
+        max-width: 45vw; min-width: 45vw;
       }
 
       #td-media {
@@ -2033,5 +2032,15 @@ th {
 
     #button-report-issue {
      margin-top: 2rem;
+    }
+  }
+
+  @media only screen and (min-width: 815px){
+    #td-issue-type {
+      padding-left: 0.5rem;
+    }
+
+    #issue-type-header {
+      padding-left: 0.5rem;
     }
   }
