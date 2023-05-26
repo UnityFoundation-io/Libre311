@@ -1052,7 +1052,7 @@
 
   const adjustTable = () => {
     return new Promise((resolve, reject) => {
-      if (tableSelector) {
+      if (tableSelector && backgroundSelector) {
         let addExtra = 140;
 
         if (!$tableHeight)
@@ -1061,7 +1061,7 @@
         backgroundSelector.style.height = $tableHeight + addExtra + "px";
 
         resolve();
-      }
+      } else setTimeout(() => adjustTable(), 100);
     });
   };
 
@@ -1555,7 +1555,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 800);
+                  }, 650);
                 }, 250);
 
                 if (filteredIssuesData?.length === 0) await getIssues();
