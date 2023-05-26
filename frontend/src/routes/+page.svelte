@@ -31,7 +31,6 @@
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
   import issueDetailList from "../stores/issueDetailList";
-  import footerDivHeight from "../stores/footerDivHeight";
   import {
     totalSize,
     totalPages,
@@ -39,7 +38,6 @@
     itemsPerPage,
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
-  import tableHeight from "../stores/tableHeight";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
   import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
@@ -78,6 +76,7 @@
   const issueDescriptionTrimCharacters = 36;
   const waitTime = 1000;
   const minAddressCharacters = 15;
+  const debounceTime = 1000;
 
   // Page Height
   let pageHeight = 1650;
@@ -152,7 +151,8 @@
     selected,
     isOnline,
     wasOnline,
-    imageData;
+    imageData,
+    timeoutId;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -190,7 +190,6 @@
 
     if (reportNewIssue) reportNewIssue = false;
     if (findReportedIssue) findReportedIssue = false;
-    footerDivHeight.set();
 
     setTimeout(() => {
       showFooter = true;
@@ -240,10 +239,7 @@
       setTimeout(() => {
         resetState();
         reportNewIssueStep6 = false;
-        backgroundSelector.style.height = $footerDivHeight + "px";
       }, 3000);
-
-      setTimeout(() => (showFooter = true), 4000);
     }, 100);
   }
 
@@ -455,7 +451,7 @@
 
   const populateIssueTypeSelectDropdown = () => {
     const defaultOption = document.createElement("option");
-    defaultOption.text = "Issue Type";
+    defaultOption.text = messages["find.issue"]["issue.type.placeholder"];
     defaultOption.value = "";
     defaultOption.disabled = true;
     defaultOption.selected = true;
@@ -748,7 +744,11 @@
     imageData = "";
     selectedFileSrc = "";
     selectedFile = "";
-    setTimeout(() => (currentStep = null), 700);
+    setTimeout(async () => {
+      currentStep = null;
+      showFooter = true;
+      await adjustFooter();
+    }, 700);
   };
 
   const clearForm = () => {
@@ -835,7 +835,7 @@
     if (heatmapVisible) {
       setTimeout(() => {
         const button = document.getElementById("Heatmap-control");
-        if (button) button.innerHTML = "Markers";
+        if (button) button.innerHTML = messages["map"]["button.markers.label"];
       }, 200);
     }
 
@@ -886,12 +886,12 @@
               markers[i].setMap(null);
             }
             const button = document.getElementById("Heatmap-control");
-            button.innerHTML = "Markers";
+            button.innerHTML = messages["map"]["button.markers.label"];
 
             heatmap.setMap(map);
           } else {
             const button = document.getElementById("Heatmap-control");
-            button.innerHTML = "Heatmap";
+            button.innerHTML = messages["map"]["button.heatmap.label"];
 
             heatmap.setMap(null);
             for (var i = 0; i < markers.length; i++) {
@@ -969,8 +969,8 @@
   };
 
   const handleBeforeUnload = (event) => {
-    const message =
-      "Are you sure you want to leave? Your unsaved changes will be lost.";
+    const message = messages["home"]["leave.message"];
+
     event.preventDefault();
     event.returnValue = message;
     return message;
@@ -1038,30 +1038,44 @@
 
   const adjustFooter = () => {
     return new Promise((resolve, reject) => {
-      if (!$footerDivHeight && $footerSelector) {
-        footerDivHeight.set(
-          $footerSelector.offsetTop + $footerSelector.offsetHeight
-        );
+      let retries = 0;
+
+      if ($footerSelector) {
+        const footerDivHeight =
+          $footerSelector.offsetTop + $footerSelector.offsetHeight;
+        backgroundSelector.style.height = footerDivHeight + "px";
+
+        resolve();
+      } else if (!$footerSelector && retries < 50) {
+        retries++;
+        console.log("no footer selector... retrying", retries);
+        setTimeout(() => adjustFooter(), 300);
+      } else {
+        reject(new Error(messages["home"]["footer.selector.error"]));
       }
-
-      backgroundSelector.style.height = $footerDivHeight + "px";
-
-      resolve();
     });
   };
 
   const adjustTable = () => {
     return new Promise((resolve, reject) => {
+      let retries = 0;
+
       if (tableSelector && backgroundSelector) {
-        let addExtra = 140;
+        const addExtra = 140;
 
-        if (!$tableHeight)
-          tableHeight.set(tableSelector.offsetTop + tableSelector.offsetHeight);
+        const tableHeight =
+          tableSelector.offsetTop + tableSelector.offsetHeight;
 
-        backgroundSelector.style.height = $tableHeight + addExtra + "px";
+        backgroundSelector.style.height = tableHeight + addExtra + "px";
 
         resolve();
-      } else setTimeout(() => adjustTable(), 100);
+      } else if (!tableSelector && retries < 50) {
+        retries++;
+        console.log("no table selector... retrying", retries);
+        setTimeout(() => adjustTable(), 300);
+      } else {
+        reject(new Error(messages["home"]["table.selector.error"]));
+      }
     });
   };
 
@@ -1233,7 +1247,7 @@
         });
 
         const centerAroundMeControl = createCenterAroundMeControl(
-          "CenterAroundMe",
+          "Center Around Me",
           function () {
             navigator.geolocation.getCurrentPosition(
               successCallback,
@@ -1390,6 +1404,19 @@
     selectedIssue = null;
   };
 
+  const handleResize = () => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      if (findReportedIssue) {
+        adjustTable();
+      }
+
+      if (showFooter) {
+        adjustFooter();
+      }
+    }, debounceTime);
+  };
+
   onMount(async () => {
     await loadRecaptcha();
     await getTokenInfo();
@@ -1404,6 +1431,8 @@
 
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
+
+    window.addEventListener("resize", handleResize);
 
     getOrientation();
 
@@ -1656,9 +1685,6 @@
               } else if (reportNewIssue) {
                 reportNewIssue = false;
                 resetState();
-
-                backgroundSelector.style.height = $footerDivHeight + 'px';
-                setTimeout(() => (showFooter = true), 700);
               }
               if (!reportNewIssue && currentStep === 2) {
                 reportNewIssueStep2 = false;
@@ -2490,12 +2516,15 @@
             on:cancel="{() => (showModal = false)}"
           >
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Type:</span>
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.type"]}</span
+              >
               {selectedIssue.service_name}
             </div>
 
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.detail"]}</span
               >
               {#if selectedIssue?.selected_values}
                 {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
@@ -2510,19 +2539,19 @@
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Description:</span
+                >{messages["modal"]["label.description"]}</span
               >{selectedIssue.description ?? "-"}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Requested At:</span
+                >{messages["modal"]["label.requested.at"]}</span
               >{formatDate(selectedIssue.requested_datetime)}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Location:</span
+                >{messages["modal"]["label.location"]}</span
               >{selectedIssue.address}
             </div>
 

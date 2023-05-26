@@ -313,6 +313,8 @@ body {
 
 .slogan-title {
   margin: 4rem auto;
+  max-width: 97vw;
+  width: 97vw;
   text-align: center;
   font-size: 2.15rem;
   font-weight: 600;
@@ -325,7 +327,8 @@ body {
   text-align: center;
   font-size: 1.6rem;
   font-weight: 500;
-  max-width: 91vw;
+  max-width: 85vw;
+  width: 85vw;
   color: white;
   text-shadow: 2px 3px 2px rgba(0, 0, 0, 0.8);
 }
@@ -579,6 +582,10 @@ td {
 
 th {
   min-width: 2rem;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
 }
 
 .find-issues {
@@ -1191,7 +1198,6 @@ th {
     margin: 2rem 0.5rem 1.5rem 0.5rem;
     font-size: 1.35rem;
     letter-spacing: 0.01rem;
-    text-align: center;
   }
 
   .slogan-text {
@@ -1379,7 +1385,6 @@ th {
     font-size: 1.55rem;
     font-weight: 600;
     letter-spacing: 0.01rem;
-    text-align: center;
   }
 
   .slogan-text {
@@ -1682,7 +1687,6 @@ th {
       font-size: 1.3rem;
       font-weight: 600;
       letter-spacing: 0.01rem;
-      text-align: center;
     }
 
     .slogan-text {
@@ -1746,13 +1750,11 @@ th {
         font-size: 1.7rem;
         font-weight: 600;
         letter-spacing: 0.01rem;
-        text-align: center;
       }
   
       .slogan-text {
         font-size: 1.3rem;
         letter-spacing: 0.05rem;
-        width: 85vw;
       }
 
       #map {
@@ -1797,14 +1799,12 @@ th {
 
         .slogan-title {
           margin: 3rem 0.5rem 2.5rem 0.5rem;
-          text-align: center;
           font-size: 2.1rem;
         }
 
         .slogan-text {
           font-size: 1.3rem;
           letter-spacing: 0.05rem;
-          width: 85vw;
         }
 
         .see-more {

@@ -12,7 +12,10 @@
             "see.more.title": "You’re the problem-solver.",
             "see.more.description": "We Move gathers crowdsourced information from people like you and creates a map of problem locations all over the city. Having a wider set of data shows patterns, and creates a much stronger case for advocates and neighbors to push for policy and infrastructure changes to improve walking, biking, and transit.",
             "button.find.issue.label": "Find a Reported Issue",
-            "button.report.issue.label": "Report a New Issue"
+            "button.report.issue.label": "Report a New Issue",
+            "table.selector.error": "tableSelector and/or backgroundSelector not found",
+            "footer.selector.error": "footerSelector not found",
+            "leave.message": "Are you sure you want to leave? Your unsaved changes will be lost."
         },
     
     "report.issue":
@@ -67,7 +70,9 @@
             "marker.title": "Issue's Location",
             "input.address.placeholder": "Find address or place",
             "empty.geometry": "Returned place contains no geometry",
-            "pac-input-placeholder": "Enter the address"
+            "pac-input-placeholder": "Enter the address",
+            "button.markers.label": "Markers",
+            "button.heatmap.label": "Heatmap"
         },
     
     "geocode":
@@ -91,5 +96,14 @@
             "issues.table.column.three": "Media",
             "issues.table.column.four": "Reported At",
             "empty.results": "No Results Found"
+        },
+
+    "modal":
+        {
+            "label.type": "Type:",
+            "label.detail": "Detail:",
+            "label.description": "Description:",
+            "label.requested.at": "Requested At:",
+            "label.location": "Location:"
         }
 }
