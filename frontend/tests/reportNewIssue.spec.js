@@ -14,8 +14,8 @@ test('report new issue with image', async ({ page }) => {
   // Enter issue details
   await expect(page.getByRole('combobox')).toBeVisible();
   await page.getByRole('combobox').selectOption('001');
-  await page.getByRole('combobox').nth(1).selectOption('CRACKED');
-  await page.getByRole('combobox').nth(1).selectOption('NARROW');
+  await page.getByRole('combobox').nth(1).selectOption({ index: 1 });
+  await page.getByRole('combobox').nth(1).selectOption({ index: 2 });
   await page.getByPlaceholder('Additional Description Details').click();
   await page.getByPlaceholder('Additional Description Details').fill('Additional description details');
   await page.getByRole('button', { name: 'Next next step' }).click();

@@ -12,9 +12,8 @@ test('apply filters to reported issues table', async ({ page }) => {
   await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
   // Opens filters
   await page.locator('div').filter({ hasText: /\+$/ }).locator('span').click();
-  // Filters to only display Bike Lane issues submitted by User 1
+  // Filters to only display Bus Stop issues 
   await page.getByRole('combobox').first().selectOption({ index:2 });
-  await page.getByRole('combobox').nth(1).selectOption({ index:0 });
 });
 
 test('view expanded issue details from reported issues table', async ({ page }) => {
