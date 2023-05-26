@@ -2826,12 +2826,20 @@
                     </tr>
                   {:else}
                     <tr>
-                      <td>{messages["find.issue"]["empty.results"]}</td>
+                      <td
+                        style="padding-left: {window.innerWidth >= 815
+                          ? '0.5rem'
+                          : '0'}">{messages["find.issue"]["empty.results"]}</td
+                      >
                     </tr>
                   {/each}
                 {:else}
                   <tr>
-                    <td>{messages["find.issue"]["empty.results"]}</td>
+                    <td
+                      style="padding-left: {window.innerWidth >= 815
+                        ? '0.5rem'
+                        : '0'}">{messages["find.issue"]["empty.results"]}</td
+                    >
                   </tr>
                 {/if}
                 <div
