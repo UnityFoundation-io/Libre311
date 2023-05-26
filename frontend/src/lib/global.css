@@ -169,6 +169,14 @@ body {
 
 /*//////// Desktop Style ////////*/
 
+#td-issue-type {
+  padding-left: 0.5rem;
+}
+
+#issue-type-header {
+  padding-left: 0.5rem;
+}
+
 .multiselect {
   color: #3478f6;
   background-color: white;
@@ -2032,15 +2040,5 @@ th {
 
     #button-report-issue {
      margin-top: 2rem;
-    }
-  }
-
-  @media only screen and (min-width: 815px){
-    #td-issue-type {
-      padding-left: 0.5rem;
-    }
-
-    #issue-type-header {
-      padding-left: 0.5rem;
     }
   }
