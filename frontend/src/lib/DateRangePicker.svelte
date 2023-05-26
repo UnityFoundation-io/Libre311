@@ -35,21 +35,30 @@
   }
 
   onMount(() => {
-    const positionElement = document.getElementById("position-element");
-
     picker = flatpickr(dateRangeInput, {
       mode: "range",
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {
+        let formattedDates = [];
+
         if (selectedDates.length == 2) {
+          let startDate = instance.formatDate(
+            selectedDates[0],
+            "Y-m-d\\TH:i:ss\\Z"
+          );
+          formattedDates.push(startDate);
+
           let endDate = selectedDates[1];
           endDate.setHours(23, 59, 59);
+          endDate = instance.formatDate(selectedDates[1], "Y-m-d\\TH:i:s\\Z");
+          formattedDates.push(endDate);
         }
 
-        const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
-        );
+        console.log("formattedDates", formattedDates);
 
+        // const formattedDates = selectedDates.map((date) =>
+        //   instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
+        // );
         dispatch("datesSelected", formattedDates);
       },
     });
