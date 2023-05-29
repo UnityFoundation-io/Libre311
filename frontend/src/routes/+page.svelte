@@ -282,11 +282,20 @@
   };
 
   const applyFontStretch = () => {
+    console.log("primary font not available");
     const style = document.createElement("style");
     style.textContent = `
         * {
           font-family: 'Roboto', 'Helvetica';
           letter-spacing: 0.12rem;
+        }
+
+        td, th, select, input, label, textarea, li, #success-message, #issue-details, .step-five-issue-description, .step-five-submitter-name, .step-five-contact-info, .step-five-issue-location-address, .step-five-issue-type, .success-message, .success-message-two-offline, #success-message-2 {
+          letter-spacing: 0 !important;
+        }
+
+        .back-button {
+          letter-spacing: 0.12rem !important;
         }
       `;
 
@@ -2053,7 +2062,9 @@
                     X
                   </div>
                 </div>
-                <div style="margin-top: 1rem">{messageSuccess}</div>
+                <div style="margin-top: 1rem" id="success-message">
+                  {messageSuccess}
+                </div>
               </div>
             {/if}
 
@@ -2271,7 +2282,9 @@
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
               {#each $issueDetail as detail, i}
-                <span style="margin-right: 1rem">{i + 1}-{detail.label}</span>
+                <span id="issue-details" style="margin-right: 1rem"
+                  >{i + 1}-{detail.label}</span
+                >
               {/each}
             </div>
           </div>
@@ -2386,6 +2399,7 @@
           <div
             class:success-message-two-offline="{!isOnline}"
             style="margin-bottom: 0.5rem"
+            id="success-message-2"
           >
             {#if isOnline}
               {messages["report.issue"]["issue.reported.success.message.two"]}

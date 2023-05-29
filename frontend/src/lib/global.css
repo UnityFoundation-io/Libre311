@@ -1229,7 +1229,7 @@ th {
   .action-buttons {
     display: block;
     text-align: center;
-    margin-top: 1rem;
+    margin-top: 2rem;
   }
 
   #button-report-issue {
