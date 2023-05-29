@@ -3,6 +3,7 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
+  import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
   import logo from "$lib/logo.png";
@@ -39,7 +40,6 @@
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
-  import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
@@ -282,7 +282,6 @@
   };
 
   const applyFontStretch = () => {
-    console.log("primary font not available");
     const style = document.createElement("style");
     style.textContent = `
         * {
@@ -296,18 +295,6 @@
 
         .back-button {
           letter-spacing: 0.12rem !important;
-        }
-      `;
-
-    document.head.appendChild(style);
-  };
-
-  const restoreFontStretch = () => {
-    const style = document.createElement("style");
-    style.textContent = `
-        * {
-          font-family: 'Gotham', 'Roboto', 'Helvetica';
-          letter-spacing: 0;
         }
       `;
 
@@ -1057,7 +1044,6 @@
         resolve();
       } else if (!$footerSelector && retries < 50) {
         retries++;
-        console.log("no footer selector... retrying", retries);
         setTimeout(() => adjustFooter(), 300);
       } else {
         reject(new Error(messages["home"]["footer.selector.error"]));
@@ -1080,7 +1066,6 @@
         resolve();
       } else if (!tableSelector && retries < 50) {
         retries++;
-        console.log("no table selector... retrying", retries);
         setTimeout(() => adjustTable(), 300);
       } else {
         reject(new Error(messages["home"]["table.selector.error"]));
@@ -1446,6 +1431,18 @@
     getOrientation();
 
     loadColorPalette();
+
+    let font = new FontFaceObserver("Gotham");
+
+    font
+      .load()
+      .then(function () {
+        // font is loaded successfully.
+      })
+      .catch(function () {
+        // font failed to load.
+        applyFontStretch();
+      });
 
     scrollToTop();
 
@@ -2869,8 +2866,3 @@
     </div>
   </div>
 {/if}
-
-<Font
-  on:primaryFontNotAvailable="{applyFontStretch}"
-  on:primaryFontAvailable="{restoreFontStretch}"
-/>
