@@ -6,7 +6,7 @@
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
-  import logo from "$lib/logo.png";
+  import logo from "$lib/logo.webp";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
