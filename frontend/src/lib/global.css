@@ -1203,13 +1203,15 @@ th {
   }
 
   .slogan-title {
-    margin: 2rem 0.5rem 1.5rem 0.5rem;
+    margin: 1rem 0.5rem 1.5rem 0.5rem;
     font-size: 1.35rem;
     letter-spacing: 0.01rem;
   }
 
   .slogan-text {
     font-size: 0.9rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .see-more {
@@ -1227,11 +1229,11 @@ th {
   .action-buttons {
     display: block;
     text-align: center;
-    margin-top: 2rem;
+    margin-top: 1rem;
   }
 
   #button-report-issue {
-    margin-top: 7vh;
+    margin-top: 5vh;
     width: 18rem;
   }
 
@@ -1479,11 +1481,11 @@ th {
   .action-buttons {
     display: block;
     text-align: center;
-    margin-top: 4rem;
+    margin-top: 3rem;
   }
 
   #button-report-issue {
-    margin-top: 3rem;
+    margin-top: 2rem;
     width: 18rem;
   }
 
@@ -1859,11 +1861,11 @@ th {
           align-items: center;
           align-content: center;
           text-align: center;
-          margin-top: 5rem;
+          margin-top: 3rem;
         }
 
         #button-report-issue {
-          margin-top: 8vh;
+          margin-top: 6vh;
           width: 20rem;
         }
 
