@@ -1,4 +1,4 @@
-# LocalMotion WeMove
+# Local Motion We Move
 
 ## Front-end
 
