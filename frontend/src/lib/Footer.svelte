@@ -3,7 +3,7 @@
   import facebookSVG from "../icons/facebook.svg";
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
-  import localMotionLogo from "$lib/localmotionlogosmall.png";
+  import localMotionLogo from "$lib/localmotionlogosmall.webp";
   import footerSelector from "../stores/footerSelector";
 
   export let backgroundColor;

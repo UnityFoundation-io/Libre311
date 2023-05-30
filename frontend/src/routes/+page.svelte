@@ -3,9 +3,10 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
+  import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
-  import logo from "$lib/logo.png";
+  import logo from "$lib/logo.webp";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -31,7 +32,6 @@
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
   import issueDetailList from "../stores/issueDetailList";
-  import footerDivHeight from "../stores/footerDivHeight";
   import {
     totalSize,
     totalPages,
@@ -40,7 +40,6 @@
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
-  import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
@@ -77,6 +76,7 @@
   const issueDescriptionTrimCharacters = 36;
   const waitTime = 1000;
   const minAddressCharacters = 15;
+  const debounceTime = 1000;
 
   // Page Height
   let pageHeight = 1650;
@@ -151,7 +151,8 @@
     selected,
     isOnline,
     wasOnline,
-    imageData;
+    imageData,
+    timeoutId;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -189,7 +190,6 @@
 
     if (reportNewIssue) reportNewIssue = false;
     if (findReportedIssue) findReportedIssue = false;
-    footerDivHeight.set();
 
     setTimeout(() => {
       showFooter = true;
@@ -239,10 +239,7 @@
       setTimeout(() => {
         resetState();
         reportNewIssueStep6 = false;
-        backgroundSelector.style.height = $footerDivHeight + "px";
       }, 3000);
-
-      setTimeout(() => (showFooter = true), 4000);
     }, 100);
   }
 
@@ -291,17 +288,13 @@
           font-family: 'Roboto', 'Helvetica';
           letter-spacing: 0.12rem;
         }
-      `;
 
-    document.head.appendChild(style);
-  };
+        td, th, select, input, label, textarea, li, #success-message, #issue-details, .step-five-issue-description, .step-five-submitter-name, .step-five-contact-info, .step-five-issue-location-address, .step-five-issue-type, .success-message, .success-message-two-offline, #success-message-2 {
+          letter-spacing: 0 !important;
+        }
 
-  const restoreFontStretch = () => {
-    const style = document.createElement("style");
-    style.textContent = `
-        * {
-          font-family: 'Gotham', 'Roboto', 'Helvetica';
-          letter-spacing: 0;
+        .back-button {
+          letter-spacing: 0.12rem !important;
         }
       `;
 
@@ -362,19 +355,6 @@
         resolve();
       } catch (err) {
         reject(err);
-      }
-    });
-  };
-
-  const lazyLoadIssuesWithRecaptcha = async () => {
-    return new Promise((resolve, reject) => {
-      try {
-        recaptcha.renderRecaptcha((token) => {
-          handleTokenGetIssues(token);
-          resolve();
-        });
-      } catch (error) {
-        reject(error);
       }
     });
   };
@@ -443,7 +423,6 @@
     if (e.detail.inView && hasMoreResults) {
       if (Number($currentPage) + 1 < $totalPages) {
         $currentPage++;
-        await lazyLoadIssuesWithRecaptcha();
         await getIssues($currentPage);
         clearHeatmap();
         await addIssuesToMap();
@@ -468,7 +447,7 @@
 
   const populateIssueTypeSelectDropdown = () => {
     const defaultOption = document.createElement("option");
-    defaultOption.text = "Issue Type";
+    defaultOption.text = messages["find.issue"]["issue.type.placeholder"];
     defaultOption.value = "";
     defaultOption.disabled = true;
     defaultOption.selected = true;
@@ -505,12 +484,7 @@
     let res;
 
     res = await axios.get(
-      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
-      {
-        headers: {
-          "X-G-RECAPTCHA-RESPONSE": token,
-        },
-      }
+      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
     );
 
     if (
@@ -535,8 +509,6 @@
     if (res.data?.length > 0) {
       if (displayIssuesInMap) await addIssuesToMap();
     }
-
-    token = null;
   };
 
   const validateEmail = (input) => {
@@ -768,7 +740,11 @@
     imageData = "";
     selectedFileSrc = "";
     selectedFile = "";
-    setTimeout(() => (currentStep = null), 700);
+    setTimeout(async () => {
+      currentStep = null;
+      showFooter = true;
+      await adjustFooter();
+    }, 700);
   };
 
   const clearForm = () => {
@@ -852,6 +828,13 @@
   const addIssuesToMap = async () => {
     clearMarkers();
 
+    if (heatmapVisible) {
+      setTimeout(() => {
+        const button = document.getElementById("Heatmap-control");
+        if (button) button.innerHTML = messages["map"]["button.markers.label"];
+      }, 200);
+    }
+
     if (filteredIssuesData && filteredIssuesData.length > 0) {
       filteredIssuesData.forEach((issue) => {
         let marker;
@@ -899,12 +882,12 @@
               markers[i].setMap(null);
             }
             const button = document.getElementById("Heatmap-control");
-            button.innerHTML = "Markers";
+            button.innerHTML = messages["map"]["button.markers.label"];
 
             heatmap.setMap(map);
           } else {
             const button = document.getElementById("Heatmap-control");
-            button.innerHTML = "Heatmap";
+            button.innerHTML = messages["map"]["button.heatmap.label"];
 
             heatmap.setMap(null);
             for (var i = 0; i < markers.length; i++) {
@@ -982,8 +965,8 @@
   };
 
   const handleBeforeUnload = (event) => {
-    const message =
-      "Are you sure you want to leave? Your unsaved changes will be lost.";
+    const message = messages["home"]["leave.message"];
+
     event.preventDefault();
     event.returnValue = message;
     return message;
@@ -1051,22 +1034,29 @@
 
   const adjustFooter = () => {
     return new Promise((resolve, reject) => {
-      if (!$footerDivHeight && $footerSelector) {
-        footerDivHeight.set(
-          $footerSelector.offsetTop + $footerSelector.offsetHeight
-        );
+      let retries = 0;
+
+      if ($footerSelector) {
+        const footerDivHeight =
+          $footerSelector.offsetTop + $footerSelector.offsetHeight;
+        backgroundSelector.style.height = footerDivHeight + "px";
+
+        resolve();
+      } else if (!$footerSelector && retries < 50) {
+        retries++;
+        setTimeout(() => adjustFooter(), 300);
+      } else {
+        reject(new Error(messages["home"]["footer.selector.error"]));
       }
-
-      backgroundSelector.style.height = $footerDivHeight + "px";
-
-      resolve();
     });
   };
 
   const adjustTable = () => {
     return new Promise((resolve, reject) => {
-      if (tableSelector) {
-        let addExtra = 140;
+      let retries = 0;
+
+      if (tableSelector && backgroundSelector) {
+        const addExtra = 140;
 
         const tableHeight =
           tableSelector.offsetTop + tableSelector.offsetHeight;
@@ -1074,6 +1064,11 @@
         backgroundSelector.style.height = tableHeight + addExtra + "px";
 
         resolve();
+      } else if (!tableSelector && retries < 50) {
+        retries++;
+        setTimeout(() => adjustTable(), 300);
+      } else {
+        reject(new Error(messages["home"]["table.selector.error"]));
       }
     });
   };
@@ -1181,10 +1176,6 @@
     localStorage.setItem("completed", "true");
   };
 
-  const handleTokenGetIssues = async (recaptchaToken) => {
-    if (recaptchaToken) token = recaptchaToken;
-  };
-
   const readFileAsDataURL = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1250,7 +1241,7 @@
         });
 
         const centerAroundMeControl = createCenterAroundMeControl(
-          "CenterAroundMe",
+          "Center Around Me",
           function () {
             navigator.geolocation.getCurrentPosition(
               successCallback,
@@ -1407,9 +1398,17 @@
     selectedIssue = null;
   };
 
-  const getIssuesWithToken = async () => {
-    if (token) await getIssues(0, true);
-    else setTimeout(getIssuesWithToken, 100);
+  const handleResize = () => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      if (findReportedIssue) {
+        adjustTable();
+      }
+
+      if (showFooter) {
+        adjustFooter();
+      }
+    }, debounceTime);
   };
 
   onMount(async () => {
@@ -1427,9 +1426,23 @@
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
 
+    window.addEventListener("resize", handleResize);
+
     getOrientation();
 
     loadColorPalette();
+
+    let font = new FontFaceObserver("Gotham");
+
+    font
+      .load()
+      .then(function () {
+        // font is loaded successfully.
+      })
+      .catch(function () {
+        // font failed to load.
+        applyFontStretch();
+      });
 
     scrollToTop();
 
@@ -1570,7 +1583,6 @@
                 showFooter = false;
                 findReportedIssue = true;
                 setTimeout(async () => {
-                  if (!token) recaptcha.renderRecaptcha(handleTokenGetIssues);
                   await adjustTable();
 
                   setTimeout(() => {
@@ -1578,10 +1590,10 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 600);
-                }, 150);
+                  }, 650);
+                }, 250);
 
-                if (filteredIssuesData?.length === 0) getIssuesWithToken();
+                if (filteredIssuesData?.length === 0) await getIssues();
 
                 addIssuesToMap();
               } else resetFindIssue();
@@ -1679,9 +1691,6 @@
               } else if (reportNewIssue) {
                 reportNewIssue = false;
                 resetState();
-
-                backgroundSelector.style.height = $footerDivHeight + 'px';
-                setTimeout(() => (showFooter = true), 700);
               }
               if (!reportNewIssue && currentStep === 2) {
                 reportNewIssueStep2 = false;
@@ -2050,7 +2059,9 @@
                     X
                   </div>
                 </div>
-                <div style="margin-top: 1rem">{messageSuccess}</div>
+                <div style="margin-top: 1rem" id="success-message">
+                  {messageSuccess}
+                </div>
               </div>
             {/if}
 
@@ -2268,7 +2279,9 @@
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
               {#each $issueDetail as detail, i}
-                <span style="margin-right: 1rem">{i + 1}-{detail.label}</span>
+                <span id="issue-details" style="margin-right: 1rem"
+                  >{i + 1}-{detail.label}</span
+                >
               {/each}
             </div>
           </div>
@@ -2383,6 +2396,7 @@
           <div
             class:success-message-two-offline="{!isOnline}"
             style="margin-bottom: 0.5rem"
+            id="success-message-2"
           >
             {#if isOnline}
               {messages["report.issue"]["issue.reported.success.message.two"]}
@@ -2402,6 +2416,7 @@
       <div
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
+        style="width:{!isOnline ? '50vw' : '100vw'} "
         class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
@@ -2512,12 +2527,15 @@
             on:cancel="{() => (showModal = false)}"
           >
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Type:</span>
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.type"]}</span
+              >
               {selectedIssue.service_name}
             </div>
 
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.detail"]}</span
               >
               {#if selectedIssue?.selected_values}
                 {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
@@ -2532,19 +2550,19 @@
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Description:</span
+                >{messages["modal"]["label.description"]}</span
               >{selectedIssue.description ?? "-"}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Requested At:</span
+                >{messages["modal"]["label.requested.at"]}</span
               >{formatDate(selectedIssue.requested_datetime)}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Location:</span
+                >{messages["modal"]["label.location"]}</span
               >{selectedIssue.address}
             </div>
 
@@ -2563,8 +2581,6 @@
         {/if}
 
         {#if findReportedIssue}
-          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
-
           <div class="filter-label">
             <div>
               {messages["find.issue"]["label.filter"]}
@@ -2619,20 +2635,6 @@
                     await getIssues();
                     setTimeout(async () => await addIssuesToMap(), 1000);
                   }}"></select>
-
-                <select
-                  class="select-filter"
-                  on:change="{(e) => {
-                    console.log(e.target.value);
-                  }}"
-                >
-                  <option disabled selected value="">
-                    {messages["find.issue"]["reported.by.placeholder"]}
-                  </option>
-                  <option value="user1">
-                    {messages["find.issue"]["select.option.reported.by.one"]}
-                  </option>
-                </select>
 
                 <DateRangePicker
                   on:datesSelected="{(e) => {
@@ -2720,7 +2722,7 @@
             <table bind:this="{tableSelector}" class="issues-table">
               <thead>
                 <tr>
-                  <th>
+                  <th id="issue-type-header">
                     {messages["find.issue"]["issues.table.column.one"]}
                   </th>
                   <th>
@@ -2835,15 +2837,22 @@
                     </tr>
                   {:else}
                     <tr>
-                      <td>{messages["find.issue"]["empty.results"]}</td>
+                      <td
+                        style="padding-left: {window.innerWidth >= 815
+                          ? '0.5rem'
+                          : '0'}">{messages["find.issue"]["empty.results"]}</td
+                      >
                     </tr>
                   {/each}
                 {:else}
                   <tr>
-                    <td>{messages["find.issue"]["empty.results"]}</td>
+                    <td
+                      style="padding-left: {window.innerWidth >= 815
+                        ? '0.5rem'
+                        : '0'}">{messages["find.issue"]["empty.results"]}</td
+                    >
                   </tr>
                 {/if}
-                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
                 <div
                   use:inview="{{ options }}"
                   on:change="{loadMoreResults}"
@@ -2857,8 +2866,3 @@
     </div>
   </div>
 {/if}
-
-<Font
-  on:primaryFontNotAvailable="{applyFontStretch}"
-  on:primaryFontAvailable="{restoreFontStretch}"
-/>

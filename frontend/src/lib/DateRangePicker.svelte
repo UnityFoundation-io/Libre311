@@ -18,14 +18,20 @@
       mode: "range",
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {
+        let formattedDates = [];
+
         if (selectedDates.length == 2) {
+          let startDate = instance.formatDate(
+            selectedDates[0],
+            "Y-m-d\\TH:i:ss\\Z"
+          );
+          formattedDates.push(startDate);
+
           let endDate = selectedDates[1];
           endDate.setHours(23, 59, 59);
+          endDate = instance.formatDate(selectedDates[1], "Y-m-d\\TH:i:s\\Z");
+          formattedDates.push(endDate);
         }
-
-        const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
-        );
 
         dispatch("datesSelected", formattedDates);
       },
@@ -35,20 +41,24 @@
   }
 
   onMount(() => {
-    const positionElement = document.getElementById("position-element");
-
     picker = flatpickr(dateRangeInput, {
       mode: "range",
       dateFormat: "Y-m-d",
       onClose: (selectedDates, dateStr, instance) => {
+        let formattedDates = [];
+
         if (selectedDates.length == 2) {
+          let startDate = instance.formatDate(
+            selectedDates[0],
+            "Y-m-d\\TH:i:ss\\Z"
+          );
+          formattedDates.push(startDate);
+
           let endDate = selectedDates[1];
           endDate.setHours(23, 59, 59);
+          endDate = instance.formatDate(selectedDates[1], "Y-m-d\\TH:i:s\\Z");
+          formattedDates.push(endDate);
         }
-
-        const formattedDates = selectedDates.map((date) =>
-          instance.formatDate(date, "Y-m-d\\TH:i:s\\Z")
-        );
 
         dispatch("datesSelected", formattedDates);
       },
@@ -84,7 +94,7 @@
   input {
     border-radius: 10px;
     height: 1.4rem;
-    width: 13rem;
+    width: 16rem;
     border: 0.01rem solid black;
     border-style: inset;
     padding-left: 0.5rem;
