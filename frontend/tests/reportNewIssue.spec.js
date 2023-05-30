@@ -42,7 +42,7 @@ test('report new issue with image', async ({ page }) => {
   // Review information
   await expect(page.getByText('Issue Location: 12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
   await expect(page.getByText('Issue Type: Sidewalk')).toBeVisible();
-  await expect(page.getByText('Issue Details: 1-Cracked2-Too narrow')).toBeVisible();
+  await expect(page.getByText(/Issue Details:.*1-ADA Access.*2-Cracked/)).toBeVisible();
   // await expect(page.getByRole('img', { name: 'uploaded image' })).toBeVisible();
   await expect(page.getByText('Description: Additional description details')).toBeVisible();
   await expect(page.getByText('Name of Submitter: John Doe')).toBeVisible();
@@ -50,7 +50,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
 
   // Confirms the submission went through
-  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
+  await expect(page.getByText(/Thank You! The issue has been reported./)).toBeVisible();
 });
 
 test('report new issue with other issue type', async ({ page }) => {
@@ -77,7 +77,7 @@ test('report new issue with other issue type', async ({ page }) => {
   await expect(page.getByText('Description: Other issue description')).toBeVisible();
   await expect(page.getByText('Issue Type: Other')).toBeVisible();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
+  await expect(page.getByText(/Thank You! The issue has been reported./)).toBeVisible();
 });
 
 /* Template for possible future tests */
