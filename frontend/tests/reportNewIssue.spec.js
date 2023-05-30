@@ -14,8 +14,10 @@ test('report new issue with image', async ({ page }) => {
   // Enter issue details
   await expect(page.getByRole('combobox')).toBeVisible();
   await page.getByRole('combobox').selectOption('001');
-  await page.getByRole('combobox').nth(1).selectOption({ index: 1 });
-  await page.getByRole('combobox').nth(1).selectOption({ index: 2 });
+  await page.getByPlaceholder('Issue Details').click();
+  await page.getByText('Cracked').click();
+  await page.getByText('Too narrow').click();
+  await page.locator('#issue-details').press('Tab');
   await page.getByPlaceholder('Additional Description Details').click();
   await page.getByPlaceholder('Additional Description Details').fill('Additional description details');
   await page.getByRole('button', { name: 'Next next step' }).click();
@@ -42,7 +44,7 @@ test('report new issue with image', async ({ page }) => {
   // Review information
   await expect(page.getByText('Issue Location: 12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
   await expect(page.getByText('Issue Type: Sidewalk')).toBeVisible();
-  await expect(page.getByText(/Issue Details:.*1-ADA Access.*2-Cracked/)).toBeVisible();
+  await expect(page.getByText('Issue Details: 1-Cracked2-Too narrow')).toBeVisible();
   // await expect(page.getByRole('img', { name: 'uploaded image' })).toBeVisible();
   await expect(page.getByText('Description: Additional description details')).toBeVisible();
   await expect(page.getByText('Name of Submitter: John Doe')).toBeVisible();
@@ -50,7 +52,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
 
   // Confirms the submission went through
-  await expect(page.getByText(/Thank You! The issue has been reported./)).toBeVisible();
+  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
 });
 
 test('report new issue with other issue type', async ({ page }) => {
@@ -74,10 +76,10 @@ test('report new issue with other issue type', async ({ page }) => {
   // Skipping image upload and contact information for the purpose of this test
   await page.getByRole('button', { name: 'Next next step' }).click();
   await page.getByRole('button', { name: 'Review & Submit submit issue' }).click();
-  await expect(page.getByText('Description: Other issue description')).toBeVisible();
   await expect(page.getByText('Issue Type: Other')).toBeVisible();
+  await expect(page.getByText('Description: Other issue description')).toBeVisible();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await expect(page.getByText(/Thank You! The issue has been reported./)).toBeVisible();
+  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
 });
 
 /* Template for possible future tests */
