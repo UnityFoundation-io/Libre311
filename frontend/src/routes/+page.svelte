@@ -1,11 +1,12 @@
 <script>
-  // import { Loader } from "@googlemaps/js-api-loader";
   import { fade, scale, blur } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
+  import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
-  import logo from "$lib/logo.png";
+  import MultiSelect from "svelte-multiselect";
+  import logo from "$lib/logo.webp";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -17,6 +18,8 @@
   import imageSVG from "../icons/image.svg";
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
+  import forbiddenSVG from "../icons/forbidden.svg";
+  import mylocationSVG from "../icons/mylocation.svg";
   import issueAddress from "../stores/issueAddress";
   import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
@@ -29,7 +32,6 @@
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
   import issueDetailList from "../stores/issueDetailList";
-  import footerDivHeight from "../stores/footerDivHeight";
   import {
     totalSize,
     totalPages,
@@ -38,13 +40,13 @@
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
-  import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
   import messages from "$lib/messages.json";
   import colors from "$lib/colors.json";
   import "$lib/global.css";
+  import "$lib/spinner.css";
 
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -74,6 +76,7 @@
   const issueDescriptionTrimCharacters = 36;
   const waitTime = 1000;
   const minAddressCharacters = 15;
+  const debounceTime = 1000;
 
   // Page Height
   let pageHeight = 1650;
@@ -104,7 +107,10 @@
     showFooter = true,
     showTable = true,
     seeMore = false,
-    heatmapVisible = true,
+    spinner = false,
+    heatmapVisible = false,
+    issuesRefs = {},
+    multiSelectOptions = [],
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
       visible: false,
@@ -142,8 +148,11 @@
     issueDetailSelectSelector,
     findIssuesButtonSelector,
     reportIssuesButtonSelector,
+    selected,
     isOnline,
-    wasOnline;
+    wasOnline,
+    imageData,
+    timeoutId;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -158,7 +167,7 @@
 
   let issuesData = [];
 
-  let filteredIssuesData;
+  let filteredIssuesData = [];
 
   let filterIssueType = { service_code: "", service_name: "" };
   let filterStartDate = "",
@@ -166,6 +175,7 @@
 
   // Image Safe Search
   let selectedFile = null,
+    selectedFileSrc = null,
     messageSuccess = "",
     messageRejectedOne = "",
     messageRejectedTwo = "",
@@ -180,13 +190,12 @@
 
     if (reportNewIssue) reportNewIssue = false;
     if (findReportedIssue) findReportedIssue = false;
-    footerDivHeight.set();
 
     setTimeout(() => {
       showFooter = true;
-      setTimeout(() => {
-        adjustFooter();
-      }, 50);
+      setTimeout(async () => {
+        await adjustFooter();
+      }, 100);
     }, 400);
 
     if (previousState === "reportNewIssue") {
@@ -199,7 +208,7 @@
     if (previousState === "findReportedIssue") {
       setTimeout(() => {
         findReportedIssue = true;
-        setTimeout(() => adjustTable(), 100);
+        setTimeout(async () => await adjustTable(), 100);
       }, 400);
     }
   };
@@ -230,10 +239,7 @@
       setTimeout(() => {
         resetState();
         reportNewIssueStep6 = false;
-        backgroundSelector.style.height = $footerDivHeight + "px";
       }, 3000);
-
-      setTimeout(() => (showFooter = true), 4000);
     }, 100);
   }
 
@@ -245,7 +251,7 @@
     try {
       res = await axios.get("/token_info", { withCredentials: true });
     } catch (err) {
-      console.error(err);
+      console.info(err);
     }
     if (res?.status === 200) isAuthenticated = true;
   };
@@ -258,8 +264,6 @@
     localStorage.removeItem("issueDetailListCode");
     localStorage.removeItem("issueDetail");
     localStorage.removeItem("issueDescription");
-    localStorage.removeItem("issueSubmitterName");
-    localStorage.removeItem("issueSubmitterContact");
     if (!bypassClearForm) clearForm();
   };
 
@@ -284,17 +288,13 @@
           font-family: 'Roboto', 'Helvetica';
           letter-spacing: 0.12rem;
         }
-      `;
 
-    document.head.appendChild(style);
-  };
+        td, th, select, input, label, textarea, li, #success-message, #issue-details, .step-five-issue-description, .step-five-submitter-name, .step-five-contact-info, .step-five-issue-location-address, .step-five-issue-type, .success-message, .success-message-two-offline, #success-message-2 {
+          letter-spacing: 0 !important;
+        }
 
-  const restoreFontStretch = () => {
-    const style = document.createElement("style");
-    style.textContent = `
-        * {
-          font-family: 'Gotham', 'Roboto', 'Helvetica';
-          letter-spacing: 0;
+        .back-button {
+          letter-spacing: 0.12rem !important;
         }
       `;
 
@@ -310,41 +310,65 @@
   const handleFileChange = async (event) => {
     clearUploadMessages();
     selectedFile = event.target.files[0];
-    await readFileAsDataURL(selectedFile);
+    spinner = true;
+    selectedFileSrc = await readFileAsDataURL(selectedFile);
+
+    await handleSubmit();
   };
 
-  const handleSubmit = async (recaptchaToken) => {
+  const handleSubmit = async () => {
     // Convert the selected image file to a data URL
-    const imageUrl = await new Promise((resolve) => {
+    imageData = await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (event) => resolve(event.target.result);
       reader.readAsDataURL(selectedFile);
     });
 
     // Call the detectExplicitContent function with the image data URL
-    if (recaptchaToken) {
-      const isExplicit = await detectExplicitContent(imageUrl, apiKey);
+    const isExplicit = await detectExplicitContent(imageData, apiKey);
 
-      if (isExplicit) {
-        messageRejectedOne =
-          messages["report.issue"]["uploaded.message.rejected-one"];
-        messageRejectedTwo =
-          messages["report.issue"]["uploaded.message.rejected-two"];
+    if (isExplicit) {
+      messageRejectedOne =
+        messages["report.issue"]["uploaded.message.rejected-one"];
+      messageRejectedTwo =
+        messages["report.issue"]["uploaded.message.rejected-two"];
 
-        selectedFile = null;
-      } else {
-        messageSuccess = messages["report.issue"]["uploaded.message.success"];
+      imageData = null;
+      selectedFileSrc = null;
+      selectedFile = null;
+      spinner = false;
+    } else {
+      messageSuccess = messages["report.issue"]["uploaded.message.success"];
+      spinner = false;
+    }
+  };
 
-        // Save the image to the Server Locally
-        // this worked for me in testing - max
-
+  const postImage = async (recaptchaToken) => {
+    return new Promise(async (resolve, reject) => {
+      try {
         const res = await axios.post("/image", {
           g_recaptcha_response: recaptchaToken,
-          image: imageUrl,
+          image: imageData,
         });
 
-        if (res?.data) mediaUrl = res.data;
+        mediaUrl = res.data;
+        resolve();
+      } catch (err) {
+        reject(err);
       }
+    });
+  };
+
+  const executeRecaptchaAndPostIssue = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        recaptcha.renderRecaptcha((recaptchaToken) => {
+          postImage(recaptchaToken).then(resolve).catch(reject);
+        });
+      });
+      await postIssue();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -423,7 +447,7 @@
 
   const populateIssueTypeSelectDropdown = () => {
     const defaultOption = document.createElement("option");
-    defaultOption.text = "Issue Type";
+    defaultOption.text = messages["find.issue"]["issue.type.placeholder"];
     defaultOption.value = "";
     defaultOption.disabled = true;
     defaultOption.selected = true;
@@ -439,25 +463,24 @@
   };
 
   const populateIssueDetailList = () => {
-    const defaultOption = document.createElement("option");
-    defaultOption.text = "Issue Detail";
-    defaultOption.value = "";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
+    multiSelectOptions = [];
 
-    if ($issueType.name !== "Other") {
-      issueDetailSelectSelector.add(defaultOption);
-
-      for (let i = 0; i < $issueDetailList.values.length; i++) {
-        const option = document.createElement("option");
-        option.text = $issueDetailList.values[i].name;
-        option.value = $issueDetailList.values[i].key;
-        issueDetailSelectSelector.add(option);
-      }
+    for (let i = 0; i < $issueDetailList.values.length; i++) {
+      let obj = {
+        label: $issueDetailList.values[i].name,
+        value: $issueDetailList.values[i].key,
+      };
+      multiSelectOptions.push(obj);
     }
+    // Reactive statement for arrays
+    multiSelectOptions = multiSelectOptions;
   };
 
-  const getIssues = async (page = 0, displayIssuesInMap = false) => {
+  const getIssues = async (
+    page = 0,
+    displayIssuesInMap = false,
+    issuePosted = false
+  ) => {
     let res;
 
     res = await axios.get(
@@ -465,14 +488,16 @@
     );
 
     if (
+      !issuePosted &&
       res.data?.length > 0 &&
       JSON.stringify(issuesData) !== JSON.stringify(res.data)
     ) {
-      if (issuesData) issuesData = [...issuesData, ...res.data];
+      if (issuesData?.length > 0) issuesData = [...issuesData, ...res.data];
       else issuesData = [...res.data];
+    } else issuesData = [...res.data];
 
-      filteredIssuesData = issuesData;
-    }
+    filteredIssuesData = issuesData;
+
     totalSize.set(res.headers["page-totalsize"]);
     totalPages.set(res.headers["page-totalpages"]);
     currentPage.set(res.headers["page-pagenumber"]);
@@ -501,7 +526,7 @@
     }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
 
     $issueDetail.forEach((attr) => {
-      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.id;
+      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
     });
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
@@ -532,7 +557,13 @@
       });
 
       if (postingOfflineIssue) notifyOfflineIssuePosted = true;
-      setTimeout(() => clearLocalStorage(), 2000);
+
+      setTimeout(async () => {
+        clearLocalStorage();
+        issuesData = [];
+        filteredIssuesData = [];
+        token = null;
+      }, 2000);
     } catch (err) {
       console.error(err);
     }
@@ -603,8 +634,8 @@
   };
 
   const clearData = () => {
-    issuesData = "";
-    filteredIssuesData = "";
+    issuesData = [];
+    filteredIssuesData = [];
     totalPages.set(0);
     currentPage.set(0);
     hasMoreResults = true;
@@ -706,7 +737,14 @@
     invalidSubmitterName.visible = false;
     invalidEmail.visible = false;
     mediaUrl = undefined;
-    setTimeout(() => (currentStep = null), 700);
+    imageData = "";
+    selectedFileSrc = "";
+    selectedFile = "";
+    setTimeout(async () => {
+      currentStep = null;
+      showFooter = true;
+      await adjustFooter();
+    }, 700);
   };
 
   const clearForm = () => {
@@ -790,6 +828,13 @@
   const addIssuesToMap = async () => {
     clearMarkers();
 
+    if (heatmapVisible) {
+      setTimeout(() => {
+        const button = document.getElementById("Heatmap-control");
+        if (button) button.innerHTML = messages["map"]["button.markers.label"];
+      }, 200);
+    }
+
     if (filteredIssuesData && filteredIssuesData.length > 0) {
       filteredIssuesData.forEach((issue) => {
         let marker;
@@ -810,6 +855,13 @@
 
         markers.push(marker);
 
+        google.maps.event.addListener(marker, "click", function () {
+          toggleDetails(issue.service_request_id);
+          selectedIssue = issue;
+          scrollToIssue(issue.service_request_id);
+          setNewCenter(issue.lat, issue.long, 17);
+        });
+
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
         );
@@ -823,19 +875,19 @@
         map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
         2
       ) {
-        const heatmapControl = createCustomControl("Markers", function () {
+        const heatmapControl = createCustomControl("Heatmap", function () {
           heatmapVisible = !heatmapVisible;
           if (heatmapVisible) {
             for (var i = 0; i < markers.length; i++) {
               markers[i].setMap(null);
             }
-            const button = document.getElementById("Markers-control");
-            button.innerHTML = "Markers";
+            const button = document.getElementById("Heatmap-control");
+            button.innerHTML = messages["map"]["button.markers.label"];
 
             heatmap.setMap(map);
           } else {
-            const button = document.getElementById("Markers-control");
-            button.innerHTML = "Heatmap";
+            const button = document.getElementById("Heatmap-control");
+            button.innerHTML = messages["map"]["button.heatmap.label"];
 
             heatmap.setMap(null);
             for (var i = 0; i < markers.length; i++) {
@@ -913,8 +965,8 @@
   };
 
   const handleBeforeUnload = (event) => {
-    const message =
-      "Are you sure you want to leave? Your unsaved changes will be lost.";
+    const message = messages["home"]["leave.message"];
+
     event.preventDefault();
     event.returnValue = message;
     return message;
@@ -981,22 +1033,44 @@
   };
 
   const adjustFooter = () => {
-    if (!$footerDivHeight && $footerSelector) {
-      footerDivHeight.set(
-        $footerSelector.offsetTop + $footerSelector.offsetHeight
-      );
-    }
+    return new Promise((resolve, reject) => {
+      let retries = 0;
 
-    backgroundSelector.style.height = $footerDivHeight + "px";
+      if ($footerSelector) {
+        const footerDivHeight =
+          $footerSelector.offsetTop + $footerSelector.offsetHeight;
+        backgroundSelector.style.height = footerDivHeight + "px";
+
+        resolve();
+      } else if (!$footerSelector && retries < 50) {
+        retries++;
+        setTimeout(() => adjustFooter(), 300);
+      } else {
+        reject(new Error(messages["home"]["footer.selector.error"]));
+      }
+    });
   };
 
   const adjustTable = () => {
-    if (tableSelector) {
-      let addExtra = 90;
+    return new Promise((resolve, reject) => {
+      let retries = 0;
 
-      const tableHeight = tableSelector.offsetTop + tableSelector.offsetHeight;
-      backgroundSelector.style.height = tableHeight + addExtra + "px";
-    }
+      if (tableSelector && backgroundSelector) {
+        const addExtra = 140;
+
+        const tableHeight =
+          tableSelector.offsetTop + tableSelector.offsetHeight;
+
+        backgroundSelector.style.height = tableHeight + addExtra + "px";
+
+        resolve();
+      } else if (!tableSelector && retries < 50) {
+        retries++;
+        setTimeout(() => adjustTable(), 300);
+      } else {
+        reject(new Error(messages["home"]["table.selector.error"]));
+      }
+    });
   };
 
   const adjustMap = () => {
@@ -1089,10 +1163,14 @@
     await initRecaptcha();
   };
 
-  const handleToken = (recaptchaToken) => {
+  const handleToken = async (recaptchaToken) => {
     if (recaptchaToken) token = recaptchaToken;
     reportNewIssueStep5 = false;
-    postIssue();
+
+    if (imageData) {
+      executeRecaptchaAndPostIssue();
+    } else await postIssue();
+
     currentStep = 6;
     reportNewIssueStep6 = true;
     localStorage.setItem("completed", "true");
@@ -1110,6 +1188,20 @@
   const populateAddress = () => {
     if ($issueAddress && offlineAddressInputSelector) {
       offlineAddressInputSelector.value = $issueAddress;
+    }
+  };
+
+  function createCenterAroundMeControl(controlText, clickHandler) {
+    const controlDiv = document.createElement("div");
+    controlDiv.className = "centerAroundMeControl";
+    controlDiv.addEventListener("click", clickHandler);
+    controlDiv.title = controlText;
+    return controlDiv;
+  }
+
+  const scrollToIssue = (id) => {
+    if (issuesRefs[id]) {
+      issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -1148,12 +1240,28 @@
           map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
         });
 
+        const centerAroundMeControl = createCenterAroundMeControl(
+          "Center Around Me",
+          function () {
+            navigator.geolocation.getCurrentPosition(
+              successCallback,
+              errorCallback,
+              {
+                enableHighAccuracy: true,
+              }
+            );
+          }
+        );
+
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mapControl);
         map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
           satelliteControl
         );
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(
           inputIssueAddressSelector
+        );
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(
+          centerAroundMeControl
         );
 
         const icon = {
@@ -1217,8 +1325,6 @@
         if (localStorage.getItem("completed")) await postOfflineIssue();
       });
     });
-
-    loadRecaptcha();
   };
 
   const updateOnlineStatus = async () => {
@@ -1274,21 +1380,39 @@
   };
 
   const resetFindIssue = () => {
+    token = null;
     scrollToTop();
 
     findReportedIssue = false;
     showFilters = false;
 
-    setTimeout(() => {
+    setTimeout(async () => {
       showFooter = true;
-      adjustFooter();
-    }, 500);
+      await adjustFooter();
+    }, 600);
 
     clearData();
     clearFilters();
+
+    if (selectedIssue) toggleDetails(selectedIssue.service_request_id);
+    selectedIssue = null;
+  };
+
+  const handleResize = () => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      if (findReportedIssue) {
+        adjustTable();
+      }
+
+      if (showFooter) {
+        adjustFooter();
+      }
+    }, debounceTime);
   };
 
   onMount(async () => {
+    await loadRecaptcha();
     await getTokenInfo();
 
     isOnline = navigator.onLine;
@@ -1302,15 +1426,27 @@
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
 
+    window.addEventListener("resize", handleResize);
+
     getOrientation();
 
     loadColorPalette();
 
+    let font = new FontFaceObserver("Gotham");
+
+    font
+      .load()
+      .then(function () {
+        // font is loaded successfully.
+      })
+      .catch(function () {
+        // font failed to load.
+        applyFontStretch();
+      });
+
     scrollToTop();
 
     await getAllServiceCodes();
-
-    await getIssues();
 
     // Trigger the Svelte Transitions
     fadeInBackground = true;
@@ -1356,9 +1492,6 @@
           class="logo"
         />
       {/if}
-    </div>
-    <div style="color:yellow; text-align: center">
-      You are currently: {isOnline ? "online" : "offline"}
     </div>
 
     {#if notifyOfflineIssuePosted}
@@ -1410,9 +1543,9 @@
           }}"
         >
           {#if seeMore}
-            -
+            less...
           {:else}
-            +
+            more...
           {/if}
         </span>
 
@@ -1449,18 +1582,18 @@
               if (!findReportedIssue) {
                 showFooter = false;
                 findReportedIssue = true;
-                setTimeout(() => {
-                  adjustTable();
+                setTimeout(async () => {
+                  await adjustTable();
 
                   setTimeout(() => {
                     findIssuesButtonSelector.scrollIntoView({
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 250);
-                }, 100);
+                  }, 650);
+                }, 250);
 
-                if (!filteredIssuesData) await getIssues();
+                if (filteredIssuesData?.length === 0) await getIssues();
 
                 addIssuesToMap();
               } else resetFindIssue();
@@ -1550,7 +1683,7 @@
                       behavior: 'smooth',
                       block: 'start',
                     });
-                  }, 250);
+                  }, 500);
                 }, 100);
 
                 reduceBackGroundOpacity = false;
@@ -1558,9 +1691,6 @@
               } else if (reportNewIssue) {
                 reportNewIssue = false;
                 resetState();
-
-                backgroundSelector.style.height = $footerDivHeight + 'px';
-                setTimeout(() => (showFooter = true), 700);
               }
               if (!reportNewIssue && currentStep === 2) {
                 reportNewIssueStep2 = false;
@@ -1646,6 +1776,8 @@
               class="step-two-select"
               bind:this="{issueTypeSelectSelector}"
               on:change="{async (e) => {
+                selected = [];
+
                 if ($issueDetail) issueDetail.set([]);
 
                 issueType.set({
@@ -1656,14 +1788,13 @@
                 if ($issueType.name !== 'Other') {
                   await getServiceDefinition(e.target.value);
 
-                  // Remove any options
-                  while (issueDetailSelectSelector.firstChild) {
-                    issueDetailSelectSelector.removeChild(
-                      issueDetailSelectSelector.firstChild
-                    );
-                  }
-
                   populateIssueDetailList();
+
+                  setTimeout(() => {
+                    let inputElement = document.querySelector('#issue-details');
+                    if (inputElement)
+                      inputElement.setAttribute('readonly', 'readonly');
+                  }, 1000);
                 }
               }}"></select>
 
@@ -1677,58 +1808,20 @@
               </div>
             {/if}
 
-            {#if $issueDetailList && $issueType.name !== "Other"}
-              <select
-                class="step-two-select-detail"
-                style="display: block"
-                bind:this="{issueDetailSelectSelector}"
-                on:load="{populateIssueDetailList}"
-                on:change="{(e) => {
-                  if ($issueDetail) {
-                    if (
-                      !$issueDetail.find(
-                        (selection) => selection.id === e.target.value
-                      )
-                    )
-                      issueDetail.update((currentSelections) => [
-                        ...currentSelections,
-                        {
-                          name: e.target.options[e.target.selectedIndex].text,
-                          id: e.target.value,
-                        },
-                      ]);
-                  } else
-                    issueDetail.set({
-                      name: e.target.options[e.target.selectedIndex].text,
-                      id: e.target.value,
-                    });
-                  e.target.options[0].selected = true;
-                }}"></select>
-            {/if}
-
-            {#if $issueDetail?.length > 0}
-              {#each $issueDetail as selection}
-                <div class="issue-detail-selected">
-                  {selection.name}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <img
-                    src="{closeSVG}"
-                    class="white-closeSVG"
-                    alt="remove issue detail"
-                    width="14rem"
-                    on:click="{async () => {
-                      invalidOtherDescription.visible = false;
-                      $issueDetail = $issueDetail.filter(
-                        (issueDTL) => issueDTL.id !== selection.id
-                      );
-                    }}"
-                  />
-                </div>
-              {/each}
+            {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
+              <div class="multiselect">
+                <MultiSelect
+                  id="issue-details"
+                  placeholder="Issue Details"
+                  bind:selected="{selected}"
+                  options="{multiSelectOptions}"
+                  on:change="{() => issueDetail.set(selected)}"
+                />
+              </div>
             {/if}
 
             {#if $issueType !== null}
-              <div style="display: inline-block">
+              <div class="textarea">
                 {#if $issueDetail.find((selection) => selection.name === "Other") || $issueType.name === "Other"}
                   <div class="step-two-required">* Required field</div>
                 {/if}
@@ -1819,11 +1912,12 @@
                 localStorage.setItem('issueDescription', $issueDescription);
 
               if (
-                ($issueType.name === 'Other' ||
+                (($issueType.name === 'Other' ||
                   $issueDetail.find(
                     (selection) => selection.name === 'Other'
                   )) &&
-                $issueDescription?.length < minOtherDescriptionLength
+                  $issueDescription?.length < minOtherDescriptionLength) ||
+                $issueDescription === null
               ) {
                 invalidOtherDescription.visible = true;
               } else {
@@ -1859,7 +1953,7 @@
           <div class="step-three-label">
             {messages["report.issue"]["label.step"]}
             <button class="numbers">3</button>
-            <span style="font-size: 1.2rem">
+            <span style="font-size: 1.2rem; margin-left: 0.3rem">
               {messages["report.issue"]["label.optional"]}
             </span>
           </div>
@@ -1873,10 +1967,6 @@
               data-callback="onSubmit"
               data-action="submit"
               class="g-recaptcha"
-              on:submit|preventDefault="{() => {
-                if (isOnline) recaptcha.renderRecaptcha(handleSubmit);
-                else handleSubmit('');
-              }}"
             >
               <div style="display: flex">
                 <label
@@ -1916,39 +2006,62 @@
                   disabled="{!isOnline}"
                   on:change="{(e) => {
                     if (isOnline) handleFileChange(e);
+                    e.target.value = '';
                   }}"
                 />
 
                 <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
-
-                <button
-                  type="submit"
-                  class="button"
-                  class:upload="{isOnline && selectedFile && !messageSuccess}"
-                  class:disabled-button-upload="{!isOnline ||
-                    !selectedFile ||
-                    messageSuccess}"
-                  disabled="{!isOnline || !selectedFile}"
-                >
-                  {messages["report.issue"]["label.upload.image"]}
-                </button>
               </div>
             </form>
 
+            {#if spinner}
+              <div class="loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            {/if}
+
             {#if messageRejectedOne}
+              <!-- svelte-ignore a11y-img-redundant-alt -->
+              <img
+                src="{forbiddenSVG}"
+                alt="rejected image"
+                height="auto"
+                width="50rem"
+                class="fobidden-icon"
+              />
               <div class="upload-message">{messageRejectedOne}</div>
               <div class="upload-message">{messageRejectedTwo}</div>
-            {:else if messageSuccess && mediaUrl}
+            {:else if messageSuccess && imageData}
               <!-- svelte-ignore a11y-img-redundant-alt -->
               <div class="upload-message">
-                <img
-                  src="{mediaUrl}"
-                  alt="issue image"
-                  height="auto"
-                  width="75rem"
-                  style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
-                />
-                {messageSuccess}
+                <div class="image-container">
+                  <img
+                    src="{selectedFileSrc}"
+                    alt="issue image"
+                    height="auto"
+                    width="75rem"
+                    style="vertical-align: middle; margin-right: 0.5rem; border-radius: 10px"
+                  />
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <div
+                    class="remove-btn"
+                    on:click="{(e) => {
+                      e.target.parentElement.style.display = 'none';
+                      selectedFile = null;
+                      selectedFileSrc = null;
+                      imageData = null;
+                      messageSuccess = '';
+                    }}"
+                  >
+                    X
+                  </div>
+                </div>
+                <div style="margin-top: 1rem" id="success-message">
+                  {messageSuccess}
+                </div>
               </div>
             {/if}
 
@@ -1979,19 +2092,19 @@
             </button>
 
             <button
-              class="button"
-              class:next-button="{$issueType && $issueDetail}"
-              class:disabled-button="{$issueType === null ||
-                $issueDetail === null ||
-                (selectedFile && !mediaUrl)}"
-              disabled="{$issueType === null ||
-                $issueDetail === null ||
-                (selectedFile && !mediaUrl)}"
+              class="button next-button"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
               on:click="{() => {
                 reportNewIssueStep3 = false;
                 currentStep = 4;
                 reportNewIssueStep4 = true;
+
+                if (localStorage.getItem('issueSubmitterName'))
+                  $issueSubmitterName =
+                    localStorage.getItem('issueSubmitterName') ?? '';
+                if (localStorage.getItem('issueSubmitterContact'))
+                  $issueSubmitterContact =
+                    localStorage.getItem('issueSubmitterContact') ?? '';
               }}"
             >
               {messages["report.issue"]["button.next"]}
@@ -2018,12 +2131,12 @@
           <div class="step-four-label">
             {messages["report.issue"]["label.step"]}
             <button class="numbers">4</button>
-            <span style="font-size: 1.2rem">
+            <span style="font-size: 1.2rem; margin-left: 0.3rem">
               {messages["report.issue"]["label.optional"]}
             </span>
           </div>
 
-          <div>
+          <div class="submitter-name-div">
             <span class="step-four-submitter-name-label">
               {messages["report.issue"]["label.submitter.name"]}
             </span>
@@ -2049,7 +2162,7 @@
             </div>
           </div>
 
-          <div>
+          <div class="contact-div">
             <span class="step-four-contact-info-label">
               {messages["report.issue"]["label.contact.info"]}
             </span>
@@ -2111,14 +2224,15 @@
 
               if (invalidEmail.visible) return;
 
-              if ($issueSubmitterName)
-                localStorage.setItem('issueSubmitterName', $issueSubmitterName);
+              localStorage.setItem(
+                'issueSubmitterName',
+                $issueSubmitterName ?? ''
+              );
 
-              if ($issueSubmitterContact)
-                localStorage.setItem(
-                  'issueSubmitterContact',
-                  $issueSubmitterContact
-                );
+              localStorage.setItem(
+                'issueSubmitterContact',
+                $issueSubmitterContact ?? ''
+              );
 
               reportNewIssueStep4 = false;
               currentStep = 5;
@@ -2165,18 +2279,20 @@
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
               {#each $issueDetail as detail, i}
-                <span style="margin-right: 1rem">{i + 1}-{detail.name}</span>
+                <span id="issue-details" style="margin-right: 1rem"
+                  >{i + 1}-{detail.label}</span
+                >
               {/each}
             </div>
           </div>
 
-          {#if mediaUrl}
+          {#if selectedFileSrc}
             <div class="step-five-issue-detail-label">
               {messages["report.issue"]["label.review.media"]}
             </div>
             <!-- svelte-ignore a11y-img-redundant-alt -->
             <img
-              src="{mediaUrl}"
+              src="{selectedFileSrc}"
               height="auto"
               width="75rem"
               alt="uploaded image"
@@ -2277,7 +2393,11 @@
             {messages["report.issue"]["issue.reported.success.message.one"]}
           </div>
 
-          <div class:success-message-two-offline="{!isOnline}">
+          <div
+            class:success-message-two-offline="{!isOnline}"
+            style="margin-bottom: 0.5rem"
+            id="success-message-2"
+          >
             {#if isOnline}
               {messages["report.issue"]["issue.reported.success.message.two"]}
             {:else}
@@ -2296,6 +2416,7 @@
       <div
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
+        style="width:{!isOnline ? '50vw' : '100vw'} "
         class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
@@ -2313,12 +2434,14 @@
                 {messages["report.issue"]["label.issue.location.subtext"]}
               </div>
             {:else}
-              <input
-                bind:this="{offlineAddressInputSelector}"
-                class="offline-address-input"
-                placeholder="{messages['map']['pac-input-placeholder']}"
-                on:click="{() => (invalidOfflineAddress = false)}"
-              />
+              <div class="offline-input">
+                <input
+                  bind:this="{offlineAddressInputSelector}"
+                  class="offline-address-input"
+                  placeholder="{messages['map']['pac-input-placeholder']}"
+                  on:click="{() => (invalidOfflineAddress = false)}"
+                />
+              </div>
 
               <div
                 class="step-one-invalid-offline-address"
@@ -2404,12 +2527,15 @@
             on:cancel="{() => (showModal = false)}"
           >
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Type:</span>
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.type"]}</span
+              >
               {selectedIssue.service_name}
             </div>
 
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.detail"]}</span
               >
               {#if selectedIssue?.selected_values}
                 {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
@@ -2424,19 +2550,19 @@
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Description:</span
+                >{messages["modal"]["label.description"]}</span
               >{selectedIssue.description ?? "-"}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Requested At:</span
+                >{messages["modal"]["label.requested.at"]}</span
               >{formatDate(selectedIssue.requested_datetime)}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Location:</span
+                >{messages["modal"]["label.location"]}</span
               >{selectedIssue.address}
             </div>
 
@@ -2509,20 +2635,6 @@
                     await getIssues();
                     setTimeout(async () => await addIssuesToMap(), 1000);
                   }}"></select>
-
-                <select
-                  class="select-filter"
-                  on:change="{(e) => {
-                    console.log(e.target.value);
-                  }}"
-                >
-                  <option disabled selected value="">
-                    {messages["find.issue"]["reported.by.placeholder"]}
-                  </option>
-                  <option value="user1">
-                    {messages["find.issue"]["select.option.reported.by.one"]}
-                  </option>
-                </select>
 
                 <DateRangePicker
                   on:datesSelected="{(e) => {
@@ -2610,16 +2722,16 @@
             <table bind:this="{tableSelector}" class="issues-table">
               <thead>
                 <tr>
-                  <th>
+                  <th id="issue-type-header">
                     {messages["find.issue"]["issues.table.column.one"]}
                   </th>
                   <th>
                     {messages["find.issue"]["issues.table.column.two"]}
                   </th>
-                  <th>
+                  <th style="text-align: center">
                     {messages["find.issue"]["issues.table.column.three"]}
                   </th>
-                  <th style="width: 14rem; text-align: center">
+                  <th style="text-align: center">
                     {messages["find.issue"]["issues.table.column.four"]}
                   </th>
                 </tr>
@@ -2629,6 +2741,7 @@
                 {#if filteredIssuesData}
                   {#each filteredIssuesData as issue (issue.service_request_id)}
                     <tr
+                      bind:this="{issuesRefs[issue.service_request_id]}"
                       on:click="{() => setNewCenter(issue.lat, issue.long, 17)}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id
@@ -2639,7 +2752,7 @@
                     >
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
-                        class="td-issue-type"
+                        id="td-issue-type"
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
                           selectedIssue = issue;
@@ -2657,7 +2770,7 @@
 
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
-                        class="td-description"
+                        id="td-description"
                         style="height: {visibleDetails.has(
                           issue.service_request_id
                         )
@@ -2674,7 +2787,7 @@
                           issue.service_request_id
                         )
                           ? 'unset'
-                          : 'hidden'}
+                          : 'hidden'}; 
                           "
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
@@ -2696,7 +2809,7 @@
                         {/if}
                       </td>
 
-                      <td style="text-align: center">
+                      <td id="td-media" style="text-align: center">
                         {#if issue.media_url !== undefined}
                           <!-- svelte-ignore a11y-click-events-have-key-events -->
                           <img
@@ -2712,6 +2825,7 @@
                       </td>
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
+                        id="td-reported-time"
                         style="text-align: center"
                         on:click="{() => {
                           toggleDetails(issue.service_request_id);
@@ -2723,12 +2837,20 @@
                     </tr>
                   {:else}
                     <tr>
-                      <td>{messages["find.issue"]["empty.results"]}</td>
+                      <td
+                        style="padding-left: {window.innerWidth >= 815
+                          ? '0.5rem'
+                          : '0'}">{messages["find.issue"]["empty.results"]}</td
+                      >
                     </tr>
                   {/each}
                 {:else}
                   <tr>
-                    <td>{messages["find.issue"]["empty.results"]}</td>
+                    <td
+                      style="padding-left: {window.innerWidth >= 815
+                        ? '0.5rem'
+                        : '0'}">{messages["find.issue"]["empty.results"]}</td
+                    >
                   </tr>
                 {/if}
                 <div
@@ -2744,8 +2866,3 @@
     </div>
   </div>
 {/if}
-
-<Font
-  on:primaryFontNotAvailable="{applyFontStretch}"
-  on:primaryFontAvailable="{restoreFontStretch}"
-/>

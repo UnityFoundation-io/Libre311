@@ -79,6 +79,30 @@
   }
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.centerAroundMeControl {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.6rem;
+  margin-left: 0.6rem;
+  background-image: url('../icons/mylocation.svg');
+  background-color: white;
+  cursor: pointer;
+  background-size: cover;
+  padding: 0.5rem;
+  box-shadow: 0.1rem 0.1rem 0.1rem rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+  animation: spin 2s linear infinite;
+  width: 100px;
+  height: 100px;
+}
+
 body {
     font-family: 'Gotham', 'Roboto', 'Helvetica';
     background-color: black;
@@ -107,7 +131,7 @@ body {
   overflow: hidden;
   height: 3.5rem;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
-  z-index: 1;
+  z-index: 0;
 }
 
 @media only screen and (max-height: 390px) {
@@ -122,7 +146,55 @@ body {
   }
 }
 
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.image-container img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.2rem;
+  background: #fff;
+  color: #000;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
 /*//////// Desktop Style ////////*/
+
+#td-issue-type {
+  padding-left: 0.5rem;
+}
+
+#issue-type-header {
+  padding-left: 0.5rem;
+}
+
+.multiselect {
+  color: #3478f6;
+  background-color: white;
+  width: 100%;
+  height: 3rem;
+  font-size: 0.8rem;
+  text-shadow: none !important;
+  border-radius: 10px;
+  border: none !important;
+  margin-top: 1rem;
+}
+
+.fobidden-icon {
+  vertical-align: middle; 
+  margin-left: 0.5rem; 
+  margin-top: 1rem; 
+  border-radius: 10px;
+}
 
 .reported-offline-issue-success {
   text-align: center; 
@@ -150,14 +222,14 @@ body {
   position: relative;
   overflow: hidden;
   background-repeat: no-repeat;
-  transition: height 0.5s ease;
+  transition: height 0.75s ease;
 }
 
 .background::before {
   content: "";
-  background-image: url("$lib/columbiaBackground.png");
+  background-image: url("$lib/columbiaBackground.jpg");
   background-repeat: no-repeat;
-  background-position: 100% 67%;
+  background-position: 100% 27%;
   background-size: cover;
   position: absolute;
   top: 0;
@@ -165,7 +237,7 @@ body {
   width: 100%;
   height: 100%;
   z-index: -1;
-  transition: height 0.5s ease;
+  transition: height 0.75s ease;
 }
 
 .background-opacity::before {
@@ -180,7 +252,7 @@ body {
 
 .next-button {
   margin-top: 1.25rem;
-  margin-right: 3rem;
+  margin-right: 0.5rem;
   float: right;
   background-image: radial-gradient(
     circle at 23%,
@@ -192,7 +264,7 @@ body {
 
 .review-button {
   margin-top: 1.25rem;
-  margin-right: 2rem;
+  margin-right: 0.5rem;
   float: right;
   background-image: radial-gradient(
     circle at 37%,
@@ -204,18 +276,18 @@ body {
 
 .review-submit {
   margin-bottom: 1.25rem;
-  margin-right: 3rem;
+  margin-right: 0.5rem;
 }
 
 .submit-button {
   margin-bottom: 1.25rem;
-  margin-right: 3rem;
+  margin-right: 0.5rem;
   margin-top: 2rem;
 }
 
 .back-button {
   margin-top: 1.25rem;
-  margin-left: 3rem;
+  margin-left: 0.5rem;
   background-image: radial-gradient(
     circle at -15%,
     rgba(190, 212, 250, 0.9) 0%,
@@ -231,22 +303,8 @@ body {
   cursor: default;
   margin-top: 1.25rem;
   margin-left: 1rem;
-  margin-right: 3rem;
+  margin-right: 0.5rem;
   float: right;
-  background-image: radial-gradient(
-    circle at 23%,
-    rgba(155, 155, 155, 1) 51%,
-    rgba(80, 80, 80, 0.9) 65%,
-    rgba(80, 80, 80, 0.9) 100%
-  );
-}
-
-.disabled-button-upload {
-  color: black;
-  border: none;
-  cursor: default;
-  margin-right: 3rem;
-  margin-left: 1rem;
   background-image: radial-gradient(
     circle at 23%,
     rgba(155, 155, 155, 1) 51%,
@@ -258,10 +316,13 @@ body {
 .button-find-issue-disabled {
   filter: grayscale(100%);
   cursor: default;
+  z-index: 0;
 }
 
 .slogan-title {
   margin: 4rem auto;
+  max-width: 97vw;
+  width: 97vw;
   text-align: center;
   font-size: 2.15rem;
   font-weight: 600;
@@ -274,14 +335,15 @@ body {
   text-align: center;
   font-size: 1.6rem;
   font-weight: 500;
-  max-width: 91vw;
+  max-width: 85vw;
+  width: 85vw;
   color: white;
   text-shadow: 2px 3px 2px rgba(0, 0, 0, 0.8);
 }
 
 .see-more {
   color:var(--primary-color-two); 
-  font-size: 2rem;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
@@ -313,7 +375,7 @@ body {
 }
 
 #map {
-  width: 55vw;
+  width: 100vw;
   height: 55vh;
   align-items: center;
 }
@@ -328,7 +390,6 @@ body {
 .describe-issue-two {
   font-weight: 200;
   margin-top: 1rem;
-  font-size: 1.75rem;
   color: white;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
   background-color: var(--primary-color-one);
@@ -343,7 +404,8 @@ body {
   border: none;
   width: 1.7rem;
   height: 1.7rem;
-  font-size: 1.2rem;
+  font-size: 0.7rem;
+  font-weight: 500;
   vertical-align: 0.25rem;
   margin-left: 0.5rem;
 }
@@ -358,10 +420,11 @@ body {
 
 .offline-address-input {
     margin-top: 0.6rem;
-    margin-left: 3rem;
     padding-left: 0.5rem;
     height: 2.18rem;
-    width: 85%;
+    width: 100%;
+    border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .hidden {
@@ -387,15 +450,19 @@ select {
   height: 1.7rem;
 }
 
+.textarea {
+  display: inline-block; 
+  width: 100%;
+  margin-top: 1rem;
+}
+
 textarea {
-  margin: 0.5rem 3rem 0 3rem;
-  font-size: 1rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  width: 32.3rem;
+  font-size: 0.85rem;
+  width: 100%;
   resize: none;
-  float: right;
   border-radius: 10px;
+  padding: 0.5rem;
+  box-sizing: border-box;
 }
 
 textarea::placeholder {
@@ -404,10 +471,11 @@ textarea::placeholder {
 
 .upload-image {
   color:black;
-  font-size: 1rem;
-  margin-left: 3rem;
+  font-size: 0.8rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
   padding: 0.3rem;
-  width: 24rem;
+  width: 100%;
   background-color: white;
   height: 2.7rem;
   border-style: dashed;
@@ -420,17 +488,9 @@ textarea::placeholder {
   justify-content: space-between;
 }
 
-.upload {
-  margin-right: 3rem;
-  margin-left: 1rem;
-  background-color: var(--accent-color-two);
-  color: white;
-  text-shadow: 1px 1px 1px  black;
-}
-
 .upload-message {
-  font-size: 1.2rem;
-  margin: 1rem 3rem 0 3rem;
+  font-size: 1rem;
+  margin: 1rem 1rem 0 1rem;
 }
 
 .upload-file {
@@ -442,7 +502,6 @@ textarea::placeholder {
 .filters {
   display: flex;
   justify-content: space-around;
-  width: 55vw;
   margin: 0 auto;
   padding-bottom: 0.5rem;
   background-color: var(--secondary-color-two);
@@ -464,10 +523,13 @@ textarea::placeholder {
 
 .issues-table {
   background-color: white;
-  width: 55vw;
-  overflow-y: auto;
+  width: 100%;
   display: block;
   max-height: 15rem;
+  table-layout: fixed;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .issue-detail-view {
@@ -514,7 +576,6 @@ tbody tr {
 
 td,
 th {
-  padding: 0.1rem 0.3rem 0.1rem 0.3rem;
   white-space: nowrap;
 }
 
@@ -527,17 +588,12 @@ td {
   cursor: pointer;
 }
 
-.td-issue-type {
-  max-width: 11rem;
-  min-width: 11rem;
-}
-
-.td-description {
-  max-width: 22rem;
-  min-width: 22rem;
-  font-size: 0.9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
+th {
+  min-width: 2rem;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
 }
 
 .find-issues {
@@ -572,34 +628,41 @@ td {
 
 #stepOne {
   background-color: var(--primary-color-one);
-  width: 55vw;
   border-radius: 21px;
+  width: 100vw;
+}
+
+.offline-input {
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 .step-one-issue-location-label {
-  margin-left: 3rem;
+  margin-left: 1rem;
+  font-size: 1.5rem;
 }
 
 .step-one-label {
-  margin-left: 3rem;
+  margin-left: 1rem;
   margin-bottom: 1rem;
   padding-top: 0.3rem;
   font-weight: 300;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
 }
 
 .step-one-instruction {
   font-size: 1rem;
   margin-top: 1.5rem;
-  margin-left: 3rem;
+  margin-left: 1rem;
 }
 
 .step-one-issue-address {
-  font-size: 1.3rem;
-  margin-bottom: -1rem;
-  margin-left: 3rem;
-  margin-top: 2rem;
-  padding-right: 3rem;
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin: 2rem 1rem 0.5rem 1rem;
   width: 80%;
+  filter: brightness(120%);
+
 }
 
 .step-one-invalid-offline-address {
@@ -609,7 +672,7 @@ td {
   text-align: right;
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
-  margin-right: 3rem;
+  margin-right: 1rem;
   color: var(--primary-color-two);
   text-shadow: none;
   position: relative;
@@ -622,11 +685,12 @@ td {
 }
 
 .step-two-label {
-  margin-left: 3rem;
+  margin-left: 1rem;
   margin-bottom: 1rem;
   padding-top: 1rem;
   min-width: 90vw;
   font-weight: 300;
+  font-size: 1.75rem;
 }
 
 .step-two-div {
@@ -635,34 +699,38 @@ td {
 }
 
 .step-two-date-label {
-  margin-left: 3rem;
-  font-size: 1.3rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  font-size: 1rem;
 }
 
 .step-two-date-timestamp {
   color: var(--primary-color-two);
-  margin-left: 0.5rem;
-  font-size: 1.3rem;
+  font-size: 1rem;
+  letter-spacing: -0.02rem;
+  filter: brightness(120%);
 }
 
 .step-two-feature-type-label {
-  margin-left: 3rem;
-  font-size: 1.2rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  font-size: 1rem;
 }
 
 .step-two-feature-type-helper {
-  margin-left: 3rem;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .step-two-select-div {
   margin-top: -1rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 .step-two-select {
-  margin-left: 3rem;
   margin-top: 2rem;
   margin-bottom: 1rem;
+  font-size: 0.85rem;
 }
 
 .step-two-select-detail {
@@ -670,6 +738,8 @@ td {
   margin-top: 1rem;
   margin-bottom: 1rem;
   font-size: 1.1rem;
+  height: 8.2rem;
+  padding-top: 0.6rem;
 }
 
 .step-two-word-count-error {
@@ -679,7 +749,7 @@ td {
   text-align: right;
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
-  margin-right: 3.3rem;
+  margin-right: 0.3rem;
   color: var(--primary-color-two);
   text-shadow: none;
   position: relative;
@@ -690,7 +760,8 @@ td {
   font-size: 0.75rem;
   text-align: right;
   margin-top: 0.2rem;
-  margin-right: 3.3rem;
+  margin-bottom: 1rem;
+  margin-right: 0.3rem;
 }
 
 .step-two-required {
@@ -698,7 +769,8 @@ td {
   font-size: 0.75rem;
   text-align: right;
   margin-top: 0.2rem;
-  margin-right: 3.3rem;
+  margin-right: 0.3rem;
+  text-shadow: none;
 }
 
 .visible {
@@ -718,15 +790,15 @@ td {
 }
 
 .step-three-label {
-  margin-left: 3rem;
+  margin-left: 1rem;
   margin-bottom: 1rem;
   padding-top: 1rem;
   font-weight: 300;
 }
 
 .step-three-add-media-label {
-  font-size: 1.3rem;
-  margin: 0 1rem 0 3rem;
+  font-size: 1rem;
+  margin: 0 1rem 0 1rem;
 }
 
 #stepContactInfo {
@@ -736,34 +808,48 @@ td {
   border-radius: 21px;
 }
 
+.contact-div {
+  margin-left: 1rem;
+  margin-right: 1rem;
+  height: 5rem;
+}
+
+.submitter-name-div {
+  margin-left: 1rem;
+  margin-right: 1rem;
+  height: 5rem;
+}
+
 .step-four-label {
-  margin-left: 3rem;
+  margin-left: 1rem;
   margin-bottom: 1rem;
   padding-top: 1rem;
   font-weight: 300;
 }
 
 .step-four-submitter-name-label {
-  font-size: 1.3rem;
-  margin: 0 1rem 0 3rem;
+  font-size: 1.1rem;
 }
 
 .step-four-input-submitter-name {
   height: 2rem;
   padding-left: 0.3rem;
-  width: 33rem;
-  margin-left: 3rem;
-  margin-bottom: 1rem;
+  width: 100%;
   border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.step-four-input-submitter-name::placeholder {
+  font-size: 0.85rem;
 }
 
 .step-four-submitter-name-word-count-error {
   visibility: hidden;
   justify-content: right;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-align: right;
   margin-bottom: 0.5rem;
-  margin-right: 3.3rem;
+  margin-right: 0.1rem;
   color: var(--primary-color-two);
   text-shadow: none;
 }
@@ -771,27 +857,25 @@ td {
 .step-four-submitter-email-error {
   visibility: hidden;
   justify-content: right;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-align: right;
   margin-bottom: 0.5rem;
-  margin-right: 3.3rem;
+  margin-right: 0.1rem;
   color: var(--primary-color-two);
   text-shadow: none;
+  letter-spacing: -0.01rem;
 }
 
 .step-four-contact-info-label {
-  font-size: 1.3rem;
-  margin: 0 1rem 0 3rem;
-  text-align: left;
+  font-size: 1.1rem;
 }
 
 .step-four-input-contact-info {
   height: 2rem;
   padding-left: 0.3rem;
-  width: 33rem;
-  margin-left: 3rem;
-  margin-bottom: 1rem;
+  width: 100%;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .step-four-input-contact-info::placeholder {
@@ -807,12 +891,12 @@ td {
 
 .image-review {
   margin-top: 0.5rem;
-  margin-left: 3rem; 
+  margin-left: 1rem; 
   border-radius: 10px;
 }
 
 .step-five-label {
-  margin-left: 3rem;
+  margin-left: 1rem;
   margin-bottom: 0.3rem;
   padding-top: 1rem;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
@@ -820,99 +904,95 @@ td {
 }
 
 .step-five-issue-location-label {
-  font-size: 1.5rem;
-  margin: 0 1rem 0 3rem;
+  font-size: 1.1rem;
+  margin: 1rem 1rem 0 1rem;
   font-weight: 300;
 }
 
 .step-five-issue-location-address {
-  font-size: 1.3rem;
+  font-size: 1rem;
   margin: 0.5 1rem 1rem 0;
   font-weight: 100;
 }
 
 .step-five-issue-type-label {
-  font-size: 1.5rem;
-  margin: 1rem 1rem 0 3rem;
+  font-size: 1.1rem;
+  margin: 1rem 1rem 0 1rem;
   font-weight: 300;
 }
 
 .step-five-issue-type {
-  font-size: 1.3rem;
+  font-size: 1rem;
   margin: 0.5 1rem 1rem 0;
   font-weight: 100;
 }
 
 .step-five-issue-detail-label {
-  font-size: 1.5rem;
-  margin: 1rem 1rem 0 3rem;
+  font-size: 1.1rem;
+  margin: 1rem 1rem 0 1rem;
   font-weight: 300;
 }
 
 .step-five-issue-detail {
-  font-size: 1.3rem;
+  font-size: 1rem;
   margin: 0.5 1rem 1rem 0;
   font-weight: 100;
 }
 
 .step-five-issue-description-label {
-  font-size: 1.5rem;
-  margin: 1rem 1rem 0 3rem;
+  font-size: 1.1rem;
+  margin: 1rem 1rem 0 1rem;
   font-weight: 300;
 }
 
 .step-five-issue-description {
-  font-size: 1.3rem;
+  font-size: 1rem;
   margin: 0.5 1rem 1rem 0;
   font-weight: 100;
 }
 
 .step-five-submitter-name-label {
-  font-size: 1.5rem;
-  margin: 1rem 1rem 0 3rem;
+  font-size: 1.1rem;
+  margin: 1rem 1rem 0 1rem;
   font-weight: 300;
 }
 
 .step-five-submitter-name {
-  font-size: 1.3rem;
+  font-size: 1rem;
   margin: 0.5 1rem 1rem 0;
   font-weight: 100;
 }
 
 .step-five-contact-info-label {
-  font-size: 1.5rem;
-  margin: 1rem 1rem 0 3rem;
+  font-size: 1.1rem;
+  margin: 1rem 1rem 0 1rem;
   font-weight: 300;
 }
 
 .step-five-contact-info {
-  font-size: 1.3rem;
+  font-size: 1rem;
   margin: 0.5 1rem 1rem 0;
   font-weight: 100;
 }
 
 #stepSubmitted {
-  width: 50vw;
+  width: max-content;
 }
 
 .success-message-div {
   background-color: var(--primary-color-one);
-  width: 55vw;
-  height: 7rem;
-  font-size: 2rem;
+  font-size: 1.3rem;
   text-align: center;
   border-radius: 21px;
-}
-
-.success-message-two-offline {
-  font-size: 1.82rem;
+  padding: 0.5rem;
 }
 
 .success-message {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 #button-find-issues {
+  min-width: max-content;
   width: 20rem;
 
   background-image: radial-gradient(
@@ -925,6 +1005,7 @@ td {
 }
 
 #button-report-issue {
+  min-width: max-content;
   width: 20rem;
 
   background-image: radial-gradient(
@@ -969,20 +1050,15 @@ td {
 /*/////// Android S10+ Portrait////////*/
 
 @media only screen and (min-width: 320px) and (max-width: 374px) and (orientation: portrait) {
+  .multiselect {
+    height: 4.1rem;
+  }
+
   .content {
     font-size: 0.5rem;
   }
 
-  .numbers {
-    font-size: 0.7rem;
-    font-weight: 500;
-  }
-
   .issues-table {
-    background-color: white;
-    width: 100vw;
-    overflow-y: auto;
-    display: block;
     font-size: 0.8rem;
     max-height: 9.6rem;
   }
@@ -1011,98 +1087,23 @@ td {
     font-size: 0.7rem;
   }
 
-  .td-description {
-    max-width: 4.7rem;
-    min-width: 4.7rem;
-    font-size: 0.7rem;
-  }
-
-  .td-issue-type {
-    max-width: 4rem;
-    min-width: 4rem;
-  }
-
   .find-issues {
     justify-content: left;
-  }
-
-  #stepOne {
-    width: 100vw;
-  }
-
-  .offline-address-input {
-    margin-left: 1rem;
-  }
-
-  .step-one-issue-location-label {
-    margin-top: -1rem;
-    margin-left: 1rem;
-    font-size: 1.3rem;
-  }
-
-  .step-one-label {
-    margin-left: 1rem;
-  }
-
-  .step-one-instruction {
-    margin-top: 0;
-    margin-left: 1rem;
-    font-size: 0.82rem;
-  }
-
-  .step-one-issue-address {
-    font-size: 1rem;
-    font-weight: 300;
-    margin: 0.5rem 0.5rem 0 1rem;
-    filter: brightness(120%);
   }
 
   .step-one-button-next {
     margin-right: 0;
   }
 
-  .step-one-invalid-offline-address {
-    margin-right: 1rem;
-  }
-
-  .step-two-label {
-    margin-left: 1rem;
-  }
-
-  .step-two-date-label {
-    font-size: 1.2rem;
-    margin-left: 1rem;
-  }
-
-  .step-two-date-timestamp {
-    font-size: 0.9rem;
-    margin-left: 0rem;
-    filter: brightness(120%);
-  }
-
   .step-two-feature-type-label {
-    font-size: 1rem;
     letter-spacing: -0.03rem;
-    margin-left: 1rem;
   }
 
   .step-two-feature-type-helper {
-    font-size: 1rem;
     letter-spacing: -0.03rem;
-    margin-left: 0;
-    margin-right: 0.5rem;
-  }
-
-  .step-two-select-div {
-    margin-left: 1rem;
   }
 
   .step-two-select-detail {
-    margin-left: 0;
-    font-size: 0.8rem;
-  }
-
-  .step-two-select {
     margin-left: 0;
     font-size: 0.8rem;
   }
@@ -1112,19 +1113,7 @@ td {
     margin-right: 0.5rem;
   }
 
-  .step-two-required {
-    margin-top: 0;
-    margin-right: 3.5rem;
-  }
-
-  .step-two-word-count {
-    margin-top: 0;
-    margin-right: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-
   .step-two-word-count-error {
-    margin-right: 1.1rem;
     font-size: 0.7rem;
   }
 
@@ -1132,130 +1121,12 @@ td {
     width: 100vw;
   }
 
-  .step-three-label {
-    margin-left: 0.5rem;
-  }
-
-  .step-three-add-media-label {
-    font-size: 1.045rem;
-    margin: 0 1rem 0 0.5rem;
-  }
-
   #stepContactInfo {
     width: 100vw;
   }
 
-  .step-four-label {
-    margin-left: 0.5rem;
-  }
-
-  .step-four-submitter-name-label {
-    font-size: 1.3rem;
-    margin: 0 1rem 0 0.5rem;
-  }
-
-  .step-four-input-submitter-name {
-    margin-left: 0.5rem;
-    width: 91vw;
-  }
-
-  .step-four-contact-info-label {
-    margin-left: 0.5rem;
-    font-size: 1.3rem;
-  }
-
-  .step-four-input-contact-info {
-    margin-left: 0.5rem;
-    width: 91vw;
-  }
-
-  .step-four-submitter-name-word-count-error {
-    margin-right: 0.25rem;
-  }
-
-  .step-four-submitter-email-error {
-    font-size: 0.8rem;
-    margin-right: 0.7rem;
-  }
-
   #stepReviewSubmit {
     width: 100vw;
-  }
-
-  .image-review {
-    margin-left: 0.5rem;
-  }
-
-  .step-five-label {
-    margin-left: 0.5rem;
-  }
-
-  .step-five-issue-location-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-location-address {
-    font-size: 1rem;
-  }
-
-  .step-five-issue-type-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-type {
-    font-size: 1rem;
-  }
-
-  .step-five-issue-detail-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-detail {
-    font-size: 1rem;
-  }
-
-  .step-five-issue-description-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-description {
-    font-size: 1rem;
-  }
-
-  .step-five-submitter-name-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-submitter-name {
-    font-size: 1rem;
-  }
-
-  .step-five-contact-info-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-contact-info {
-    font-size: 1rem;
-  }
-
-  #stepSubmitted {
-    width: 100vw;
-  }
-
-  .success-message-div {
-    width: 100vw;
-    font-size: 1.2rem;
-    height: 4.5rem;
-  }
-
-  .success-message {
-    margin-top: 1rem;
   }
 
   .success-message-two-offline {
@@ -1264,8 +1135,6 @@ td {
   }
 
   .upload-image {
-    margin: 0 0.5rem 0 0.5rem;
-    font-size: 0.7rem;
     min-height: 2.7rem;
   }
 
@@ -1277,49 +1146,23 @@ td {
     width: 100vw;
   }
 
-  .next-button {
-    margin-right: 0.5rem;
-  }
-
   .back-button {
-    margin-left: 0.5rem;
     letter-spacing: -0.08rem;
   }
 
   .review-button {
-    margin-right: 0.5rem;
     letter-spacing: -0.05rem;
-  }
-
-  .review-submit {
-    margin-right: 0.5rem;
   }
 
   .submit-button {
     margin-right: 0.5rem;
   }
 
-  .disabled-button {
-    margin-right: 0.5rem;
-  }
-
-  .disabled-button-upload {
-    margin-right: 0.5rem;
-    padding: 0 3rem 0 1.5rem !important;
-  }
-
-  .upload {
-    margin-right: 0.5rem;
-    padding: 0 3rem 0 1.5rem !important;
-  }
-
   .upload-message {
-    font-size: 0.73rem;
-    margin: 1rem 0.5rem 0 0.5rem;
+    font-size: 0.95rem;
   }
 
   #map {
-    width: 100vw;
     height: 40vh;
   }
 
@@ -1360,19 +1203,19 @@ td {
   }
 
   .slogan-title {
-    margin: 2rem 0.5rem 1.5rem 0.5rem;
+    margin: 1rem 0.5rem 1.5rem 0.5rem;
     font-size: 1.35rem;
     letter-spacing: 0.01rem;
-    text-align: center;
   }
 
   .slogan-text {
-    margin: 1rem auto;
     font-size: 0.9rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .see-more {
-    font-size: 1rem;
+    font-size: 0.75rem;
   }
 
   .see-more-title {
@@ -1390,7 +1233,7 @@ td {
   }
 
   #button-report-issue {
-    margin-top: 7vh;
+    margin-top: 5vh;
     width: 18rem;
   }
 
@@ -1415,41 +1258,17 @@ td {
   }
 
   .background::before {
-    background-position: calc(40% - 100px) calc(50% - 500px);
+    background-position: 45% 50%;
   }
 
-  textarea {
-    margin-left: 0.1rem;
-    margin-bottom: 0.1rem;
-    width: 84vw;
-    font-size: 0.75rem;
-  }
-
-  textarea::placeholder {
-    font-size: 0.75rem;
-  }
 }
 /* /////////////////// */
 
 /*/////// iPhone SE Portrait////////*/
 
-  @media only screen and (min-width: 375px) and (orientation: portrait) {
+  @media only screen and (min-width: 375px) and (max-width: 586px) and (orientation: portrait) {
   .content {
     font-size: 0.5rem;
-  }
-
-  .numbers {
-    font-size: 0.7rem;
-    font-weight: 500;
-  }
-
-  .issues-table {
-    background-color: white;
-    width: 100vw;
-    overflow-y: auto;
-    display: block;
-    font-size: 0.8rem;
-    max-height: 9.6rem;
   }
 
   .table-expanded {
@@ -1491,72 +1310,20 @@ td {
     justify-content: left;
   }
 
-  #stepOne {
-    width: 100vw;
-  }
-
-  .step-one-issue-location-label {
-    margin-top: -1rem;
-    margin-left: 1.5rem;
-    font-size: 1.5rem;
-  }
-
-  .step-one-label {
-    margin-left: 1.5rem;
-  }
-
-  .step-one-instruction {
-    margin-top: 0;
-    margin-left: 1.5rem;
-  }
-
-  .step-one-issue-address {
-    font-size: 1rem;
-    font-weight: 300;
-    margin-top: 0.5rem;
-    margin-left: 1.5rem;
-    filter: brightness(120%);
-  }
-
   .step-one-button-next {
     margin-right: 0;
   }
 
-  .offline-address-input {
-    margin-left: 1.5rem;
-    width: 85%;
-  }
-
-  .step-two-label {
-    margin-left: 1.5rem;
-  }
-
   .step-two-date-label {
-    font-size: 1.2rem;
-    margin-left: 1.5rem;
-  }
-
-  .step-two-date-timestamp {
-    font-size: 1.1rem;
-    margin-left: 0rem;
-    filter: brightness(120%);
+    font-size: 1rem;
   }
 
   .step-two-feature-type-label {
-    font-size: 1.1rem;
     letter-spacing: -0.03rem;
-    margin-left: 1.5rem;
-    margin-right: 0.5rem;
   }
 
   .step-two-feature-type-helper {
-    font-size: 1.1rem;
     letter-spacing: -0.03rem;
-    margin-left: 0;
-  }
-
-  .step-two-select-div {
-    margin-left: 1.5rem;
   }
 
   .step-two-select-detail {
@@ -1564,169 +1331,21 @@ td {
     font-size: 0.8rem;
   }
 
-  .step-two-select {
-    margin-left: 0;
-    font-size: 0.8rem;
-  }
-
   .issue-detail-selected {
-    margin-left: 0rem;
+    margin-left: 0.3rem;
     margin-right: 0.5rem;
-  }
-
-  .step-two-required {
-    margin-top: 0;
-    margin-right: 3.5rem;
-  }
-
-  .step-two-word-count {
-    margin-top: 0;
-    margin-right: 1.8rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .step-two-word-count-error {
-    margin-right: 1.8rem;
   }
 
   #stepPhoto {
     width: 100vw;
   }
 
-  .step-three-label {
-    margin-left: 0.5rem;
-  }
-
-  .step-three-add-media-label {
-    font-size: 1.045rem;
-    margin: 0 1rem 0 0.5rem;
-  }
-
   #stepContactInfo {
     width: 100vw;
   }
 
-  .step-four-label {
-    margin-left: 0.5rem;
-  }
-
-  .step-four-submitter-name-label {
-    font-size: 1.3rem;
-    margin: 0 1rem 0 0.5rem;
-  }
-
-  .step-four-input-submitter-name {
-    margin-left: 0.5rem;
-    width: 93vw;
-  }
-
-  .step-four-contact-info-label {
-    margin-left: 0.5rem;
-    font-size: 1.3rem;
-  }
-
-  .step-four-input-contact-info {
-    margin-left: 0.5rem;
-    width: 93vw;
-  }
-
-  .step-four-submitter-name-word-count-error {
-    margin-right: 0.9rem;
-  }
-  
-  .step-four-submitter-email-error {
-    margin-right: 0.9rem;
-  }
-
   #stepReviewSubmit {
     width: 100vw;
-  }
-
-  .image-review {
-    margin-left: 0.5rem;
-  }
-
-  .step-five-label {
-    margin-left: 0.5rem;
-  }
-
-  .step-five-issue-location-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-location-address {
-    font-size: 1rem;
-  }
-
-  .step-five-issue-type-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-type {
-    font-size: 1rem;
-  }
-
-  .step-five-issue-detail-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-detail {
-    font-size: 1rem;
-  }
-
-  .step-five-issue-description-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-issue-description {
-    font-size: 1rem;
-  }
-
-  .step-five-submitter-name-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-submitter-name {
-    font-size: 1rem;
-  }
-
-  .step-five-contact-info-label {
-    margin-left: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .step-five-contact-info {
-    font-size: 1rem;
-  }
-
-  #stepSubmitted {
-    width: 100vw;
-  }
-
-  .success-message-div {
-    width: 100vw;
-    font-size: 1.5rem;
-    height: 5.5rem;
-  }
-
-  .success-message {
-    margin-top: 1rem;
-  }
-
-  .success-message-two-offline {
-    font-size: 1.15rem;
-    letter-spacing: -0.07rem;
-  }
-
-  .upload-image {
-    margin-left: 0.5rem;
-    width: 13rem;
-    font-size: 0.8rem;
   }
 
   .describe-issue {
@@ -1737,45 +1356,7 @@ td {
     width: 100vw;
   }
 
-  .next-button {
-    margin-right: 0.5rem;
-  }
-
-  .back-button {
-    margin-left: 0.5rem;
-  }
-
-  .review-button {
-    margin-right: 0.5rem;
-  }
-
-  .review-submit {
-    margin-right: 0.5rem;
-  }
-
-  .submit-button {
-    margin-right: 0.5rem;
-  }
-
-  .disabled-button {
-    margin-right: 0.5rem;
-  }
-
-  .disabled-button-upload {
-    margin-right: 0.5rem;
-  }
-
-  .upload {
-    margin-right: 0.5rem;
-  }
-
-  .upload-message {
-    font-size: 1rem;
-    margin: 1rem 0.5rem 0 0.5rem;
-  }
-
   #map {
-    width: 100vw;
     height: 40vh;
   }
 
@@ -1805,10 +1386,6 @@ td {
     font-size: 1.2rem;
   }
 
-  .button {
-    font-size: 1rem;
-  }
-
   .logo {
     height: 10rem;
   }
@@ -1818,16 +1395,14 @@ td {
     font-size: 1.55rem;
     font-weight: 600;
     letter-spacing: 0.01rem;
-    text-align: center;
   }
 
   .slogan-text {
-    margin: 1rem auto;
     font-size: 1.1rem;
   }
 
   .see-more {
-    font-size: 1.3rem;
+    font-size: 0.9rem;
   }
 
   .see-more-title {
@@ -1840,7 +1415,8 @@ td {
   }
 
   .action-buttons {
-    display: block;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
     margin-top: 3rem;
   }
@@ -1861,17 +1437,6 @@ td {
   .background::before {
     background-position: center calc(50% - 300px);
   }
-
-  textarea {
-    margin-left: 0.1rem;
-    margin-bottom: 0.1rem;
-    width: 84vw;
-    font-size: 0.85rem;
-  }
-
-  textarea::placeholder {
-    font-size: 0.85rem;
-  }
 }
 
 /*/////// End iPhone SE Portrait////////*/
@@ -1880,8 +1445,12 @@ td {
 /*/////// iPhone 13 Pro Portrait////////*/
 
 @media only screen and (min-width: 375px) and (min-height: 669px) and (max-height: 739px) and (orientation: portrait) {
+  .multiselect {
+    height: 4.1rem;
+  }
+
   .background::before {
-    background-position: center calc(50% - 400px);
+    background-position: 45% 10%;
   }
 
   .logo {
@@ -1897,7 +1466,7 @@ td {
   }
 
   .see-more {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
   }
 
   .see-more-title {
@@ -1912,69 +1481,37 @@ td {
   .action-buttons {
     display: block;
     text-align: center;
-    margin-top: 4rem;
+    margin-top: 3rem;
   }
 
   #button-report-issue {
-    margin-top: 3rem;
+    margin-top: 2rem;
     width: 18rem;
   }
 
   #map {
-    width: 100vw;
     height: 45vh;
   }
 
-  textarea {
-    width: 84vw;
-  }
-
-  .upload-image {
-    width: 18rem;
-  }
-
   .td-description {
-    max-width: 10rem;
-    min-width: 10rem;
+    max-width: 8.5rem;
+    min-width: 8.5rem;
   }
 
-  .upload {
-    margin-right: 0.5rem;
-    padding: 0 2.1rem 0 1.5rem;
-  }
-
-  .disabled-button-upload {
-    margin-right: 0.5rem;
-    padding: 0 2.1rem 0 1.5rem;
-  }
-
-  .step-two-word-count-error {
-    margin-right: 1.2rem;
-}
-
-  .upload-message {
-    font-size: 0.9rem;
-  }
-  
   .issue-detail-selected {
-    margin-left: 0.2rem;
-  }
-
-  .success-message-two-offline {
-    font-size: 1.1rem;
-    letter-spacing: -0.04rem;
-  }
-
-  .step-one-invalid-offline-address {
-    margin-right: 1.2rem;
+    margin-left: 0.3rem;
   }
 }
 
 /*/////// iPhone 14 Pro Max Portrait ////////*/
 
 @media only screen and (min-width: 400px) and (min-height: 670px) and (max-height: 750px) and (orientation: portrait) {
+  .multiselect {
+    height: 4.1rem;
+  }
+
   .background::before {
-    background-position: center calc(50% - 400px);
+    background-position: 50% 10%;
   }
 
   .logo {
@@ -1990,7 +1527,7 @@ td {
   }
 
   .see-more {
-    font-size: 1.35rem;
+    font-size: 1rem;
   }
 
   .see-more-title {
@@ -2014,51 +1551,28 @@ td {
   }
 
   #map {
-    width: 100vw;
     height: 45vh;
-  }
-
-  .upload-image {
-    width: 17.5rem;
   }
 
   .camera-icon {
     margin-left: 0.3rem;
   }
 
-  .success-message-two-offline {
-    font-size: 1.2rem;
-    letter-spacing: -0.03rem;
-  }
-
-  .offline-address-input {
-    width: 86%;
-  }
-
-  .step-one-invalid-offline-address {
-    margin-right: 1.3rem;
+  .td-description {
+    max-width: 10rem;
+    min-width: 10rem;
   }
 }
 
-
    /*/////// Style: Landscape Galaxy S10+ ///////*/
 
-   @media only screen and (min-width: 596px) and (max-width: 814px) and (orientation: landscape){
+   @media only screen and (min-width: 530px) and (max-width: 814px) and (orientation: landscape){
+    .multiselect {
+      height: 4.1rem;
+    }
+
     .content {
       font-size: 0.5rem;
-    }
-
-    .numbers {
-      font-size: 0.7rem;
-      font-weight: 500;
-    }
-
-    .issues-table {
-      background-color: white;
-      width: 100vw;
-      overflow-y: auto;
-      display: block;
-      font-size: 0.8rem;
     }
 
     .table-expanded {
@@ -2105,245 +1619,29 @@ td {
       justify-content: left;
     }
 
-    #stepOne {
-      width: 100vw;
-    }
-
-    .step-one-issue-location-label {
-      margin-top: -1rem;
-      margin-left: 0.5rem;
-      font-size: 1.5rem;
-    }
-
-    .step-one-label {
-      margin-left: 0.5rem;
-    }
-
-    .step-one-instruction {
-      margin-top: 0;
-      margin-left: 0.5rem;
-    }
-
-    .step-one-issue-address {
-      font-size: 1rem;
-      font-weight: 300;
-      margin-top: 0.5rem;
-      margin-left: 0.5rem;
-      filter: brightness(120%);
-    }
-
     .step-one-button-next {
       margin-right: 0;
     }
 
-    .step-one-invalid-offline-address {
-      margin-right: 0.5rem;
-    }
-
-    .offline-address-input {
-      margin-left: 0.5rem;
-      width: 95%;
-    }
-
-    .step-two-label {
-      margin-left: 0.5rem;
-    }
-
-    .step-two-date-label {
-      font-size: 1.2rem;
-      margin-left: 0.5rem;
-    }
-
-    .step-two-date-timestamp {
-      font-size: 1.1rem;
-      margin-left: 0rem;
-      filter: brightness(120%);
-    }
-
     .step-two-feature-type-label {
-      font-size: 1.1rem;
       letter-spacing: -0.03rem;
-      margin-left: 0.5rem;
     }
 
-    .step-two-select {
-      margin-left: 0.5rem;
-    }
-
-    .step-two-feature-type-helper {
-      margin-left: 0.6rem;
-      margin-right: 0.6rem;
-      font-size: 1.1rem;
-    }
-  
     .step-two-select-detail {
       margin-left: 0.5rem;
       font-size: 0.75rem;
-    }
-
-    .step-two-word-count {
-      margin-top: 0;
-      margin-right: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .step-two-word-count-error {
-      margin-right: 0.5rem;
     }
 
     #stepPhoto {
       width: 70vw;
     }
 
-    .step-three-label {
-      margin-left: 0.5rem;
-    }
-
-    .step-three-add-media-label {
-      font-size: 1.045rem;
-      margin: 0 1rem 0 0.5rem;
-    }
-
-    .upload {
-      margin-right: 0.5rem;
-      padding: 0 3.2rem 0 1.5rem;
-    }
-
-    .disabled-button-upload {
-      margin-right: 0.5rem;
-      padding: 0 2rem 0 1.5rem;
-    }
-
-    .upload-message {
-      font-size: 1rem;
-      margin: 1rem 0.5rem 0 0.5rem;
-    }
-
     #stepContactInfo {
       width: 70vw;
     }
-
-    .step-four-label {
-      margin-left: 0.5rem;
-    }
-
-    .step-four-submitter-name-label {
-      font-size: 1.3rem;
-      margin: 0 1rem 0 0.5rem;
-    }
-
-    .step-four-input-submitter-name {
-      margin-left: 0.5rem;
-      width: 65.5vw;
-    }
-
-    .step-four-contact-info-label {
-      margin-left: 0.5rem;
-      font-size: 1.3rem;
-    }
-
-    .step-four-input-contact-info {
-      margin-left: 0.5rem;
-      width: 65.5vw;
-    }
-
-    .step-four-submitter-name-word-count-error {
-      margin-right: 0.6rem;
-    }
     
-    .step-four-submitter-email-error {
-      margin-right: 0.6rem;
-    }
-
     #stepReviewSubmit {
       width: 75vw;
-    }
-
-    .step-five-label {
-      margin-left: 0.5rem;
-    }
-
-    .step-five-issue-location-label {
-      margin-left: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .step-five-issue-location-address {
-      font-size: 1rem;
-    }
-
-    .step-five-issue-type-label {
-      margin-left: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .step-five-issue-type {
-      font-size: 1rem;
-    }
-
-    .step-five-issue-detail-label {
-      margin-left: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .step-five-issue-detail {
-      font-size: 1rem;
-    }
-
-    .step-five-issue-description-label {
-      margin-left: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .step-five-issue-description {
-      font-size: 1rem;
-    }
-
-    .step-five-submitter-name-label {
-      margin-left: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .step-five-submitter-name {
-      font-size: 1rem;
-    }
-
-    .step-five-contact-info-label {
-      margin-left: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .step-five-contact-info {
-      font-size: 1rem;
-    }
-
-    #stepSubmitted {
-      width: 70vw;
-    }
-
-    .image-review {
-      margin-left: 0.5rem;
-    }
-
-    .success-message-div {
-      width: 100vw;
-      font-size: 1.5rem;
-      height: 5.5rem;
-    }
-
-    .success-message {
-      margin-top: 1rem;
-    }
-
-    .success-message-two-offline {
-      font-size: 1.2rem;
-      letter-spacing: -0.05rem;
-    }
-
-    .upload-image {
-      margin-left: 0.5rem;
-      border-radius: 10px;
-      width: 18.5rem;
     }
 
     .camera-icon {
@@ -2354,36 +1652,7 @@ td {
       width: 100vw;
     }
 
-    .describe-issue-two {
-      width: 75vw;
-    }
-
-    .next-button {
-      margin-right: 0.5rem;
-    }
-
-    .back-button {
-      margin-left: 0.5rem;
-    }
-
-    .review-button {
-      margin-right: 0.5rem;
-    }
-
-    .review-submit {
-      margin-right: 0.5rem;
-    }
-
-    .submit-button {
-      margin-right: 0.5rem;
-    }
-
-    .disabled-button {
-      margin-right: 0.5rem;
-    }
-
     #map {
-      width: 100vw;
       height: 85vh;
     }
 
@@ -2413,10 +1682,6 @@ td {
       font-size: 1.2rem;
     }
 
-    .button {
-      font-size: 1rem;
-    }
-
     .logo {
       margin-top: 1rem;
       margin: 0 auto;
@@ -2432,16 +1697,14 @@ td {
       font-size: 1.3rem;
       font-weight: 600;
       letter-spacing: 0.01rem;
-      text-align: center;
     }
 
     .slogan-text {
       font-size: 1rem;
-      margin: 0 auto;
     }
 
     .see-more {
-      font-size: 1rem;
+      font-size: 0.8rem;
     }
   
     .see-more-title {
@@ -2454,19 +1717,19 @@ td {
     }
 
     .action-buttons {
-      display: block;
-      text-align: center;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
       margin-top: 4rem;
     }
 
     #button-report-issue {
-      width: 18rem;
+      width: 20rem;
       margin-top: 4rem;
     }
 
     #button-find-issues {
-      display: block;
-      margin: 0 auto;
       text-align: center;
       width: 18rem;
     }
@@ -2476,19 +1739,7 @@ td {
     }
 
     .background::before {
-      background-position: center calc(50% - 400px);
-    }
-
-    textarea {
-      margin-left: 0.5rem;
-      margin-bottom: 0.1rem;
-      width: 69.5vw;
-      font-size: 0.85rem;
-      border-radius: 10px;
-    }
-
-    textarea::placeholder {
-      font-size: 0.85rem;
+      background-position: center calc(10% -300px);
     }
   }
 
@@ -2509,43 +1760,15 @@ td {
         font-size: 1.7rem;
         font-weight: 600;
         letter-spacing: 0.01rem;
-        text-align: center;
       }
   
       .slogan-text {
         font-size: 1.3rem;
         letter-spacing: 0.05rem;
-        margin: 0 auto;
-        width: 85vw;
       }
 
       #map {
-        width: 100vw;
         height: 70vh;
-      }
-
-      .upload-image {
-        width: 29rem;
-      }
-
-      textarea {
-        width: 70.5vw;
-      }
-
-      .step-four-input-submitter-name {
-        width: 66.5vw;
-      }
-
-      .step-four-input-contact-info {
-        width: 66.5vw;
-      }
-
-      .step-four-submitter-name-word-count-error {
-        margin-right: 0.6rem
-      }
-
-      .step-four-submitter-email-error {
-        margin-right: 0.6rem;
       }
 
       .td-description {
@@ -2559,7 +1782,7 @@ td {
       }
 
       .see-more {
-        font-size: 1.3rem;
+        font-size: 1rem;
       }
     
       .see-more-title {
@@ -2572,12 +1795,7 @@ td {
       }
 
       .background::before {
-        background-position: center calc(50% - 275px);
-      }
-
-      .offline-address-input {
-        margin-left: 0.5rem;
-        width: 96%;
+        background-position: center 50%;
       }
      }
 
@@ -2591,19 +1809,16 @@ td {
 
         .slogan-title {
           margin: 3rem 0.5rem 2.5rem 0.5rem;
-          text-align: center;
           font-size: 2.1rem;
         }
 
         .slogan-text {
           font-size: 1.3rem;
           letter-spacing: 0.05rem;
-          margin: 0 auto;
-          width: 85vw;
         }
 
         .see-more {
-          font-size: 1.3rem;
+          font-size: 1rem;
         }
       
         .see-more-title {
@@ -2616,15 +1831,7 @@ td {
         }
   
         .background::before {
-          background-position: center calc(50% - 300px);
-        }
-
-        #button-report-issue {
-          width: 17.5rem;
-        }
-
-        #button-find-issues {
-          width: 17.5rem;
+          background-position: center 50%;
         }
 
         .td-description {
@@ -2636,32 +1843,6 @@ td {
           max-width: 10rem;
           min-width: 10rem;
         }
-
-        textarea {
-          width: 71vw;
-        }
-
-        .upload-image {
-          width: 32rem;
-          }
-
-        .step-four-input-submitter-name {
-          margin-left: 0.5rem;
-          width: 66.5vw;
-        }
-    
-        .step-four-input-contact-info {
-          margin-left: 0.5rem;
-          width: 66.5vw;
-        }
-
-        .offline-address-input {
-          width: 96%;
-        }
-
-        .step-one-invalid-offline-address {
-          margin-right: 0.7rem;
-        }
        }
        
        @media only screen and (min-width: 1000px){
@@ -2669,3 +1850,197 @@ td {
         font-size: 1.4rem;   
         }
       }
+
+
+      /* In between brakpoints */
+
+      @media only screen and (min-width: 412px) and (max-width: 578px) {
+        .action-buttons{
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          align-content: center;
+          text-align: center;
+          margin-top: 3rem;
+        }
+
+        #button-report-issue {
+          margin-top: 6vh;
+          width: 20rem;
+        }
+
+        #button-find-issues {
+          width: 20rem;
+        }
+
+      }
+
+      @media only screen and (min-width: 579px) and (max-width: 739px) {
+        .action-buttons{
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          margin-top: 5rem;
+        }
+
+        #button-report-issue {
+          margin-top: 3rem;
+        }
+      }
+
+      @media only screen and (min-width: 320px) and (max-width: 379px) {
+        th {
+          font-size: 0.7rem;
+        }
+
+        td {
+          font-size: 0.7rem;
+        }
+
+        #td-issue-type {
+          max-width: 20vw; min-width: 20vw; 
+        }
+
+        #td-description {
+          max-width: 35vw; min-width: 35vw;
+        }
+
+        #td-media {
+          max-width: 5vw; min-width: 5vw;
+        }
+
+        #td-reported-time {
+          max-width: 25vw; min-width: 25vw;
+        }
+    }
+
+    @media only screen and (min-width: 375px) and (max-width: 520px){
+      .multiselect {
+        height: 4.1rem;
+      }
+    }
+
+
+    @media only screen and (min-width: 380px) and (max-width: 479px){
+      th {
+        font-size: 0.73rem;
+      }
+
+      td {
+        font-size: 0.73rem;
+      }
+
+      #td-issue-type {
+        max-width: 20vw; min-width: 20vw;
+      }
+
+      #td-description {
+        max-width: 40vw; min-width: 40vw;
+      }
+
+      #td-media {
+        max-width: 5vw; min-width: 5vw; 
+      }
+
+      #td-reported-time {
+        max-width: 25vw; min-width: 25vw;
+      }
+    }
+
+    @media only screen and (min-width: 480px) and (max-width: 649px){
+      th {
+        font-size: 0.8rem;
+      }
+
+      td {
+        font-size: 0.8rem;
+      }
+
+      #td-issue-type {
+        max-width: 20vw; min-width: 20vw;
+      }
+
+      #td-description {
+        max-width: 42vw; min-width: 42vw;
+      }
+
+      #td-media {
+        max-width: 5vw; min-width: 5vw; 
+      }
+
+      #td-reported-time {
+        max-width: 25vw; min-width: 25vw;
+      }
+    }
+
+    @media only screen and (min-width: 650px){
+      th {
+        font-size: 1rem;
+      }
+
+      td {
+        font-size: 1rem;
+      }
+
+      #td-issue-type {
+        max-width: 20vw; min-width: 20vw;
+      }
+
+      #td-description {
+        max-width: 45vw; min-width: 45vw;
+      }
+
+      #td-media {
+        max-width: 5vw; min-width: 5vw; 
+      }
+
+      #td-reported-time {
+        max-width: 25vw; min-width: 25vw;
+      }
+    }
+
+    @media only screen and (min-width: 375px) and (max-width: 416px){
+      .success-message-two-offline {
+        font-size: 0.9rem;
+        letter-spacing: -0.04rem;
+      }
+    }
+
+    @media only screen and (min-width: 375px) and (max-width: 415px) {
+      .button {
+        font-size: 1rem;
+      }
+    }
+
+    @media only screen and (min-width: 416px) and (max-width: 477px) {
+      #button-report-issue {
+        width: 20rem;
+      }
+    }
+
+    @media only screen and (min-width: 530px) and (max-width: 585px) {
+      .button {
+        font-size: 1rem;
+      }
+
+      #button-report-issue {
+        width: 18rem;
+      }
+
+      #button-find-issues {
+        width: 18rem;
+      }
+    }
+
+
+    @media only screen and (min-width: 320px) and (max-width: 585px) and (max-height: 320px) {
+    .action-buttons {
+      display: block;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    #button-report-issue {
+     margin-top: 2rem;
+    }
+  }
