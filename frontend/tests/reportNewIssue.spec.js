@@ -52,7 +52,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
 
   // Confirms the submission went through
-  await page.getByText('Thank You! The issue has been reported.').click();
+  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
 });
 
 test('report new issue with other issue type', async ({ page }) => {
@@ -79,7 +79,7 @@ test('report new issue with other issue type', async ({ page }) => {
   await expect(page.getByText('Issue Type: Other')).toBeVisible();
   await expect(page.getByText('Description: Other issue description')).toBeVisible();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await page.getByText('Thank You! The issue has been reported.').click();
+  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
 });
 
 /* Template for possible future tests */
