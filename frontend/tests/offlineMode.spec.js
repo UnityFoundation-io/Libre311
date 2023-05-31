@@ -44,9 +44,11 @@ test('report new issue in offline mode', async ({ page, context }) => {
   await page.goto('http://localhost:3000/');
   await context.setOffline(false);
 
+  // Awaits notification that the offline issue has been uploaded
   await expect(page.getByText('Your pending offline issue was successfully reported.')).toBeVisible({ timeout: 15000 });
   await page.getByRole('button', { name: 'Close' }).click();
 
+  // Verifies content
   await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
   await page.getByRole('cell', { name: 'Additional description details' }).first().click();
   await page.getByRole('img', { name: 'detail view' }).click();
@@ -54,10 +56,3 @@ test('report new issue in offline mode', async ({ page, context }) => {
   await page.getByText('Description:Additional description details').click();
   await page.getByText('Location:12140 Woodcrest Executive Drive').click();
 });
-
-// The issue will be reported when you go online.
-
-// Issue Reported
-// Your pending offline issue was successfully reported.
-
-// check local storage. if blank, submitted successfully. if completed, issue has not fully submitted
