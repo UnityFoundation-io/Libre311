@@ -38,6 +38,8 @@ test('report new issue in offline mode', async ({ page, context }) => {
 
   // Confirms the submission went through
   await expect(page.getByText('Thank You! The issue will be reported when you go online.')).toBeVisible();
+
+  await page.goto('http://localhost:3000/');
   await context.setOffline(false);
 
   await page.getByRole('button', { name: 'Close' }).click({ timeout: 500000 });
