@@ -6,11 +6,10 @@ const config = {
     reuseExistingServer: true
 	},
 	testDir: './tests',
-	reporter: [ ['html', { open: 'never' }] ],
+	reporter: [ ['html', { open: 'never', outputFolder: './reports' }] ],
   use: {
     video: 'on'
   }
 };
 
 export default config;
-
