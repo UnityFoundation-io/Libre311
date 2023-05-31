@@ -34,6 +34,7 @@ jobs:
       run: npx playwright test
       - name: Upload videos
         if: failure()
+        working-directory: ./frontend
         uses: actions/upload-artifact@v3
         with:
           name: test-videos
