@@ -32,6 +32,12 @@ jobs:
       working-directory: ./frontend
     - name: Run Playwright tests
       run: npx playwright test
+      - name: Upload videos
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-videos
+          path: frontend/test-results/
       working-directory: ./frontend
     - uses: actions/upload-artifact@v3
       if: always()
