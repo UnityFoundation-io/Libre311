@@ -38,10 +38,10 @@ jobs:
         with:
           name: test-videos
           path: frontend/test-results/
-      working-directory: ./frontend
-    - uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: playwright-report
-        path: frontend/playwright-report/
-        retention-days: 30
+    #   working-directory: ./frontend
+    # - uses: actions/upload-artifact@v3
+    #   if: always()
+    #   with:
+    #     name: playwright-report
+    #     path: frontend/playwright-report/
+    #     retention-days: 30
