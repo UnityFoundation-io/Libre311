@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 
 test('report new issue in offline mode', async ({ page, context }) => {
   await page.goto('http://localhost:3000/');
+  // Makes sure the page is fully loaded before toggling offline
   await expect(page.getByRole('button', { name: 'report a new issue Report a New Issue' })).toBeVisible();
   await context.setOffline(true);
   await page.getByRole('button', { name: 'report a new issue Report a New Issue' }).click();
@@ -18,7 +19,7 @@ test('report new issue in offline mode', async ({ page, context }) => {
   await page.getByPlaceholder('Additional Description Details').fill('Additional description details');
   await page.getByRole('button', { name: 'Next next step' }).click();
 
-  // Upload picture
+  // Picture upload disabled while offline
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Enter contact information
@@ -39,13 +40,15 @@ test('report new issue in offline mode', async ({ page, context }) => {
   // Confirms the submission went through
   await expect(page.getByText('Thank You! The issue will be reported when you go online.')).toBeVisible();
 
+  // Refreshes page
   await page.goto('http://localhost:3000/');
   await context.setOffline(false);
 
-  await page.getByRole('button', { name: 'Close' }).click({ timeout: 500000 });
+  await expect(page.getByText('Your pending offline issue was successfully reported.')).toBeVisible({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Close' }).click();
 
   await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
-  await page.getByRole('cell', { name: 'Additional description details' }).click();
+  await page.getByRole('cell', { name: 'Additional description details' }).first().click();
   await page.getByRole('img', { name: 'detail view' }).click();
   await page.getByText('Type: Other').click();
   await page.getByText('Description:Additional description details').click();
