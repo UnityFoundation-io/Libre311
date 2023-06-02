@@ -52,7 +52,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
 
   // Confirms the submission went through
-  await expect(page.getByText(/Thank You!.*/)).toBeVisible({ timeout: 25000 });
+  await page.getByText(/Thank You!.*/).click({ timeout: 25000 });
 });
 
 test('report new issue with other issue type', async ({ page }) => {
@@ -79,7 +79,7 @@ test('report new issue with other issue type', async ({ page }) => {
   await expect(page.getByText('Issue Type: Other')).toBeVisible();
   await expect(page.getByText('Description: Other issue description')).toBeVisible();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await expect(page.getByText(/Thank You!.*/)).toBeVisible({ timeout: 25000 });
+  await page.getByText(/Thank You!.*/).click({ timeout: 25000 });
 });
 
 /* Template for possible future tests */
