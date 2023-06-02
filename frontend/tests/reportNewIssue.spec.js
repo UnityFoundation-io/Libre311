@@ -8,7 +8,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByPlaceholder('Enter the address').click();
   await page.getByPlaceholder('Enter the address').fill('12140 Woodcrest Executive Drive');
   await page.getByPlaceholder('Enter the address').press('Enter');
-  await expect(page.getByText(/12140 Woodcrest Executive Dr.*/)).toBeVisible({ timeout: 25000 });
+  await expect(page.getByText('12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Enter issue details
@@ -63,7 +63,7 @@ test('report new issue with other issue type', async ({ page }) => {
   await page.getByPlaceholder('Enter the address').click();
   await page.getByPlaceholder('Enter the address').fill('12140 Woodcrest Executive Drive');
   await page.getByPlaceholder('Enter the address').press('Enter');
-  await expect(page.getByText(/12140 Woodcrest Executive Dr.*/)).toBeVisible({ timeout: 25000 });
+  await expect(page.getByText('12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Issue type "other" selected
