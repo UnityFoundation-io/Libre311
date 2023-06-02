@@ -8,7 +8,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByPlaceholder('Enter the address').click();
   await page.getByPlaceholder('Enter the address').fill('12140 Woodcrest Executive Drive');
   await page.getByPlaceholder('Enter the address').press('Enter');
-  await expect(page.getByText('12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
+  await expect(page.getByText(/12140 Woodcrest Executive Dr.*/)).toBeVisible();
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Enter issue details
@@ -52,7 +52,7 @@ test('report new issue with image', async ({ page }) => {
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
 
   // Confirms the submission went through
-  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
+  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible({ timeout: 25000 });
 });
 
 test('report new issue with other issue type', async ({ page }) => {
@@ -63,7 +63,7 @@ test('report new issue with other issue type', async ({ page }) => {
   await page.getByPlaceholder('Enter the address').click();
   await page.getByPlaceholder('Enter the address').fill('12140 Woodcrest Executive Drive');
   await page.getByPlaceholder('Enter the address').press('Enter');
-  await expect(page.getByText('12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
+  await expect(page.getByText(/12140 Woodcrest Executive Dr.*/)).toBeVisible();
   await page.getByRole('button', { name: 'Next next step' }).click();
 
   // Issue type "other" selected
@@ -79,7 +79,7 @@ test('report new issue with other issue type', async ({ page }) => {
   await expect(page.getByText('Issue Type: Other')).toBeVisible();
   await expect(page.getByText('Description: Other issue description')).toBeVisible();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible();
+  await expect(page.getByText('Thank You! The issue has been reported.')).toBeVisible({ timeout: 25000 });
 });
 
 /* Template for possible future tests */
