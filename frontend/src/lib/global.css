@@ -1902,7 +1902,7 @@ th {
         }
 
         #td-description {
-          max-width: 35vw; min-width: 35vw;
+          max-width: 27vw; min-width: 27vw;
         }
 
         #td-media {
@@ -1935,7 +1935,7 @@ th {
       }
 
       #td-description {
-        max-width: 40vw; min-width: 40vw;
+        max-width: 33vw; min-width: 33vw;
       }
 
       #td-media {
@@ -1961,7 +1961,7 @@ th {
       }
 
       #td-description {
-        max-width: 42vw; min-width: 42vw;
+        max-width: 38vw; min-width: 38vw;
       }
 
       #td-media {
@@ -1981,20 +1981,20 @@ th {
 
     @media only screen and (min-width: 400px) and (max-width: 524px){
       th {
-        min-width: 6rem;
+        min-width: 4.3rem;
       }
     }
 
     @media only screen and (min-width: 525px) and (max-width: 649px){
       th {
-        min-width: 8rem;
+        min-width: 5rem;
       }
     }
 
     @media only screen and (min-width: 650px){
       th {
         font-size: 1rem;
-        min-width: 10rem;
+        min-width: 4.3rem;
       }
 
       td {
@@ -2006,7 +2006,7 @@ th {
       }
 
       #td-description {
-        max-width: 45vw; min-width: 45vw;
+        max-width: 43vw; min-width: 43vw;
       }
 
       #td-media {
@@ -2061,5 +2061,11 @@ th {
 
     #button-report-issue {
      margin-top: 2rem;
+    }
+  }
+
+  @media only screen and (min-width: 1100px) {
+    th {
+      min-width: 10rem;
     }
   }

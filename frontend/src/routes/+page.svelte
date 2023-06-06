@@ -862,7 +862,7 @@
 
         markers.push(marker);
 
-        google.maps.event.addListener(marker, "click", function (event) {
+        google.maps.event.addListener(marker, "click", function () {
           // Selects all the markers in the same location
           const selectedMarkers = markers.filter(
             (mrk) =>
