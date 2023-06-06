@@ -896,8 +896,19 @@
           toggleDetails(issue.service_request_id);
           selectedIssue = issue;
           selectedIssueMarker = marker;
-          scrollToIssue(issue.service_request_id);
           setNewCenter(issue.lat, issue.long, 17);
+
+          const selectedRow = document.getElementById(issue.service_request_id);
+          const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
+          if (rowIndex > 0) {
+            const rowAboveC = tableSelector.rows[rowIndex - 1];
+            setTimeout(() => {
+              rowAboveC.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }, 500);
+          }
         });
 
         heatmapData.push(
