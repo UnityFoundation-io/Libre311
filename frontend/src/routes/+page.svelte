@@ -136,6 +136,7 @@
     geocoder,
     bounds,
     selectedIssue,
+    selectedIssueMarker,
     heatmapControlIndex,
     timer,
     recaptcha,
@@ -827,7 +828,6 @@
     } ${day}, ${year} ${hours}:${minutes.toString().padStart(2, "0")}`;
     return formattedDate;
   };
-
   const addIssuesToMap = async () => {
     clearMarkers();
 
@@ -851,20 +851,26 @@
           title: issue.name,
           icon: {
             scaledSize: new google.maps.Size(25, 25),
-            url: issuePinSVG,
+            url:
+              parseFloat(issue.lat) === selectedIssueMarker?.position.lat() &&
+              parseFloat(issue.long) === selectedIssueMarker?.position.lng()
+                ? issuePinSelectedSVG
+                : issuePinSVG,
             anchor: new google.maps.Point(12, 12),
           },
         });
 
         markers.push(marker);
 
-        google.maps.event.addListener(marker, "click", function () {
+        google.maps.event.addListener(marker, "click", function (event) {
+          // Selects all the markers in the same location
           const selectedMarkers = markers.filter(
             (mrk) =>
               mrk.position.lat() === marker.position.lat() &&
               mrk.position.lng() === marker.position.lng()
           );
 
+          // Clears all the markers that are not selected
           selectedMarkers.forEach((selectedMarker) => {
             markers.forEach((mkr) => {
               if (
@@ -879,15 +885,30 @@
 
             let icon = selectedMarker.getIcon();
             if (icon.url === issuePinSVG) icon.url = issuePinSelectedSVG;
-            else icon.url = issuePinSVG;
+            else {
+              icon.url = issuePinSVG;
+              selectedIssueMarker = undefined;
+            }
 
             selectedMarker.setIcon(icon);
           });
 
           toggleDetails(issue.service_request_id);
           selectedIssue = issue;
-          scrollToIssue(issue.service_request_id);
+          selectedIssueMarker = marker;
           setNewCenter(issue.lat, issue.long, 17);
+
+          const selectedRow = document.getElementById(issue.service_request_id);
+          const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
+          if (rowIndex > 0) {
+            const rowAboveC = tableSelector.rows[rowIndex - 1];
+            setTimeout(() => {
+              rowAboveC.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }, 500);
+          }
         });
 
         heatmapData.push(
@@ -956,7 +977,7 @@
       heatmap.set("gradient", gradient);
 
       setTimeout(() => {
-        calculateBoundsAroundMarkers();
+        if (!selectedIssue) calculateBoundsAroundMarkers();
       }, 400);
     }
   };
