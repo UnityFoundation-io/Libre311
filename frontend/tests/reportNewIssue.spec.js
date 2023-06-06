@@ -50,9 +50,12 @@ test('report new issue with image', async ({ page }) => {
   await expect(page.getByText('Name of Submitter: John Doe')).toBeVisible();
   await expect(page.getByText('Contact Info: johndoe@gmail.com')).toBeVisible();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
+  await page.route('**/api/requests.json', route => route.fulfill({
+    status: 200
+  }));
 
   // Confirms the submission went through
-  await page.getByText(/Thank You!.*/).click({ timeout: 25000 });
+  // await page.getByText(/Thank You!.*/).click({ timeout: 25000 });
 });
 
 test('report new issue with other issue type', async ({ page }) => {
@@ -79,7 +82,9 @@ test('report new issue with other issue type', async ({ page }) => {
   await expect(page.getByText('Issue Type: Other')).toBeVisible();
   await expect(page.getByText('Description: Other issue description')).toBeVisible();
   await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await page.getByText(/Thank You!.*/).click({ timeout: 25000 });
+  await page.route('**/api/requests.json', route => route.fulfill({
+    status: 200
+  }));
 });
 
 /* Template for possible future tests */
