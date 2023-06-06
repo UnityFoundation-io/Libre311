@@ -18,6 +18,7 @@
   import imageSVG from "../icons/image.svg";
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
+  import issuePinSelectedSVG from "../icons/issuepinselected.svg";
   import forbiddenSVG from "../icons/forbidden.svg";
   import mylocationSVG from "../icons/mylocation.svg";
   import issueAddress from "../stores/issueAddress";
@@ -279,6 +280,8 @@
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
+
+    scrollToIssue(service_request_id);
   };
 
   const applyFontStretch = () => {
@@ -856,6 +859,31 @@
         markers.push(marker);
 
         google.maps.event.addListener(marker, "click", function () {
+          const selectedMarkers = markers.filter(
+            (mrk) =>
+              mrk.position.lat() === marker.position.lat() &&
+              mrk.position.lng() === marker.position.lng()
+          );
+
+          selectedMarkers.forEach((selectedMarker) => {
+            markers.forEach((mkr) => {
+              if (
+                mkr.position.lat() !== selectedMarker.position.lat() &&
+                mkr.position.lng() !== selectedMarker.position.lng()
+              ) {
+                let icon = mkr.getIcon();
+                icon.url = issuePinSVG;
+                mkr.setIcon(icon);
+              }
+            });
+
+            let icon = selectedMarker.getIcon();
+            if (icon.url === issuePinSVG) icon.url = issuePinSelectedSVG;
+            else icon.url = issuePinSVG;
+
+            selectedMarker.setIcon(icon);
+          });
+
           toggleDetails(issue.service_request_id);
           selectedIssue = issue;
           scrollToIssue(issue.service_request_id);
@@ -1201,7 +1229,7 @@
 
   const scrollToIssue = (id) => {
     if (issuesRefs[id]) {
-      issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "start" });
+      issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -1412,6 +1440,7 @@
   };
 
   onMount(async () => {
+    setTimeout(() => console.clear(), 100);
     await loadRecaptcha();
     await getTokenInfo();
 
@@ -2741,8 +2770,54 @@
                 {#if filteredIssuesData}
                   {#each filteredIssuesData as issue (issue.service_request_id)}
                     <tr
+                      id="{issue.service_request_id}"
                       bind:this="{issuesRefs[issue.service_request_id]}"
-                      on:click="{() => setNewCenter(issue.lat, issue.long, 17)}"
+                      on:click="{(e) => {
+                        const clickedElement = e.target;
+                        const selectedRow = clickedElement.closest('tr');
+                        const rowIndex = Array.from(tableSelector.rows).indexOf(
+                          selectedRow
+                        );
+
+                        if (rowIndex > 0) {
+                          const rowAbove = tableSelector.rows[rowIndex - 1];
+                          rowAbove.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start',
+                          });
+                        }
+
+                        setNewCenter(issue.lat, issue.long, 17);
+
+                        const selectedMarkers = markers.filter(
+                          (mrk) =>
+                            mrk.position.lat() === Number(issue.lat) &&
+                            mrk.position.lng() === Number(issue.long)
+                        );
+
+                        if (selectedMarkers) {
+                          selectedMarkers.forEach((selectedMarker) => {
+                            markers.forEach((mkr) => {
+                              if (
+                                mkr.position.lat() !==
+                                  selectedMarker.position.lat() &&
+                                mkr.position.lng() !==
+                                  selectedMarker.position.lng()
+                              ) {
+                                let icon = mkr.getIcon();
+                                icon.url = issuePinSVG;
+                                mkr.setIcon(icon);
+                              }
+                            });
+
+                            let selectedMarkerIcon = selectedMarker.getIcon();
+                            if (selectedMarkerIcon.url === issuePinSVG) {
+                              selectedMarkerIcon.url = issuePinSelectedSVG;
+                            } else selectedMarkerIcon.url = issuePinSVG;
+                            selectedMarker.setIcon(selectedMarkerIcon);
+                          });
+                        }
+                      }}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id
                       )
