@@ -18,9 +18,8 @@ import java.util.UUID;
 @Replaces(StorageService.class)
 public class MockStorageService extends StorageService {
 
-
-    public MockStorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService) {
-        super(objectStorage, reCaptchaService, googleImageClassificationService);
+    public MockStorageService() {
+        super();
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
