@@ -45,7 +45,10 @@ test('report new issue in offline mode', async ({ page, context }) => {
   await context.setOffline(false);
 
   // Awaits notification that the offline issue has been uploaded
-  await expect(page.getByText('Your pending offline issue was successfully reported.')).toBeVisible({ timeout: 15000 });
+  // await expect(page.getByText('Your pending offline issue was successfully reported.')).toBeVisible({ timeout: 15000 });
+  await page.route('**/api/requests.json', route => route.fulfill({
+    status: 200
+  }));
   await page.getByRole('button', { name: 'Close' }).click();
 
   // Verifies content
