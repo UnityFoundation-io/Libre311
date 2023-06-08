@@ -1739,7 +1739,7 @@ th {
     }
 
     .background::before {
-      background-position: center calc(10% -300px);
+      background-position: center calc(10% - 100px);
     }
   }
 
