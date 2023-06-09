@@ -718,6 +718,14 @@
     markers = [];
   };
 
+  const clearIcons = () => {
+    markers.forEach((mkr) => {
+      const icon = mkr.getIcon();
+      icon.url = issuePinSVG;
+      mkr.setIcon(icon);
+    });
+  };
+
   // From Unix Epoch to Current Time
   const convertDate = (unixTimestamp) => {
     const date = new Date(unixTimestamp);
@@ -863,7 +871,17 @@
         markers.push(marker);
 
         google.maps.event.addListener(marker, "click", function () {
-          // Selects all the markers in the same location
+          // Marker being deselected
+          const selection = marker.getIcon();
+          if (selection.url === issuePinSelectedSVG) {
+            clearIcons();
+            toggleDetails(issue.service_request_id);
+            selectedIssueMarker = undefined;
+            selectedIssue = undefined;
+            return;
+          }
+
+          // Marker being selected: selects all the markers in the same location
           const selectedMarkers = markers.filter(
             (mrk) =>
               mrk.position.lat() === marker.position.lat() &&
@@ -898,6 +916,7 @@
           selectedIssueMarker = marker;
           setNewCenter(issue.lat, issue.long, 17);
 
+          // Table
           const selectedRow = document.getElementById(issue.service_request_id);
           const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
           if (rowIndex > 0) {
@@ -910,6 +929,7 @@
             }, 500);
           }
         });
+        // End of click handler
 
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
