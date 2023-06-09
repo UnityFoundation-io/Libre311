@@ -1448,6 +1448,42 @@
     currentStep = null;
   };
 
+  const selectIssue = (issue) => {
+    toggleDetails(issue.service_request_id);
+    selectedIssue = issue;
+
+    // In the case there are more than one marker stacked in the same coordinate
+    const selectedMarkers = markers.filter(
+      (mrk) =>
+        mrk.position.lat() === Number(issue.lat) &&
+        mrk.position.lng() === Number(issue.long)
+    );
+
+    if (selectedMarkers) {
+      selectedIssueMarker = selectedMarkers[0];
+
+      selectedMarkers.forEach((selectedMarker) => {
+        markers.forEach((mkr) => {
+          if (
+            mkr.position.lat() === selectedMarker.position.lat() &&
+            mkr.position.lng() === selectedMarker.position.lng()
+          ) {
+            let icon = mkr.getIcon();
+            icon.url = issuePinSelectedSVG;
+            mkr.setIcon(icon);
+          }
+        });
+      });
+    }
+  };
+
+  const deselectIssue = (issue) => {
+    toggleDetails(issue);
+    clearIcons();
+    selectedIssue = undefined;
+    selectedIssueMarker = undefined;
+  };
+
   const resetFindIssue = () => {
     token = null;
     scrollToTop();
@@ -2829,35 +2865,6 @@
                         }
 
                         setNewCenter(issue.lat, issue.long, 17);
-
-                        const selectedMarkers = markers.filter(
-                          (mrk) =>
-                            mrk.position.lat() === Number(issue.lat) &&
-                            mrk.position.lng() === Number(issue.long)
-                        );
-
-                        if (selectedMarkers) {
-                          selectedMarkers.forEach((selectedMarker) => {
-                            markers.forEach((mkr) => {
-                              if (
-                                mkr.position.lat() !==
-                                  selectedMarker.position.lat() &&
-                                mkr.position.lng() !==
-                                  selectedMarker.position.lng()
-                              ) {
-                                let icon = mkr.getIcon();
-                                icon.url = issuePinSVG;
-                                mkr.setIcon(icon);
-                              }
-                            });
-
-                            let selectedMarkerIcon = selectedMarker.getIcon();
-                            if (selectedMarkerIcon.url === issuePinSVG) {
-                              selectedMarkerIcon.url = issuePinSelectedSVG;
-                            } else selectedMarkerIcon.url = issuePinSVG;
-                            selectedMarker.setIcon(selectedMarkerIcon);
-                          });
-                        }
                       }}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id
@@ -2870,8 +2877,17 @@
                       <td
                         id="td-issue-type"
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {#if issue.service_name.length > issueTypeTrimCharacters}
@@ -2906,8 +2922,17 @@
                           : 'hidden'}; 
                           "
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {issue.description ?? "-"}
@@ -2944,8 +2969,17 @@
                         id="td-reported-time"
                         style="text-align: center"
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {formatRelativeDate(issue.requested_datetime)}
