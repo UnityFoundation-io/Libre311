@@ -184,7 +184,7 @@
     color: #f2a900;
   }
 
-  @media only screen and (min-width: 320px) {
+  @media only screen and (min-width: 245px) {
     .row {
       flex-wrap: wrap;
     }
@@ -216,7 +216,7 @@
     }
   }
 
-  @media only screen and (min-width: 320px) and (max-width: 415px) {
+  @media only screen and (min-width: 245px) and (max-width: 415px) {
     .row {
       justify-content: left;
     }
