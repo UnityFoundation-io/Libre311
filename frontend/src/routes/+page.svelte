@@ -1585,6 +1585,9 @@
     in:fade="{{ duration: 3000, quintOut, amount: 10 }}"
     out:fade="{{ duration: 300, quintOut, amount: 10 }}"
   >
+    <span style="color:white"
+      >{#if window.innerWidth}{window.innerWidth} - {window.innerHeight}{/if}</span
+    >
     <div style="display: flex; align-items: center; z-index: 1" id="logo-div">
       {#if openLogo}
         <img
