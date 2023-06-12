@@ -7,6 +7,13 @@ const config = {
 	},
 	testDir: './tests',
 	reporter: [ ['html', { open: 'never' }] ],
+  use: {
+    video: {
+      mode: 'retain-on-failure',
+      size: { width: 640, height: 480 },
+      dir: "frontend/playwright-report"
+    }
+  }
 };
 
 export default config;
