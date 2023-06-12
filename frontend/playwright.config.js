@@ -9,7 +9,7 @@ const config = {
 	reporter: [ ['html', { open: 'never' }] ],
   use: {
     video: {
-      mode: 'on',
+      mode: 'retain-on-failure',
       size: { width: 640, height: 480 },
       dir: "frontend/playwright-report"
     }
