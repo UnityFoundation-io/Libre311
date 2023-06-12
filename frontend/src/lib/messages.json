@@ -23,6 +23,7 @@
             "button.next": "Next",
             "button.submit": "Submit",
             "button.review.submit": "Review & Submit",
+            "button.review.submit.short": "Review",
             "button.back": "Back",
             "label.step": "Step",
             "label.issue.location": "Where is the issue located?",
