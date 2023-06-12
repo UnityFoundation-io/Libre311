@@ -3,6 +3,7 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
+  import { browser } from "$app/environment";
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
@@ -182,6 +183,13 @@
     messageRejectedOne = "",
     messageRejectedTwo = "",
     mediaUrl;
+
+  // Locks the background scroll when modal is open
+  $: if (browser && showModal) {
+    document.body.classList.add("modal-open");
+  } else if (browser && !showModal) {
+    document.body.classList.remove("modal-open");
+  }
 
   const getOrientation = () => {
     let previousState;
@@ -718,6 +726,14 @@
     markers = [];
   };
 
+  const clearIcons = () => {
+    markers.forEach((mkr) => {
+      const icon = mkr.getIcon();
+      icon.url = issuePinSVG;
+      mkr.setIcon(icon);
+    });
+  };
+
   // From Unix Epoch to Current Time
   const convertDate = (unixTimestamp) => {
     const date = new Date(unixTimestamp);
@@ -863,7 +879,17 @@
         markers.push(marker);
 
         google.maps.event.addListener(marker, "click", function () {
-          // Selects all the markers in the same location
+          // Marker being deselected
+          const selection = marker.getIcon();
+          if (selection.url === issuePinSelectedSVG) {
+            clearIcons();
+            toggleDetails(issue.service_request_id);
+            selectedIssueMarker = undefined;
+            selectedIssue = undefined;
+            return;
+          }
+
+          // Marker being selected: selects all the markers in the same location
           const selectedMarkers = markers.filter(
             (mrk) =>
               mrk.position.lat() === marker.position.lat() &&
@@ -898,6 +924,7 @@
           selectedIssueMarker = marker;
           setNewCenter(issue.lat, issue.long, 17);
 
+          // Table
           const selectedRow = document.getElementById(issue.service_request_id);
           const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
           if (rowIndex > 0) {
@@ -910,6 +937,7 @@
             }, 500);
           }
         });
+        // End of click handler
 
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
@@ -1049,6 +1077,7 @@
     controlButton.style.width = "fit-content";
     controlButton.style.height = "20px";
     controlButton.innerText = text;
+    if (window.innerWidth < 320) controlButton.style.fontSize = "0.65rem";
 
     controlButton.addEventListener("click", clickHandler);
 
@@ -1428,6 +1457,42 @@
     currentStep = null;
   };
 
+  const selectIssue = (issue) => {
+    toggleDetails(issue.service_request_id);
+    selectedIssue = issue;
+
+    // In the case there are more than one marker stacked in the same coordinate
+    const selectedMarkers = markers.filter(
+      (mrk) =>
+        mrk.position.lat() === Number(issue.lat) &&
+        mrk.position.lng() === Number(issue.long)
+    );
+
+    if (selectedMarkers) {
+      selectedIssueMarker = selectedMarkers[0];
+
+      selectedMarkers.forEach((selectedMarker) => {
+        markers.forEach((mkr) => {
+          if (
+            mkr.position.lat() === selectedMarker.position.lat() &&
+            mkr.position.lng() === selectedMarker.position.lng()
+          ) {
+            let icon = mkr.getIcon();
+            icon.url = issuePinSelectedSVG;
+            mkr.setIcon(icon);
+          }
+        });
+      });
+    }
+  };
+
+  const deselectIssue = (issue) => {
+    toggleDetails(issue);
+    clearIcons();
+    selectedIssue = undefined;
+    selectedIssueMarker = undefined;
+  };
+
   const resetFindIssue = () => {
     token = null;
     scrollToTop();
@@ -1660,8 +1725,11 @@
               <img
                 src="{closeSVG}"
                 alt="close find an issue"
-                style="vertical-align: -0.3rem; margin-right: 1.3rem; margin-left: -0.7rem"
-                height="25rem"
+                style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
+                320
+                  ? '1.3rem'
+                  : '1rem'}; margin-left: -0.7rem"
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.find.issue.label"]}
@@ -1781,8 +1849,11 @@
               <img
                 src="{closeSVG}"
                 alt="close report a new issue"
-                style="vertical-align: -0.3rem; margin-right: 1.3rem; margin-left: -2.1rem"
-                height="25rem"
+                style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
+                320
+                  ? '1.3rem'
+                  : '1rem'}; margin-left: -2.1rem"
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.report.issue.label"]}
@@ -2289,7 +2360,11 @@
               reportNewIssueStep5 = true;
             }}"
           >
-            {messages["report.issue"]["button.review.submit"]}
+            {#if window.innerWidth < 320}
+              {messages["report.issue"]["button.review.submit.short"]}
+            {:else}
+              {messages["report.issue"]["button.review.submit"]}
+            {/if}
             <img
               src="{pageLastSVG}"
               alt="submit issue"
@@ -2466,7 +2541,9 @@
       <div
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
-        style="width:{!isOnline ? '50vw' : '100vw'} "
+        style="width:{(!isOnline && window.innerWidth) > 320
+          ? '50vw'
+          : '100vw'}"
         class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
@@ -2475,6 +2552,7 @@
               {messages["report.issue"]["label.step"]}
               <button class="numbers">1</button>
             </div>
+
             <div class="step-one-issue-location-label">
               {messages["report.issue"]["label.issue.location"]}
             </div>
@@ -2501,7 +2579,10 @@
               </div>
             {/if}
 
-            <div class="step-one-issue-address">
+            <div
+              class="step-one-issue-address"
+              style="display:{isOnline ? 'inherit' : 'none'}"
+            >
               {#if isOnline}
                 <span style="color: {primaryTwo}">
                   {$issueAddress ??
@@ -2809,35 +2890,6 @@
                         }
 
                         setNewCenter(issue.lat, issue.long, 17);
-
-                        const selectedMarkers = markers.filter(
-                          (mrk) =>
-                            mrk.position.lat() === Number(issue.lat) &&
-                            mrk.position.lng() === Number(issue.long)
-                        );
-
-                        if (selectedMarkers) {
-                          selectedMarkers.forEach((selectedMarker) => {
-                            markers.forEach((mkr) => {
-                              if (
-                                mkr.position.lat() !==
-                                  selectedMarker.position.lat() &&
-                                mkr.position.lng() !==
-                                  selectedMarker.position.lng()
-                              ) {
-                                let icon = mkr.getIcon();
-                                icon.url = issuePinSVG;
-                                mkr.setIcon(icon);
-                              }
-                            });
-
-                            let selectedMarkerIcon = selectedMarker.getIcon();
-                            if (selectedMarkerIcon.url === issuePinSVG) {
-                              selectedMarkerIcon.url = issuePinSelectedSVG;
-                            } else selectedMarkerIcon.url = issuePinSVG;
-                            selectedMarker.setIcon(selectedMarkerIcon);
-                          });
-                        }
                       }}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id
@@ -2850,8 +2902,17 @@
                       <td
                         id="td-issue-type"
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {#if issue.service_name.length > issueTypeTrimCharacters}
@@ -2886,8 +2947,17 @@
                           : 'hidden'}; 
                           "
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {issue.description ?? "-"}
@@ -2924,8 +2994,17 @@
                         id="td-reported-time"
                         style="text-align: center"
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {formatRelativeDate(issue.requested_datetime)}
