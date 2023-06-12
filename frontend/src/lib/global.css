@@ -116,6 +116,10 @@ body {
   z-index: -100;
 }
 
+.modal-open {
+	overflow-y: hidden;
+}
+
 .button {
   font-weight: 500;
   font-family: Gotham;
@@ -1049,7 +1053,7 @@ th {
 
 /*/////// Android S10+ Portrait////////*/
 
-@media only screen and (min-width: 320px) and (max-width: 374px) and (orientation: portrait) {
+@media only screen and (min-width: 245px) and (max-width: 374px) and (orientation: portrait) {
   .multiselect {
     height: 4.1rem;
   }
@@ -1887,6 +1891,118 @@ th {
           margin-top: 3rem;
         }
       }
+
+      @media only screen and (min-width: 245px) and (max-width: 319px) {
+        .button{
+          font-size: 0.82rem;
+        }
+
+        .back-button {
+          letter-spacing: 0;
+          margin-left: 0;
+        }
+
+        .next-button {
+          margin-right: 0;
+        }
+
+        .disabled-button {
+          margin-left: 0;
+          margin-right: 0;
+        }
+
+        .review-button {
+          margin-right: 0;
+        }
+
+        .step-one-issue-location-label {
+          font-size: 1.3rem;
+        }
+
+        .step-one-instruction {
+          font-size: 0.9rem;
+        }
+
+        .step-two-date-label{
+          font-size: 0.75rem;
+        }
+
+        .step-two-date-timestamp {
+          font-size: 0.75rem;
+        }
+
+        .step-two-feature-type-label {
+          font-size: 0.9rem;
+        }
+
+        .step-two-feature-type-helper {
+          font-size: 0.9rem;
+        }
+
+        .upload-message {
+          font-size: 0.73rem;
+        }
+
+        textarea::placeholder {
+          font-size: 0.75rem;
+        }
+
+        .success-message-div {
+          font-size: 1rem;
+        }
+
+        #map {
+          height: 55vh
+        }
+
+        #pac-input {
+          width: 68%;
+        }
+
+        #button-find-issues {
+          max-width: 15rem;
+          min-width: 15rem;
+        }
+
+        #button-find-issues > img {
+          margin-right: 1.5rem;
+          margin-left: -0.75rem;
+        }
+
+        #button-report-issue {
+          max-width: 15rem;
+          min-width: 15rem;
+        }
+
+        #button-report-issue > img {
+          margin-right: 1.5rem;
+          margin-left: -1.5rem;
+        }
+
+        th {
+          font-size: 0.65rem;
+        }
+
+        td {
+          font-size: 0.65rem;
+        }
+
+        #td-issue-type {
+          max-width: 20vw; min-width: 20vw; 
+        }
+
+        #td-description {
+          max-width: 22vw; min-width: 22vw;
+        }
+
+        #td-media {
+          max-width: 4vw; min-width: 4vw;
+        }
+
+        #td-reported-time {
+          max-width: 25vw; min-width: 25vw;
+        }
+    }
 
       @media only screen and (min-width: 320px) and (max-width: 379px) {
         th {

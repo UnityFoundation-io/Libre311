@@ -124,7 +124,7 @@
     cursor: pointer;
   }
 
-  @media only screen and (min-width: 320px) and (max-width: 374px) {
+  @media only screen and (min-width: 245px) and (max-width: 374px) {
     input::placeholder {
       font-size: 0.5rem;
     }

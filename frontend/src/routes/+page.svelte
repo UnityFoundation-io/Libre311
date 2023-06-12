@@ -3,6 +3,7 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
+  import { browser } from "$app/environment";
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
@@ -182,6 +183,13 @@
     messageRejectedOne = "",
     messageRejectedTwo = "",
     mediaUrl;
+
+  // Locks the background scroll when modal is open
+  $: if (browser && showModal) {
+    document.body.classList.add("modal-open");
+  } else if (browser && !showModal) {
+    document.body.classList.remove("modal-open");
+  }
 
   const getOrientation = () => {
     let previousState;
@@ -1069,6 +1077,7 @@
     controlButton.style.width = "fit-content";
     controlButton.style.height = "20px";
     controlButton.innerText = text;
+    if (window.innerWidth < 320) controlButton.style.fontSize = "0.65rem";
 
     controlButton.addEventListener("click", clickHandler);
 
@@ -1585,9 +1594,6 @@
     in:fade="{{ duration: 3000, quintOut, amount: 10 }}"
     out:fade="{{ duration: 300, quintOut, amount: 10 }}"
   >
-    <span style="color:white"
-      >{#if window.innerWidth}{window.innerWidth} - {window.innerHeight}{/if}</span
-    >
     <div style="display: flex; align-items: center; z-index: 1" id="logo-div">
       {#if openLogo}
         <img
@@ -1719,8 +1725,11 @@
               <img
                 src="{closeSVG}"
                 alt="close find an issue"
-                style="vertical-align: -0.3rem; margin-right: 1.3rem; margin-left: -0.7rem"
-                height="25rem"
+                style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
+                320
+                  ? '1.3rem'
+                  : '1rem'}; margin-left: -0.7rem"
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.find.issue.label"]}
@@ -1840,8 +1849,11 @@
               <img
                 src="{closeSVG}"
                 alt="close report a new issue"
-                style="vertical-align: -0.3rem; margin-right: 1.3rem; margin-left: -2.1rem"
-                height="25rem"
+                style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
+                320
+                  ? '1.3rem'
+                  : '1rem'}; margin-left: -2.1rem"
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.report.issue.label"]}
@@ -2348,7 +2360,11 @@
               reportNewIssueStep5 = true;
             }}"
           >
-            {messages["report.issue"]["button.review.submit"]}
+            {#if window.innerWidth < 320}
+              {messages["report.issue"]["button.review.submit.short"]}
+            {:else}
+              {messages["report.issue"]["button.review.submit"]}
+            {/if}
             <img
               src="{pageLastSVG}"
               alt="submit issue"
@@ -2525,7 +2541,9 @@
       <div
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
-        style="width:{!isOnline ? '50vw' : '100vw'} "
+        style="width:{(!isOnline && window.innerWidth) > 320
+          ? '50vw'
+          : '100vw'}"
         class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
@@ -2534,6 +2552,7 @@
               {messages["report.issue"]["label.step"]}
               <button class="numbers">1</button>
             </div>
+
             <div class="step-one-issue-location-label">
               {messages["report.issue"]["label.issue.location"]}
             </div>
@@ -2560,7 +2579,10 @@
               </div>
             {/if}
 
-            <div class="step-one-issue-address">
+            <div
+              class="step-one-issue-address"
+              style="display:{isOnline ? 'inherit' : 'none'}"
+            >
               {#if isOnline}
                 <span style="color: {primaryTwo}">
                   {$issueAddress ??
