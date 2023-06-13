@@ -2288,6 +2288,7 @@
               {messages["report.issue"]["label.contact.info"]}
             </span>
             <input
+              type="email"
               class="step-four-input-contact-info"
               bind:value="{$issueSubmitterContact}"
               on:blur="{() => {
