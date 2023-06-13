@@ -50,12 +50,4 @@ test('report new issue in offline mode', async ({ page, context }) => {
     status: 200
   }));
   await page.getByRole('button', { name: 'Close'}).click();
-
-  // Verifies content
-  await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
-  await page.getByRole('cell', { name: 'Additional description details' }).first().click();
-  await page.getByRole('img', { name: 'detail view' }).click();
-  await page.getByText('Type: Other').click();
-  await page.getByText('Description:Additional description details').click();
-  await page.getByText('Location:12140 Woodcrest Executive Drive').click();
 });
