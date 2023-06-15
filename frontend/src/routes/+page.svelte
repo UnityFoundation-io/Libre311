@@ -1298,6 +1298,7 @@
           zoom: zoom,
           center: { lat: 38.6740015313782, lng: -90.453269188364 },
           mapTypeControl: false,
+          gestureHandling: 'greedy'
         });
 
         geocoder = new google.maps.Geocoder();
