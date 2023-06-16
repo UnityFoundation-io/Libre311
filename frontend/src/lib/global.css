@@ -590,6 +590,7 @@ td {
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
+  word-wrap: break-word;
 }
 
 th {
