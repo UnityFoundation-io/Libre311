@@ -16,8 +16,11 @@ import java.util.UUID;
 @Replaces(StorageService.class)
 public class MockStorageService extends StorageService {
 
+    private final Environment environment;
+
     public MockStorageService(Environment environment) {
         super(environment);
+        this.environment = environment;
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
