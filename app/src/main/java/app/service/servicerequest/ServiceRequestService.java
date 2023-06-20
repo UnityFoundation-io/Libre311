@@ -44,16 +44,23 @@ public class ServiceRequestService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRepository serviceRepository;
     private final ReCaptchaService reCaptchaService;
+    private final StorageService storageService;
 
-    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService) {
+    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService, StorageService storageService) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
         this.reCaptchaService = reCaptchaService;
+        this.storageService = storageService;
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
         if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
             LOG.error("ReCaptcha verification failed.");
+            return null;
+        }
+
+        if (!validMediaUrl(serviceRequestDTO.getMediaUrl())) {
+            LOG.error("Media URL is invalid.");
             return null;
         }
 
@@ -108,6 +115,11 @@ public class ServiceRequestService {
         }
 
         return new PostResponseServiceRequestDTO(serviceRequestRepository.save(serviceRequest));
+    }
+
+    private boolean validMediaUrl(String mediaUrl) {
+        if (mediaUrl == null) return true;
+        return mediaUrl.startsWith(storageService.getBucketUrlString());
     }
 
     private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, List<ServiceDefinitionAttribute> requestAttributes) {

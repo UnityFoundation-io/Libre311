@@ -1,12 +1,10 @@
 package app.util;
 
 import app.dto.storage.PhotoUploadDTO;
-import app.recaptcha.ReCaptchaService;
-import app.safesearch.GoogleImageSafeSearchService;
 import app.service.storage.StorageService;
 import io.micronaut.context.annotation.Replaces;
+import io.micronaut.context.env.Environment;
 import io.micronaut.http.MediaType;
-import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import jakarta.inject.Singleton;
 
@@ -18,8 +16,8 @@ import java.util.UUID;
 @Replaces(StorageService.class)
 public class MockStorageService extends StorageService {
 
-    public MockStorageService() {
-        super();
+    public MockStorageService(Environment environment) {
+        super(environment);
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {

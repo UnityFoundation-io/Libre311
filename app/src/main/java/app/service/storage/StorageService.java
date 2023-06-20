@@ -3,9 +3,11 @@ package app.service.storage;
 import app.dto.storage.PhotoUploadDTO;
 import app.recaptcha.ReCaptchaService;
 import app.safesearch.GoogleImageSafeSearchService;
-import com.google.cloud.storage.Blob;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.context.env.Environment;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
+import io.micronaut.objectstorage.configuration.AbstractObjectStorageConfiguration;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
@@ -22,15 +24,27 @@ public class StorageService {
     private final ObjectStorageOperations<?, ?, ?> objectStorage;
     private final ReCaptchaService reCaptchaService;
     private final GoogleImageSafeSearchService googleImageClassificationService;
+    private final Environment environment;
+
+    @Property(name = "wemove.image-storage.bucket-url-format")
+    private String bucketUrlFormat;
+
+    @Property(name = "wemove.image-storage.append-object-url-format")
+    private String appendObjectUrlFormat;
+
+    @Property(name = "wemove.image-storage.bucket")
+    private String bucket;
 
 
-    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService) {
+    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, AbstractObjectStorageConfiguration objectStorageConfiguration, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, Environment environment) {
         this.objectStorage = objectStorage;
+        this.environment = environment;
         this.reCaptchaService = reCaptchaService;
         this.googleImageClassificationService = googleImageClassificationService;
     }
 
-    public StorageService() {
+    public StorageService(Environment environment) {
+        this.environment = environment;
         this.objectStorage = null;
         this.reCaptchaService = null;
         this.googleImageClassificationService = null;
@@ -62,9 +76,16 @@ public class StorageService {
         byte[] bytes = Base64.getDecoder().decode(image);
         UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
         UploadResponse<?> response = objectStorage.upload(request);
-        Blob blob = (Blob) response.getNativeResponse();
-        String imageLink = "https://storage.googleapis.com/" + blob.getBucket() + "/" + blob.getName();
 
-        return imageLink;
+        return getObjectUrlString(response.getKey());
+    }
+
+    private String getObjectUrlString(String blobId) {
+        return String.format(getBucketUrlString().concat(appendObjectUrlFormat), blobId);
+    }
+
+    public String getBucketUrlString() {
+        String bucketId = environment.getProperty(bucket, String.class).get();
+        return String.format(bucketUrlFormat, bucketId);
     }
 }
