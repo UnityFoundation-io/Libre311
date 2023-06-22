@@ -7,7 +7,6 @@ import io.micronaut.context.annotation.Property;
 import io.micronaut.context.env.Environment;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
-import io.micronaut.objectstorage.configuration.AbstractObjectStorageConfiguration;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
@@ -36,7 +35,7 @@ public class StorageService {
     private String bucket;
 
 
-    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, AbstractObjectStorageConfiguration objectStorageConfiguration, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, Environment environment) {
+    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, Environment environment) {
         this.objectStorage = objectStorage;
         this.environment = environment;
         this.reCaptchaService = reCaptchaService;
