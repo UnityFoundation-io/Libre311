@@ -91,16 +91,16 @@
 
       <div class="socials">
         <a class="socialButton" href="https://facebook.com/localmotioncomo">
-          <img src="{facebookSVG}" alt="facebook" style="scale:4%;" />
+          <img src="{facebookSVG}" alt="facebook" />
         </a>
         <a
           class="socialButton"
           href="https://www.instagram.com/localmotioncomo/"
         >
-          <img src="{instagramSVG}" alt="instagram" style="scale:2.5%;" />
+          <img src="{instagramSVG}" alt="instagram" />
         </a>
         <a class="socialButton" href="https://twitter.com/localmotioncomo">
-          <img src="{twitterSVG}" alt="twitter" style="scale:2.5%;" />
+          <img src="{twitterSVG}" alt="twitter" />
         </a>
       </div>
     </div>
