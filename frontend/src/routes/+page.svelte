@@ -126,8 +126,13 @@
       visible: false,
     },
     fileName = "report.csv",
-    invalidOfflineAddress = false,
+    invalidOfflineAddress = {
+      message: messages["report.issue"]["invalid.offline.address"],
+      visible: false,
+    },
     isAuthenticated = false;
+
+  let offlineAddressRegex = /[a-zA-Z0-9,&'.\ -]+$/gm;
 
   let submitterNameRegex = /[a-zA-Z'.\ -]+$/gm;
 
@@ -524,6 +529,13 @@
       if (displayIssuesInMap) await addIssuesToMap();
     }
   };
+
+  const validateOfflineAddress = (input) => {
+    if (input.match(offlineAddressRegex)) invalidOfflineAddress.visible = false;
+    else {
+      invalidOfflineAddress.visible = true;
+    }
+  }
 
   const validateSubmitterName = (input) => {
     if (input.match(submitterNameRegex)) invalidSubmitterName.visible = false;
@@ -2352,6 +2364,11 @@
                 return;
               }
 
+              
+              if ($issueAddress) validateOfflineAddress($issueAddress);
+              if (invalidOfflineAddress.visible) return;
+              
+
               if ($issueSubmitterName) validateSubmitterName($issueSubmitterName);
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
@@ -2580,15 +2597,15 @@
                   bind:this="{offlineAddressInputSelector}"
                   class="offline-address-input"
                   placeholder="{messages['map']['pac-input-placeholder']}"
-                  on:click="{() => (invalidOfflineAddress = false)}"
+                  on:click="{() => (invalidOfflineAddress.visible = false)}"
                 />
               </div>
 
               <div
                 class="step-one-invalid-offline-address"
-                class:visible="{invalidOfflineAddress}"
+                class:visible="{invalidOfflineAddress.visible}"
               >
-                {messages["report.issue"]["invalid.offline.address"]}
+                {invalidOfflineAddress.message}
               </div>
             {/if}
 
