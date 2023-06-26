@@ -129,6 +129,8 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
+  let submitterNameRegex = /[a-zA-Z\.'\- ]/;
+
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
 
@@ -522,6 +524,13 @@
       if (displayIssuesInMap) await addIssuesToMap();
     }
   };
+
+  const validateSubmitterName = (input) => {
+    if (input.match(submitterNameRegex)) invalidSubmitterName.visible = false;
+    else {
+      invalidSubmitterName.visible = true;
+    }
+  }
 
   const validateEmail = (input) => {
     if (input.match(validRegex)) invalidEmail.visible = false;
@@ -2343,8 +2352,10 @@
                 return;
               }
 
+              if ($issueSubmitterName) validateSubmitterName($issueSubmitterName);
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
+              if (invalidSubmitterName.visible) return;
               if (invalidEmail.visible) return;
 
               localStorage.setItem(

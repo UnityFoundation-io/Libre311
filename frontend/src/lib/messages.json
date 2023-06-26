@@ -55,7 +55,7 @@
             "label.review.description": "Description:",
             "placeholder.submitter.name": "ex: John Doe",
             "placeholder.contact.info": "ex: johndoe@gmail.com",
-            "input.submitter.name.error": "The name should contain at least 3 characters.",
+            "input.submitter.name.error": "Invalid name. The name should contain at least 3 valid characters.",
             "input.email.error": "Invalid email, please make sure your email valid.",
             "issue.reported.success.message.one": "Thank You!",
             "issue.reported.success.message.two": "The issue has been reported.",
