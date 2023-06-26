@@ -129,7 +129,7 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let submitterNameRegex = /[a-zA-Z\.'\- ]+$/gm;
+  let submitterNameRegex = /[a-zA-Z'.\ -]+$/gm;
 
   let validRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
