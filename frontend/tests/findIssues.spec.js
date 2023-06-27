@@ -9,6 +9,7 @@ test('open reported issues screen', async ({ page }) => {
 
 test('apply filters to reported issues table', async ({ page }) => {
   await page.goto('http://localhost:3000/');
+  await expect(page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' })).toBeVisible();
   await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
   // Opens filters
   await page.locator('div').filter({ hasText: /\+$/ }).locator('span').click();
