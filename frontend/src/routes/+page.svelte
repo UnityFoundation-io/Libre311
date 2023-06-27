@@ -129,11 +129,11 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let offlineAddressRegex = /[a-zA-Z0-9,&'.\ -]+$/gm;
+  let offlineAddressRegex = /[a-zA-Z0-9&\-',. ]+$/gm;
 
-  let submitterNameRegex = /[a-zA-Z'.\ -]+$/gm;
+  let submitterNameRegex = /[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
 
-  let validRegex =
+  let emailRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
 
   let map,
@@ -542,7 +542,7 @@
   }
 
   const validateEmail = (input) => {
-    if (input.match(validRegex)) invalidEmail.visible = false;
+    if (input.match(emailRegex)) invalidEmail.visible = false;
     else {
       invalidEmail.visible = true;
     }
