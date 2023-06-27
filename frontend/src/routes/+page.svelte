@@ -126,10 +126,7 @@
       visible: false,
     },
     fileName = "report.csv",
-    invalidOfflineAddress = {
-      message: messages["report.issue"]["invalid.offline.address"],
-      visible: false,
-    },
+    invalidOfflineAddress = false,
     isAuthenticated = false;
 
   let offlineAddressRegex = /[a-zA-Z0-9,&'.\ -]+$/gm;
@@ -531,9 +528,9 @@
   };
 
   const validateOfflineAddress = (input) => {
-    if (input.match(offlineAddressRegex)) invalidOfflineAddress.visible = false;
+    if (input.match(offlineAddressRegex)) invalidOfflineAddress = false;
     else {
-      invalidOfflineAddress.visible = true;
+      invalidOfflineAddress = true;
     }
   }
 
@@ -2364,14 +2361,11 @@
                 return;
               }
 
-              
               if ($issueAddress) validateOfflineAddress($issueAddress);
-              if (invalidOfflineAddress.visible) return;
-              
-
               if ($issueSubmitterName) validateSubmitterName($issueSubmitterName);
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
+              if (invalidOfflineAddress) return;
               if (invalidSubmitterName.visible) return;
               if (invalidEmail.visible) return;
 
@@ -2597,15 +2591,15 @@
                   bind:this="{offlineAddressInputSelector}"
                   class="offline-address-input"
                   placeholder="{messages['map']['pac-input-placeholder']}"
-                  on:click="{() => (invalidOfflineAddress.visible = false)}"
+                  on:click="{() => (invalidOfflineAddress = false)}"
                 />
               </div>
 
               <div
                 class="step-one-invalid-offline-address"
-                class:visible="{invalidOfflineAddress.visible}"
+                class:visible="{invalidOfflineAddress}"
               >
-                {invalidOfflineAddress.message}
+                {messages["report.issue"]["invalid.offline.address"]}
               </div>
             {/if}
 
