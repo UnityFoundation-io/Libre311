@@ -8,6 +8,7 @@ test('footer displays Local Motion logo', async ({ page }) => {
 test('footer displays major headings', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.getByRole('heading', { name: 'Admin Login' }).click();
+  await expect(page).toHaveURL(/.*accounts.google.com\/.*/);
 
   await page.goto('http://localhost:3000/');
   await page.getByRole('heading', { name: 'Contact Us' }).click();
