@@ -25,9 +25,11 @@ public class GoogleImageSafeSearchService {
     // See https://cloud.google.com/vision/docs/before-you-begin
     public boolean imageIsExplicit(String image) {
         List<AnnotateImageRequest> requests = new ArrayList<>();
+        LOG.info("in imageIsExplicit");
 
         ByteString imgBytes = null;
         try {
+            LOG.info("parse base64");
             imgBytes = ByteString.readFrom(new ByteArrayInputStream(
                     Base64.getDecoder().decode(image.getBytes("UTF-8"))
             ));
@@ -44,7 +46,9 @@ public class GoogleImageSafeSearchService {
         requests.add(request);
 
         try {
+            LOG.info("before request");
             BatchAnnotateImagesResponse response = safeSearchImageClientFactory.client().batchAnnotateImages(requests);
+            LOG.info("after request");
             List<AnnotateImageResponse> responses = response.getResponsesList();
 
             for (AnnotateImageResponse res : responses) {
@@ -54,6 +58,7 @@ public class GoogleImageSafeSearchService {
                 }
 
                 // For full list of available annotations, see http://g.co/cloud/vision/docs
+                LOG.info("getSafeSearchAnnotations");
                 SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
                 return annotation.getAdult() == Likelihood.LIKELY || annotation.getAdult() == Likelihood.VERY_LIKELY ||
                         annotation.getViolence() == Likelihood.LIKELY || annotation.getViolence() == Likelihood.VERY_LIKELY ||
