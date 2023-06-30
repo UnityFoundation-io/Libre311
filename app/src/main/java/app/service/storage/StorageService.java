@@ -54,12 +54,10 @@ public class StorageService {
 
         String image = base64Image.split(",")[1];
 
-        LOG.info("before googleImageClassificationService.imageIsExplicit");
         if (googleImageClassificationService.imageIsExplicit(image)) {
             LOG.error("Image does not meet SafeSearch criteria.");
             return null;
         }
-        LOG.info("after googleImageClassificationService.imageIsExplicit");
 
         byte[] bytes = Base64.getDecoder().decode(image);
         UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
