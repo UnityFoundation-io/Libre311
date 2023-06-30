@@ -18,9 +18,6 @@ public class GoogleImageSafeSearchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleImageSafeSearchService.class);
 
-    @Inject
-    SafeSearchImageClientFactory safeSearchImageClientFactory;
-
     // Derived from https://cloud.google.com/vision/docs/detecting-safe-search#vision_safe_search_detection-java
     // See https://cloud.google.com/vision/docs/before-you-begin
     public boolean imageIsExplicit(String image) {
@@ -45,9 +42,10 @@ public class GoogleImageSafeSearchService {
                 AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
         requests.add(request);
 
-        try {
+        LOG.info("before ImageAnnotatorClient.create");
+        try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
             LOG.info("before request");
-            BatchAnnotateImagesResponse response = safeSearchImageClientFactory.client().batchAnnotateImages(requests);
+            BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
             LOG.info("after request");
             List<AnnotateImageResponse> responses = response.getResponsesList();
 
