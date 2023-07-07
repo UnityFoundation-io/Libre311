@@ -111,6 +111,7 @@
     seeMore = false,
     spinner = false,
     heatmapVisible = false,
+    postingError = false,
     issuesRefs = {},
     multiSelectOptions = [],
     invalidOtherDescription = {
@@ -129,7 +130,11 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let validRegex =
+  let offlineAddressRegex = /^[0-9]+[a-zA-Z0-9&\-',. ]+$/gm;
+
+  let submitterNameRegex = /[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
+
+  let emailRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
 
   let map,
@@ -249,6 +254,7 @@
       setTimeout(() => {
         resetState();
         reportNewIssueStep6 = false;
+        postingError = false;
       }, 3000);
     }, 100);
   }
@@ -337,7 +343,16 @@
     });
 
     // Call the detectExplicitContent function with the image data URL
-    const isExplicit = await detectExplicitContent(imageData, apiKey);
+    let isExplicit;
+    try {
+      isExplicit = await detectExplicitContent(imageData, apiKey);
+    } catch (err) {
+      console.error(err);
+      imageData = null;
+      selectedFileSrc = null;
+      selectedFile = null;
+      spinner = false;
+    }
 
     if (isExplicit) {
       messageRejectedOne =
@@ -349,7 +364,9 @@
       selectedFileSrc = null;
       selectedFile = null;
       spinner = false;
-    } else {
+    } else if (
+      messageRejectedOne !== messages["report.issue"]["vision.api.error"]
+    ) {
       messageSuccess = messages["report.issue"]["uploaded.message.success"];
       spinner = false;
     }
@@ -381,6 +398,9 @@
       await postIssue();
     } catch (error) {
       console.error(error);
+      postingError = true;
+
+      clearLocalStorage();
     }
   };
 
@@ -428,6 +448,13 @@
       return isExplicit;
     } catch (error) {
       console.error("Error:", error);
+      messageRejectedOne = messages["report.issue"]["vision.api.error"];
+      messageRejectedTwo = messages["report.issue"]["vision.api.error.two"];
+
+      spinner = false;
+      imageData = null;
+      selectedFileSrc = null;
+      selectedFile = null;
     }
   };
 
@@ -523,8 +550,22 @@
     }
   };
 
+  const validateOfflineAddress = (input) => {
+    if (input.match(offlineAddressRegex)) invalidOfflineAddress = false;
+    else {
+      invalidOfflineAddress = true;
+    }
+  }
+
+  const validateSubmitterName = (input) => {
+    if (input.match(submitterNameRegex)) invalidSubmitterName.visible = false;
+    else {
+      invalidSubmitterName.visible = true;
+    }
+  }
+
   const validateEmail = (input) => {
-    if (input.match(validRegex)) invalidEmail.visible = false;
+    if (input.match(emailRegex)) invalidEmail.visible = false;
     else {
       invalidEmail.visible = true;
     }
@@ -1246,7 +1287,7 @@
     reportNewIssueStep5 = false;
 
     if (imageData) {
-      executeRecaptchaAndPostIssue();
+      await executeRecaptchaAndPostIssue();
     } else await postIssue();
 
     currentStep = 6;
@@ -1298,7 +1339,7 @@
           zoom: zoom,
           center: { lat: 38.6740015313782, lng: -90.453269188364 },
           mapTypeControl: false,
-          gestureHandling: 'greedy'
+          gestureHandling: "greedy",
         });
 
         geocoder = new google.maps.Geocoder();
@@ -2343,8 +2384,12 @@
                 return;
               }
 
+              if ($issueAddress) validateOfflineAddress($issueAddress);
+              if ($issueSubmitterName) validateSubmitterName($issueSubmitterName);
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
+              if (invalidOfflineAddress) return;
+              if (invalidSubmitterName.visible) return;
               if (invalidEmail.visible) return;
 
               localStorage.setItem(
@@ -2517,7 +2562,11 @@
           class:hidden="{!reportNewIssueStep6}"
         >
           <div class="success-message">
-            {messages["report.issue"]["issue.reported.success.message.one"]}
+            {#if postingError}
+              {messages["report.issue"]["issue.reported.failure"]}
+            {:else}
+              {messages["report.issue"]["issue.reported.success.message.one"]}
+            {/if}
           </div>
 
           <div
@@ -2525,9 +2574,9 @@
             style="margin-bottom: 0.5rem"
             id="success-message-2"
           >
-            {#if isOnline}
+            {#if isOnline && postingError === false}
               {messages["report.issue"]["issue.reported.success.message.two"]}
-            {:else}
+            {:else if isOnline === false && postingError === false}
               {messages["report.issue"][
                 "issue.reported.success.message.two.offline"
               ]}

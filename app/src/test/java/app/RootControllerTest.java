@@ -11,6 +11,8 @@ import app.util.MockAuthenticationFetcher;
 import app.util.MockReCaptchaService;
 import app.util.MockSecurityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
@@ -63,6 +66,7 @@ public class RootControllerTest {
     @BeforeEach
     void setup() {
         dbCleanup.cleanup();
+        mockAuthenticationFetcher.setAuthentication(null);
     }
 
     void login() {
@@ -213,6 +217,60 @@ public class RootControllerTest {
         InputStream inputStream = new ByteArrayInputStream(body.get());
         String text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         assertNotNull(text);
+    }
+
+    @Test
+    public void theCSVFileShouldNotContainCellsBeginningWithUnsafeCharacters() throws IOException {
+        HttpResponse<?> response;
+
+        // create service requests
+        response = createServiceRequest("001", "=1+3",
+                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        response = createServiceRequest("001", "@1+3",
+                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        response = createServiceRequest("001", "+1+3",
+                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        response = createServiceRequest("001", "-1+3",
+                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        response = createServiceRequest("001", "\t1+3",
+                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        response = createServiceRequest("001", "\r1+3",
+                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        // create service requests
+        HttpRequest<?> request = HttpRequest.GET("/requests/download");
+
+        login();
+
+        response = client.toBlocking().exchange(request, byte[].class);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<byte[]> body = response.getBody(byte[].class);
+        assertTrue(body.isPresent());
+        InputStream inputStream = new ByteArrayInputStream(body.get());
+        String text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        assertNotNull(text);
+        try (CSVReader reader = new CSVReader(new StringReader(text))) {
+            reader.skip(1); // skip header
+            String[] cells = reader.readNext();
+            while (cells != null) {
+                String addressCell = cells[0];
+                assertTrue(addressCell.startsWith("'"));
+                cells = reader.readNext();
+            }
+        } catch (CsvValidationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes) {
