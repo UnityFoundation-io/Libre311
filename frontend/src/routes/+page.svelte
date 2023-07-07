@@ -130,7 +130,11 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let validRegex =
+  let offlineAddressRegex = /^[0-9]+[a-zA-Z0-9&\-',. ]+$/gm;
+
+  let submitterNameRegex = /[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
+
+  let emailRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
 
   let map,
@@ -546,8 +550,22 @@
     }
   };
 
+  const validateOfflineAddress = (input) => {
+    if (input.match(offlineAddressRegex)) invalidOfflineAddress = false;
+    else {
+      invalidOfflineAddress = true;
+    }
+  }
+
+  const validateSubmitterName = (input) => {
+    if (input.match(submitterNameRegex)) invalidSubmitterName.visible = false;
+    else {
+      invalidSubmitterName.visible = true;
+    }
+  }
+
   const validateEmail = (input) => {
-    if (input.match(validRegex)) invalidEmail.visible = false;
+    if (input.match(emailRegex)) invalidEmail.visible = false;
     else {
       invalidEmail.visible = true;
     }
@@ -2366,8 +2384,12 @@
                 return;
               }
 
+              if ($issueAddress) validateOfflineAddress($issueAddress);
+              if ($issueSubmitterName) validateSubmitterName($issueSubmitterName);
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
+              if (invalidOfflineAddress) return;
+              if (invalidSubmitterName.visible) return;
               if (invalidEmail.visible) return;
 
               localStorage.setItem(
