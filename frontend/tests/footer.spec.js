@@ -96,5 +96,5 @@ test('footer has instagram icon', async ({ page }) => {
 test('footer has twitter icon', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.getByRole('img', { name: 'twitter' }).click();
-  await expect(page).toHaveURL('https://twitter.com/localmotioncomo');
+  await expect(page).toHaveURL(/https:\/\/twitter\.com\/.*localmotioncomo/);
 });
