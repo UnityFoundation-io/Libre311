@@ -3,7 +3,6 @@ package app.util;
 import app.dto.storage.PhotoUploadDTO;
 import app.service.storage.StorageService;
 import io.micronaut.context.annotation.Replaces;
-import io.micronaut.context.env.Environment;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.request.UploadRequest;
 import jakarta.inject.Singleton;
@@ -16,11 +15,8 @@ import java.util.UUID;
 @Replaces(StorageService.class)
 public class MockStorageService extends StorageService {
 
-    private final Environment environment;
-
-    public MockStorageService(Environment environment) {
-        super(environment);
-        this.environment = environment;
+    public MockStorageService() {
+        super();
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {

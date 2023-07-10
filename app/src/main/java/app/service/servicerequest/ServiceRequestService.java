@@ -12,7 +12,7 @@ import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
-import app.service.storage.StorageService;
+import app.service.storage.StorageUrlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -44,13 +44,13 @@ public class ServiceRequestService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRepository serviceRepository;
     private final ReCaptchaService reCaptchaService;
-    private final StorageService storageService;
+    private final StorageUrlUtil storageUrlUtil;
 
-    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService, StorageService storageService) {
+    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
         this.reCaptchaService = reCaptchaService;
-        this.storageService = storageService;
+        this.storageUrlUtil = storageUrlUtil;
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
@@ -119,7 +119,7 @@ public class ServiceRequestService {
 
     private boolean validMediaUrl(String mediaUrl) {
         if (mediaUrl == null) return true;
-        return mediaUrl.startsWith(storageService.getBucketUrlString());
+        return mediaUrl.startsWith(storageUrlUtil.getBucketUrlString());
     }
 
     private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, List<ServiceDefinitionAttribute> requestAttributes) {

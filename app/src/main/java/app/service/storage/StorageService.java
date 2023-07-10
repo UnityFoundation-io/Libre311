@@ -3,8 +3,6 @@ package app.service.storage;
 import app.dto.storage.PhotoUploadDTO;
 import app.recaptcha.ReCaptchaService;
 import app.safesearch.GoogleImageSafeSearchService;
-import io.micronaut.context.annotation.Property;
-import io.micronaut.context.env.Environment;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
@@ -23,27 +21,17 @@ public class StorageService {
     private final ObjectStorageOperations<?, ?, ?> objectStorage;
     private final ReCaptchaService reCaptchaService;
     private final GoogleImageSafeSearchService googleImageClassificationService;
-    private final Environment environment;
+    private final StorageUrlUtil storageUrlUtil;
 
-    @Property(name = "wemove.image-storage.bucket-url-format")
-    private String bucketUrlFormat;
-
-    @Property(name = "wemove.image-storage.append-object-url-format")
-    private String appendObjectUrlFormat;
-
-    @Property(name = "wemove.image-storage.bucket")
-    private String bucket;
-
-
-    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, Environment environment) {
+    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, StorageUrlUtil storageUrlUtil) {
         this.objectStorage = objectStorage;
-        this.environment = environment;
         this.reCaptchaService = reCaptchaService;
         this.googleImageClassificationService = googleImageClassificationService;
+        this.storageUrlUtil = storageUrlUtil;
     }
 
-    public StorageService(Environment environment) {
-        this.environment = environment;
+    public StorageService() {
+        this.storageUrlUtil = null;
         this.objectStorage = null;
         this.reCaptchaService = null;
         this.googleImageClassificationService = null;
@@ -76,15 +64,6 @@ public class StorageService {
         UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
         UploadResponse<?> response = objectStorage.upload(request);
 
-        return getObjectUrlString(response.getKey());
-    }
-
-    private String getObjectUrlString(String blobId) {
-        return String.format(getBucketUrlString().concat(appendObjectUrlFormat), blobId);
-    }
-
-    public String getBucketUrlString() {
-        String bucketId = environment.getProperty(bucket, String.class).get();
-        return String.format(bucketUrlFormat, bucketId);
+        return storageUrlUtil.getObjectUrlString(response.getKey());
     }
 }
