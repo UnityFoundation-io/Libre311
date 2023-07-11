@@ -1,0 +1,5 @@
+secrets:
+  jwtSecret: WeMoveChangeThisSecretForANewOne
+  oauth2Secret: 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
+  recaptchaSecret: "6LfY3tMlAAAAAAxsA68VyjGMkbIkBqql3gDLG-Hs"
+  safesearchKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk"
