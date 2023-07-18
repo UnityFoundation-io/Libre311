@@ -1,3 +1,6 @@
+custom:
+  secrets: ${file(./values.yml):${self:provider.stage}}
+
 gcp:
   project-id: local-motion-we-move
 
@@ -15,7 +18,7 @@ micronaut:
         signatures:
           secret:
             generator:
-              secret: WeMoveChangeThisSecretForANewOne
+              secret: ${self:custom.secrets.jwtSecret}
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:8080/failed-auth
@@ -26,7 +29,7 @@ micronaut:
       clients:
         google:
           client-id: "867150944261-toegpflg674bdoikca22l6bm5aaqm5kj.apps.googleusercontent.com"
-          client-secret: "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"
+          client-secret: ${self:custom.secrets.oauth2Secret}
           openid:
             authorization:
               prompt: select_account
@@ -117,6 +120,6 @@ netty:
       max-order: 3
 wemove:
   recaptcha:
-    secret: "6LfY3tMlAAAAAAxsA68VyjGMkbIkBqql3gDLG-Hs"
+    secret: ${self:custom.secrets.recaptchaSecret}
   safesearch:
-    key: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk"
+    key: ${self:custom.secrets.safesearchKey}
