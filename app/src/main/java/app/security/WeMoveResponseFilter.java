@@ -22,7 +22,8 @@ public class WeMoveResponseFilter implements HttpServerFilter {
 //                "Content-Security-Policy", "default-src 'self'",
 //                "Content-Security-Policy-Report-Only", "default-src 'self'",
 
-                "Permission-Policy", "geolocation=(*), magnetometer=(*), " +
+                "Strict-Transport-Security", "max-age=31536000; includeSubDomains",
+                "Permissions-Policy", "geolocation=(*), magnetometer=(*), " +
                         "camera=(self), display-capture=(self), fullscreen=(self), " +
                         "payment=(), microphone=()",
                 "X-Frame-Options", "DENY",
