@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export GCP_PROJECT_ID=local-motion-we-move
+export MICRONAUT_ENVIRONMENTS=dev,dev-data
+#export MICRONAUT_ENVIRONMENTS=dev-data
+export MICRONAUT_SERVER_PORT=8080
+#export MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_SECRET_GENERATOR_SECRET=MjcUCidaaUkZXtecJMnzonPbkdtizlRs
+
+export STORAGE_BUCKET_ID=a69c003f-5281-4376-9875-ebac846ae7e9-wemove
+export GOOGLE_CLIENT_ID=867150944261-toegpflg674bdoikca22l6bm5aaqm5kj.apps.googleusercontent.com
+export GOOGLE_CLIENT_SECRET=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
+export RECAPTCHA_SECRET=6LfY3tMlAAAAAAxsA68VyjGMkbIkBqql3gDLG-Hs
+export SAFESEARCH_KEY=AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk
+
