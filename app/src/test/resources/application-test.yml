@@ -1,0 +1,24 @@
+---
+micronaut:
+  server:
+    cors:
+      enabled: true
+      configurations:
+        allowedOrigins:
+          - http://localhost:3000
+          - localhost:3000
+          - http://127.0.0.1:3000
+---
+micronaut:
+  security:
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: pleaseChangeThisSecretForANewOne
+              jws-algorithm: HS256
+    redirect:
+      login-success: http://localhost:3000
+      login-failure: http://localhost:8080/failed-auth
+      logout: http://localhost:8080
