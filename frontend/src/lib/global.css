@@ -231,7 +231,7 @@ body {
 
 .background::before {
   content: "";
-  background-image: url("$lib/columbiaBackground.jpg");
+  background-image: url("$lib/backgroundImage.jpg");
   background-repeat: no-repeat;
   background-position: 100% 27%;
   background-size: cover;
