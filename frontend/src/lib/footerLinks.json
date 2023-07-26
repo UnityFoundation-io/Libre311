@@ -1,0 +1,56 @@
+[
+  {
+    "header": "Advocacy",
+    "header.url": "https://lomocomo.org/?ct_template=advocacy",
+    "links":
+    {
+      "one": "Livable Streets",
+      "two": "Transportation Planning",
+      "three": "Grassroots Organizing",
+      "four": "State-Level Advocacy"
+    },
+    "url":
+    {
+      "one": "https://lomocomo.org/advocacy/livable-streets/",
+      "two": "https://lomocomo.org/advocacy/transportation-planning/",
+      "three": "https://lomocomo.org/advocacy/grassroots-organizing/",
+      "four": "https://lomocomo.org/advocacy/missourians-for-responsible-transportation/"
+    }
+  },
+  {
+    "header": "Get Involved",
+    "header.url": "https://lomocomo.org/get-involved/",
+    "links":
+    {
+      "one": "Membership",
+      "two": "Volunteer",
+      "three": "Sign up for our newsletter"
+    },
+    "url":
+    {
+      "one": "https://lomocomo.org/get-involved/membership/",
+      "two": "https://lomocomo.org/get-involved/volunteer/",
+      "three": "https://lomocomo.org/get-involved/sign-up-for-our-newsletter/"
+    }
+  },
+  {
+    "header": "About",
+    "header.url": "https://lomocomo.org/about/",
+    "links":
+    {
+      "one": "Staff",
+      "two": "Board of Directors",
+      "three": "Annual Reports",
+      "four": "Legal and Financial",
+      "five": "Our Rebrand Story"
+    },
+    "url":
+    {
+      "one": "https://lomocomo.org/about/staff/",
+      "two": "https://lomocomo.org/about/board-of-directors/",
+      "three": "https://lomocomo.org/about/annual-reports",
+      "four": "https://lomocomo.org/about/legal-and-financial/",
+      "five": "https://lomocomo.org/about/the-rebrand-story/"
+    }
+  }
+]

@@ -30,7 +30,9 @@ We handle online/offline mode using a combination of local storage and service w
 - Concurrently
 - Fontfaceobserver
 
-### Customization/Skinning
+## Customization
+
+### Skinning
 
 - Externalized Messages: `/lib/messages.json`
 - Color Palette: `/lib/messages.json`
@@ -40,6 +42,14 @@ We handle online/offline mode using a combination of local storage and service w
 - Fonts: `/static/font`
 
 Use `.env` to store Google Keys and the backend reference. The keys can be found in the root frontend folder `.env.example`.
+
+### Background Image
+
+The image used in the background of the app is located in `/frontend/src/lib/backgroundImage.jpg`. If you want to change the background image, remove the current `backgroundImage.jpg`, and put a new image in this directory in it's place (remember to rename the new file to `backgroundImage.jpg`).
+
+### Footer
+
+The footer of the app currently displays links to various pages from LocalMotion, as well as their social media links.
 
 ### Maintaining State
 

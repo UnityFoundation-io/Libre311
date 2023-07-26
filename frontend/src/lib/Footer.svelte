@@ -1,10 +1,14 @@
 <script>
   import { goto } from "$app/navigation";
+
   import facebookSVG from "../icons/facebook.svg";
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
-  import localMotionLogo from "$lib/localmotionlogosmall.webp";
+
   import footerSelector from "../stores/footerSelector";
+  import localMotionLogo from "$lib/localmotionlogosmall.webp";
+ 
+  import footerLinks from "$lib/footerLinks.json"
 
   export let backgroundColor;
 
