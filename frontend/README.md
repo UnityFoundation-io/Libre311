@@ -45,11 +45,38 @@ Use `.env` to store Google Keys and the backend reference. The keys can be found
 
 ### Background Image
 
-The image used in the background of the app is located in `/frontend/src/lib/backgroundImage.jpg`. If you want to change the background image, remove the current `backgroundImage.jpg`, and put a new image in this directory in it's place (remember to rename the new file to `backgroundImage.jpg`).
+The image used in the background of the app is located in `frontend/src/lib/backgroundImage.jpg`. If you want to change the background image, remove the current `backgroundImage.jpg`, and put a new image in this directory in it's place (remember to rename the new file to `backgroundImage`).
+
+***Notice**: The image should be in a portrait orientation, ideally with a high resolution.*
 
 ### Footer
 
 The footer of the app currently displays links to various pages from LocalMotion, as well as their social media links.
+
+To edit the content of the footer, go to `frontend/src/lib/footerLinks.json.` The structure of the file is set up as:
+
+```json
+[
+  {
+    "header": "<HEADER TEXT>",
+    "headerUrl": "<HEADER URL>",
+    "links": [
+      {
+        "text": "<LINK TEXT>",
+        "url": "<LINK URL>"
+      },
+      ...
+    ]
+  },
+  ...
+]
+```
+
+To create a new header with it's own set of links, copy this structure in `footerLinks.json`, and replace the text wrapped in carets.
+
+The image on top of the footer is stored in `/frontend/src/lib/footerLogoSmall.webp`. To use a custom image, replace the default `footerLogoSmall.webp` with a new image, and rename that file's name to `footerLogoSmall`. 
+
+***Notice**: The image should be a file with dimensions no bigger than 200x200px.*
 
 ### Maintaining State
 

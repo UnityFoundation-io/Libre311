@@ -6,7 +6,7 @@
   import twitterSVG from "../icons/twitter.svg";
 
   import footerSelector from "../stores/footerSelector";
-  import localMotionLogo from "$lib/localmotionlogosmall.webp";
+  import footerLogoSmall from "$lib/footerLogoSmall.webp";
  
   import footerLinks from "$lib/footerLinks.json"
 
@@ -16,7 +16,7 @@
 </script>
 
 <img
-  src="{localMotionLogo}"
+  src="{footerLogoSmall}"
   alt="local motion logo"
   class="local-motion-logo"
 />
@@ -29,57 +29,15 @@
     class="row"
     class:row-wrap="{window.innerHeight <= 375 && window.innerWidth <= 513}"
   >
-    <div class="col">
-      <a href="https://lomocomo.org/?ct_template=advocacy"><h2>Advocacy</h2></a>
-      <a href="https://lomocomo.org/advocacy/livable-streets/"
-        ><li>Livable Streets</li></a
-      >
-      <a href="https://lomocomo.org/advocacy/transportation-planning/"
-        ><li>Transportation Planning</li></a
-      >
-      <a href="https://lomocomo.org/advocacy/grassroots-organizing/"
-        ><li>Grassroots Organizing</li></a
-      >
-      <a
-        href="https://lomocomo.org/advocacy/missourians-for-responsible-transportation/"
-        ><li>State-Level Advocacy</li></a
-      >
-    </div>
-    <div
-      class="col"
-      class:add-padding-top="{window.innerWidth >= 431 &&
-        window.innerWidth < 700}"
-    >
-      <a href="https://lomocomo.org/get-involved/"
-        ><h2 style="min-width: max-content">Get Involved</h2></a
-      >
-      <a href="https://lomocomo.org/get-involved/membership/"
-        ><li>Membership</li></a
-      >
-      <a href="https://lomocomo.org/get-involved/volunteer/"
-        ><li>Volunteer</li></a
-      >
-      <a href="https://lomocomo.org/get-involved/sign-up-for-our-newsletter/"
-        ><li>Sign up for our newsletter</li></a
-      >
-    </div>
-
-    <div class="col">
-      <a href="https://lomocomo.org/about/"><h2>About</h2></a>
-      <a href="https://lomocomo.org/about/staff/"><li>Staff</li></a>
-      <a href="https://lomocomo.org/about/board-of-directors/"
-        ><li>Board of Directors</li></a
-      >
-      <a href="https://lomocomo.org/about/annual-reports"
-        ><li>Annual Reports</li></a
-      >
-      <a href="https://lomocomo.org/about/legal-and-financial/"
-        ><li>Legal and Financial</li></a
-      >
-      <a href="https://lomocomo.org/about/the-rebrand-story/"
-        ><li>Our Rebrand Story</li></a
-      >
-    </div>
+    {#each footerLinks as footerLink}
+      <div class="col">
+        <a href={footerLink["headerUrl"]}><h2>{footerLink["header"]}</h2></a>
+        {#each footerLink["links"] as link}
+          <a href={link["url"]}><li>{link["text"]}</li></a>
+        {/each}
+      </div>
+    {/each}
+     
     <div class="col">
       <!-- svelte-ignore missing-declaration -->
       <!-- svelte-ignore a11y-click-events-have-key-events -->
