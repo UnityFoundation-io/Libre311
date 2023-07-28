@@ -45,9 +45,13 @@ Use `.env` to store Google Keys and the backend reference. The keys can be found
 
 ### Background Image
 
-The image used in the background of the app is located in `frontend/src/lib/backgroundImage.jpg`. If you want to change the background image, remove the current `backgroundImage.jpg`, and put a new image in this directory in it's place (remember to rename the new file to `backgroundImage`).
+The image used in the background of the app is located in `frontend/src/lib/backgroundImage.jpg`. To change the background image, remove the current `backgroundImage.jpg`, and put a new image in it's place (remember to rename the new file to `backgroundImage`).
 
 ***Notice**: The image should be in a portrait orientation, ideally with a high resolution.*
+
+### Logo
+
+The image used for the company logo is located in `frontend/src/lib/logo.webp`. To change the logo, remove the current `logo.webp`, and put a new image in it's place (remember to rename the new file to `logo`).
 
 ### Footer
 
