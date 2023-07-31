@@ -47,11 +47,13 @@ Use `.env` to store Google Keys and the backend reference. The keys can be found
 
 The image used in the background of the app is located in `frontend/src/lib/backgroundImage.jpg`. To change the background image, remove the current `backgroundImage.jpg`, and put a new image in it's place (remember to rename the new file to `backgroundImage`).
 
-***Notice**: The image should be in a portrait orientation, ideally with a high resolution.*
+***Notice**: The image should be in a portrait orientation. The default image has a resolution of 1024x1792 px.*
 
 ### Logo
 
 The image used for the company logo is located in `frontend/src/lib/logo.webp`. To change the logo, remove the current `logo.webp`, and put a new image in it's place (remember to rename the new file to `logo`).
+
+***Notice**: The default image has a resolution of 800x450 px.*
 
 ### Footer
 
@@ -80,7 +82,7 @@ To create a new header with it's own set of links, copy this structure in `foote
 
 The image on top of the footer is stored in `/frontend/src/lib/footerLogoSmall.webp`. To use a custom image, replace the default `footerLogoSmall.webp` with a new image, and rename that file's name to `footerLogoSmall`. 
 
-***Notice**: The image should be a file with dimensions no bigger than 200x200px.*
+***Notice**: The default image has a resolution of 72x72 px.*
 
 ### Maintaining State
 
