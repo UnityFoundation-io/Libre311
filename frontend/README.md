@@ -30,7 +30,9 @@ We handle online/offline mode using a combination of local storage and service w
 - Concurrently
 - Fontfaceobserver
 
-### Customization/Skinning
+## Customization
+
+### Skinning
 
 - Externalized Messages: `/lib/messages.json`
 - Color Palette: `/lib/messages.json`
@@ -40,6 +42,57 @@ We handle online/offline mode using a combination of local storage and service w
 - Fonts: `/static/font`
 
 Use `.env` to store Google Keys and the backend reference. The keys can be found in the root frontend folder `.env.example`.
+
+#### A Note on Images
+
+In order to insure faster load times, it's recommended to use WebP image files instead of JPEGs or PNGs due to their smaller file size. For example, the default `backgroundImage.webp` was originally a 2.8mb JPEG, but it is currently a 348kb WebP (approximately 88% smaller).
+
+If the desired images are not currently in WebP format, there are multiple tools online that allow the conversion from many different file types to .webp.
+
+### Background Image
+
+The image used in the background of the app is located in `frontend/src/lib/backgroundImage.webp`. To change the background image, remove the current `backgroundImage.webp`, and put a new image in it's place (remember to rename the new file to `backgroundImage`).
+
+***Notice**: The image should be in a portrait orientation. The default image has a resolution of 1024x1792 px.*
+
+### Logo
+
+The image used for the company logo is located in `frontend/src/lib/logo.webp`. To change the logo, remove the current `logo.webp`, and put a new image in it's place (remember to rename the new file to `logo`).
+
+***Notice**: The default image has a resolution of 800x450 px.*
+
+### Footer
+
+The footer of the app currently displays links to various pages from LocalMotion, as well as their social media links.
+
+To edit the content of the footer, go to `frontend/src/lib/footerLinks.json.` The structure of the file is set up as:
+
+```json
+[
+  {
+    "header": "<HEADER TEXT>",
+    "headerUrl": "<HEADER URL>",
+    "links": [
+      {
+        "text": "<LINK TEXT>",
+        "url": "<LINK URL>"
+      },
+      ...
+    ]
+  },
+  ...
+]
+```
+
+To create a new header with it's own set of links, copy this structure in `footerLinks.json`, and replace the text wrapped in carets.
+
+The image on top of the footer is stored in `/frontend/src/lib/footerLogoSmall.webp`. To use a custom image, replace the default `footerLogoSmall.webp` with a new image, and rename that file's name to `footerLogoSmall`. 
+
+***Notice**: The default image has a resolution of 72x72 px.*
+
+### Color Schema
+
+Hex values for the app's color scheme are saved in `/frontend/src/lib/colors.json`. To adjust the color scheme to closer align with brand standards, edit these values accordingly. 
 
 ### Maintaining State
 
