@@ -8,7 +8,14 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter({
 			fallback: "index.html"
-		})
+		}),
+		csp: {
+			mode: "auto",
+			directives: {
+				'script-src': ['self', 'https://www.google.com/', 'https://maps.googleapis.com/',
+					'https://www.gstatic.com/recaptcha/', 'https://maps.gstatic.com/', 'https://fonts.googleapis.com/']
+			},
+		}
 	}
 };
 
