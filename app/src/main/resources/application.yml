@@ -118,6 +118,10 @@ netty:
     allocator:
       max-order: 3
 wemove:
+  image-storage:
+    bucket-url-format: "https://storage.googleapis.com/%s/"
+    bucket: "micronaut.object-storage.gcp.default.bucket"
+    append-object-url-format: "%s"
   recaptcha:
     secret: "6LfY3tMlAAAAAAxsA68VyjGMkbIkBqql3gDLG-Hs"
   safesearch:

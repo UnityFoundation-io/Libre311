@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('report new issue with image', async ({ page }) => {
   await page.goto('http://localhost:3000/');
+  await expect(page.getByRole('button', { name: 'report a new issue Report a New Issue' })).toBeVisible();
   await page.getByRole('button', { name: 'report a new issue Report a New Issue' }).click();
   
   // Enter issue location

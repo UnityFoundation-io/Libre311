@@ -1,12 +1,9 @@
 package app.util;
 
 import app.dto.storage.PhotoUploadDTO;
-import app.recaptcha.ReCaptchaService;
-import app.safesearch.GoogleImageSafeSearchService;
 import app.service.storage.StorageService;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.http.MediaType;
-import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import jakarta.inject.Singleton;
 
