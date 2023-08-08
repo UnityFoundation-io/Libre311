@@ -12,6 +12,8 @@ micronaut:
     authentication: cookie
     token:
       jwt:
+        cookie:
+          cookie-secure: true
         signatures:
           secret:
             generator:
