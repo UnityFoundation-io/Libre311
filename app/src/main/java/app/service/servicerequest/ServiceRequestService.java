@@ -12,7 +12,7 @@ import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
-import app.service.storage.StorageService;
+import app.service.storage.StorageUrlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -44,16 +44,23 @@ public class ServiceRequestService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRepository serviceRepository;
     private final ReCaptchaService reCaptchaService;
+    private final StorageUrlUtil storageUrlUtil;
 
-    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService) {
+    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
         this.reCaptchaService = reCaptchaService;
+        this.storageUrlUtil = storageUrlUtil;
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
         if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
             LOG.error("ReCaptcha verification failed.");
+            return null;
+        }
+
+        if (!validMediaUrl(serviceRequestDTO.getMediaUrl())) {
+            LOG.error("Media URL is invalid.");
             return null;
         }
 
@@ -108,6 +115,11 @@ public class ServiceRequestService {
         }
 
         return new PostResponseServiceRequestDTO(serviceRequestRepository.save(serviceRequest));
+    }
+
+    private boolean validMediaUrl(String mediaUrl) {
+        if (mediaUrl == null) return true;
+        return mediaUrl.startsWith(storageUrlUtil.getBucketUrlString());
     }
 
     private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, List<ServiceDefinitionAttribute> requestAttributes) {
