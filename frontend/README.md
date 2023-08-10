@@ -32,21 +32,7 @@ We handle online/offline mode using a combination of local storage and service w
 
 ### Setting Secrets
 
-In the root directory, create a file called `setenv.sh`. This file will contain any keys and secrets pertaining to online services using the following structure:
-
-```bash
-#!/bin/bash
-
-export GCP_PROJECT_ID=<PROJECT_ID>
-export MICRONAUT_ENVIRONMENTS=dev,dev-data
-export MICRONAUT_SERVER_PORT=8080
-
-export STORAGE_BUCKET_ID=<STORAGE_BUCKET_ID>
-export GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
-export GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
-export RECAPTCHA_SECRET=<RECAPTCHA_SECRET>
-export SAFESEARCH_KEY=<SAFESEARCH_KEY>
-```
+In the root directory, create a file called `setenv.sh`. Copy the contents from `setenv.sh.example` into `setenv.sh`, replacing values in carets with the corresponding values.
 
 ### Running Locally
 
