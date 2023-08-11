@@ -1329,7 +1329,7 @@
       const Loader = module.Loader;
 
       const loader = new Loader({
-        apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
+        apiKey,
         version: "weekly",
         libraries: ["places", "visualization"],
       });
