@@ -1,4 +1,7 @@
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
+import dotenv from 'dotenv';
+
+dotenv.config();
 const config = {
 	webServer: {
 		command: 'npm run start:frontend',
