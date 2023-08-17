@@ -50,6 +50,10 @@
   import "$lib/global.css";
   import "$lib/spinner.css";
 
+  import mapProvider from "$lib/mapProvider.json";
+
+  const provider = mapProvider["provider"]
+
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -195,6 +199,8 @@
   } else if (browser && !showModal) {
     document.body.classList.remove("modal-open");
   }
+
+
 
   const getOrientation = () => {
     let previousState;
@@ -622,21 +628,31 @@
     }
 
     if (isOnline) {
-      const marker = new google.maps.Marker({
-        position: {
-          lat: parseFloat($issueAddressCoordinates.lat),
-          lng: parseFloat($issueAddressCoordinates.lng),
-        },
-        map: map,
-        title: $issueType.name,
-        icon: {
-          scaledSize: new google.maps.Size(25, 25),
-          url: issuePinSVG,
-          anchor: new google.maps.Point(12, 12),
-        },
-      });
+      if (provider === "osm"){
+        const marker = new L.marker(
+          [parseFloat($issueAddressCoordinates.lat), parseFloat($issueAddressCoordinates.lng)], {
+            icon: issuePin
+          }).addTo(map);
 
-      markers.push(marker);
+        markers.push(marker);
+      }
+      else if (provider === "googleMaps") {
+        const marker = new google.maps.Marker({
+          position: {
+            lat: parseFloat($issueAddressCoordinates.lat),
+            lng: parseFloat($issueAddressCoordinates.lng),
+          },
+          map: map,
+          title: $issueType.name,
+          icon: {
+            scaledSize: new google.maps.Size(25, 25),
+            url: issuePinSVG,
+            anchor: new google.maps.Point(12, 12),
+          },
+        });
+
+        markers.push(marker);
+      }
     }
   };
 
@@ -736,13 +752,20 @@
   };
 
   const setNewCenter = (lat, lng, zoom = 15) => {
-    let newCenter = new google.maps.LatLng(lat, lng);
-    map.setCenter(newCenter);
-    setNewZoom(zoom);
-  };
+    if (provider === "osm"){
+      map.setView([lat, lng], zoom);
+      setNewZoom(zoom);
+    }
+    else if (provider === "googleMaps") {
+      let newCenter = new google.maps.LatLng(lat, lng);
+      map.setCenter(newCenter);
+      setNewZoom(zoom);
+    }
+  }
 
   const setNewZoom = (zoomLevel) => {
-    map.setZoom(zoomLevel);
+    if (provider === "osm") map.zoom(zoomLevel);
+    if (provider === "googleMaps") map.setZoom(zoomLevel);
   };
 
   const successCallback = (position) => {
@@ -760,13 +783,14 @@
     console.log(error);
   };
 
+  // TODO
   const clearMarkers = () => {
     markers.forEach((marker) => {
       marker.setMap(null);
     });
     markers = [];
   };
-
+  // TODO
   const clearIcons = () => {
     markers.forEach((mkr) => {
       const icon = mkr.getIcon();
@@ -981,10 +1005,12 @@
         // End of click handler
 
         heatmapData.push(
-          new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
+          provider === "osm" ? new L.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
+          : new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
         );
       });
 
+      // TODO
       heatmap = new google.maps.visualization.HeatmapLayer({
         data: heatmapData,
       });
@@ -1052,18 +1078,32 @@
   };
 
   const calculateBoundsAroundMarkers = () => {
-    if (markers && bounds) {
-      let lat, lng;
-      bounds = new google.maps.LatLngBounds();
-      for (let i = 0; i < markers.length; i++) {
-        lat = markers[i].position.lat();
-        lng = markers[i].position.lng();
-        bounds.extend({ lat, lng });
+    if (provider === "osm") {
+      if (markers) {
+        let bounds = L.latLngBounds();
+        
+        markers.forEach(function (marker) {
+          bounds.extend(marker.getLatLng());
+        })
+    
+        map.fitBounds(bounds);
       }
-      setNewCenter(bounds.getCenter());
-      map.fitBounds(bounds);
+    }
+    else if (provider === "googleMaps") {
+      if (markers && bounds) {
+        let lat, lng;
+        bounds = new google.maps.LatLngBounds();
+        for (let i = 0; i < markers.length; i++) {
+          lat = markers[i].position.lat();
+          lng = markers[i].position.lng();
+          bounds.extend({ lat, lng });
+        }
+        setNewCenter(bounds.getCenter());
+        map.fitBounds(bounds);
+      }
     }
   };
+
 
   const loadColorPalette = () => {
     const colorStyle = document.createElement("style");
@@ -1323,6 +1363,46 @@
       issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
+
+  const initOSM = async () => {
+    const L = await import("leaflet");
+    const GeoSearch = await import("leaflet-geosearch");
+
+    const issuePin = L.icon({
+      iconUrl: issuePinSVG,
+      iconSize: [25, 25],
+      iconAnchor: [12, 12]
+    });
+    const currentLocationPin = L.icon({
+      iconUrl: currentLocationSVG,
+      iconSize: [71, 71],
+      iconAnchor: [17, 34]
+    });
+    
+    map = new L.map('map', {
+      center: [38.6740015313782, -90.453269188364],
+      zoom: zoom
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    const provider = new GeoSearch.OpenStreetMapProvider();
+
+    const searchControl = new GeoSearch.GeoSearchControl({
+      provider: provider,
+      autoComplete: true,
+      autoCompleteDelay: 250
+    });
+
+    map.addControl(searchControl);
+
+    currentPositionMarker = new L.marker(map.getCenter(), {
+      icon: currentLocationSVG
+    }).addTo(map);
+  }
 
   const initGoogleMaps = async () => {
     import("@googlemaps/js-api-loader").then((module) => {
@@ -1609,7 +1689,13 @@
     fadeInBackground = true;
     openLogo = true;
 
-    if (isOnline) await initGoogleMaps();
+    // if (isOnline) await initOSM();
+    // if (isOnline) await initGoogleMaps();
+    if (mapProvider["provider"] === "googleMaps") {
+      await initGoogleMaps();
+    } else if (mapProvider["provider"] === "osm") {
+      await initOSM();
+    }
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
