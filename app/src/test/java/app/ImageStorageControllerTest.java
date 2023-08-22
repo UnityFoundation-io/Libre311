@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@MicronautTest(environments={"app-api-test-data"})
+@MicronautTest
 public class ImageStorageControllerTest {
 
     @Inject

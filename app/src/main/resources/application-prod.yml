@@ -1,0 +1,6 @@
+datasources:
+  default:
+    url: ${WEMOVE_JDBC_URL}
+    driverClassName: ${WEMOVE_JDBC_DRIVER}
+    username: ${WEMOVE_JDBC_USER}
+    password: ${WEMOVE_JDBC_PASSWORD}

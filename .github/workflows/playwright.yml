@@ -20,7 +20,7 @@ jobs:
         distribution: 'temurin'
     - name: Run the server with Gradle
       env:
-        MICRONAUT_ENVIRONMENTS: dev-data
+        MICRONAUT_ENVIRONMENTS: h2,dev-data
       run: |
         ./gradlew app:run &
     - name: Create and populate .env file
