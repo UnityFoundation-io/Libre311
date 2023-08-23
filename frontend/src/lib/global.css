@@ -150,6 +150,10 @@ body {
   }
 }
 
+.content {
+  word-wrap: break-word;
+}
+
 .image-container {
   position: relative;
   display: inline-block;
