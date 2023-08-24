@@ -12,7 +12,7 @@ public class ReCaptchaService {
     @Inject
     ReCaptchaClient client;
 
-    @Property(name = "wemove.recaptcha.secret")
+    @Property(name = "app.recaptcha.secret")
     protected String secret;
 
     public Boolean verifyReCaptcha(String response) {

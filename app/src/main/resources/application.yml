@@ -1,5 +1,5 @@
 gcp:
-  project-id: local-motion-we-move
+  project-id: gcp-project-id-here
 
 micronaut:
   application:
@@ -7,7 +7,7 @@ micronaut:
   object-storage:
     gcp:
       default:
-        bucket: a69c003f-5281-4376-9875-ebac846ae7e9-wemove
+        bucket: bucket-name-here
   security:
     authentication: cookie
     token:
@@ -17,7 +17,7 @@ micronaut:
         signatures:
           secret:
             generator:
-              secret: WeMoveChangeThisSecretForANewOne
+              secret: PleaseChangeThisSecretForANewOne
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:8080/failed-auth
@@ -101,7 +101,7 @@ micronaut:
       size-parameter-name: page_size
 datasources:
   default:
-    db-type: ${WEMOVE_DB_TYPE}
+    db-type: ${TODONAME_DB_TYPE}
 jpa:
   default:
     entity-scan:
@@ -109,12 +109,12 @@ jpa:
     properties:
       hibernate:
         hbm2ddl:
-          auto: ${WEMOVE_AUTO_SCHEMA_GEN:update}
+          auto: ${TODONAME_AUTO_SCHEMA_GEN:update}
 netty:
   default:
     allocator:
       max-order: 3
-wemove:
+app:
   image-storage:
     bucket-url-format: "https://storage.googleapis.com/%s/"
     bucket: "micronaut.object-storage.gcp.default.bucket"

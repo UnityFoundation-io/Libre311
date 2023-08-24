@@ -6,7 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 
 @Entity
-@Table(name = "wemove_user")
+@Table(name = "app_users")
 public class User {
 
     @Id
