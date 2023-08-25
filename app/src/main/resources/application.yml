@@ -101,7 +101,7 @@ micronaut:
       size-parameter-name: page_size
 datasources:
   default:
-    db-type: ${TODONAME_DB_TYPE}
+    db-type: ${LIBRE311_DB_TYPE}
 jpa:
   default:
     entity-scan:
@@ -109,7 +109,7 @@ jpa:
     properties:
       hibernate:
         hbm2ddl:
-          auto: ${TODONAME_AUTO_SCHEMA_GEN:update}
+          auto: ${LIBRE311_AUTO_SCHEMA_GEN:update}
 netty:
   default:
     allocator:

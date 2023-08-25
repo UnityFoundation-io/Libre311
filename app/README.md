@@ -1,6 +1,6 @@
 ### The Database
 
-Currently, the TODONAME supports the following Databases:
+Currently, the Libre311 supports the following Databases:
 
 | Database     | Versions     | Driver                   | Reference                                                                                                                 |
 |--------------|--------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------|
@@ -9,13 +9,13 @@ Currently, the TODONAME supports the following Databases:
 
 To connect to a database, the following environment variables must be set for the Web API:
 
-* TODONAME_JDBC_URL - The JDBC URL of the database
-* TODONAME_JDBC_DRIVER - The driver to use. See Driver column for values.
-* TODONAME_JDBC_USER - The database user name.
-* TODONAME_JDBC_PASSWORD - The database user password.
-* TODONAME_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
+* LIBRE311_JDBC_URL - The JDBC URL of the database
+* LIBRE311_JDBC_DRIVER - The driver to use. See Driver column for values.
+* LIBRE311_JDBC_USER - The database user name.
+* LIBRE311_JDBC_PASSWORD - The database user password.
+* LIBRE311_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
 
-The following describes the options for TODONAME_AUTO_SCHEMA_GEN environment variable in detail:
+The following describes the options for LIBRE311_AUTO_SCHEMA_GEN environment variable in detail:
 
 * *none** - No action will be performed.
 * *create-only** - Database creation will be generated.
@@ -25,7 +25,7 @@ The following describes the options for TODONAME_AUTO_SCHEMA_GEN environment var
 * *validate** - Validate the database schema.
 * *update** - Update the database schema.
 
-The TODONAME_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
+The LIBRE311_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
 Examples include `mysql:mysql-connector-java:8.0.31` and `org.postgresql:postgresql:42.4.2`.
 Multiple drivers can be specified.
 For example, `mysql:mysql-connector-java:8.0.31,com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2`.
