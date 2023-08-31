@@ -13,7 +13,7 @@ public class StorageUrlUtil {
     @Property(name = "wemove.image-storage.append-object-url-format")
     private String appendObjectUrlFormat;
 
-    @Value("${wemove.image-storage.bucket}")
+    @Property(name = "wemove.image-storage.bucket")
     private String bucketId;
 
 
