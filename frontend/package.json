@@ -32,6 +32,7 @@
     "leaflet-control-geocoder": "^2.4.0",
     "leaflet-geosearch": "^3.8.0",
     "leaflet.heat": "^0.2.0",
+    "leaflet.locatecontrol": "^0.79.0",
     "svelte-multiselect": "^8.6.2"
   }
 }

@@ -1,3 +1,7 @@
+@import "leaflet/dist/leaflet.css";
+@import "leaflet-geosearch/dist/geosearch.css";
+@import "leaflet.locatecontrol/dist/L.Control.Locate.css";
+
 @font-face {
   font-family: 'Gotham';
   src: url('/fonts/Gotham-Light.otf') format('opentype');
