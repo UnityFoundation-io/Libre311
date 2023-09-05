@@ -954,7 +954,6 @@
         } 
         else if (provider === "osm") {
           markerGroup = L.layerGroup().addTo(map);
-          console.log([parseFloat(issue.lat), parseFloat(issue.long)])
           marker = new L.marker([parseFloat(issue.lat), parseFloat(issue.long)], {
             icon: L.icon({
               iconAnchor: [12, 12],
@@ -1031,7 +1030,7 @@
             }
           });
         } else if (provider === "osm") {
-          L.featureGroup(markers).on('click', function() {
+          marker.on('click', function() {
             // Marker being deselected
             const selection = marker.getIcon();
             if (selection.url === issuePinSelectedSVG) {
