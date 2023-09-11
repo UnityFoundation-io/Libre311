@@ -744,19 +744,25 @@
 
   const geocodeLatLng = (lat, lng) => {
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
-    geocoder.geocode({ location: latlng }, (results, status) => {
-      if (status === "OK") {
-        if (results[0]) {
-          issueAddress.set(results[0].formatted_address);
-          issueAddressCoordinates.set({ lat: lat, lng: lng });
-          inputIssueAddressSelector.value = results[0].formatted_address;
+    if (provider === "googleMaps") {
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === "OK") {
+          if (results[0]) {
+            issueAddress.set(results[0].formatted_address);
+            issueAddressCoordinates.set({ lat: lat, lng: lng });
+            inputIssueAddressSelector.value = results[0].formatted_address;
+          } else {
+            console.log(messages["geocode"]["empty.results"]);
+          }
         } else {
-          console.log(messages["geocode"]["empty.results"]);
+          console.log(`${messages["geocode"]["error"]} ${status}`);
         }
-      } else {
-        console.log(`${messages["geocode"]["error"]} ${status}`);
-      }
-    });
+      });
+    }
+    else if (provider === "osm") {
+      
+    }
+    
   };
 
   const setNewCenter = (lat, lng, zoom = 15) => {
@@ -783,7 +789,7 @@
 
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
     issueTime.set(convertDate(new Date()));
-    geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
+    if (provider === "googleMaps") geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
   };
 
   const errorCallback = (error) => {
@@ -1221,7 +1227,7 @@
 
   const calculateBoundsAroundMarkers = () => {
     if (provider === "osm") {
-      if (markers) {
+      if (markers && bounds) {
         let bounds = L.latLngBounds();
         
         markers.forEach(function (marker) {
@@ -1509,7 +1515,7 @@
   const initOSM = async () => {
     const L = await import("leaflet");
     const GeoSearch = await import("leaflet-geosearch");
-    const leafletLocate = await import ("leaflet.locatecontrol")
+    await import ("leaflet.locatecontrol");
     await import("leaflet.heat");
 
     const issuePin = L.icon({
@@ -1539,12 +1545,13 @@
     const searchControl = new GeoSearch.GeoSearchControl({
       provider: provider,
       autoComplete: true,
-      autoCompleteDelay: 100,
+      autoCompleteDelay: 25,
       style: 'bar',
     });
 
     function searchEventHandler(result) {
-      console.log(result.location.label)
+      console.log(result.location)
+      issueAddress.set(result.location.label)
     }
 
     L.control.locate().addTo(map);
