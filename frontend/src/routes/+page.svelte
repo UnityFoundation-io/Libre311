@@ -826,7 +826,10 @@
   };
 
   const resetState = () => {
-    setTimeout(() => scrollToTop(), 100);
+    // setTimeout(() => scrollToTop(), 100);
+    scrollToTop();
+    showFooter = true;
+    adjustFooter();
     reduceBackGroundOpacity = true;
     clearMarkers();
     issueAddress.set();
@@ -1740,6 +1743,9 @@
     if (reportNewIssueStep6) reportNewIssueStep6 = false;
 
     currentStep = null;
+    scrollToTop();
+    showFooter = true;
+    adjustFooter();
   };
 
   const selectIssue = (issue) => {
@@ -1807,12 +1813,14 @@
   const resetFindIssue = () => {
     token = null;
     scrollToTop();
+    adjustFooter();
+    showFooter = true;
+    
 
     findReportedIssue = false;
     showFilters = false;
 
     setTimeout(async () => {
-      showFooter = true;
       await adjustFooter();
     }, 600);
 
@@ -1870,7 +1878,7 @@
         applyFontStretch();
       });
 
-    scrollToTop();
+    
 
     await getAllServiceCodes();
 
