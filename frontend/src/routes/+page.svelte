@@ -630,11 +630,16 @@
       console.error(err);
     }
 
+    // Creates a new marker for a newly reported issue
     if (isOnline) {
       if (provider === "osm"){
         const marker = new L.marker(
           [parseFloat($issueAddressCoordinates.lat), parseFloat($issueAddressCoordinates.lng)], {
-            icon: issuePin
+            icon: L.icon({
+              iconUrl: issuePinSVG,
+              iconSize: [25, 25],
+              iconAnchor: [12, 12]
+            })
           }).addTo(map);
       }
       else if (provider === "googleMaps") {
@@ -1552,6 +1557,7 @@
     function searchEventHandler(result) {
       console.log(result.location)
       issueAddress.set(result.location.label)
+      issueAddressCoordinates.set({lat: result.location.y, lng: result.location.x})
     }
 
     L.control.locate().addTo(map);
@@ -2649,10 +2655,12 @@
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
             on:click="{() => {
+              // Reviews data for the issue before it can be reported
               if (
                 $issueSubmitterName?.length < minSubmitterNameLength &&
                 $issueSubmitterName?.length !== 0
               ) {
+                console.log("invalid submitter name")
                 invalidSubmitterName.visible = true;
                 return;
               }
