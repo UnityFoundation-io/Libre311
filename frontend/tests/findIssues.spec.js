@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('open reported issues screen', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(5000);
   const issuesButton = await page.$('#button-find-issues');
   await issuesButton.click();
 
@@ -12,7 +12,7 @@ test('open reported issues screen', async ({ page }) => {
 
 test('apply filters to reported issues table', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(5000);
   const issuesButton = await page.$('#button-find-issues');
   await issuesButton.click();
 
@@ -24,7 +24,7 @@ test('apply filters to reported issues table', async ({ page }) => {
 
 test('view expanded issue details from reported issues table', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(5000);
   const issuesButton = await page.$('#button-find-issues');
   await issuesButton.click();
 
