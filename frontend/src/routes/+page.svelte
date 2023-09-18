@@ -810,13 +810,22 @@
       markers = [];
     }
   };
-  // TODO
+
   const clearIcons = () => {
-    markers.forEach((mkr) => {
-      const icon = mkr.getIcon();
-      icon.url = issuePinSVG;
-      mkr.setIcon(icon);
-    });
+    if (provider === "googleMaps") {
+      markers.forEach((mkr) => {
+        const icon = mkr.getIcon();
+        icon.url = issuePinSVG;
+        mkr.setIcon(icon);
+      });
+    }
+    else if (provider === "osm") {
+      markers.forEach((mkr) => {
+        const icon = mkr.getIcon();
+        icon.options.iconUrl = issuePinSVG;
+        mkr.setIcon(icon);
+      })
+    }
   };
 
   // From Unix Epoch to Current Time
@@ -973,9 +982,10 @@
               iconAnchor: [12, 12],
               iconSize: [25, 25],
               iconUrl:
-                [parseFloat(issue.lat), parseFloat(issue.long)] === selectedIssueMarker?.getLatLng()
+                parseFloat(issue.lat) === selectedIssueMarker?.getLatLng().lat &&
+                parseFloat(issue.long) === selectedIssueMarker?.getLatLng().lng
                   ? issuePinSelectedSVG
-                  : issuePinSVG
+                  : issuePinSVG,
             }),
             title: issue.name,
           }).addTo(markerGroup);
@@ -1047,7 +1057,7 @@
           marker.on('click', function() {
             // Marker being deselected
             const selection = marker.getIcon();
-            if (selection.url === issuePinSelectedSVG) {
+            if (selection.options.iconUrl === issuePinSelectedSVG) {
               clearIcons();
               toggleDetails(issue.service_request_id);
               selectedIssueMarker = undefined;
@@ -1058,29 +1068,29 @@
             // Marker being selected: selects all the markers in the same location
             const selectedMarkers = markers.filter(
               (mrk) =>
-                mrk.getLatLng() === marker.getLatLng()
+                mrk.getLatLng().lat === marker.getLatLng().lat &&
+                mrk.getLatLng().lng === marker.getLatLng().lng
                 // mrk.position.lat() === marker.position.lat() &&
                 // mrk.position.lng() === marker.position.lng()
             );
 
             // Clears all the markers that are not selected
             selectedMarkers.forEach((selectedMarker) => {
-              markers.forEach((marker) => {
+              markers.forEach((mkr) => {
                 if (
-                  marker.getLatLng() !== selectedMarker.getLatLng()
-                  // mkr.position.lat() !== selectedMarker.position.lat() &&
-                  // mkr.position.lng() !== selectedMarker.position.lng()
+                  mkr.getLatLng().lat !== selectedMarker.getLatLng().lat &&
+                  mkr.getLatLng().lng !== selectedMarker.getLatLng().lng
                 ) {
-                  let icon = marker.getIcon();
-                  icon.url = issuePinSVG;
-                  marker.setIcon(icon);
+                  let icon = mkr.getIcon();
+                  icon.options.iconUrl = issuePinSVG;
+                  mkr.setIcon(icon);
                 }
               });
 
               let icon = selectedMarker.getIcon();
-              if (icon.url === issuePinSVG) icon.url = issuePinSelectedSVG;
+              if (icon.options.iconUrl === issuePinSVG) icon.options.iconUrl = issuePinSelectedSVG;
               else {
-                icon.url = issuePinSVG;
+                icon.options.iconUrl = issuePinSVG;
                 selectedIssueMarker = undefined;
               }
 
@@ -1290,6 +1300,7 @@
     window.open(url, "_blank");
   };
 
+  // TODO for OSM
   const toggleMarkers = () => {
     for (var i = 0; i < markers.length; i++) {
       if (markers[i].getMap() === null) {
@@ -1525,17 +1536,6 @@
     const GeoSearch = await import("leaflet-geosearch");
     await import ("leaflet.locatecontrol");
     await import("leaflet.heat");
-
-    const issuePin = L.icon({
-      iconUrl: issuePinSVG,
-      iconSize: [25, 25],
-      iconAnchor: [12, 12]
-    });
-    const currentLocationPin = L.icon({
-      iconUrl: currentLocationSVG,
-      iconSize: [71, 71],
-      iconAnchor: [17, 34]
-    });
 
     const mapLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
@@ -1783,7 +1783,8 @@
 
       const selectedMarkers = markers.filter(
         (mrk) =>
-          mrk.getLatLng() === [Number(issue.lat), Number(issue.long)]
+          mrk.getLatLng().lat === Number(issue.lat) &&
+          mrk.getLatLng().lng === Number(issue.long)
       );
 
       if (selectedMarkers) {
@@ -1791,9 +1792,12 @@
 
         selectedMarkers.forEach((selectedMarker) => {
           markers.forEach((mkr) => {
-            if (mkr.getLatLng() === selectedMarker.getLatLng()) {
+            if (
+              mkr.getLatLng().lat === selectedMarker.getLatLng().lat &&
+              mkr.getLatLng().lng === selectedMarker.getLatLng().lng
+            ) {
               let icon = mkr.getIcon();
-              icon.url = issuePinSelectedSVG;
+              icon.options.iconUrl = issuePinSelectedSVG;
               mkr.setIcon(icon);
             }
           })
