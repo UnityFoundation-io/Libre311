@@ -809,6 +809,12 @@
       });
       markers = [];
     }
+    else if (provider === "osm"){
+      markers.forEach((marker) => {
+        marker.remove()
+      });
+      markers = [];
+    }
   };
 
   const clearIcons = () => {
@@ -1537,11 +1543,13 @@
     await import ("leaflet.locatecontrol");
     await import("leaflet.heat");
 
+    let reverseGeocodedAddress;
+
     const mapLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     });
-    
+
     map = new L.map('map', {
       center: [38.6740015313782, -90.453269188364],
       layers: [mapLayer],
@@ -1557,14 +1565,48 @@
       style: 'bar',
     });
 
+    const icon = L.icon({
+      iconAnchor: [34,68],
+      iconSize: [71, 71],
+      iconUrl: currentLocationSVG
+    });
+
+    currentPositionMarker = new L.marker(map.getCenter(), {
+      icon: icon,
+      title: messages["map"]["marker.title"]
+    }).addTo(map)
+
     function searchEventHandler(result) {
       console.log(result.location)
       issueAddress.set(result.location.label)
       issueAddressCoordinates.set({lat: result.location.y, lng: result.location.x})
     }
 
+    function centerMarkerOnMap(map) {
+      if (!findReportedIssue) {
+        let markerLat;
+        let markerLng;
+
+        currentPositionMarker.setLatLng(map.target.getCenter());
+
+        markerLat = currentPositionMarker.getLatLng().lat;
+        markerLng = currentPositionMarker.getLatLng().lng;
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${markerLat}&lon=${markerLng}`)
+          .then((response) => response.json())
+          .then((data) => {
+            reverseGeocodedAddress = data.display_name;
+          })
+        
+        issueAddress.set(reverseGeocodedAddress);
+        issueAddressCoordinates.set({lat: markerLat, lng: markerLng})
+      }
+    }
+
     L.control.locate().addTo(map);
     map.addControl(searchControl);
+
+    map.on('moveend', centerMarkerOnMap);
     map.on('geosearch/showlocation', searchEventHandler);
 
     heatmapToggle();
@@ -2021,10 +2063,10 @@
                 currentPositionMarker.setMap(null);
               }
 
-              // TODO
-              if (provider === "osm") {}
+              if (provider === "osm") {
+                currentPositionMarker.remove();
+              }
               
-
               // Clears the value of the input field inside the map
               inputIssueAddressSelector = document.getElementById('pac-input');
               inputIssueAddressSelector.value = '';
@@ -2092,6 +2134,9 @@
                     map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].removeAt(heatmapControlIndex);
 
                   currentPositionMarker.setMap(map);
+                }
+                else if (provider === "osm") {
+                  currentPositionMarker.addTo(map);
                 }
                 
               } else {
