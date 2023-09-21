@@ -1597,10 +1597,11 @@
           .then((response) => response.json())
           .then((data) => {
             reverseGeocodedAddress = data.display_name;
+            issueAddress.set(reverseGeocodedAddress);
+            issueAddressCoordinates.set({lat: currentPositionMarker.getLatLng().lat, lng: currentPositionMarker.getLatLng().lng})
           })
         
-        issueAddress.set(reverseGeocodedAddress);
-        issueAddressCoordinates.set({lat: currentPositionMarker.getLatLng().lat, lng: currentPositionMarker.getLatLng().lng})
+        
       }
     }
 
