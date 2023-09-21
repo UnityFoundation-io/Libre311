@@ -801,7 +801,6 @@
     console.log(error);
   };
 
-  // TODO
   const clearMarkers = () => {
     if (provider === "googleMaps") {
       markers.forEach((marker) => {
@@ -1563,8 +1562,7 @@
 
     const searchControl = new GeoSearch.GeoSearchControl({
       provider: provider,
-      autoComplete: true,
-      autoCompleteDelay: 25,
+      autoComplete: false,
       style: 'bar',
     });
 
@@ -1598,7 +1596,7 @@
           .then((data) => {
             reverseGeocodedAddress = data.display_name;
             issueAddress.set(reverseGeocodedAddress);
-            issueAddressCoordinates.set({lat: currentPositionMarker.getLatLng().lat, lng: currentPositionMarker.getLatLng().lng})
+            issueAddressCoordinates.set({lat: data.lat, lng: data.lon})
           })
         
         
