@@ -1545,6 +1545,8 @@
 
     let reverseGeocodedAddress;
 
+    inputIssueAddressSelector = document.getElementById("pac-input");
+
     const mapLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -1556,6 +1558,7 @@
       zoom: zoom
     });
 
+    // ~ leaflet-geosearch ~
     const provider = new GeoSearch.OpenStreetMapProvider();
 
     const searchControl = new GeoSearch.GeoSearchControl({
@@ -1584,29 +1587,29 @@
 
     function centerMarkerOnMap(map) {
       if (!findReportedIssue) {
-        let markerLat;
-        let markerLng;
-
         currentPositionMarker.setLatLng(map.target.getCenter());
+      }
+    }
 
-        markerLat = currentPositionMarker.getLatLng().lat;
-        markerLng = currentPositionMarker.getLatLng().lng;
-
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${markerLat}&lon=${markerLng}`)
+    function geocodeFromMarker() {
+      if (!findReportedIssue) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentPositionMarker.getLatLng().lat}&lon=${currentPositionMarker.getLatLng().lng}`)
           .then((response) => response.json())
           .then((data) => {
             reverseGeocodedAddress = data.display_name;
           })
         
         issueAddress.set(reverseGeocodedAddress);
-        issueAddressCoordinates.set({lat: markerLat, lng: markerLng})
+        issueAddressCoordinates.set({lat: currentPositionMarker.getLatLng().lat, lng: currentPositionMarker.getLatLng().lng})
       }
     }
 
     L.control.locate().addTo(map);
     map.addControl(searchControl);
 
-    map.on('moveend', centerMarkerOnMap);
+    
+    map.on('move', centerMarkerOnMap)
+    map.on('moveend', geocodeFromMarker);
     map.on('geosearch/showlocation', searchEventHandler);
 
     heatmapToggle();
