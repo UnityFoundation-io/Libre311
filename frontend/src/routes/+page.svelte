@@ -535,6 +535,8 @@
       `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
     );
 
+    console.log(res)
+
     if (
       !issuePosted &&
       res.data?.length > 0 &&
@@ -580,7 +582,9 @@
     }
   };
 
+  $: console.log($issueAddress, "issue Address changed")
   const postIssue = async () => {
+    console.log($issueAddress, "post issue")
     let attributes = `?service_code=${
       $issueType.id
     }&address_string=${$issueAddress}&lat=${
@@ -670,6 +674,8 @@
     issueType.set({ id: localStorage.getItem("issueTypeId") });
     issueAddress.set(localStorage.getItem("issueAddress"));
 
+    console.log($issueAddress, "offline issue address")
+
     if (provider === "googleMaps") {
       try {
         await geocoder.geocode({ address: $issueAddress }, (results, status) => {
@@ -695,12 +701,16 @@
     }
     else if (provider === "osm") {
       try {
-        await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${issueAddress}`)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${$issueAddress}`)
           .then((response) => response.json())
           .then((data) => {
-            issueAddress.set(data.display_name)
-            issueAddressCoordinates.set({ lat: parseFloat(data.lat), lng: parseFloat(data.lon) })
+            console.log('input address', $issueAddress)
+            console.log('response input address', data[0].display_name)
+            console.log('data call', data)
+            issueAddress.set(data[0].display_name)
+            issueAddressCoordinates.set({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) })
           })
+        console.log($issueAddress)
       } catch (err) {
         console.error(err);
         return
@@ -1606,6 +1616,7 @@
       console.log(result.location)
       issueAddress.set(result.location.label)
       issueAddressCoordinates.set({lat: result.location.y, lng: result.location.x})
+      console.log($issueAddressCoordinates)
     }
 
     function centerMarkerOnMap(map) {
