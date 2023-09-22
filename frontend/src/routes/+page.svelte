@@ -2181,7 +2181,7 @@
                   }}"
                 />
 
-                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
+                <Recaptcha bind:this={recaptcha} sitekey={sitekey} />
               </div>
             </form>
 

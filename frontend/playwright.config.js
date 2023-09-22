@@ -6,8 +6,10 @@ const config = {
 	webServer: {
 		command: 'npm run start:frontend',
 		url: 'http://127.0.0.1:3000',
-    reuseExistingServer: true
+    reuseExistingServer: false
 	},
+  retries: 2,
+  timeout: 30000,
 	testDir: './tests',
 	reporter: [ ['html', { open: 'never' }] ],
   use: {

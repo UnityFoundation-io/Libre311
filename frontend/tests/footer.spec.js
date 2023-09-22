@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 
 test('footer displays Local Motion logo', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await expect(page.getByRole('img', { name: 'local motion logo' })).toBeVisible();
+  await page.waitForTimeout(1000);
+  const img = page.getByRole('img', { name: 'local motion logo' });
+  await img.waitFor({ state: 'visible'})
 });
 
 test('footer displays major headings', async ({ page }) => {

@@ -2,8 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('open reported issues screen', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.waitForTimeout(5000);
-  const issuesButton = await page.$('#button-find-issues');
+  const issuesButton = await page.waitForSelector('#button-find-issues');
   await issuesButton.click();
 
   await page.locator('#map').isVisible();
@@ -12,8 +11,8 @@ test('open reported issues screen', async ({ page }) => {
 
 test('apply filters to reported issues table', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.waitForTimeout(5000);
-  const issuesButton = await page.$('#button-find-issues');
+  await page.waitForTimeout(1000);
+  const issuesButton = await page.waitForSelector('#button-find-issues');
   await issuesButton.click();
 
   // Opens filters
@@ -24,8 +23,8 @@ test('apply filters to reported issues table', async ({ page }) => {
 
 test('view expanded issue details from reported issues table', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.waitForTimeout(5000);
-  const issuesButton = await page.$('#button-find-issues');
+  await page.waitForTimeout(1000);
+  const issuesButton = await page.waitForSelector('#button-find-issues');
   await issuesButton.click();
 
   await page.getByRole('cell', { name: /Two city buses parked obstructing .*/ }).click();

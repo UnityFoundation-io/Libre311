@@ -28,10 +28,12 @@ jobs:
       env:
         VITE_BACKEND_URL: /api
         VITE_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        VITE_GOOGLE_RECAPTCHA_KEY: ${{ secrets.GOOGLE_RECAPTCHA_KEY }}
       run: |
           touch .env
           echo VITE_BACKEND_URL="$VITE_BACKEND_URL" >> .env
           echo VITE_GOOGLE_API_KEY="$VITE_GOOGLE_API_KEY" >> .env
+          echo VITE_GOOGLE_RECAPTCHA_KEY="$VITE_GOOGLE_RECAPTCHA_KEY" >> .env
 
           echo "cat .env"
           cat .env
@@ -43,7 +45,7 @@ jobs:
       run: npx playwright install --with-deps
       working-directory: ./frontend
     - name: Run Playwright tests
-      run: npx playwright test --workers=1
+      run: npx playwright test --workers=2
       working-directory: ./frontend
     - uses: actions/upload-artifact@v3
       if: always()
