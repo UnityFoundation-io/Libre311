@@ -14,7 +14,13 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="modal-backdrop" on:click="{closeModal}" transition:fade></div>
-<div class="modal" transition:fly="{{ y: 300 }}">
+<div
+  class="modal"
+  transition:fly="{{ y: 300 }}"
+  style="width: {window.innerWidth < 320
+    ? '100vw'
+    : '70vw'}; left: {window.innerWidth < 320 ? '0' : '15vw'}"
+>
   <h1 style="color: {color}">{title}</h1>
   <div class="content">
     <slot />
@@ -49,8 +55,6 @@
   .modal {
     position: fixed;
     top: 10vh;
-    width: 70vw;
-    left: 15vw;
     max-height: 80vh;
     background: white;
     border-radius: 15px;

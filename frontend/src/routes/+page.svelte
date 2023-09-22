@@ -3,9 +3,11 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
+  import { browser } from "$app/environment";
+  import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
-  import logo from "$lib/logo.png";
+  import logo from "$lib/logo.webp";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -17,6 +19,7 @@
   import imageSVG from "../icons/image.svg";
   import detailSVG from "../icons/detail.svg";
   import issuePinSVG from "../icons/issuepin.svg";
+  import issuePinSelectedSVG from "../icons/issuepinselected.svg";
   import forbiddenSVG from "../icons/forbidden.svg";
   import mylocationSVG from "../icons/mylocation.svg";
   import issueAddress from "../stores/issueAddress";
@@ -31,7 +34,6 @@
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
   import issueDetailList from "../stores/issueDetailList";
-  import footerDivHeight from "../stores/footerDivHeight";
   import {
     totalSize,
     totalPages,
@@ -39,9 +41,7 @@
     itemsPerPage,
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
-  import tableHeight from "../stores/tableHeight";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
-  import Font from "$lib/Font.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
@@ -78,6 +78,7 @@
   const issueDescriptionTrimCharacters = 36;
   const waitTime = 1000;
   const minAddressCharacters = 15;
+  const debounceTime = 1000;
 
   // Page Height
   let pageHeight = 1650;
@@ -110,6 +111,7 @@
     seeMore = false,
     spinner = false,
     heatmapVisible = false,
+    postingError = false,
     issuesRefs = {},
     multiSelectOptions = [],
     invalidOtherDescription = {
@@ -128,7 +130,11 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let validRegex =
+  let offlineAddressRegex = /^[0-9]+[a-zA-Z0-9&\-',. ]+$/gm;
+
+  let submitterNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
+
+  let emailRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
 
   let map,
@@ -136,6 +142,7 @@
     geocoder,
     bounds,
     selectedIssue,
+    selectedIssueMarker,
     heatmapControlIndex,
     timer,
     recaptcha,
@@ -152,7 +159,8 @@
     selected,
     isOnline,
     wasOnline,
-    imageData;
+    imageData,
+    timeoutId;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -181,6 +189,13 @@
     messageRejectedTwo = "",
     mediaUrl;
 
+  // Locks the background scroll when modal is open
+  $: if (browser && showModal) {
+    document.body.classList.add("modal-open");
+  } else if (browser && !showModal) {
+    document.body.classList.remove("modal-open");
+  }
+
   const getOrientation = () => {
     let previousState;
     scrollToTop();
@@ -190,7 +205,6 @@
 
     if (reportNewIssue) reportNewIssue = false;
     if (findReportedIssue) findReportedIssue = false;
-    footerDivHeight.set();
 
     setTimeout(() => {
       showFooter = true;
@@ -240,10 +254,8 @@
       setTimeout(() => {
         resetState();
         reportNewIssueStep6 = false;
-        backgroundSelector.style.height = $footerDivHeight + "px";
+        postingError = false;
       }, 3000);
-
-      setTimeout(() => (showFooter = true), 4000);
     }, 100);
   }
 
@@ -283,6 +295,8 @@
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
+
+    scrollToIssue(service_request_id);
   };
 
   const applyFontStretch = () => {
@@ -292,17 +306,13 @@
           font-family: 'Roboto', 'Helvetica';
           letter-spacing: 0.12rem;
         }
-      `;
 
-    document.head.appendChild(style);
-  };
+        td, th, select, input, label, textarea, li, #success-message, #issue-details, .step-five-issue-description, .step-five-submitter-name, .step-five-contact-info, .step-five-issue-location-address, .step-five-issue-type, .success-message, .success-message-two-offline, #success-message-2 {
+          letter-spacing: 0 !important;
+        }
 
-  const restoreFontStretch = () => {
-    const style = document.createElement("style");
-    style.textContent = `
-        * {
-          font-family: 'Gotham', 'Roboto', 'Helvetica';
-          letter-spacing: 0;
+        .back-button {
+          letter-spacing: 0.12rem !important;
         }
       `;
 
@@ -333,7 +343,16 @@
     });
 
     // Call the detectExplicitContent function with the image data URL
-    const isExplicit = await detectExplicitContent(imageData, apiKey);
+    let isExplicit;
+    try {
+      isExplicit = await detectExplicitContent(imageData, apiKey);
+    } catch (err) {
+      console.error(err);
+      imageData = null;
+      selectedFileSrc = null;
+      selectedFile = null;
+      spinner = false;
+    }
 
     if (isExplicit) {
       messageRejectedOne =
@@ -345,7 +364,9 @@
       selectedFileSrc = null;
       selectedFile = null;
       spinner = false;
-    } else {
+    } else if (
+      messageRejectedOne !== messages["report.issue"]["vision.api.error"]
+    ) {
       messageSuccess = messages["report.issue"]["uploaded.message.success"];
       spinner = false;
     }
@@ -367,19 +388,6 @@
     });
   };
 
-  const lazyLoadIssuesWithRecaptcha = async () => {
-    return new Promise((resolve, reject) => {
-      try {
-        recaptcha.renderRecaptcha((token) => {
-          handleTokenGetIssues(token);
-          resolve();
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  };
-
   const executeRecaptchaAndPostIssue = async () => {
     try {
       await new Promise((resolve, reject) => {
@@ -390,6 +398,9 @@
       await postIssue();
     } catch (error) {
       console.error(error);
+      postingError = true;
+
+      clearLocalStorage();
     }
   };
 
@@ -437,6 +448,13 @@
       return isExplicit;
     } catch (error) {
       console.error("Error:", error);
+      messageRejectedOne = messages["report.issue"]["vision.api.error"];
+      messageRejectedTwo = messages["report.issue"]["vision.api.error.two"];
+
+      spinner = false;
+      imageData = null;
+      selectedFileSrc = null;
+      selectedFile = null;
     }
   };
 
@@ -444,7 +462,6 @@
     if (e.detail.inView && hasMoreResults) {
       if (Number($currentPage) + 1 < $totalPages) {
         $currentPage++;
-        await lazyLoadIssuesWithRecaptcha();
         await getIssues($currentPage);
         clearHeatmap();
         await addIssuesToMap();
@@ -469,7 +486,7 @@
 
   const populateIssueTypeSelectDropdown = () => {
     const defaultOption = document.createElement("option");
-    defaultOption.text = "Issue Type";
+    defaultOption.text = messages["find.issue"]["issue.type.placeholder"];
     defaultOption.value = "";
     defaultOption.disabled = true;
     defaultOption.selected = true;
@@ -506,12 +523,7 @@
     let res;
 
     res = await axios.get(
-      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`,
-      {
-        headers: {
-          "X-G-RECAPTCHA-RESPONSE": token,
-        },
-      }
+      `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
     );
 
     if (
@@ -536,12 +548,24 @@
     if (res.data?.length > 0) {
       if (displayIssuesInMap) await addIssuesToMap();
     }
-
-    token = null;
   };
 
+  const validateOfflineAddress = (input) => {
+    if (input.match(offlineAddressRegex)) invalidOfflineAddress = false;
+    else {
+      invalidOfflineAddress = true;
+    }
+  }
+
+  const validateSubmitterName = (input) => {
+    if (input.match(submitterNameRegex)) invalidSubmitterName.visible = false;
+    else {
+      invalidSubmitterName.visible = true;
+    }
+  }
+
   const validateEmail = (input) => {
-    if (input.match(validRegex)) invalidEmail.visible = false;
+    if (input.match(emailRegex)) invalidEmail.visible = false;
     else {
       invalidEmail.visible = true;
     }
@@ -743,6 +767,14 @@
     markers = [];
   };
 
+  const clearIcons = () => {
+    markers.forEach((mkr) => {
+      const icon = mkr.getIcon();
+      icon.url = issuePinSVG;
+      mkr.setIcon(icon);
+    });
+  };
+
   // From Unix Epoch to Current Time
   const convertDate = (unixTimestamp) => {
     const date = new Date(unixTimestamp);
@@ -750,7 +782,10 @@
   };
 
   const resetState = () => {
-    setTimeout(() => scrollToTop(), 100);
+    // setTimeout(() => scrollToTop(), 100);
+    scrollToTop();
+    showFooter = true;
+    adjustFooter();
     reduceBackGroundOpacity = true;
     clearMarkers();
     issueAddress.set();
@@ -769,7 +804,11 @@
     imageData = "";
     selectedFileSrc = "";
     selectedFile = "";
-    setTimeout(() => (currentStep = null), 700);
+    setTimeout(async () => {
+      currentStep = null;
+      showFooter = true;
+      await adjustFooter();
+    }, 700);
   };
 
   const clearForm = () => {
@@ -849,14 +888,13 @@
     } ${day}, ${year} ${hours}:${minutes.toString().padStart(2, "0")}`;
     return formattedDate;
   };
-
   const addIssuesToMap = async () => {
     clearMarkers();
 
     if (heatmapVisible) {
       setTimeout(() => {
         const button = document.getElementById("Heatmap-control");
-        if (button) button.innerHTML = "Markers";
+        if (button) button.innerHTML = messages["map"]["button.markers.label"];
       }, 200);
     }
 
@@ -873,7 +911,11 @@
           title: issue.name,
           icon: {
             scaledSize: new google.maps.Size(25, 25),
-            url: issuePinSVG,
+            url:
+              parseFloat(issue.lat) === selectedIssueMarker?.position.lat() &&
+              parseFloat(issue.long) === selectedIssueMarker?.position.lng()
+                ? issuePinSelectedSVG
+                : issuePinSVG,
             anchor: new google.maps.Point(12, 12),
           },
         });
@@ -881,11 +923,65 @@
         markers.push(marker);
 
         google.maps.event.addListener(marker, "click", function () {
+          // Marker being deselected
+          const selection = marker.getIcon();
+          if (selection.url === issuePinSelectedSVG) {
+            clearIcons();
+            toggleDetails(issue.service_request_id);
+            selectedIssueMarker = undefined;
+            selectedIssue = undefined;
+            return;
+          }
+
+          // Marker being selected: selects all the markers in the same location
+          const selectedMarkers = markers.filter(
+            (mrk) =>
+              mrk.position.lat() === marker.position.lat() &&
+              mrk.position.lng() === marker.position.lng()
+          );
+
+          // Clears all the markers that are not selected
+          selectedMarkers.forEach((selectedMarker) => {
+            markers.forEach((mkr) => {
+              if (
+                mkr.position.lat() !== selectedMarker.position.lat() &&
+                mkr.position.lng() !== selectedMarker.position.lng()
+              ) {
+                let icon = mkr.getIcon();
+                icon.url = issuePinSVG;
+                mkr.setIcon(icon);
+              }
+            });
+
+            let icon = selectedMarker.getIcon();
+            if (icon.url === issuePinSVG) icon.url = issuePinSelectedSVG;
+            else {
+              icon.url = issuePinSVG;
+              selectedIssueMarker = undefined;
+            }
+
+            selectedMarker.setIcon(icon);
+          });
+
           toggleDetails(issue.service_request_id);
           selectedIssue = issue;
-          scrollToIssue(issue.service_request_id);
+          selectedIssueMarker = marker;
           setNewCenter(issue.lat, issue.long, 17);
+
+          // Table
+          const selectedRow = document.getElementById(issue.service_request_id);
+          const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
+          if (rowIndex > 0) {
+            const rowAboveC = tableSelector.rows[rowIndex - 1];
+            setTimeout(() => {
+              rowAboveC.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }, 500);
+          }
         });
+        // End of click handler
 
         heatmapData.push(
           new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
@@ -907,12 +1003,12 @@
               markers[i].setMap(null);
             }
             const button = document.getElementById("Heatmap-control");
-            button.innerHTML = "Markers";
+            button.innerHTML = messages["map"]["button.markers.label"];
 
             heatmap.setMap(map);
           } else {
             const button = document.getElementById("Heatmap-control");
-            button.innerHTML = "Heatmap";
+            button.innerHTML = messages["map"]["button.heatmap.label"];
 
             heatmap.setMap(null);
             for (var i = 0; i < markers.length; i++) {
@@ -953,7 +1049,7 @@
       heatmap.set("gradient", gradient);
 
       setTimeout(() => {
-        calculateBoundsAroundMarkers();
+        if (!selectedIssue) calculateBoundsAroundMarkers();
       }, 400);
     }
   };
@@ -990,8 +1086,8 @@
   };
 
   const handleBeforeUnload = (event) => {
-    const message =
-      "Are you sure you want to leave? Your unsaved changes will be lost.";
+    const message = messages["home"]["leave.message"];
+
     event.preventDefault();
     event.returnValue = message;
     return message;
@@ -1025,6 +1121,7 @@
     controlButton.style.width = "fit-content";
     controlButton.style.height = "20px";
     controlButton.innerText = text;
+    if (window.innerWidth < 320) controlButton.style.fontSize = "0.65rem";
 
     controlButton.addEventListener("click", clickHandler);
 
@@ -1059,29 +1156,41 @@
 
   const adjustFooter = () => {
     return new Promise((resolve, reject) => {
-      if (!$footerDivHeight && $footerSelector) {
-        footerDivHeight.set(
-          $footerSelector.offsetTop + $footerSelector.offsetHeight
-        );
+      let retries = 0;
+
+      if ($footerSelector) {
+        const footerDivHeight =
+          $footerSelector.offsetTop + $footerSelector.offsetHeight;
+        backgroundSelector.style.height = footerDivHeight + "px";
+
+        resolve();
+      } else if (!$footerSelector && retries < 50) {
+        retries++;
+        setTimeout(() => adjustFooter(), 300);
+      } else {
+        reject(new Error(messages["home"]["footer.selector.error"]));
       }
-
-      backgroundSelector.style.height = $footerDivHeight + "px";
-
-      resolve();
     });
   };
 
   const adjustTable = () => {
     return new Promise((resolve, reject) => {
-      if (tableSelector) {
-        let addExtra = 140;
+      let retries = 0;
 
-        if (!$tableHeight)
-          tableHeight.set(tableSelector.offsetTop + tableSelector.offsetHeight);
+      if (tableSelector && backgroundSelector) {
+        const addExtra = 140;
 
-        backgroundSelector.style.height = $tableHeight + addExtra + "px";
+        const tableHeight =
+          tableSelector.offsetTop + tableSelector.offsetHeight;
+
+        backgroundSelector.style.height = tableHeight + addExtra + "px";
 
         resolve();
+      } else if (!tableSelector && retries < 50) {
+        retries++;
+        setTimeout(() => adjustTable(), 300);
+      } else {
+        reject(new Error(messages["home"]["table.selector.error"]));
       }
     });
   };
@@ -1181,16 +1290,12 @@
     reportNewIssueStep5 = false;
 
     if (imageData) {
-      executeRecaptchaAndPostIssue();
+      await executeRecaptchaAndPostIssue();
     } else await postIssue();
 
     currentStep = 6;
     reportNewIssueStep6 = true;
     localStorage.setItem("completed", "true");
-  };
-
-  const handleTokenGetIssues = async (recaptchaToken) => {
-    if (recaptchaToken) token = recaptchaToken;
   };
 
   const readFileAsDataURL = (file) => {
@@ -1218,7 +1323,7 @@
 
   const scrollToIssue = (id) => {
     if (issuesRefs[id]) {
-      issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "start" });
+      issuesRefs[id].scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -1227,7 +1332,7 @@
       const Loader = module.Loader;
 
       const loader = new Loader({
-        apiKey: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk",
+        apiKey,
         version: "weekly",
         libraries: ["places", "visualization"],
       });
@@ -1237,6 +1342,7 @@
           zoom: zoom,
           center: { lat: 38.6740015313782, lng: -90.453269188364 },
           mapTypeControl: false,
+          gestureHandling: "greedy",
         });
 
         geocoder = new google.maps.Geocoder();
@@ -1258,7 +1364,7 @@
         });
 
         const centerAroundMeControl = createCenterAroundMeControl(
-          "CenterAroundMe",
+          "Center Around Me",
           function () {
             navigator.geolocation.getCurrentPosition(
               successCallback,
@@ -1394,17 +1500,58 @@
     if (reportNewIssueStep6) reportNewIssueStep6 = false;
 
     currentStep = null;
+    scrollToTop();
+    showFooter = true;
+    adjustFooter();
+  };
+
+  const selectIssue = (issue) => {
+    toggleDetails(issue.service_request_id);
+    selectedIssue = issue;
+
+    // In the case there are more than one marker stacked in the same coordinate
+    const selectedMarkers = markers.filter(
+      (mrk) =>
+        mrk.position.lat() === Number(issue.lat) &&
+        mrk.position.lng() === Number(issue.long)
+    );
+
+    if (selectedMarkers) {
+      selectedIssueMarker = selectedMarkers[0];
+
+      selectedMarkers.forEach((selectedMarker) => {
+        markers.forEach((mkr) => {
+          if (
+            mkr.position.lat() === selectedMarker.position.lat() &&
+            mkr.position.lng() === selectedMarker.position.lng()
+          ) {
+            let icon = mkr.getIcon();
+            icon.url = issuePinSelectedSVG;
+            mkr.setIcon(icon);
+          }
+        });
+      });
+    }
+  };
+
+  const deselectIssue = (issue) => {
+    toggleDetails(issue);
+    clearIcons();
+    selectedIssue = undefined;
+    selectedIssueMarker = undefined;
   };
 
   const resetFindIssue = () => {
     token = null;
     scrollToTop();
+    adjustFooter();
+    showFooter = true;
+    
 
     findReportedIssue = false;
     showFilters = false;
 
     setTimeout(async () => {
-      showFooter = true;
       await adjustFooter();
     }, 600);
 
@@ -1415,12 +1562,21 @@
     selectedIssue = null;
   };
 
-  const getIssuesWithToken = async () => {
-    if (token) await getIssues(0, true);
-    else setTimeout(getIssuesWithToken, 100);
+  const handleResize = () => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      if (findReportedIssue) {
+        adjustTable();
+      }
+
+      if (showFooter) {
+        adjustFooter();
+      }
+    }, debounceTime);
   };
 
   onMount(async () => {
+    setTimeout(() => console.clear(), 100);
     await loadRecaptcha();
     await getTokenInfo();
 
@@ -1435,11 +1591,25 @@
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
 
+    window.addEventListener("resize", handleResize);
+
     getOrientation();
 
     loadColorPalette();
 
-    scrollToTop();
+    let font = new FontFaceObserver("Gotham");
+
+    font
+      .load()
+      .then(function () {
+        // font is loaded successfully.
+      })
+      .catch(function () {
+        // font failed to load.
+        applyFontStretch();
+      });
+
+    
 
     await getAllServiceCodes();
 
@@ -1578,7 +1748,6 @@
                 showFooter = false;
                 findReportedIssue = true;
                 setTimeout(async () => {
-                  if (!token) recaptcha.renderRecaptcha(handleTokenGetIssues);
                   await adjustTable();
 
                   setTimeout(() => {
@@ -1589,7 +1758,7 @@
                   }, 650);
                 }, 250);
 
-                if (filteredIssuesData?.length === 0) getIssuesWithToken();
+                if (filteredIssuesData?.length === 0) await getIssues();
 
                 addIssuesToMap();
               } else resetFindIssue();
@@ -1606,8 +1775,11 @@
               <img
                 src="{closeSVG}"
                 alt="close find an issue"
-                style="vertical-align: -0.3rem; margin-right: 1.3rem; margin-left: -0.7rem"
-                height="25rem"
+                style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
+                320
+                  ? '1.3rem'
+                  : '1rem'}; margin-left: -0.7rem"
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.find.issue.label"]}
@@ -1687,9 +1859,6 @@
               } else if (reportNewIssue) {
                 reportNewIssue = false;
                 resetState();
-
-                backgroundSelector.style.height = $footerDivHeight + 'px';
-                setTimeout(() => (showFooter = true), 700);
               }
               if (!reportNewIssue && currentStep === 2) {
                 reportNewIssueStep2 = false;
@@ -1730,8 +1899,11 @@
               <img
                 src="{closeSVG}"
                 alt="close report a new issue"
-                style="vertical-align: -0.3rem; margin-right: 1.3rem; margin-left: -2.1rem"
-                height="25rem"
+                style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
+                320
+                  ? '1.3rem'
+                  : '1rem'}; margin-left: -2.1rem"
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.report.issue.label"]}
@@ -2058,7 +2230,9 @@
                     X
                   </div>
                 </div>
-                <div style="margin-top: 1rem">{messageSuccess}</div>
+                <div style="margin-top: 1rem" id="success-message">
+                  {messageSuccess}
+                </div>
               </div>
             {/if}
 
@@ -2164,6 +2338,7 @@
               {messages["report.issue"]["label.contact.info"]}
             </span>
             <input
+              type="email"
               class="step-four-input-contact-info"
               bind:value="{$issueSubmitterContact}"
               on:blur="{() => {
@@ -2217,8 +2392,12 @@
                 return;
               }
 
+              if ($issueAddress) validateOfflineAddress($issueAddress);
+              if ($issueSubmitterName) validateSubmitterName($issueSubmitterName);
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
+              if (invalidOfflineAddress) return;
+              if (invalidSubmitterName.visible) return;
               if (invalidEmail.visible) return;
 
               localStorage.setItem(
@@ -2236,7 +2415,11 @@
               reportNewIssueStep5 = true;
             }}"
           >
-            {messages["report.issue"]["button.review.submit"]}
+            {#if window.innerWidth < 320}
+              {messages["report.issue"]["button.review.submit.short"]}
+            {:else}
+              {messages["report.issue"]["button.review.submit"]}
+            {/if}
             <img
               src="{pageLastSVG}"
               alt="submit issue"
@@ -2276,7 +2459,9 @@
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
               {#each $issueDetail as detail, i}
-                <span style="margin-right: 1rem">{i + 1}-{detail.label}</span>
+                <span id="issue-details" style="margin-right: 1rem"
+                  >{i + 1}-{detail.label}</span
+                >
               {/each}
             </div>
           </div>
@@ -2385,16 +2570,21 @@
           class:hidden="{!reportNewIssueStep6}"
         >
           <div class="success-message">
-            {messages["report.issue"]["issue.reported.success.message.one"]}
+            {#if postingError}
+              {messages["report.issue"]["issue.reported.failure"]}
+            {:else}
+              {messages["report.issue"]["issue.reported.success.message.one"]}
+            {/if}
           </div>
 
           <div
             class:success-message-two-offline="{!isOnline}"
             style="margin-bottom: 0.5rem"
+            id="success-message-2"
           >
-            {#if isOnline}
+            {#if isOnline && postingError === false}
               {messages["report.issue"]["issue.reported.success.message.two"]}
-            {:else}
+            {:else if isOnline === false && postingError === false}
               {messages["report.issue"][
                 "issue.reported.success.message.two.offline"
               ]}
@@ -2410,7 +2600,9 @@
       <div
         id="stepOne"
         class:visible="{reportNewIssue || findReportedIssue}"
-        style="width:{!isOnline ? '50vw' : '100vw'} "
+        style="width:{(!isOnline && window.innerWidth) > 320
+          ? '50vw'
+          : '100vw'}"
         class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
@@ -2419,6 +2611,7 @@
               {messages["report.issue"]["label.step"]}
               <button class="numbers">1</button>
             </div>
+
             <div class="step-one-issue-location-label">
               {messages["report.issue"]["label.issue.location"]}
             </div>
@@ -2445,7 +2638,10 @@
               </div>
             {/if}
 
-            <div class="step-one-issue-address">
+            <div
+              class="step-one-issue-address"
+              style="display:{isOnline ? 'inherit' : 'none'}"
+            >
               {#if isOnline}
                 <span style="color: {primaryTwo}">
                   {$issueAddress ??
@@ -2521,12 +2717,15 @@
             on:cancel="{() => (showModal = false)}"
           >
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Type:</span>
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.type"]}</span
+              >
               {selectedIssue.service_name}
             </div>
 
             <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem">Detail:</span
+              <span style="font-weight: 300; margin-right: 0.3rem"
+                >{messages["modal"]["label.detail"]}</span
               >
               {#if selectedIssue?.selected_values}
                 {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
@@ -2541,19 +2740,19 @@
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Description:</span
+                >{messages["modal"]["label.description"]}</span
               >{selectedIssue.description ?? "-"}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Requested At:</span
+                >{messages["modal"]["label.requested.at"]}</span
               >{formatDate(selectedIssue.requested_datetime)}
             </div>
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
-                >Location:</span
+                >{messages["modal"]["label.location"]}</span
               >{selectedIssue.address}
             </div>
 
@@ -2572,8 +2771,6 @@
         {/if}
 
         {#if findReportedIssue}
-          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
-
           <div class="filter-label">
             <div>
               {messages["find.issue"]["label.filter"]}
@@ -2715,7 +2912,7 @@
             <table bind:this="{tableSelector}" class="issues-table">
               <thead>
                 <tr>
-                  <th>
+                  <th id="issue-type-header">
                     {messages["find.issue"]["issues.table.column.one"]}
                   </th>
                   <th>
@@ -2734,8 +2931,25 @@
                 {#if filteredIssuesData}
                   {#each filteredIssuesData as issue (issue.service_request_id)}
                     <tr
+                      id="{issue.service_request_id}"
                       bind:this="{issuesRefs[issue.service_request_id]}"
-                      on:click="{() => setNewCenter(issue.lat, issue.long, 17)}"
+                      on:click="{(e) => {
+                        const clickedElement = e.target;
+                        const selectedRow = clickedElement.closest('tr');
+                        const rowIndex = Array.from(tableSelector.rows).indexOf(
+                          selectedRow
+                        );
+
+                        if (rowIndex > 0) {
+                          const rowAbove = tableSelector.rows[rowIndex - 1];
+                          rowAbove.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start',
+                          });
+                        }
+
+                        setNewCenter(issue.lat, issue.long, 17);
+                      }}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id
                       )
@@ -2747,8 +2961,17 @@
                       <td
                         id="td-issue-type"
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {#if issue.service_name.length > issueTypeTrimCharacters}
@@ -2783,8 +3006,17 @@
                           : 'hidden'}; 
                           "
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {issue.description ?? "-"}
@@ -2821,8 +3053,17 @@
                         id="td-reported-time"
                         style="text-align: center"
                         on:click="{() => {
-                          toggleDetails(issue.service_request_id);
-                          selectedIssue = issue;
+                          if (
+                            selectedIssue &&
+                            selectedIssue.lat === issue.lat &&
+                            selectedIssue.long === issue.long
+                          ) {
+                            deselectIssue(issue.service_request_id);
+                            return;
+                          } else {
+                            clearIcons();
+                            selectIssue(issue);
+                          }
                         }}"
                       >
                         {formatRelativeDate(issue.requested_datetime)}
@@ -2830,15 +3071,22 @@
                     </tr>
                   {:else}
                     <tr>
-                      <td>{messages["find.issue"]["empty.results"]}</td>
+                      <td
+                        style="padding-left: {window.innerWidth >= 815
+                          ? '0.5rem'
+                          : '0'}">{messages["find.issue"]["empty.results"]}</td
+                      >
                     </tr>
                   {/each}
                 {:else}
                   <tr>
-                    <td>{messages["find.issue"]["empty.results"]}</td>
+                    <td
+                      style="padding-left: {window.innerWidth >= 815
+                        ? '0.5rem'
+                        : '0'}">{messages["find.issue"]["empty.results"]}</td
+                    >
                   </tr>
                 {/if}
-                <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
                 <div
                   use:inview="{{ options }}"
                   on:change="{loadMoreResults}"
@@ -2852,8 +3100,3 @@
     </div>
   </div>
 {/if}
-
-<Font
-  on:primaryFontNotAvailable="{applyFontStretch}"
-  on:primaryFontAvailable="{restoreFontStretch}"
-/>

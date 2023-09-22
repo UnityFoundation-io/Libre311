@@ -3,7 +3,6 @@ package app.service.storage;
 import app.dto.storage.PhotoUploadDTO;
 import app.recaptcha.ReCaptchaService;
 import app.safesearch.GoogleImageSafeSearchService;
-import com.google.cloud.storage.Blob;
 import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
@@ -22,12 +21,20 @@ public class StorageService {
     private final ObjectStorageOperations<?, ?, ?> objectStorage;
     private final ReCaptchaService reCaptchaService;
     private final GoogleImageSafeSearchService googleImageClassificationService;
+    private final StorageUrlUtil storageUrlUtil;
 
-
-    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService) {
+    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, StorageUrlUtil storageUrlUtil) {
         this.objectStorage = objectStorage;
         this.reCaptchaService = reCaptchaService;
         this.googleImageClassificationService = googleImageClassificationService;
+        this.storageUrlUtil = storageUrlUtil;
+    }
+
+    public StorageService() {
+        this.storageUrlUtil = null;
+        this.objectStorage = null;
+        this.reCaptchaService = null;
+        this.googleImageClassificationService = null;
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
@@ -56,9 +63,7 @@ public class StorageService {
         byte[] bytes = Base64.getDecoder().decode(image);
         UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
         UploadResponse<?> response = objectStorage.upload(request);
-        Blob blob = (Blob) response.getNativeResponse();
-        String imageLink = "https://storage.googleapis.com/" + blob.getBucket() + "/" + blob.getName();
 
-        return imageLink;
+        return storageUrlUtil.getObjectUrlString(response.getKey());
     }
 }

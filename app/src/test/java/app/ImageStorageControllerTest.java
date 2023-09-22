@@ -2,6 +2,7 @@ package app;
 
 import app.dto.storage.PhotoUploadDTO;
 import app.util.MockReCaptchaService;
+import app.util.MockStorageService;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -15,7 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@MicronautTest(environments={"app-api-test-data"})
+@MicronautTest
 public class ImageStorageControllerTest {
 
     @Inject
@@ -24,6 +25,9 @@ public class ImageStorageControllerTest {
 
     @Inject
     MockReCaptchaService mockReCaptchaService;
+
+    @Inject
+    MockStorageService mockStorageService;
 
     // upload
     @Test
