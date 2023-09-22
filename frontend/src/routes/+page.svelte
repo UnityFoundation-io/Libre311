@@ -135,7 +135,7 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let offlineAddressRegex = /^[0-9]+[a-zA-Z0-9&\-',. ]+$/gm;
+  let offlineAddressRegex = /^[0-9]+[a-zA-Z0-9&\-'’,. ]+$/gm;
 
   let submitterNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
 
@@ -641,6 +641,8 @@
               iconAnchor: [12, 12]
             })
           }).addTo(map);
+
+        markers.push(marker)
       }
       else if (provider === "googleMaps") {
         const marker = new google.maps.Marker({
@@ -667,26 +669,42 @@
 
     issueType.set({ id: localStorage.getItem("issueTypeId") });
     issueAddress.set(localStorage.getItem("issueAddress"));
-    try {
-      await geocoder.geocode({ address: $issueAddress }, (results, status) => {
-        if (status === "OK") {
-          const lat = results[0].geometry.location.lat();
-          const lng = results[0].geometry.location.lng();
 
-          issueAddressCoordinates.set({ lat: lat, lng: lng });
-        } else {
-          geocodeError = true;
-          clearLocalStorage();
-          clearForm();
-          console.error(
-            `Geocode was not successful for the following reason: ${status}`
-          );
-          return;
-        }
-      });
-    } catch (err) {
-      console.error(err);
-      return;
+    if (provider === "googleMaps") {
+      try {
+        await geocoder.geocode({ address: $issueAddress }, (results, status) => {
+          if (status === "OK") {
+            const lat = results[0].geometry.location.lat();
+            const lng = results[0].geometry.location.lng();
+
+            issueAddressCoordinates.set({ lat: lat, lng: lng });
+          } else {
+            geocodeError = true;
+            clearLocalStorage();
+            clearForm();
+            console.error(
+              `Geocode was not successful for the following reason: ${status}`
+            );
+            return;
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        return;
+      }
+    }
+    else if (provider === "osm") {
+      try {
+        await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${issueAddress}`)
+          .then((response) => response.json())
+          .then((data) => {
+            issueAddress.set(data.display_name)
+            issueAddressCoordinates.set({ lat: parseFloat(data.lat), lng: parseFloat(data.lon) })
+          })
+      } catch (err) {
+        console.error(err);
+        return
+      }
     }
 
     issueDetailList.set({ code: localStorage.getItem("issueDetailListCode") });
@@ -765,7 +783,14 @@
       });
     }
     else if (provider === "osm") {
-      
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
+        .then((response) => response.json())
+        .then((data) => {
+          issueAddress.set(data.display_name);
+          issueAddressCoordinates.set({ lat: lat, lng: lng });
+          inputIssueAddressSelector.value = data.display_name;
+        })
+
     }
     
   };
@@ -794,7 +819,7 @@
 
     setNewCenter($userCurrentLocation.lat, $userCurrentLocation.lng);
     issueTime.set(convertDate(new Date()));
-    if (provider === "googleMaps") geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
+    geocodeLatLng($userCurrentLocation.lat, $userCurrentLocation.lng);
   };
 
   const errorCallback = (error) => {
@@ -1598,8 +1623,6 @@
             issueAddress.set(reverseGeocodedAddress);
             issueAddressCoordinates.set({lat: data.lat, lng: data.lon})
           })
-        
-        
       }
     }
 
@@ -1612,6 +1635,8 @@
     map.on('geosearch/showlocation', searchEventHandler);
 
     heatmapToggle();
+
+    if (localStorage.getItem("completed")) await postOfflineIssue();
   }
 
   const initGoogleMaps = async () => {
@@ -2137,6 +2162,7 @@
 
                   currentPositionMarker.setMap(map);
                 }
+                //
                 else if (provider === "osm") {
                   currentPositionMarker.addTo(map);
                 }
