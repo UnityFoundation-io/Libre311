@@ -85,7 +85,7 @@ The authentication method leverages OAuth where the Identity Provider is Google.
 backend issues a JWT token (in the form of a cookie) with embedded details as defined in
 `app/src/main/java/app/security/WeMoveAuthenticationMapper.java`.
 As can be drawn from the code, the user is 'fully' authenticated (against the We Move service) if the user's email already
-exists in the database.
+exists in the database under the `wemove_user` table.
 
 ### Data Layer
 The We Move Service data models draw inspiration from Open311 GeoReport API v2 specification and is composed of the 
@@ -100,6 +100,18 @@ location details.
 The above data models and their respective data
 [repository interfaces](https://micronaut-projects.github.io/micronaut-data/latest/guide/#repositories)
 can be found in `app/src/main/java/app/model`.
+
+#### Initializing Services and Service Definitions in the Database
+Assuming DDL is enabled (see jpa.default.properties.hibernate.hbm2ddl.auto in application.yml),
+Services (or Issue Types) and their respective Service Definitions can be established before build time. To do so, modify
+the application-data.yml file, build the project, then include `data` in the MICRONAUT_ENVIRONMENTS environment variable
+before executing the application as a service.
+
+After initializing the data and before subsequent bootstrapping of the application, one should remove `data` from the
+MICRONAUT_ENVIRONMENTS environment variable so as not to receive database primary key conflicts when reloading the data
+outlined in application-data.yml.
+
+As of this writing, any modification or additions of Services and Service Definition must be done manually in the database.
 
 ### Service Layer
 Following the pattern of CRUD capabilities per resource, a service primarily interacts with its corresponding resource;
