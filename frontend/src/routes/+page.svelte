@@ -674,8 +674,6 @@
     issueType.set({ id: localStorage.getItem("issueTypeId") });
     issueAddress.set(localStorage.getItem("issueAddress"));
 
-    console.log($issueAddress, "offline issue address")
-
     if (provider === "googleMaps") {
       try {
         await geocoder.geocode({ address: $issueAddress }, (results, status) => {
@@ -704,13 +702,9 @@
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${$issueAddress}`)
           .then((response) => response.json())
           .then((data) => {
-            console.log('input address', $issueAddress)
-            console.log('response input address', data[0].display_name)
-            console.log('data call', data)
             issueAddress.set(data[0].display_name)
             issueAddressCoordinates.set({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) })
           })
-        console.log($issueAddress)
       } catch (err) {
         console.error(err);
         return
