@@ -801,7 +801,8 @@
 
   const setNewCenter = (lat, lng, zoom = 15) => {
     if (provider === "osm"){
-      map.setView([lat, lng], zoom);
+      let newCenter = new L.LatLng(lat, lng)
+      map.setView(newCenter, zoom);
     }
     else if (provider === "googleMaps") {
       let newCenter = new google.maps.LatLng(lat, lng);
@@ -811,7 +812,7 @@
   }
 
   const setNewZoom = (zoomLevel) => {
-    // if (provider === "osm") map.zoom(zoomLevel);
+    if (provider === "osm") map.zoom(zoomLevel);
     if (provider === "googleMaps") map.setZoom(zoomLevel);
   };
 
@@ -1280,19 +1281,20 @@
   const calculateBoundsAroundMarkers = () => {
     if (provider === "osm") {
       if (markers && bounds) {
-        let bounds = L.latLngBounds();
+        let bounds = new L.latLngBounds();
         
         markers.forEach(function (marker) {
           bounds.extend(marker.getLatLng());
         })
     
+        setNewCenter(bounds.getCenter())
         map.fitBounds(bounds);
       }
     }
     else if (provider === "googleMaps") {
       if (markers && bounds) {
         let lat, lng;
-        bounds = new google.maps.LatLngBounds();
+        let bounds = new google.maps.LatLngBounds();
         for (let i = 0; i < markers.length; i++) {
           lat = markers[i].position.lat();
           lng = markers[i].position.lng();
