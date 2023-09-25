@@ -1273,7 +1273,7 @@
         return container;
       },
     });
-
+    
     map.addControl(new CustomControl());
   };
 
@@ -1572,8 +1572,6 @@
     await import("leaflet.heat");
 
     let reverseGeocodedAddress;
-
-    inputIssueAddressSelector = document.getElementById("pac-input");
 
     const mapLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
@@ -2100,8 +2098,11 @@
               }
               
               // Clears the value of the input field inside the map
-              inputIssueAddressSelector = document.getElementById('pac-input');
-              inputIssueAddressSelector.value = '';
+              if (provider === "googleMaps") {
+                inputIssueAddressSelector = document.getElementById('pac-input');
+                inputIssueAddressSelector.value = '';
+              }
+              
 
               if (!findReportedIssue) {
                 showFooter = false;
@@ -3063,11 +3064,13 @@
 
         <!-- END Report New Issue Flow -->
         {#if isOnline}
-          <input
-            id="pac-input"
-            placeholder="{messages['map']['pac-input-placeholder']}"
-            type="text"
-          />
+          {#if (provider === 'googleMaps')}
+            <input
+              id="pac-input"
+              placeholder="{messages['map']['pac-input-placeholder']}"
+              type="text"
+            />
+          {/if}
 
           <div id="map"></div>
         {/if}
