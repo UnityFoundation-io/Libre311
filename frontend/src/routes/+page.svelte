@@ -1590,8 +1590,9 @@
     const provider = new GeoSearch.OpenStreetMapProvider();
 
     const searchControl = new GeoSearch.GeoSearchControl({
-      provider: provider,
       autoComplete: false,
+      provider: provider,
+      showMarker: false,
       style: 'bar',
     });
 
