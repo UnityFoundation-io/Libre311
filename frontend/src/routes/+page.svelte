@@ -32,6 +32,8 @@
   import issueDescription from "../stores/issueDescription";
   import issueSubmitterName from "../stores/issueSubmitterName";
   import issueSubmitterContact from "../stores/issueSubmitterContact";
+  import hasHeatmapControl from "../stores/hasHeatmapControl";
+  import osmHeatmapControl from "../stores/osmHeatmapControl";
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
   import issueDetailList from "../stores/issueDetailList";
@@ -180,7 +182,6 @@
   let markers = [];
   let heatmapData = [];
   let currentPositionMarker;
-  let osmHeatmapControl;
 
   let issuesData = [];
 
@@ -788,17 +789,6 @@
         }
       });
     }
-    else if (provider === "osm") {
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
-        .then((response) => response.json())
-        .then((data) => {
-          issueAddress.set(data.display_name);
-          issueAddressCoordinates.set({ lat: lat, lng: lng });
-          inputIssueAddressSelector.value = data.display_name;
-        })
-
-    }
-    
   };
 
   const setNewCenter = (lat, lng, zoom = 15) => {
@@ -1273,65 +1263,14 @@
             return container;
           },
         });
-        osmHeatmapControl = new customControl
+        if ($osmHeatmapControl === null) osmHeatmapControl.set(new customControl)
 
-
-        if (!hasHeatmapButton){
-          osmHeatmapControl.addTo(map)
-          hasHeatmapButton = true
-        }
-        
-
-
-
-
+        if (!$hasHeatmapControl){
+          $osmHeatmapControl.addTo(map)
+          hasHeatmapControl.set(true)          
+        } 
       }
     }
-  };
-
-  const heatmapToggle = () => {
-    let CustomControl = L.Control.extend({
-      options: {
-        position: "topright",
-      },
-
-      onAdd: function (map) {
-        let container = L.DomUtil.create(
-          "img",
-          "leaflet-bar leaflet-control leaflet-control-custom"
-        );
-
-        container.style.backgroundColor = "white";
-        container.src = fireSVG;
-        container.style.width = "30px";
-        container.style.height = "30px";
-        container.innerHTML =
-          '<button style="width: 100%; height: 100%;">X</button>';
-
-        container.onclick = function () {
-
-          heatmapVisible = !heatmapVisible;
-
-          if (heatmapVisible) {     
-            for (var i = 0; i < markers.length; i++) {
-              markers[i].removeFrom(map);
-            }    
-            map.addLayer(heatmap);
-            
-          }
-          if (!heatmapVisible) {
-            map.removeLayer(heatmap);
-            for (var i = 0; i < markers.length; i++) {
-              markers[i].addTo(map);
-            }
-          }
-        };
-
-        return container;
-      },
-    });
-    
-    map.addControl(new CustomControl());
   };
 
   const calculateBoundsAroundMarkers = () => {
@@ -1392,24 +1331,12 @@
     window.open(url, "_blank");
   };
 
-  // TODO for OSM
   const toggleMarkers = () => {
-    if (provider === "googleMaps") {
-      for (var i = 0; i < markers.length; i++) {
-        if (markers[i].getMap() === null) {
-          markers[i].setMap(map);
-        } else {
-          markers[i].setMap(null);
-        }
-      }
-    }
-    else if (provider === "osm") {
-      for (var i = 0; i < markers.length; i++) {
-        if (map.hasLayer(markerGroup)) {
-          markers[i].remove()
-        } else {
-          markers[i].addTo(map)
-        }
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].getMap() === null) {
+        markers[i].setMap(map);
+      } else {
+        markers[i].setMap(null);
       }
     }
   };
@@ -2238,12 +2165,12 @@
 
                   currentPositionMarker.setMap(map);
                 }
-                //
+                
                 else if (provider === "osm") {
-                  
-                  osmHeatmapControl.remove();
-                  hasHeatmapButton = false;
-
+                  if ($hasHeatmapControl) {
+                    $osmHeatmapControl.remove()
+                    hasHeatmapControl.set(false)
+                  }
                   currentPositionMarker.addTo(map);
                 }
                 
