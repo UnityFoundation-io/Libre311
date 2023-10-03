@@ -21,7 +21,6 @@
   import issuePinSVG from "../icons/issuepin.svg";
   import issuePinSelectedSVG from "../icons/issuepinselected.svg";
   import forbiddenSVG from "../icons/forbidden.svg";
-  import mylocationSVG from "../icons/mylocation.svg";
   import fireSVG from "../icons/fire.svg";
   import issueAddress from "../stores/issueAddress";
   import seeMoreHeight from "../stores/seeMoreHeight";
