@@ -137,7 +137,7 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let offlineAddressRegex = /^[0-9]+[a-zA-Z0-9&\-'’,. ]+$/gm;
+  let offlineAddressRegex = /^[a-zA-Z&\-'’,. ]+|[0-9]+[a-zA-Z0-9&\-'’,. ]+$/gm;
 
   let submitterNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
 
