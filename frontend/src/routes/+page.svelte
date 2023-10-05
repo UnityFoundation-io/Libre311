@@ -1217,9 +1217,6 @@
         ];
         heatmap.set("gradient", gradient);
 
-        setTimeout(() => {
-          if (!selectedIssue) calculateBoundsAroundMarkers();
-        }, 400);
       } 
       else if (provider === "osm") {
         const customControl = L.Control.extend({
@@ -1270,6 +1267,11 @@
         } 
       }
     }
+    setTimeout(() => {
+      if (!selectedIssue) {
+        calculateBoundsAroundMarkers();
+      }
+    }, 400);
   };
 
   const calculateBoundsAroundMarkers = () => {
@@ -1278,10 +1280,10 @@
         let bounds = new L.latLngBounds();
         
         markers.forEach(function (marker) {
-          bounds.extend(marker.getLatLng());
+          bounds.extend([marker.getLatLng().lat, marker.getLatLng().lng]);
         })
-    
-        setNewCenter(bounds.getCenter())
+
+        setNewCenter(bounds.getCenter().lat, bounds.getCenter().lng)
         map.fitBounds(bounds);
       }
     }
@@ -1578,6 +1580,8 @@
       layers: [mapLayer],
       zoom: zoom
     });
+
+    bounds = new L.latLngBounds()
 
     // ~ leaflet-geosearch ~
     const provider = new GeoSearch.OpenStreetMapProvider();
