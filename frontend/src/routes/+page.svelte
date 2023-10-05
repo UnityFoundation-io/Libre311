@@ -1216,7 +1216,11 @@
           "rgba(255, 0, 0, 1)",
         ];
         heatmap.set("gradient", gradient);
-
+        setTimeout(() => {
+          if (!selectedIssue) {
+            calculateBoundsAroundMarkers();
+          }
+        }, 400);
       } 
       else if (provider === "osm") {
         const customControl = L.Control.extend({
@@ -1265,13 +1269,13 @@
           $osmHeatmapControl.addTo(map)
           hasHeatmapControl.set(true)          
         } 
+        setTimeout(() => {
+          if (!selectedIssue) {
+            calculateBoundsAroundMarkers();
+          }
+        }, 400);
       }
     }
-    setTimeout(() => {
-      if (!selectedIssue) {
-        calculateBoundsAroundMarkers();
-      }
-    }, 400);
   };
 
   const calculateBoundsAroundMarkers = () => {
