@@ -150,6 +150,10 @@ body {
   }
 }
 
+.content {
+  word-wrap: break-word;
+}
+
 .image-container {
   position: relative;
   display: inline-block;
@@ -222,8 +226,8 @@ body {
 
 .background {
   width: 100%;
-  height: 100%;
-  position: relative;
+  height: 123%;
+  position: absolute;
   overflow: hidden;
   background-repeat: no-repeat;
   transition: height 0.75s ease;

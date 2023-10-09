@@ -97,7 +97,7 @@ netty:
 wemove:
   image-storage:
     bucket-url-format: "https://storage.googleapis.com/%s/"
-    bucket: "micronaut.object-storage.gcp.default.bucket"
+    bucket:  a69c003f-5281-4376-9875-ebac846ae7e9-wemove # same as micronaut.object-storage.gcp.default.bucket above.
     append-object-url-format: "%s"
   recaptcha:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
