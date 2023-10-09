@@ -12,6 +12,8 @@ micronaut:
     authentication: cookie
     token:
       jwt:
+        cookie:
+          cookie-secure: true
         signatures:
           secret:
             generator:
@@ -99,10 +101,7 @@ micronaut:
       size-parameter-name: page_size
 datasources:
   default:
-    url: ${WEMOVE_JDBC_URL:`jdbc:h2:mem:devDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE;IGNORECASE=TRUE`}
-    driverClassName: ${WEMOVE_JDBC_DRIVER:org.h2.Driver}
-    username: ${WEMOVE_JDBC_USER:sa}
-    password: ${WEMOVE_JDBC_PASSWORD:""}
+    db-type: ${WEMOVE_DB_TYPE}
 jpa:
   default:
     entity-scan:
@@ -116,6 +115,10 @@ netty:
     allocator:
       max-order: 3
 wemove:
+  image-storage:
+    bucket-url-format: "https://storage.googleapis.com/%s/"
+    bucket:  a69c003f-5281-4376-9875-ebac846ae7e9-wemove # same as micronaut.object-storage.gcp.default.bucket above.
+    append-object-url-format: "%s"
   recaptcha:
     secret: "6LfY3tMlAAAAAAxsA68VyjGMkbIkBqql3gDLG-Hs"
   safesearch:

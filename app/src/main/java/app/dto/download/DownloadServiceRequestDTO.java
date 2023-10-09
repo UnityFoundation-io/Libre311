@@ -72,19 +72,19 @@ public class DownloadServiceRequestDTO {
         this.dateCreated = serviceRequest.getDateCreated();
         this.dateUpdated = serviceRequest.getDateUpdated();
         this.closedDate = serviceRequest.getClosedDate();
-        this.statusDescription = serviceRequest.getStatus().toString();
-        this.statusNotes = serviceRequest.getStatusNotes();
-        this.serviceName = serviceRequest.getService().getServiceName();
-        this.description = serviceRequest.getDescription();
-        this.agencyResponsible = serviceRequest.getAgencyResponsible();
-        this.address = serviceRequest.getAddressString();
-        this.latitude = serviceRequest.getLatitude();
-        this.longitude = serviceRequest.getLongitude();
-        this.email = serviceRequest.getEmail();
-        this.firstName = serviceRequest.getFirstName();
-        this.lastName = serviceRequest.getLastName();
-        this.phone = serviceRequest.getPhone();
-        this.mediaUrl = serviceRequest.getMediaUrl();
+        this.statusDescription = sanitize(serviceRequest.getStatus().toString());
+        this.statusNotes = sanitize(serviceRequest.getStatusNotes());
+        this.serviceName = sanitize(serviceRequest.getService().getServiceName());
+        this.description = sanitize(serviceRequest.getDescription());
+        this.agencyResponsible = sanitize(serviceRequest.getAgencyResponsible());
+        this.address = sanitize(serviceRequest.getAddressString());
+        this.latitude = sanitize(serviceRequest.getLatitude());
+        this.longitude = sanitize(serviceRequest.getLongitude());
+        this.email = sanitize(serviceRequest.getEmail());
+        this.firstName = sanitize(serviceRequest.getFirstName());
+        this.lastName = sanitize(serviceRequest.getLastName());
+        this.phone = sanitize(serviceRequest.getPhone());
+        this.mediaUrl = sanitize(serviceRequest.getMediaUrl());
     }
 
     public Long getId() {
@@ -229,5 +229,14 @@ public class DownloadServiceRequestDTO {
 
     public void setServiceSubtype(String serviceSubtype) {
         this.serviceSubtype = serviceSubtype;
+    }
+
+    private String sanitize(String value) {
+        String csvInjectionRegex = "^[=@+\\-\t\r].*";
+
+        if (value == null || !value.matches(csvInjectionRegex))
+            return value;
+
+        return "'" + value;
     }
 }

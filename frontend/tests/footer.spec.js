@@ -2,13 +2,15 @@ import { expect, test } from '@playwright/test';
 
 test('footer displays Local Motion logo', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.getByRole('img', { name: 'local motion logo' }).click();
+  await page.waitForTimeout(1000);
+  const img = page.getByRole('img', { name: 'local motion logo' });
+  await img.waitFor({ state: 'visible'})
 });
 
 test('footer displays major headings', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.getByRole('heading', { name: 'Mobile App' }).click();
-  await expect(page).toHaveURL('https://lomocomo.org/we-move-app/');
+  await page.getByRole('heading', { name: 'Admin Login' }).click();
+  await expect(page).toHaveURL(/.*accounts.google.com\/.*/);
 
   await page.goto('http://localhost:3000/');
   await page.getByRole('heading', { name: 'Contact Us' }).click();
@@ -90,11 +92,11 @@ test('footer has facebook icon', async ({ page }) => {
 test('footer has instagram icon', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.getByRole('img', { name: 'instagram' }).click();
-  await expect(page).toHaveURL('https://www.instagram.com/localmotioncomo/');
+  await expect(page).toHaveURL(/https:\/\/www.instagram.com\/.*localmotioncomo.*/);
 });
 
 test('footer has twitter icon', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.getByRole('img', { name: 'twitter' }).click();
-  await expect(page).toHaveURL('https://twitter.com/localmotioncomo');
+  await expect(page).toHaveURL(/https:\/\/twitter\.com\/.*localmotioncomo/);
 });

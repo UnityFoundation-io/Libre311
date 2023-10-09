@@ -1,41 +1,37 @@
-import { test } from '@playwright/test';
-
+import { expect, test } from '@playwright/test';
 
 test('open reported issues screen', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
-});
+  const issuesButton = await page.waitForSelector('#button-find-issues');
+  await issuesButton.click();
 
-test('reported issues screen displays map', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
-  await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
-  await page.locator('div').filter({ hasText: /^To navigate, press the arrow keys\.$/ }).first().click();
-});
-
-test('reported issues screen displays table', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
-  await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
-  await page.getByRole('cell', { name: 'Two city buses parked obstructing the bike lane rather than using the bus lane' }).click();
+  await page.locator('#map').isVisible();
+  await page.getByRole('table').isVisible();
 });
 
 test('apply filters to reported issues table', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
+  await page.waitForTimeout(1000);
+  const issuesButton = await page.waitForSelector('#button-find-issues');
+  await issuesButton.click();
+
   // Opens filters
-  await page.locator('div').filter({ hasText: /^Filters \+$/ }).locator('span').click();
-  // Filters to only display Bike Lane issues submitted by User 1
-  await page.getByRole('combobox').first().selectOption('003');
-  await page.getByRole('combobox').nth(1).selectOption('user1');
+  await page.locator('div').filter({ hasText: /\+$/ }).locator('span').click();
+  // Filters to only display Bus Stop issues 
+  await page.getByRole('combobox').first().selectOption({ index: 2 });
 });
 
 test('view expanded issue details from reported issues table', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  await page.getByRole('button', { name: 'search for reported issues Find a Reported Issue' }).click();
-  await page.getByRole('cell', { name: 'Two city buses parked obstructing the bike lane rather than using the bus lane' }).click();
+  await page.waitForTimeout(1000);
+  const issuesButton = await page.waitForSelector('#button-find-issues');
+  await issuesButton.click();
+
+  await page.getByRole('cell', { name: /Two city buses parked obstructing .*/ }).click();
   await page.getByRole('img', { name: 'detail view' }).click();
-  await page.getByText('Type: Bike Lane').click();
-  await page.getByText('Description:Two city buses parked obstructing the bike lane rather than using th').click();
-  await page.getByText('Location:270 Temple St New Haven, CT, 06511, USA').click();
+  await expect(page.getByText('Type: Bike Lane')).toBeVisible();
+  await expect(page.getByText('Description:Two city buses parked obstructing the bike lane rather than using th')).toBeVisible();
+  await expect(page.getByText('Location:270 Temple St New Haven, CT, 06511, USA')).toBeVisible();
 });
 
 

@@ -1,10 +1,14 @@
 <script>
   import { goto } from "$app/navigation";
+
   import facebookSVG from "../icons/facebook.svg";
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
-  import localMotionLogo from "$lib/localmotionlogosmall.png";
+
   import footerSelector from "../stores/footerSelector";
+  import footerLogoSmall from "$lib/footerLogoSmall.webp";
+ 
+  import footerLinks from "$lib/footerLinks.json"
 
   export let backgroundColor;
 
@@ -12,7 +16,7 @@
 </script>
 
 <img
-  src="{localMotionLogo}"
+  src="{footerLogoSmall}"
   alt="local motion logo"
   class="local-motion-logo"
 />
@@ -25,57 +29,15 @@
     class="row"
     class:row-wrap="{window.innerHeight <= 375 && window.innerWidth <= 513}"
   >
-    <div class="col">
-      <a href="https://lomocomo.org/?ct_template=advocacy"><h2>Advocacy</h2></a>
-      <a href="https://lomocomo.org/advocacy/livable-streets/"
-        ><li>Livable Streets</li></a
-      >
-      <a href="https://lomocomo.org/advocacy/transportation-planning/"
-        ><li>Transportation Planning</li></a
-      >
-      <a href="https://lomocomo.org/advocacy/grassroots-organizing/"
-        ><li>Grassroots Organizing</li></a
-      >
-      <a
-        href="https://lomocomo.org/advocacy/missourians-for-responsible-transportation/"
-        ><li>State-Level Advocacy</li></a
-      >
-    </div>
-    <div
-      class="col"
-      class:add-padding-top="{window.innerWidth >= 431 &&
-        window.innerWidth < 700}"
-    >
-      <a href="https://lomocomo.org/get-involved/"
-        ><h2 style="min-width: max-content">Get Involved</h2></a
-      >
-      <a href="https://lomocomo.org/get-involved/membership/"
-        ><li>Membership</li></a
-      >
-      <a href="https://lomocomo.org/get-involved/volunteer/"
-        ><li>Volunteer</li></a
-      >
-      <a href="https://lomocomo.org/get-involved/sign-up-for-our-newsletter/"
-        ><li>Sign up for our newsletter</li></a
-      >
-    </div>
-
-    <div class="col">
-      <a href="https://lomocomo.org/about/"><h2>About</h2></a>
-      <a href="https://lomocomo.org/about/staff/"><li>Staff</li></a>
-      <a href="https://lomocomo.org/about/board-of-directors/"
-        ><li>Board of Directors</li></a
-      >
-      <a href="https://lomocomo.org/about/annual-reports"
-        ><li>Annual Reports</li></a
-      >
-      <a href="https://lomocomo.org/about/legal-and-financial/"
-        ><li>Legal and Financial</li></a
-      >
-      <a href="https://lomocomo.org/about/the-rebrand-story/"
-        ><li>Our Rebrand Story</li></a
-      >
-    </div>
+    {#each footerLinks as footerLink}
+      <div class="col">
+        <a href={footerLink["headerUrl"]}><h2>{footerLink["header"]}</h2></a>
+        {#each footerLink["links"] as link}
+          <a href={link["url"]}><li>{link["text"]}</li></a>
+        {/each}
+      </div>
+    {/each}
+     
     <div class="col">
       <!-- svelte-ignore missing-declaration -->
       <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -91,16 +53,16 @@
 
       <div class="socials">
         <a class="socialButton" href="https://facebook.com/localmotioncomo">
-          <img src="{facebookSVG}" alt="facebook" style="scale:4%;" />
+          <img src="{facebookSVG}" alt="facebook" />
         </a>
         <a
           class="socialButton"
           href="https://www.instagram.com/localmotioncomo/"
         >
-          <img src="{instagramSVG}" alt="instagram" style="scale:2.5%;" />
+          <img src="{instagramSVG}" alt="instagram" />
         </a>
         <a class="socialButton" href="https://twitter.com/localmotioncomo">
-          <img src="{twitterSVG}" alt="twitter" style="scale:2.5%;" />
+          <img src="{twitterSVG}" alt="twitter" />
         </a>
       </div>
     </div>
@@ -184,7 +146,7 @@
     color: #f2a900;
   }
 
-  @media only screen and (min-width: 320px) {
+  @media only screen and (min-width: 245px) {
     .row {
       flex-wrap: wrap;
     }
@@ -216,7 +178,7 @@
     }
   }
 
-  @media only screen and (min-width: 320px) and (max-width: 415px) {
+  @media only screen and (min-width: 245px) and (max-width: 415px) {
     .row {
       justify-content: left;
     }

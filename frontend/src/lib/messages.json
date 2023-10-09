@@ -12,7 +12,10 @@
             "see.more.title": "You’re the problem-solver.",
             "see.more.description": "We Move gathers crowdsourced information from people like you and creates a map of problem locations all over the city. Having a wider set of data shows patterns, and creates a much stronger case for advocates and neighbors to push for policy and infrastructure changes to improve walking, biking, and transit.",
             "button.find.issue.label": "Find a Reported Issue",
-            "button.report.issue.label": "Report a New Issue"
+            "button.report.issue.label": "Report a New Issue",
+            "table.selector.error": "tableSelector and/or backgroundSelector not found",
+            "footer.selector.error": "footerSelector not found",
+            "leave.message": "Are you sure you want to leave? Your unsaved changes will be lost."
         },
     
     "report.issue":
@@ -20,11 +23,12 @@
             "button.next": "Next",
             "button.submit": "Submit",
             "button.review.submit": "Review & Submit",
+            "button.review.submit.short": "Review",
             "button.back": "Back",
             "label.step": "Step",
             "label.issue.location": "Where is the issue located?",
             "label.issue.location.subtext": "Place the marker or type the exact address.",
-            "invalid.offline.address": "Please verify that the address is valid.",
+            "invalid.offline.address": "Please verify that the address is valid (valid characters: alphanumeric characters, &, -, ', ., ,).",
             "label.optional": "(optional)",
             "label.date": "Date & Time:",
             "label.feature.type": "Select the Feature Type that you are reporting on:",
@@ -35,6 +39,8 @@
             "location.services.disabled": "Enable Location Services on your Device",
             "uploaded.message.rejected-one": "Our policy prohibits storage of explicit images.",
             "uploaded.message.rejected-two": "Please upload a different photo.",
+            "vision.api.error": "Unable to connect to Google Vision API",
+            "vision.api.error.two": "The issue will be posted without an image",
             "uploaded.message.success": "The uploaded image has been saved.",
             "image.upload.disabled": "Disabled in offline mode",
             "select.option.issue.type.placeholder": "Choose an Issue Type*",
@@ -51,11 +57,12 @@
             "label.review.description": "Description:",
             "placeholder.submitter.name": "ex: John Doe",
             "placeholder.contact.info": "ex: johndoe@gmail.com",
-            "input.submitter.name.error": "The name should contain at least 3 characters.",
+            "input.submitter.name.error": "Invalid name. The name should contain at least 3 valid characters (valid characters: alphabetical characters, -, ', .).",
             "input.email.error": "Invalid email, please make sure your email valid.",
             "issue.reported.success.message.one": "Thank You!",
             "issue.reported.success.message.two": "The issue has been reported.",
             "issue.reported.success.message.two.offline": "The issue will be reported when you go online.",
+            "issue.reported.failure": "There was an error trying to report the issue, please try again later",
             "modal.offline.issue.posted.title": "Issue Reported",
             "modal.offline.issue.posted.description": "Your pending offline issue was successfully reported.",
             "modal.offline.issue.posted.title.error": "Unable to Report Issue",
@@ -67,7 +74,9 @@
             "marker.title": "Issue's Location",
             "input.address.placeholder": "Find address or place",
             "empty.geometry": "Returned place contains no geometry",
-            "pac-input-placeholder": "Enter the address"
+            "pac-input-placeholder": "Enter the address",
+            "button.markers.label": "Markers",
+            "button.heatmap.label": "Heatmap"
         },
     
     "geocode":
@@ -91,5 +100,14 @@
             "issues.table.column.three": "Media",
             "issues.table.column.four": "Reported At",
             "empty.results": "No Results Found"
+        },
+
+    "modal":
+        {
+            "label.type": "Type:",
+            "label.detail": "Detail:",
+            "label.description": "Description:",
+            "label.requested.at": "Requested At:",
+            "label.location": "Location:"
         }
 }

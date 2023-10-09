@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.xml.XmlEscapers;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpRequest;
@@ -24,7 +25,6 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +63,13 @@ public class RootController {
     @ExecuteOn(TaskExecutors.IO)
     public HttpResponse<String> indexXml(@Valid Pageable pageable) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-        Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable);
+        Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable)
+                .map(serviceDTO -> {
+                    if (serviceDTO.getDescription() != null) {
+                        serviceDTO.setDescription(XmlEscapers.xmlContentEscaper().escape(serviceDTO.getDescription()));
+                    }
+                    return serviceDTO;
+                });
         ServiceList serviceList = new ServiceList(serviceDTOPage.getContent());
 
         return HttpResponse.ok(xmlMapper.writeValueAsString(serviceList))
@@ -118,9 +124,8 @@ public class RootController {
     @Get(uris = {"/requests", "/requests.json"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
-                                                                        @NotBlank @Header("X-G-RECAPTCHA-RESPONSE") String gRecaptchaResponse) {
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, gRecaptchaResponse);
+    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO) {
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO);
         return HttpResponse.ok(serviceRequestDTOPage.getContent())
                 .headers(Map.of(
                         "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
@@ -135,11 +140,14 @@ public class RootController {
     @Get("/requests.xml")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
-                                                      @NotBlank @Header("X-G-RECAPTCHA-RESPONSE") String gRecaptchaResponse) throws JsonProcessingException {
+    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, gRecaptchaResponse);
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO)
+                .map(serviceRequestDTO -> {
+                    sanitizeXmlContent(serviceRequestDTO);
+                    return serviceRequestDTO;
+                });;
         ServiceRequestList serviceRequestList = new ServiceRequestList(serviceRequestDTOPage.getContent());
 
         return HttpResponse.ok(xmlMapper.writeValueAsString(serviceRequestList))
@@ -151,6 +159,18 @@ public class RootController {
                         "page-Offset", String.valueOf(serviceRequestDTOPage.getOffset()),
                         "page-Size", String.valueOf(serviceRequestDTOPage.getSize())
                 ));
+    }
+
+    private void sanitizeXmlContent(ServiceRequestDTO serviceRequestDTO) {
+        if (serviceRequestDTO.getDescription() != null) {
+            serviceRequestDTO.setDescription(XmlEscapers.xmlContentEscaper().escape(serviceRequestDTO.getDescription()));
+        }
+        if (serviceRequestDTO.getStatusNotes() != null) {
+            serviceRequestDTO.setStatusNotes(XmlEscapers.xmlContentEscaper().escape(serviceRequestDTO.getStatusNotes()));
+        }
+        if (serviceRequestDTO.getAddress() != null) {
+            serviceRequestDTO.setAddress(XmlEscapers.xmlContentEscaper().escape(serviceRequestDTO.getAddress()));
+        }
     }
 
     @Get(uris = {"/requests/{serviceRequestId}", "/requests/{serviceRequestId}.json"})
@@ -166,7 +186,9 @@ public class RootController {
     public String getServiceRequestXml(Long serviceRequestId) throws JsonProcessingException {
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
-        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.getServiceRequest(serviceRequestId)));
+        ServiceRequestDTO serviceRequestDTO = serviceRequestService.getServiceRequest(serviceRequestId);
+        sanitizeXmlContent(serviceRequestDTO);
+        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestDTO));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
     }

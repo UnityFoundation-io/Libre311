@@ -1,6 +1,7 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.7.3"
+    id("io.micronaut.application") version "3.7.10"
+    id("io.micronaut.test-resources") version "3.7.10"
 }
 
 version = "0.1"
@@ -38,7 +39,6 @@ dependencies {
     }
 }
 
-
 application {
     mainClass.set("app.Application")
 }
@@ -55,12 +55,15 @@ micronaut {
         incremental(true)
         annotations("app.*")
     }
+    // see https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/#_configuring_the_test_resources_plugin
+    testResources {
+        enabled = true
+    }
 }
 
 tasks.withType(JavaCompile) {
     options.fork = true
 }
-
 
 tasks.register('copyClientResources', Copy) {
     dependsOn ':frontend:build'
