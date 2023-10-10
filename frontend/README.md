@@ -30,6 +30,14 @@ We handle online/offline mode using a combination of local storage and service w
 - Concurrently
 - Fontfaceobserver
 
+### Setting Secrets
+
+In the root directory, create a file called `setenv.sh`. Copy the contents from `setenv.sh.example` into `setenv.sh`, replacing values in carets with the corresponding values.
+
+### Running Locally
+
+With `setenv.sh` populated with relevant keys, run `source setenv.sh` in root, followed by `./gradlew app:run`.
+
 ## Customization
 
 ### Skinning
