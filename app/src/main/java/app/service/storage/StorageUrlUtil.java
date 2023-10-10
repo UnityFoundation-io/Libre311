@@ -13,7 +13,7 @@ public class StorageUrlUtil {
     @Property(name = "app.image-storage.append-object-url-format")
     private String appendObjectUrlFormat;
 
-    @Value("${app.image-storage.bucket}")
+    @Property(name = "app.image-storage.bucket")
     private String bucketId;
 
 
