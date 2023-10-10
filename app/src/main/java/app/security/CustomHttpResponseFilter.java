@@ -12,7 +12,7 @@ import org.reactivestreams.Publisher;
 import java.util.Map;
 
 @Filter("/**")
-public class WeMoveResponseFilter implements HttpServerFilter {
+public class CustomHttpResponseFilter implements HttpServerFilter {
     @Override
     public Publisher<MutableHttpResponse<?>> doFilter(HttpRequest<?> request, ServerFilterChain chain) {
 

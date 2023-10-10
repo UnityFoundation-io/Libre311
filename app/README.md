@@ -1,4 +1,4 @@
-# We Move API Documentation
+# Libre311 API Documentation
 
 ## Quickstart
 The project requires JDK 11 or later to build and run. There is no need to
@@ -40,7 +40,7 @@ java -jar build/libs/app-[version number]-all.jar
 ```
 
 ## External Service Dependencies
-The We Move Service expects four external services offered by Google:
+The Libre311 Service API expects four external services offered by Google:
 
 * ReCaptcha - prevents abuse from bots
 * SafeSearch - inspects images for inappropriate content
@@ -86,7 +86,7 @@ Multiple drivers can be specified.
 For example, `mysql:mysql-connector-java:8.0.31,com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2`.
 
 #### Object Storage
-In the context of the We Move application, Google Object Storage is used to store images uploaded by an end user when 
+In the context of the Libre311 application, Google Object Storage is used to store images uploaded by an end user when 
 creating a Service Request (aka an Issue).
 The client code that interacts with the Object Storage service is a singleton object generated from the class
 `app/src/main/java/app/service/storage/StorageService.java`.
@@ -99,9 +99,9 @@ environment.  Please see relevant documentation:
 * [How Application Default Credentials works](https://cloud.google.com/docs/authentication/application-default-credentials)
 
 #### SafeSearch and ReCaptcha
-Both SafeSearch and ReCaptcha rely on HTTP clients that are configured with secret values like so:
+Both SafeSearch and ReCaptcha rely on HTTP clients that are configured with secret values in application.yml like so:
 ```yaml
-wemove:
+app:
   recaptcha:
     secret: "secret-value"
   safesearch:
@@ -115,15 +115,15 @@ wemove:
 #### Authentication & Authorization
 The authentication method leverages OAuth where the Identity Provider is Google. Once authenticated, the
 backend issues a JWT token (in the form of a cookie) with embedded details as defined in
-`app/src/main/java/app/security/WeMoveAuthenticationMapper.java`.
-As can be drawn from the code, the user is 'fully' authenticated (against the We Move service) if the user's email already
-exists in the database under the `wemove_user` table.
+`app/src/main/java/app/security/CustomAuthenticationMapper.java`.
+As can be drawn from the code, the user is 'fully' authenticated (against the Libre311 service) if the user's email already
+exists in the database under the `app_users` table.
 
 ### Data Layer
-The We Move Service data models draw inspiration from Open311 GeoReport API v2 specification and is composed of the 
+The Libre311 Service data models draw inspiration from Open311 GeoReport API v2 specification and is composed of the 
 following data models:
 
-* User - An authorized user of the We Move application.
+* User - An authorized user of the Libre311 application.
 * Service - Is the Issue Type related to the type of services that a jurisdiction provides. Examples include Sidewalk or Bus Stop. 
 * ServiceDefinition - Issue subtype such as 'Cracked' for Sidewalk or 'No Shelter' for Bus Stop.
 * ServiceRequest - The end user reported Issue that references Service and ServiceDefinition and includes contact and 
@@ -151,7 +151,7 @@ however, each service pulls in (or rather, injects) other services/repository in
 for accommodating a users request.
 
 ### API Layer
-The We Move Service is a microservice that exposes endpoints that correspond to 
+The Libre311 Service is a microservice that exposes endpoints that correspond to 
 [Open311 GeoReport API v2](http://wiki.open311.org/GeoReport_v2/) specification and are coded in `app/src/main/java/app/RootController.java`.
 In addition, there exists a separate controller class that accommodates image uploading (`app/src/main/java/app/ImageStorageController.java`)
 
