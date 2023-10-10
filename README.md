@@ -26,7 +26,7 @@ The Web API is horizontally scalable.
 
 ### The Database
 
-Currently, the DDS Permissions Manager supports the following Databases:
+Currently, the WeMove application supports the following Databases:
 
 | Database     | Versions     | Driver                   | Reference                                                                                                                 |
 |--------------|--------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------|
