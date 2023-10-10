@@ -1,10 +1,6 @@
 # WeMove
 
-TODO:  Write introduction
-
-## User Documentation
-
-TODO: write.
+WeMove is a web application for service requests based on the [Open311](https://www.open311.org) standard.
 
 ## Operator Documentation
 
