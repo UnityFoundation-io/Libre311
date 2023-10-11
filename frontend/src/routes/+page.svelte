@@ -8,6 +8,7 @@
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
   import logo from "$lib/logo.webp";
+  import unityLogo from "$lib/genericFiles/unityLogo.png"
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -1652,7 +1653,7 @@
             duration: 1000,
             quintOut,
           }}"
-          src="{logo}"
+          src="{unityLogo}"
           alt="we move logo"
           class="logo"
         />
