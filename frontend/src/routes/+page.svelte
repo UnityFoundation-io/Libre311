@@ -584,9 +584,7 @@
     }
   };
 
-  $: console.log($issueAddress, "issue Address changed")
   const postIssue = async () => {
-    console.log($issueAddress, "post issue")
     let attributes = `?service_code=${
       $issueType.id
     }&address_string=${$issueAddress}&lat=${
@@ -1609,10 +1607,8 @@
     }).addTo(map)
 
     function searchEventHandler(result) {
-      console.log(result.location)
       issueAddress.set(result.location.label)
       issueAddressCoordinates.set({lat: result.location.y, lng: result.location.x})
-      console.log($issueAddressCoordinates)
     }
 
     function centerMarkerOnMap(map) {
@@ -2759,7 +2755,6 @@
                 $issueSubmitterName?.length < minSubmitterNameLength &&
                 $issueSubmitterName?.length !== 0
               ) {
-                console.log("invalid submitter name")
                 invalidSubmitterName.visible = true;
                 return;
               }
