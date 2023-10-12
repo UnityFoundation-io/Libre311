@@ -21,7 +21,7 @@
   import issuePinSVG from "../icons/issuepin.svg";
   import issuePinSelectedSVG from "../icons/issuepinselected.svg";
   import forbiddenSVG from "../icons/forbidden.svg";
-  import mylocationSVG from "../icons/mylocation.svg";
+  import fireSVG from "../icons/fire.svg";
   import issueAddress from "../stores/issueAddress";
   import seeMoreHeight from "../stores/seeMoreHeight";
   import issueAddressCoordinates from "../stores/issueAddressCoordinates";
@@ -31,6 +31,8 @@
   import issueDescription from "../stores/issueDescription";
   import issueSubmitterName from "../stores/issueSubmitterName";
   import issueSubmitterContact from "../stores/issueSubmitterContact";
+  import hasHeatmapControl from "../stores/hasHeatmapControl";
+  import osmHeatmapControl from "../stores/osmHeatmapControl";
   import userCurrentLocation from "../stores/userCurrentLocation";
   import resetDate from "../stores/resetDate";
   import issueDetailList from "../stores/issueDetailList";
@@ -49,6 +51,10 @@
   import colors from "$lib/colors.json";
   import "$lib/global.css";
   import "$lib/spinner.css";
+
+  import mapProvider from "$lib/mapProvider.json";
+
+  const provider = mapProvider["provider"]
 
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -111,6 +117,7 @@
     seeMore = false,
     spinner = false,
     heatmapVisible = false,
+    hasHeatmapButton = false,
     postingError = false,
     issuesRefs = {},
     multiSelectOptions = [],
@@ -130,7 +137,7 @@
     invalidOfflineAddress = false,
     isAuthenticated = false;
 
-  let offlineAddressRegex = /^[0-9]+[a-zA-Z0-9&\-',. ]+$/gm;
+  let offlineAddressRegex = /^[a-zA-Z&\-'’,. ]+|[0-9]+[a-zA-Z0-9&\-'’,. ]+$/gm;
 
   let submitterNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
 
@@ -161,6 +168,8 @@
     wasOnline,
     imageData,
     timeoutId;
+
+  let markerGroup;
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -195,6 +204,8 @@
   } else if (browser && !showModal) {
     document.body.classList.remove("modal-open");
   }
+
+
 
   const getOrientation = () => {
     let previousState;
@@ -526,6 +537,8 @@
       `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
     );
 
+    console.log(res)
+
     if (
       !issuePosted &&
       res.data?.length > 0 &&
@@ -621,22 +634,37 @@
       console.error(err);
     }
 
+    // Creates a new marker for a newly reported issue
     if (isOnline) {
-      const marker = new google.maps.Marker({
-        position: {
-          lat: parseFloat($issueAddressCoordinates.lat),
-          lng: parseFloat($issueAddressCoordinates.lng),
-        },
-        map: map,
-        title: $issueType.name,
-        icon: {
-          scaledSize: new google.maps.Size(25, 25),
-          url: issuePinSVG,
-          anchor: new google.maps.Point(12, 12),
-        },
-      });
+      if (provider === "osm"){
+        const marker = new L.marker(
+          [parseFloat($issueAddressCoordinates.lat), parseFloat($issueAddressCoordinates.lng)], {
+            icon: L.icon({
+              iconUrl: issuePinSVG,
+              iconSize: [25, 25],
+              iconAnchor: [12, 12]
+            })
+          }).addTo(map);
 
-      markers.push(marker);
+        markers.push(marker)
+      }
+      else if (provider === "googleMaps") {
+        const marker = new google.maps.Marker({
+          position: {
+            lat: parseFloat($issueAddressCoordinates.lat),
+            lng: parseFloat($issueAddressCoordinates.lng),
+          },
+          map: map,
+          title: $issueType.name,
+          icon: {
+            scaledSize: new google.maps.Size(25, 25),
+            url: issuePinSVG,
+            anchor: new google.maps.Point(12, 12),
+          },
+        });
+
+        markers.push(marker);
+      }
     }
   };
 
@@ -645,26 +673,42 @@
 
     issueType.set({ id: localStorage.getItem("issueTypeId") });
     issueAddress.set(localStorage.getItem("issueAddress"));
-    try {
-      await geocoder.geocode({ address: $issueAddress }, (results, status) => {
-        if (status === "OK") {
-          const lat = results[0].geometry.location.lat();
-          const lng = results[0].geometry.location.lng();
 
-          issueAddressCoordinates.set({ lat: lat, lng: lng });
-        } else {
-          geocodeError = true;
-          clearLocalStorage();
-          clearForm();
-          console.error(
-            `Geocode was not successful for the following reason: ${status}`
-          );
-          return;
-        }
-      });
-    } catch (err) {
-      console.error(err);
-      return;
+    if (provider === "googleMaps") {
+      try {
+        await geocoder.geocode({ address: $issueAddress }, (results, status) => {
+          if (status === "OK") {
+            const lat = results[0].geometry.location.lat();
+            const lng = results[0].geometry.location.lng();
+
+            issueAddressCoordinates.set({ lat: lat, lng: lng });
+          } else {
+            geocodeError = true;
+            clearLocalStorage();
+            clearForm();
+            console.error(
+              `Geocode was not successful for the following reason: ${status}`
+            );
+            return;
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        return;
+      }
+    }
+    else if (provider === "osm") {
+      try {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${$issueAddress}`)
+          .then((response) => response.json())
+          .then((data) => {
+            issueAddress.set(data[0].display_name)
+            issueAddressCoordinates.set({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) })
+          })
+      } catch (err) {
+        console.error(err);
+        return
+      }
     }
 
     issueDetailList.set({ code: localStorage.getItem("issueDetailListCode") });
@@ -698,9 +742,16 @@
 
   const clearHeatmap = () => {
     if (heatmap) {
-      heatmap.setMap(null);
-      heatmapData = [];
-      heatmap.setData(heatmapData);
+      if (provider === "googleMaps") {
+        heatmap.setMap(null);
+        heatmapData = [];
+        heatmap.setData(heatmapData);
+      }
+      else if (provider === "osm") {
+        map.removeLayer(heatmap);
+        heatmapData = [];
+      }
+      
     }
   };
 
@@ -720,29 +771,38 @@
 
   const geocodeLatLng = (lat, lng) => {
     const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
-    geocoder.geocode({ location: latlng }, (results, status) => {
-      if (status === "OK") {
-        if (results[0]) {
-          issueAddress.set(results[0].formatted_address);
-          issueAddressCoordinates.set({ lat: lat, lng: lng });
-          inputIssueAddressSelector.value = results[0].formatted_address;
+    if (provider === "googleMaps") {
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === "OK") {
+          if (results[0]) {
+            issueAddress.set(results[0].formatted_address);
+            issueAddressCoordinates.set({ lat: lat, lng: lng });
+            inputIssueAddressSelector.value = results[0].formatted_address;
+          } else {
+            console.log(messages["geocode"]["empty.results"]);
+          }
         } else {
-          console.log(messages["geocode"]["empty.results"]);
+          console.log(`${messages["geocode"]["error"]} ${status}`);
         }
-      } else {
-        console.log(`${messages["geocode"]["error"]} ${status}`);
-      }
-    });
+      });
+    }
   };
 
   const setNewCenter = (lat, lng, zoom = 15) => {
-    let newCenter = new google.maps.LatLng(lat, lng);
-    map.setCenter(newCenter);
-    setNewZoom(zoom);
-  };
+    if (provider === "osm"){
+      let newCenter = new L.LatLng(lat, lng)
+      map.setView(newCenter, zoom);
+    }
+    else if (provider === "googleMaps") {
+      let newCenter = new google.maps.LatLng(lat, lng);
+      map.setCenter(newCenter);
+      setNewZoom(zoom);
+    }
+  }
 
   const setNewZoom = (zoomLevel) => {
-    map.setZoom(zoomLevel);
+    if (provider === "osm") map.zoom(zoomLevel);
+    if (provider === "googleMaps") map.setZoom(zoomLevel);
   };
 
   const successCallback = (position) => {
@@ -761,18 +821,35 @@
   };
 
   const clearMarkers = () => {
-    markers.forEach((marker) => {
-      marker.setMap(null);
-    });
-    markers = [];
+    if (provider === "googleMaps") {
+      markers.forEach((marker) => {
+        marker.setMap(null);
+      });
+      markers = [];
+    }
+    else if (provider === "osm"){
+      markers.forEach((marker) => {
+        marker.remove()
+      });
+      markers = [];
+    }
   };
 
   const clearIcons = () => {
-    markers.forEach((mkr) => {
-      const icon = mkr.getIcon();
-      icon.url = issuePinSVG;
-      mkr.setIcon(icon);
-    });
+    if (provider === "googleMaps") {
+      markers.forEach((mkr) => {
+        const icon = mkr.getIcon();
+        icon.url = issuePinSVG;
+        mkr.setIcon(icon);
+      });
+    }
+    else if (provider === "osm") {
+      markers.forEach((mkr) => {
+        const icon = mkr.getIcon();
+        icon.options.iconUrl = issuePinSVG;
+        mkr.setIcon(icon);
+      })
+    }
   };
 
   // From Unix Epoch to Current Time
@@ -902,171 +979,331 @@
       filteredIssuesData.forEach((issue) => {
         let marker;
 
-        marker = new google.maps.Marker({
-          position: {
-            lat: parseFloat(issue.lat),
-            lng: parseFloat(issue.long),
-          },
-          map: map,
-          title: issue.name,
-          icon: {
-            scaledSize: new google.maps.Size(25, 25),
-            url:
-              parseFloat(issue.lat) === selectedIssueMarker?.position.lat() &&
-              parseFloat(issue.long) === selectedIssueMarker?.position.lng()
-                ? issuePinSelectedSVG
-                : issuePinSVG,
-            anchor: new google.maps.Point(12, 12),
-          },
-        });
+        if (provider === "googleMaps") {
+          marker = new google.maps.Marker({
+            position: {
+              lat: parseFloat(issue.lat),
+              lng: parseFloat(issue.long),
+            },
+            map: map,
+            title: issue.name,
+            icon: {
+              scaledSize: new google.maps.Size(25, 25),
+              url:
+                parseFloat(issue.lat) === selectedIssueMarker?.position.lat() &&
+                parseFloat(issue.long) === selectedIssueMarker?.position.lng()
+                  ? issuePinSelectedSVG
+                  : issuePinSVG,
+              anchor: new google.maps.Point(12, 12),
+            },
+          });
+          markers.push(marker);
+        } 
+        else if (provider === "osm") {
+          markerGroup = L.layerGroup().addTo(map);
+          marker = new L.marker([parseFloat(issue.lat), parseFloat(issue.long)], {
+            icon: L.icon({
+              iconAnchor: [12, 12],
+              iconSize: [25, 25],
+              iconUrl:
+                parseFloat(issue.lat) === selectedIssueMarker?.getLatLng().lat &&
+                parseFloat(issue.long) === selectedIssueMarker?.getLatLng().lng
+                  ? issuePinSelectedSVG
+                  : issuePinSVG,
+            }),
+            title: issue.name,
+          }).addTo(markerGroup);
+          markers.push(marker);
+        }
+        
 
-        markers.push(marker);
-
-        google.maps.event.addListener(marker, "click", function () {
-          // Marker being deselected
-          const selection = marker.getIcon();
-          if (selection.url === issuePinSelectedSVG) {
-            clearIcons();
-            toggleDetails(issue.service_request_id);
-            selectedIssueMarker = undefined;
-            selectedIssue = undefined;
-            return;
-          }
-
-          // Marker being selected: selects all the markers in the same location
-          const selectedMarkers = markers.filter(
-            (mrk) =>
-              mrk.position.lat() === marker.position.lat() &&
-              mrk.position.lng() === marker.position.lng()
-          );
-
-          // Clears all the markers that are not selected
-          selectedMarkers.forEach((selectedMarker) => {
-            markers.forEach((mkr) => {
-              if (
-                mkr.position.lat() !== selectedMarker.position.lat() &&
-                mkr.position.lng() !== selectedMarker.position.lng()
-              ) {
-                let icon = mkr.getIcon();
-                icon.url = issuePinSVG;
-                mkr.setIcon(icon);
-              }
-            });
-
-            let icon = selectedMarker.getIcon();
-            if (icon.url === issuePinSVG) icon.url = issuePinSelectedSVG;
-            else {
-              icon.url = issuePinSVG;
+        if (provider === "googleMaps") {
+          google.maps.event.addListener(marker, "click", function () {
+            // Marker being deselected
+            const selection = marker.getIcon();
+            if (selection.url === issuePinSelectedSVG) {
+              clearIcons();
+              toggleDetails(issue.service_request_id);
               selectedIssueMarker = undefined;
+              selectedIssue = undefined;
+              return;
             }
 
-            selectedMarker.setIcon(icon);
-          });
+            // Marker being selected: selects all the markers in the same location
+            const selectedMarkers = markers.filter(
+              (mrk) =>
+                mrk.position.lat() === marker.position.lat() &&
+                mrk.position.lng() === marker.position.lng()
+            );
 
-          toggleDetails(issue.service_request_id);
-          selectedIssue = issue;
-          selectedIssueMarker = marker;
-          setNewCenter(issue.lat, issue.long, 17);
-
-          // Table
-          const selectedRow = document.getElementById(issue.service_request_id);
-          const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
-          if (rowIndex > 0) {
-            const rowAboveC = tableSelector.rows[rowIndex - 1];
-            setTimeout(() => {
-              rowAboveC.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
+            // Clears all the markers that are not selected
+            selectedMarkers.forEach((selectedMarker) => {
+              markers.forEach((mkr) => {
+                if (
+                  mkr.position.lat() !== selectedMarker.position.lat() &&
+                  mkr.position.lng() !== selectedMarker.position.lng()
+                ) {
+                  let icon = mkr.getIcon();
+                  icon.url = issuePinSVG;
+                  mkr.setIcon(icon);
+                }
               });
-            }, 500);
-          }
-        });
+
+              let icon = selectedMarker.getIcon();
+              if (icon.url === issuePinSVG) icon.url = issuePinSelectedSVG;
+              else {
+                icon.url = issuePinSVG;
+                selectedIssueMarker = undefined;
+              }
+
+              selectedMarker.setIcon(icon);
+            });
+
+            toggleDetails(issue.service_request_id);
+            selectedIssue = issue;
+            selectedIssueMarker = marker;
+            setNewCenter(issue.lat, issue.long, 17);
+
+            // Table
+            const selectedRow = document.getElementById(issue.service_request_id);
+            const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
+            if (rowIndex > 0) {
+              const rowAboveC = tableSelector.rows[rowIndex - 1];
+              setTimeout(() => {
+                rowAboveC.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              }, 500);
+            }
+          });
+        } else if (provider === "osm") {
+          marker.on('click', function() {
+            // Marker being deselected
+            const selection = marker.getIcon();
+            if (selection.options.iconUrl === issuePinSelectedSVG) {
+              clearIcons();
+              toggleDetails(issue.service_request_id);
+              selectedIssueMarker = undefined;
+              selectedIssue = undefined;
+              return;
+            }
+
+            // Marker being selected: selects all the markers in the same location
+            const selectedMarkers = markers.filter(
+              (mrk) =>
+                mrk.getLatLng().lat === marker.getLatLng().lat &&
+                mrk.getLatLng().lng === marker.getLatLng().lng
+                // mrk.position.lat() === marker.position.lat() &&
+                // mrk.position.lng() === marker.position.lng()
+            );
+
+            // Clears all the markers that are not selected
+            selectedMarkers.forEach((selectedMarker) => {
+              markers.forEach((mkr) => {
+                if (
+                  mkr.getLatLng().lat !== selectedMarker.getLatLng().lat &&
+                  mkr.getLatLng().lng !== selectedMarker.getLatLng().lng
+                ) {
+                  let icon = mkr.getIcon();
+                  icon.options.iconUrl = issuePinSVG;
+                  mkr.setIcon(icon);
+                }
+              });
+
+              let icon = selectedMarker.getIcon();
+              if (icon.options.iconUrl === issuePinSVG) icon.options.iconUrl = issuePinSelectedSVG;
+              else {
+                icon.options.iconUrl = issuePinSVG;
+                selectedIssueMarker = undefined;
+              }
+
+              selectedMarker.setIcon(icon);
+            });
+
+            toggleDetails(issue.service_request_id);
+            selectedIssue = issue;
+            selectedIssueMarker = marker;
+            setNewCenter(issue.lat, issue.long, 17);
+
+            // Table
+            const selectedRow = document.getElementById(issue.service_request_id);
+            const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
+            if (rowIndex > 0) {
+              const rowAboveC = tableSelector.rows[rowIndex - 1];
+              setTimeout(() => {
+                rowAboveC.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              }, 500);
+            }
+          })
+        }
         // End of click handler
 
         heatmapData.push(
-          new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
+          provider === "osm" ? new L.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
+          : new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
         );
       });
 
-      heatmap = new google.maps.visualization.HeatmapLayer({
-        data: heatmapData,
-      });
-
-      if (
-        map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
-        2
-      ) {
-        const heatmapControl = createCustomControl("Heatmap", function () {
-          heatmapVisible = !heatmapVisible;
-          if (heatmapVisible) {
-            for (var i = 0; i < markers.length; i++) {
-              markers[i].setMap(null);
-            }
-            const button = document.getElementById("Heatmap-control");
-            button.innerHTML = messages["map"]["button.markers.label"];
-
-            heatmap.setMap(map);
-          } else {
-            const button = document.getElementById("Heatmap-control");
-            button.innerHTML = messages["map"]["button.heatmap.label"];
-
-            heatmap.setMap(null);
-            for (var i = 0; i < markers.length; i++) {
-              markers[i].setMap(map);
-            }
-          }
+      if (provider === "googleMaps") {
+        heatmap = new google.maps.visualization.HeatmapLayer({
+          data: heatmapData,
         });
-
-        heatmapControlIndex =
-          map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
-            heatmapControl
-          ) - 1;
+      } else if (provider === "osm" && !heatmapVisible) {
+        heatmap = L.heatLayer(heatmapData, {
+          radius: 15,
+          blur: 15,
+        });
       }
+      
+      if (provider === "googleMaps") {
+        if (
+          map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
+          2
+        ) {
+          const heatmapControl = createCustomControl("Heatmap", function () {
+            heatmapVisible = !heatmapVisible;
+            if (heatmapVisible) {
+              for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+              }
+              const button = document.getElementById("Heatmap-control");
+              button.innerHTML = messages["map"]["button.markers.label"];
 
-      if (heatmapVisible) heatmap.setMap(map);
+              heatmap.setMap(map);
+            } else {
+              const button = document.getElementById("Heatmap-control");
+              button.innerHTML = messages["map"]["button.heatmap.label"];
 
-      heatmap.set("radius", 15);
-      heatmap.set("opacity", 0.8);
+              heatmap.setMap(null);
+              for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+              }
+            }
+          });
 
-      if (heatmapVisible) toggleMarkers();
+          heatmapControlIndex =
+            map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(
+              heatmapControl
+            ) - 1;
+        }
+        if (heatmapVisible) heatmap.setMap(map);
 
-      const gradient = [
-        "rgba(0, 255, 255, 0)",
-        "rgba(0, 255, 255, 1)",
-        "rgba(0, 191, 255, 1)",
-        "rgba(0, 127, 255, 1)",
-        "rgba(0, 63, 255, 1)",
-        "rgba(0, 0, 255, 1)",
-        "rgba(0, 0, 223, 1)",
-        "rgba(0, 0, 191, 1)",
-        "rgba(0, 0, 159, 1)",
-        "rgba(0, 0, 127, 1)",
-        "rgba(63, 0, 91, 1)",
-        "rgba(127, 0, 63, 1)",
-        "rgba(191, 0, 31, 1)",
-        "rgba(255, 0, 0, 1)",
-      ];
-      heatmap.set("gradient", gradient);
+        heatmap.set("radius", 15);
+        heatmap.set("opacity", 0.8);
 
-      setTimeout(() => {
-        if (!selectedIssue) calculateBoundsAroundMarkers();
-      }, 400);
+        if (heatmapVisible) toggleMarkers();
+
+        const gradient = [
+          "rgba(0, 255, 255, 0)",
+          "rgba(0, 255, 255, 1)",
+          "rgba(0, 191, 255, 1)",
+          "rgba(0, 127, 255, 1)",
+          "rgba(0, 63, 255, 1)",
+          "rgba(0, 0, 255, 1)",
+          "rgba(0, 0, 223, 1)",
+          "rgba(0, 0, 191, 1)",
+          "rgba(0, 0, 159, 1)",
+          "rgba(0, 0, 127, 1)",
+          "rgba(63, 0, 91, 1)",
+          "rgba(127, 0, 63, 1)",
+          "rgba(191, 0, 31, 1)",
+          "rgba(255, 0, 0, 1)",
+        ];
+        heatmap.set("gradient", gradient);
+        setTimeout(() => {
+          if (!selectedIssue) {
+            calculateBoundsAroundMarkers();
+          }
+        }, 400);
+      } 
+      else if (provider === "osm") {
+        const customControl = L.Control.extend({
+          options: {
+            position: "topright",
+          },
+
+          onAdd: function (map) {
+            let container = L.DomUtil.create(
+              "img",
+              "leaflet-bar leaflet-control leaflet-control-custom"
+            );
+
+            container.style.backgroundColor = "white";
+            container.src = fireSVG;
+            container.style.width = "30px";
+            container.style.height = "30px";
+            container.innerHTML =
+              '<button style="width: 100%; height: 100%;">X</button>';
+
+            container.onclick = function () {
+
+              heatmapVisible = !heatmapVisible;
+
+              if (heatmapVisible) {     
+                for (var i = 0; i < markers.length; i++) {
+                  markers[i].removeFrom(map);
+                }    
+                map.addLayer(heatmap);
+                
+              }
+              if (!heatmapVisible) {
+                map.removeLayer(heatmap);
+                for (var i = 0; i < markers.length; i++) {
+                  markers[i].addTo(map);
+                }
+              }
+            };
+
+            return container;
+          },
+        });
+        if ($osmHeatmapControl === null) osmHeatmapControl.set(new customControl)
+
+        if (!$hasHeatmapControl){
+          $osmHeatmapControl.addTo(map)
+          hasHeatmapControl.set(true)          
+        } 
+        setTimeout(() => {
+          if (!selectedIssue) {
+            calculateBoundsAroundMarkers();
+          }
+        }, 400);
+      }
     }
   };
 
   const calculateBoundsAroundMarkers = () => {
-    if (markers && bounds) {
-      let lat, lng;
-      bounds = new google.maps.LatLngBounds();
-      for (let i = 0; i < markers.length; i++) {
-        lat = markers[i].position.lat();
-        lng = markers[i].position.lng();
-        bounds.extend({ lat, lng });
+    if (provider === "osm") {
+      if (markers && bounds) {
+        let bounds = new L.latLngBounds();
+        
+        markers.forEach(function (marker) {
+          bounds.extend([marker.getLatLng().lat, marker.getLatLng().lng]);
+        })
+
+        setNewCenter(bounds.getCenter().lat, bounds.getCenter().lng)
+        map.fitBounds(bounds);
       }
-      setNewCenter(bounds.getCenter());
-      map.fitBounds(bounds);
+    }
+    else if (provider === "googleMaps") {
+      if (markers && bounds) {
+        let lat, lng;
+        let bounds = new google.maps.LatLngBounds();
+        for (let i = 0; i < markers.length; i++) {
+          lat = markers[i].position.lat();
+          lng = markers[i].position.lng();
+          bounds.extend({ lat, lng });
+        }
+        setNewCenter(bounds.getCenter());
+        map.fitBounds(bounds);
+      }
     }
   };
+
 
   const loadColorPalette = () => {
     const colorStyle = document.createElement("style");
@@ -1327,6 +1564,84 @@
     }
   };
 
+  const initOSM = async () => {
+    const L = await import("leaflet");
+    const GeoSearch = await import("leaflet-geosearch");
+    await import ("leaflet.locatecontrol");
+    await import("leaflet.heat");
+
+    let reverseGeocodedAddress;
+
+    const mapLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
+
+    map = new L.map('map', {
+      center: [38.6740015313782, -90.453269188364],
+      layers: [mapLayer],
+      zoom: zoom
+    });
+
+    bounds = new L.latLngBounds()
+
+    // ~ leaflet-geosearch ~
+    const provider = new GeoSearch.OpenStreetMapProvider();
+
+    const searchControl = new GeoSearch.GeoSearchControl({
+      autoComplete: false,
+      provider: provider,
+      showMarker: false,
+      style: 'bar',
+    });
+
+    const icon = L.icon({
+      iconAnchor: [34,68],
+      iconSize: [71, 71],
+      iconUrl: currentLocationSVG
+    });
+
+    currentPositionMarker = new L.marker(map.getCenter(), {
+      icon: icon,
+      title: messages["map"]["marker.title"]
+    }).addTo(map)
+
+    function searchEventHandler(result) {
+      issueAddress.set(result.location.label)
+      issueAddressCoordinates.set({lat: result.location.y, lng: result.location.x})
+    }
+
+    function centerMarkerOnMap(map) {
+      if (!findReportedIssue) {
+        currentPositionMarker.setLatLng(map.target.getCenter());
+      }
+    }
+
+    function geocodeFromMarker() {
+      if (!findReportedIssue) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentPositionMarker.getLatLng().lat}&lon=${currentPositionMarker.getLatLng().lng}`)
+          .then((response) => response.json())
+          .then((data) => {
+            reverseGeocodedAddress = data.display_name;
+            issueAddress.set(reverseGeocodedAddress);
+            issueAddressCoordinates.set({lat: data.lat, lng: data.lon})
+          })
+      }
+    }
+
+    L.control.locate().addTo(map);
+    map.addControl(searchControl);
+
+    
+    map.on('move', centerMarkerOnMap)
+    map.on('moveend', geocodeFromMarker);
+    map.on('geosearch/showlocation', searchEventHandler);
+
+    // heatmapToggle();
+
+    if (localStorage.getItem("completed")) await postOfflineIssue();
+  }
+
   const initGoogleMaps = async () => {
     import("@googlemaps/js-api-loader").then((module) => {
       const Loader = module.Loader;
@@ -1506,32 +1821,62 @@
   };
 
   const selectIssue = (issue) => {
-    toggleDetails(issue.service_request_id);
-    selectedIssue = issue;
+    if (provider === "googleMaps"){
+      toggleDetails(issue.service_request_id);
+      selectedIssue = issue;
 
-    // In the case there are more than one marker stacked in the same coordinate
-    const selectedMarkers = markers.filter(
-      (mrk) =>
-        mrk.position.lat() === Number(issue.lat) &&
-        mrk.position.lng() === Number(issue.long)
-    );
+      // In the case there are more than one marker stacked in the same coordinate
+      const selectedMarkers = markers.filter(
+        (mrk) =>
+          mrk.position.lat() === Number(issue.lat) &&
+          mrk.position.lng() === Number(issue.long)
+      );
 
-    if (selectedMarkers) {
-      selectedIssueMarker = selectedMarkers[0];
+      if (selectedMarkers) {
+        selectedIssueMarker = selectedMarkers[0];
 
-      selectedMarkers.forEach((selectedMarker) => {
-        markers.forEach((mkr) => {
-          if (
-            mkr.position.lat() === selectedMarker.position.lat() &&
-            mkr.position.lng() === selectedMarker.position.lng()
-          ) {
-            let icon = mkr.getIcon();
-            icon.url = issuePinSelectedSVG;
-            mkr.setIcon(icon);
-          }
+        selectedMarkers.forEach((selectedMarker) => {
+          markers.forEach((mkr) => {
+            if (
+              mkr.position.lat() === selectedMarker.position.lat() &&
+              mkr.position.lng() === selectedMarker.position.lng()
+            ) {
+              let icon = mkr.getIcon();
+              icon.url = issuePinSelectedSVG;
+              mkr.setIcon(icon);
+            }
+          });
         });
-      });
+      }
     }
+    else if (provider === "osm") {
+      toggleDetails(issue.service_request_id);
+      selectedIssue = issue;
+
+      const selectedMarkers = markers.filter(
+        (mrk) =>
+          mrk.getLatLng().lat === Number(issue.lat) &&
+          mrk.getLatLng().lng === Number(issue.long)
+      );
+
+      if (selectedMarkers) {
+        selectedIssueMarker = selectedMarkers[0];
+
+        selectedMarkers.forEach((selectedMarker) => {
+          markers.forEach((mkr) => {
+            if (
+              mkr.getLatLng().lat === selectedMarker.getLatLng().lat &&
+              mkr.getLatLng().lng === selectedMarker.getLatLng().lng
+            ) {
+              let icon = mkr.getIcon();
+              icon.options.iconUrl = issuePinSelectedSVG;
+              mkr.setIcon(icon);
+            }
+          })
+        })
+      }
+    }
+    
   };
 
   const deselectIssue = (issue) => {
@@ -1617,7 +1962,13 @@
     fadeInBackground = true;
     openLogo = true;
 
-    if (isOnline) await initGoogleMaps();
+    // if (isOnline) await initOSM();
+    // if (isOnline) await initGoogleMaps();
+    if (mapProvider["provider"] === "googleMaps") {
+      await initGoogleMaps();
+    } else if (mapProvider["provider"] === "osm") {
+      await initOSM();
+    }
 
     // Fade the background after loading
     setTimeout(() => (reduceBackGroundOpacity = true), 1500);
@@ -1738,11 +2089,20 @@
               if (reportNewIssueStep6 || !isOnline) return;
 
               // Clears the current position marker from the map
-              currentPositionMarker.setMap(null);
+              if (provider === "googleMaps") {
+                currentPositionMarker.setMap(null);
+              }
 
+              if (provider === "osm") {
+                currentPositionMarker.remove();
+              }
+              
               // Clears the value of the input field inside the map
-              inputIssueAddressSelector = document.getElementById('pac-input');
-              inputIssueAddressSelector.value = '';
+              if (provider === "googleMaps") {
+                inputIssueAddressSelector = document.getElementById('pac-input');
+                inputIssueAddressSelector.value = '';
+              }
+              
 
               if (!findReportedIssue) {
                 showFooter = false;
@@ -1802,15 +2162,21 @@
               if (reportNewIssueStep6) return;
 
               if (isOnline) {
-                if (
-                  map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
-                    .length === 3
-                )
-                  map.controls[
-                    window.google.maps.ControlPosition.BOTTOM_LEFT
-                  ].removeAt(heatmapControlIndex);
+                if (provider === "googleMaps"){
+                  if (map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length === 3) 
+                    map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].removeAt(heatmapControlIndex);
 
-                currentPositionMarker.setMap(map);
+                  currentPositionMarker.setMap(map);
+                }
+                
+                else if (provider === "osm") {
+                  if ($hasHeatmapControl) {
+                    $osmHeatmapControl.remove()
+                    hasHeatmapControl.set(false)
+                  }
+                  currentPositionMarker.addTo(map);
+                }
+                
               } else {
                 const stepOneDiv = document.getElementById('stepOne');
 
@@ -2384,6 +2750,7 @@
             class:disabled-button="{$issueType === null ||
               $issueDetail === null}"
             on:click="{() => {
+              // Reviews data for the issue before it can be reported
               if (
                 $issueSubmitterName?.length < minSubmitterNameLength &&
                 $issueSubmitterName?.length !== 0
@@ -2700,11 +3067,13 @@
 
         <!-- END Report New Issue Flow -->
         {#if isOnline}
-          <input
-            id="pac-input"
-            placeholder="{messages['map']['pac-input-placeholder']}"
-            type="text"
-          />
+          {#if (provider === 'googleMaps')}
+            <input
+              id="pac-input"
+              placeholder="{messages['map']['pac-input-placeholder']}"
+              type="text"
+            />
+          {/if}
 
           <div id="map"></div>
         {/if}

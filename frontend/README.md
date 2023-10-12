@@ -18,17 +18,29 @@ We handle online/offline mode using a combination of local storage and service w
 
 ### External Dependencies
 
-- Google Recaptcha
-- Google Maps API (@googlemaps/js-api-loader)
-- Google Location Library (locations)
-- Google Visualization Library (heat map)
-- Google Safe Search
-- Google OAuth 2
-- Flatpickr
-- Svelte-multiselect
-- Cross-env
 - Concurrently
+- Cross-env
+- Flatpickr
 - Fontfaceobserver
+- Google Location Library (locations)
+- Google Maps API (@googlemaps/js-api-loader)
+- Google OAuth 2
+- Google Recaptcha
+- Google Safe Search
+- Google Visualization Library (heat map)
+- Leaflet
+- Leaflet Control Geocoder
+- Leaflet Geosearch
+- Leaflet Heat
+- Svelte-multiselect
+
+### Setting Secrets
+
+In the root directory, create a file called `setenv.sh`. Copy the contents from `setenv.sh.example` into `setenv.sh`, replacing values in carets with the corresponding values.
+
+### Running Locally
+
+With `setenv.sh` populated with relevant keys, run `source setenv.sh` in root, followed by `./gradlew app:run`.
 
 ## Customization
 
@@ -97,6 +109,10 @@ Hex values for the app's color scheme are saved in `/frontend/src/lib/colors.jso
 ### Maintaining State
 
 SvelteKit uses the concept of 'stores' to maintain the frontend state, even as some DOM elements are destroyed or the user navigates to another screen. These stores, located in the `/stores` folder, can be initialized with a value or return null.
+
+### Select Map Provider
+
+The maps can be provided by OpenStreetMaps/Leaflet or Google Maps, depending on preference. Within `/frontend/src/lib/mapProvider.json`, the value of `provider` can be set to either `googleMaps` or `osm` for OpenStreetMaps.
 
 ## Front-end Testing
 

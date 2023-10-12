@@ -1,5 +1,5 @@
 gcp:
-  project-id: gcp-project-id-here
+  project-id: ${GCP_PROJECT_ID}
 
 micronaut:
   application:
@@ -7,28 +7,16 @@ micronaut:
   object-storage:
     gcp:
       default:
-        bucket: bucket-name-here
+        bucket: ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
   security:
     authentication: cookie
-    token:
-      jwt:
-        cookie:
-          cookie-secure: true
-        signatures:
-          secret:
-            generator:
-              secret: PleaseChangeThisSecretForANewOne
-    redirect:
-      login-success: http://localhost:3000
-      login-failure: http://localhost:8080/failed-auth
-      logout: http://localhost:8080
     oauth2:
       login-uri: "/api/oauth/login{/provider}"
       callback-uri: "/api/oauth/callback{/provider}"
       clients:
         google:
-          client-id: "867150944261-toegpflg674bdoikca22l6bm5aaqm5kj.apps.googleusercontent.com"
-          client-secret: "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"
+          client-id: ${GOOGLE_CLIENT_ID:`your-client-id-here.apps.googleusercontent.com`}
+          client-secret: ${GOOGLE_CLIENT_SECRET:`googleClientSecret`}
           openid:
             authorization:
               prompt: select_account
@@ -88,14 +76,6 @@ micronaut:
         paths: classpath:public
         mapping: /**
         enabled: true
-  server:
-    cors:
-      enabled: true
-      configurations:
-        allowedOrigins:
-          - http://localhost:3000
-          - localhost:3000
-          - http://127.0.0.1:3000
   data:
     pageable:
       size-parameter-name: page_size
@@ -120,6 +100,6 @@ app:
     bucket:  a69c003f-5281-4376-9875-ebac846ae7e9-wemove # same as micronaut.object-storage.gcp.default.bucket above.
     append-object-url-format: "%s"
   recaptcha:
-    secret: "6LfY3tMlAAAAAAxsA68VyjGMkbIkBqql3gDLG-Hs"
+    secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
   safesearch:
-    key: "AIzaSyC_RuNsPOuWzMq7oiWNDxJoiqGZrOky9Kk"
+    key: ${SAFESEARCH_KEY:`safesearchKey`}

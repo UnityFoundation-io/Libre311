@@ -76,14 +76,18 @@ If the Web API will serve the UI, then set VITE_BACKEND_URL to `/api`.
 
 Set the following environment variables to enable Google as an auth provider:
 
-* MICRONAUT_SECURITY_OAUTH2_CLIENTS_GOOGLE_CLIENT_ID - The id of oauth client.
-* MICRONAUT_SECURITY_OAUTH2_CLIENTS_GOOGLE_CLIENT_SECRET - The secret of the oauth client.
+* GOOGLE_CLIENT_ID - The id of oauth client.
+* GOOGLE_CLIENT_SECRET - The secret of the oauth client.
 * MICRONAUT_SECURITY_OAUTH2_CLIENTS_GOOGLE_OPENID_ISSUER - Set to "https://accounts.google.com"
 
 ### Configuring the Web API
 
 The following environment variables should be set to configure the application:
 
+* GCP_PROJECT_ID - The GCP project ID
+* STORAGE_BUCKET_ID - The ID of the bucket where user-uploaded images are hosted.
+* RECAPTCHA_SECRET - Site abuse prevention.
+* SAFESEARCH_KEY - Prevents explicit images from being uploaded. 
 * MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_SECRET_GENERATOR_SECRET - Secret uses to sign JWTs.
 * MICRONAUT_SECURITY_TOKEN_JWT_GENERATOR_REFRESH_TOKEN_SECRET - Secret for JWT renewal tokens.
 * MICRONAUT_SECURITY_REDIRECT_LOGIN_SUCCESS
