@@ -8,7 +8,6 @@
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
   import logo from "$lib/logo.webp";
-  import unityLogo from "$lib/genericFiles/unityLogoCropped.webp"
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -48,7 +47,7 @@
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
-  import messages from "$lib/messages.json";
+  
   import colors from "$lib/colors.json";
   import "$lib/global.css";
   import "$lib/spinner.css";
@@ -2004,8 +2003,8 @@
             duration: 1000,
             quintOut,
           }}"
-          src="{unityLogo}"
-          alt="we move logo"
+          src="{logo}"
+          alt="app logo"
           class="logo"
         />
       {/if}

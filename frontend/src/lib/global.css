@@ -239,7 +239,7 @@ body {
 
 .background::before {
   content: "";
-  background-image: url("$lib/genericFiles/streetview16-9.png");
+  background-image: url("$lib/backgroundImage.webp");
   background-repeat: no-repeat;
   background-position: 100% 27%;
   background-size: cover;
