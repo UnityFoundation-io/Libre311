@@ -81,7 +81,7 @@ micronaut:
       size-parameter-name: page_size
 datasources:
   default:
-    db-type: ${WEMOVE_DB_TYPE}
+    db-type: ${LIBRE311_DB_TYPE}
 jpa:
   default:
     entity-scan:
@@ -89,15 +89,15 @@ jpa:
     properties:
       hibernate:
         hbm2ddl:
-          auto: ${WEMOVE_AUTO_SCHEMA_GEN:update}
+          auto: ${LIBRE311_AUTO_SCHEMA_GEN:update}
 netty:
   default:
     allocator:
       max-order: 3
-wemove:
+app:
   image-storage:
     bucket-url-format: "https://storage.googleapis.com/%s/"
-    bucket:  a69c003f-5281-4376-9875-ebac846ae7e9-wemove # same as micronaut.object-storage.gcp.default.bucket above.
+    bucket:  ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
     append-object-url-format: "%s"
   recaptcha:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}

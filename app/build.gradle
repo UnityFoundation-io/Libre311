@@ -29,7 +29,7 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security-oauth2")
     implementation('com.opencsv:opencsv:5.7.1')
 
-    String databaseSelection = System.getenv("WEMOVE_DATABASE_DEPENDENCY")
+    String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
     if (databaseSelection != null) {
         databaseSelection.split(',').each {part ->
             runtimeOnly(part)

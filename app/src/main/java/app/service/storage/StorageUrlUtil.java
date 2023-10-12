@@ -7,13 +7,13 @@ import jakarta.inject.Singleton;
 @Singleton
 public class StorageUrlUtil {
 
-    @Property(name = "wemove.image-storage.bucket-url-format")
+    @Property(name = "app.image-storage.bucket-url-format")
     private String bucketUrlFormat;
 
-    @Property(name = "wemove.image-storage.append-object-url-format")
+    @Property(name = "app.image-storage.append-object-url-format")
     private String appendObjectUrlFormat;
 
-    @Property(name = "wemove.image-storage.bucket")
+    @Property(name = "app.image-storage.bucket")
     private String bucketId;
 
 

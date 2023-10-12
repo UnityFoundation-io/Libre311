@@ -14,7 +14,7 @@ public class GoogleImageSafeSearchService {
     @Inject
     SafeSearchClient client;
 
-    @Property(name = "wemove.safesearch.key")
+    @Property(name = "app.safesearch.key")
     protected String key;
 
     public boolean imageIsExplicit(String image) {

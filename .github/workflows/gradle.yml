@@ -38,16 +38,16 @@ jobs:
       - name: Build with Gradle - MySQL Datasource
         if: ${{ success() }}
         env:
-          WEMOVE_DATABASE_DEPENDENCY: mysql:mysql-connector-java:8.0.31
-          WEMOVE_DB_TYPE: mysql
+          LIBRE311_DATABASE_DEPENDENCY: mysql:mysql-connector-java:8.0.31
+          LIBRE311_DB_TYPE: mysql
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
           arguments: 'app:build'
       - name: Build with Gradle - PostgreSQL Datasource
         if: ${{ success() }}
         env:
-          WEMOVE_DATABASE_DEPENDENCY: org.postgresql:postgresql:42.4.2
-          WEMOVE_DB_TYPE: postgres
+          LIBRE311_DATABASE_DEPENDENCY: org.postgresql:postgresql:42.4.2
+          LIBRE311_DB_TYPE: postgres
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
           arguments: 'app:build'

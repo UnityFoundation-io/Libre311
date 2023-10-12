@@ -1,6 +1,6 @@
-# WeMove
+# Libre311
 
-WeMove is a web application for service requests based on the [Open311](https://www.open311.org) standard.
+Libre311 is a web application for service requests based on the [Open311](https://www.open311.org) standard.
 
 ## Operator Documentation
 
@@ -13,7 +13,7 @@ WeMove is a web application for service requests based on the [Open311](https://
                                               +->| Auth Provider |
                                                  +---------------+
 
-The WeMove application consists of
+The Libre311 application consists of
 
 * A Web App UI that can either be served by the Web API or independently
 * A Web API that serves data to the UI
@@ -26,7 +26,7 @@ The Web API is horizontally scalable.
 
 ### The Database
 
-Currently, the WeMove application supports the following Databases:
+Currently, the Libre311 application supports the following Databases:
 
 | Database     | Versions     | Driver                   | Reference                                                                                                                 |
 |--------------|--------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------|
@@ -34,13 +34,13 @@ Currently, the WeMove application supports the following Databases:
 
 To connect to a database, the following environment variables must be set for the Web API:
 
-* WEMOVE_JDBC_URL - The JDBC URL of the database
-* WEMOVE_JDBC_DRIVER - The driver to use. See Driver column for values.
-* WEMOVE_JDBC_USER - The database user name.
-* WEMOVE_JDBC_PASSWORD - The database user password.
-* WEMOVE_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
+* LIBRE311_JDBC_URL - The JDBC URL of the database
+* LIBRE311_JDBC_DRIVER - The driver to use. See Driver column for values.
+* LIBRE311_JDBC_USER - The database user name.
+* LIBRE311_JDBC_PASSWORD - The database user password.
+* LIBRE311_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
 
-The following describes the options for WEMOVE_AUTO_SCHEMA_GEN environment variable in detail:
+The following describes the options for LIBRE311_AUTO_SCHEMA_GEN environment variable in detail:
 
 * *none** - No action will be performed.
 * *create-only** - Database creation will be generated.
@@ -50,7 +50,7 @@ The following describes the options for WEMOVE_AUTO_SCHEMA_GEN environment varia
 * *validate** - Validate the database schema.
 * *update** - Update the database schema.
 
-The WEMOVE_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
+The LIBRE311_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
 Examples include `mysql:mysql-connector-java:8.0.31` and `org.postgresql:postgresql:42.4.2`.
 Multiple drivers can be specified.
 For example, `mysql:mysql-connector-java:8.0.31,com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2`.
@@ -61,8 +61,8 @@ The database contains a table listing the email addresses of users that are auth
 To authorize a user for this activity, insert their email address as follows:
 
 ```sql
-USE wemove;
-INSERT INTO wemove_user (email)
+USE libre311db;
+INSERT INTO app_users (email)
 VALUES ('$EMAIL');
 ```
 

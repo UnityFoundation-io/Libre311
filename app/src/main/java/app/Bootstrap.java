@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Requires(property = "wemove.bootstrap.data.enabled", value = StringUtils.TRUE)
-@ConfigurationProperties("wemove.bootstrap")
+@Requires(property = "app-data.bootstrap.data.enabled", value = StringUtils.TRUE)
+@ConfigurationProperties("app-data.bootstrap")
 public class Bootstrap {
 
     @MapFormat(transformation = MapFormat.MapTransformation.NESTED)

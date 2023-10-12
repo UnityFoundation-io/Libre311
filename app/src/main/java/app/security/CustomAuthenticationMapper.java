@@ -17,11 +17,11 @@ import java.util.Optional;
 @Replaces(DefaultOpenIdAuthenticationMapper.class)
 @Singleton
 @Named("google")
-public class WeMoveAuthenticationMapper implements OpenIdAuthenticationMapper {
+public class CustomAuthenticationMapper implements OpenIdAuthenticationMapper {
 
     private final UserRepository userRepository;
 
-    public WeMoveAuthenticationMapper(UserRepository userRepository) {
+    public CustomAuthenticationMapper(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

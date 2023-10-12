@@ -1,4 +1,4 @@
-wemove:
+app-data:
   bootstrap:
     data:
       enabled: true
