@@ -4,10 +4,10 @@
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
   import { browser } from "$app/environment";
+  import messages from "$lib/messages.json"
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
-  import logo from "$lib/logo.webp";
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -47,7 +47,7 @@
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
-  
+
   import colors from "$lib/colors.json";
   import "$lib/global.css";
   import "$lib/spinner.css";
@@ -85,6 +85,8 @@
   const waitTime = 1000;
   const minAddressCharacters = 15;
   const debounceTime = 1000;
+
+  let logo;
 
   // Page Height
   let pageHeight = 1650;
@@ -1921,7 +1923,11 @@
   };
 
   onMount(async () => {
+    logo = (await import(messages["assets"]["logo"]));
+
+    //logo = await import("../lib/logo.webp")
     setTimeout(() => console.clear(), 100);
+    
     await loadRecaptcha();
     await getTokenInfo();
 

@@ -114,8 +114,8 @@
   "assets":
     {
       "background.image": "$lib/backgroundImage.webp",
-      "footer.links": "$lib/footerLinks.json",
-      "footer.logo.small": "$lib/footerLogoSmall.webp",
-      "logo": "$lib/logo.webp"
+      "footer.links": "./footerLinks.json",
+      "footer.logo.small": "./footerLogoSmall.webp",
+      "logo": "../lib/logo.webp"
     }
 }
