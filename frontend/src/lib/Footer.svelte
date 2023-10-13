@@ -7,8 +7,8 @@
   import twitterSVG from "../icons/twitter.svg";
 
   import footerSelector from "../stores/footerSelector";
-  import footerLogoSmall from "$lib/footerLogoSmall.webp";
-  import footerLinks from "$lib/footerLinks.json"
+  import footerLogoSmall from "$media/footerLogoSmall.webp";
+  import footerLinks from "$media/footerLinks.json"
 
 
   export let backgroundColor;

@@ -15,7 +15,10 @@ const config = {
 				'script-src': ['self', 'https://www.google.com/', 'https://maps.googleapis.com/',
 					'https://www.gstatic.com/recaptcha/', 'https://maps.gstatic.com/', 'https://fonts.googleapis.com/']
 			},
-		}
+		},
+    alias: {
+      $media: "src/media/*"
+    }
 	}
 };
 
