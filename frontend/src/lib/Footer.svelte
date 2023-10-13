@@ -1,30 +1,20 @@
 <script>
   import { goto } from "$app/navigation";
 
-  import messages from "$lib/messages.json"
+
   import facebookSVG from "../icons/facebook.svg";
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
 
   import footerSelector from "../stores/footerSelector";
-  // import footerLogoSmall from "$lib/footerLogoSmall.webp";
-  import { onMount } from "svelte";
+  import footerLogoSmall from "$lib/footerLogoSmall.webp";
+  import footerLinks from "$lib/footerLinks.json"
 
-  let footerLinks = []
-  let footerLogoSmall
 
   export let backgroundColor;
 
   const URL_PREFIX = import.meta.env.VITE_BACKEND_URL;
 
-  onMount(async () => {
-    // footerLinks = await import.meta.glob("$lib/footerLinks.json", {eager: true})
-    // const pages = Object.keys(footanything).map((key) => footanything[key].default);
-    // console.log(pages)
-
-    footerLinks = (await import(/* @vite-ignore */messages["assets"]["footer.links"]))
-    footerLogoSmall = (await import(/* @vite-ignore */messages["assets"]["footer.logo.small"]));
-  })
 </script>
 
 <img

@@ -8,6 +8,7 @@
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
+  import logo from "$lib/logo.webp"
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -86,7 +87,6 @@
   const minAddressCharacters = 15;
   const debounceTime = 1000;
 
-  let logo;
 
   // Page Height
   let pageHeight = 1650;
@@ -1923,9 +1923,6 @@
   };
 
   onMount(async () => {
-    logo = (await import(messages["assets"]["logo"]));
-
-    //logo = await import("../lib/logo.webp")
     setTimeout(() => console.clear(), 100);
     
     await loadRecaptcha();
