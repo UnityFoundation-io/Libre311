@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
   import { browser } from "$app/environment";
-  import messages from "$lib/messages.json"
+  import messages from "$media/messages.json"
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";

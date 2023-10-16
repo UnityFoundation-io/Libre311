@@ -109,13 +109,5 @@
       "label.description": "Description:",
       "label.requested.at": "Requested At:",
       "label.location": "Location:"
-    },
-  
-  "assets":
-    {
-      "background.image": "$lib/backgroundImage.webp",
-      "footer.links": "./footerLinks.json",
-      "footer.logo.small": "./footerLogoSmall.webp",
-      "logo": "../lib/logo.webp"
     }
 }
