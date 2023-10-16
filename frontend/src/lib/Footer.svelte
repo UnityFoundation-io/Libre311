@@ -9,6 +9,7 @@
   import footerSelector from "../stores/footerSelector";
   import footerLogoSmall from "$media/footerLogoSmall.webp";
   import footerLinks from "$media/footerLinks.json"
+  import socialMediaLinks from "$media/socialMediaLinks.json";
 
 
   export let backgroundColor;
@@ -54,18 +55,20 @@
       </a>
 
       <div class="socials">
-        <a class="socialButton" href="">
-          <img src="{facebookSVG}" alt="facebook" />
-        </a>
-        <a
-          class="socialButton"
-          href=""
-        >
-          <img src="{instagramSVG}" alt="instagram" />
-        </a>
-        <a class="socialButton" href="">
-          <img src="{twitterSVG}" alt="twitter" />
-        </a>
+        {#each socialMediaLinks as socialMediaLink}
+          <a class="socialButton" href={socialMediaLink["facebook"]}>
+            <img src="{facebookSVG}" alt="facebook" />
+          </a>
+          <a
+            class="socialButton"
+            href={socialMediaLink["instagram"]}
+          >
+            <img src="{instagramSVG}" alt="instagram" />
+          </a>
+          <a class="socialButton" href={socialMediaLink["twitter"]}>
+            <img src="{twitterSVG}" alt="twitter" />
+          </a>
+        {/each}
       </div>
     </div>
   </div>

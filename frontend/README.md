@@ -61,6 +61,7 @@ The following assets are stored by default in `frontend/src/media`:
 - Footer logo: `footerLogoSmall.webp`
 - Organization logo: `logo.webp`
 - Externalized Messages: `messages.json`
+- Social Media Links: `socialMediaLinks.json`
 
 To change any of these elements to fit around specific organization material, these files can be directly altered (in the case of .json files), or replaced with files of the same name (in the case of .webp files). 
 
@@ -128,7 +129,7 @@ If a custom media directory is used, simply put the new file in that directory (
 
 ***Notice**: The default image has a resolution of 72x72 px.*
 
-For social media links, see `frontend/src/lib/Footer.svelte`. The buttons for social media (Facebook, Instagram, and Twitter) are in place, but without links by default. 
+The buttons for social media (Facebook, Instagram, and Twitter) are located in `frontend/src/lib/Footer.svelte`, but without links by default.
 
 ```html
 <div class="socials">
@@ -144,8 +145,18 @@ For social media links, see `frontend/src/lib/Footer.svelte`. The buttons for so
   </a>
 </div>
 ```
+For social media links, see `frontend/src/media/socialMediaLinks.json`:
 
-To connect each button to a respective social media page, place the appropriate page link in the `href` for each respective social media button.
+```json
+[
+  {
+    "facebook": "",
+    "instagram": "",
+    "twitter": ""
+  }
+]
+```
+To populate the buttons with links, add the links to it's respective service in `socialMediaLinks.json`.
 
 ### Color Schema
 
