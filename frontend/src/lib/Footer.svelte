@@ -54,16 +54,16 @@
       </a>
 
       <div class="socials">
-        <a class="socialButton" href="https://facebook.com/localmotioncomo">
+        <a class="socialButton" href="">
           <img src="{facebookSVG}" alt="facebook" />
         </a>
         <a
           class="socialButton"
-          href="https://www.instagram.com/localmotioncomo/"
+          href=""
         >
           <img src="{instagramSVG}" alt="instagram" />
         </a>
-        <a class="socialButton" href="https://twitter.com/localmotioncomo">
+        <a class="socialButton" href="">
           <img src="{twitterSVG}" alt="twitter" />
         </a>
       </div>

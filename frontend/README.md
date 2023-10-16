@@ -128,6 +128,25 @@ If a custom media directory is used, simply put the new file in that directory (
 
 ***Notice**: The default image has a resolution of 72x72 px.*
 
+For social media links, see `frontend/src/lib/Footer.svelte`. The buttons for social media (Facebook, Instagram, and Twitter) are in place, but without links by default. 
+
+```html
+<div class="socials">
+  <a class="socialButton" href="">
+    <img src="{facebookSVG}" alt="facebook" />
+  </a>
+  <a
+    class="socialButton" href="">
+    <img src="{instagramSVG}" alt="instagram" />
+  </a>
+  <a class="socialButton" href="">
+    <img src="{twitterSVG}" alt="twitter" />
+  </a>
+</div>
+```
+
+To connect each button to a respective social media page, place the appropriate page link in the `href` for each respective social media button.
+
 ### Color Schema
 
 Hex values for the app's color scheme are saved in `/frontend/src/lib/colors.json`. To adjust the color scheme to closer align with brand standards, edit these values accordingly. 
