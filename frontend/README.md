@@ -46,14 +46,32 @@ With `setenv.sh` populated with relevant keys, run `source setenv.sh` in root, f
 
 ### Skinning
 
-- Externalized Messages: `/lib/messages.json`
-- Color Palette: `/lib/messages.json`
+- Color palette: `/lib/colors.json`
 - Styling: `/lib/global.css`
 - Icons: `/icons`
 - Library folder: `/lib`
 - Fonts: `/static/font`
 
 Use `.env` to store Google Keys and the backend reference. The keys can be found in the root frontend folder `.env.example`.
+
+The following assets are stored by default in `frontend/src/media`:
+
+- Background: `backgroundImage.webp`
+- Footer links: `footerLinks.json`
+- Footer logo: `footerLogoSmall.webp`
+- Organization logo: `logo.webp`
+- Externalized Messages: `messages.json`
+
+To change any of these elements to fit around specific organization material, these files can be directly altered (in the case of .json files), or replaced with files of the same name (in the case of .webp files). 
+
+Alternatively, a new folder can be created with these files named accordingly within. To change which folder is read for assets, the following line from `frontend/svelte.config.js` can be changed to the appropriate file path:
+
+```js
+alias: {
+  $media: "src/media/*"
+}
+```
+where `src/media/*` can be replaced with the path to the newly created folder.
 
 #### A Note on Images
 
@@ -63,13 +81,17 @@ If the desired images are not currently in WebP format, there are multiple tools
 
 ### Background Image
 
-The image used in the background of the app is located in `frontend/src/lib/backgroundImage.webp`. To change the background image, remove the current `backgroundImage.webp`, and put a new image in it's place (remember to rename the new file to `backgroundImage`).
+To change the background image, remove the current `backgroundImage.webp` from `frontend/src/media`, and put a new image in it's place (remember to rename the new file to `backgroundImage.webp`). 
 
-***Notice**: The image should be in a portrait orientation. The default image has a resolution of 1024x1792 px.*
+If a custom media directory is used, simply put the new file in that directory (make sure the file is named `backgroundImage.webp`)
+
+***Notice**: The image should be in a portrait orientation. The default image has a resolution of 816x1456 px.*
 
 ### Logo
 
-The image used for the company logo is located in `frontend/src/lib/logo.webp`. To change the logo, remove the current `logo.webp`, and put a new image in it's place (remember to rename the new file to `logo`).
+To change the organization logo, remove the current `logo.webp` from `frontend/src/media`, and put a new image in it's place (remember to rename the new file to `logo`).
+
+If a custom media directory is used, simply put the new file in that directory (make sure the file is named `logo.webp`)
 
 ***Notice**: The default image has a resolution of 800x450 px.*
 
@@ -77,7 +99,7 @@ The image used for the company logo is located in `frontend/src/lib/logo.webp`. 
 
 The footer of the app currently displays links to various pages from LocalMotion, as well as their social media links.
 
-To edit the content of the footer, go to `frontend/src/lib/footerLinks.json.` The structure of the file is set up as:
+To edit the content of the footer, go to `frontend/src/media/footerLinks.json.` The structure of the file is set up as:
 
 ```json
 [
@@ -98,7 +120,11 @@ To edit the content of the footer, go to `frontend/src/lib/footerLinks.json.` Th
 
 To create a new header with it's own set of links, copy this structure in `footerLinks.json`, and replace the text wrapped in carets.
 
-The image on top of the footer is stored in `/frontend/src/lib/footerLogoSmall.webp`. To use a custom image, replace the default `footerLogoSmall.webp` with a new image, and rename that file's name to `footerLogoSmall`. 
+If a custom media directory is used, simply copy `footerLinks.json` from `frontend/src/media` into that directory, and edit the content accordingly. Alternatively, create a new `footerLinks.json` in the new directory, using the structure above to fill the footer with custom links.
+
+To use a custom footer icon, remove the current `footerLogoSmall.webp` from `frontend/src/media`, and put a new image in it's place (remember to rename the new file to `footerLogoSmall.webp`.). 
+
+If a custom media directory is used, simply put the new file in that directory (make sure the file is named `footerLogoSmall.webp`)
 
 ***Notice**: The default image has a resolution of 72x72 px.*
 
