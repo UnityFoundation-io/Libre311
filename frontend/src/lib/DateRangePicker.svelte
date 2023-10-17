@@ -3,7 +3,7 @@
   import "flatpickr/dist/flatpickr.min.css";
   import flatpickr from "flatpickr";
   import resetDate from "../stores/resetDate";
-  import messages from "$lib/messages.json";
+  import messages from "$media/messages.json";
   import expandSVG from "../icons/expand.svg";
 
   const dispatch = createEventDispatcher();

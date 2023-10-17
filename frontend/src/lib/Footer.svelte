@@ -1,23 +1,26 @@
 <script>
   import { goto } from "$app/navigation";
 
+
   import facebookSVG from "../icons/facebook.svg";
   import instagramSVG from "../icons/instagram.svg";
   import twitterSVG from "../icons/twitter.svg";
 
   import footerSelector from "../stores/footerSelector";
-  import footerLogoSmall from "$lib/footerLogoSmall.webp";
- 
-  import footerLinks from "$lib/footerLinks.json"
+  import footerLogoSmall from "$media/footerLogoSmall.webp";
+  import footerLinks from "$media/footerLinks.json"
+  import socialMediaLinks from "$media/socialMediaLinks.json";
+
 
   export let backgroundColor;
 
   const URL_PREFIX = import.meta.env.VITE_BACKEND_URL;
+
 </script>
 
 <img
   src="{footerLogoSmall}"
-  alt="local motion logo"
+  alt="footer logo"
   class="local-motion-logo"
 />
 <div
@@ -52,18 +55,20 @@
       </a>
 
       <div class="socials">
-        <a class="socialButton" href="https://facebook.com/localmotioncomo">
-          <img src="{facebookSVG}" alt="facebook" />
-        </a>
-        <a
-          class="socialButton"
-          href="https://www.instagram.com/localmotioncomo/"
-        >
-          <img src="{instagramSVG}" alt="instagram" />
-        </a>
-        <a class="socialButton" href="https://twitter.com/localmotioncomo">
-          <img src="{twitterSVG}" alt="twitter" />
-        </a>
+        {#each socialMediaLinks as socialMediaLink}
+          <a class="socialButton" href={socialMediaLink["facebook"]}>
+            <img src="{facebookSVG}" alt="facebook" />
+          </a>
+          <a
+            class="socialButton"
+            href={socialMediaLink["instagram"]}
+          >
+            <img src="{instagramSVG}" alt="instagram" />
+          </a>
+          <a class="socialButton" href={socialMediaLink["twitter"]}>
+            <img src="{twitterSVG}" alt="twitter" />
+          </a>
+        {/each}
       </div>
     </div>
   </div>
