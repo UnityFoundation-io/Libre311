@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('footer displays Local Motion logo', async ({ page }) => {
+test('footer displays logo', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.waitForTimeout(1000);
   const img = page.getByRole('img', { name: 'footer logo' });
