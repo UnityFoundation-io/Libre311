@@ -50,7 +50,7 @@
       >
         Admin Login
       </h2>
-      <a href="https://lomocomo.org/about/contact-us/">
+      <a href="">
         <h2>Contact Us</h2>
       </a>
 
