@@ -17,7 +17,7 @@ public class MockSecurityService implements SecurityService {
 
     @PostConstruct
     public void postConstruct() {
-        serverAuthentication = new ServerAuthentication("unity-admin-test@unityfoundation.io",
+        serverAuthentication = new ServerAuthentication("unity-admin-test@test.test",
                 null,
                 null);
     }
