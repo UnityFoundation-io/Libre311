@@ -22,7 +22,7 @@
 <img
   src="{footerLogoSmall}"
   alt="footer logo"
-  class="local-motion-logo"
+  class="footer-logo"
 />
 <div
   class="footer"
@@ -95,7 +95,7 @@
     font-size: 0.85rem;
   }
 
-  .local-motion-logo {
+  .footer-logo {
     margin-top: 5rem;
     margin-bottom: -0.4rem;
     height: 69px;
