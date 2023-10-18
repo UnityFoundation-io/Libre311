@@ -1,4 +1,4 @@
-# Local Motion We Move
+# Libre311
 
 ## Front-end
 
@@ -98,7 +98,7 @@ If a custom media directory is used, simply put the new file in that directory (
 
 ### Footer
 
-The footer of the app currently displays links to various pages from LocalMotion, as well as their social media links.
+By default, the footer of the app displays a link to the Libre311 GitHub repo, as well as buttons for social media links.
 
 To edit the content of the footer, go to `frontend/src/media/footerLinks.json.` The structure of the file is set up as:
 
@@ -172,7 +172,7 @@ The maps can be provided by OpenStreetMaps/Leaflet or Google Maps, depending on 
 
 ## Front-end Testing
 
-WeMove uses Playwright for front-end testing.
+Libre311 uses Playwright for front-end testing.
 
 ### Configuration
 

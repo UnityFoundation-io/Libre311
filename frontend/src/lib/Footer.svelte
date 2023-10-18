@@ -16,6 +16,7 @@
 
   const URL_PREFIX = import.meta.env.VITE_BACKEND_URL;
 
+
 </script>
 
 <img
@@ -50,25 +51,36 @@
       >
         Admin Login
       </h2>
-      <a href="https://lomocomo.org/about/contact-us/">
-        <h2>Contact Us</h2>
-      </a>
+
+      {#if socialMediaLinks["contactUs"]}
+        <a href={socialMediaLinks["contactUs"]}>
+          <h2>Contact Us</h2>
+        </a>
+      {/if}
 
       <div class="socials">
-        {#each socialMediaLinks as socialMediaLink}
-          <a class="socialButton" href={socialMediaLink["facebook"]}>
+        
+        {#if socialMediaLinks["facebook"]}
+          <a class="socialButton" href={socialMediaLinks["facebook"]}>
             <img src="{facebookSVG}" alt="facebook" />
           </a>
+        {/if}
+
+        {#if socialMediaLinks["instagram"]}
           <a
             class="socialButton"
-            href={socialMediaLink["instagram"]}
+            href={socialMediaLinks["instagram"]}
           >
             <img src="{instagramSVG}" alt="instagram" />
           </a>
-          <a class="socialButton" href={socialMediaLink["twitter"]}>
+        {/if}
+
+        {#if socialMediaLinks["twitter"]}
+          <a class="socialButton" href={socialMediaLinks["twitter"]}>
             <img src="{twitterSVG}" alt="twitter" />
           </a>
-        {/each}
+        {/if}
+      
       </div>
     </div>
   </div>
