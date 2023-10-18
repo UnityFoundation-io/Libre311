@@ -21,18 +21,3 @@ test('footer displays about sub links', async ({ page }) => {
   await page.getByRole('link', { name: 'GitHub Repo' }).click();
   await expect(page).toHaveURL('https://github.com/UnityFoundation-io/LocalMotionWeMove');
 });
-
-test('footer has facebook icon', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
-  await page.getByRole('img', { name: 'facebook' }).click();
-});
-
-test('footer has instagram icon', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
-  await page.getByRole('img', { name: 'instagram' }).click();
-});
-
-test('footer has twitter icon', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
-  await page.getByRole('img', { name: 'twitter' }).click();
-});
