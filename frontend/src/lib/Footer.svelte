@@ -50,9 +50,6 @@
       >
         Admin Login
       </h2>
-      <a href="">
-        <h2>Contact Us</h2>
-      </a>
 
       <div class="socials">
         {#each socialMediaLinks as socialMediaLink}
