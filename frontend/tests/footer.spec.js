@@ -19,5 +19,5 @@ test('footer displays major headings', async ({ page }) => {
 test('footer displays about sub links', async ({ page }) => {
   await page.goto('http://localhost:3000/');
   await page.getByRole('link', { name: 'GitHub Repo' }).click();
-  await expect(page).toHaveURL('https://github.com/UnityFoundation-io/LocalMotionWeMove');
+  await expect(page).toHaveURL('https://github.com/UnityFoundation-io/Libre311');
 });
