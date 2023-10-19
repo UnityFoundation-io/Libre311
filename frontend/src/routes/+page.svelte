@@ -3,7 +3,11 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
+
   import { browser } from "$app/environment";
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+
   import messages from "$media/messages.json"
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
@@ -145,6 +149,8 @@
 
   let emailRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
+
+  let hasFailed = $page.url.searchParams.has('login-failed');
 
   let map,
     heatmap,
@@ -2012,6 +2018,22 @@
         />
       {/if}
     </div>
+
+    {#if hasFailed}
+      <Modal
+        title="{messages['home']['login.failed.title']}"
+        color="{primaryOne}"
+        on:cancel="{() => {
+            hasFailed = false 
+            goto(`/`)
+          }
+        }"
+      >
+        <div class="failed-auth">
+          {messages["home"]["login.failed.description"]}
+        </div>
+      </Modal>
+    {/if}
 
     {#if notifyOfflineIssuePosted}
       <Modal

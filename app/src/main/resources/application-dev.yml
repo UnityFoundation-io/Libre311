@@ -20,5 +20,5 @@ micronaut:
               jws-algorithm: HS256
     redirect:
       login-success: http://localhost:3000
-      login-failure: http://localhost:8080/failed-auth
+      login-failure: http://localhost:3000/?login-failed=true
       logout: http://localhost:8080

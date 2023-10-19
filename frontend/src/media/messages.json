@@ -15,7 +15,9 @@
       "button.report.issue.label": "Report a New Issue",
       "table.selector.error": "tableSelector and/or backgroundSelector not found",
       "footer.selector.error": "footerSelector not found",
-      "leave.message": "Are you sure you want to leave? Your unsaved changes will be lost."
+      "leave.message": "Are you sure you want to leave? Your unsaved changes will be lost.",
+      "login.failed.title": "Authentication Failed",
+      "login.failed.description": "Try Again"
     },
   
   "report.issue":
