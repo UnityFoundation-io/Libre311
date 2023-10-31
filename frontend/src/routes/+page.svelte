@@ -319,10 +319,6 @@
   const toggleDetails = (service_request_id) => {
     if (visibleDetails.has(service_request_id)) {
       visibleDetails.delete(service_request_id);
-
-      setTimeout(() => {
-        calculateBoundsAroundMarkers();
-      }, 100);
     } else {
       visibleDetails.clear();
       visibleDetails.add(service_request_id);
@@ -1307,7 +1303,6 @@
           bounds.extend([marker.getLatLng().lat, marker.getLatLng().lng]);
         })
 
-        setNewCenter(bounds.getCenter().lat, bounds.getCenter().lng)
         map.fitBounds(bounds);
       }
     }
@@ -1320,7 +1315,6 @@
           lng = markers[i].position.lng();
           bounds.extend({ lat, lng });
         }
-        setNewCenter(bounds.getCenter());
         map.fitBounds(bounds);
       }
     }
