@@ -121,9 +121,10 @@
     flex-wrap: wrap;
     height: auto;
     justify-content: space-evenly;
-    overflow: auto;
-    padding-bottom: auto;
-    margin-top: -2.5rem;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
   }
 
   .col {
