@@ -177,7 +177,7 @@
     color: #f2a900;
   }
 
-  @media only screen and (min-width: 1000px) and (min-height: 870px) {
+  @media only screen and (min-width: 930px) and (min-height: 870px) {
     .footer {
       position: fixed;
       left: 0;
