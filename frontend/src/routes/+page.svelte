@@ -1431,12 +1431,10 @@
       let retries = 0;
 
       if (tableSelector && backgroundSelector) {
-        const addExtra = 140;
-
         const tableHeight =
           tableSelector.offsetTop + tableSelector.offsetHeight;
 
-        backgroundSelector.style.height = tableHeight + addExtra + "px";
+        backgroundSelector.style.height = tableHeight + "px";
 
         resolve();
       } else if (!tableSelector && retries < 50) {
