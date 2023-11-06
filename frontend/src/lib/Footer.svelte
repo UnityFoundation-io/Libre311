@@ -121,10 +121,6 @@
     flex-wrap: wrap;
     height: auto;
     justify-content: space-evenly;
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
   }
 
   .col {
@@ -179,6 +175,15 @@
 
   .footer li:hover {
     color: #f2a900;
+  }
+
+  @media only screen and (min-width: 930px) and (min-height: 870px) {
+    .footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+    }
   }
 
   @media only screen and (min-width: 245px) {

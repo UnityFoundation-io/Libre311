@@ -253,7 +253,7 @@ body {
 
 .background {
   width: 100%;
-  height: 123%;
+  height: 100vh;
   position: absolute;
   overflow: hidden;
   background-repeat: no-repeat;
