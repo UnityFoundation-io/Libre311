@@ -116,6 +116,67 @@ public class RootControllerTest {
     }
 
     @Test
+    public void canCreateServiceRequestWithVaryingDatatypes() {
+        HttpResponse<?> response;
+
+        response = createServiceRequest("001", "12345 Fairway",
+                Map.of(
+                        "attribute[SDWLK]", "NARROW",
+                        "attribute[SDWLK_NEAR]", "A string description",
+                        "attribute[SDWLK_WIDTH]", "5",
+                        "attribute[SDWLK_DATETIME]", "2015-04-14T11:07:36.639Z",
+                        "attribute[SDWLK_CMNTS]", "This is a comment field that can introduce multiline characters",
+                        "attribute[SDWLK_SNGLIST]", "NARROW"
+                ));
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        assertTrue(optional.isPresent());
+        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
+        assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
+                .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+
+        PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
+
+
+        // GET
+        response = client.toBlocking().exchange("/requests/" + postResponseServiceRequestDTO.getId(), ServiceRequestDTO[].class);
+        assertEquals(HttpStatus.OK, response.status());
+
+        Optional<ServiceRequestDTO[]> bodyOptional = response.getBody(ServiceRequestDTO[].class);
+        assertTrue(bodyOptional.isPresent());
+        ServiceRequestDTO[] serviceRequestDTOS = bodyOptional.get();
+        assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
+        assertEquals(1, serviceRequestDTOS.length);
+
+        ServiceRequestDTO serviceRequestDTO = serviceRequestDTOS[0];
+        assertFalse(serviceRequestDTO.getSelectedValues().isEmpty());
+    }
+
+    @Test
+    public void cannotCreateServiceRequestWithInvalidFormattedDateField() {
+        HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
+            createServiceRequest("001", "12345 Fairway",
+                    Map.of(
+                            "attribute[SDWLK]", "NARROW",
+                            "attribute[SDWLK_DATETIME]", "2015/04/14Z"
+                    ));
+        });
+        assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
+    }
+
+    @Test
+    public void cannotCreateServiceRequestWithInvalidFormattedNumberField() {
+        HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
+            createServiceRequest("001", "12345 Fairway",
+                    Map.of(
+                            "attribute[SDWLK]", "NARROW",
+                            "attribute[SDWLK_WIDTH]", "NotANumber"
+                    ));
+        });
+        assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
+    }
+
+    @Test
     public void cannotCreateServiceRequestWithoutRequiredAttributes() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
             createServiceRequest("001", "12345 Fairway", Map.of());

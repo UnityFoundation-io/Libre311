@@ -19,6 +19,7 @@ import app.dto.download.DownloadServiceRequestDTO;
 import app.dto.servicerequest.*;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
+import app.model.service.servicedefinition.AttributeDataType;
 import app.model.service.servicedefinition.AttributeValue;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -107,7 +109,7 @@ public class ServiceRequestService {
                 return null; // should not be in this state and admin needs to be aware.
             }
 
-            requestAttributes = buildAttributesFromRequest(request, service);
+            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionJson);
             if (requestAttributes.isEmpty()) {
                 LOG.error("Submitted Service Request does not contain any attribute values.");
                 return null; // todo throw exception - must provide attributes
@@ -161,7 +163,15 @@ public class ServiceRequestService {
         return containsAllRequiredAttrs;
     }
 
-    private List<ServiceDefinitionAttribute> buildAttributesFromRequest(HttpRequest<?> request, Service service) {
+    private List<ServiceDefinitionAttribute> buildUserResponseAttributesFromRequest(HttpRequest<?> request, String serviceDefinitionJson) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ServiceDefinition serviceDefinition;
+        try {
+            serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         Optional<Map> body = request.getBody(Map.class);
 
         List<ServiceDefinitionAttribute> attributes = new ArrayList<>();
@@ -169,19 +179,52 @@ public class ServiceRequestService {
             Map<String, Object> map = body.get();
             map.forEach((k, v) -> {
                 if (k.startsWith("attribute[")) {
-                    String code = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
+                    String attributeCode = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
+
+                    // search for attribute by code in serviceDefinition
+                    Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeOptional = serviceDefinition.getAttributes().stream()
+                            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals(attributeCode))
+                            .findFirst();
+
+                    // if attribute in request does not exist in db, then ignore
+                    if (serviceDefinitionAttributeOptional.isEmpty()) {
+                        return;
+                    }
+                    ServiceDefinitionAttribute serviceDefinitionAttribute = serviceDefinitionAttributeOptional.get();
+
+                    // validate the value if necessary (number and dates)
+                    if (v != null && !validValueType(v, serviceDefinitionAttribute.getDatatype())) {
+                        String errorMsg = String.format("Provided value for attribute with code %s is invalid", attributeCode);
+                        LOG.error(errorMsg);
+                        throw new RuntimeException(errorMsg);
+                    }
 
                     ServiceDefinitionAttribute sda = new ServiceDefinitionAttribute();
-                    sda.setCode(code);
+                    sda.setCode(attributeCode);
+                    sda.setAttributeOrder(serviceDefinitionAttribute.getAttributeOrder());
+                    sda.setRequired(serviceDefinitionAttribute.isRequired());
+                    sda.setVariable(serviceDefinitionAttribute.isVariable());
+
                     List<AttributeValue> values = new ArrayList<>();
-                    if (v instanceof ArrayList) {
-                        ((ArrayList<?>) v).forEach(s -> {
-                            values.add(new AttributeValue((String) s, getAttributeValueName(code, (String) s, service)));
-                        });
+
+                    if (serviceDefinitionAttribute.getDatatype() == AttributeDataType.SINGLEVALUELIST ||
+                            serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST) {
+
+                        List<AttributeValue> attributeValues = serviceDefinitionAttribute.getValues();
+                        if (attributeValues != null) {
+                            if (v instanceof ArrayList) {
+                                ((ArrayList<?>) v).forEach(s -> {
+                                    values.add(new AttributeValue((String) s, getAttributeValueName((String) s, attributeValues)));
+                                });
+                            } else {
+                                values.add(new AttributeValue((String) v, getAttributeValueName((String) v, attributeValues)));
+                            }
+                        }
                     } else {
-                        values.add(new AttributeValue((String) v, getAttributeValueName(code, (String) v, service)));
+                        // we need a way to capture the user's response. We will do so by adding an attribute value where
+                        // the key is the code and the value is the user's response.
+                        values.add(new AttributeValue(attributeCode, (String) v));
                     }
-                    sda.setValues(values);
 
                     attributes.add(sda);
                 }
@@ -191,25 +234,40 @@ public class ServiceRequestService {
         return attributes;
     }
 
-    private String getAttributeValueName(String code, String valueKey, Service service) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String valueName = null;
-        try {
-            String serviceDefinitionJson = service.getServiceDefinitionJson();
-            if (serviceDefinitionJson != null) {
-                ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
-                Optional<AttributeValue> attributeValueOptional = serviceDefinition.getAttributes().stream()
-                        .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals(code))
-                        .flatMap((Function<ServiceDefinitionAttribute, Stream<AttributeValue>>) serviceDefinitionAttribute -> serviceDefinitionAttribute.getValues().stream())
-                        .filter(attributeValue -> attributeValue.getKey().equals(valueKey)).findFirst();
+    private boolean validValueType(Object v, AttributeDataType datatype) {
 
-                if (attributeValueOptional.isPresent()) {
-                    valueName = attributeValueOptional.get().getName();
+        if (datatype == AttributeDataType.NUMBER || datatype == AttributeDataType.DATETIME){
+            String value = (String) v;
+
+            if (datatype == AttributeDataType.NUMBER) {
+                try {
+                    Integer.parseInt(value);
+                } catch (NumberFormatException nfe) {
+                    return false;
+                }
+            } else {
+                try {
+                    Instant.parse(value);
+                } catch (DateTimeParseException dtpe) {
+                    return false;
                 }
             }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+
+            return true;
         }
+
+        return true;
+    }
+
+    private String getAttributeValueName(String valueKey, List<AttributeValue> attributeValues) {
+        String valueName = null;
+        Optional<AttributeValue> attributeValueOptional = attributeValues.stream()
+                .filter(attributeValue -> attributeValue.getKey().equals(valueKey)).findFirst();
+
+        if (attributeValueOptional.isPresent()) {
+            valueName = attributeValueOptional.get().getName();
+        }
+
         return valueName;
     }
 
@@ -345,7 +403,12 @@ public class ServiceRequestService {
                             ServiceDefinitionAttribute[] serviceDefinitionAttributes =
                                     objectMapper.readValue(serviceRequest.getAttributesJson(), ServiceDefinitionAttribute[].class);
                             List<String> values = Arrays.stream(serviceDefinitionAttributes)
-                                    .flatMap(serviceDefinitionAttribute -> serviceDefinitionAttribute.getValues().stream())
+                                    .flatMap(serviceDefinitionAttribute -> {
+                                        if (serviceDefinitionAttribute.getValues() != null) {
+                                            return serviceDefinitionAttribute.getValues().stream();
+                                        }
+                                        return Stream.of();
+                                    })
                                     .map(AttributeValue::getKey).collect(Collectors.toList());
 
                             dto.setServiceSubtype(String.join(",", values));
