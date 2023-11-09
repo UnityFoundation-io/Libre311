@@ -66,6 +66,21 @@ INSERT INTO app_users (email)
 VALUES ('$EMAIL');
 ```
 
+### Service Discovery Configuration
+As outlined in Open311's Service Discovery [page](https://wiki.open311.org/Service_Discovery), an endpoint is offered
+at `/discovery` which describes organization contact and the base URLs of endpoints. As a convenience, Libre311 provides 
+a default set of endpoint configurations for a set of `production` and `test` environments as well as the ability to set
+configuration values via the following environment variables:
+
+
+* LIBRE311_DISCOVERY_CHANGESET_DATETIME
+* LIBRE311_DISCOVERY_CONTACT_MESSAGE
+* LIBRE311_DISCOVERY_PRODUCTION_URL
+* LIBRE311_DISCOVERY_TEST_URL
+
+
+Please feel free to modify `app/src/main/resources/application.yml`'s `app.discovery` content to your use case.  
+
 ### Building the Web Application UI
 
 The Web Application UI requires the URL of the API when built.

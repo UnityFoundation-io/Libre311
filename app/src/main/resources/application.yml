@@ -95,6 +95,25 @@ netty:
     allocator:
       max-order: 3
 app:
+  discovery:
+    changeset: ${LIBRE311_DISCOVERY_CHANGESET_DATETIME:`2012-09-14T08:00:00-07:00`}
+    contact: ${LIBRE311_DISCOVERY_CONTACT_MESSAGE:`Contact admin@test.test for assistance`}
+    key-service: "Visit [endpoint here] to request an API Key"
+    endpoints:
+      - specification: "http://wiki.open311.org/GeoReport_v2"
+        url: ${LIBRE311_DISCOVERY_PRODUCTION_URL:`http://localhost:8080/api`}
+        changeset: ${LIBRE311_DISCOVERY_CHANGESET_DATETIME:`2012-09-14T08:00:00-07:00`}
+        type: "production"
+        formats:
+          - "text/xml"
+          - "application/json"
+      - specification: "http://wiki.open311.org/GeoReport_v2"
+        url: ${LIBRE311_DISCOVERY_TEST_URL:`http://localhost:8080/api`}
+        changeset: ${LIBRE311_DISCOVERY_CHANGESET_DATETIME:`2012-09-14T08:00:00-07:00`}
+        type: "test"
+        formats:
+          - "text/xml"
+          - "application/json"
   image-storage:
     bucket-url-format: "https://storage.googleapis.com/%s/"
     bucket:  ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
