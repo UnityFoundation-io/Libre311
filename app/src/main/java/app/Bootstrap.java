@@ -71,20 +71,27 @@ public class Bootstrap {
 
                         List<Map<String, Object>> attributes = (List<Map<String, Object>>) definitionMap.get("attributes");
                         serviceDefinition.setAttributes(attributes.stream().map(stringObjectMap -> {
+                            AttributeDataType attributeDataType = AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase());
+                            String attributeCode = (String) stringObjectMap.get("code");
+
                             ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
                             serviceDefinitionAttribute.setVariable((Boolean) stringObjectMap.get("variable"));
-                            serviceDefinitionAttribute.setCode((String) stringObjectMap.get("code"));
-                            serviceDefinitionAttribute.setDatatype(AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase()));
+                            serviceDefinitionAttribute.setCode(attributeCode);
+                            serviceDefinitionAttribute.setDatatype(attributeDataType);
                             serviceDefinitionAttribute.setRequired((Boolean) stringObjectMap.get("required"));
                             serviceDefinitionAttribute.setDatatypeDescription((String) stringObjectMap.get("datatypeDescription"));
                             serviceDefinitionAttribute.setAttributeOrder((Integer) stringObjectMap.get("order"));
                             serviceDefinitionAttribute.setDescription((String) stringObjectMap.get("description"));
 
                             List<Map<String, String>> values = (List<Map<String, String>>) stringObjectMap.get("values");
-                            List<AttributeValue> attributeValues = values.stream()
-                                    .map(stringStringMap -> new AttributeValue(stringStringMap.get("key"), stringStringMap.get("name")))
-                                    .collect(Collectors.toList());
-                            serviceDefinitionAttribute.setValues(attributeValues);
+                            if ((values == null || values.isEmpty()) &&
+                                    (attributeDataType.equals(AttributeDataType.MULTIVALUELIST) || attributeDataType.equals(AttributeDataType.SINGLEVALUELIST))) {
+                                LOG.warn(String.format("Attribute with code %s does not contain values despite being a MULTIVALUELIST or SINGLEVALUELIST", attributeCode));
+                            }
+                            if (values != null) {
+                                List<AttributeValue> attributeValues = values.stream().map(stringStringMap -> new AttributeValue(stringStringMap.get("key"), stringStringMap.get("name"))).collect(Collectors.toList());
+                                serviceDefinitionAttribute.setValues(attributeValues);
+                            }
                             return serviceDefinitionAttribute;
                         }).collect(Collectors.toList()));
 

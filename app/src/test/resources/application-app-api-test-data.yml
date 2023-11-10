@@ -27,6 +27,53 @@ app-data:
                     name: "Heaved/Uneven Sidewalk"
                   - key: "OTHER"
                     name: "Other"
+              - variable: true
+                code: "SDWLK_NEAR"
+                datatype: string
+                required: false
+                datatypeDescription: Please add additional information.
+                order: 2
+                description: Please add additional information.
+              - variable: true
+                code: "SDWLK_WIDTH"
+                datatype: number
+                required: false
+                datatypeDescription: In feet, how large is the issue.
+                order: 3
+                description: In feet, how large is the issue.
+              - variable: true
+                code: "SDWLK_DATETIME"
+                datatype: datetime
+                required: false
+                datatypeDescription: When was the issue observed?
+                order: 4
+                description: When was the issue observed?
+              - variable: true
+                code: "SDWLK_CMNTS"
+                datatype: text
+                required: false
+                datatypeDescription: Any additional comments?
+                order: 5
+                description: Any additional comments?
+                values:
+              - variable: true
+                code: "SDWLK_SNGLIST"
+                datatype: singlevaluelist
+                required: false
+                datatypeDescription: Please select one value.
+                order: 6
+                description: Please select one value.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "CRACKED"
+                    name: "Cracked"
+                  - key: "NARROW"
+                    name: "Too narrow"
+                  - key: "HEAVED_UNEVEN"
+                    name: "Heaved/Uneven Sidewalk"
+                  - key: "OTHER"
+                    name: "Other"
         - serviceCode: "002"
           serviceName: Bus Stop
           description: Bus Stop
