@@ -14,16 +14,19 @@
 
 package app;
 
+import app.dto.discovery.DiscoveryDTO;
 import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
 import app.model.service.servicedefinition.ServiceDefinition;
+import app.service.discovery.DiscoveryEndpointService;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.xml.XmlEscapers;
 import io.micronaut.data.model.Page;
@@ -49,10 +52,31 @@ public class RootController {
 
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
+    private final DiscoveryEndpointService discoveryEndpointService;
 
-    public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
+    public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService, DiscoveryEndpointService discoveryEndpointService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
+        this.discoveryEndpointService = discoveryEndpointService;
+    }
+
+    @Get(uris = {"/discovery", "/discovery.json"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public HttpResponse<DiscoveryDTO> discoveryJson() {
+        return HttpResponse.ok(discoveryEndpointService.getDiscoveryInfo());
+    }
+
+    @Get("/discovery.xml")
+    @Produces(MediaType.TEXT_XML)
+    @ExecuteOn(TaskExecutors.IO)
+    public HttpResponse<String> discoveryXml() throws JsonProcessingException {
+        XmlMapper xmlMapper = XmlMapper.xmlBuilder()
+                .configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true)
+                .defaultUseWrapper(true).build();
+        DiscoveryDTO discovery = discoveryEndpointService.getDiscoveryInfo();
+
+        return HttpResponse.ok(xmlMapper.writeValueAsString(discovery));
     }
 
     @Get(uris = {"/services", "/services.json"})

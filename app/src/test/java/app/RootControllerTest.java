@@ -14,6 +14,7 @@
 
 package app;
 
+import app.dto.discovery.DiscoveryDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
@@ -261,6 +262,28 @@ public class RootControllerTest {
         ServiceRequestDTO[] serviceRequestDTOS = bodyOptional.get();
         assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
         assertEquals(1, serviceRequestDTOS.length);
+    }
+
+    @Test
+    public void canGetDiscoveryInfoJson() {
+        HttpRequest<?> request = HttpRequest.GET("/discovery");
+        HttpResponse<?> response = client.toBlocking().exchange(request, Map.class);
+        assertEquals(HttpStatus.OK, response.status());
+
+        Optional<DiscoveryDTO> bodyOptional = response.getBody(DiscoveryDTO.class);
+        assertTrue(bodyOptional.isPresent());
+        assertNotNull(bodyOptional.get().getContact());
+    }
+
+    @Test
+    public void canGetDiscoveryInfoXml() {
+        HttpRequest<?> request = HttpRequest.GET("/discovery.xml");
+        HttpResponse<?> response = client.toBlocking().exchange(request, String.class);
+        assertEquals(HttpStatus.OK, response.status());
+
+        Optional<String> bodyOptional = response.getBody(String.class);
+        assertTrue(bodyOptional.isPresent());
+        assertNotNull(bodyOptional.get());
     }
 
     @Test
