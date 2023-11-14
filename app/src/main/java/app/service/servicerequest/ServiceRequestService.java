@@ -69,6 +69,23 @@ public class ServiceRequestService {
         this.storageUrlUtil = storageUrlUtil;
     }
 
+    private static ServiceRequestDTO convertToDTO(ServiceRequest serviceRequest) {
+        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String attributesJson = serviceRequest.getAttributesJson();
+        if (attributesJson != null) {
+            try {
+                ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
+                serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return serviceRequestDTO;
+    }
+
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
         if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
             LOG.error("ReCaptcha verification failed.");
@@ -85,6 +102,12 @@ public class ServiceRequestService {
         if (serviceByServiceCodeOptional.isEmpty()) {
             LOG.error("Corresponding service not found.");
             return null; // todo return 'corresponding service not found
+        }
+
+        if (serviceRequestDTO.getJurisdictionId() != null &&
+                !serviceRequestDTO.getJurisdictionId().equals(serviceByServiceCodeOptional.get().getJurisdiction().getId())) {
+            LOG.error("Mismatch between jurisdiction_id provided and Service's associated jurisdiction.");
+            return null;
         }
 
         // validate if a location is provided
@@ -274,6 +297,7 @@ public class ServiceRequestService {
     private ServiceRequest transformDtoToServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Service service) {
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setService(service);
+        serviceRequest.setJurisdiction(service.getJurisdiction());
         serviceRequest.setLatitude(serviceRequestDTO.getLatitude());
         serviceRequest.setLongitude(serviceRequestDTO.getLongitude());
         serviceRequest.setAddressString(serviceRequestDTO.getAddressString());
@@ -290,27 +314,13 @@ public class ServiceRequestService {
     }
 
     public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO) {
-        return getServiceRequestPage(requestDTO).map(serviceRequest -> {
-            ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String attributesJson = serviceRequest.getAttributesJson();
-            if (attributesJson != null) {
-                try {
-                    ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
-                    serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            return serviceRequestDTO;
-        });
+        return getServiceRequestPage(requestDTO).map(ServiceRequestService::convertToDTO);
     }
 
     private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO) {
         String serviceRequestIds = requestDTO.getId();
         String serviceCode = requestDTO.getServiceCode();
+        String jurisdictionId = requestDTO.getJurisdictionId();
         ServiceRequestStatus status = requestDTO.getStatus();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
@@ -324,6 +334,15 @@ public class ServiceRequestService {
             List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
             return serviceRequestRepository.findByIdIn(requestIds, pageable);
         }
+
+        if (jurisdictionId == null) {
+            return getServiceRequests(pageable, serviceCode, status, startDate, endDate);
+        }
+
+        return getJurisdictionServiceRequests(jurisdictionId, pageable, serviceCode, status, startDate, endDate);
+    }
+
+    private Page<ServiceRequest> getServiceRequests(Pageable pageable, String serviceCode, ServiceRequestStatus status, Instant startDate, Instant endDate) {
 
         if (StringUtils.hasText(serviceCode) && status != null) {
             if (startDate != null && endDate != null) {
@@ -371,24 +390,62 @@ public class ServiceRequestService {
         return serviceRequestRepository.findAll(pageable);
     }
 
-    public ServiceRequestDTO getServiceRequest(Long serviceRequestId) {
-        Optional<ServiceRequest> byId = serviceRequestRepository.findById(serviceRequestId);
-        return byId.map(serviceRequest -> {
-            ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
+    private Page<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, Pageable pageable, String serviceCode, ServiceRequestStatus status, Instant startDate, Instant endDate) {
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String attributesJson = serviceRequest.getAttributesJson();
-            if (attributesJson != null) {
-                try {
-                    ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
-                    serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
+        if (StringUtils.hasText(serviceCode) && status != null) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusAndDateCreatedBetween(jurisdictionId, serviceCode, status, startDate, endDate, pageable);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusAndDateCreatedAfter(jurisdictionId, serviceCode, status, startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusAndDateCreatedBefore(jurisdictionId, serviceCode, status, endDate, pageable);
             }
 
-            return serviceRequestDTO;
-        }).orElse(null);
+            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatus(jurisdictionId, serviceCode, status, pageable);
+        } else if (StringUtils.hasText(serviceCode) && status == null) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBetween(jurisdictionId, serviceCode, startDate, endDate, pageable);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedAfter(jurisdictionId, serviceCode, startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBefore(jurisdictionId, serviceCode, endDate, pageable);
+            }
+
+            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCode(jurisdictionId, serviceCode, pageable);
+        } else if (status != null && StringUtils.isEmpty(serviceCode)) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndStatusAndDateCreatedBetween(jurisdictionId, status, startDate, endDate, pageable);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndStatusAndDateCreatedAfter(jurisdictionId, status, startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndStatusAndDateCreatedBefore(jurisdictionId, status, endDate, pageable);
+            }
+
+            return serviceRequestRepository.findByJurisdictionIdAndStatus(jurisdictionId, status, pageable);
+        }
+
+        if (startDate != null && endDate != null) {
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBetween(jurisdictionId, startDate, endDate, pageable);
+        } else if (startDate != null && endDate == null) {
+            // just start
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedAfter(jurisdictionId, startDate, pageable);
+        } else if (startDate == null && endDate != null) {
+            // just end
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBefore(jurisdictionId, endDate, pageable);
+        }
+
+        return serviceRequestRepository.findAllByJurisdictionId(jurisdictionId, pageable);
+    }
+
+    public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
+        Optional<ServiceRequest> serviceRequestOptional;
+        if (jurisdictionId == null) {
+            serviceRequestOptional = serviceRequestRepository.findById(serviceRequestId);
+        } else {
+            serviceRequestOptional = serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
+        }
+
+        return serviceRequestOptional.map(ServiceRequestService::convertToDTO).orElse(null);
     }
 
     public StreamedFile getAllServiceRequests(DownloadRequestsArgumentsDTO downloadRequestsArgumentsDTO) throws MalformedURLException {
@@ -442,6 +499,7 @@ public class ServiceRequestService {
 
     private List<ServiceRequest> getServiceRequests(DownloadRequestsArgumentsDTO requestDTO) {
         String serviceName = requestDTO.getServiceName();
+        String jurisdictionId = requestDTO.getJurisdictionId();
         ServiceRequestStatus status = requestDTO.getStatus();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
@@ -453,6 +511,14 @@ public class ServiceRequestService {
             byServiceName = serviceRequestRepository.findByServiceServiceNameIlike(serviceName);
         }
 
+        if (jurisdictionId == null) {
+            return getServiceRequests(byServiceName, status, startDate, endDate);
+        }
+
+        return getJurisdictionServiceRequests(jurisdictionId, byServiceName, status, startDate, endDate);
+    }
+
+    private List<ServiceRequest> getServiceRequests(Optional<ServiceRequest> byServiceName, ServiceRequestStatus status, Instant startDate, Instant endDate) {
         String serviceCode;
         if (byServiceName.isPresent() && status != null) {
             serviceCode = byServiceName.get().getService().getServiceCode();
@@ -499,5 +565,54 @@ public class ServiceRequestService {
         }
 
         return (List<ServiceRequest>) serviceRequestRepository.findAll();
+    }
+
+    private List<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, Optional<ServiceRequest> byServiceName, ServiceRequestStatus status, Instant startDate, Instant endDate) {
+        String serviceCode;
+        if (byServiceName.isPresent() && status != null) {
+            serviceCode = byServiceName.get().getService().getServiceCode();
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusAndDateCreatedBetween(jurisdictionId, serviceCode, status, startDate, endDate);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusAndDateCreatedAfter(jurisdictionId, serviceCode, status, startDate);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusAndDateCreatedBefore(jurisdictionId, serviceCode, status, endDate);
+            }
+
+            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatus(jurisdictionId, serviceCode, status);
+        } else if (byServiceName.isPresent() && status == null) {
+            serviceCode = byServiceName.get().getService().getServiceCode();
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBetween(jurisdictionId, serviceCode, startDate, endDate);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedAfter(jurisdictionId, serviceCode, startDate);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBefore(jurisdictionId, serviceCode, endDate);
+            }
+
+            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCode(jurisdictionId, serviceCode);
+        } else if (status != null && byServiceName.isEmpty()) {
+            if (startDate != null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndStatusAndDateCreatedBetween(jurisdictionId, status, startDate, endDate);
+            } else if (startDate != null && endDate == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndStatusAndDateCreatedAfter(jurisdictionId, status, startDate);
+            } else if (startDate == null && endDate != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndStatusAndDateCreatedBefore(jurisdictionId, status, endDate);
+            }
+
+            return serviceRequestRepository.findByJurisdictionIdAndStatus(jurisdictionId, status);
+        }
+
+        if (startDate != null && endDate != null) {
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBetween(jurisdictionId, startDate, endDate);
+        } else if (startDate != null && endDate == null) {
+            // just start
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedAfter(jurisdictionId, startDate);
+        } else if (startDate == null && endDate != null) {
+            // just end
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBefore(jurisdictionId, endDate);
+        }
+
+        return serviceRequestRepository.findAllByJurisdictionId(jurisdictionId);
     }
 }

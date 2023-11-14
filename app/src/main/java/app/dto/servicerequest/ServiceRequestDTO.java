@@ -32,6 +32,9 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("service_request_id")
     private Long id;
 
+    @JsonProperty("jurisdiction_id")
+    private String jurisdictionId;
+
     private ServiceRequestStatus status;
 
     @JsonProperty("status_notes")
@@ -106,6 +109,9 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         this.latitude = serviceRequest.getLatitude();
         this.longitude = serviceRequest.getLongitude();
         this.mediaUrl = serviceRequest.getMediaUrl();
+        if (serviceRequest.getJurisdiction() != null) {
+            this.jurisdictionId = serviceRequest.getJurisdiction().getId();
+        }
     }
 
     public Long getId() {
@@ -242,6 +248,14 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     public void setMediaUrl(String mediaUrl) {
         this.mediaUrl = mediaUrl;
+    }
+
+    public String getJurisdictionId() {
+        return jurisdictionId;
+    }
+
+    public void setJurisdictionId(String jurisdictionId) {
+        this.jurisdictionId = jurisdictionId;
     }
 
     // see https://github.com/micronaut-projects/micronaut-core/issues/1853

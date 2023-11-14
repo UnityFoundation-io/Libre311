@@ -16,6 +16,8 @@ package app.dto.servicerequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.Nullable;
+import io.micronaut.http.annotation.QueryValue;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -31,7 +33,9 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("service_code")
     private String serviceCode;
 
-    // optional
+    @Nullable
+    @QueryValue(value = "jurisdiction_id")
+    private String jurisdictionId;
 
     @JsonProperty("lat")
     private String latitude;
@@ -198,5 +202,14 @@ public class PostRequestServiceRequestDTO {
 
     public void setgRecaptchaResponse(String gRecaptchaResponse) {
         this.gRecaptchaResponse = gRecaptchaResponse;
+    }
+
+    @Nullable
+    public String getJurisdictionId() {
+        return jurisdictionId;
+    }
+
+    public void setJurisdictionId(@Nullable String jurisdictionId) {
+        this.jurisdictionId = jurisdictionId;
     }
 }
