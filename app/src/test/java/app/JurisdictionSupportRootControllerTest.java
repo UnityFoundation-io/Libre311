@@ -94,7 +94,7 @@ public class JurisdictionSupportRootControllerTest {
     public void canCreateServiceRequestThatDoesNotRequireAdditionalAttributes() {
         HttpResponse<?> response;
 
-        response = createServiceRequest("006", "12345 Fairway", Map.of(), "town.gov");
+        response = createServiceRequest("206", "12345 Fairway", Map.of(), "town.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
         assertTrue(optional.isPresent());
@@ -107,7 +107,7 @@ public class JurisdictionSupportRootControllerTest {
     public void canCreateServiceRequestWithRequiredAttributes() {
         HttpResponse<?> response;
 
-        response = createServiceRequest("001", "12345 Fairway",
+        response = createServiceRequest("201", "12345 Fairway",
                 Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
@@ -120,7 +120,7 @@ public class JurisdictionSupportRootControllerTest {
     @Test
     public void cannotCreateServiceRequestWithoutRequiredAttributes() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
-            createServiceRequest("001", "12345 Fairway", Map.of(), "city.gov");
+            createServiceRequest("201", "12345 Fairway", Map.of(), "city.gov");
         });
         assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
     }
@@ -128,7 +128,7 @@ public class JurisdictionSupportRootControllerTest {
     @Test
     public void cannotCreateServiceRequestIfAddressIsNotProvided() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
-            createServiceRequest("006", null, Map.of(), "town.gov");
+            createServiceRequest("206", null, Map.of(), "town.gov");
         });
         assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
     }
@@ -151,7 +151,7 @@ public class JurisdictionSupportRootControllerTest {
     public void canGetServiceDefinitionByServiceCodeAndRequiredJurisdictionId() {
         HttpResponse<?> response;
 
-        response = client.toBlocking().exchange("/services/001?jurisdiction_id=city.gov", String.class);
+        response = client.toBlocking().exchange("/services/201?jurisdiction_id=city.gov", String.class);
         assertEquals(HttpStatus.OK, response.status());
         Optional<String> serviceDefinitionOptional = response.getBody(String.class);
         assertTrue(serviceDefinitionOptional.isPresent());
@@ -164,10 +164,10 @@ public class JurisdictionSupportRootControllerTest {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest("006", "12345 Fairway", Map.of(), "town.gov");
+        response = createServiceRequest("206", "12345 Fairway", Map.of(), "town.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "12345 Fairway",
+        response = createServiceRequest("201", "12345 Fairway",
                 Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
@@ -189,7 +189,7 @@ public class JurisdictionSupportRootControllerTest {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest("001", "12345 Fairway",
+        response = createServiceRequest("201", "12345 Fairway",
                 Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
@@ -212,10 +212,10 @@ public class JurisdictionSupportRootControllerTest {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest("006", "12345 Fairway", Map.of(), "town.gov");
+        response = createServiceRequest("206", "12345 Fairway", Map.of(), "town.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "12345 Fairway",
+        response = createServiceRequest("201", "12345 Fairway",
                 Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
@@ -243,27 +243,27 @@ public class JurisdictionSupportRootControllerTest {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest("001", "=1+3",
+        response = createServiceRequest("201", "=1+3",
                 Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "@1+3",
+        response = createServiceRequest("201", "@1+3",
                 Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "+1+3",
+        response = createServiceRequest("201", "+1+3",
                 Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "-1+3",
+        response = createServiceRequest("201", "-1+3",
                 Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "\t1+3",
+        response = createServiceRequest("201", "\t1+3",
                 Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "\r1+3",
+        response = createServiceRequest("201", "\r1+3",
                 Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 

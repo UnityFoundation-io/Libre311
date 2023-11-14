@@ -20,8 +20,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "jurisdictions")
@@ -32,11 +32,11 @@ public class Jurisdiction {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<Service> services = new ArrayList<>();
+    private Set<Service> services = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<ServiceRequest> serviceRequests = new ArrayList<>();
+    private Set<ServiceRequest> serviceRequests = new HashSet<>();
 
     public Jurisdiction(String id) {
         this.id = id;
@@ -52,19 +52,19 @@ public class Jurisdiction {
         this.id = id;
     }
 
-    public List<Service> getServices() {
+    public Set<Service> getServices() {
         return services;
     }
 
-    public void setServices(List<Service> services) {
+    public void setServices(Set<Service> services) {
         this.services = services;
     }
 
-    public List<ServiceRequest> getServiceRequests() {
+    public Set<ServiceRequest> getServiceRequests() {
         return serviceRequests;
     }
 
-    public void setServiceRequests(List<ServiceRequest> serviceRequests) {
+    public void setServiceRequests(Set<ServiceRequest> serviceRequests) {
         this.serviceRequests = serviceRequests;
     }
 }
