@@ -80,7 +80,8 @@ public class RootControllerTest {
 
     @BeforeEach
     void setup() {
-        dbCleanup.cleanup();
+        dbCleanup.cleanupJurisdictions();
+        dbCleanup.cleanupServiceRequests();
         mockAuthenticationFetcher.setAuthentication(null);
     }
 

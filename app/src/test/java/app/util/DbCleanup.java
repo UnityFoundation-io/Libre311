@@ -14,6 +14,7 @@
 
 package app.util;
 
+import app.model.jurisdiction.JurisdictionRepository;
 import app.model.servicerequest.ServiceRequestRepository;
 import jakarta.inject.Singleton;
 
@@ -23,14 +24,20 @@ import javax.transaction.Transactional;
 public class DbCleanup {
 
     private final ServiceRequestRepository serviceRequestRepository;
+    private final JurisdictionRepository jurisdictionRepository;
 
-    public DbCleanup(ServiceRequestRepository serviceRequestRepository) {
+    public DbCleanup(ServiceRequestRepository serviceRequestRepository, JurisdictionRepository jurisdictionRepository) {
         this.serviceRequestRepository = serviceRequestRepository;
+        this.jurisdictionRepository = jurisdictionRepository;
     }
 
+    @Transactional
+    public void cleanupServiceRequests() {
+        serviceRequestRepository.deleteAll();
+    }
 
     @Transactional
-    public void cleanup() {
-        serviceRequestRepository.deleteAll();
+    public void cleanupJurisdictions() {
+        jurisdictionRepository.deleteAll();
     }
 }

@@ -48,7 +48,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static io.micronaut.http.HttpStatus.UNAUTHORIZED;
@@ -81,7 +80,7 @@ public class JurisdictionSupportRootControllerTest {
 
     @BeforeEach
     void setup() {
-        dbCleanup.cleanup();
+        dbCleanup.cleanupServiceRequests();
         mockAuthenticationFetcher.setAuthentication(null);
     }
 
