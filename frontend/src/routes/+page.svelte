@@ -141,6 +141,7 @@
     postingError = false,
     issuesRefs = {},
     multiSelectOptions = [],
+    singleSelectOptions = [],
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
       visible: false,
@@ -198,6 +199,8 @@
       if (issueTypeSelectSelector?.options?.length === 0)
         populateIssueTypeSelectDropdown();
     }, 200);
+
+  $: console.log(issueTypeSelectSelector)
 
   let zoom = 15;
   let markers = [];
@@ -510,7 +513,8 @@
 
   const getServiceDefinition = async (serviceId) => {
     const res = await axios.get(`/services/${serviceId}`);
-    issueDetailList.set(res.data.attributes[0]);
+    console.log(res.data.attributes)
+    issueDetailList.set(res.data.attributes);
   };
 
   const populateIssueTypeSelectDropdown = () => {
@@ -533,15 +537,32 @@
   const populateIssueDetailList = () => {
     multiSelectOptions = [];
 
-    for (let i = 0; i < $issueDetailList.values.length; i++) {
-      let obj = {
-        label: $issueDetailList.values[i].name,
-        value: $issueDetailList.values[i].key,
-      };
-      multiSelectOptions.push(obj);
+    for (let i = 0; i < $issueDetailList.length; i++) {
+      if ($issueDetailList[i].values) {
+        console.log($issueDetailList[i])
+        for (let j = 0; j < $issueDetailList[i].values.length; j++){
+          let obj = {
+            label: $issueDetailList[i].values[j].name,
+            value: $issueDetailList[i].values[j].label
+          }
+          multiSelectOptions.push(obj);
+          console.log(multiSelectOptions);
+        }
+      } 
+      
+      // else if ($issueDetailList[i].values && $issueDetailList[i].datatype === 'singlevaluelist') {
+      //   for (let j = 0; j < $issueDetailList[i].values.length; j++){
+      //     let obj = {
+      //       label: $issueDetailList[i].values[j].name,
+      //       value: $issueDetailList[i].values[j].label
+      //     }
+      //     singleSelectOptions.push(obj);
+      //   }
+      // }
     }
     // Reactive statement for arrays
     multiSelectOptions = multiSelectOptions;
+    // singleSelectOptions = singleSelectOptions;
   };
 
   const getIssues = async (
@@ -608,9 +629,10 @@
     }&address_string=${$issueAddress}&lat=${
       isOnline ? $issueAddressCoordinates.lat : ""
     }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
-
+    console.log($issueDetail)
     $issueDetail.forEach((attr) => {
-      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
+      console.log(attr, attributes, $issueDetailList)
+      attributes += "&attribute[" + $issueDetailList[0].code + "]=" + attr.value;
     });
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
@@ -632,7 +654,8 @@
     attributes += "&g_recaptcha_response=" + token;
 
     const data = new URLSearchParams(attributes);
-
+    console.log(data.getAll("first_name"))
+    console.log(attributes)
     try {
       await axios.post("/requests.json", data, {
         headers: {
@@ -2375,6 +2398,28 @@
                 {messages["report.issue"]["selection.other.description"]}
               </div>
             {/if}
+
+            <!-- {#each $issueDetailList as detail}
+              {#if detail.datatype === "string" || detail.datatype === "text"}
+                <div class="step-two-feature-type-helper">
+                  {detail.description}
+                </div>
+                <input class="step-two-attribute-text-input" />
+              {/if}
+
+              {#if detail.datatype === "number"}
+                <div class="step-two-feature-type-helper">
+                  {detail.description}
+                </div>
+                <input
+                  class="step-two-attribute-text-input"
+                  type="number"
+                />
+              {/if}
+
+            {/each} -->
+
+
 
             {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
               <div class="multiselect">
