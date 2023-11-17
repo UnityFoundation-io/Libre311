@@ -14,7 +14,7 @@ app-data:
                 code: "SDWLK"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: "Sidewalk Issues"
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -38,7 +38,7 @@ app-data:
                 code: "BUS_STOP"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: "Bus Stop Issues"
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -62,7 +62,7 @@ app-data:
                 code: "BIKE_LANE"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: "Bike Lane Issues"
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -86,7 +86,7 @@ app-data:
                 code: "CRSWLK"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: "Crosswalk Issues"
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -110,7 +110,7 @@ app-data:
                 code: "INTSCTN"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: "Intersection Issues"
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
