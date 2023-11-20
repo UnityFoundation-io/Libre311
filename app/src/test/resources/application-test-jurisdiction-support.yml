@@ -1,0 +1,136 @@
+app-data:
+  bootstrap:
+    data:
+      enabled: true
+      jurisdictions: ["city.gov", "town.gov"]
+      services:
+        - serviceCode: "201"
+          jurisdiction: "city.gov"
+          serviceName: Sidewalk
+          description: Sidewalk
+          type: realtime
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "SDWLK"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "CRACKED"
+                    name: "Cracked"
+                  - key: "NARROW"
+                    name: "Too narrow"
+                  - key: "HEAVED_UNEVEN"
+                    name: "Heaved/Uneven Sidewalk"
+                  - key: "OTHER"
+                    name: "Other"
+        - serviceCode: "202"
+          jurisdiction: "town.gov"
+          serviceName: Bus Stop
+          description: Bus Stop
+          type: realtime
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "BUS_STOP"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "UNSAFE"
+                    name: "Unsafe location"
+                  - key: "NO_SDWLK"
+                    name: "No sidewalk"
+                  - key: "MISSING_SIGN"
+                    name: "Sign missing"
+                  - key: "NO_SHELTER"
+                    name: "No Shelter"
+                  - key: "OTHER"
+                    name: "Other"
+        - serviceCode: "203"
+          jurisdiction: "city.gov"
+          serviceName: Bike Lane
+          description: Bike Lane
+          type: realtime
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "BIKE_LANE"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "INCOMPLETE"
+                    name: "Incomplete"
+                  - key: "UNEVEN"
+                    name: "Uneven"
+                  - key: "UNSAFE"
+                    name: "Unsafe location"
+                  - key: "OTHER"
+                    name: "Other"
+        - serviceCode: "204"
+          jurisdiction: "town.gov"
+          serviceName: Crosswalk
+          description: Crosswalk
+          type: realtime
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "CRSWLK"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "MISSING"
+                    name: "Missing"
+                  - key: "FADED"
+                    name: "Faded or worn paint"
+                  - key: "DRIVERS"
+                    name: "Drivers failing to yield"
+                  - key: "OTHER"
+                    name: "Other"
+        - serviceCode: "205"
+          jurisdiction: "city.gov"
+          serviceName: Intersection
+          description: Intersection
+          type: realtime
+          serviceDefinition:
+            attributes:
+              - variable: true
+                code: "INTSCTN"
+                datatype: multivaluelist
+                required: true
+                datatypeDescription: Please select one or more items.
+                order: 1
+                description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
+                values:
+                  - key: "ADA_ACCESS"
+                    name: "ADA Access"
+                  - key: "NOCRSWLK"
+                    name: "No crosswalk"
+                  - key: "LIGHTCHNG"
+                    name: "Light will not change"
+                  - key: "SHORTLIGHT"
+                    name: "Light too short"
+                  - key: "OTHER"
+                    name: "Other"
+        - serviceCode: "206"
+          jurisdiction: "town.gov"
+          serviceName: Other
+          description: Other
+          type: realtime

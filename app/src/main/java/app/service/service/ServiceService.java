@@ -38,21 +38,33 @@ public class ServiceService {
         this.serviceRepository = serviceRepository;
     }
 
-    public Page<ServiceDTO> findAll(Pageable pageable) {
-        return serviceRepository.findAll(pageable).map(ServiceDTO::new);
+    public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
+        Page<Service> servicePage;
+        if (jurisdictionId == null) {
+            servicePage = serviceRepository.findAll(pageable);
+        } else {
+            servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
+        }
+
+        return servicePage.map(ServiceDTO::new);
     }
 
-    public String getServiceDefinition(String serviceCode) {
-        Optional<Service> byServiceCode = serviceRepository.findByServiceCode(serviceCode);
+    public String getServiceDefinition(String serviceCode, String jurisdictionId) {
+        Optional<Service> serviceOptional;
+        if (jurisdictionId == null) {
+            serviceOptional = serviceRepository.findByServiceCode(serviceCode);
+        } else {
+            serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
+        }
 
-        if (byServiceCode.isEmpty()) {
-            LOG.error("Corresponding service not found.");
+        if (serviceOptional.isEmpty()) {
+            LOG.error("Service not found.");
             return null;
-        } else if (byServiceCode.get().getServiceDefinitionJson() == null) {
+        } else if (serviceOptional.get().getServiceDefinitionJson() == null) {
             LOG.error("Service Definition is null.");
             return null;
         }
 
-        return byServiceCode.get().getServiceDefinitionJson();
+        return serviceOptional.get().getServiceDefinitionJson();
     }
 }
