@@ -25,6 +25,10 @@ import java.time.Instant;
 public class DownloadRequestsArgumentsDTO {
 
     @Nullable
+    @QueryValue(value = "jurisdiction_id")
+    private String jurisdictionId;
+
+    @Nullable
     @QueryValue(value = "service_name")
     private String serviceName;
 
@@ -78,5 +82,14 @@ public class DownloadRequestsArgumentsDTO {
 
     public void setStatus(@Nullable ServiceRequestStatus status) {
         this.status = status;
+    }
+
+    @Nullable
+    public String getJurisdictionId() {
+        return jurisdictionId;
+    }
+
+    public void setJurisdictionId(@Nullable String jurisdictionId) {
+        this.jurisdictionId = jurisdictionId;
     }
 }

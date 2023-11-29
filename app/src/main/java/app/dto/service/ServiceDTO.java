@@ -25,6 +25,9 @@ public class ServiceDTO {
     @JsonProperty("service_code")
     private String serviceCode;
 
+    @JsonProperty("jurisdiction_id")
+    private String jurisdictionId;
+
     @JsonProperty("service_name")
     private String serviceName;
 
@@ -43,6 +46,9 @@ public class ServiceDTO {
         this.description = service.getDescription();
         this.metadata = service.isMetadata();
         this.type = service.getType();
+        if (service.getJurisdiction() != null) {
+            this.jurisdictionId = service.getJurisdiction().getId();
+        }
     }
 
     public String getServiceCode() {
@@ -51,6 +57,14 @@ public class ServiceDTO {
 
     public void setServiceCode(String serviceCode) {
         this.serviceCode = serviceCode;
+    }
+
+    public String getJurisdictionId() {
+        return jurisdictionId;
+    }
+
+    public void setJurisdictionId(String jurisdictionId) {
+        this.jurisdictionId = jurisdictionId;
     }
 
     public String getServiceName() {

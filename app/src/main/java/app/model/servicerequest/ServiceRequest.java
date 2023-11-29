@@ -14,6 +14,7 @@
 
 package app.model.servicerequest;
 
+import app.model.jurisdiction.Jurisdiction;
 import app.model.service.Service;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.DateCreated;
@@ -36,6 +37,10 @@ public class ServiceRequest {
     @ManyToOne
     @JoinColumn(name = "services_id", nullable = false)
     private Service service;
+
+    @ManyToOne
+    @JoinColumn(name = "jurisdiction_id")
+    private Jurisdiction jurisdiction;
 
     @Nullable
     @Column(columnDefinition = "TEXT")
@@ -124,6 +129,14 @@ public class ServiceRequest {
 
     public Long getId() {
         return id;
+    }
+
+    public Jurisdiction getJurisdiction() {
+        return jurisdiction;
+    }
+
+    public void setJurisdiction(Jurisdiction jurisdiction) {
+        this.jurisdiction = jurisdiction;
     }
 
     @Nullable

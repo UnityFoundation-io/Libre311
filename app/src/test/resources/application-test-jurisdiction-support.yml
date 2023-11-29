@@ -1,10 +1,11 @@
----
 app-data:
   bootstrap:
     data:
       enabled: true
+      jurisdictions: ["city.gov", "town.gov"]
       services:
-        - serviceCode: "001"
+        - serviceCode: "201"
+          jurisdiction: "city.gov"
           serviceName: Sidewalk
           description: Sidewalk
           type: realtime
@@ -14,7 +15,7 @@ app-data:
                 code: "SDWLK"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: "Sidewalk Issues"
+                datatypeDescription: Please select one or more items.
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -28,7 +29,8 @@ app-data:
                     name: "Heaved/Uneven Sidewalk"
                   - key: "OTHER"
                     name: "Other"
-        - serviceCode: "002"
+        - serviceCode: "202"
+          jurisdiction: "town.gov"
           serviceName: Bus Stop
           description: Bus Stop
           type: realtime
@@ -38,7 +40,7 @@ app-data:
                 code: "BUS_STOP"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: "Bus Stop Issues"
+                datatypeDescription: Please select one or more items.
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -52,7 +54,8 @@ app-data:
                     name: "No Shelter"
                   - key: "OTHER"
                     name: "Other"
-        - serviceCode: "003"
+        - serviceCode: "203"
+          jurisdiction: "city.gov"
           serviceName: Bike Lane
           description: Bike Lane
           type: realtime
@@ -62,7 +65,7 @@ app-data:
                 code: "BIKE_LANE"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: "Bike Lane Issues"
+                datatypeDescription: Please select one or more items.
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -76,7 +79,8 @@ app-data:
                     name: "Unsafe location"
                   - key: "OTHER"
                     name: "Other"
-        - serviceCode: "004"
+        - serviceCode: "204"
+          jurisdiction: "town.gov"
           serviceName: Crosswalk
           description: Crosswalk
           type: realtime
@@ -86,7 +90,7 @@ app-data:
                 code: "CRSWLK"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: "Crosswalk Issues"
+                datatypeDescription: Please select one or more items.
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -100,7 +104,8 @@ app-data:
                     name: "Drivers failing to yield"
                   - key: "OTHER"
                     name: "Other"
-        - serviceCode: "005"
+        - serviceCode: "205"
+          jurisdiction: "city.gov"
           serviceName: Intersection
           description: Intersection
           type: realtime
@@ -110,7 +115,7 @@ app-data:
                 code: "INTSCTN"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: "Intersection Issues"
+                datatypeDescription: Please select one or more items.
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -124,7 +129,8 @@ app-data:
                     name: "Light too short"
                   - key: "OTHER"
                     name: "Other"
-        - serviceCode: "006"
+        - serviceCode: "206"
+          jurisdiction: "town.gov"
           serviceName: Other
           description: Other
           type: realtime

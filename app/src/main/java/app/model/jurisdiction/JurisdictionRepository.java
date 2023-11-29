@@ -12,20 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service;
+package app.model.jurisdiction;
 
 import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.model.Page;
-import io.micronaut.data.model.Pageable;
 import io.micronaut.data.repository.PageableRepository;
 
-import java.util.Optional;
-
 @Repository
-public interface ServiceRepository extends PageableRepository<Service, Long> {
-    Optional<Service> findByServiceCode(String serviceCode);
-
-    Page<Service> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
-
-    Optional<Service> findByServiceCodeAndJurisdictionId(String serviceCode, String jurisdictionId);
+public interface JurisdictionRepository extends PageableRepository<Jurisdiction, String> {
 }

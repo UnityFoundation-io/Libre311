@@ -14,6 +14,7 @@
 
 package app.model.service;
 
+import app.model.jurisdiction.Jurisdiction;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -32,6 +33,10 @@ public class Service {
 
     @Column(unique = true)
     private String serviceCode;
+
+    @ManyToOne
+    @JoinColumn(name = "jurisdiction_id")
+    private Jurisdiction jurisdiction;
 
     @Column(columnDefinition = "TEXT")
     private String serviceDefinitionJson;
@@ -64,6 +69,14 @@ public class Service {
 
     public void setServiceCode(String serviceCode) {
         this.serviceCode = serviceCode;
+    }
+
+    public Jurisdiction getJurisdiction() {
+        return jurisdiction;
+    }
+
+    public void setJurisdiction(Jurisdiction jurisdiction) {
+        this.jurisdiction = jurisdiction;
     }
 
     public String getServiceName() {

@@ -27,6 +27,9 @@ public class DownloadServiceRequestDTO {
     @CsvBindByName(column = "service_request_id")
     private Long id;
 
+    @CsvBindByName(column = "jurisdiction_id")
+    private String jurisdictionId;
+
     @CsvDate(value = "yyyy-MM-dd'T'HH:mm'Z'")
     @CsvBindByName(column = "requested_datetime")
     private Instant dateCreated;
@@ -99,6 +102,9 @@ public class DownloadServiceRequestDTO {
         this.lastName = sanitize(serviceRequest.getLastName());
         this.phone = sanitize(serviceRequest.getPhone());
         this.mediaUrl = sanitize(serviceRequest.getMediaUrl());
+        if (serviceRequest.getJurisdiction() != null) {
+            this.jurisdictionId = serviceRequest.getJurisdiction().getId();
+        }
     }
 
     public Long getId() {
@@ -107,6 +113,14 @@ public class DownloadServiceRequestDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getJurisdictionId() {
+        return jurisdictionId;
+    }
+
+    public void setJurisdictionId(String jurisdictionId) {
+        this.jurisdictionId = jurisdictionId;
     }
 
     public String getStatusNotes() {

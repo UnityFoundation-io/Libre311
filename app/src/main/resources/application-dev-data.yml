@@ -14,28 +14,28 @@ app-data:
                 code: "SDWLK_NEAR"
                 datatype: string
                 required: false
-                datatypeDescription: Please add additional information.
+                datatypeDescription: Located near...
                 order: 2
-                description: Please add additional information.
+                description: Please add a description to help locate the issue.
               - variable: true
                 code: "SDWLK_WIDTH"
                 datatype: number
                 required: false
-                datatypeDescription: In standard system of measurement, how large is the issue.
+                datatypeDescription: "1"
                 order: 3
                 description: In standard system of measurement, how large is the issue.
               - variable: true
                 code: "SDWLK_DATETIME"
                 datatype: datetime
                 required: true
-                datatypeDescription: When was the issue observed?
+                datatypeDescription: "2018-08-18T10:00:00Z"
                 order: 4
                 description: When was the issue observed?
               - variable: true
                 code: "SDWLK_CMNTS"
                 datatype: text
                 required: false
-                datatypeDescription: Any additional comments?
+                datatypeDescription: "Please add comments here..."
                 order: 5
                 description: Any additional comments?
                 values:
@@ -43,7 +43,7 @@ app-data:
                 code: "SDWLK_SNGLIST"
                 datatype: singlevaluelist
                 required: true
-                datatypeDescription: Please select one value.
+                datatypeDescription: Sidewalk Issue
                 order: 6
                 description: Please select one value.
                 values:
@@ -61,7 +61,7 @@ app-data:
                 code: "SDWLK"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: Sidewalk Issues
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -256,7 +256,7 @@ app-data:
                 code: "BUS_STOP"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: Bus Stop Issues
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -400,7 +400,7 @@ app-data:
                 code: "BIKE_LANE"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: Bike Lane Issues
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -459,7 +459,7 @@ app-data:
                 code: "CRSWLK"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: Crosswalk Issues
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
@@ -483,7 +483,7 @@ app-data:
                 code: "INTSCTN"
                 datatype: multivaluelist
                 required: true
-                datatypeDescription: Please select one or more items.
+                datatypeDescription: Intersection Issues
                 order: 1
                 description: Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.
                 values:
