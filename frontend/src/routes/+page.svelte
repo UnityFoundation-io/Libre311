@@ -63,14 +63,27 @@
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
+  import DateTimePicker from "$lib/DateTimePicker.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
 
+  // Issue Attribute Stores
+  import dateTimeAttribute from "../stores/dateTimeAttribute";
+  import issueAttributes from "../stores/issueAttributes";
+  import issueDescriptionAttribute from "../stores/issueDescriptionAttribute";
+  import multiSelectAttribute from "../stores/multiSelectAttribute";
+  import numberAttribute from "../stores/numberAttribute";
+  import singleSelectAttribute from "../stores/singleSelectAttribute";
+  import stringAttribute from "../stores/stringAttribute";
+  import textAttribute from "../stores/textAttribute";
+
+  // Styling
   import colors from "$lib/colors.json";
   import "$lib/global.css";
   import "$lib/spinner.css";
 
+  // Toggle map provider here
   import mapProvider from "$lib/mapProvider.json";
 
   const provider = mapProvider["provider"]
@@ -187,6 +200,7 @@
     findIssuesButtonSelector,
     reportIssuesButtonSelector,
     selected,
+    singleSelected,
     isOnline,
     wasOnline,
     imageData,
@@ -194,13 +208,15 @@
 
   let markerGroup;
 
+  $: console.log(selectedIssue)
+
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
       if (issueTypeSelectSelector?.options?.length === 0)
         populateIssueTypeSelectDropdown();
     }, 200);
 
-  $: console.log(issueTypeSelectSelector)
+  // $: console.log(issueTypeSelectSelector)
 
   let zoom = 15;
   let markers = [];
@@ -214,6 +230,8 @@
   let filterIssueType = { service_code: "", service_name: "" };
   let filterStartDate = "",
     filterEndDate = "";
+
+  let issueDateTime = ""
 
   // Image Safe Search
   let selectedFile = null,
@@ -514,8 +532,36 @@
   const getServiceDefinition = async (serviceId) => {
     const res = await axios.get(`/services/${serviceId}`);
     console.log(res.data.attributes)
-    issueDetailList.set(res.data.attributes);
+    const newAttributes = massageIssueDetailList(res.data.attributes);
+    issueAttributes.set(newAttributes);
+    console.log($issueAttributes)
+    issueDetailList.set(res.data.attributes[0]);
   };
+
+  const massageIssueDetailList = (issueAttributes) => {
+    const newAttributes = issueAttributes.map(attribute => {
+      if (attribute.datatype === "multivaluelist") {
+        attribute.multiSelectOptions = attribute.values.map(value => {
+          return {
+            label: value.name,
+            value: value.key
+          }
+        })
+      }
+
+      if (attribute.datatype === "singlevaluelist") {
+        // const singleSelectOptions = attribute.values.map(value => {
+        attribute.singleSelectOptions = attribute.values.map(value => {
+          return {
+            label: value.name,
+            value: value.key
+          }
+        })
+      }
+      return attribute
+    });
+    return newAttributes
+  }
 
   const populateIssueTypeSelectDropdown = () => {
     const defaultOption = document.createElement("option");
@@ -537,32 +583,15 @@
   const populateIssueDetailList = () => {
     multiSelectOptions = [];
 
-    for (let i = 0; i < $issueDetailList.length; i++) {
-      if ($issueDetailList[i].values) {
-        console.log($issueDetailList[i])
-        for (let j = 0; j < $issueDetailList[i].values.length; j++){
-          let obj = {
-            label: $issueDetailList[i].values[j].name,
-            value: $issueDetailList[i].values[j].label
-          }
-          multiSelectOptions.push(obj);
-          console.log(multiSelectOptions);
-        }
-      } 
-      
-      // else if ($issueDetailList[i].values && $issueDetailList[i].datatype === 'singlevaluelist') {
-      //   for (let j = 0; j < $issueDetailList[i].values.length; j++){
-      //     let obj = {
-      //       label: $issueDetailList[i].values[j].name,
-      //       value: $issueDetailList[i].values[j].label
-      //     }
-      //     singleSelectOptions.push(obj);
-      //   }
-      // }
+    for (let i = 0; i < $issueAttributes.values.length; i++) {
+      let obj = {
+        label: $issueAttributes.values[i].name,
+        value: $issueAttributes.values[i].key,
+      };
+        multiSelectOptions.push(obj);
     }
     // Reactive statement for arrays
     multiSelectOptions = multiSelectOptions;
-    // singleSelectOptions = singleSelectOptions;
   };
 
   const getIssues = async (
@@ -632,7 +661,8 @@
     console.log($issueDetail)
     $issueDetail.forEach((attr) => {
       console.log(attr, attributes, $issueDetailList)
-      attributes += "&attribute[" + $issueDetailList[0].code + "]=" + attr.value;
+      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
+      console.log(attributes)
     });
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
@@ -1499,6 +1529,10 @@
 
     return `${start}...${end}`;
   };
+
+  function tempThrow(){
+    throw new Error("Ouch");
+  }
 
   const reportCSV = async () => {
     try {
@@ -2368,8 +2402,10 @@
               bind:this="{issueTypeSelectSelector}"
               on:change="{async (e) => {
                 selected = [];
+                singleSelected = [];
 
                 if ($issueDetail) issueDetail.set([]);
+                if ($singleSelectAttribute) singleSelectAttribute.set([]);
 
                 issueType.set({
                   id: e.target.value,
@@ -2389,11 +2425,7 @@
                 }
               }}"></select>
 
-            {#if $issueDetailList?.description && $issueType?.name !== "Other"}
-              <div class="step-two-feature-type-helper">
-                {$issueDetailList.description}
-              </div>
-            {:else if $issueType?.name === "Other"}
+            {#if $issueType?.name === "Other"}
               <div class="step-two-feature-type-helper">
                 {messages["report.issue"]["selection.other.description"]}
               </div>
@@ -2419,9 +2451,98 @@
 
             {/each} -->
 
+            {#if $issueDetailList && $issueType.name !== "Other"}
+              {#each $issueAttributes as issueAttribute}
+                {#if issueAttribute.datatype === "datetime"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <DateTimePicker 
+                    on:dateSelected="{(e) => {
+                      dateTimeAttribute.set(e.detail);
+                      console.log($dateTimeAttribute);
+                    }}"/>
+                {/if}
 
+                {#if issueAttribute.datatype === "string"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <input 
+                    bind:value="{$stringAttribute}"
+                    class="step-two-attribute-text-input" 
+                    placeholder="{issueAttribute.datatype_description}"
+                  />
+                {/if}
 
-            {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
+                {#if issueAttribute.datatype === "number"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <input
+                    bind:value={$numberAttribute}
+                    class="step-two-attribute-text-input"
+                    placeholder="{issueAttribute.datatype_description}"
+                    type="number"
+                  />
+                {/if}
+
+                {#if issueAttribute.datatype === "singlevaluelist"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <div class="multiselect">
+                    <MultiSelect
+                      maxSelect={1}
+                      id="issue-details"
+                      placeholder="{issueAttribute.datatype_description}"
+                      bind:selected="{singleSelected}"
+                      options="{issueAttribute.singleSelectOptions}"
+                      on:change="{() => {
+                        singleSelectAttribute.set(singleSelected)
+                      }}"
+                    />
+                  </div>
+                {/if}
+
+                {#if issueAttribute.datatype === "multivaluelist"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <div class="multiselect">
+                    <MultiSelect
+                      id="issue-details"
+                      placeholder="{issueAttribute.datatype_description}"
+                      bind:selected="{selected}"
+                      options="{issueAttribute.multiSelectOptions}"
+                      on:change="{() => {
+                        issueDetail.set(selected)
+                      }}"
+                    />
+                  </div>
+                {/if}
+
+                {#if issueAttribute.datatype === "text"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <textarea
+                    placeholder="{$issueDetail.find(
+                      (selection) => selection.name === 'Other') 
+                      || $issueType.name === 'Other'
+                      ? messages['report.issue']['textarea.description.placeholder']
+                      : messages['report.issue']['textarea.description.not.required.placeholder']
+                    }"
+                    rows="3"
+                    maxlength="{maxCharactersLength}"
+                    bind:value="{$textAttribute}"
+                    on:click="{() => (invalidOtherDescription.visible = false)}"
+                  ></textarea>
+                {/if}
+              {/each}
+            {/if}
+
+            <!-- {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
               <div class="multiselect">
                 <MultiSelect
                   id="issue-details"
@@ -2431,7 +2552,7 @@
                   on:change="{() => issueDetail.set(selected)}"
                 />
               </div>
-            {/if}
+            {/if} -->
 
             {#if $issueType !== null}
               <div class="textarea">
@@ -2957,6 +3078,51 @@
             </div>
           {/if}
 
+          {#if $dateTimeAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.datetime.attribute"]}
+              <div class="step-five-issue-description">
+                {$dateTimeAttribute}
+              </div>
+            </div>
+          {/if}
+
+          {#if $stringAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.string.attribute"]}
+              <div class="step-five-issue-description">
+                {$stringAttribute}
+              </div>
+            </div>
+          {/if}
+
+          {#if $textAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.text.attribute"]}
+              <div class="step-five-issue-description">
+                {$textAttribute}
+              </div>
+            </div>
+          {/if}
+
+          {#if $numberAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.number.attribute"]}
+              <div class="step-five-issue-description">
+                {$numberAttribute}
+              </div>
+            </div>
+          {/if}
+
+          {#if $singleSelectAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.singleselect.attribute"]}
+              <div class="step-five-issue-description">
+                {$singleSelectAttribute[0].label}
+              </div>
+            </div>
+          {/if}
+
           {#if mediaUrl && !$issueDescription && !$issueSubmitterName && !$issueSubmitterContact}
             <div></div>
           {/if}
@@ -3172,7 +3338,8 @@
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >{messages["modal"]["label.detail"]}</span
               >
-              {#if selectedIssue?.selected_values}
+              {#if selectedIssue?.selected_values[0]?.values}
+                {console.log({selectedIssue})}
                 {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
                   <span style="margin-right:1rem"
                     >{i + 1}-{issueDetail.name}</span
@@ -3451,6 +3618,7 @@
                           : 'hidden'}; 
                           "
                         on:click="{() => {
+                          console.log(selectedIssue)
                           if (
                             selectedIssue &&
                             selectedIssue.lat === issue.lat &&

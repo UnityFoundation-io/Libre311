@@ -14,6 +14,6 @@
 
 import { writable } from 'svelte/store';
 
-const issueDetailList = writable(null);
+const textAttribute = writable('');
 
-export default issueDetailList;
+export default textAttribute;

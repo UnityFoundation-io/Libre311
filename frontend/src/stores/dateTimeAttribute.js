@@ -1,3 +1,4 @@
+
 // Copyright 2023 Libre311 Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,6 @@
 
 import { writable } from 'svelte/store';
 
-const issueDetailList = writable(null);
+const dateTimeAttribute = writable(null);
 
-export default issueDetailList;
+export default dateTimeAttribute;
