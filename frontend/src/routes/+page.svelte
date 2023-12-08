@@ -241,6 +241,8 @@
     messageRejectedTwo = "",
     mediaUrl;
 
+    $: console.log(filteredIssuesData);
+
   // Locks the background scroll when modal is open
   $: if (browser && showModal) {
     document.body.classList.add("modal-open");
@@ -664,6 +666,11 @@
       attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
       console.log(attributes)
     });
+
+    if ($stringAttribute) attributes += "&string=" + $stringAttribute;
+    if ($textAttribute) attributes += "&text=" + $textAttribute;
+    if ($numberAttribute) attributes += "&number=" + $numberAttribute;
+    if ($singleSelectAttribute) attributes += "&singleselect=" + $singleSelectAttribute;
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
     if ($issueSubmitterName) {
@@ -3338,7 +3345,7 @@
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >{messages["modal"]["label.detail"]}</span
               >
-              {#if selectedIssue?.selected_values[0]?.values}
+              {#if selectedIssue?.selected_values?.[0]?.values}
                 {console.log({selectedIssue})}
                 {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
                   <span style="margin-right:1rem"
