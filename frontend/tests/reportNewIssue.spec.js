@@ -12,31 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from "@playwright/test";
 
-test('report new issue with image', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+test("report new issue with image", async ({ page }) => {
+  await page.goto("http://localhost:3000/");
   await page.waitForTimeout(1000);
-  const issuesButton = await page.waitForSelector('#button-report-issue');
+  const issuesButton = await page.waitForSelector("#button-report-issue");
   await issuesButton.click();
-  
+
   // Enter issue location
-  await page.getByPlaceholder('Enter the address').click();
-  await page.getByPlaceholder('Enter the address').fill('12140 Woodcrest Executive Drive');
-  await page.getByPlaceholder('Enter the address').press('Enter');
-  await expect(page.getByText('12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
-  await page.getByRole('button', { name: 'Next next step' }).click();
+  await page.getByPlaceholder("Enter the address").click();
+  await page
+    .getByPlaceholder("Enter the address")
+    .fill("12140 Woodcrest Executive Drive");
+  await page.getByPlaceholder("Enter the address").press("Enter");
+  await expect(
+    page.getByText("12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA")
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
 
   // Enter issue details
-  await expect(page.getByRole('combobox')).toBeVisible();
-  await page.getByRole('combobox').selectOption('001');
-  await page.getByPlaceholder('Issue Details').click();
-  await page.getByText('Cracked').click();
-  await page.getByText('Too narrow').click();
-  await page.locator('#issue-details').press('Tab');
-  await page.getByPlaceholder('Additional Description Details').click();
-  await page.getByPlaceholder('Additional Description Details').fill('Additional description details');
-  await page.getByRole('button', { name: 'Next next step' }).click();
+  await expect(page.getByRole("combobox")).toBeVisible();
+  await page.getByRole("combobox").selectOption("001");
+  await page.getByPlaceholder("Issue Details").click();
+  await page.getByText("Cracked").click();
+  await page.getByText("Too narrow").click();
+  await page.locator("#issue-details").press("Tab");
+  await page.getByPlaceholder("Additional Description Details").click();
+  await page
+    .getByPlaceholder("Additional Description Details")
+    .fill("Additional description details");
+  await page.getByRole("button", { name: "Next" }).click();
 
   // Upload picture
   // ~ These tests are commented out because the CI environment currently does not support
@@ -48,61 +54,83 @@ test('report new issue with image', async ({ page }) => {
   // await fileChooser.setFiles('./tests/fixtures/logo.png');
   // await page.getByRole('button', { name: 'Upload' }).click();
   // await expect(page.getByText('The uploaded image has been saved.')).toBeVisible();
-  await page.getByRole('button', { name: 'Next next step' }).click();
+  await page.getByRole("button", { name: "Next" }).click();
 
   // Enter contact information
-  await page.getByPlaceholder('ex: John Doe').click();
-  await page.getByPlaceholder('ex: John Doe').fill('John Doe');
-  await page.getByPlaceholder('ex: johndoe@gmail.com').click();
-  await page.getByPlaceholder('ex: johndoe@gmail.com').fill('johndoe@gmail.com');
-  await page.getByRole('button', { name: 'Review & Submit submit issue' }).click();
+  await page.getByPlaceholder("ex: John Doe").click();
+  await page.getByPlaceholder("ex: John Doe").fill("John Doe");
+  await page.getByPlaceholder("ex: johndoe@gmail.com").click();
+  await page
+    .getByPlaceholder("ex: johndoe@gmail.com")
+    .fill("johndoe@gmail.com");
+  await page.getByRole("button", { name: "Review & Submit" }).click();
 
   // Review information
-  await expect(page.getByText('Issue Location: 12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
-  await expect(page.getByText('Issue Type: Sidewalk')).toBeVisible();
-  await expect(page.getByText('Issue Details: 1-Cracked2-Too narrow')).toBeVisible();
+  await expect(
+    page.getByText(
+      "Issue Location: 12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA"
+    )
+  ).toBeVisible();
+  await expect(page.getByText("Issue Type: Sidewalk")).toBeVisible();
+  await expect(
+    page.getByText("Issue Details: 1-Cracked2-Too narrow")
+  ).toBeVisible();
   // await expect(page.getByRole('img', { name: 'uploaded image' })).toBeVisible();
-  await expect(page.getByText('Description: Additional description details')).toBeVisible();
-  await expect(page.getByText('Name of Submitter: John Doe')).toBeVisible();
-  await expect(page.getByText('Contact Info: johndoe@gmail.com')).toBeVisible();
-  await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await page.route('**/api/requests.json', route => route.fulfill({
-    status: 200
-  }));
+  await expect(
+    page.getByText("Description: Additional description details")
+  ).toBeVisible();
+  await expect(page.getByText("Name of Submitter: John Doe")).toBeVisible();
+  await expect(page.getByText("Contact Info: johndoe@gmail.com")).toBeVisible();
+  await page.getByRole("button", { name: "Submit" }).click();
+  await page.route("**/api/requests.json", (route) =>
+    route.fulfill({
+      status: 200,
+    })
+  );
 
   // Confirms the submission went through
   // await page.getByText(/Thank You!.*/).click({ timeout: 25000 });
 });
 
-test('report new issue with other issue type', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+test("report new issue with other issue type", async ({ page }) => {
+  await page.goto("http://localhost:3000/");
   await page.waitForTimeout(1000);
-  const issuesButton = await page.waitForSelector('#button-report-issue');
+  const issuesButton = await page.waitForSelector("#button-report-issue");
   await issuesButton.click();
 
   // Enter issue location
-  await page.getByPlaceholder('Enter the address').click();
-  await page.getByPlaceholder('Enter the address').fill('12140 Woodcrest Executive Drive');
-  await page.getByPlaceholder('Enter the address').press('Enter');
-  await expect(page.getByText('12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA')).toBeVisible();
-  await page.getByRole('button', { name: 'Next next step' }).click();
+  await page.getByPlaceholder("Enter the address").click();
+  await page
+    .getByPlaceholder("Enter the address")
+    .fill("12140 Woodcrest Executive Drive");
+  await page.getByPlaceholder("Enter the address").press("Enter");
+  await expect(
+    page.getByText("12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA")
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
 
   // Issue type "other" selected
-  await expect(page.getByRole('combobox')).toBeVisible();
-  await page.getByRole('combobox').selectOption({ index: 6 });
-  await page.getByPlaceholder('Additional Description Details*').fill('Other issue description');
-  await page.getByRole('button', { name: 'Next next step' }).click();
+  await expect(page.getByRole("combobox")).toBeVisible();
+  await page.getByRole("combobox").selectOption({ index: 6 });
+  await page
+    .getByPlaceholder("Additional Description Details*")
+    .fill("Other issue description");
+  await page.getByRole("button", { name: "Next" }).click();
 
   // Proceeds as normal, confirming the rest of the issue information
   // Skipping image upload and contact information for the purpose of this test
-  await page.getByRole('button', { name: 'Next next step' }).click();
-  await page.getByRole('button', { name: 'Review & Submit submit issue' }).click();
-  await expect(page.getByText('Issue Type: Other')).toBeVisible();
-  await expect(page.getByText('Description: Other issue description')).toBeVisible();
-  await page.getByRole('button', { name: 'Submit submit issue' }).click();
-  await page.route('**/api/requests.json', route => route.fulfill({
-    status: 200
-  }));
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Review & Submit" }).click();
+  await expect(page.getByText("Issue Type: Other")).toBeVisible();
+  await expect(
+    page.getByText("Description: Other issue description")
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Submit" }).click();
+  await page.route("**/api/requests.json", (route) =>
+    route.fulfill({
+      status: 200,
+    })
+  );
 });
 
 /* Template for possible future tests */
