@@ -512,7 +512,10 @@
 
   const getServiceDefinition = async (serviceId) => {
     const res = await axios.get(`/services/${serviceId}`);
-    issueDetailList.set(res.data.attributes[0]);
+    const first = res.data.attributes
+      .sort((attributeA, attributeB) => attributeA.order - attributeB.order)
+      .at(0);
+    issueDetailList.set(first);
   };
 
   const populateIssueTypeSelectDropdown = () => {
@@ -535,7 +538,7 @@
   const populateIssueDetailList = () => {
     multiSelectOptions = [];
 
-    for (let i = 0; i < $issueDetailList.values.length; i++) {
+    for (let i = 0; i < $issueDetailList?.values?.length; i++) {
       let obj = {
         label: $issueDetailList.values[i].name,
         value: $issueDetailList.values[i].key,
@@ -1959,8 +1962,6 @@
   };
 
   onMount(async () => {
-    setTimeout(() => console.clear(), 100);
-
     await loadRecaptcha();
     await getTokenInfo();
 
