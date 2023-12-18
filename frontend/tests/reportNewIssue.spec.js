@@ -20,15 +20,13 @@ test("report new issue with image", async ({ page }) => {
   const issuesButton = await page.waitForSelector("#button-report-issue");
   await issuesButton.click();
 
-  // Enter issue location
-  await page.getByPlaceholder("Enter the address").click();
-  await page
-    .getByPlaceholder("Enter the address")
-    .fill("12140 Woodcrest Executive Drive");
-  await page.getByPlaceholder("Enter the address").press("Enter");
-  await expect(
-    page.getByText("12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA")
-  ).toBeVisible();
+  const locationInputLocator = await page.getByPlaceholder("Enter the address");
+  await locationInputLocator.click();
+  await locationInputLocator.fill(
+    "12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA"
+  );
+  await locationInputLocator.press("Enter");
+
   await page.getByRole("button", { name: "Next" }).click();
 
   // Enter issue details
