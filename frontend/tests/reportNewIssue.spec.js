@@ -16,7 +16,7 @@ import { expect, test } from "@playwright/test";
 
 test("report new issue with image", async ({ page }) => {
   await page.goto("http://localhost:3000/");
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(5000);
   const issuesButton = await page.waitForSelector("#button-report-issue");
   await issuesButton.click();
 
@@ -92,7 +92,7 @@ test("report new issue with image", async ({ page }) => {
 
 test("report new issue with other issue type", async ({ page }) => {
   await page.goto("http://localhost:3000/");
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(5000);
   const issuesButton = await page.waitForSelector("#button-report-issue");
   await issuesButton.click();
 
