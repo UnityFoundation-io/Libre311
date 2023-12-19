@@ -14,6 +14,6 @@
 
 import { writable } from 'svelte/store';
 
-const stringAttribute = writable(null);
+const issueDetails = writable([]);
 
-export default stringAttribute;
+export default issueDetails;

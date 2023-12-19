@@ -14,6 +14,6 @@
 
 import { writable } from 'svelte/store';
 
-const textAttribute = writable('');
+const textAttribute = writable(null);
 
 export default textAttribute;

@@ -72,8 +72,10 @@
   import dateTimeAttribute from "../stores/dateTimeAttribute";
   import issueAttributes from "../stores/issueAttributes";
   import issueDescriptionAttribute from "../stores/issueDescriptionAttribute";
+  import issueDetails from "../stores/issueDetails"
   import multiSelectAttribute from "../stores/multiSelectAttribute";
   import numberAttribute from "../stores/numberAttribute";
+  import otherDescription from "../stores/otherDescription";
   import singleSelectAttribute from "../stores/singleSelectAttribute";
   import stringAttribute from "../stores/stringAttribute";
   import textAttribute from "../stores/textAttribute";
@@ -207,6 +209,10 @@
     timeoutId;
 
   let markerGroup;
+
+  let userNumber,
+    userString,
+    userText
 
   $: console.log(selectedIssue)
 
@@ -661,16 +667,32 @@
       isOnline ? $issueAddressCoordinates.lat : ""
     }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
     console.log($issueDetail)
-    $issueDetail.forEach((attr) => {
-      console.log(attr, attributes, $issueDetailList)
-      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
-      console.log(attributes)
-    });
 
-    if ($stringAttribute) attributes += "&string=" + $stringAttribute;
-    if ($textAttribute) attributes += "&text=" + $textAttribute;
-    if ($numberAttribute) attributes += "&number=" + $numberAttribute;
-    if ($singleSelectAttribute) attributes += "&singleselect=" + $singleSelectAttribute;
+    let vals = [];
+
+
+    $issueDetails.forEach((attr) => {
+      console.log(attr, attributes, $issueDetailList)
+      if (attr.datatype === 'multivaluelist') {
+        $issueDetail.value.forEach((val) => {
+          vals.push(val.value)
+        })
+        attributes += "&attribute[" + attr.code + "]=" + vals
+      }
+
+      if (attr.datatype === 'singlevaluelist') {
+        attributes += "&attribute[" + attr.code + "]=" + attr.value[0].value
+      }
+
+      if (attr.datatype === 'string' || 
+          attr.datatype === 'number' || 
+          attr.datatype === "datetime" ||
+          attr.datatype === "text") {
+        attributes += "&attribute[" + attr.code + "]=" + attr.value
+      }
+
+      console.log(attributes)
+    })
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
     if ($issueSubmitterName) {
@@ -2466,7 +2488,14 @@
                   </div>
                   <DateTimePicker 
                     on:dateSelected="{(e) => {
-                      dateTimeAttribute.set(e.detail);
+                      // dateTimeAttribute.set(e.detail);
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        value: e.detail
+                      };
+
+                      dateTimeAttribute.set(obj)
                       console.log($dateTimeAttribute);
                     }}"/>
                 {/if}
@@ -2476,9 +2505,19 @@
                     {issueAttribute.description}
                   </div>
                   <input 
-                    bind:value="{$stringAttribute}"
+                    bind:value="{userString}"
                     class="step-two-attribute-text-input" 
                     placeholder="{issueAttribute.datatype_description}"
+                    on:change="{() => {
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        value: userString
+                      }
+
+                      stringAttribute.set(obj)
+                      console.log($stringAttribute)
+                    }}"
                   />
                 {/if}
 
@@ -2487,10 +2526,21 @@
                     {issueAttribute.description}
                   </div>
                   <input
-                    bind:value={$numberAttribute}
+                    bind:value={userNumber}
                     class="step-two-attribute-text-input"
                     placeholder="{issueAttribute.datatype_description}"
                     type="number"
+                    on:change="{() => {
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        value: userNumber
+                      }
+
+                      numberAttribute.set(obj);
+                      console.log($numberAttribute);
+                      
+                    }}"
                   />
                 {/if}
 
@@ -2506,7 +2556,13 @@
                       bind:selected="{singleSelected}"
                       options="{issueAttribute.singleSelectOptions}"
                       on:change="{() => {
-                        singleSelectAttribute.set(singleSelected)
+                        let obj = {
+                          code: issueAttribute.code,
+                          datatype: issueAttribute.datatype,
+                          value: singleSelected
+                        }
+                        singleSelectAttribute.set(obj)
+                        console.log($singleSelectAttribute)
                       }}"
                     />
                   </div>
@@ -2523,7 +2579,14 @@
                       bind:selected="{selected}"
                       options="{issueAttribute.multiSelectOptions}"
                       on:change="{() => {
-                        issueDetail.set(selected)
+                        let obj = {
+                          code: issueAttribute.code,
+                          datatype: issueAttribute.datatype,
+                          value: selected
+                        }
+                        console.log(obj)
+                        issueDetail.set(obj)
+                        console.log($issueDetail)
                       }}"
                     />
                   </div>
@@ -2534,43 +2597,38 @@
                     {issueAttribute.description}
                   </div>
                   <textarea
-                    placeholder="{$issueDetail.find(
-                      (selection) => selection.name === 'Other') 
-                      || $issueType.name === 'Other'
+                    placeholder="{
+                      $issueType.name === 'Other'
                       ? messages['report.issue']['textarea.description.placeholder']
                       : messages['report.issue']['textarea.description.not.required.placeholder']
                     }"
                     rows="3"
                     maxlength="{maxCharactersLength}"
-                    bind:value="{$textAttribute}"
+                    bind:value="{userText}"
                     on:click="{() => (invalidOtherDescription.visible = false)}"
+                    on:change="{() => {
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        value: userText
+                      }
+
+                      textAttribute.set(obj)
+                      console.log($textAttribute)
+                    }}"
                   ></textarea>
                 {/if}
               {/each}
             {/if}
 
-            <!-- {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
-              <div class="multiselect">
-                <MultiSelect
-                  id="issue-details"
-                  placeholder="Issue Details"
-                  bind:selected="{selected}"
-                  options="{multiSelectOptions}"
-                  on:change="{() => issueDetail.set(selected)}"
-                />
-              </div>
-            {/if} -->
-
             {#if $issueType !== null}
               <div class="textarea">
-                {#if $issueDetail.find((selection) => selection.name === "Other") || $issueType.name === "Other"}
+                {#if $issueType.name === "Other"}
                   <div class="step-two-required">* Required field</div>
                 {/if}
 
                 <textarea
-                  placeholder="{$issueDetail.find(
-                    (selection) => selection.name === 'Other'
-                  ) || $issueType.name === 'Other'
+                  placeholder="{$issueType.name === 'Other'
                     ? messages['report.issue'][
                         'textarea.description.placeholder'
                       ]
@@ -2587,11 +2645,7 @@
               <div class="step-two-word-count">
                 <span
                   class:step-two-word-count-accent="{$issueDescription?.length <
-                    10 &&
-                    ($issueDetail.find(
-                      (selection) => selection.name === 'Other'
-                    ) ||
-                      $issueType.name === 'Other')}"
+                    10 && $issueType.name === 'Other'}"
                 >
                   {$issueDescription?.length ?? 0}
                 </span>
@@ -2632,15 +2686,68 @@
               ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
+              let multiObjectValues = [];
+
               if (!isOnline) issueTime.set(convertDate(new Date()));
 
               localStorage.setItem('issueTime', $issueTime);
               localStorage.setItem('issueTypeId', $issueType.id);
-              if ($issueDetail)
+              if ($issueDetail) {
                 localStorage.setItem(
                   'issueDetail',
                   JSON.stringify($issueDetail)
                 );
+
+                $issueDetails.push($issueDetail)
+                
+              }
+
+              if ($stringAttribute) {
+                localStorage.setItem(
+                  'issueString',
+                  JSON.stringify($stringAttribute)
+                )
+                $issueDetails.push($stringAttribute)
+              }
+
+              if ($numberAttribute) {
+                localStorage.setItem(
+                  'issueNumber',
+                  JSON.stringify($numberAttribute)
+                )
+                $issueDetails.push($numberAttribute)
+              }
+
+
+              if ($singleSelectAttribute) {
+                localStorage.setItem(
+                  'singleSelect',
+                  JSON.stringify($singleSelectAttribute)
+                )
+
+                $issueDetails.push($singleSelectAttribute)
+              }
+
+              if ($dateTimeAttribute) {
+                localStorage.setItem(
+                  'issueDateTime',
+                  JSON.stringify($dateTimeAttribute)
+                )
+
+                $issueDetails.push($dateTimeAttribute)
+              }
+                
+
+              if ($textAttribute) {
+
+              
+                localStorage.setItem(
+                  'issueText',
+                  JSON.stringify($textAttribute)
+                )
+
+                $issueDetails.push($textAttribute)
+              }
 
               if ($issueType.name !== 'Other') {
                 localStorage.setItem(
@@ -2653,10 +2760,7 @@
                 localStorage.setItem('issueDescription', $issueDescription);
 
               if (
-                (($issueType.name === 'Other' ||
-                  $issueDetail.find(
-                    (selection) => selection.name === 'Other'
-                  )) &&
+                (($issueType.name === 'Other') &&
                   $issueDescription?.length < minOtherDescriptionLength) ||
                 $issueDescription === null
               ) {
@@ -2669,6 +2773,8 @@
                   reportIssuesButtonSelector.scrollIntoView();
                 }, 100);
               }
+
+              console.log($issueDetails)
             }}"
           >
             {messages["report.issue"]["button.next"]}
@@ -3029,7 +3135,7 @@
           <div class="step-five-issue-detail-label">
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
-              {#each $issueDetail as detail, i}
+              {#each $issueDetail.value as detail, i}
                 <span id="issue-details" style="margin-right: 1rem"
                   >{i + 1}-{detail.label}</span
                 >
@@ -3089,7 +3195,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.datetime.attribute"]}
               <div class="step-five-issue-description">
-                {$dateTimeAttribute}
+                {$dateTimeAttribute.value}
               </div>
             </div>
           {/if}
@@ -3098,7 +3204,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.string.attribute"]}
               <div class="step-five-issue-description">
-                {$stringAttribute}
+                {$stringAttribute.value}
               </div>
             </div>
           {/if}
@@ -3107,7 +3213,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.text.attribute"]}
               <div class="step-five-issue-description">
-                {$textAttribute}
+                {$textAttribute.value}
               </div>
             </div>
           {/if}
@@ -3116,7 +3222,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.number.attribute"]}
               <div class="step-five-issue-description">
-                {$numberAttribute}
+                {$numberAttribute.value}
               </div>
             </div>
           {/if}
@@ -3125,7 +3231,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.singleselect.attribute"]}
               <div class="step-five-issue-description">
-                {$singleSelectAttribute[0].label}
+                {$singleSelectAttribute.value[0].label}
               </div>
             </div>
           {/if}
@@ -3329,6 +3435,7 @@
         <!-- START Find Reported Issue -->
 
         {#if showModal}
+          {console.log(selectedIssue)}
           <Modal
             title="Issue Details"
             color="{primaryOne}"
