@@ -1,3 +1,5 @@
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import { z } from 'zod';
 
 const JurisdicationIdSchema = z.string();
@@ -95,8 +97,7 @@ export const ServiceDefinitionAttributeSchema = z.union([
 
 type ServiceDefinitionAttribute = z.infer<typeof ServiceDefinitionAttributeSchema>;
 
-const ServiceDefinitionSchema = z.object({
-	service_code: z.string(),
+const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 	attributes: z.array(ServiceDefinitionAttributeSchema)
 });
 
@@ -179,7 +180,9 @@ type GetServiceRequestsParams =
 			status?: ServiceRequestStatus[];
 	  };
 
-export interface Open311 {
+// todo can you really not get a service request and the values that the user entered?
+// may need to create Open311Extension interface to capture that need (or Libre311 interface)
+export interface Open311Service {
 	// https://wiki.open311.org/GeoReport_v2/#get-service-list
 	getServiceList(params: HasJurisdictionId): Promise<GetServiceListResponse>;
 	// https://wiki.open311.org/GeoReport_v2/#get-service-definition
@@ -190,4 +193,35 @@ export interface Open311 {
 	getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse>;
 	// https://wiki.open311.org/GeoReport_v2/#get-service-request
 	getServiceRequest(params: HasJurisdictionId & HasServiceRequestId): Promise<ServiceRequest>;
+}
+
+export interface Libre311Service extends Open311Service {}
+
+export type Libre311ServiceProps = {
+	baseUrl: string;
+} & HasJurisdictionId;
+// const ROUTES = {
+//     getServiceList: "/",
+// };
+
+export class Libre311ServiceImpl implements Libre311Service {
+	private axios: AxiosInstance;
+	constructor(props: Libre311ServiceProps) {
+		this.axios = axios.create({ baseURL: props.baseUrl });
+	}
+	getServiceList(params: HasJurisdictionId): Promise<GetServiceListResponse> {
+		throw Error('Not Implemented');
+	}
+	getServiceDefinition(params: HasJurisdictionId & HasServiceCode): Promise<ServiceDefinition> {
+		throw Error('Not Implemented');
+	}
+	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse> {
+		throw Error('Not Implemented');
+	}
+	getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse> {
+		throw Error('Not Implemented');
+	}
+	getServiceRequest(params: HasJurisdictionId & HasServiceRequestId): Promise<ServiceRequest> {
+		throw Error('Not Implemented');
+	}
 }
