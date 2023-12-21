@@ -25,9 +25,9 @@ export const ServiceSchema = HasServiceCodeSchema.extend({
 	service_name: z.string(),
 	description: z.string(),
 	metadata: z.boolean(),
-	type: ServiceTypeSchema,
-	keywords: z.array(z.string()),
-	group: z.string()
+	type: ServiceTypeSchema
+	// keywords: z.array(z.string()),
+	// group: z.string()
 });
 
 export type Service = z.infer<typeof ServiceSchema>;
@@ -150,17 +150,17 @@ export const ServiceRequestSchema = HasServiceRequestIdSchema.extend({
 	status: ServiceRequestStatusSchema,
 	status_notes: z.string().nullish(),
 	service_name: z.string(),
-	description: z.string().nullish(),
-	agency_responsible: z.string().nullish(),
+	description: z.string().nullish(), // this seems like it should be required as a bareminimum
+	agency_responsible: z.string().nullish(), // SeeClickFix guarentees this as known at time of creation
 	service_notice: z.string().nullish(),
 	requested_datetime: z.string(),
 	updated_datetime: z.string(),
-	expected_datetime: z.string(),
+	expected_datetime: z.string().nullish(),
 	address: z.string(),
 	address_id: z.number().nullish(),
-	zipcode: z.number(),
-	lat: z.number(),
-	long: z.number(),
+	zipcode: z.string(),
+	lat: z.string(),
+	long: z.string(),
 	media_url: z.string().nullish()
 });
 
@@ -181,10 +181,10 @@ type GetServiceRequestsParams =
 	  };
 
 // todo can you really not get a service request and the values that the user entered?
-// may need to create Open311Extension interface to capture that need (or Libre311 interface)
+// may need to add that to the Libre311Service interface
 export interface Open311Service {
 	// https://wiki.open311.org/GeoReport_v2/#get-service-list
-	getServiceList(params: HasJurisdictionId): Promise<GetServiceListResponse>;
+	getServiceList(): Promise<GetServiceListResponse>;
 	// https://wiki.open311.org/GeoReport_v2/#get-service-definition
 	getServiceDefinition(params: HasJurisdictionId & HasServiceCode): Promise<ServiceDefinition>;
 	// https://wiki.open311.org/GeoReport_v2/#post-service-request
@@ -198,30 +198,48 @@ export interface Open311Service {
 export interface Libre311Service extends Open311Service {}
 
 export type Libre311ServiceProps = {
-	baseUrl: string;
-} & HasJurisdictionId;
-// const ROUTES = {
-//     getServiceList: "/",
-// };
+	baseURL: string;
+	jurisdictionId: JurisdictionId;
+};
+
+// until we have good test data, don't pass the jurisdiction_id
+const ROUTES = {
+	getServiceList: () => '/services', // todo ?jurisdiction_id={}
+	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
+		`/services/${params.service_code}` // todo ?jurisdiction_id={}
+};
 
 export class Libre311ServiceImpl implements Libre311Service {
-	private axios: AxiosInstance;
+	private axiosInstance: AxiosInstance;
+	private jurisdictionId: JurisdictionId;
 	constructor(props: Libre311ServiceProps) {
-		this.axios = axios.create({ baseURL: props.baseUrl });
+		console.log({ props });
+		this.axiosInstance = axios.create({ baseURL: props.baseURL });
+
+		this.jurisdictionId = props.jurisdictionId;
 	}
-	getServiceList(params: HasJurisdictionId): Promise<GetServiceListResponse> {
+	async getServiceList(): Promise<GetServiceListResponse> {
+		// todo pass params to routes once we are using jurisdiction_id
+		const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceList());
+		return GetServiceListResponseSchema.parse(res.data);
+	}
+	async getServiceDefinition(
+		params: HasJurisdictionId & HasServiceCode
+	): Promise<ServiceDefinition> {
+		const res = await axios.get<unknown>(ROUTES.getServiceDefinition(params));
+		return ServiceDefinitionSchema.parse(res.data);
+	}
+	async createServiceRequest(
+		params: CreateServiceRequestParams
+	): Promise<CreateServiceRequestResponse> {
 		throw Error('Not Implemented');
 	}
-	getServiceDefinition(params: HasJurisdictionId & HasServiceCode): Promise<ServiceDefinition> {
+	async getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse> {
 		throw Error('Not Implemented');
 	}
-	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse> {
-		throw Error('Not Implemented');
-	}
-	getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse> {
-		throw Error('Not Implemented');
-	}
-	getServiceRequest(params: HasJurisdictionId & HasServiceRequestId): Promise<ServiceRequest> {
+	async getServiceRequest(
+		params: HasJurisdictionId & HasServiceRequestId
+	): Promise<ServiceRequest> {
 		throw Error('Not Implemented');
 	}
 }

@@ -6,8 +6,8 @@
 	import { page } from '$app/stores';
 	import type { Page } from '@sveltejs/kit';
 
-	function getJurisdictionId(page: Page<Record<string, string>>) {
-		const jurisdictionId = page.params.jurisdiction_id;
+	function getJurisdictionId(pageParams: Record<string, string>) {
+		const jurisdictionId = pageParams.jurisdiction_id;
 		if (!jurisdictionId)
 			throw new Error('jurisdiction_id is required to initialize the Libre311Context');
 		return jurisdictionId;
@@ -15,8 +15,8 @@
 
 	const props: Libre311ContextProps = {
 		service: {
-			baseUrl: 'http://localhost:8080',
-			jurisdiction_id: getJurisdictionId($page)
+			baseURL: 'http://localhost:8080/api',
+			jurisdictionId: getJurisdictionId($page.params)
 		}
 	};
 </script>

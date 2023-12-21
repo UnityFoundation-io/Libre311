@@ -18,7 +18,10 @@ export type Libre311ContextProps = {
 
 export function createLibre311Context(params: Libre311ContextProps) {
 	const service = new Libre311ServiceImpl(params.service);
-	setContext(libre311CtxKey, service);
+	const libre311Context: Libre311Context = {
+		service
+	};
+	setContext(libre311CtxKey, libre311Context);
 }
 
 export function useLibre311Service(): Libre311Service {
