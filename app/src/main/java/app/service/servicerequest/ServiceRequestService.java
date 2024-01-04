@@ -249,6 +249,7 @@ public class ServiceRequestService {
                         values.add(new AttributeValue(attributeCode, (String) v));
                     }
 
+                    sda.setValues(values);
                     attributes.add(sda);
                 }
             });
