@@ -63,6 +63,10 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant expectedDate;
 
+    @JsonProperty("closed_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Instant closedDate;
+
     @JsonProperty("address")
     private String address;
 
@@ -105,6 +109,7 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         this.latitude = serviceRequest.getLatitude();
         this.longitude = serviceRequest.getLongitude();
         this.mediaUrl = serviceRequest.getMediaUrl();
+        this.closedDate = serviceRequest.getClosedDate();
         if (serviceRequest.getJurisdiction() != null) {
             this.jurisdictionId = serviceRequest.getJurisdiction().getId();
         }
@@ -236,6 +241,14 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     public void setMediaUrl(String mediaUrl) {
         this.mediaUrl = mediaUrl;
+    }
+
+    public Instant getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(Instant closedDate) {
+        this.closedDate = closedDate;
     }
 
     public String getJurisdictionId() {
