@@ -37,9 +37,6 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     private ServiceRequestStatus status;
 
-    @JsonProperty("status_notes")
-    private String statusNotes;
-
     @JsonProperty("service_name")
     private String serviceName;
 
@@ -94,7 +91,6 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
         this.status = serviceRequest.getStatus();
-        this.statusNotes = serviceRequest.getStatusNotes();
         this.serviceName = serviceRequest.getService().getServiceName();
         this.serviceCode = serviceRequest.getService().getServiceCode();
         this.description = serviceRequest.getDescription();
@@ -128,14 +124,6 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     public void setStatus(ServiceRequestStatus status) {
         this.status = status;
-    }
-
-    public String getStatusNotes() {
-        return statusNotes;
-    }
-
-    public void setStatusNotes(String statusNotes) {
-        this.statusNotes = statusNotes;
     }
 
     public String getServiceName() {
