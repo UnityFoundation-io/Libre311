@@ -336,12 +336,29 @@
 
   const clearLocalStorage = (bypassClearForm = false) => {
     localStorage.removeItem("completed");
-    localStorage.removeItem("issueTypeId");
     localStorage.removeItem("issueAddress");
-    localStorage.removeItem("issueTime");
-    localStorage.removeItem("issueDetailListCode");
-    localStorage.removeItem("issueDetail");
+    localStorage.removeItem("issueDateTime");
     localStorage.removeItem("issueDescription");
+    localStorage.removeItem("issueDetail");
+    localStorage.removeItem("issueDetailListCode");
+    localStorage.removeItem("issueNumber");
+    localStorage.removeItem("issueString");
+    localStorage.removeItem("issueText");
+    localStorage.removeItem("issueTime");
+    localStorage.removeItem("issueTypeId");
+    localStorage.removeItem("singleSelect");
+
+    issueDetails.set([])
+
+    dateTimeAttribute.set(null);
+    issueDescriptionAttribute.set(null);
+    multiSelectAttribute.set(null);
+    numberAttribute.set(null);
+    singleSelectAttribute.set(null);
+    stringAttribute.set(null);
+    textAttribute.set(null);
+
+    console.log($issueDetails)
     if (!bypassClearForm) clearForm();
   };
 
@@ -674,21 +691,21 @@
     $issueDetails.forEach((attr) => {
       console.log(attr, attributes, $issueDetailList)
       if (attr.datatype === 'multivaluelist') {
-        $issueDetail.value.forEach((val) => {
+        $issueDetail.values.forEach((val) => {
           vals.push(val.value)
         })
         attributes += "&attribute[" + attr.code + "]=" + vals
       }
 
       if (attr.datatype === 'singlevaluelist') {
-        attributes += "&attribute[" + attr.code + "]=" + attr.value[0].value
+        attributes += "&attribute[" + attr.code + "]=" + attr.values[0].value
       }
 
       if (attr.datatype === 'string' || 
           attr.datatype === 'number' || 
           attr.datatype === "datetime" ||
           attr.datatype === "text") {
-        attributes += "&attribute[" + attr.code + "]=" + attr.value
+        attributes += "&attribute[" + attr.code + "]=" + attr.values
       }
 
       console.log(attributes)
@@ -714,6 +731,7 @@
 
     const data = new URLSearchParams(attributes);
     console.log(data.getAll("first_name"))
+    console.log(data);
     console.log(attributes)
     try {
       await axios.post("/requests.json", data, {
@@ -2492,7 +2510,7 @@
                       let obj = {
                         code: issueAttribute.code,
                         datatype: issueAttribute.datatype,
-                        value: e.detail
+                        values: e.detail
                       };
 
                       dateTimeAttribute.set(obj)
@@ -2512,7 +2530,7 @@
                       let obj = {
                         code: issueAttribute.code,
                         datatype: issueAttribute.datatype,
-                        value: userString
+                        values: userString
                       }
 
                       stringAttribute.set(obj)
@@ -2534,7 +2552,7 @@
                       let obj = {
                         code: issueAttribute.code,
                         datatype: issueAttribute.datatype,
-                        value: userNumber
+                        values: userNumber
                       }
 
                       numberAttribute.set(obj);
@@ -2559,7 +2577,7 @@
                         let obj = {
                           code: issueAttribute.code,
                           datatype: issueAttribute.datatype,
-                          value: singleSelected
+                          values: singleSelected
                         }
                         singleSelectAttribute.set(obj)
                         console.log($singleSelectAttribute)
@@ -2582,7 +2600,7 @@
                         let obj = {
                           code: issueAttribute.code,
                           datatype: issueAttribute.datatype,
-                          value: selected
+                          values: selected
                         }
                         console.log(obj)
                         issueDetail.set(obj)
@@ -2610,7 +2628,7 @@
                       let obj = {
                         code: issueAttribute.code,
                         datatype: issueAttribute.datatype,
-                        value: userText
+                        values: userText
                       }
 
                       textAttribute.set(obj)
@@ -2686,8 +2704,6 @@
               ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
             style="margin-bottom: 1.25rem"
             on:click="{() => {
-              let multiObjectValues = [];
-
               if (!isOnline) issueTime.set(convertDate(new Date()));
 
               localStorage.setItem('issueTime', $issueTime);
@@ -3135,7 +3151,7 @@
           <div class="step-five-issue-detail-label">
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
-              {#each $issueDetail.value as detail, i}
+              {#each $issueDetail.values as detail, i}
                 <span id="issue-details" style="margin-right: 1rem"
                   >{i + 1}-{detail.label}</span
                 >
@@ -3195,7 +3211,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.datetime.attribute"]}
               <div class="step-five-issue-description">
-                {$dateTimeAttribute.value}
+                {$dateTimeAttribute.values}
               </div>
             </div>
           {/if}
@@ -3204,7 +3220,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.string.attribute"]}
               <div class="step-five-issue-description">
-                {$stringAttribute.value}
+                {$stringAttribute.values}
               </div>
             </div>
           {/if}
@@ -3213,7 +3229,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.text.attribute"]}
               <div class="step-five-issue-description">
-                {$textAttribute.value}
+                {$textAttribute.values}
               </div>
             </div>
           {/if}
@@ -3222,7 +3238,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.number.attribute"]}
               <div class="step-five-issue-description">
-                {$numberAttribute.value}
+                {$numberAttribute.values}
               </div>
             </div>
           {/if}
@@ -3231,7 +3247,7 @@
             <div class="step-five-issue-description-label">
               {messages["report.issue"]["label.review.singleselect.attribute"]}
               <div class="step-five-issue-description">
-                {$singleSelectAttribute.value[0].label}
+                {$singleSelectAttribute.values[0].label}
               </div>
             </div>
           {/if}
@@ -3732,7 +3748,6 @@
                           : 'hidden'}; 
                           "
                         on:click="{() => {
-                          console.log(selectedIssue)
                           if (
                             selectedIssue &&
                             selectedIssue.lat === issue.lat &&
