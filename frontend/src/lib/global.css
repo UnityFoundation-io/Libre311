@@ -378,8 +378,11 @@ body {
 
 .see-more {
   color:var(--primary-color-two); 
-  font-size: 1.1rem;
   cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-size: 1.3rem;
+  text-shadow: 2px 3px 2px rgba(0, 0, 0, 0.8);
 }
 
 .see-more-title {
