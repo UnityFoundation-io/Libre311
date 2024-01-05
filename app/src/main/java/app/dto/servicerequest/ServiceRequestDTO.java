@@ -37,9 +37,6 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     private ServiceRequestStatus status;
 
-    @JsonProperty("status_notes")
-    private String statusNotes;
-
     @JsonProperty("service_name")
     private String serviceName;
 
@@ -65,6 +62,10 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("expected_datetime")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant expectedDate;
+
+    @JsonProperty("closed_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Instant closedDate;
 
     @JsonProperty("address")
     private String address;
@@ -94,7 +95,6 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
         this.status = serviceRequest.getStatus();
-        this.statusNotes = serviceRequest.getStatusNotes();
         this.serviceName = serviceRequest.getService().getServiceName();
         this.serviceCode = serviceRequest.getService().getServiceCode();
         this.description = serviceRequest.getDescription();
@@ -109,6 +109,7 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         this.latitude = serviceRequest.getLatitude();
         this.longitude = serviceRequest.getLongitude();
         this.mediaUrl = serviceRequest.getMediaUrl();
+        this.closedDate = serviceRequest.getClosedDate();
         if (serviceRequest.getJurisdiction() != null) {
             this.jurisdictionId = serviceRequest.getJurisdiction().getId();
         }
@@ -128,14 +129,6 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     public void setStatus(ServiceRequestStatus status) {
         this.status = status;
-    }
-
-    public String getStatusNotes() {
-        return statusNotes;
-    }
-
-    public void setStatusNotes(String statusNotes) {
-        this.statusNotes = statusNotes;
     }
 
     public String getServiceName() {
@@ -248,6 +241,14 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     public void setMediaUrl(String mediaUrl) {
         this.mediaUrl = mediaUrl;
+    }
+
+    public Instant getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(Instant closedDate) {
+        this.closedDate = closedDate;
     }
 
     public String getJurisdictionId() {
