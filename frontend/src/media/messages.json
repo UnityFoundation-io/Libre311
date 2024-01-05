@@ -116,6 +116,11 @@
       "label.detail": "Detail:",
       "label.description": "Description:",
       "label.requested.at": "Requested At:",
-      "label.location": "Location:"
+      "label.location": "Location:",
+      "label.string": "String:",
+      "label.text": "Text:",
+      "label.number": "Number:",
+      "label.datetime": "Incident Date/Time:",
+      "label.singleselect": "Single Selection:"
     }
 }

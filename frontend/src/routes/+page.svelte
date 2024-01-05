@@ -3463,22 +3463,34 @@
               >
               {selectedIssue.service_name}
             </div>
-
-            <div class="issue-detail-line">
+            <!-- <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
                 >{messages["modal"]["label.detail"]}</span
               >
               {#if selectedIssue?.selected_values?.[0]?.values}
-                {console.log({selectedIssue})}
-                {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
+                {console.log(selectedIssue.selected_values)}
+                {#each selectedIssue.selected_values[0]?.values as issueDetail}
                   <span style="margin-right:1rem"
-                    >{i + 1}-{issueDetail.name}</span
+                    >{issueDetail.key}</span
                   >
                 {/each}
               {:else}
                 -
               {/if}
-            </div>
+            </div> -->
+            
+            {#each selectedIssue?.selected_values as issueValues}
+              <div class="issue-detail-line">
+                <span style="font-weight:300; margin-right: 0.3rem">
+                    {issueValues.code}:
+                </span>
+                {#if issueValues.values[0]?.name}
+                  {issueValues.values[0].name}
+                {:else}
+                  {issueValues.values[0].key}
+                {/if}
+              </div>
+            {/each}
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
