@@ -36,7 +36,7 @@ public class SensitiveServiceRequestDTO extends ServiceRequestDTO {
     @JsonProperty("device_id")
     private String deviceId;
 
-    @JsonProperty("device_id")
+    @JsonProperty("account_id")
     private String accountId;
 
     private String email;

@@ -16,6 +16,7 @@ package app.dto.servicerequest;
 
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
@@ -53,9 +54,11 @@ public class PatchServiceRequestDTO {
     private String agencyResponsible;
 
     @JsonProperty("expected_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant expectedDate;
 
     @JsonProperty("closed_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant closedDate;
 
 
@@ -86,7 +89,7 @@ public class PatchServiceRequestDTO {
         this.priority = priority;
     }
 
-    public String getAgencyEmail() {
+    public String getAgency_email() {
         return agencyEmail;
     }
 
@@ -94,7 +97,7 @@ public class PatchServiceRequestDTO {
         this.agencyEmail = agencyEmail;
     }
 
-    public String getServiceNotice() {
+    public String getService_notice() {
         return serviceNotice;
     }
 
@@ -102,7 +105,7 @@ public class PatchServiceRequestDTO {
         this.serviceNotice = serviceNotice;
     }
 
-    public String getStatusNotes() {
+    public String getStatus_notes() {
         return statusNotes;
     }
 
@@ -110,7 +113,7 @@ public class PatchServiceRequestDTO {
         this.statusNotes = statusNotes;
     }
 
-    public String getAgencyResponsible() {
+    public String getAgency_responsible() {
         return agencyResponsible;
     }
 
@@ -118,7 +121,7 @@ public class PatchServiceRequestDTO {
         this.agencyResponsible = agencyResponsible;
     }
 
-    public Instant getExpectedDate() {
+    public Instant getExpected_date() {
         return expectedDate;
     }
 
@@ -126,7 +129,7 @@ public class PatchServiceRequestDTO {
         this.expectedDate = expectedDate;
     }
 
-    public Instant getClosedDate() {
+    public Instant getClosed_date() {
         return closedDate;
     }
 

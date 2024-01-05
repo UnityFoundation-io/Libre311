@@ -49,7 +49,6 @@ import java.net.MalformedURLException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -340,23 +339,26 @@ public class ServiceRequestService {
         if (serviceRequestDTO.getPriority() != null) {
             serviceRequest.setPriority(serviceRequestDTO.getPriority());
         }
-        if (serviceRequestDTO.getAgencyEmail() != null) {
-            serviceRequest.setAgencyEmail(serviceRequestDTO.getAgencyEmail());
+        if (serviceRequestDTO.getAgency_email() != null) {
+            serviceRequest.setAgencyEmail(serviceRequestDTO.getAgency_email());
         }
-        if (serviceRequestDTO.getServiceNotice() != null) {
-            serviceRequest.setServiceNotice(serviceRequestDTO.getServiceNotice());
+        if (serviceRequestDTO.getService_notice() != null) {
+            serviceRequest.setServiceNotice(serviceRequestDTO.getService_notice());
         }
-        if (serviceRequestDTO.getStatusNotes() != null) {
-            serviceRequest.setStatusNotes(serviceRequestDTO.getStatusNotes());
+        if (serviceRequestDTO.getStatus_notes() != null) {
+            serviceRequest.setStatusNotes(serviceRequestDTO.getStatus_notes());
         }
-        if (serviceRequestDTO.getAgencyResponsible() != null) {
-            serviceRequest.setStatusNotes(serviceRequestDTO.getAgencyResponsible());
+        if (serviceRequestDTO.getAgency_responsible() != null) {
+            serviceRequest.setAgencyResponsible(serviceRequestDTO.getAgency_responsible());
         }
-        if (serviceRequestDTO.getExpectedDate() != null) {
-            serviceRequest.setExpectedDate(serviceRequestDTO.getExpectedDate());
+        if (serviceRequestDTO.getExpected_date() != null) {
+            serviceRequest.setExpectedDate(serviceRequestDTO.getExpected_date());
         }
-        if (serviceRequestDTO.getClosedDate() != null) {
-            serviceRequest.setClosedDate(serviceRequestDTO.getClosedDate());
+        if (serviceRequestDTO.getClosed_date() != null) {
+            serviceRequest.setClosedDate(serviceRequestDTO.getClosed_date());
+        }
+        if (serviceRequestDTO.getStatus_notes() != null) {
+            serviceRequest.setStatusNotes(serviceRequestDTO.getStatus_notes());
         }
     }
 

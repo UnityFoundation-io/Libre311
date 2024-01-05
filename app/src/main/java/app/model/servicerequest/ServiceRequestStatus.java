@@ -17,7 +17,7 @@ package app.model.servicerequest;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ServiceRequestStatus {
-    OPEN, CLOSED;
+    OPEN, IN_PROGRESS, CLOSED;
 
     @Override
     @JsonValue
