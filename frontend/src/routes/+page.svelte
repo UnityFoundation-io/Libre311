@@ -556,7 +556,6 @@
 
   const getServiceDefinition = async (serviceId) => {
     const res = await axios.get(`/services/${serviceId}`);
-    console.log(res.data.attributes)
     const newAttributes = massageIssueDetailList(res.data.attributes);
     issueAttributes.set(newAttributes);
     console.log($issueAttributes)
@@ -687,12 +686,10 @@
 
     let vals = [];
 
-
     $issueDetails.forEach((attr) => {
-      console.log(attr, attributes, $issueDetailList)
       if (attr.datatype === 'multivaluelist') {
         $issueDetail.values.forEach((val) => {
-          vals.push(val.value)
+          vals.push(val.label)
         })
         attributes += "&attribute[" + attr.code + "]=" + vals
       }
@@ -707,8 +704,6 @@
           attr.datatype === "text") {
         attributes += "&attribute[" + attr.code + "]=" + attr.values
       }
-
-      console.log(attributes)
     })
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
@@ -730,9 +725,7 @@
     attributes += "&g_recaptcha_response=" + token;
 
     const data = new URLSearchParams(attributes);
-    console.log(data.getAll("first_name"))
-    console.log(data);
-    console.log(attributes)
+
     try {
       await axios.post("/requests.json", data, {
         headers: {
@@ -2604,7 +2597,6 @@
                         }
                         console.log(obj)
                         issueDetail.set(obj)
-                        console.log($issueDetail)
                       }}"
                     />
                   </div>
@@ -3463,21 +3455,6 @@
               >
               {selectedIssue.service_name}
             </div>
-            <!-- <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem"
-                >{messages["modal"]["label.detail"]}</span
-              >
-              {#if selectedIssue?.selected_values?.[0]?.values}
-                {console.log(selectedIssue.selected_values)}
-                {#each selectedIssue.selected_values[0]?.values as issueDetail}
-                  <span style="margin-right:1rem"
-                    >{issueDetail.key}</span
-                  >
-                {/each}
-              {:else}
-                -
-              {/if}
-            </div> -->
             
             {#each selectedIssue?.selected_values as issueValues}
               <div class="issue-detail-line">
