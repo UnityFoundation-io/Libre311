@@ -2700,7 +2700,7 @@
 
               localStorage.setItem('issueTime', $issueTime);
               localStorage.setItem('issueTypeId', $issueType.id);
-              if ($issueDetail) {
+              if ($issueDetail && $issueType.name !== 'Other') {
                 localStorage.setItem(
                   'issueDetail',
                   JSON.stringify($issueDetail)
@@ -3143,11 +3143,13 @@
           <div class="step-five-issue-detail-label">
             {messages["report.issue"]["label.review.issue.detail"]}
             <div class="step-five-issue-detail">
-              {#each $issueDetail.values as detail, i}
-                <span id="issue-details" style="margin-right: 1rem"
-                  >{i + 1}-{detail.label}</span
-                >
-              {/each}
+              {#if $issueDetail}
+                {#each $issueDetail.values as detail, i}
+                  <span id="issue-details" style="margin-right: 1rem"
+                    >{i + 1}-{detail.label}</span
+                  >
+                {/each}
+              {/if}
             </div>
           </div>
 
@@ -3456,18 +3458,20 @@
               {selectedIssue.service_name}
             </div>
             
-            {#each selectedIssue?.selected_values as issueValues}
-              <div class="issue-detail-line">
-                <span style="font-weight:300; margin-right: 0.3rem">
-                    {issueValues.code}:
-                </span>
-                {#if issueValues.values[0]?.name}
-                  {issueValues.values[0].name}
-                {:else}
-                  {issueValues.values[0].key}
-                {/if}
-              </div>
-            {/each}
+            {#if selectedIssue?.selected_values}
+              {#each selectedIssue?.selected_values as issueValues}
+                <div class="issue-detail-line">
+                  <span style="font-weight:300; margin-right: 0.3rem">
+                      {issueValues.code}:
+                  </span>
+                  {#if issueValues.values[0]?.name}
+                    {issueValues.values[0].name}
+                  {:else}
+                    {issueValues.values[0].key}
+                  {/if}
+                </div>
+              {/each}
+            {/if}
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"

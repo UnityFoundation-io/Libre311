@@ -31,10 +31,10 @@ test("report new issue with image", async ({ page }) => {
 
   // Enter issue details
   await expect(page.getByRole("combobox")).toBeVisible();
-  await page.getByRole("combobox").selectOption("001");
-  await page.getByPlaceholder("Issue Details").click();
-  await page.getByText("Cracked").click();
-  await page.getByText("Too narrow").click();
+  await page.getByRole("combobox").selectOption("002");
+  await page.getByPlaceholder("Bus Stop Issues").click();
+  await page.getByText("Unsafe location").click();
+  await page.getByText("No sidewalk").click();
   await page.locator("#issue-details").press("Tab");
   await page.getByPlaceholder("Additional Description Details").click();
   await page
@@ -69,9 +69,9 @@ test("report new issue with image", async ({ page }) => {
       "Issue Location: 12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA"
     )
   ).toBeVisible();
-  await expect(page.getByText("Issue Type: Sidewalk")).toBeVisible();
+  await expect(page.getByText("Issue Type: Bus Stop")).toBeVisible();
   await expect(
-    page.getByText("Issue Details: 1-Cracked2-Too narrow")
+    page.getByText("Issue Details: 1-Unsafe location2-No sidewalk")
   ).toBeVisible();
   // await expect(page.getByRole('img', { name: 'uploaded image' })).toBeVisible();
   await expect(
