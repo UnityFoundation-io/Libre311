@@ -3462,12 +3462,27 @@
               {#each selectedIssue?.selected_values as issueValues}
                 <div class="issue-detail-line">
                   <span style="font-weight:300; margin-right: 0.3rem">
-                      {issueValues.code}:
+                      {#if issueValues.datatype === 'multivaluelist'}
+                        {messages["modal"]["label.detail"]}
+                      {:else if issueValues.datatype === 'string'}
+                        {messages["modal"]["label.string"]}
+                      {:else if issueValues.datatype === 'number'}
+                        {messages["modal"]["label.number"]}
+                      {:else if issueValues.datatype === 'singlevaluelist'}
+                        {messages["modal"]["label.singleselect"]}
+                      {:else if issueValues.datatype === 'datetime'}
+                        {messages["modal"]["label.datetime"]}
+                      {:else if issueValues.datatype === 'text'}
+                        {messages["modal"]["label.text"]}
+                      {/if}
                   </span>
-                  {#if issueValues.values[0]?.name}
-                    {issueValues.values[0].name}
+                  
+                  {#if issueValues.datatype === 'datetime'}
+                    {formatDate(issueValues.values[0].name)}
+                  {:else if issueValues.datatype === 'multivaluelist'}
+                    {issueValues.values[0].key.split(',').join(', ')}
                   {:else}
-                    {issueValues.values[0].key}
+                    {issueValues.values[0].name}
                   {/if}
                 </div>
               {/each}
