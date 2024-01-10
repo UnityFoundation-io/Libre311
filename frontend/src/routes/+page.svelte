@@ -3140,18 +3140,20 @@
               {$issueType.name}
             </div>
           </div>
-          <div class="step-five-issue-detail-label">
-            {messages["report.issue"]["label.review.issue.detail"]}
-            <div class="step-five-issue-detail">
-              {#if $issueDetail}
-                {#each $issueDetail.values as detail, i}
-                  <span id="issue-details" style="margin-right: 1rem"
-                    >{i + 1}-{detail.label}</span
-                  >
-                {/each}
-              {/if}
+          {#if $issueType.name !== "Other"}
+            <div class="step-five-issue-detail-label">
+              {messages["report.issue"]["label.review.issue.detail"]}
+              <div class="step-five-issue-detail">
+                {#if $issueDetail}
+                  {#each $issueDetail.values as detail, i}
+                    <span id="issue-details" style="margin-right: 1rem"
+                      >{i + 1}-{detail.label}</span
+                    >
+                  {/each}
+                {/if}
+              </div>
             </div>
-          </div>
+          {/if}
 
           {#if selectedFileSrc}
             <div class="step-five-issue-detail-label">
