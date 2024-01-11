@@ -33,6 +33,7 @@
       "invalid.offline.address": "Please verify that the address is valid (valid characters: alphanumeric characters, &, -, ', ., ,).",
       "label.optional": "(optional)",
       "label.date": "Date & Time:",
+      "label.datetime": "Select Date/Time.",
       "label.feature.type": "Select the Feature Type that you are reporting on:",
       "selection.other.description": "Please elaborate in the Description field below.",
       "label.add.media": "Add an Image",
@@ -57,6 +58,11 @@
       "label.review.issue.detail": "Issue Details:",
       "label.review.media": "Media:",
       "label.review.description": "Description:",
+      "label.review.text.attribute": "Description (Attribute):",
+      "label.review.string.attribute": "String (Attribute):",
+      "label.review.number.attribute": "Number (Attribute):",
+      "label.review.datetime.attribute": "Date/Time (Attribute):",
+      "label.review.singleselect.attribute": "Single Selection:",
       "placeholder.submitter.name": "ex: John Doe",
       "placeholder.contact.info": "ex: johndoe@gmail.com",
       "input.submitter.name.error": "Invalid name. The name should contain at least 3 valid characters (valid characters: alphabetical characters, -, ', .).",
@@ -110,6 +116,11 @@
       "label.detail": "Detail:",
       "label.description": "Description:",
       "label.requested.at": "Requested At:",
-      "label.location": "Location:"
+      "label.location": "Location:",
+      "label.string": "String:",
+      "label.text": "Text:",
+      "label.number": "Number:",
+      "label.datetime": "Incident Date/Time:",
+      "label.singleselect": "Single Selection:"
     }
 }
