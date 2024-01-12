@@ -32,9 +32,9 @@
 </script>
 
 {#if contextProviderProps.type == 'success'}
-	<Libre311ContextProvider props={contextProviderProps.value}>
+	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
 		<header>
-			<h1>Fayetteville, AR</h1>
+			<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
 			<div class="controls">
 				<!-- todo move inside of map -->
 				<!-- <Funnel /> -->

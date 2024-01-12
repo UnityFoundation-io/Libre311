@@ -192,7 +192,12 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
-const JurisdictionConfigSchema = HasJurisdictionIdSchema;
+const JurisdictionConfigSchema = z
+	.object({
+		jurisdiction_name: z.string()
+	})
+	.merge(HasJurisdictionIdSchema);
+
 type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
 
 export interface Libre311Service extends Open311Service {
@@ -231,7 +236,10 @@ export class Libre311ServiceImpl implements Libre311Service {
 	public static async create(props: Libre311ServiceProps) {
 		// todo uncomment when /config endpoint exists code the jurisdiction_id
 		// const jurisdictionConfig = await getJurisdictionConfig();
-		const jurisdictionConfig = { jurisdiction_id: 'town.gov' };
+		const jurisdictionConfig = {
+			jurisdiction_id: 'town.gov',
+			jurisdiction_name: 'Fayetteville, AR'
+		};
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
 	}
 
