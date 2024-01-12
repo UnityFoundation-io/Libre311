@@ -183,65 +183,88 @@ type GetServiceRequestsParams =
 			status?: ServiceRequestStatus[];
 	  };
 
-// todo can you really not get a service request and the values that the user entered?
-// may need to add that to the Libre311Service interface
+// https://wiki.open311.org/GeoReport_v2/
 export interface Open311Service {
-	// https://wiki.open311.org/GeoReport_v2/#get-service-list
 	getServiceList(): Promise<GetServiceListResponse>;
-	// https://wiki.open311.org/GeoReport_v2/#get-service-definition
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
-	// https://wiki.open311.org/GeoReport_v2/#post-service-request
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	// https://wiki.open311.org/GeoReport_v2/#get-service-requests
 	getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse>;
-	// https://wiki.open311.org/GeoReport_v2/#get-service-request
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
-export interface Libre311Service extends Open311Service {}
+const JurisdictionConfigSchema = HasJurisdictionIdSchema;
+type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
+
+export interface Libre311Service extends Open311Service {
+	getJurisdictionConfig(): JurisdictionConfig;
+}
 
 export type Libre311ServiceProps = {
 	baseURL: string;
-	jurisdictionId: JurisdictionId;
 };
 
 const ROUTES = {
+	getJurisdictionConfig: '/config',
 	getServiceList: (params: HasJurisdictionId) =>
 		`/services?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getJurisdictionConfig(): Promise<JurisdictionConfig> {
+	const res = await axios.get<unknown>(ROUTES.getJurisdictionConfig);
+	return JurisdictionConfigSchema.parse(res.data);
+}
+
 export class Libre311ServiceImpl implements Libre311Service {
 	private axiosInstance: AxiosInstance;
 	private jurisdictionId: JurisdictionId;
+	private jurisdictionConfig: JurisdictionConfig;
 
-	constructor(props: Libre311ServiceProps) {
+	private constructor(props: Libre311ServiceProps & { jurisdictionConfig: JurisdictionConfig }) {
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
-		this.jurisdictionId = props.jurisdictionId;
+		this.jurisdictionConfig = props.jurisdictionConfig;
+		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
 	}
+
+	public static async create(props: Libre311ServiceProps) {
+		// todo uncomment when /config endpoint exists code the jurisdiction_id
+		// const jurisdictionConfig = await getJurisdictionConfig();
+		const jurisdictionConfig = { jurisdiction_id: 'town.gov' };
+		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
+	}
+
+	getJurisdictionConfig(): JurisdictionConfig {
+		return this.jurisdictionConfig;
+	}
+
 	async getServiceList(): Promise<GetServiceListResponse> {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getServiceList({ jurisdiction_id: this.jurisdictionId })
 		);
 		return GetServiceListResponseSchema.parse(res.data);
 	}
+
 	async getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition> {
 		const res = await axios.get<unknown>(
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
 		return ServiceDefinitionSchema.parse(res.data);
 	}
+
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
 		console.log(params);
 		throw Error('Not Implemented');
 	}
+
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse> {
 		console.log(params);
 		throw Error('Not Implemented');
 	}
+
 	async getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest> {
 		console.log(params);
 		throw Error('Not Implemented');

@@ -1,26 +1,18 @@
-import {
-	Libre311ServiceImpl,
-	type Libre311Service,
-	type Libre311ServiceProps
-} from '$lib/services/Libre311/Libre311';
+import { type Libre311Service } from '$lib/services/Libre311/Libre311';
 import { getContext, setContext } from 'svelte';
 
 const libre311CtxKey = Symbol();
 
-type Libre311Context = {
+export type Libre311Context = {
 	service: Libre311Service;
 };
 
-export type Libre311ContextProps = {
-	service: Libre311ServiceProps;
+export type Libre311ContextProviderProps = {
+	service: Libre311Service;
 };
 
-export function createLibre311Context(params: Libre311ContextProps) {
-	const service = new Libre311ServiceImpl(params.service);
-	const libre311Context: Libre311Context = {
-		service
-	};
-	setContext(libre311CtxKey, libre311Context);
+export async function createLibre311Context(ctx: Libre311Context) {
+	setContext(libre311CtxKey, ctx);
 }
 
 export function useLibre311Service(): Libre311Service {
