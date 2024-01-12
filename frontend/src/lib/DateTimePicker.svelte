@@ -16,7 +16,6 @@
   import { onMount, onDestroy, createEventDispatcher } from "svelte";
   import "flatpickr/dist/flatpickr.min.css";
   import flatpickr from "flatpickr";
-  import issueTime from "../stores/issueTime"
   import resetDate from "../stores/resetDate";
   import messages from "$media/messages.json";
   import expandSVG from "../icons/expand.svg";
@@ -24,9 +23,7 @@
   const dispatch = createEventDispatcher();
 
   let picker;
-  // let dateTimeInput;
   let ref;
-  let value;
 
   $: if ($resetDate) {
     ref.value = "";
@@ -43,7 +40,6 @@
         dispatch("dateSelected", dateStr);
       },
     });
-
     resetDate.set(false);
   }
 

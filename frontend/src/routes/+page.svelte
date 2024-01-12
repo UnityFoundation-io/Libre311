@@ -17,7 +17,6 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
-
   import { browser } from "$app/environment";
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
@@ -120,7 +119,6 @@
   const minAddressCharacters = 15;
   const debounceTime = 1000;
 
-
   // Page Height
   let pageHeight = 1650;
 
@@ -222,8 +220,6 @@
         populateIssueTypeSelectDropdown();
     }, 200);
 
-  // $: console.log(issueTypeSelectSelector)
-
   let zoom = 15;
   let markers = [];
   let heatmapData = [];
@@ -237,8 +233,6 @@
   let filterStartDate = "",
     filterEndDate = "";
 
-  let issueDateTime = ""
-
   // Image Safe Search
   let selectedFile = null,
     selectedFileSrc = null,
@@ -247,16 +241,12 @@
     messageRejectedTwo = "",
     mediaUrl;
 
-    $: console.log(filteredIssuesData);
-
   // Locks the background scroll when modal is open
   $: if (browser && showModal) {
     document.body.classList.add("modal-open");
   } else if (browser && !showModal) {
     document.body.classList.remove("modal-open");
   }
-
-
 
   const getOrientation = () => {
     let previousState;
@@ -370,7 +360,6 @@
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
-
     scrollToIssue(service_request_id);
   };
 
@@ -574,7 +563,6 @@
       }
 
       if (attribute.datatype === "singlevaluelist") {
-        // const singleSelectOptions = attribute.values.map(value => {
         attribute.singleSelectOptions = attribute.values.map(value => {
           return {
             label: value.name,
@@ -773,7 +761,6 @@
             anchor: new google.maps.Point(12, 12),
           },
         });
-
         markers.push(marker);
       }
     }
@@ -862,7 +849,6 @@
         map.removeLayer(heatmap);
         heatmapData = [];
       }
-      
     }
   };
 
@@ -1127,7 +1113,6 @@
           markers.push(marker);
         }
         
-
         if (provider === "googleMaps") {
           google.maps.event.addListener(marker, "click", function () {
             // Marker being deselected
@@ -1412,7 +1397,6 @@
       }
     }
   };
-
 
   const loadColorPalette = () => {
     const colorStyle = document.createElement("style");
@@ -1987,7 +1971,6 @@
         })
       }
     }
-    
   };
 
   const deselectIssue = (issue) => {
@@ -2003,7 +1986,6 @@
     adjustFooter();
     showFooter = true;
     
-
     findReportedIssue = false;
     showFilters = false;
 
@@ -2065,8 +2047,6 @@
         // font failed to load.
         applyFontStretch();
       });
-
-    
 
     await getAllServiceCodes();
 
@@ -2231,7 +2211,6 @@
                 inputIssueAddressSelector.value = '';
               }
               
-
               if (!findReportedIssue) {
                 showFooter = false;
                 findReportedIssue = true;
@@ -2471,26 +2450,6 @@
               </div>
             {/if}
 
-            <!-- {#each $issueDetailList as detail}
-              {#if detail.datatype === "string" || detail.datatype === "text"}
-                <div class="step-two-feature-type-helper">
-                  {detail.description}
-                </div>
-                <input class="step-two-attribute-text-input" />
-              {/if}
-
-              {#if detail.datatype === "number"}
-                <div class="step-two-feature-type-helper">
-                  {detail.description}
-                </div>
-                <input
-                  class="step-two-attribute-text-input"
-                  type="number"
-                />
-              {/if}
-
-            {/each} -->
-
             {#if $issueDetailList && $issueType.name !== "Other"}
               {#each $issueAttributes as issueAttribute}
                 {#if issueAttribute.datatype === "datetime"}
@@ -2705,9 +2664,7 @@
                   'issueDetail',
                   JSON.stringify($issueDetail)
                 );
-
                 $issueDetails.push($issueDetail)
-                
               }
 
               if ($stringAttribute) {
@@ -2741,19 +2698,14 @@
                   'issueDateTime',
                   JSON.stringify($dateTimeAttribute)
                 )
-
                 $issueDetails.push($dateTimeAttribute)
               }
-                
 
               if ($textAttribute) {
-
-              
                 localStorage.setItem(
                   'issueText',
                   JSON.stringify($textAttribute)
                 )
-
                 $issueDetails.push($textAttribute)
               }
 
@@ -3447,7 +3399,6 @@
         <!-- START Find Reported Issue -->
 
         {#if showModal}
-          {console.log(selectedIssue)}
           <Modal
             title="Issue Details"
             color="{primaryOne}"
