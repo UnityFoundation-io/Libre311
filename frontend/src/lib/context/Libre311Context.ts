@@ -11,8 +11,9 @@ export type Libre311ContextProviderProps = {
 	service: Libre311Service;
 };
 
-export async function createLibre311Context(ctx: Libre311Context) {
+export function createLibre311Context(ctx: Libre311Context) {
 	setContext(libre311CtxKey, ctx);
+	return ctx;
 }
 
 export function useLibre311Service(): Libre311Service {

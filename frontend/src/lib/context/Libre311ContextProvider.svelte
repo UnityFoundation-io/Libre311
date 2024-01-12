@@ -2,7 +2,7 @@
 	import { createLibre311Context, type Libre311ContextProviderProps } from './Libre311Context';
 	export let props: Libre311ContextProviderProps;
 
-	createLibre311Context(props);
+	const libre311Context = createLibre311Context(props);
 </script>
 
-<slot />
+<slot {libre311Context} />
