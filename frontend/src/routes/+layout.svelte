@@ -36,7 +36,8 @@
 		<header>
 			<h1>Fayetteville, AR</h1>
 			<div class="controls">
-				<Funnel />
+				<!-- todo move inside of map -->
+				<!-- <Funnel /> -->
 				<Bars3 />
 			</div>
 		</header>
