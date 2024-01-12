@@ -21,14 +21,16 @@ const HasServiceCodeSchema = z.object({
 type HasServiceCode = z.infer<typeof HasServiceCodeSchema>;
 type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
-export const ServiceSchema = HasServiceCodeSchema.extend({
-	service_name: z.string(),
-	description: z.string(),
-	metadata: z.boolean(),
-	type: ServiceTypeSchema
-	// keywords: z.array(z.string()),
-	// group: z.string()
-});
+export const ServiceSchema = z
+	.object({
+		service_name: z.string(),
+		description: z.string(),
+		metadata: z.boolean(),
+		type: ServiceTypeSchema
+		// keywords: z.array(z.string()),
+		// group: z.string()
+	})
+	.merge(HasServiceCodeSchema);
 
 export type Service = z.infer<typeof ServiceSchema>;
 
@@ -110,10 +112,12 @@ const HasServiceRequestIdSchema = z.object({
 export type HasServiceRequestId = z.infer<typeof HasServiceRequestIdSchema>;
 export type ServiceRequestId = HasServiceRequestId['service_request_id'];
 
-export const CreateServiceRequestResponseSchema = HasServiceRequestIdSchema.extend({
-	service_notice: z.string().nullish(),
-	account_id: z.number().nullish()
-});
+export const CreateServiceRequestResponseSchema = z
+	.object({
+		service_notice: z.string().nullish(),
+		account_id: z.number().nullish()
+	})
+	.merge(HasServiceRequestIdSchema);
 
 export type CreateServiceRequestResponse = z.infer<typeof CreateServiceRequestResponseSchema>;
 
@@ -126,15 +130,14 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
 // todo revisit params, they list a ton of optional that we may want to require
 // todo will likely need the recaptcha value here
-export type CreateServiceRequestParams = HasJurisdictionId &
-	HasServiceCode & {
-		lat: string;
-		lng: string;
-		address_string: string;
-		attributes: AttributeResponse[];
-		description: string;
-		media_url?: string;
-	};
+export type CreateServiceRequestParams = HasServiceCode & {
+	lat: string;
+	lng: string;
+	address_string: string;
+	attributes: AttributeResponse[];
+	description: string;
+	media_url?: string;
+};
 
 export const OpenServiceRequestStatusSchema = z.literal('Open');
 export const ClosedServiceRequestStatusSchema = z.literal('Closed');
@@ -144,32 +147,32 @@ export const ServiceRequestStatusSchema = z.union([
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusSchema>;
 
-export const ServiceRequestSchema = HasServiceRequestIdSchema.extend({
-	HasServiceCodeSchema
-}).extend({
-	status: ServiceRequestStatusSchema,
-	status_notes: z.string().nullish(),
-	service_name: z.string(),
-	description: z.string().nullish(), // this seems like it should be required as a bareminimum
-	agency_responsible: z.string().nullish(), // SeeClickFix guarentees this as known at time of creation
-	service_notice: z.string().nullish(),
-	requested_datetime: z.string(),
-	updated_datetime: z.string(),
-	expected_datetime: z.string().nullish(),
-	address: z.string(),
-	address_id: z.number().nullish(),
-	zipcode: z.string(),
-	lat: z.string(),
-	long: z.string(),
-	media_url: z.string().nullish()
-});
+export const ServiceRequestSchema = z
+	.object({
+		status: ServiceRequestStatusSchema,
+		status_notes: z.string().nullish(),
+		service_name: z.string(),
+		description: z.string().nullish(), // this seems like it should be required as a bareminimum
+		agency_responsible: z.string().nullish(), // SeeClickFix guarantees this as known at time of creation
+		service_notice: z.string().nullish(),
+		requested_datetime: z.string(),
+		updated_datetime: z.string(),
+		expected_datetime: z.string().nullish(),
+		address: z.string(),
+		address_id: z.number().nullish(),
+		zipcode: z.string(),
+		lat: z.string(),
+		long: z.string(),
+		media_url: z.string().nullish()
+	})
+	.merge(HasServiceRequestIdSchema)
+	.merge(HasServiceCodeSchema);
 
 export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
 
-// service_request_id array or query params
 // todo add pagination params
 type GetServiceRequestsParams =
 	| ServiceRequestId[]
@@ -186,13 +189,13 @@ export interface Open311Service {
 	// https://wiki.open311.org/GeoReport_v2/#get-service-list
 	getServiceList(): Promise<GetServiceListResponse>;
 	// https://wiki.open311.org/GeoReport_v2/#get-service-definition
-	getServiceDefinition(params: HasJurisdictionId & HasServiceCode): Promise<ServiceDefinition>;
+	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	// https://wiki.open311.org/GeoReport_v2/#post-service-request
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	// https://wiki.open311.org/GeoReport_v2/#get-service-requests
 	getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse>;
 	// https://wiki.open311.org/GeoReport_v2/#get-service-request
-	getServiceRequest(params: HasJurisdictionId & HasServiceRequestId): Promise<ServiceRequest>;
+	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
 export interface Libre311Service extends Open311Service {}
@@ -202,44 +205,45 @@ export type Libre311ServiceProps = {
 	jurisdictionId: JurisdictionId;
 };
 
-// until we have good test data, don't pass the jurisdiction_id
 const ROUTES = {
-	getServiceList: () => '/services', // todo ?jurisdiction_id={}
+	getServiceList: (params: HasJurisdictionId) =>
+		`/services?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
-		`/services/${params.service_code}` // todo ?jurisdiction_id={}
+		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export class Libre311ServiceImpl implements Libre311Service {
 	private axiosInstance: AxiosInstance;
 	private jurisdictionId: JurisdictionId;
-	constructor(props: Libre311ServiceProps) {
-		console.log({ props });
-		this.axiosInstance = axios.create({ baseURL: props.baseURL });
 
+	constructor(props: Libre311ServiceProps) {
+		this.axiosInstance = axios.create({ baseURL: props.baseURL });
 		this.jurisdictionId = props.jurisdictionId;
 	}
 	async getServiceList(): Promise<GetServiceListResponse> {
-		// todo pass params to routes once we are using jurisdiction_id
-		const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceList());
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getServiceList({ jurisdiction_id: this.jurisdictionId })
+		);
 		return GetServiceListResponseSchema.parse(res.data);
 	}
-	async getServiceDefinition(
-		params: HasJurisdictionId & HasServiceCode
-	): Promise<ServiceDefinition> {
-		const res = await axios.get<unknown>(ROUTES.getServiceDefinition(params));
+	async getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition> {
+		const res = await axios.get<unknown>(
+			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
+		);
 		return ServiceDefinitionSchema.parse(res.data);
 	}
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
+		console.log(params);
 		throw Error('Not Implemented');
 	}
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse> {
+		console.log(params);
 		throw Error('Not Implemented');
 	}
-	async getServiceRequest(
-		params: HasJurisdictionId & HasServiceRequestId
-	): Promise<ServiceRequest> {
+	async getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest> {
+		console.log(params);
 		throw Error('Not Implemented');
 	}
 }

@@ -7,7 +7,6 @@ import { getContext, setContext } from 'svelte';
 
 const libre311CtxKey = Symbol();
 
-//  todo hydration data here (Name of tenant)
 type Libre311Context = {
 	service: Libre311Service;
 };
