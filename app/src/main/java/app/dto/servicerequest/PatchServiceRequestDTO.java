@@ -31,8 +31,7 @@ import java.util.Map;
 @Introspected
 public class PatchServiceRequestDTO {
 
-    @Nullable
-    @QueryValue(value = "jurisdiction_id")
+    @JsonProperty("jurisdiction_id")
     private String jurisdictionId;
 
     private ServiceRequestStatus status;
@@ -64,12 +63,11 @@ public class PatchServiceRequestDTO {
 
     public PatchServiceRequestDTO() {}
 
-    @Nullable
     public String getJurisdictionId() {
         return jurisdictionId;
     }
 
-    public void setJurisdictionId(@Nullable String jurisdictionId) {
+    public void setJurisdictionId(String jurisdictionId) {
         this.jurisdictionId = jurisdictionId;
     }
 
