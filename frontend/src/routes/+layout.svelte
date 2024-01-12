@@ -4,7 +4,7 @@
 	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
 	import '../app.pcss';
-	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+
 	import {
 		asAsyncFailure,
 		asAsyncSuccess,
@@ -14,7 +14,7 @@
 	import { Libre311ServiceImpl, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
 
 	const libre311ServiceProps: Libre311ServiceProps = {
-		baseURL: PUBLIC_BACKEND_URL
+		baseURL: import.meta.env.VITE_BACKEND_URL
 	};
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
