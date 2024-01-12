@@ -15,9 +15,15 @@
 package app;
 
 import app.dto.discovery.DiscoveryDTO;
+import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
+import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.*;
 import app.model.service.ServiceRepository;
+import app.model.service.servicedefinition.AttributeDataType;
+import app.model.service.servicedefinition.AttributeValue;
+import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
@@ -25,6 +31,7 @@ import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockReCaptchaService;
 import app.util.MockSecurityService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -48,6 +55,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -266,9 +274,208 @@ public class RootControllerTest {
         assertEquals(1, serviceRequestDTOS.length);
     }
 
+    // create service
+    @Test
+    public void canCreateServiceIfAuthenticated() throws JsonProcessingException {
+        HttpResponse<?> response;
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            createService("BIKELN007", "Bike Lane Obstruction");
+        });
+        assertEquals(UNAUTHORIZED, exception.getStatus());
+
+        login();
+
+        // success, bare minimum
+        response = createService("BIKELN007", "Bike Lane Obstruction");
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<ServiceDTO[]> optional = response.getBody(ServiceDTO[].class);
+        assertTrue(optional.isPresent());
+        ServiceDTO[] postResponseServiceDTOS = optional.get();
+        assertTrue(postResponseServiceDTOS.length > 0);
+
+        // success, all provided
+        ServiceDefinition serviceDefinition = new ServiceDefinition();
+        serviceDefinition.setServiceCode("BUS_STOP");
+        serviceDefinition.setAttributes(List.of(
+                new ServiceDefinitionAttribute(
+                        "ISSUE_NEAR",
+                        true,
+                        AttributeDataType.STRING,
+                        false,
+                        "Bus Stop Near",
+                        1,
+                        "(Optional) If the issue is near anything, please describe here.",
+                        null
+                ),
+                new ServiceDefinitionAttribute(
+                        "ISSUE_SELECT",
+                        true,
+                        AttributeDataType.MULTIVALUELIST,
+                        true,
+                        "Bus Stop Issues",
+                        2,
+                        "(Optional) If the issue is near anything, please describe here.",
+                        List.of(
+                                new AttributeValue("UNSAFE", "Unsafe location"),
+                                new AttributeValue("NO_SDLWLK", "No Sidewalk present"),
+                                new AttributeValue("MISSING_SIGN", "Sign is missing")
+                        )
+                )
+        ));
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(serviceDefinition);
+        response = createService("BUS_STOP", "Bike Lane Obstruction", "Bike Lane", json);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        optional = response.getBody(ServiceDTO[].class);
+        assertTrue(optional.isPresent());
+        postResponseServiceDTOS = optional.get();
+        assertTrue(postResponseServiceDTOS.length > 0);
+        ServiceDTO serviceDTO = postResponseServiceDTOS[0];
+
+        // get service definition
+        response = client.toBlocking().exchange("/services/"+serviceDTO.getServiceCode(), String.class);
+        assertEquals(HttpStatus.OK, response.status());
+        Optional<String> serviceDefinitionOptional = response.getBody(String.class);
+        assertTrue(serviceDefinitionOptional.isPresent());
+        String serviceDefinitionResponse = serviceDefinitionOptional.get();
+        assertTrue(StringUtils.hasText(serviceDefinitionResponse));
+        ServiceDefinition serviceDefinitionObject = (new ObjectMapper()).readValue(serviceDefinitionResponse, ServiceDefinition.class);
+        assertNotNull(serviceDefinitionObject.getServiceCode());
+        assertNotNull(serviceDefinitionObject.getAttributes());
+        assertFalse(serviceDefinitionObject.getAttributes().isEmpty());
+        assertTrue(serviceDefinitionObject.getAttributes().stream()
+                .anyMatch(serviceDefinitionAttribute ->
+                        serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT") &&
+                                serviceDefinitionAttribute.getValues() != null &&
+                                !serviceDefinitionAttribute.getValues().isEmpty())
+        );
+
+        // fail, code not provided
+        exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            createService(null, "Road Issues");
+        });
+        assertEquals(BAD_REQUEST, exception.getStatus());
+
+        // fail, name not provided
+        exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            createService("ROAD", null);
+        });
+        assertEquals(BAD_REQUEST, exception.getStatus());
+    }
+
+    // update service
+    @Test
+    public void canUpdateServiceIfAuthenticated() throws JsonProcessingException {
+        HttpResponse<?> response;
+        HttpRequest<?> request;
+
+        login();
+
+        // create
+        ServiceDefinition serviceDefinition = new ServiceDefinition();
+        serviceDefinition.setServiceCode("BUS_STOP_UPDATE");
+        serviceDefinition.setAttributes(List.of(
+                new ServiceDefinitionAttribute(
+                        "ISSUE_NEAR",
+                        true,
+                        AttributeDataType.STRING,
+                        false,
+                        "Bus Stop Near",
+                        1,
+                        "(Optional) If the issue is near anything, please describe here.",
+                        null
+                ),
+                new ServiceDefinitionAttribute(
+                        "ISSUE_SELECT",
+                        true,
+                        AttributeDataType.MULTIVALUELIST,
+                        true,
+                        "Bus Stop Issues",
+                        2,
+                        "(Optional) If the issue is near anything, please describe here.",
+                        List.of(
+                                new AttributeValue("UNSAFE", "Unsafe location"),
+                                new AttributeValue("NO_SDLWLK", "No Sidewalk present"),
+                                new AttributeValue("MISSING_SIGN", "Sign is missing")
+                        )
+                )
+        ));
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(serviceDefinition);
+        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "Issues pertaining to bus stops", json);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<ServiceDTO[]> optional = response.getBody(ServiceDTO[].class);
+        assertTrue(optional.isPresent());
+        ServiceDTO[] postResponseServiceDTOS = optional.get();
+        assertTrue(postResponseServiceDTOS.length > 0);
+        ServiceDTO serviceDTO = postResponseServiceDTOS[0];
+
+        // update all
+        UpdateServiceDTO updateServiceDTO = new UpdateServiceDTO();
+        updateServiceDTO.setServiceCode("INNER_CITY_BUS_STOPS");
+        updateServiceDTO.setServiceName("Inner City Bust Stops");
+        updateServiceDTO.setDescription("Issues pertaining to inner city bus stops.");
+
+        ServiceDefinition serviceDefinitionUpdate = new ServiceDefinition();
+        serviceDefinitionUpdate.setServiceCode("INNER_CITY_BUS_STOPS");
+        serviceDefinitionUpdate.setAttributes(List.of(
+                new ServiceDefinitionAttribute(
+                        "ISSUE_SELECT",
+                        true,
+                        AttributeDataType.MULTIVALUELIST,
+                        true,
+                        "Bus Stop Issues",
+                        2,
+                        "(Optional) If the issue is near anything, please describe here.",
+                        List.of(
+                                new AttributeValue("UNSAFE", "Unsafe location"),
+                                new AttributeValue("NO_SDLWLK", "No Sidewalk present"),
+                                new AttributeValue("MISSING_SIGN", "Sign is missing")
+                        )
+                )
+        ));
+        json = mapper.writeValueAsString(serviceDefinitionUpdate);
+        updateServiceDTO.setServiceDefinitionJson(json);
+
+        Map payload = mapper.convertValue(updateServiceDTO, Map.class);
+        request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId(), payload)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+        response = client.toBlocking().exchange(request, ServiceDTO[].class);
+        assertEquals(OK, response.getStatus());
+
+        // verify all
+        Optional<ServiceDTO[]> body = response.getBody(ServiceDTO[].class);
+        assertTrue(body.isPresent());
+        ServiceDTO serviceDTO1 = body.get()[0];
+        assertEquals("INNER_CITY_BUS_STOPS", serviceDTO1.getServiceCode());
+        assertEquals("Inner City Bust Stops", serviceDTO1.getServiceName());
+        assertEquals("Issues pertaining to inner city bus stops.", serviceDTO1.getDescription());
+
+//        // get service definition
+        response = client.toBlocking().exchange("/services/"+serviceDTO1.getServiceCode(), String.class);
+        assertEquals(HttpStatus.OK, response.status());
+        Optional<String> serviceDefinitionOptional = response.getBody(String.class);
+        assertTrue(serviceDefinitionOptional.isPresent());
+        String serviceDefinitionResponse = serviceDefinitionOptional.get();
+        assertTrue(StringUtils.hasText(serviceDefinitionResponse));
+        ServiceDefinition serviceDefinitionObject = (new ObjectMapper()).readValue(serviceDefinitionResponse, ServiceDefinition.class);
+        assertNotNull(serviceDefinitionObject.getServiceCode());
+        assertEquals("INNER_CITY_BUS_STOPS", serviceDefinitionObject.getServiceCode());
+        assertNotNull(serviceDefinitionObject.getAttributes());
+        assertFalse(serviceDefinitionObject.getAttributes().isEmpty());
+        assertEquals(1, serviceDefinitionObject.getAttributes().size());
+        assertTrue(serviceDefinitionObject.getAttributes().stream()
+                .anyMatch(serviceDefinitionAttribute ->
+                        serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT") &&
+                                serviceDefinitionAttribute.getValues() != null &&
+                                !serviceDefinitionAttribute.getValues().isEmpty())
+        );
+    }
+
     // update
     @Test
-    public void canUpdateIfAuthenticated() {
+    public void canUpdateServiceRequestIfAuthenticated() {
         HttpResponse<?> response;
 
         response = createServiceRequest("001", "12345 Fairway",
@@ -340,7 +547,7 @@ public class RootControllerTest {
 
     // read
     @Test
-    public void canReadSensitiveInfoIfAuthenticated() {
+    public void canReadServiceRequestSensitiveInfoIfAuthenticated() {
         HttpResponse<?> response;
 
         response = createServiceRequest("001", "12345 Fairway",
@@ -477,6 +684,23 @@ public class RootControllerTest {
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private HttpResponse<?> createService(String code, String name) {
+        return createService(code, name, null, null);
+    }
+
+    private HttpResponse<?> createService(String code, String name, String description, String serviceDefinitionJson) {
+        CreateServiceDTO serviceDTO = new CreateServiceDTO();
+        serviceDTO.setServiceCode(code);
+        serviceDTO.setServiceName(name);
+        serviceDTO.setDescription(description);
+        serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map payload = objectMapper.convertValue(serviceDTO, Map.class);
+        HttpRequest<?> request = HttpRequest.POST("/admin/services", payload)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+        return client.toBlocking().exchange(request, ServiceDTO[].class);
     }
 
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes) {

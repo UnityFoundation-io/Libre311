@@ -31,8 +31,12 @@ public class JurisdictionService {
         this.jurisdictionRepository = jurisdictionRepository;
     }
 
+    public boolean jurisdictionSupportEnabled() {
+        return jurisdictionRepository.count() > 0;
+    }
+
     public List<Map> validateJurisdictionSupport(String jurisdictionId) {
-        if (jurisdictionRepository.count() == 0) {
+        if (!jurisdictionSupportEnabled()) {
             return List.of();
         }
 

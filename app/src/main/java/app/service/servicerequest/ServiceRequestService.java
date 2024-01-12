@@ -96,7 +96,13 @@ public class ServiceRequestService {
             return null;
         }
 
-        Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
+        Optional<Service> serviceByServiceCodeOptional;
+        if (serviceRequestDTO.getJurisdictionId() == null) {
+            serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
+        } else {
+            serviceByServiceCodeOptional = serviceRepository.findByServiceCodeAndJurisdictionId(
+                    serviceRequestDTO.getServiceCode(), serviceRequestDTO.getJurisdictionId());
+        }
 
         if (serviceByServiceCodeOptional.isEmpty()) {
             LOG.error("Corresponding service not found.");

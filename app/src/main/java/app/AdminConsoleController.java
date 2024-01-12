@@ -14,9 +14,13 @@
 
 package app;
 
+import app.dto.service.CreateServiceDTO;
+import app.dto.service.ServiceDTO;
+import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.service.jurisdiction.JurisdictionService;
+import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.MediaType;
@@ -34,12 +38,40 @@ import java.util.Map;
 @Secured(SecurityRule.IS_AUTHENTICATED)
 public class AdminConsoleController {
 
+    private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
     private final JurisdictionService jurisdictionService;
 
-    public AdminConsoleController(ServiceRequestService serviceRequestService, JurisdictionService jurisdictionService) {
+    public AdminConsoleController(ServiceService serviceService, ServiceRequestService serviceRequestService, JurisdictionService jurisdictionService) {
+        this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
         this.jurisdictionService = jurisdictionService;
+    }
+
+    @Post(uris = {"/services", "/services.json"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ExecuteOn(TaskExecutors.IO)
+    public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO) {
+        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
+        if (!errors.isEmpty()) {
+            return null;
+        }
+
+        return List.of(serviceService.createService(requestDTO));
+    }
+
+    @Patch(uris = {"/services/{serviceId}", "/requests/{serviceId}.json"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ExecuteOn(TaskExecutors.IO)
+    public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO) {
+        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
+        if (!errors.isEmpty()) {
+            return null;
+        }
+
+        return List.of(serviceService.updateService(serviceId, requestDTO));
     }
 
     @Get(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
