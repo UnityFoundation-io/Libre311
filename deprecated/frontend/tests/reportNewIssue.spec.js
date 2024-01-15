@@ -20,7 +20,7 @@ test("report new issue with image", async ({ page }) => {
   const issuesButton = await page.waitForSelector("#button-report-issue");
   await issuesButton.click();
 
-  const locationInputLocator = await page.getByPlaceholder("Enter the address");
+  const locationInputLocator = await page.getByPlaceholder("Enter address");
   await locationInputLocator.click();
   await locationInputLocator.fill(
     "12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA"
@@ -31,10 +31,10 @@ test("report new issue with image", async ({ page }) => {
 
   // Enter issue details
   await expect(page.getByRole("combobox")).toBeVisible();
-  await page.getByRole("combobox").selectOption("001");
-  await page.getByPlaceholder("Issue Details").click();
-  await page.getByText("Cracked").click();
-  await page.getByText("Too narrow").click();
+  await page.getByRole("combobox").selectOption("002");
+  await page.getByPlaceholder("Bus Stop Issues").click();
+  await page.getByText("Unsafe location").click();
+  await page.getByText("No sidewalk").click();
   await page.locator("#issue-details").press("Tab");
   await page.getByPlaceholder("Additional Description Details").click();
   await page
@@ -66,12 +66,12 @@ test("report new issue with image", async ({ page }) => {
   // Review information
   await expect(
     page.getByText(
-      "Issue Location: 12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA"
+      "Issue Location: 12140, Woodcrest Executive Drive, Creve Coeur, Saint Louis County, Missouri, 63141, United States"
     )
   ).toBeVisible();
-  await expect(page.getByText("Issue Type: Sidewalk")).toBeVisible();
+  await expect(page.getByText("Issue Type: Bus Stop")).toBeVisible();
   await expect(
-    page.getByText("Issue Details: 1-Cracked2-Too narrow")
+    page.getByText("Issue Details: 1-Unsafe location2-No sidewalk")
   ).toBeVisible();
   // await expect(page.getByRole('img', { name: 'uploaded image' })).toBeVisible();
   await expect(
@@ -97,14 +97,13 @@ test("report new issue with other issue type", async ({ page }) => {
   await issuesButton.click();
 
   // Enter issue location
-  await page.getByPlaceholder("Enter the address").click();
-  await page
-    .getByPlaceholder("Enter the address")
-    .fill("12140 Woodcrest Executive Drive");
-  await page.getByPlaceholder("Enter the address").press("Enter");
-  await expect(
-    page.getByText("12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA")
-  ).toBeVisible();
+  const locationInputLocator = await page.getByPlaceholder("Enter address");
+  await locationInputLocator.click();
+  await locationInputLocator.fill(
+    "12140 Woodcrest Executive Dr, Creve Coeur, MO 63141, USA"
+  );
+  await locationInputLocator.press("Enter");
+
   await page.getByRole("button", { name: "Next" }).click();
 
   // Issue type "other" selected

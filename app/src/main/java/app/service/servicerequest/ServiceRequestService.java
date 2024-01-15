@@ -227,6 +227,7 @@ public class ServiceRequestService {
                     sda.setAttributeOrder(serviceDefinitionAttribute.getAttributeOrder());
                     sda.setRequired(serviceDefinitionAttribute.isRequired());
                     sda.setVariable(serviceDefinitionAttribute.isVariable());
+                    sda.setDatatype(serviceDefinitionAttribute.getDatatype());
 
                     List<AttributeValue> values = new ArrayList<>();
 
@@ -249,6 +250,7 @@ public class ServiceRequestService {
                         values.add(new AttributeValue(attributeCode, (String) v));
                     }
 
+                    sda.setValues(values);
                     attributes.add(sda);
                 }
             });

@@ -20,6 +20,7 @@ import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
 import app.dto.servicerequest.ServiceRequestDTO;
 import app.model.service.ServiceRepository;
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
@@ -152,6 +153,9 @@ public class RootControllerTest {
 
         ServiceRequestDTO serviceRequestDTO = serviceRequestDTOS[0];
         assertFalse(serviceRequestDTO.getSelectedValues().isEmpty());
+        ServiceDefinitionAttribute serviceDefinitionAttribute = serviceRequestDTO.getSelectedValues().get(0);
+        assertNotNull(serviceDefinitionAttribute.getValues());
+        assertFalse(serviceDefinitionAttribute.getValues().isEmpty());
     }
 
     @Test
