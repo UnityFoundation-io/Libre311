@@ -109,14 +109,6 @@ public class ServiceRequest {
     private String zipCode;
 
     @Nullable
-    @Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")
-    private String agencyEmail;
-
-    @Nullable
-    @Enumerated(EnumType.STRING)
-    private ServiceRequestPriority priority;
-
-    @Nullable
     private Instant expectedDate;
 
     @Nullable
@@ -344,26 +336,5 @@ public class ServiceRequest {
 
     public void setClosedDate(@Nullable Instant closedDate) {
         this.closedDate = closedDate;
-    }
-
-    public void setExpectedDate(@Nullable Instant expectedDate) {
-        this.expectedDate = expectedDate;
-    }
-
-    @Nullable
-    public String getAgencyEmail() {
-        return agencyEmail;
-    }
-
-    public void setAgencyEmail(@Nullable String agencyEmail) {
-        this.agencyEmail = agencyEmail;
-    }
-
-    public ServiceRequestPriority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(ServiceRequestPriority priority) {
-        this.priority = priority;
     }
 }
