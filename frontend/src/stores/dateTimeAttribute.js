@@ -1,3 +1,4 @@
+
 // Copyright 2023 Libre311 Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.servicerequest;
+import { writable } from 'svelte/store';
 
-import com.fasterxml.jackson.annotation.JsonValue;
+const dateTimeAttribute = writable(null);
 
-public enum ServiceRequestStatus {
-    OPEN, CLOSED;
-
-    @Override
-    @JsonValue
-    public String toString() {
-        return name().toLowerCase();
-    }
-}
+export default dateTimeAttribute;

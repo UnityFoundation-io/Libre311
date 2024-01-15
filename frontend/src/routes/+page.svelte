@@ -17,16 +17,15 @@
   import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { inview } from "svelte-inview";
-
   import { browser } from "$app/environment";
-  import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
 
-  import messages from "$media/messages.json";
+  import messages from "$media/messages.json"
   import FontFaceObserver from "fontfaceobserver";
   import axios from "axios";
   import MultiSelect from "svelte-multiselect";
-  import logo from "$media/logo.webp";
+  import logo from "$media/logo.webp"
   import addSVG from "../icons/add.svg";
   import closeSVG from "../icons/close.svg";
   import searchSVG from "../icons/search.svg";
@@ -63,21 +62,32 @@
   } from "../stores/pagination";
   import footerSelector from "../stores/footerSelector";
   import DateRangePicker from "$lib/DateRangePicker.svelte";
+  import DateTimePicker from "$lib/DateTimePicker.svelte";
   import Modal from "$lib/Modal.svelte";
   import Footer from "$lib/Footer.svelte";
   import Recaptcha from "$lib/Recaptcha.svelte";
 
+  // Issue Attribute Stores
+  import dateTimeAttribute from "../stores/dateTimeAttribute";
+  import issueAttributes from "../stores/issueAttributes";
+  import issueDescriptionAttribute from "../stores/issueDescriptionAttribute";
+  import issueDetails from "../stores/issueDetails"
+  import multiSelectAttribute from "../stores/multiSelectAttribute";
+  import numberAttribute from "../stores/numberAttribute";
+  import otherDescription from "../stores/otherDescription";
+  import singleSelectAttribute from "../stores/singleSelectAttribute";
+  import stringAttribute from "../stores/stringAttribute";
+  import textAttribute from "../stores/textAttribute";
+
+  // Styling
   import colors from "$lib/colors.json";
   import "$lib/global.css";
   import "$lib/spinner.css";
 
+  // Toggle map provider here
   import mapProvider from "$lib/mapProvider.json";
-  import Button from "../lib/Button.svelte";
 
-  import IconButton from "../lib/IconButton.svelte";
-  import IconLink from "../lib/IconLink.svelte";
-
-  const provider = mapProvider["provider"];
+  const provider = mapProvider["provider"]
 
   // Configure the backend path
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -144,6 +154,7 @@
     postingError = false,
     issuesRefs = {},
     multiSelectOptions = [],
+    singleSelectOptions = [],
     invalidOtherDescription = {
       message: messages["report.issue"]["textarea.description.error"],
       visible: false,
@@ -162,13 +173,12 @@
 
   let offlineAddressRegex = /^[a-zA-Z&\-'’,. ]+|[0-9]+[a-zA-Z0-9&\-'’,. ]+$/gm;
 
-  let submitterNameRegex =
-    /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
+  let submitterNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
 
   let emailRegex =
     /^([a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/gm;
 
-  let hasFailed = $page.url.searchParams.has("login-failed");
+  let hasFailed = $page.url.searchParams.has('login-failed');
 
   let map,
     heatmap,
@@ -190,12 +200,19 @@
     findIssuesButtonSelector,
     reportIssuesButtonSelector,
     selected,
+    singleSelected,
     isOnline,
     wasOnline,
     imageData,
     timeoutId;
 
   let markerGroup;
+
+  let userNumber,
+    userString,
+    userText
+
+  $: console.log(selectedIssue)
 
   $: if (issueTypeSelectSelector !== undefined)
     setTimeout(() => {
@@ -309,12 +326,29 @@
 
   const clearLocalStorage = (bypassClearForm = false) => {
     localStorage.removeItem("completed");
-    localStorage.removeItem("issueTypeId");
     localStorage.removeItem("issueAddress");
-    localStorage.removeItem("issueTime");
-    localStorage.removeItem("issueDetailListCode");
-    localStorage.removeItem("issueDetail");
+    localStorage.removeItem("issueDateTime");
     localStorage.removeItem("issueDescription");
+    localStorage.removeItem("issueDetail");
+    localStorage.removeItem("issueDetailListCode");
+    localStorage.removeItem("issueNumber");
+    localStorage.removeItem("issueString");
+    localStorage.removeItem("issueText");
+    localStorage.removeItem("issueTime");
+    localStorage.removeItem("issueTypeId");
+    localStorage.removeItem("singleSelect");
+
+    issueDetails.set([])
+
+    dateTimeAttribute.set(null);
+    issueDescriptionAttribute.set(null);
+    multiSelectAttribute.set(null);
+    numberAttribute.set(null);
+    singleSelectAttribute.set(null);
+    stringAttribute.set(null);
+    textAttribute.set(null);
+
+    console.log($issueDetails)
     if (!bypassClearForm) clearForm();
   };
 
@@ -326,7 +360,6 @@
       visibleDetails.add(service_request_id);
     }
     visibleDetails = new Set(visibleDetails);
-
     scrollToIssue(service_request_id);
   };
 
@@ -512,11 +545,35 @@
 
   const getServiceDefinition = async (serviceId) => {
     const res = await axios.get(`/services/${serviceId}`);
-    const first = res.data.attributes
-      .sort((attributeA, attributeB) => attributeA.order - attributeB.order)
-      .at(0);
-    issueDetailList.set(first);
+    const newAttributes = massageIssueDetailList(res.data.attributes);
+    issueAttributes.set(newAttributes);
+    console.log($issueAttributes)
+    issueDetailList.set(res.data.attributes[0]);
   };
+
+  const massageIssueDetailList = (issueAttributes) => {
+    const newAttributes = issueAttributes.map(attribute => {
+      if (attribute.datatype === "multivaluelist") {
+        attribute.multiSelectOptions = attribute.values.map(value => {
+          return {
+            label: value.name,
+            value: value.key
+          }
+        })
+      }
+
+      if (attribute.datatype === "singlevaluelist") {
+        attribute.singleSelectOptions = attribute.values.map(value => {
+          return {
+            label: value.name,
+            value: value.key
+          }
+        })
+      }
+      return attribute
+    });
+    return newAttributes
+  }
 
   const populateIssueTypeSelectDropdown = () => {
     const defaultOption = document.createElement("option");
@@ -538,12 +595,12 @@
   const populateIssueDetailList = () => {
     multiSelectOptions = [];
 
-    for (let i = 0; i < $issueDetailList?.values?.length; i++) {
+    for (let i = 0; i < $issueAttributes.values.length; i++) {
       let obj = {
-        label: $issueDetailList.values[i].name,
-        value: $issueDetailList.values[i].key,
+        label: $issueAttributes.values[i].name,
+        value: $issueAttributes.values[i].key,
       };
-      multiSelectOptions.push(obj);
+        multiSelectOptions.push(obj);
     }
     // Reactive statement for arrays
     multiSelectOptions = multiSelectOptions;
@@ -559,6 +616,8 @@
     res = await axios.get(
       `/requests?page_size=${$itemsPerPage}&page=${page}&service_code=${filterIssueType.service_code}&start_date=${filterStartDate}&end_date=${filterEndDate}`
     );
+
+    console.log(res)
 
     if (
       !issuePosted &&
@@ -589,14 +648,14 @@
     else {
       invalidOfflineAddress = true;
     }
-  };
+  }
 
   const validateSubmitterName = (input) => {
     if (input.match(submitterNameRegex)) invalidSubmitterName.visible = false;
     else {
       invalidSubmitterName.visible = true;
     }
-  };
+  }
 
   const validateEmail = (input) => {
     if (input.match(emailRegex)) invalidEmail.visible = false;
@@ -611,10 +670,29 @@
     }&address_string=${$issueAddress}&lat=${
       isOnline ? $issueAddressCoordinates.lat : ""
     }&long=${isOnline ? $issueAddressCoordinates.lng : ""}`;
+    console.log($issueDetail)
 
-    $issueDetail.forEach((attr) => {
-      attributes += "&attribute[" + $issueDetailList.code + "]=" + attr.value;
-    });
+    let vals = [];
+
+    $issueDetails.forEach((attr) => {
+      if (attr.datatype === 'multivaluelist') {
+        $issueDetail.values.forEach((val) => {
+          vals.push(val.label)
+        })
+        attributes += "&attribute[" + attr.code + "]=" + vals
+      }
+
+      if (attr.datatype === 'singlevaluelist') {
+        attributes += "&attribute[" + attr.code + "]=" + attr.values[0].value
+      }
+
+      if (attr.datatype === 'string' || 
+          attr.datatype === 'number' || 
+          attr.datatype === "datetime" ||
+          attr.datatype === "text") {
+        attributes += "&attribute[" + attr.code + "]=" + attr.values
+      }
+    })
 
     if ($issueDescription) attributes += "&description=" + $issueDescription;
     if ($issueSubmitterName) {
@@ -657,23 +735,19 @@
 
     // Creates a new marker for a newly reported issue
     if (isOnline) {
-      if (provider === "osm") {
+      if (provider === "osm"){
         const marker = new L.marker(
-          [
-            parseFloat($issueAddressCoordinates.lat),
-            parseFloat($issueAddressCoordinates.lng),
-          ],
-          {
+          [parseFloat($issueAddressCoordinates.lat), parseFloat($issueAddressCoordinates.lng)], {
             icon: L.icon({
               iconUrl: issuePinSVG,
               iconSize: [25, 25],
-              iconAnchor: [12, 12],
-            }),
-          }
-        ).addTo(map);
+              iconAnchor: [12, 12]
+            })
+          }).addTo(map);
 
-        markers.push(marker);
-      } else if (provider === "googleMaps") {
+        markers.push(marker)
+      }
+      else if (provider === "googleMaps") {
         const marker = new google.maps.Marker({
           position: {
             lat: parseFloat($issueAddressCoordinates.lat),
@@ -687,7 +761,6 @@
             anchor: new google.maps.Point(12, 12),
           },
         });
-
         markers.push(marker);
       }
     }
@@ -701,45 +774,38 @@
 
     if (provider === "googleMaps") {
       try {
-        await geocoder.geocode(
-          { address: $issueAddress },
-          (results, status) => {
-            if (status === "OK") {
-              const lat = results[0].geometry.location.lat();
-              const lng = results[0].geometry.location.lng();
+        await geocoder.geocode({ address: $issueAddress }, (results, status) => {
+          if (status === "OK") {
+            const lat = results[0].geometry.location.lat();
+            const lng = results[0].geometry.location.lng();
 
-              issueAddressCoordinates.set({ lat: lat, lng: lng });
-            } else {
-              geocodeError = true;
-              clearLocalStorage();
-              clearForm();
-              console.error(
-                `Geocode was not successful for the following reason: ${status}`
-              );
-              return;
-            }
+            issueAddressCoordinates.set({ lat: lat, lng: lng });
+          } else {
+            geocodeError = true;
+            clearLocalStorage();
+            clearForm();
+            console.error(
+              `Geocode was not successful for the following reason: ${status}`
+            );
+            return;
           }
-        );
+        });
       } catch (err) {
         console.error(err);
         return;
       }
-    } else if (provider === "osm") {
+    }
+    else if (provider === "osm") {
       try {
-        fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${$issueAddress}`
-        )
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${$issueAddress}`)
           .then((response) => response.json())
           .then((data) => {
-            issueAddress.set(data[0].display_name);
-            issueAddressCoordinates.set({
-              lat: parseFloat(data[0].lat),
-              lng: parseFloat(data[0].lon),
-            });
-          });
+            issueAddress.set(data[0].display_name)
+            issueAddressCoordinates.set({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) })
+          })
       } catch (err) {
         console.error(err);
-        return;
+        return
       }
     }
 
@@ -778,7 +844,8 @@
         heatmap.setMap(null);
         heatmapData = [];
         heatmap.setData(heatmapData);
-      } else if (provider === "osm") {
+      }
+      else if (provider === "osm") {
         map.removeLayer(heatmap);
         heatmapData = [];
       }
@@ -819,15 +886,16 @@
   };
 
   const setNewCenter = (lat, lng, zoom = 15) => {
-    if (provider === "osm") {
-      let newCenter = new L.LatLng(lat, lng);
+    if (provider === "osm"){
+      let newCenter = new L.LatLng(lat, lng)
       map.setView(newCenter, zoom);
-    } else if (provider === "googleMaps") {
+    }
+    else if (provider === "googleMaps") {
       let newCenter = new google.maps.LatLng(lat, lng);
       map.setCenter(newCenter);
       setNewZoom(zoom);
     }
-  };
+  }
 
   const setNewZoom = (zoomLevel) => {
     if (provider === "osm") map.zoom(zoomLevel);
@@ -855,9 +923,10 @@
         marker.setMap(null);
       });
       markers = [];
-    } else if (provider === "osm") {
+    }
+    else if (provider === "osm"){
       markers.forEach((marker) => {
-        marker.remove();
+        marker.remove()
       });
       markers = [];
     }
@@ -870,12 +939,13 @@
         icon.url = issuePinSVG;
         mkr.setIcon(icon);
       });
-    } else if (provider === "osm") {
+    }
+    else if (provider === "osm") {
       markers.forEach((mkr) => {
         const icon = mkr.getIcon();
         icon.options.iconUrl = issuePinSVG;
         mkr.setIcon(icon);
-      });
+      })
     }
   };
 
@@ -1025,28 +1095,24 @@
             },
           });
           markers.push(marker);
-        } else if (provider === "osm") {
+        } 
+        else if (provider === "osm") {
           markerGroup = L.layerGroup().addTo(map);
-          marker = new L.marker(
-            [parseFloat(issue.lat), parseFloat(issue.long)],
-            {
-              icon: L.icon({
-                iconAnchor: [12, 12],
-                iconSize: [25, 25],
-                iconUrl:
-                  parseFloat(issue.lat) ===
-                    selectedIssueMarker?.getLatLng().lat &&
-                  parseFloat(issue.long) ===
-                    selectedIssueMarker?.getLatLng().lng
-                    ? issuePinSelectedSVG
-                    : issuePinSVG,
-              }),
-              title: issue.name,
-            }
-          ).addTo(markerGroup);
+          marker = new L.marker([parseFloat(issue.lat), parseFloat(issue.long)], {
+            icon: L.icon({
+              iconAnchor: [12, 12],
+              iconSize: [25, 25],
+              iconUrl:
+                parseFloat(issue.lat) === selectedIssueMarker?.getLatLng().lat &&
+                parseFloat(issue.long) === selectedIssueMarker?.getLatLng().lng
+                  ? issuePinSelectedSVG
+                  : issuePinSVG,
+            }),
+            title: issue.name,
+          }).addTo(markerGroup);
           markers.push(marker);
         }
-
+        
         if (provider === "googleMaps") {
           google.maps.event.addListener(marker, "click", function () {
             // Marker being deselected
@@ -1095,12 +1161,8 @@
             setNewCenter(issue.lat, issue.long, 17);
 
             // Table
-            const selectedRow = document.getElementById(
-              issue.service_request_id
-            );
-            const rowIndex = Array.from(tableSelector.rows).indexOf(
-              selectedRow
-            );
+            const selectedRow = document.getElementById(issue.service_request_id);
+            const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
             if (rowIndex > 0) {
               const rowAboveC = tableSelector.rows[rowIndex - 1];
               setTimeout(() => {
@@ -1112,7 +1174,7 @@
             }
           });
         } else if (provider === "osm") {
-          marker.on("click", function () {
+          marker.on('click', function() {
             // Marker being deselected
             const selection = marker.getIcon();
             if (selection.options.iconUrl === issuePinSelectedSVG) {
@@ -1128,8 +1190,8 @@
               (mrk) =>
                 mrk.getLatLng().lat === marker.getLatLng().lat &&
                 mrk.getLatLng().lng === marker.getLatLng().lng
-              // mrk.position.lat() === marker.position.lat() &&
-              // mrk.position.lng() === marker.position.lng()
+                // mrk.position.lat() === marker.position.lat() &&
+                // mrk.position.lng() === marker.position.lng()
             );
 
             // Clears all the markers that are not selected
@@ -1146,8 +1208,7 @@
               });
 
               let icon = selectedMarker.getIcon();
-              if (icon.options.iconUrl === issuePinSVG)
-                icon.options.iconUrl = issuePinSelectedSVG;
+              if (icon.options.iconUrl === issuePinSVG) icon.options.iconUrl = issuePinSelectedSVG;
               else {
                 icon.options.iconUrl = issuePinSVG;
                 selectedIssueMarker = undefined;
@@ -1162,12 +1223,8 @@
             setNewCenter(issue.lat, issue.long, 17);
 
             // Table
-            const selectedRow = document.getElementById(
-              issue.service_request_id
-            );
-            const rowIndex = Array.from(tableSelector.rows).indexOf(
-              selectedRow
-            );
+            const selectedRow = document.getElementById(issue.service_request_id);
+            const rowIndex = Array.from(tableSelector.rows).indexOf(selectedRow);
             if (rowIndex > 0) {
               const rowAboveC = tableSelector.rows[rowIndex - 1];
               setTimeout(() => {
@@ -1177,17 +1234,13 @@
                 });
               }, 500);
             }
-          });
+          })
         }
         // End of click handler
 
         heatmapData.push(
-          provider === "osm"
-            ? new L.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
-            : new google.maps.LatLng(
-                parseFloat(issue.lat),
-                parseFloat(issue.long)
-              )
+          provider === "osm" ? new L.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
+          : new google.maps.LatLng(parseFloat(issue.lat), parseFloat(issue.long))
         );
       });
 
@@ -1201,11 +1254,11 @@
           blur: 15,
         });
       }
-
+      
       if (provider === "googleMaps") {
         if (
-          map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
-            .length === 2
+          map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length ===
+          2
         ) {
           const heatmapControl = createCustomControl("Heatmap", function () {
             heatmapVisible = !heatmapVisible;
@@ -1262,7 +1315,8 @@
             calculateBoundsAroundMarkers();
           }
         }, 400);
-      } else if (provider === "osm") {
+      } 
+      else if (provider === "osm") {
         const customControl = L.Control.extend({
           options: {
             position: "topright",
@@ -1282,13 +1336,15 @@
               '<button style="width: 100%; height: 100%;">X</button>';
 
             container.onclick = function () {
+
               heatmapVisible = !heatmapVisible;
 
-              if (heatmapVisible) {
+              if (heatmapVisible) {     
                 for (var i = 0; i < markers.length; i++) {
                   markers[i].removeFrom(map);
-                }
+                }    
                 map.addLayer(heatmap);
+                
               }
               if (!heatmapVisible) {
                 map.removeLayer(heatmap);
@@ -1301,13 +1357,12 @@
             return container;
           },
         });
-        if ($osmHeatmapControl === null)
-          osmHeatmapControl.set(new customControl());
+        if ($osmHeatmapControl === null) osmHeatmapControl.set(new customControl)
 
-        if (!$hasHeatmapControl) {
-          $osmHeatmapControl.addTo(map);
-          hasHeatmapControl.set(true);
-        }
+        if (!$hasHeatmapControl){
+          $osmHeatmapControl.addTo(map)
+          hasHeatmapControl.set(true)          
+        } 
         setTimeout(() => {
           if (!selectedIssue) {
             calculateBoundsAroundMarkers();
@@ -1321,14 +1376,15 @@
     if (provider === "osm") {
       if (markers && bounds) {
         let bounds = new L.latLngBounds();
-
+        
         markers.forEach(function (marker) {
           bounds.extend([marker.getLatLng().lat, marker.getLatLng().lng]);
-        });
+        })
 
         map.fitBounds(bounds);
       }
-    } else if (provider === "googleMaps") {
+    }
+    else if (provider === "googleMaps") {
       if (markers && bounds) {
         let lat, lng;
         let bounds = new google.maps.LatLngBounds();
@@ -1498,6 +1554,10 @@
     return `${start}...${end}`;
   };
 
+  function tempThrow(){
+    throw new Error("Ouch");
+  }
+
   const reportCSV = async () => {
     try {
       const res = await axios.get(
@@ -1602,26 +1662,23 @@
   const initOSM = async () => {
     const L = await import("leaflet");
     const GeoSearch = await import("leaflet-geosearch");
-    await import("leaflet.locatecontrol");
+    await import ("leaflet.locatecontrol");
     await import("leaflet.heat");
 
     let reverseGeocodedAddress;
 
-    const mapLayer = L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
+    const mapLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }
-    );
-
-    map = new L.map("map", {
-      center: [38.6740015313782, -90.453269188364],
-      layers: [mapLayer],
-      zoom: zoom,
     });
 
-    bounds = new L.latLngBounds();
+    map = new L.map('map', {
+      center: [38.6740015313782, -90.453269188364],
+      layers: [mapLayer],
+      zoom: zoom
+    });
+
+    bounds = new L.latLngBounds()
 
     // ~ leaflet-geosearch ~
     const provider = new GeoSearch.OpenStreetMapProvider();
@@ -1630,26 +1687,23 @@
       autoComplete: false,
       provider: provider,
       showMarker: false,
-      style: "bar",
+      style: 'bar',
     });
 
     const icon = L.icon({
-      iconAnchor: [34, 68],
+      iconAnchor: [34,68],
       iconSize: [71, 71],
-      iconUrl: currentLocationSVG,
+      iconUrl: currentLocationSVG
     });
 
     currentPositionMarker = new L.marker(map.getCenter(), {
       icon: icon,
-      title: messages["map"]["marker.title"],
-    }).addTo(map);
+      title: messages["map"]["marker.title"]
+    }).addTo(map)
 
     function searchEventHandler(result) {
-      issueAddress.set(result.location.label);
-      issueAddressCoordinates.set({
-        lat: result.location.y,
-        lng: result.location.x,
-      });
+      issueAddress.set(result.location.label)
+      issueAddressCoordinates.set({lat: result.location.y, lng: result.location.x})
     }
 
     function centerMarkerOnMap(map) {
@@ -1660,31 +1714,28 @@
 
     function geocodeFromMarker() {
       if (!findReportedIssue) {
-        fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${
-            currentPositionMarker.getLatLng().lat
-          }&lon=${currentPositionMarker.getLatLng().lng}`
-        )
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentPositionMarker.getLatLng().lat}&lon=${currentPositionMarker.getLatLng().lng}`)
           .then((response) => response.json())
           .then((data) => {
             reverseGeocodedAddress = data.display_name;
             issueAddress.set(reverseGeocodedAddress);
-            issueAddressCoordinates.set({ lat: data.lat, lng: data.lon });
-          });
+            issueAddressCoordinates.set({lat: data.lat, lng: data.lon})
+          })
       }
     }
 
     L.control.locate().addTo(map);
     map.addControl(searchControl);
 
-    map.on("move", centerMarkerOnMap);
-    map.on("moveend", geocodeFromMarker);
-    map.on("geosearch/showlocation", searchEventHandler);
+    
+    map.on('move', centerMarkerOnMap)
+    map.on('moveend', geocodeFromMarker);
+    map.on('geosearch/showlocation', searchEventHandler);
 
     // heatmapToggle();
 
     if (localStorage.getItem("completed")) await postOfflineIssue();
-  };
+  }
 
   const initGoogleMaps = async () => {
     import("@googlemaps/js-api-loader").then((module) => {
@@ -1865,7 +1916,7 @@
   };
 
   const selectIssue = (issue) => {
-    if (provider === "googleMaps") {
+    if (provider === "googleMaps"){
       toggleDetails(issue.service_request_id);
       selectedIssue = issue;
 
@@ -1892,7 +1943,8 @@
           });
         });
       }
-    } else if (provider === "osm") {
+    }
+    else if (provider === "osm") {
       toggleDetails(issue.service_request_id);
       selectedIssue = issue;
 
@@ -1915,8 +1967,8 @@
               icon.options.iconUrl = issuePinSelectedSVG;
               mkr.setIcon(icon);
             }
-          });
-        });
+          })
+        })
       }
     }
   };
@@ -1933,7 +1985,7 @@
     scrollToTop();
     adjustFooter();
     showFooter = true;
-
+    
     findReportedIssue = false;
     showFilters = false;
 
@@ -1962,6 +2014,8 @@
   };
 
   onMount(async () => {
+    setTimeout(() => console.clear(), 100);
+    
     await loadRecaptcha();
     await getTokenInfo();
 
@@ -2015,33 +2069,33 @@
 
 <svelte:head>
   <title>{messages["home"]["title.header"]}</title>
-  <meta name="description" content={messages["metadata"]["content"]} />
+  <meta name="description" content="{messages['metadata']['content']}" />
 </svelte:head>
 
 {#if fadeInBackground}
   <div
-    bind:this={backgroundSelector}
+    bind:this="{backgroundSelector}"
     height="{pageHeight}px"
     class="background"
-    class:background-opacity={reduceBackGroundOpacity}
-    class:background-opacity-report-issue={reportNewIssue ||
+    class:background-opacity="{reduceBackGroundOpacity}"
+    class:background-opacity-report-issue="{reportNewIssue ||
       reportNewIssueStep2 ||
       reportNewIssueStep3 ||
       reportNewIssueStep4 ||
       reportNewIssueStep5 ||
-      reportNewIssueStep6}
-    in:fade={{ duration: 3000, quintOut, amount: 10 }}
-    out:fade={{ duration: 300, quintOut, amount: 10 }}
+      reportNewIssueStep6}"
+    in:fade="{{ duration: 3000, quintOut, amount: 10 }}"
+    out:fade="{{ duration: 300, quintOut, amount: 10 }}"
   >
     <div style="display: flex; align-items: center; z-index: 1" id="logo-div">
       {#if openLogo}
         <img
-          in:scale={{
+          in:scale="{{
             delay: startRendering,
             duration: 1000,
             quintOut,
-          }}
-          src={logo}
+          }}"
+          src="{logo}"
           alt="app logo"
           class="logo"
         />
@@ -2050,12 +2104,13 @@
 
     {#if hasFailed}
       <Modal
-        title={messages["home"]["login.failed.title"]}
-        color={primaryOne}
-        on:cancel={() => {
-          hasFailed = false;
-          goto(`/`);
-        }}
+        title="{messages['home']['login.failed.title']}"
+        color="{primaryOne}"
+        on:cancel="{() => {
+            hasFailed = false 
+            goto(`/`)
+          }
+        }"
       >
         <div class="failed-auth">
           {messages["home"]["login.failed.description"]}
@@ -2065,9 +2120,9 @@
 
     {#if notifyOfflineIssuePosted}
       <Modal
-        title={messages["report.issue"]["modal.offline.issue.posted.title"]}
-        color={primaryOne}
-        on:cancel={() => (notifyOfflineIssuePosted = false)}
+        title="{messages['report.issue']['modal.offline.issue.posted.title']}"
+        color="{primaryOne}"
+        on:cancel="{() => (notifyOfflineIssuePosted = false)}"
       >
         <div class="reported-offline-issue-success">
           {messages["report.issue"]["modal.offline.issue.posted.description"]}
@@ -2077,11 +2132,11 @@
 
     {#if geocodeError}
       <Modal
-        title={messages["report.issue"][
-          "modal.offline.issue.posted.title.error"
-        ]}
-        color={primaryOne}
-        on:cancel={() => (geocodeError = false)}
+        title="{messages['report.issue'][
+          'modal.offline.issue.posted.title.error'
+        ]}"
+        color="{primaryOne}"
+        on:cancel="{() => (geocodeError = false)}"
       >
         <div class="reported-offline-issue-success">
           {messages["report.issue"][
@@ -2093,29 +2148,30 @@
 
     <div
       class="content"
-      in:fade={{ delay: startRendering, duration: 1000, quintOut }}
-      out:fade={{ duration: 300, quintOut }}
+      in:fade="{{ delay: startRendering, duration: 1000, quintOut }}"
+      out:fade="{{ duration: 300, quintOut }}"
     >
       <div class="slogan-title">{messages["home"]["tagline.one"]}</div>
 
       <div class="slogan-text">
         {messages["home"]["tagline.two"]}
-        <Button
-          on:click={() => {
+
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <span
+          class="see-more"
+          on:click="{() => {
             seeMore = !seeMore;
             setTimeout(() => {
               adjustSeeMore();
             }, 50);
-          }}
+          }}"
         >
-          <span class="see-more">
-            {#if seeMore}
-              less...
-            {:else}
-              more...
-            {/if}
-          </span>
-        </Button>
+          {#if seeMore}
+            less...
+          {:else}
+            more...
+          {/if}
+        </span>
 
         {#if seeMore}
           <div id="see-more">
@@ -2132,13 +2188,12 @@
       <div class="action-buttons">
         {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5}
           <button
-            aria-pressed={findReportedIssue}
-            bind:this={findIssuesButtonSelector}
+            bind:this="{findIssuesButtonSelector}"
             class="button"
-            class:button-find-issue-disabled={showModal || !isOnline}
-            disabled={showModal || !isOnline}
+            class:button-find-issue-disabled="{showModal || !isOnline}"
+            disabled="{showModal || !isOnline}"
             id="button-find-issues"
-            on:click={async () => {
+            on:click="{async () => {
               if (reportNewIssueStep6 || !isOnline) return;
 
               // Clears the current position marker from the map
@@ -2149,14 +2204,13 @@
               if (provider === "osm") {
                 currentPositionMarker.remove();
               }
-
+              
               // Clears the value of the input field inside the map
               if (provider === "googleMaps") {
-                inputIssueAddressSelector =
-                  document.getElementById("pac-input");
-                inputIssueAddressSelector.value = "";
+                inputIssueAddressSelector = document.getElementById('pac-input');
+                inputIssueAddressSelector.value = '';
               }
-
+              
               if (!findReportedIssue) {
                 showFooter = false;
                 findReportedIssue = true;
@@ -2165,8 +2219,8 @@
 
                   setTimeout(() => {
                     findIssuesButtonSelector.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
+                      behavior: 'smooth',
+                      block: 'start',
                     });
                   }, 650);
                 }, 250);
@@ -2175,27 +2229,24 @@
 
                 addIssuesToMap();
               } else resetFindIssue();
-            }}
+            }}"
           >
             {#if !findReportedIssue}
-              <!-- alt intentionally left empty as img is decorative and shouldn't be read aloud -->
               <img
-                src={searchSVG}
-                aria-hidden="true"
-                alt=""
+                src="{searchSVG}"
+                alt="search for reported issues"
                 class="search-svg"
                 height="23rem"
               />
             {:else}
               <img
-                src={closeSVG}
-                aria-hidden="true"
-                alt=""
+                src="{closeSVG}"
+                alt="close find an issue"
                 style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
                 320
                   ? '1.3rem'
                   : '1rem'}; margin-left: -0.7rem"
-                height={window.innerWidth < 320 ? "20rem" : "25rem"}
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.find.issue.label"]}
@@ -2203,63 +2254,58 @@
         {/if}
 
         {#if !findReportedIssue}
-          {@const reportIssueButtonPressed = new Set([
-            reportNewIssue,
-            reportNewIssueStep2,
-            reportNewIssueStep3,
-            reportNewIssueStep4,
-            reportNewIssueStep5,
-          ]).has(true)}
           <button
-            aria-pressed={reportIssueButtonPressed}
-            bind:this={reportIssuesButtonSelector}
+            bind:this="{reportIssuesButtonSelector}"
             class="button"
-            class:collapse-margin={reportIssueButtonPressed}
+            class:collapse-margin="{reportNewIssue ||
+              reportNewIssueStep2 ||
+              reportNewIssueStep3 ||
+              reportNewIssueStep4 ||
+              reportNewIssueStep5 ||
+              reportNewIssueStep6}"
             id="button-report-issue"
-            on:click={() => {
-              if (!localStorage.getItem("completed")) clearLocalStorage(true);
+            on:click="{() => {
+              if (!localStorage.getItem('completed')) clearLocalStorage(true);
               if (reportNewIssueStep6) return;
 
               if (isOnline) {
-                if (provider === "googleMaps") {
-                  if (
-                    map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT]
-                      .length === 3
-                  )
-                    map.controls[
-                      window.google.maps.ControlPosition.BOTTOM_LEFT
-                    ].removeAt(heatmapControlIndex);
+                if (provider === "googleMaps"){
+                  if (map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].length === 3) 
+                    map.controls[window.google.maps.ControlPosition.BOTTOM_LEFT].removeAt(heatmapControlIndex);
 
                   currentPositionMarker.setMap(map);
-                } else if (provider === "osm") {
+                }
+                
+                else if (provider === "osm") {
                   if ($hasHeatmapControl) {
-                    $osmHeatmapControl.remove();
-                    hasHeatmapControl.set(false);
+                    $osmHeatmapControl.remove()
+                    hasHeatmapControl.set(false)
                   }
                   currentPositionMarker.addTo(map);
                 }
+                
               } else {
-                const stepOneDiv = document.getElementById("stepOne");
+                const stepOneDiv = document.getElementById('stepOne');
 
                 if (
                   window.innerWidth >= 320 &&
                   window.innerWidth <= 374 &&
-                  screen.orientation.type.includes("portrait")
+                  screen.orientation.type.includes('portrait')
                 ) {
-                  if (stepOneDiv) stepOneDiv.style.height = "16rem";
+                  if (stepOneDiv) stepOneDiv.style.height = '16rem';
                 } else if (
                   window.innerWidth >= 596 &&
                   window.innerWidth <= 814 &&
-                  screen.orientation.type.includes("portrait")
+                  screen.orientation.type.includes('portrait')
                 ) {
-                  if (stepOneDiv) stepOneDiv.style.height = "15.5rem";
+                  if (stepOneDiv) stepOneDiv.style.height = '15.5rem';
                 } else if (
                   window.innerWidth >= 375 &&
-                  screen.orientation.type.includes("portrait")
+                  screen.orientation.type.includes('portrait')
                 ) {
-                  if (stepOneDiv) stepOneDiv.style.height = "14.5rem";
+                  if (stepOneDiv) stepOneDiv.style.height = '14.5rem';
                 } else {
-                  if (stepOneDiv) stepOneDiv.style.height = "18rem";
+                  if (stepOneDiv) stepOneDiv.style.height = '18rem';
                 }
               }
 
@@ -2275,8 +2321,8 @@
 
                   setTimeout(() => {
                     reportIssuesButtonSelector.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
+                      behavior: 'smooth',
+                      block: 'start',
                     });
                   }, 500);
                 }, 100);
@@ -2313,26 +2359,24 @@
                   }
                 );
               }
-            }}
+            }}"
           >
             {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5}
               <img
-                src={addSVG}
-                aria-hidden="true"
-                alt=""
+                src="{addSVG}"
+                alt="report a new issue"
                 class="add-svg"
                 height="25rem"
               />
             {:else}
               <img
-                src={closeSVG}
-                aria-hidden="true"
-                alt=""
+                src="{closeSVG}"
+                alt="close report a new issue"
                 style="vertical-align: -0.3rem; margin-right: {window.innerWidth >
                 320
                   ? '1.3rem'
                   : '1rem'}; margin-left: -2.1rem"
-                height={window.innerWidth < 320 ? "20rem" : "25rem"}
+                height="{window.innerWidth < 320 ? '20rem' : '25rem'}"
               />
             {/if}
             {messages["home"]["button.report.issue.label"]}
@@ -2341,7 +2385,7 @@
       </div>
     </div>
     {#if !reportNewIssue && !reportNewIssueStep2 && !reportNewIssueStep3 && !reportNewIssueStep4 && !reportNewIssueStep5 && !reportNewIssueStep6 && !findReportedIssue && showFooter}
-      <Footer bind:this={$footerSelector} backgroundColor={primaryOne} />
+      <Footer bind:this="{$footerSelector}" backgroundColor="{primaryOne}" />
     {/if}
     <!-- START Report New Issue Flow -->
 
@@ -2350,8 +2394,8 @@
         <div
           id="stepIssueTypeAndDetail"
           class="describe-issue-two"
-          class:visible={reportNewIssueStep2}
-          class:hidden={!reportNewIssueStep2}
+          class:visible="{reportNewIssueStep2}"
+          class:hidden="{!reportNewIssueStep2}"
         >
           <div class="step-two-label">
             {messages["report.issue"]["label.step"]}
@@ -2374,84 +2418,203 @@
           <div class="step-two-select-div">
             <select
               class="step-two-select"
-              bind:this={issueTypeSelectSelector}
-              on:change={async (e) => {
+              bind:this="{issueTypeSelectSelector}"
+              on:change="{async (e) => {
                 selected = [];
+                singleSelected = [];
 
                 if ($issueDetail) issueDetail.set([]);
+                if ($singleSelectAttribute) singleSelectAttribute.set([]);
 
                 issueType.set({
                   id: e.target.value,
                   name: e.target.options[e.target.selectedIndex].text,
                 });
 
-                if ($issueType.name !== "Other") {
+                if ($issueType.name !== 'Other') {
                   await getServiceDefinition(e.target.value);
 
                   populateIssueDetailList();
 
                   setTimeout(() => {
-                    let inputElement = document.querySelector("#issue-details");
+                    let inputElement = document.querySelector('#issue-details');
                     if (inputElement)
-                      inputElement.setAttribute("readonly", "readonly");
+                      inputElement.setAttribute('readonly', 'readonly');
                   }, 1000);
                 }
-              }}
-            ></select>
+              }}"></select>
 
-            {#if $issueDetailList?.description && $issueType?.name !== "Other"}
-              <div class="step-two-feature-type-helper">
-                {$issueDetailList.description}
-              </div>
-            {:else if $issueType?.name === "Other"}
+            {#if $issueType?.name === "Other"}
               <div class="step-two-feature-type-helper">
                 {messages["report.issue"]["selection.other.description"]}
               </div>
             {/if}
 
-            {#if $issueDetailList && $issueType.name !== "Other" && multiSelectOptions?.length > 0}
-              <div class="multiselect">
-                <MultiSelect
-                  id="issue-details"
-                  placeholder="Issue Details"
-                  bind:selected
-                  options={multiSelectOptions}
-                  on:change={() => issueDetail.set(selected)}
-                />
-              </div>
+            {#if $issueDetailList && $issueType.name !== "Other"}
+              {#each $issueAttributes as issueAttribute}
+                {#if issueAttribute.datatype === "datetime"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <DateTimePicker 
+                    on:dateSelected="{(e) => {
+                      // dateTimeAttribute.set(e.detail);
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        values: e.detail
+                      };
+
+                      dateTimeAttribute.set(obj)
+                      console.log($dateTimeAttribute);
+                    }}"/>
+                {/if}
+
+                {#if issueAttribute.datatype === "string"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <input 
+                    bind:value="{userString}"
+                    class="step-two-attribute-text-input" 
+                    placeholder="{issueAttribute.datatype_description}"
+                    on:change="{() => {
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        values: userString
+                      }
+
+                      stringAttribute.set(obj)
+                      console.log($stringAttribute)
+                    }}"
+                  />
+                {/if}
+
+                {#if issueAttribute.datatype === "number"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <input
+                    bind:value={userNumber}
+                    class="step-two-attribute-text-input"
+                    placeholder="{issueAttribute.datatype_description}"
+                    type="number"
+                    on:change="{() => {
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        values: userNumber
+                      }
+
+                      numberAttribute.set(obj);
+                      console.log($numberAttribute);
+                      
+                    }}"
+                  />
+                {/if}
+
+                {#if issueAttribute.datatype === "singlevaluelist"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <div class="multiselect">
+                    <MultiSelect
+                      maxSelect={1}
+                      id="issue-details"
+                      placeholder="{issueAttribute.datatype_description}"
+                      bind:selected="{singleSelected}"
+                      options="{issueAttribute.singleSelectOptions}"
+                      on:change="{() => {
+                        let obj = {
+                          code: issueAttribute.code,
+                          datatype: issueAttribute.datatype,
+                          values: singleSelected
+                        }
+                        singleSelectAttribute.set(obj)
+                        console.log($singleSelectAttribute)
+                      }}"
+                    />
+                  </div>
+                {/if}
+
+                {#if issueAttribute.datatype === "multivaluelist"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <div class="multiselect">
+                    <MultiSelect
+                      id="issue-details"
+                      placeholder="{issueAttribute.datatype_description}"
+                      bind:selected="{selected}"
+                      options="{issueAttribute.multiSelectOptions}"
+                      on:change="{() => {
+                        let obj = {
+                          code: issueAttribute.code,
+                          datatype: issueAttribute.datatype,
+                          values: selected
+                        }
+                        console.log(obj)
+                        issueDetail.set(obj)
+                      }}"
+                    />
+                  </div>
+                {/if}
+
+                {#if issueAttribute.datatype === "text"}
+                  <div class="step-two-feature-type-helper">
+                    {issueAttribute.description}
+                  </div>
+                  <textarea
+                    placeholder="{
+                      $issueType.name === 'Other'
+                      ? messages['report.issue']['textarea.description.placeholder']
+                      : messages['report.issue']['textarea.description.not.required.placeholder']
+                    }"
+                    rows="3"
+                    maxlength="{maxCharactersLength}"
+                    bind:value="{userText}"
+                    on:click="{() => (invalidOtherDescription.visible = false)}"
+                    on:change="{() => {
+                      let obj = {
+                        code: issueAttribute.code,
+                        datatype: issueAttribute.datatype,
+                        values: userText
+                      }
+
+                      textAttribute.set(obj)
+                      console.log($textAttribute)
+                    }}"
+                  ></textarea>
+                {/if}
+              {/each}
             {/if}
 
             {#if $issueType !== null}
               <div class="textarea">
-                {#if $issueDetail.find((selection) => selection.name === "Other") || $issueType.name === "Other"}
+                {#if $issueType.name === "Other"}
                   <div class="step-two-required">* Required field</div>
                 {/if}
 
                 <textarea
-                  placeholder={$issueDetail.find(
-                    (selection) => selection.name === "Other"
-                  ) || $issueType.name === "Other"
-                    ? messages["report.issue"][
-                        "textarea.description.placeholder"
+                  placeholder="{$issueType.name === 'Other'
+                    ? messages['report.issue'][
+                        'textarea.description.placeholder'
                       ]
-                    : messages["report.issue"][
-                        "textarea.description.not.required.placeholder"
-                      ]}
+                    : messages['report.issue'][
+                        'textarea.description.not.required.placeholder'
+                      ]}"
                   rows="3"
-                  maxlength={maxCharactersLength}
-                  bind:value={$issueDescription}
-                  on:click={() => (invalidOtherDescription.visible = false)}
+                  maxlength="{maxCharactersLength}"
+                  bind:value="{$issueDescription}"
+                  on:click="{() => (invalidOtherDescription.visible = false)}"
                 ></textarea>
               </div>
 
               <div class="step-two-word-count">
                 <span
-                  class:step-two-word-count-accent={$issueDescription?.length <
-                    10 &&
-                    ($issueDetail.find(
-                      (selection) => selection.name === "Other"
-                    ) ||
-                      $issueType.name === "Other")}
+                  class:step-two-word-count-accent="{$issueDescription?.length <
+                    10 && $issueType.name === 'Other'}"
                 >
                   {$issueDescription?.length ?? 0}
                 </span>
@@ -2460,7 +2623,7 @@
 
               <div
                 class="step-two-word-count-error"
-                class:visible={invalidOtherDescription.visible}
+                class:visible="{invalidOtherDescription.visible}"
               >
                 {invalidOtherDescription.message}
               </div>
@@ -2470,14 +2633,14 @@
           <button
             class="button back-button"
             style="margin-bottom: 1.25rem"
-            on:click={() => {
+            on:click="{() => {
               reportNewIssueStep2 = false;
               reportNewIssue = true;
-            }}
+            }}"
           >
             <img
-              src={pageBackwardsSVG}
-              alt=""
+              src="{pageBackwardsSVG}"
+              alt="previous step"
               width="19rem"
               style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1.1rem"
             />
@@ -2485,38 +2648,79 @@
           </button>
           <button
             class="button"
-            class:next-button={$issueType && $issueDetail}
-            class:disabled-button={$issueType === null ||
-              ($issueDetail?.length < 1 && $issueType.name !== "Other")}
-            disabled={$issueType === null ||
-              ($issueDetail?.length < 1 && $issueType.name !== "Other")}
+            class:next-button="{$issueType && $issueDetail}"
+            class:disabled-button="{$issueType === null ||
+              ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
+            disabled="{$issueType === null ||
+              ($issueDetail?.length < 1 && $issueType.name !== 'Other')}"
             style="margin-bottom: 1.25rem"
-            on:click={() => {
+            on:click="{() => {
               if (!isOnline) issueTime.set(convertDate(new Date()));
 
-              localStorage.setItem("issueTime", $issueTime);
-              localStorage.setItem("issueTypeId", $issueType.id);
-              if ($issueDetail)
+              localStorage.setItem('issueTime', $issueTime);
+              localStorage.setItem('issueTypeId', $issueType.id);
+              if ($issueDetail && $issueType.name !== 'Other') {
                 localStorage.setItem(
-                  "issueDetail",
+                  'issueDetail',
                   JSON.stringify($issueDetail)
                 );
+                $issueDetails.push($issueDetail)
+              }
 
-              if ($issueType.name !== "Other") {
+              if ($stringAttribute) {
                 localStorage.setItem(
-                  "issueDetailListCode",
+                  'issueString',
+                  JSON.stringify($stringAttribute)
+                )
+                $issueDetails.push($stringAttribute)
+              }
+
+              if ($numberAttribute) {
+                localStorage.setItem(
+                  'issueNumber',
+                  JSON.stringify($numberAttribute)
+                )
+                $issueDetails.push($numberAttribute)
+              }
+
+
+              if ($singleSelectAttribute) {
+                localStorage.setItem(
+                  'singleSelect',
+                  JSON.stringify($singleSelectAttribute)
+                )
+
+                $issueDetails.push($singleSelectAttribute)
+              }
+
+              if ($dateTimeAttribute) {
+                localStorage.setItem(
+                  'issueDateTime',
+                  JSON.stringify($dateTimeAttribute)
+                )
+                $issueDetails.push($dateTimeAttribute)
+              }
+
+              if ($textAttribute) {
+                localStorage.setItem(
+                  'issueText',
+                  JSON.stringify($textAttribute)
+                )
+                $issueDetails.push($textAttribute)
+              }
+
+              if ($issueType.name !== 'Other') {
+                localStorage.setItem(
+                  'issueDetailListCode',
                   $issueDetailList.code
                 );
               }
 
               if ($issueDescription)
-                localStorage.setItem("issueDescription", $issueDescription);
+                localStorage.setItem('issueDescription', $issueDescription);
 
               if (
-                (($issueType.name === "Other" ||
-                  $issueDetail.find(
-                    (selection) => selection.name === "Other"
-                  )) &&
+                (($issueType.name === 'Other') &&
                   $issueDescription?.length < minOtherDescriptionLength) ||
                 $issueDescription === null
               ) {
@@ -2529,12 +2733,14 @@
                   reportIssuesButtonSelector.scrollIntoView();
                 }, 100);
               }
-            }}
+
+              console.log($issueDetails)
+            }}"
           >
             {messages["report.issue"]["button.next"]}
             <img
-              src={pageForwardSVG}
-              alt=""
+              src="{pageForwardSVG}"
+              alt="next step"
               width="19rem"
               style="vertical-align: -0.15rem; margin-left: 1rem; margin-right: -1.1rem"
             />
@@ -2548,8 +2754,8 @@
         <div
           id="stepPhoto"
           class="describe-issue"
-          class:visible={reportNewIssueStep3}
-          class:hidden={!reportNewIssueStep3}
+          class:visible="{reportNewIssueStep3}"
+          class:hidden="{!reportNewIssueStep3}"
         >
           <div class="step-three-label">
             {messages["report.issue"]["label.step"]}
@@ -2564,7 +2770,7 @@
 
           <div style="margin-top: 1rem">
             <form
-              data-sitekey={sitekey}
+              data-sitekey="{sitekey}"
               data-callback="onSubmit"
               data-action="submit"
               class="g-recaptcha"
@@ -2588,10 +2794,10 @@
                     {messages["report.issue"]["image.upload.disabled"]}
                   {/if}
 
+                  <!-- svelte-ignore a11y-img-redundant-alt -->
                   <img
-                    role="presentation"
-                    alt=""
-                    src={cameraSVG}
+                    src="{cameraSVG}"
+                    alt="take photo"
                     max-width="37rem"
                     max-height="37rem"
                     style="padding: 0 0.3rem 0 0.3rem; vertical-align: middle; background-color: white; border-radius: 10px; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer"
@@ -2604,14 +2810,14 @@
                   style="display: none; cursor: {isOnline
                     ? 'pointer'
                     : 'default'}"
-                  disabled={!isOnline}
-                  on:change={(e) => {
+                  disabled="{!isOnline}"
+                  on:change="{(e) => {
                     if (isOnline) handleFileChange(e);
-                    e.target.value = "";
-                  }}
+                    e.target.value = '';
+                  }}"
                 />
 
-                <Recaptcha bind:this={recaptcha} {sitekey} />
+                <Recaptcha bind:this={recaptcha} sitekey={sitekey} />
               </div>
             </form>
 
@@ -2627,7 +2833,7 @@
             {#if messageRejectedOne}
               <!-- svelte-ignore a11y-img-redundant-alt -->
               <img
-                src={forbiddenSVG}
+                src="{forbiddenSVG}"
                 alt="rejected image"
                 height="auto"
                 width="50rem"
@@ -2640,7 +2846,7 @@
               <div class="upload-message">
                 <div class="image-container">
                   <img
-                    src={selectedFileSrc}
+                    src="{selectedFileSrc}"
                     alt="issue image"
                     height="auto"
                     width="75rem"
@@ -2649,13 +2855,13 @@
                   <!-- svelte-ignore a11y-click-events-have-key-events -->
                   <div
                     class="remove-btn"
-                    on:click={(e) => {
-                      e.target.parentElement.style.display = "none";
+                    on:click="{(e) => {
+                      e.target.parentElement.style.display = 'none';
                       selectedFile = null;
                       selectedFileSrc = null;
                       imageData = null;
-                      messageSuccess = "";
-                    }}
+                      messageSuccess = '';
+                    }}"
                   >
                     X
                   </div>
@@ -2669,7 +2875,7 @@
             <button
               class="button back-button"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
-              on:click={() => {
+              on:click="{() => {
                 reportNewIssueStep3 = false;
                 reportNewIssueStep2 = true;
                 currentStep = 2;
@@ -2681,11 +2887,11 @@
                     populateIssueDetailList();
                   }
                 }, 100);
-              }}
+              }}"
             >
               <img
-                src={pageBackwardsSVG}
-                alt=""
+                src="{pageBackwardsSVG}"
+                alt="previous step"
                 width="19rem"
                 style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1.1rem"
               />
@@ -2695,23 +2901,23 @@
             <button
               class="button next-button"
               style="margin-bottom: 1.25rem; margin-top: 2rem"
-              on:click={() => {
+              on:click="{() => {
                 reportNewIssueStep3 = false;
                 currentStep = 4;
                 reportNewIssueStep4 = true;
 
-                if (localStorage.getItem("issueSubmitterName"))
+                if (localStorage.getItem('issueSubmitterName'))
                   $issueSubmitterName =
-                    localStorage.getItem("issueSubmitterName") ?? "";
-                if (localStorage.getItem("issueSubmitterContact"))
+                    localStorage.getItem('issueSubmitterName') ?? '';
+                if (localStorage.getItem('issueSubmitterContact'))
                   $issueSubmitterContact =
-                    localStorage.getItem("issueSubmitterContact") ?? "";
-              }}
+                    localStorage.getItem('issueSubmitterContact') ?? '';
+              }}"
             >
               {messages["report.issue"]["button.next"]}
 
               <img
-                src={pageForwardSVG}
+                src="{pageForwardSVG}"
                 alt="next step"
                 width="19rem"
                 style="vertical-align: -0.15rem; margin-left: 1rem; margin-right: -1.1rem"
@@ -2726,8 +2932,8 @@
         <div
           id="stepContactInfo"
           class="describe-issue"
-          class:visible={reportNewIssueStep4}
-          class:hidden={!reportNewIssueStep4}
+          class:visible="{reportNewIssueStep4}"
+          class:hidden="{!reportNewIssueStep4}"
         >
           <div class="step-four-label">
             {messages["report.issue"]["label.step"]}
@@ -2743,21 +2949,21 @@
             </span>
             <input
               class="step-four-input-submitter-name"
-              bind:value={$issueSubmitterName}
-              on:blur={() => {
+              bind:value="{$issueSubmitterName}"
+              on:blur="{() => {
                 if ($issueSubmitterName) {
                   $issueSubmitterName = $issueSubmitterName.trim();
                 }
-              }}
-              on:click={() => (invalidSubmitterName.visible = false)}
-              placeholder={messages["report.issue"][
-                "placeholder.submitter.name"
-              ]}
+              }}"
+              on:click="{() => (invalidSubmitterName.visible = false)}"
+              placeholder="{messages['report.issue'][
+                'placeholder.submitter.name'
+              ]}"
             />
 
             <div
               class="step-four-submitter-name-word-count-error"
-              class:visible={invalidSubmitterName.visible}
+              class:visible="{invalidSubmitterName.visible}"
             >
               {invalidSubmitterName.message}
             </div>
@@ -2770,19 +2976,21 @@
             <input
               type="email"
               class="step-four-input-contact-info"
-              bind:value={$issueSubmitterContact}
-              on:blur={() => {
+              bind:value="{$issueSubmitterContact}"
+              on:blur="{() => {
                 if ($issueSubmitterContact) {
                   $issueSubmitterContact = $issueSubmitterContact.trim();
                 }
-              }}
-              on:click={() => (invalidEmail.visible = false)}
-              placeholder={messages["report.issue"]["placeholder.contact.info"]}
+              }}"
+              on:click="{() => (invalidEmail.visible = false)}"
+              placeholder="{messages['report.issue'][
+                'placeholder.contact.info'
+              ]}"
             />
 
             <div
               class="step-four-submitter-email-error"
-              class:visible={invalidEmail.visible}
+              class:visible="{invalidEmail.visible}"
             >
               {invalidEmail.message}
             </div>
@@ -2791,15 +2999,15 @@
           <button
             class="button back-button"
             style="margin-bottom: 1.25rem"
-            on:click={() => {
+            on:click="{() => {
               reportNewIssueStep4 = false;
               reportNewIssueStep3 = true;
               currentStep = 3;
-            }}
+            }}"
           >
             <img
-              src={pageBackwardsSVG}
-              alt=""
+              src="{pageBackwardsSVG}"
+              alt="previous step"
               width="19rem"
               style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1rem"
             />
@@ -2808,9 +3016,10 @@
 
           <button
             class="button review-submit"
-            class:review-button={$issueType && $issueDetail}
-            class:disabled-button={$issueType === null || $issueDetail === null}
-            on:click={() => {
+            class:review-button="{$issueType && $issueDetail}"
+            class:disabled-button="{$issueType === null ||
+              $issueDetail === null}"
+            on:click="{() => {
               // Reviews data for the issue before it can be reported
               if (
                 $issueSubmitterName?.length < minSubmitterNameLength &&
@@ -2821,8 +3030,7 @@
               }
 
               if ($issueAddress) validateOfflineAddress($issueAddress);
-              if ($issueSubmitterName)
-                validateSubmitterName($issueSubmitterName);
+              if ($issueSubmitterName) validateSubmitterName($issueSubmitterName);
               if ($issueSubmitterContact) validateEmail($issueSubmitterContact);
 
               if (invalidOfflineAddress) return;
@@ -2830,19 +3038,19 @@
               if (invalidEmail.visible) return;
 
               localStorage.setItem(
-                "issueSubmitterName",
-                $issueSubmitterName ?? ""
+                'issueSubmitterName',
+                $issueSubmitterName ?? ''
               );
 
               localStorage.setItem(
-                "issueSubmitterContact",
-                $issueSubmitterContact ?? ""
+                'issueSubmitterContact',
+                $issueSubmitterContact ?? ''
               );
 
               reportNewIssueStep4 = false;
               currentStep = 5;
               reportNewIssueStep5 = true;
-            }}
+            }}"
           >
             {#if window.innerWidth < 320}
               {messages["report.issue"]["button.review.submit.short"]}
@@ -2850,9 +3058,8 @@
               {messages["report.issue"]["button.review.submit"]}
             {/if}
             <img
-              src={pageLastSVG}
-              role="presentation"
-              alt=""
+              src="{pageLastSVG}"
+              alt="submit issue"
               width="19rem"
               style="vertical-align: -0.15rem; margin-left: 1rem; margin-right: -1.1rem"
             />
@@ -2866,8 +3073,8 @@
           id="stepReviewSubmit"
           class="describe-issue"
           style=""
-          class:visible={reportNewIssueStep5}
-          class:hidden={!reportNewIssueStep5}
+          class:visible="{reportNewIssueStep5}"
+          class:hidden="{!reportNewIssueStep5}"
         >
           <div class="step-five-label">
             {messages["report.issue"]["label.review.title"]}
@@ -2885,16 +3092,20 @@
               {$issueType.name}
             </div>
           </div>
-          <div class="step-five-issue-detail-label">
-            {messages["report.issue"]["label.review.issue.detail"]}
-            <div class="step-five-issue-detail">
-              {#each $issueDetail as detail, i}
-                <span id="issue-details" style="margin-right: 1rem"
-                  >{i + 1}-{detail.label}</span
-                >
-              {/each}
+          {#if $issueType.name !== "Other"}
+            <div class="step-five-issue-detail-label">
+              {messages["report.issue"]["label.review.issue.detail"]}
+              <div class="step-five-issue-detail">
+                {#if $issueDetail}
+                  {#each $issueDetail.values as detail, i}
+                    <span id="issue-details" style="margin-right: 1rem"
+                      >{i + 1}-{detail.label}</span
+                    >
+                  {/each}
+                {/if}
+              </div>
             </div>
-          </div>
+          {/if}
 
           {#if selectedFileSrc}
             <div class="step-five-issue-detail-label">
@@ -2902,7 +3113,7 @@
             </div>
             <!-- svelte-ignore a11y-img-redundant-alt -->
             <img
-              src={selectedFileSrc}
+              src="{selectedFileSrc}"
               height="auto"
               width="75rem"
               alt="uploaded image"
@@ -2944,24 +3155,68 @@
             </div>
           {/if}
 
+          {#if $dateTimeAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.datetime.attribute"]}
+              <div class="step-five-issue-description">
+                {$dateTimeAttribute.values}
+              </div>
+            </div>
+          {/if}
+
+          {#if $stringAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.string.attribute"]}
+              <div class="step-five-issue-description">
+                {$stringAttribute.values}
+              </div>
+            </div>
+          {/if}
+
+          {#if $textAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.text.attribute"]}
+              <div class="step-five-issue-description">
+                {$textAttribute.values}
+              </div>
+            </div>
+          {/if}
+
+          {#if $numberAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.number.attribute"]}
+              <div class="step-five-issue-description">
+                {$numberAttribute.values}
+              </div>
+            </div>
+          {/if}
+
+          {#if $singleSelectAttribute}
+            <div class="step-five-issue-description-label">
+              {messages["report.issue"]["label.review.singleselect.attribute"]}
+              <div class="step-five-issue-description">
+                {$singleSelectAttribute.values[0].label}
+              </div>
+            </div>
+          {/if}
+
           {#if mediaUrl && !$issueDescription && !$issueSubmitterName && !$issueSubmitterContact}
             <div></div>
           {/if}
-          <Recaptcha bind:this={recaptcha} {sitekey} />
+          <Recaptcha bind:this="{recaptcha}" sitekey="{sitekey}" />
 
           <button
             class="button back-button"
             style="margin-bottom: 1.25rem; margin-top: 2rem"
-            on:click={() => {
+            on:click="{() => {
               reportNewIssueStep5 = false;
               reportNewIssueStep4 = true;
               currentStep = 4;
-            }}
+            }}"
           >
             <img
-              src={pageBackwardsSVG}
-              role="presentation"
-              alt=""
+              src="{pageBackwardsSVG}"
+              alt="previous step"
               width="19rem"
               style="vertical-align: -0.15rem; margin-left: -1rem; margin-right: 1rem"
             />
@@ -2969,21 +3224,21 @@
           </button>
           <button
             class="button submit-button g-recaptcha"
-            class:next-button={$issueType && $issueDetail}
-            class:disabled-button={$issueType === null || $issueDetail === null}
-            data-sitekey={sitekey}
+            class:next-button="{$issueType && $issueDetail}"
+            class:disabled-button="{$issueType === null ||
+              $issueDetail === null}"
+            data-sitekey="{sitekey}"
             data-callback="handleToken"
             data-action="submit"
-            on:click={() => {
+            on:click="{() => {
               if (isOnline) recaptcha.renderRecaptcha(handleToken);
-              else handleToken("");
-            }}
+              else handleToken('');
+            }}"
           >
             {messages["report.issue"]["button.submit"]}
             <img
-              role="presentation"
-              src={pageLastSVG}
-              alt=""
+              src="{pageLastSVG}"
+              alt="submit issue"
               width="19rem"
               style="vertical-align: -0.15rem; margin-left: 1rem; margin-right: -1.1rem"
             />
@@ -2997,8 +3252,8 @@
         <div
           id="stepSubmitted"
           class="describe-issue success-message-div"
-          class:visible={reportNewIssueStep6}
-          class:hidden={!reportNewIssueStep6}
+          class:visible="{reportNewIssueStep6}"
+          class:hidden="{!reportNewIssueStep6}"
         >
           <div class="success-message">
             {#if postingError}
@@ -3009,7 +3264,7 @@
           </div>
 
           <div
-            class:success-message-two-offline={!isOnline}
+            class:success-message-two-offline="{!isOnline}"
             style="margin-bottom: 0.5rem"
             id="success-message-2"
           >
@@ -3030,11 +3285,11 @@
     <div class="find-issues">
       <div
         id="stepOne"
-        class:visible={reportNewIssue || findReportedIssue}
+        class:visible="{reportNewIssue || findReportedIssue}"
         style="width:{(!isOnline && window.innerWidth) > 320
           ? '50vw'
           : '100vw'}"
-        class:hidden={!reportNewIssue && !findReportedIssue}
+        class:hidden="{!reportNewIssue && !findReportedIssue}"
       >
         {#if reportNewIssue}
           <div class="describe-issue">
@@ -3054,16 +3309,16 @@
             {:else}
               <div class="offline-input">
                 <input
-                  bind:this={offlineAddressInputSelector}
+                  bind:this="{offlineAddressInputSelector}"
                   class="offline-address-input"
-                  placeholder={messages["map"]["pac-input-placeholder"]}
-                  on:click={() => (invalidOfflineAddress = false)}
+                  placeholder="{messages['map']['pac-input-placeholder']}"
+                  on:click="{() => (invalidOfflineAddress = false)}"
                 />
               </div>
 
               <div
                 class="step-one-invalid-offline-address"
-                class:visible={invalidOfflineAddress}
+                class:visible="{invalidOfflineAddress}"
               >
                 {messages["report.issue"]["invalid.offline.address"]}
               </div>
@@ -3083,11 +3338,11 @@
             <div>
               <button
                 class="button next-button"
-                step-one-button-next={$issueAddress}
-                class:disabled-button={!$issueAddress && isOnline}
-                disabled={!$issueAddress && isOnline}
+                step-one-button-next="{$issueAddress}"
+                class:disabled-button="{!$issueAddress && isOnline}"
+                disabled="{!$issueAddress && isOnline}"
                 style="margin-bottom: 0.5rem"
-                on:click={() => {
+                on:click="{() => {
                   if (!isOnline) {
                     if (
                       offlineAddressInputSelector?.value?.length >=
@@ -3100,7 +3355,7 @@
                     }
                   }
 
-                  localStorage.setItem("issueAddress", $issueAddress); // for offline mode
+                  localStorage.setItem('issueAddress', $issueAddress); // for offline mode
 
                   reportNewIssueStep2 = true;
                   currentStep = 2;
@@ -3114,14 +3369,13 @@
                       populateIssueDetailList();
                     }
                   }, 100);
-                }}
+                }}"
               >
                 {messages["report.issue"]["button.next"]}
 
                 <img
-                  src={pageForwardSVG}
-                  role="presentation"
-                  alt=""
+                  src="{pageForwardSVG}"
+                  alt="next step"
                   width="19rem"
                   style="vertical-align: -0.15rem; margin-left: 1rem; margin-right: -1.1rem;"
                 />
@@ -3132,10 +3386,10 @@
 
         <!-- END Report New Issue Flow -->
         {#if isOnline}
-          {#if provider === "googleMaps"}
+          {#if (provider === 'googleMaps')}
             <input
               id="pac-input"
-              placeholder={messages["map"]["pac-input-placeholder"]}
+              placeholder="{messages['map']['pac-input-placeholder']}"
               type="text"
             />
           {/if}
@@ -3147,8 +3401,8 @@
         {#if showModal}
           <Modal
             title="Issue Details"
-            color={primaryOne}
-            on:cancel={() => (showModal = false)}
+            color="{primaryOne}"
+            on:cancel="{() => (showModal = false)}"
           >
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
@@ -3156,21 +3410,36 @@
               >
               {selectedIssue.service_name}
             </div>
-
-            <div class="issue-detail-line">
-              <span style="font-weight: 300; margin-right: 0.3rem"
-                >{messages["modal"]["label.detail"]}</span
-              >
-              {#if selectedIssue?.selected_values}
-                {#each selectedIssue.selected_values[0]?.values as issueDetail, i}
-                  <span style="margin-right:1rem"
-                    >{i + 1}-{issueDetail.name}</span
-                  >
-                {/each}
-              {:else}
-                -
-              {/if}
-            </div>
+            
+            {#if selectedIssue?.selected_values}
+              {#each selectedIssue?.selected_values as issueValues}
+                <div class="issue-detail-line">
+                  <span style="font-weight:300; margin-right: 0.3rem">
+                      {#if issueValues.datatype === 'multivaluelist'}
+                        {messages["modal"]["label.detail"]}
+                      {:else if issueValues.datatype === 'string'}
+                        {messages["modal"]["label.string"]}
+                      {:else if issueValues.datatype === 'number'}
+                        {messages["modal"]["label.number"]}
+                      {:else if issueValues.datatype === 'singlevaluelist'}
+                        {messages["modal"]["label.singleselect"]}
+                      {:else if issueValues.datatype === 'datetime'}
+                        {messages["modal"]["label.datetime"]}
+                      {:else if issueValues.datatype === 'text'}
+                        {messages["modal"]["label.text"]}
+                      {/if}
+                  </span>
+                  
+                  {#if issueValues.datatype === 'datetime'}
+                    {formatDate(issueValues.values[0].name)}
+                  {:else if issueValues.datatype === 'multivaluelist'}
+                    {issueValues.values[0].key.split(',').join(', ')}
+                  {:else}
+                    {issueValues.values[0].name}
+                  {/if}
+                </div>
+              {/each}
+            {/if}
 
             <div class="issue-detail-line">
               <span style="font-weight: 300; margin-right: 0.3rem"
@@ -3191,14 +3460,15 @@
             </div>
 
             {#if selectedIssue.media_url !== undefined}
-              <a href={selectedIssue.media_url} target="_blank">
-                <img
-                  src={selectedIssue.media_url}
-                  alt="The issue"
-                  width="175px"
-                  style="margin-top: 0.5rem; border-radius: 15px; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.4)"
-                />
-              </a>
+              <!-- svelte-ignore a11y-img-redundant-alt -->
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <img
+                src="{selectedIssue.media_url}"
+                alt="photo of the issue"
+                width="175px"
+                style="margin-top: 0.5rem; border-radius: 15px; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.4)"
+                on:click="{() => openInNewWindow(selectedIssue.media_url)}"
+              />
             {/if}
           </Modal>
         {/if}
@@ -3210,9 +3480,9 @@
               {#if showFilters}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span
-                  on:click={() => {
+                  on:click="{() => {
                     showFilters = !showFilters;
-                  }}
+                  }}"
                   style="cursor: pointer"
                 >
                   -
@@ -3221,13 +3491,13 @@
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span
                   style="cursor: pointer"
-                  on:click={() => {
+                  on:click="{() => {
                     showFilters = !showFilters;
                     // Wait for the DOM to render the Dropdown
                     setTimeout(() => {
                       populateIssueTypeSelectDropdown();
                     }, 10);
-                  }}
+                  }}"
                 >
                   +
                 </span>
@@ -3237,7 +3507,7 @@
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
               style="margin-right: 1rem; cursor: pointer"
-              on:click={reportCSV}
+              on:click="{reportCSV}"
             >
               {#if isAuthenticated}
                 {messages["find.issue"]["label.download.csv"]}
@@ -3250,27 +3520,26 @@
               <div class="filters">
                 <select
                   class="select-filter"
-                  bind:this={issueTypeSelectSelector}
-                  on:change={async (e) => {
+                  bind:this="{issueTypeSelectSelector}"
+                  on:change="{async (e) => {
                     clearData();
                     filterIssueType = { service_code: e.target.value };
 
                     await getIssues();
                     setTimeout(async () => await addIssuesToMap(), 1000);
-                  }}
-                ></select>
+                  }}"></select>
 
                 <DateRangePicker
-                  on:datesSelected={(e) => {
+                  on:datesSelected="{(e) => {
                     if (e.detail.length === 2) {
                       filterStartDate = e.detail[0];
                       filterEndDate = e.detail[1];
                     }
                     findIssuesButtonSelector.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
+                      behavior: 'smooth',
+                      block: 'start',
                     });
-                  }}
+                  }}"
                 />
               </div>
 
@@ -3278,28 +3547,26 @@
                 {#if filterIssueType.service_name !== ""}
                   <div class="filter-selection-label">
                     {filterIssueType.service_name}
-                    <Button
-                      on:click={async () => {
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <img
+                      src="{closeSVG}"
+                      class="white-closeSVG"
+                      alt="remove filter"
+                      width="14rem"
+                      on:click="{async () => {
                         filterIssueType = {
-                          service_code: "",
-                          service_name: "",
+                          service_code: '',
+                          service_name: '',
                         };
-                        issuesData = "";
+                        issuesData = '';
                         hasMoreResults = true;
                         clearHeatmap();
 
                         await getIssues();
                         issueTypeSelectSelector.selectedIndex = 0;
                         addIssuesToMap();
-                      }}
-                    >
-                      <img
-                        src={closeSVG}
-                        class="white-closeSVG"
-                        alt="remove filter"
-                        width="14rem"
-                      />
-                    </Button>
+                      }}"
+                    />
                   </div>
                 {/if}
 
@@ -3309,10 +3576,15 @@
                       filterEndDate
                     )}
 
-                    <Button
-                      on:click={async () => {
-                        filterStartDate = "";
-                        filterEndDate = "";
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <img
+                      src="{closeSVG}"
+                      class="white-closeSVG"
+                      alt="remove filter"
+                      width="14rem"
+                      on:click="{async () => {
+                        filterStartDate = '';
+                        filterEndDate = '';
 
                         clearData();
 
@@ -3320,16 +3592,8 @@
                         await getIssues();
 
                         addIssuesToMap();
-                      }}
-                    >
-                      <img
-                        src={closeSVG}
-                        class="white-closeSVG"
-                        role="presentation"
-                        alt=""
-                        width="14rem"
-                      />
-                    </Button>
+                      }}"
+                    />
                   </div>
                 {/if}
               </div>
@@ -3340,15 +3604,15 @@
             {messages["find.issue"]["label.reported.issues"]}
             {#if showTable}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span on:click={toggleTable} style="cursor: pointer">-</span>
+              <span on:click="{toggleTable}" style="cursor: pointer">-</span>
             {:else}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <span on:click={toggleTable} style="cursor: pointer">+</span>
+              <span on:click="{toggleTable}" style="cursor: pointer">+</span>
             {/if}
           </div>
 
           {#if showTable}
-            <table bind:this={tableSelector} class="issues-table">
+            <table bind:this="{tableSelector}" class="issues-table">
               <thead>
                 <tr>
                   <th id="issue-type-header">
@@ -3370,11 +3634,11 @@
                 {#if filteredIssuesData}
                   {#each filteredIssuesData as issue (issue.service_request_id)}
                     <tr
-                      id={issue.service_request_id}
-                      bind:this={issuesRefs[issue.service_request_id]}
-                      on:click={(e) => {
+                      id="{issue.service_request_id}"
+                      bind:this="{issuesRefs[issue.service_request_id]}"
+                      on:click="{(e) => {
                         const clickedElement = e.target;
-                        const selectedRow = clickedElement.closest("tr");
+                        const selectedRow = clickedElement.closest('tr');
                         const rowIndex = Array.from(tableSelector.rows).indexOf(
                           selectedRow
                         );
@@ -3382,13 +3646,13 @@
                         if (rowIndex > 0) {
                           const rowAbove = tableSelector.rows[rowIndex - 1];
                           rowAbove.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
+                            behavior: 'smooth',
+                            block: 'start',
                           });
                         }
 
                         setNewCenter(issue.lat, issue.long, 17);
-                      }}
+                      }}"
                       style="background-color: {visibleDetails.has(
                         issue.service_request_id
                       )
@@ -3399,7 +3663,7 @@
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <td
                         id="td-issue-type"
-                        on:click={() => {
+                        on:click="{() => {
                           if (
                             selectedIssue &&
                             selectedIssue.lat === issue.lat &&
@@ -3411,7 +3675,7 @@
                             clearIcons();
                             selectIssue(issue);
                           }
-                        }}
+                        }}"
                       >
                         {#if issue.service_name.length > issueTypeTrimCharacters}
                           {issue.service_name.slice(
@@ -3444,7 +3708,7 @@
                           ? 'unset'
                           : 'hidden'}; 
                           "
-                        on:click={() => {
+                        on:click="{() => {
                           if (
                             selectedIssue &&
                             selectedIssue.lat === issue.lat &&
@@ -3456,39 +3720,33 @@
                             clearIcons();
                             selectIssue(issue);
                           }
-                        }}
+                        }}"
                       >
                         {issue.description ?? "-"}
                         {#if visibleDetails.has(issue.service_request_id)}
-                          <IconButton
-                            ariaLabel="view Issue Details"
-                            on:click={(e) => {
-                              e.stopPropagation();
+                          <!-- svelte-ignore a11y-click-events-have-key-events -->
+                          <img
+                            src="{detailSVG}"
+                            style="background-color: {accentTwo}; vertical-align: middle"
+                            alt="detail view"
+                            height="17rem"
+                            on:click|stopPropagation="{(e) => {
                               showModal = true;
-                            }}
-                          >
-                            <img
-                              role="presentation"
-                              src={detailSVG}
-                              style="background-color: {accentTwo}; vertical-align: middle"
-                              alt="detail view"
-                              height="17rem"
-                            />
-                          </IconButton>
+                            }}"
+                          />
                         {/if}
                       </td>
 
                       <td id="td-media" style="text-align: center">
                         {#if issue.media_url !== undefined}
-                          <IconLink href={issue.media_url} target="_blank">
-                            <img
-                              role="presentation"
-                              src={imageSVG}
-                              alt=""
-                              width="15rem"
-                              style="margin-right: 0 auto; cursor: pointer; text-align: center"
-                            />
-                          </IconLink>
+                          <!-- svelte-ignore a11y-click-events-have-key-events -->
+                          <img
+                            src="{imageSVG}"
+                            alt="issue media"
+                            width="15rem"
+                            style="margin-right: 0 auto; cursor: pointer; text-align: center"
+                            on:click="{() => openInNewWindow(issue.media_url)}"
+                          />
                         {:else}
                           <span style="text-align: center">-</span>
                         {/if}
@@ -3497,7 +3755,7 @@
                       <td
                         id="td-reported-time"
                         style="text-align: center"
-                        on:click={() => {
+                        on:click="{() => {
                           if (
                             selectedIssue &&
                             selectedIssue.lat === issue.lat &&
@@ -3509,7 +3767,7 @@
                             clearIcons();
                             selectIssue(issue);
                           }
-                        }}
+                        }}"
                       >
                         {formatRelativeDate(issue.requested_datetime)}
                       </td>
@@ -3532,7 +3790,10 @@
                     >
                   </tr>
                 {/if}
-                <div use:inview={{ options }} on:change={loadMoreResults}></div>
+                <div
+                  use:inview="{{ options }}"
+                  on:change="{loadMoreResults}"
+                ></div>
               </tbody>
             </table>
           {/if}

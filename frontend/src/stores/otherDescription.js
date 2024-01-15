@@ -12,18 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { writable } from 'svelte/store';
 
-package app.model.servicerequest;
+const otherDescription = writable('');
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
-public enum ServiceRequestPriority {
-    LOW, MEDIUM, HIGH;
-
-    @Override
-    @JsonValue
-    public String toString() {
-        return name().toLowerCase();
-    }
-}
-
+export default otherDescription;
