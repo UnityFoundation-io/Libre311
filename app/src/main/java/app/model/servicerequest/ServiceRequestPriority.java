@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 package app.model.servicerequest;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ServiceRequestStatus {
-    OPEN, IN_PROGRESS, CLOSED;
+public enum ServiceRequestPriority {
+    LOW, MEDIUM, HIGH;
 
     @Override
     @JsonValue
