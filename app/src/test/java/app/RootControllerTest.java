@@ -16,12 +16,11 @@ package app;
 
 import app.dto.discovery.DiscoveryDTO;
 import app.dto.service.ServiceDTO;
-import app.dto.servicerequest.PostRequestServiceRequestDTO;
-import app.dto.servicerequest.PostResponseServiceRequestDTO;
-import app.dto.servicerequest.ServiceRequestDTO;
+import app.dto.servicerequest.*;
 import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequestRepository;
+import app.model.servicerequest.ServiceRequestStatus;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockReCaptchaService;
@@ -40,6 +39,7 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -265,6 +265,112 @@ public class RootControllerTest {
         Optional<ServiceRequestDTO[]> bodyOptional = response.getBody(ServiceRequestDTO[].class);
         assertTrue(bodyOptional.isPresent());
         ServiceRequestDTO[] serviceRequestDTOS = bodyOptional.get();
+        assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
+        assertEquals(1, serviceRequestDTOS.length);
+    }
+
+    // update
+    @Test
+    public void canUpdateIfAuthenticated() {
+        HttpResponse<?> response;
+
+        response = createServiceRequest("001", "12345 Fairway",
+                Map.of("attribute[SDWLK]", "CRACKED"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        assertTrue(optional.isPresent());
+        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
+        PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
+
+        // update attempt
+        PatchServiceRequestDTO patchServiceRequestDTO = new PatchServiceRequestDTO();
+        patchServiceRequestDTO.setPriority(ServiceRequestPriority.HIGH);
+        patchServiceRequestDTO.setStatus(ServiceRequestStatus.IN_PROGRESS);
+        patchServiceRequestDTO.setServiceNotice("To be fulfilled by Acme Concrete Co.");
+        patchServiceRequestDTO.setAgencyEmail("acme@example.com");
+        patchServiceRequestDTO.setAgencyResponsible("Acme Concrete");
+        patchServiceRequestDTO.setStatusNotes("Will investigate and remediate within 2 weeks");
+
+        HttpRequest<?> request = HttpRequest
+                .PATCH("admin/requests/" + postResponseServiceRequestDTO.getId(), patchServiceRequestDTO)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpRequest<?> finalRequest = request;
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(finalRequest, SensitiveServiceRequestDTO[].class);
+        });
+        assertEquals(UNAUTHORIZED, exception.getStatus());
+
+        login();
+
+        // update
+        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
+        assertEquals(HttpStatus.OK, response.status());
+
+        Optional<SensitiveServiceRequestDTO[]> bodyOptional = response.getBody(SensitiveServiceRequestDTO[].class);
+        assertTrue(bodyOptional.isPresent());
+        SensitiveServiceRequestDTO[] serviceRequestDTOS = bodyOptional.get();
+        assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
+        assertEquals(1, serviceRequestDTOS.length);
+        SensitiveServiceRequestDTO updatedServiceRequestDTO = serviceRequestDTOS[0];
+        assertEquals("acme@example.com", updatedServiceRequestDTO.getAgencyEmail());
+        assertEquals("To be fulfilled by Acme Concrete Co.", updatedServiceRequestDTO.getServiceNotice());
+        assertEquals("Acme Concrete", updatedServiceRequestDTO.getAgencyResponsible());
+        assertEquals("Will investigate and remediate within 2 weeks", updatedServiceRequestDTO.getStatusNotes());
+        assertEquals(ServiceRequestPriority.HIGH, updatedServiceRequestDTO.getPriority());
+        assertEquals(ServiceRequestStatus.IN_PROGRESS, updatedServiceRequestDTO.getStatus());
+
+        // update dates
+        request = HttpRequest
+                .PATCH("admin/requests/" + postResponseServiceRequestDTO.getId(),
+                        Map.of(
+                                "closed_date", "2023-01-25T13:15:30Z",
+                                "expected_date", "2023-01-15T13:15:30Z"
+                        ))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
+        assertEquals(HttpStatus.OK, response.status());
+        bodyOptional = response.getBody(SensitiveServiceRequestDTO[].class);
+        assertTrue(bodyOptional.isPresent());
+        serviceRequestDTOS = bodyOptional.get();
+        assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
+        assertEquals(1, serviceRequestDTOS.length);
+        updatedServiceRequestDTO = serviceRequestDTOS[0];
+        assertNotNull(updatedServiceRequestDTO.getClosedDate());
+        assertNotNull(updatedServiceRequestDTO.getExpectedDate());
+    }
+
+    // read
+    @Test
+    public void canReadSensitiveInfoIfAuthenticated() {
+        HttpResponse<?> response;
+
+        response = createServiceRequest("001", "12345 Fairway",
+                Map.of("attribute[SDWLK]", "NARROW"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        assertTrue(optional.isPresent());
+        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
+
+        PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
+
+        // unauthenticated read attempt
+        HttpRequest<?> request = HttpRequest.GET("admin/requests/" + postResponseServiceRequestDTO.getId());
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
+        });
+        assertEquals(UNAUTHORIZED, exception.getStatus());
+
+        login();
+
+        response = client.toBlocking().exchange("admin/requests/" + postResponseServiceRequestDTO.getId(), SensitiveServiceRequestDTO[].class);
+        assertEquals(HttpStatus.OK, response.status());
+
+        Optional<SensitiveServiceRequestDTO[]> bodyOptional = response.getBody(SensitiveServiceRequestDTO[].class);
+        assertTrue(bodyOptional.isPresent());
+        SensitiveServiceRequestDTO[] serviceRequestDTOS = bodyOptional.get();
         assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
         assertEquals(1, serviceRequestDTOS.length);
     }
