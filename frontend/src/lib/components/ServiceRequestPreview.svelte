@@ -18,7 +18,7 @@
 		visible = !visible;
 	}
 
-	function getStatus (serviceRequest: ServiceRequest) {
+	function getStatus (serviceRequest: ServiceRequest) : string  {
 		switch (serviceRequest.status) {
 			case 'closed': {
 				return 'success';
@@ -27,6 +27,7 @@
 				return 'warn';
 			}
 		}
+		return 'error';
 	}
 
 	function toTimeStamp (serviceRequest: ServiceRequest) {
