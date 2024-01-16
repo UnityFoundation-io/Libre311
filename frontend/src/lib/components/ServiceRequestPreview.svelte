@@ -8,7 +8,7 @@
 
 	export let serviceRequest: GetServiceRequestsResponse;
 
-	let visible: Boolean = false;
+	let visible: boolean = false;
 
 	function closeDropdown() {
 		visible = false;
