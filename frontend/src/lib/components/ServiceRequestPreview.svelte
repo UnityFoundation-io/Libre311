@@ -20,7 +20,7 @@
 </script>
 
 <div class='flow-root'>
-	<h1 class='text-lg float-left'>#{myData.service_request_id}</h1>
+	<h1 class='text-lg float-left tracking-wide'>#{myData.service_request_id}</h1>
 	<Badge class='text-sm float-right' type='warn'>{myData.status}</Badge>
 </div>
 
