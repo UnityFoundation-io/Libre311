@@ -32,23 +32,7 @@ micronaut:
       oauth:
         path: /api/oauth/access_token
     intercept-url-map:
-      - pattern: /favicon.ico
-        http-method: GET
-        access:
-          - isAnonymous()
-      - pattern: /
-        http-method: GET
-        access:
-          - isAnonymous()
-      - pattern: /login-failed.html
-        http-method: GET
-        access:
-          - isAnonymous()
       - pattern: /info
-        http-method: GET
-        access:
-          - isAnonymous()
-      - pattern: /assets/**
         http-method: GET
         access:
           - isAnonymous()
@@ -60,10 +44,6 @@ micronaut:
         http-method: GET
         access:
           - isAnonymous()
-      - pattern: /**
-        http-method: GET
-        access:
-          - isAnonymous()
   router:
     static-resources:
       swagger:
@@ -72,10 +52,6 @@ micronaut:
       swagger-ui:
         paths: classpath:META-INF/swagger/views/swagger-ui
         mapping: /swagger-ui/**
-      default:
-        paths: classpath:public
-        mapping: /**
-        enabled: true
   data:
     pageable:
       size-parameter-name: page_size

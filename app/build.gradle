@@ -78,15 +78,3 @@ micronaut {
 tasks.withType(JavaCompile) {
     options.fork = true
 }
-
-tasks.register('copyClientResources', Copy) {
-    dependsOn ':frontend:build'
-    from "${project(':frontend').projectDir}/build"
-    into "${project(':app').buildDir}/resources/main/public"
-}
-
-processResources {
-    dependsOn 'copyClientResources'
-}
-
-
