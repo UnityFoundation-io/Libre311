@@ -3,10 +3,10 @@
 	import { goto } from '$app/navigation';
 	import { Badge, Card } from 'stwui';
 	import { Dropdown } from 'stwui';
-	import type { GetServiceRequestsResponse, ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 
-	export let serviceRequest: GetServiceRequestsResponse;
+	export let serviceRequest: ServiceRequest;
 
 	let visible: boolean = false;
 
