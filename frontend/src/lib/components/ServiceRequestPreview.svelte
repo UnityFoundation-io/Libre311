@@ -53,9 +53,9 @@
 		
 		{#if serviceRequest.media_url}
 			<div class='bg-[#D9D9D9] rounded-md'>
-				<button class='flex overflow-y-hidden overflow-x-scroll mx-auto rounded-md' on:click={gotoServiceRequest}>
+				<a class='flex overflow-y-hidden overflow-x-scroll mx-auto rounded-md' href={`/issues/map/${serviceRequest.service_request_id}`}>
 					<img class='h-[300px] rounded-b-none w-full' alt='service-request' src={serviceRequest.media_url}/>
-				</button>
+				</a>
 			</div>
 		{/if}
 
