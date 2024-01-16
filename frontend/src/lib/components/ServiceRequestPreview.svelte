@@ -1,41 +1,106 @@
 <script lang='ts'>
-	import image from '$lib/assets/cracked-road.png';
 	import messages from '$media/messages.json'
 	import { goto } from '$app/navigation';
-	import { Badge } from 'stwui';
+	import { Badge, Card } from 'stwui';
+	import { Dropdown } from 'stwui';
+	import type { GetServiceRequestsResponse, ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 
-	// Test Data
-	let myData = {
-		'title': 'Road Issue',
-		'address': '220 N Main St, Paris MO 65275',
-		'description': 'It looks like a light clog has formed at this intersection',
-		'requested_datetime': '2023-03-29T14:36:43-04:00',
-		'service_request_id': '14282821',
-		'status': 'Acknowledged'
+	export let serviceRequest: GetServiceRequestsResponse;
+
+	let visible: Boolean = false;
+
+	function closeDropdown() {
+		visible = false;
+	}
+
+	function toggleDropdown() {
+		visible = !visible;
+	}
+
+	function getStatus (serviceRequest: ServiceRequest) {
+		switch (serviceRequest.status) {
+			case 'closed': {
+				return 'success';
+			}
+			case 'open': {
+				return 'warn';
+			}
+		}
+	}
+
+	function toTimeStamp (serviceRequest: ServiceRequest) {
+		return `${new Date(serviceRequest.requested_datetime).toLocaleDateString()} ${new Date(serviceRequest.requested_datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
 	}
 
 	const gotoServiceRequest = () => {
-		goto('/issues/map/123');
+		goto(`/issues/map/${serviceRequest.service_request_id}`);
 	}
 </script>
 
-<div class='flow-root'>
-	<h1 class='text-lg float-left tracking-wide'>#{myData.service_request_id}</h1>
-	<Badge class='text-sm float-right' type='warn'>{myData.status}</Badge>
-</div>
+<Card>
+	<div class="my-1 mx-4" slot="content">
 
-<p class='text-sm font-extralight'>{myData.requested_datetime}</p>
+		<div class='flow-root'>			
+			<h2 class='text-base float-left tracking-wide'>
+				#{serviceRequest.service_request_id}
+			</h2>
+			<Badge class='text-sm float-right' type={getStatus(serviceRequest)}>{serviceRequest.status}</Badge>
+		</div>
 
-<button on:click={gotoServiceRequest}>
-	<img class='rounded-md' alt='service-request' src={image}/>
-</button>
-<div>
+		<p class='text-sm font-extralight my-1'>{toTimeStamp(serviceRequest)} </p>
+		
+		{#if serviceRequest.media_url}
+			<div class='bg-[#D9D9D9] rounded-md'>
+				<button class='flex overflow-y-hidden overflow-x-scroll mx-auto rounded-md' on:click={gotoServiceRequest}>
+					<img class='h-[300px] rounded-b-none w-full' alt='service-request' src={serviceRequest.media_url}/>
+				</button>
+			</div>
+		{/if}
 
-</div>
+		<div class='mt-2 flow-root'>
+			<a href={`/issues/map/${serviceRequest.service_request_id}`}>
+				<h1 class='text-lg float-left'>{serviceRequest.service_name}</h1>
+			</a>
 
-<a class="text-sm underline underline-offset-1" href='http://tinyurl.com/2hntej99'>{myData.address}</a>
+			<Dropdown class='float-right' bind:visible={visible}>
+				<button
+					aria-label="dropdown toggle"
+					slot="trigger"
+					on:click={toggleDropdown}
+					type="button"
+				>
+					<span class="sr-only">Open user menu</span>
+					<img
+						src={dropDownIcon}
+						alt="drop-down-menu"
+					/>
+				</button>
+				<Dropdown.Items slot="items">
+					<Dropdown.Items.Item on:click={closeDropdown} label="Item 1" />
+					<Dropdown.Items.Item on:click={closeDropdown} label="Item 2" />
+					<Dropdown.Items.Item on:click={closeDropdown} label="Item 3" />
+				</Dropdown.Items>
+			</Dropdown>
+		</div>
+		
+		<div class="mb-2">
+			<p class="text-sm">{serviceRequest.address}</p>
+		</div>
+		
+		<div class="mb-1">
+			<strong class="text-base">{messages['serviceRequest']['description']}</strong>
+		</div>
 
-<div>
-	<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-	<p class='w-82 overflow-hidden text-sm text-ellipsis whitespace-nowrap'>{myData.description}</p>
-</div>
+		<div>
+			<p class='w-82 overflow-hidden text-sm text-ellipsis whitespace-nowrap'>{serviceRequest.description}</p>
+		</div>
+
+	</div>
+</Card>
+
+<style>
+	h1 {
+		color: hsl(var(--primary));
+	}
+</style>
