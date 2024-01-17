@@ -26,8 +26,9 @@
 			case 'Open': {
 				return 'warn';
 			}
+			default:
+				return 'error';
 		}
-		return 'error';
 	}
 
 	function toTimeStamp (timeStamp: string | null | undefined) {
