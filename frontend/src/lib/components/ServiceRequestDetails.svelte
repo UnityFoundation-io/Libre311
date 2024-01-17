@@ -103,21 +103,29 @@
 			<p class='text-sm'>{serviceRequest.description}</p>
 		</div>
 
-		<div class="mb-1">
-			<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
-			<p class='text-sm'></p>
-		</div>
+		{#if serviceRequest.citizen_contact}
+			<div class="mb-1">
+				<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
+				<p class='text-sm'>{serviceRequest.citizen_contact}</p>
+			</div>
+		{/if}
 
-		<div class="mb-1">
-			<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
-			<p class='text-sm'>{serviceRequest.agency_responsible}</p>
-		</div>
+		{#if serviceRequest.agency_responsible}
+			<div class="mb-1">
+				<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
+				<p class='text-sm'>{serviceRequest.agency_responsible}</p>
+			</div>
+		{/if}
 
 		<div class="flex mb-1">
 			<img alt='clock' src={clockIcon}/>
 			<strong class="ml-1 text-base">{messages['serviceRequest']['expected_datetime']}</strong>
 			<div class="flex ml-1 items-center">
-				<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime)}</p>
+				{#if serviceRequest.expected_datetime}
+					<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime)}</p>
+				{:else}
+					<p class="text-sm">--</p>
+				{/if}
 			</div>
 		</div>
 
