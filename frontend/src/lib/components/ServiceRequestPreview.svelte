@@ -20,10 +20,10 @@
 
 	function getStatus (serviceRequest: ServiceRequest) : string  {
 		switch (serviceRequest.status) {
-			case 'closed': {
+			case 'Closed': {
 				return 'success';
 			}
-			case 'open': {
+			case 'Open': {
 				return 'warn';
 			}
 		}
@@ -40,7 +40,7 @@
 </script>
 
 <Card>
-	<div class="my-1 mx-4" slot="content">
+	<div class="my-2 mx-4" slot="content">
 
 		<div class='flow-root'>			
 			<h2 class='text-base float-left tracking-wide'>
