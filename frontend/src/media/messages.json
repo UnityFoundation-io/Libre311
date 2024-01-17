@@ -11,7 +11,7 @@
 		"detail": "Details:",
 		"citizen_contact": "Citizen Contact:",
 		"agency_contact": "Agency Contact:",
-		"expected_datetime": "Estimated Fix",
+		"expected_datetime": "Estimated Fix:",
 		"service_notes": "Service Notes"
 	}
 }

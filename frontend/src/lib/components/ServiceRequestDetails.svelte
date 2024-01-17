@@ -1,10 +1,10 @@
 <script lang='ts'>
 	import messages from '$media/messages.json'
-	import { goto } from '$app/navigation';
 	import { Badge, Card } from 'stwui';
 	import { Dropdown } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
+	import clockIcon from '$lib/assets/Clock.svg';
 
 	export let serviceRequest: ServiceRequest;
 
@@ -112,9 +112,12 @@
 			<p class='text-sm'>{serviceRequest.agency_responsible}</p>
 		</div>
 
-		<div class="mb-1">
-			<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
-			<p class='text-sm'>{toTimeStamp(serviceRequest.expected_datetime)}</p>
+		<div class="flex mb-1">
+			<img alt='clock' src={clockIcon}/>
+			<strong class="ml-1 text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+			<div class="flex ml-1 items-center">
+				<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime)}</p>
+			</div>
 		</div>
 
 		{#if serviceRequest.status_notes}
