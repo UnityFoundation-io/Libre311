@@ -2,7 +2,7 @@
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 
   // Map imports
-  import OpenStreetMap from './OpenStreetMap.svelte';
+  import OpenStreetMap from '$lib/components/OpenStreetMap.svelte';
   import type { LatLngExpression } from 'leaflet';
 
   // Initial View for map
