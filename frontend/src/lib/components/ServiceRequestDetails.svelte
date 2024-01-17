@@ -105,7 +105,7 @@
 		<div class="mb-1">
 			<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
 			<p class='text-sm'></p>
-		</div>expected_datetime
+		</div>
 
 		<div class="mb-1">
 			<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
