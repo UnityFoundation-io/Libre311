@@ -5,7 +5,7 @@
 		useSelectedServiceRequestStore,
 		useServiceRequestsStore
 	} from '$lib/context/ServiceRequestsContext';
-	import { serviceRequestsResponse } from '../serviceRequestsResponse'; // replace this with the real response
+
 	const issuesLink = useIssuesLinkStore();
 	const serviceRequestsStore = useServiceRequestsStore();
 	const selectedServiceRequest = useSelectedServiceRequestStore();
