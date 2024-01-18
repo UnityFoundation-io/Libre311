@@ -1,25 +1,31 @@
-import type {
-	GetServiceRequestsParams,
-	Libre311Service,
-	Pagination,
-	ServiceRequest
+import {
+	type ServiceRequestId,
+	type GetServiceRequestsParams,
+	type Libre311Service,
+	type Pagination,
+	type ServiceRequest
 } from '$lib/services/Libre311/Libre311';
-import { ASYNC_IN_PROGRESS, asAsyncSuccess, type AsyncResult } from '$lib/services/http';
-import type { Maybe } from '$lib/utils/types';
+import {
+	asAsyncFailure,
+	asAsyncSuccess,
+	ASYNC_IN_PROGRESS,
+	type AsyncResult
+} from '$lib/services/http';
+
+import type { Maybe, Selectable } from '$lib/utils/types';
 import type { Page } from '@sveltejs/kit';
 import { getContext, setContext } from 'svelte';
-import { writable, type Readable } from 'svelte/store';
+import { writable, type Readable, derived, get } from 'svelte/store';
 
 const key = Symbol();
 const issuesBasePath = '/issues/map';
 
 export type ServiceRequestsContext = {
-	nextPageLink: Readable<Maybe<string>>;
-	prevPageLink: Readable<Maybe<string>>;
+	pagination: Readable<EnhancedPagination>;
 	issuesLink: Readable<string>;
 	serviceRequests: Readable<AsyncResult<ServiceRequest[]>>;
 	selectedServiceRequest: Readable<Maybe<ServiceRequest>>;
-	// todo mapBounds store
+	// todo mapBounds store (map should re center whenever new serviceRequests are loaded)
 	// todo applyFilters function
 	// will need to have applyFilters function to filter data (this will reset the pagination) (takes filterable values and updates the URLSearchParams accordingly)
 	// 		will be Set<ServiceId> or something of to that effect.
@@ -40,21 +46,9 @@ function toServiceRequestParams(searchParams: URLSearchParams) {
 	return params;
 }
 
-function toURLSearchParams(srParams: GetServiceRequestsParams) {
-	const searchParams = new URLSearchParams();
-	if (srParams.pageNumber) searchParams.append('pageNumber', srParams.pageNumber.toString());
-	if (srParams.serviceCode) searchParams.append('serviceCode', srParams.serviceCode);
-	if (srParams.startDate) searchParams.append('startDate', srParams.startDate);
-	if (srParams.endDate) searchParams.append('endDate', srParams.endDate);
-	// todo validate that this is the format the backend expects for a list type query param
-	if (srParams.status) searchParams.append('status', "[${srParams.status.join(', ')}]");
-
-	return searchParams;
-}
-
 function createNextPageLink(pagination: Pagination, searchParams: URLSearchParams) {
-	if (pagination.totalPages === pagination.pageNumber) return;
-	searchParams.append('pageNumber', (pagination.pageNumber + 1).toString());
+	if (pagination.totalPages === pagination.pageNumber + 1) return;
+	searchParams.set('pageNumber', (pagination.pageNumber + 1).toString());
 	return issuesBasePath + '?' + searchParams.toString();
 }
 
@@ -62,50 +56,103 @@ function createPrevPageLink(pagination: Pagination, searchParams: URLSearchParam
 	if (pagination.pageNumber === 0) {
 		return;
 	}
-	searchParams.append('pageNumber', (pagination.pageNumber - 1).toString());
+	searchParams.set('pageNumber', (pagination.pageNumber - 1).toString());
 	return issuesBasePath + '?' + searchParams.toString();
 }
 
-function createIssuesLink(pagination: Pagination, searchParams: URLSearchParams) {
-	if (searchParams.entries().next().done) {
+function createIssuesLink(searchParams: URLSearchParams) {
+	if (searchParams.size == 0) {
 		return issuesBasePath;
 	}
-	searchParams.append('pageNumber', pagination.pageNumber.toString());
+
 	return issuesBasePath + '?' + searchParams.toString();
 }
+
+export type SelectableServiceRequest = ServiceRequest & Selectable;
+
+export type EnhancedPagination = Pagination & {
+	nextPage?: string;
+	prevPage?: string;
+};
 
 export function createServiceRequestsContext(
 	libreService: Libre311Service,
 	page: Readable<Page<Record<string, string>, string | null>>
 ): ServiceRequestsContext {
-	const nextPageLink = writable<Maybe<string>>();
-	const prevPageLink = writable<Maybe<string>>();
+	const pagination = writable<EnhancedPagination>();
 	const issuesLink = writable<string>(issuesBasePath);
-	const serviceRequests = writable<AsyncResult<ServiceRequest[]>>(ASYNC_IN_PROGRESS);
+	// consider type as Maybe<AsyncRequest<ServiceRequest>> that would cover all possible states
 	const selectedServiceRequest = writable<Maybe<ServiceRequest>>();
+	const serviceRequestsMapStore =
+		writable<AsyncResult<Map<ServiceRequestId, ServiceRequest>>>(ASYNC_IN_PROGRESS);
+
+	// state updates to be done when a user navigates to /issues/map/[issue_id]
+	async function handleIssueDetailsPageNav(page: Page<Record<string, string>, string | null>) {
+		const asyncMapStoreVal = get(serviceRequestsMapStore);
+		if (asyncMapStoreVal.type === 'success') {
+			// data has already been loaded, update our selectedServiceRequest to the value
+			// later on we may way to request the record to ensure it is completely up to date
+			selectedServiceRequest.set(asyncMapStoreVal.value.get(+page.params.issue_id));
+		} else {
+			// this covers a bit of an edge case where the user navivated straight to the page and we don't have any incidents loaded
+			// so we need to fetch the specific ServiceRequest, add it to our serviceRequestsMapStore, and update the serviceRequests store.
+			try {
+				const res = await libreService.getServiceRequest({
+					service_request_id: +page.params.issue_id
+				});
+				selectedServiceRequest.set(res);
+				const initialMap = new Map<ServiceRequestId, ServiceRequest>();
+				initialMap.set(res.service_request_id, res);
+				serviceRequestsMapStore.set(asAsyncSuccess(initialMap));
+			} catch (error) {
+				serviceRequestsMapStore.set(asAsyncFailure(error));
+			}
+		}
+	}
+
+	// state updates for when  user navigates to /issues/map
+	async function handleMapPageNav(page: Page<Record<string, string>, string | null>) {
+		try {
+			selectedServiceRequest.set(undefined);
+			const updatedParams = toServiceRequestParams(page.url.searchParams);
+			const res = await libreService.getServiceRequests(updatedParams);
+			serviceRequestsMapStore.set(
+				asAsyncSuccess(new Map(res.serviceRequests.map((res) => [res.service_request_id, res])))
+			);
+
+			issuesLink.set(createIssuesLink(page.url.searchParams));
+			pagination.set({
+				...res.metadata.pagination,
+				nextPage: createNextPageLink(res.metadata.pagination, page.url.searchParams),
+				prevPage: createPrevPageLink(res.metadata.pagination, page.url.searchParams)
+			});
+		} catch (error) {
+			serviceRequestsMapStore.set({
+				type: 'failure',
+				error
+			});
+		}
+	}
 
 	page.subscribe(async (page: Page<Record<string, string>, string | null>) => {
-		if (page.params.issue_id) {
-			// set the selectedServiceRequest
-			// then return, preventing map data updates and link updates from occurring when in 'details' view
-			return;
+		if (page.route.id === '/issues/map/[issue_id]') {
+			await handleIssueDetailsPageNav(page);
+		} else if (page.route.id === '/issues/map') {
+			await handleMapPageNav(page);
 		}
-
-		const updatedParams = toServiceRequestParams(page.url.searchParams);
-
-		const res = await libreService.getServiceRequests(updatedParams);
-		serviceRequests.set(asAsyncSuccess(res.serviceRequests));
-
-		// likely don't need to do this conversion
-		const updatedURlSearchParams = toURLSearchParams(updatedParams);
-		issuesLink.set(createIssuesLink(res.metadata.pagination, updatedURlSearchParams));
-		prevPageLink.set(createPrevPageLink(res.metadata.pagination, updatedURlSearchParams));
-		nextPageLink.set(createNextPageLink(res.metadata.pagination, updatedURlSearchParams));
 	});
 
+	const serviceRequests: Readable<AsyncResult<ServiceRequest[]>> = derived(
+		serviceRequestsMapStore,
+		(asyncResultMap: AsyncResult<Map<ServiceRequestId, ServiceRequest>>) => {
+			if (asyncResultMap.type === 'success') {
+				return asAsyncSuccess(Array.from(asyncResultMap.value.values()));
+			} else return asyncResultMap;
+		}
+	);
+
 	const ctx: ServiceRequestsContext = {
-		nextPageLink,
-		prevPageLink,
+		pagination,
 		issuesLink,
 		serviceRequests,
 		selectedServiceRequest
@@ -118,4 +165,20 @@ export function createServiceRequestsContext(
 
 export function useServiceRequestsContext(): ServiceRequestsContext {
 	return getContext<ServiceRequestsContext>(key);
+}
+
+export function useServiceRequestsStore(): ServiceRequestsContext['serviceRequests'] {
+	return useServiceRequestsContext().serviceRequests;
+}
+
+export function useSelectedServiceRequestStore(): ServiceRequestsContext['selectedServiceRequest'] {
+	return useServiceRequestsContext().selectedServiceRequest;
+}
+
+export function useIssuesLinkStore(): ServiceRequestsContext['issuesLink'] {
+	return useServiceRequestsContext().issuesLink;
+}
+
+export function usePaginationStore(): ServiceRequestsContext['pagination'] {
+	return useServiceRequestsContext().pagination;
 }
