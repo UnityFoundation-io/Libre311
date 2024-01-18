@@ -1,7 +1,11 @@
 {
 	"metadata":
-	  {
+	{
+		"app": "Libre311",
 		"content": "Libre311 Share the location of a walking, biking, or transit issues"
+	},
+	"environment": {
+		"loading": "Loading Environment"
 	},
 	"sidebar": {
 		"title": "Requests"

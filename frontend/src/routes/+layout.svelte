@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
 	import Bars3 from '$lib/components/Svg/Bars3.svelte';
+	import SplashLoading from '$lib/components/SplashLoading.svelte';
 	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
 	import '../app.pcss';
@@ -47,7 +48,7 @@
 	</Libre311ContextProvider>
 {:else if contextProviderProps.type == 'inProgress'}
 	<!-- todo nice looking components for loading and error-->
-	<h1>preparing libre311</h1>
+	<SplashLoading/>
 {:else}
 	<h1>something went wrong</h1>
 {/if}
