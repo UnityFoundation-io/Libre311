@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import messages from '$media/messages.json';
 	import { rocketLaunch } from '$lib/assets/rocket-launch.js';
 	import { Progress } from 'stwui';
@@ -12,10 +12,17 @@
 	});
 </script>
 
-<div class='splashLoad flex flex-col justify-center items-center'>
+<div class="splashLoad flex flex-col items-center justify-center">
 	{#if visible}
-		<div class='size-28 m-2'>
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="hsl(var(--primary))" xml:space="preserve">
+		<div class="m-2 size-28">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1"
+				stroke="hsl(var(--primary))"
+				xml:space="preserve"
+			>
 				<g out:fade={{ duration: 200 }} opacity="1">
 					<path
 						class="st0"
@@ -30,11 +37,11 @@
 		</div>
 	{/if}
 
-		<h1 class='m-2 text-2xl'>{messages['metadata']['app']}</h1>
-		<p class='m-2 text-base font-normal'>{messages['environment']['loading']}</p>
-		<div class='m-2 max-w-52 w-52'>
-			<Progress value={0} indeterminate size='md' />
-		</div>
+	<h1 class="m-2 text-2xl">{messages['metadata']['app']}</h1>
+	<p class="m-2 text-base font-normal">{messages['environment']['loading']}</p>
+	<div class="m-2 w-52 max-w-52">
+		<Progress value={0} indeterminate size="md" />
+	</div>
 </div>
 
 <style>
@@ -50,7 +57,7 @@
 	}
 
 	path {
-		fill: rgba(0,0,0,0);
+		fill: rgba(0, 0, 0, 0);
 		opacity: 1;
 	}
 </style>
