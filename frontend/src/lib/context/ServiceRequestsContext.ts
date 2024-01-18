@@ -68,8 +68,6 @@ function createIssuesLink(searchParams: URLSearchParams) {
 	return issuesBasePath + '?' + searchParams.toString();
 }
 
-export type SelectableServiceRequest = ServiceRequest & Selectable;
-
 export type EnhancedPagination = Pagination & {
 	nextPage?: string;
 	prevPage?: string;
