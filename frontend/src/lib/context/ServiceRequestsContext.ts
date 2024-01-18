@@ -12,7 +12,7 @@ import {
 	type AsyncResult
 } from '$lib/services/http';
 
-import type { Maybe, Selectable } from '$lib/utils/types';
+import type { Maybe } from '$lib/utils/types';
 import type { Page } from '@sveltejs/kit';
 import { getContext, setContext } from 'svelte';
 import { writable, type Readable, derived, get } from 'svelte/store';

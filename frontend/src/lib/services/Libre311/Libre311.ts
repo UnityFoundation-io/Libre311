@@ -222,6 +222,37 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
+const PaginationSchema = z.object({
+	size: z.number(), // the number of records per page
+	offset: z.number(), // if pageSize = 10 and pageNumber = 5 then offset = 50,
+	pageNumber: z.number(), // the current page number (first page starts at 0)
+	totalPages: z.number(), // the total number of pages
+	totalSize: z.number() // the total number of records
+});
+
+export type Pagination = z.infer<typeof PaginationSchema>;
+
+export type HasPagination = {
+	pagination: Pagination;
+};
+
+export type HasMetadata<T> = {
+	metadata: T;
+};
+
+export type ServiceRequestsResponse = {
+	serviceRequests: GetServiceRequestsResponse;
+} & HasMetadata<HasPagination>;
+
+// https://wiki.open311.org/GeoReport_v2/
+export interface Open311Service {
+	getServiceList(): Promise<GetServiceListResponse>;
+	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
+	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
+	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
+	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
+}
+
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 }
