@@ -1,17 +1,6 @@
 <script lang="ts">
 	import ServiceRequestDetails from '$lib/components/ServiceRequestDetails.svelte';
-	import {
-		useIssuesLinkStore,
-		useSelectedServiceRequestStore,
-		useServiceRequestsStore
-	} from '$lib/context/ServiceRequestsContext';
-
-	const issuesLink = useIssuesLinkStore();
-	const serviceRequestsStore = useServiceRequestsStore();
-	const selectedServiceRequest = useSelectedServiceRequestStore();
+	import { serviceRequestsResponse } from '../serviceRequestsResponse';	// replace this with the real response
 </script>
 
-<a href={$issuesLink}>Back to map</a>
-{#if $selectedServiceRequest}
-	<ServiceRequestDetails serviceRequest={$selectedServiceRequest} />
-{/if}
+<ServiceRequestDetails serviceRequest={serviceRequestsResponse[1]}/>

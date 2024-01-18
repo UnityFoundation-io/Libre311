@@ -1,7 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
-import { MockLibre311ServiceImpl } from './MockLibre311';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -19,8 +18,8 @@ const HasServiceCodeSchema = z.object({
 	service_code: ServiceCodeSchema
 });
 
-export type HasServiceCode = z.infer<typeof HasServiceCodeSchema>;
-export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
+type HasServiceCode = z.infer<typeof HasServiceCodeSchema>;
+type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
 export const ServiceSchema = z
 	.object({
@@ -154,7 +153,7 @@ export const ServiceRequestSchema = z
 		status_notes: z.string().nullish(),
 		service_name: z.string(),
 		description: z.string().nullish(), // this seems like it should be required as a bareminimum
-		// detail: z.array(z.string()),
+		detail: z.array(z.string()),
 		agency_responsible: z.string().nullish(), // SeeClickFix guarantees this as known at time of creation
 		service_notice: z.string().nullish(),
 		requested_datetime: z.string(),
@@ -175,13 +174,24 @@ export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
 
-export type GetServiceRequestsParams = {
-	serviceCode?: ServiceCode;
-	startDate?: string;
-	endDate?: string;
-	status?: ServiceRequestStatus[];
-	pageNumber?: number;
-};
+// todo add pagination params
+type GetServiceRequestsParams =
+	| ServiceRequestId[]
+	| {
+			service_code?: ServiceCode;
+			start_date?: string;
+			end_date?: string;
+			status?: ServiceRequestStatus[];
+	  };
+
+// https://wiki.open311.org/GeoReport_v2/
+export interface Open311Service {
+	getServiceList(): Promise<GetServiceListResponse>;
+	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
+	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
+	getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse>;
+	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
+}
 
 const JurisdictionConfigSchema = z
 	.object({
@@ -189,70 +199,26 @@ const JurisdictionConfigSchema = z
 	})
 	.merge(HasJurisdictionIdSchema);
 
-export type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
-
-const PaginationSchema = z.object({
-	size: z.number(), // the number of records per page
-	offset: z.number(), // if pageSize = 10 and pageNumber = 5 then offset = 50,
-	pageNumber: z.number(), // the current page number (first page starts at 0)
-	totalPages: z.number(), // the total number of pages
-	totalSize: z.number() // the total number of records
-});
-
-export type Pagination = z.infer<typeof PaginationSchema>;
-
-export type HasPagination = {
-	pagination: Pagination;
-};
-
-export type HasMetadata<T> = {
-	metadata: T;
-};
-
-export type ServiceRequestsResponse = {
-	serviceRequests: GetServiceRequestsResponse;
-} & HasMetadata<HasPagination>;
-
-// https://wiki.open311.org/GeoReport_v2/
-export interface Open311Service {
-	getServiceList(): Promise<GetServiceListResponse>;
-	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
-	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
-	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
-}
-
-// https://wiki.open311.org/GeoReport_v2/
-export interface Open311Service {
-	getServiceList(): Promise<GetServiceListResponse>;
-	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
-	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
-	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
-}
+type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
 
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 }
 
-const Libre311ServicePropsSchema = z.object({
-	baseURL: z.string()
-});
-
-export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema>;
+export type Libre311ServiceProps = {
+	baseURL: string;
+};
 
 const ROUTES = {
 	getJurisdictionConfig: '/config',
 	getServiceList: (params: HasJurisdictionId) =>
 		`/services?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
-		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
-	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`
+		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getJurisdictionConfig(): Promise<JurisdictionConfig> {
-	// todo don't use axios (will need to create axiosInstance or pass in the baseUrl)
 	const res = await axios.get<unknown>(ROUTES.getJurisdictionConfig);
 	return JurisdictionConfigSchema.parse(res.data);
 }
@@ -263,7 +229,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 	private jurisdictionConfig: JurisdictionConfig;
 
 	private constructor(props: Libre311ServiceProps & { jurisdictionConfig: JurisdictionConfig }) {
-		Libre311ServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
 		this.jurisdictionConfig = props.jurisdictionConfig;
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
@@ -291,7 +256,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition> {
-		const res = await this.axiosInstance.get<unknown>(
+		const res = await axios.get<unknown>(
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
 		return ServiceDefinitionSchema.parse(res.data);
@@ -304,36 +269,13 @@ export class Libre311ServiceImpl implements Libre311Service {
 		throw Error('Not Implemented');
 	}
 
-	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		const queryParams = new URLSearchParams();
-		queryParams.append('jurisdiction_id', this.jurisdictionId);
-		queryParams.append('page_size', '10');
-		queryParams.append('page', `${params.pageNumber ?? 0}`);
-
-		const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));
-		const serviceRequests = GetServiceRequestsResponseSchema.parse(res.data);
-		const pagination: Pagination = {
-			offset: res.headers['page-offset'],
-			pageNumber: res.headers['page-pagenumber'],
-			size: res.headers['page-totalsize'],
-			totalPages: res.headers['page-totalpages'],
-			totalSize: res.headers['page-totalsize']
-		};
-
-		return {
-			serviceRequests,
-			metadata: {
-				pagination
-			}
-		};
+	async getServiceRequests(params: GetServiceRequestsParams): Promise<GetServiceRequestsResponse> {
+		console.log(params);
+		throw Error('Not Implemented');
 	}
 
 	async getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest> {
 		console.log(params);
 		throw Error('Not Implemented');
 	}
-}
-
-export async function libre311Factory(props: Libre311ServiceProps): Promise<Libre311Service> {
-	return MockLibre311ServiceImpl.create(props);
 }

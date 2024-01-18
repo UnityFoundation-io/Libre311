@@ -11,7 +11,7 @@
 		ASYNC_IN_PROGRESS,
 		type AsyncResult
 	} from '$lib/services/http';
-	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
+	import { Libre311ServiceImpl, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
 
 	const libre311ServiceProps: Libre311ServiceProps = {
 		baseURL: import.meta.env.VITE_BACKEND_URL
@@ -21,7 +21,7 @@
 
 	async function createLibre311ContextProps(serviceProps: Libre311ServiceProps) {
 		try {
-			const service = await libre311Factory({ baseURL: serviceProps.baseURL });
+			const service = await Libre311ServiceImpl.create({ baseURL: serviceProps.baseURL });
 			contextProviderProps = asAsyncSuccess({ service });
 		} catch (error) {
 			contextProviderProps = asAsyncFailure(error);

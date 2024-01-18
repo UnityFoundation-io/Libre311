@@ -1,27 +1,15 @@
-<script lang="ts">
+<script lang='ts'>
 	import messages from '$media/messages.json';
 	import ServiceRequestPreview from '$lib/components/ServiceRequestPreview.svelte';
-	import { usePaginationStore, useServiceRequestsStore } from '$lib/context/ServiceRequestsContext';
-	import Pagination from '$lib/components/Pagination.svelte';
-
-	const serviceRequestsStore = useServiceRequestsStore();
-	const paginationStore = usePaginationStore();
+	import { serviceRequestsResponse} from './serviceRequestsResponse';	// replace this with the real response
 </script>
 
-<h1 class="mx-2 text-3xl">{messages['sidebar']['title']}</h1>
-
-{#if $paginationStore}
-	<div class="flex justify-end">
-		<Pagination pagination={$paginationStore} />
-	</div>
-{/if}
+<h1 class='text-3xl mx-2'>{messages['sidebar']['title']}</h1>
 
 <ul>
-	{#if $serviceRequestsStore.type === 'success'}
-		{#each $serviceRequestsStore.value as serviceRequest}
-			<li class="m-3">
-				<ServiceRequestPreview {serviceRequest} />
-			</li>
-		{/each}
-	{/if}
+	{#each serviceRequestsResponse as serviceRequest}
+		<li class='m-3'>
+			<ServiceRequestPreview {serviceRequest}/>
+		</li>
+	{/each}
 </ul>
