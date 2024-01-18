@@ -33,10 +33,6 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("service_code")
     private String serviceCode;
 
-    @Nullable
-    @QueryValue(value = "jurisdiction_id")
-    private String jurisdictionId;
-
     @JsonProperty("lat")
     private String latitude;
 
@@ -202,14 +198,5 @@ public class PostRequestServiceRequestDTO {
 
     public void setgRecaptchaResponse(String gRecaptchaResponse) {
         this.gRecaptchaResponse = gRecaptchaResponse;
-    }
-
-    @Nullable
-    public String getJurisdictionId() {
-        return jurisdictionId;
-    }
-
-    public void setJurisdictionId(@Nullable String jurisdictionId) {
-        this.jurisdictionId = jurisdictionId;
     }
 }

@@ -14,21 +14,45 @@
 
 package app.security;
 
+import app.model.jurisdiction.JurisdictionRepository;
 import io.micronaut.core.async.publisher.Publishers;
-import io.micronaut.http.HttpHeaders;
-import io.micronaut.http.HttpRequest;
-import io.micronaut.http.MutableHttpResponse;
+import io.micronaut.http.*;
 import io.micronaut.http.annotation.Filter;
 import io.micronaut.http.filter.HttpServerFilter;
 import io.micronaut.http.filter.ServerFilterChain;
 import org.reactivestreams.Publisher;
 
+import java.util.List;
 import java.util.Map;
 
 @Filter("/**")
 public class CustomHttpResponseFilter implements HttpServerFilter {
+
+    private final JurisdictionRepository jurisdictionRepository;
+
+    public CustomHttpResponseFilter(JurisdictionRepository jurisdictionRepository) {
+        this.jurisdictionRepository = jurisdictionRepository;
+    }
+
     @Override
     public Publisher<MutableHttpResponse<?>> doFilter(HttpRequest<?> request, ServerFilterChain chain) {
+
+        String jurisdictionId = request.getParameters().get("jurisdiction_id");
+
+        if(jurisdictionId == null || jurisdictionId.trim().isEmpty()) {
+            return Publishers.just(HttpResponse.badRequest(List.of(Map.of(
+                    "code", "400", "description",
+                    "Request must include jurisdiction_id request parameter")
+            )));
+        }
+
+        // todo: Address 'Possible call in non-blocking context'
+        if (!jurisdictionRepository.existsById(jurisdictionId)) {
+            return Publishers.just(HttpResponse.notFound(List.of(Map.of(
+                    "code", "404",
+                    "description", "jurisdiction_id not found."
+            ))));
+        }
 
         // see https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
         return Publishers.map(chain.proceed(request), mutableHttpResponse -> mutableHttpResponse.headers(Map.of(

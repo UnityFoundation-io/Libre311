@@ -293,7 +293,6 @@ public class JurisdictionSupportRootControllerTest {
 
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes, String jurisdictionId) {
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(serviceCode);
-        serviceRequestDTO.setJurisdictionId(jurisdictionId);
         serviceRequestDTO.setgRecaptchaResponse("abc");
         if (address != null) {
             serviceRequestDTO.setAddressString(address);
@@ -301,7 +300,7 @@ public class JurisdictionSupportRootControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);
-        HttpRequest<?> request = HttpRequest.POST("/requests", payload)
+        HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
     }
