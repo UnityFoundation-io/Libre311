@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
+import { MockLibre311ServiceImpl } from './MockLibre311';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -18,8 +19,8 @@ const HasServiceCodeSchema = z.object({
 	service_code: ServiceCodeSchema
 });
 
-type HasServiceCode = z.infer<typeof HasServiceCodeSchema>;
-type ServiceCode = z.infer<typeof ServiceCodeSchema>;
+export type HasServiceCode = z.infer<typeof HasServiceCodeSchema>;
+export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
 export const ServiceSchema = z
 	.object({
@@ -153,7 +154,7 @@ export const ServiceRequestSchema = z
 		status_notes: z.string().nullish(),
 		service_name: z.string(),
 		description: z.string().nullish(), // this seems like it should be required as a bareminimum
-		detail: z.array(z.string()),
+		// detail: z.array(z.string()),
 		agency_responsible: z.string().nullish(), // SeeClickFix guarantees this as known at time of creation
 		service_notice: z.string().nullish(),
 		requested_datetime: z.string(),
@@ -188,7 +189,7 @@ const JurisdictionConfigSchema = z
 	})
 	.merge(HasJurisdictionIdSchema);
 
-type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
+export type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
 
 const PaginationSchema = z.object({
 	size: z.number(), // the number of records per page
@@ -323,4 +324,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 		console.log(params);
 		throw Error('Not Implemented');
 	}
+}
+
+export async function libre311Factory(props: Libre311ServiceProps): Promise<Libre311Service> {
+	return MockLibre311ServiceImpl.create(props);
 }
