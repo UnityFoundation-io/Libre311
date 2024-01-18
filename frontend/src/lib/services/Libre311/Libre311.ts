@@ -153,6 +153,7 @@ export const ServiceRequestSchema = z
 		status_notes: z.string().nullish(),
 		service_name: z.string(),
 		description: z.string().nullish(), // this seems like it should be required as a bareminimum
+		detail: z.array(z.string()),
 		agency_responsible: z.string().nullish(), // SeeClickFix guarantees this as known at time of creation
 		service_notice: z.string().nullish(),
 		requested_datetime: z.string(),

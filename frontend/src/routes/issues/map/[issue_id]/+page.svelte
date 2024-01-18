@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import ServiceRequestDetails from '$lib/components/ServiceRequestDetails.svelte';
+	import { serviceRequestsResponse } from '../serviceRequestsResponse';	// replace this with the real response
 </script>
 
-<h1>load and show issues detail for {+$page.params.issue_id}</h1>
-<a href="/issues/map">
-	<h3>go back to issues</h3>
-</a>
+<ServiceRequestDetails serviceRequest={serviceRequestsResponse[1]}/>
