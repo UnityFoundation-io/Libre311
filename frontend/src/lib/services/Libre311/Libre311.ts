@@ -327,7 +327,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		// todo convert the other params to query params when that functionality is added
 		const queryParams = new URLSearchParams();
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
 		queryParams.append('page_size', '10');
