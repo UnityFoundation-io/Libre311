@@ -1,10 +1,11 @@
 <script lang="ts">
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-
-	// create the issues context / or load issues and set to state value
+	import ServiceRequestsContextProvider from '$lib/context/ServiceRequestsContextProvider.svelte';
 </script>
 
-<SideBarMainContentLayout>
-	<slot slot="side-bar" />
-	<div slot="main-content">map goes here</div>
-</SideBarMainContentLayout>
+<ServiceRequestsContextProvider>
+	<SideBarMainContentLayout>
+		<slot slot="side-bar" />
+		<div slot="main-content">map goes here</div>
+	</SideBarMainContentLayout>
+</ServiceRequestsContextProvider>
