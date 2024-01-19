@@ -25,7 +25,7 @@ import org.reactivestreams.Publisher;
 import java.util.List;
 import java.util.Map;
 
-@Filter("/**")
+@Filter(value = {"/api/services/**", "/api/requests/**"})
 public class CustomHttpResponseFilter implements HttpServerFilter {
 
     private final JurisdictionRepository jurisdictionRepository;
