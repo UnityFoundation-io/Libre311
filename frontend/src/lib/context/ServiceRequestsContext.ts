@@ -46,13 +46,21 @@ function toServiceRequestParams(searchParams: URLSearchParams) {
 	return params;
 }
 
-function createNextPageLink(pagination: Pagination, searchParams: URLSearchParams) {
+function createNextPageLink(
+	pagination: Pagination,
+	searchParams: URLSearchParams,
+	issuesBasePath: string | null
+) {
 	if (pagination.totalPages === pagination.pageNumber + 1) return;
 	searchParams.set('pageNumber', (pagination.pageNumber + 1).toString());
 	return issuesBasePath + '?' + searchParams.toString();
 }
 
-function createPrevPageLink(pagination: Pagination, searchParams: URLSearchParams) {
+function createPrevPageLink(
+	pagination: Pagination,
+	searchParams: URLSearchParams,
+	issuesBasePath: string | null
+) {
 	if (pagination.pageNumber === 0) {
 		return;
 	}
@@ -121,8 +129,8 @@ export function createServiceRequestsContext(
 			issuesLink.set(createIssuesLink(page.url.searchParams));
 			pagination.set({
 				...res.metadata.pagination,
-				nextPage: createNextPageLink(res.metadata.pagination, page.url.searchParams),
-				prevPage: createPrevPageLink(res.metadata.pagination, page.url.searchParams)
+				nextPage: createNextPageLink(res.metadata.pagination, page.url.searchParams, page.route.id),
+				prevPage: createPrevPageLink(res.metadata.pagination, page.url.searchParams, page.route.id)
 			});
 		} catch (error) {
 			serviceRequestsMapStore.set({
@@ -135,7 +143,7 @@ export function createServiceRequestsContext(
 	page.subscribe(async (page: Page<Record<string, string>, string | null>) => {
 		if (page.route.id === '/issues/map/[issue_id]') {
 			await handleIssueDetailsPageNav(page);
-		} else if (page.route.id === '/issues/map') {
+		} else if (page.route.id === '/issues/map' || page.route.id === '/issues/list') {
 			await handleMapPageNav(page);
 		}
 	});
