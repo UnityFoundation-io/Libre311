@@ -1,5 +1,5 @@
-<script lang='ts'>
-	import messages from '$media/messages.json'
+<script lang="ts">
+	import messages from '$media/messages.json';
 	import { goto } from '$app/navigation';
 	import { Badge, Card } from 'stwui';
 	import { Dropdown } from 'stwui';
@@ -18,7 +18,7 @@
 		visible = !visible;
 	}
 
-	function getStatus (serviceRequest: ServiceRequest) : string  {
+	function getStatus(serviceRequest: ServiceRequest): string {
 		switch (serviceRequest.status) {
 			case 'Closed': {
 				return 'success';
@@ -30,52 +30,52 @@
 		return 'error';
 	}
 
-	function toTimeStamp (serviceRequest: ServiceRequest) {
-		return `${new Date(serviceRequest.requested_datetime).toLocaleDateString()} ${new Date(serviceRequest.requested_datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
+	function toTimeStamp(serviceRequest: ServiceRequest) {
+		return `${new Date(serviceRequest.requested_datetime).toLocaleDateString()} ${new Date(serviceRequest.requested_datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 	}
 
 	const gotoServiceRequest = () => {
 		goto(`/issues/map/${serviceRequest.service_request_id}`);
-	}
+	};
 </script>
 
 <Card>
-	<div class="my-2 mx-4" slot="content">
-
-		<div class='flow-root'>			
-			<h2 class='text-base float-left tracking-wide'>
+	<div class="mx-4 my-2" slot="content">
+		<div class="flow-root">
+			<h2 class="float-left text-base tracking-wide">
 				#{serviceRequest.service_request_id}
 			</h2>
-			<Badge class='text-sm float-right' type={getStatus(serviceRequest)}>{serviceRequest.status}</Badge>
+			<Badge class="float-right text-sm" type={getStatus(serviceRequest)}
+				>{serviceRequest.status}</Badge
+			>
 		</div>
 
-		<p class='text-sm font-extralight my-1'>{toTimeStamp(serviceRequest)} </p>
-		
+		<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest)}</p>
+
 		{#if serviceRequest.media_url}
-			<div class='bg-[#D9D9D9] rounded-md'>
-				<a class='flex overflow-y-hidden overflow-x-scroll mx-auto rounded-md' href={`/issues/map/${serviceRequest.service_request_id}`}>
-					<img class='h-[300px] rounded-b-none w-full' alt='service-request' src={serviceRequest.media_url}/>
+			<div class="rounded-md bg-[#D9D9D9]">
+				<a
+					class="mx-auto flex overflow-y-hidden overflow-x-scroll rounded-md"
+					href={`/issues/map/${serviceRequest.service_request_id}`}
+				>
+					<img
+						class="h-[300px] w-full rounded-b-none"
+						alt="service-request"
+						src={serviceRequest.media_url}
+					/>
 				</a>
 			</div>
 		{/if}
 
-		<div class='mt-2 flow-root'>
+		<div class="mt-2 flow-root">
 			<a href={`/issues/map/${serviceRequest.service_request_id}`}>
-				<h1 class='text-lg float-left'>{serviceRequest.service_name}</h1>
+				<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 			</a>
 
-			<Dropdown class='float-right' bind:visible={visible}>
-				<button
-					aria-label="dropdown toggle"
-					slot="trigger"
-					on:click={toggleDropdown}
-					type="button"
-				>
+			<Dropdown class="float-right" bind:visible>
+				<button aria-label="dropdown toggle" slot="trigger" on:click={toggleDropdown} type="button">
 					<span class="sr-only">Open user menu</span>
-					<img
-						src={dropDownIcon}
-						alt="drop-down-menu"
-					/>
+					<img src={dropDownIcon} alt="drop-down-menu" />
 				</button>
 				<Dropdown.Items slot="items">
 					<Dropdown.Items.Item on:click={closeDropdown} label="Item 1" />
@@ -84,19 +84,20 @@
 				</Dropdown.Items>
 			</Dropdown>
 		</div>
-		
+
 		<div class="mb-2">
 			<p class="text-sm">{serviceRequest.address}</p>
 		</div>
-		
+
 		<div class="mb-1">
 			<strong class="text-base">{messages['serviceRequest']['description']}</strong>
 		</div>
 
 		<div>
-			<p class='w-82 overflow-hidden text-sm text-ellipsis whitespace-nowrap'>{serviceRequest.description}</p>
+			<p class="w-82 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+				{serviceRequest.description}
+			</p>
 		</div>
-
 	</div>
 </Card>
 
