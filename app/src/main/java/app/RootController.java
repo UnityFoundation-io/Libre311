@@ -88,7 +88,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     public HttpResponse<List<ServiceDTO>> indexJson(@Valid Pageable pageable, @Nullable String jurisdiction_id) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
+        List<Map> errors = jurisdictionService.validateJurisdictionId(jurisdiction_id);
         if (!errors.isEmpty()) {
             return null;
         }
@@ -110,7 +110,7 @@ public class RootController {
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
     public HttpResponse<String> indexXml(@Valid Pageable pageable, @Nullable String jurisdiction_id) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
+        List<Map> errors = jurisdictionService.validateJurisdictionId(jurisdiction_id);
         if (!errors.isEmpty()) {
             return null;
         }
@@ -140,7 +140,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     public String getServiceDefinitionJson(String serviceCode, @Nullable String jurisdiction_id) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
+        List<Map> errors = jurisdictionService.validateJurisdictionId(jurisdiction_id);
         if (!errors.isEmpty()) {
             return null;
         }
@@ -152,7 +152,7 @@ public class RootController {
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
     public String getServiceDefinitionXml(String serviceCode, @Nullable String jurisdiction_id) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
+        List<Map> errors = jurisdictionService.validateJurisdictionId(jurisdiction_id);
         if (!errors.isEmpty()) {
             return null;
         }
@@ -170,7 +170,7 @@ public class RootController {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
     public List<PostResponseServiceRequestDTO> createServiceRequestJson(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
+        List<Map> errors = jurisdictionService.validateJurisdictionId(requestDTO.getJurisdictionId());
         if (!errors.isEmpty()) {
             return null;
         }
@@ -183,7 +183,7 @@ public class RootController {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
     public String createServiceRequestXml(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
+        List<Map> errors = jurisdictionService.validateJurisdictionId(requestDTO.getJurisdictionId());
         if (!errors.isEmpty()) {
             return null;
         }
@@ -198,7 +198,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
+        List<Map> errors = jurisdictionService.validateJurisdictionId(requestDTO.getJurisdictionId());
         if (!errors.isEmpty()) {
             return null;
         }
@@ -219,7 +219,7 @@ public class RootController {
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
     public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
+        List<Map> errors = jurisdictionService.validateJurisdictionId(requestDTO.getJurisdictionId());
         if (!errors.isEmpty()) {
             return null;
         }
@@ -248,7 +248,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     public List<ServiceRequestDTO> getServiceRequestJson(Long serviceRequestId, @Nullable String jurisdiction_id) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
+        List<Map> errors = jurisdictionService.validateJurisdictionId(jurisdiction_id);
         if (!errors.isEmpty()) {
             return null;
         }
@@ -260,7 +260,7 @@ public class RootController {
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
     public String getServiceRequestXml(Long serviceRequestId, @Nullable String jurisdiction_id) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
+        List<Map> errors = jurisdictionService.validateJurisdictionId(jurisdiction_id);
         if (!errors.isEmpty()) {
             return null;
         }
@@ -278,6 +278,10 @@ public class RootController {
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @ExecuteOn(TaskExecutors.IO)
     public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO) throws MalformedURLException {
+        List<Map> errors = jurisdictionService.validateJurisdictionId(requestDTO.getJurisdictionId());
+        if (!errors.isEmpty()) {
+            return null;
+        }
         return serviceRequestService.getAllServiceRequests(requestDTO);
     }
 

@@ -31,11 +31,7 @@ public class JurisdictionService {
         this.jurisdictionRepository = jurisdictionRepository;
     }
 
-    public List<Map> validateJurisdictionSupport(String jurisdictionId) {
-        if (jurisdictionRepository.count() == 0) {
-            return List.of();
-        }
-
+    public List<Map> validateJurisdictionId(String jurisdictionId) {
         if (jurisdictionId == null) {
             return List.of(Map.of(
                     "code", "400",

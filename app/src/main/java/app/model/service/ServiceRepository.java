@@ -23,8 +23,6 @@ import java.util.Optional;
 
 @Repository
 public interface ServiceRepository extends PageableRepository<Service, Long> {
-    Optional<Service> findByServiceCode(String serviceCode);
-
     Page<Service> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
 
     Optional<Service> findByServiceCodeAndJurisdictionId(String serviceCode, String jurisdictionId);
