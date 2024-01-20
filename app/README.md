@@ -1,6 +1,6 @@
 # Libre311 API Documentation
 
-## Quickstart
+## Project Quickstart
 The project requires JDK 11 or later to build and run. There is no need to
 install the Micronaut framework, or Gradle, or any tools other than the JDK in order to
 build and run the app.
