@@ -1,27 +1,46 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import ServiceRequestPreview from '$lib/components/ServiceRequestPreview.svelte';
-	import { usePaginationStore, useServiceRequestsStore } from '$lib/context/ServiceRequestsContext';
-	import Pagination from '$lib/components/Pagination.svelte';
 
-	const serviceRequestsStore = useServiceRequestsStore();
-	const paginationStore = usePaginationStore();
+	import Pagination from '$lib/components/Pagination.svelte';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { page } from '$app/stores';
+	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
+
+	const ctx = useServiceRequestsContext();
+	const serviceRequestsRes = ctx.serviceRequestsResponse;
+
+	const linkResolver = useLibre311Context().linkResolver;
 </script>
 
 <h1 class="mx-2 text-3xl">{messages['sidebar']['title']}</h1>
 
-{#if $paginationStore}
+{#if $serviceRequestsRes.type === 'success'}
 	<div class="flex justify-end">
-		<Pagination pagination={$paginationStore} />
+		<Pagination
+			pagination={$serviceRequestsRes.value.metadata.pagination}
+			nextPage={linkResolver.nextIssuesPage(
+				$serviceRequestsRes.value.metadata.pagination,
+				$page.url
+			)}
+			prevPage={linkResolver.prevIssuesPage(
+				$serviceRequestsRes.value.metadata.pagination,
+				$page.url
+			)}
+		/>
 	</div>
-{/if}
 
-<ul>
-	{#if $serviceRequestsStore.type === 'success'}
-		{#each $serviceRequestsStore.value as serviceRequest}
+	<ul>
+		{#each $serviceRequestsRes.value.serviceRequests as serviceRequest}
 			<li class="m-3">
-				<ServiceRequestPreview {serviceRequest} />
+				<ServiceRequestPreview
+					{serviceRequest}
+					detailsLink={linkResolver.issueDetailsDesktop(
+						$page.url,
+						serviceRequest.service_request_id
+					)}
+				/>
 			</li>
 		{/each}
-	{/if}
-</ul>
+	</ul>
+{/if}

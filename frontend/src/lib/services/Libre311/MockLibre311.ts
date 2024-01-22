@@ -301,7 +301,6 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		console.log(params);
 		const pagination: Pagination = {
 			offset: 0,
 			pageNumber: params.pageNumber ?? 0,
@@ -313,10 +312,8 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 		const start = pagination.pageNumber * pagination.size;
 		const end = start + pagination.size;
 
-		console.log({ start, end });
-
 		const requests = serviceRequests.slice(start, end);
-		console.log({ requests });
+
 		return {
 			serviceRequests: requests,
 			metadata: {
@@ -330,7 +327,7 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 			(record) => record.service_request_id === params.service_request_id
 		);
 		if (!req) throw new Error('Not found');
-		console.log({ req });
+
 		return req;
 	}
 }
