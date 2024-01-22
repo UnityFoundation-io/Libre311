@@ -31,7 +31,6 @@
     marker?.remove();
     marker = undefined;
   })
-
 </script>
 
 <div bind:this={markerElement}>

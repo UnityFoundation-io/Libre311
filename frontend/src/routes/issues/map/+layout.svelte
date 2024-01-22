@@ -1,49 +1,54 @@
 <script lang="ts">
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import ServiceRequestsContextProvider from '$lib/context/ServiceRequestsContextProvider.svelte';
-  import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
-
-	const ctx = useServiceRequestsContext();
-	const resStore = ctx.serviceRequestsResponse;
-
-	$: console.log($resStore);
+  import { useSelectedServiceRequestStore, useServiceRequestsResponseStore } from '$lib/context/ServiceRequestsContext';
 
   // Map imports
+  import L from 'leaflet';
   import MapComponent from '$lib/components/MapComponent.svelte';
-  import MapMarker from '$lib/components/MapMarker.svelte';
+  import MapMarkerCircle from '$lib/components/MapMarkerCircle.svelte'
+  import MapMarkerWaypoint from '$lib/components/MapMarkerWaypoint.svelte';
+
+  // Type imports
   import type { LatLngExpression } from 'leaflet';
+	import type { Maybe } from '$lib/utils/types';
+	import type { ServiceRequest, ServiceRequestsResponse } from '$lib/services/Libre311/Libre311';
+	import type { AsyncResult } from '$lib/services/http';
 
-  // Icon imports
-  import WaypointAcknowledged from '$lib/assets/waypoint-acknowledged.png';
-  import WaypointArchived from '$lib/assets/waypoint-archived.png';
-  import WaypointClosed from '$lib/assets/waypoint-closed.png';
-  import WaypointOpen from '$lib/assets/waypoint-open.png';
+  const serviceRequestsResponseStore = useServiceRequestsResponseStore();
+  const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
-  const initialView: LatLngExpression = [38.79046, -90.48648];
-  const markerLocations: Array<LatLngExpression> = [
-    [38.79046, -90.48648],
-    [38.79125, -90.47737],
-    [38.78201, -90.48866]
-  ]
+  const initialView: LatLngExpression = [41.3083092093462, -72.9258607025516];
+
+  $: mapBounds = createMapBounds($serviceRequestsResponseStore)
+
+  function isSelected(serviceRequest: ServiceRequest, selectedServiceRequest: Maybe<ServiceRequest>) {
+    return (serviceRequest.service_request_id === selectedServiceRequest?.service_request_id) 
+  }
+  
+  function createMapBounds(res: AsyncResult<ServiceRequestsResponse>) {
+    if (res.type !== 'success') {
+      return L.latLngBounds([initialView]);
+    }
+    const latLngs: LatLngExpression[] = res.value.serviceRequests.map(req => [+req.lat, +req.long]);
+    return L.latLngBounds(latLngs);
+  }
 </script>
 
-<ServiceRequestsContextProvider>
-	<SideBarMainContentLayout>
-		<slot slot="side-bar" />
-		<div slot="main-content">
-      <div class="w-full h-screen">
-        <MapComponent view={initialView} zoom={14}>
-          {#each markerLocations as latLng}
-            <MapMarker {latLng}>
-              <img alt="acknowledged" 
-                class="size-12"
-                src={WaypointAcknowledged} 
-              />
-            </MapMarker>
+<SideBarMainContentLayout>
+  <slot slot="side-bar" />
+  <div slot="main-content">
+    <div class="w-full h-screen">
+      <MapComponent bounds={mapBounds} zoom={16}>
+        {#if $serviceRequestsResponseStore.type === 'success'}
+          {#each $serviceRequestsResponseStore.value.serviceRequests as req}
+            {#if isSelected(req, $selectedServiceRequestStore)}
+              <MapMarkerWaypoint serviceRequest={req} />
+            {:else}
+              <MapMarkerCircle serviceRequest={req} />
+            {/if}
           {/each}
-        </MapComponent>
-      </div>
+        {/if}
+      </MapComponent>
     </div>
-	</SideBarMainContentLayout>
-</ServiceRequestsContextProvider>
-
+  </div>
+</SideBarMainContentLayout>
