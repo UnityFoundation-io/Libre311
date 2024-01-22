@@ -45,6 +45,10 @@ public class Service {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+    @Column(columnDefinition = "TEXT")
+    private String keywords;
+    @Column(columnDefinition = "TEXT")
+    private String groups;
 
     private boolean metadata = false;
 
@@ -117,7 +121,8 @@ public class Service {
     }
 
     public String getServiceDefinitionJson() {
-        return serviceDefinitions.stream().filter(ServiceDefinitionEntity::getActive).findFirst().orElse(new ServiceDefinitionEntity()).getDefinition();
+        if (serviceDefinitions.isEmpty()) return null;
+        return serviceDefinitions.get(0).getDefinition();
     }
     public Long getId() {
         return id;
@@ -146,5 +151,21 @@ public class Service {
     public void setServiceDefinitions(
         List<ServiceDefinitionEntity> serviceDefinitions) {
         this.serviceDefinitions = serviceDefinitions;
+    }
+
+    public String getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
+    }
+
+    public String getGroups() {
+        return groups;
+    }
+
+    public void setGroups(String groups) {
+        this.groups = groups;
     }
 }
