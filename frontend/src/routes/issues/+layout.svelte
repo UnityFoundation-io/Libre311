@@ -8,10 +8,5 @@
 </script>
 
 <ServiceRequestsContextProvider>
-	<div class="flex justify-center">
-		<a href="/issues/map">map</a>
-		|
-		<a href={detailsLink}>list</a>
-	</div>
 	<slot />
 </ServiceRequestsContextProvider>
