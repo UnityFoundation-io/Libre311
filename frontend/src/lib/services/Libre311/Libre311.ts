@@ -201,6 +201,14 @@ const PaginationSchema = z.object({
 
 export type Pagination = z.infer<typeof PaginationSchema>;
 
+export const EMPTY_PAGINATION = {
+	size: 0,
+	offset: 0,
+	pageNumber: 0,
+	totalPages: 0,
+	totalSize: 0
+};
+
 export type HasPagination = {
 	pagination: Pagination;
 };
