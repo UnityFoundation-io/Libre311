@@ -16,13 +16,17 @@ package app.service.servicerequest;
 
 import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.download.DownloadServiceRequestDTO;
-import app.dto.servicerequest.*;
+import app.dto.servicerequest.GetServiceRequestsDTO;
+import app.dto.servicerequest.PostRequestServiceRequestDTO;
+import app.dto.servicerequest.PostResponseServiceRequestDTO;
+import app.dto.servicerequest.ServiceRequestDTO;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.AttributeDataType;
 import app.model.service.servicedefinition.AttributeValue;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicerequest.MissingActiveServiceDefinitionException;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
@@ -41,17 +45,22 @@ import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Singleton
@@ -148,6 +157,12 @@ public class ServiceRequestService {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 serviceRequest.setAttributesJson(objectMapper.writeValueAsString(requestAttributes));
+                serviceRequest.setServiceDefinition(
+                    service.getServiceDefinitions().stream()
+                        .filter(sde -> sde.getActive()).findFirst().orElseThrow(
+                            ()-> new MissingActiveServiceDefinitionException()
+                        )
+                );
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

@@ -15,6 +15,7 @@
 package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -22,6 +23,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "services")
@@ -38,9 +40,6 @@ public class Service {
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
 
-    @Column(columnDefinition = "TEXT")
-    private String serviceDefinitionJson;
-
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
 
@@ -55,6 +54,12 @@ public class Service {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "service")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "service_id")
+    @Where(clause = "active = true")
+    private List<ServiceDefinitionEntity> serviceDefinitions = new ArrayList<>();
 
 
     public Service(String serviceName) {
@@ -112,13 +117,8 @@ public class Service {
     }
 
     public String getServiceDefinitionJson() {
-        return serviceDefinitionJson;
+        return serviceDefinitions.stream().filter(ServiceDefinitionEntity::getActive).findFirst().orElse(new ServiceDefinitionEntity()).getDefinition();
     }
-
-    public void setServiceDefinitionJson(String serviceDefinitionJson) {
-        this.serviceDefinitionJson = serviceDefinitionJson;
-    }
-
     public Long getId() {
         return id;
     }
@@ -137,5 +137,14 @@ public class Service {
 
     public void addServiceRequest(ServiceRequest serviceRequest) {
         serviceRequests.add(serviceRequest);
+    }
+
+    public List<ServiceDefinitionEntity> getServiceDefinitions() {
+        return serviceDefinitions;
+    }
+
+    public void setServiceDefinitions(
+        List<ServiceDefinitionEntity> serviceDefinitions) {
+        this.serviceDefinitions = serviceDefinitions;
     }
 }

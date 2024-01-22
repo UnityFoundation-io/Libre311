@@ -153,8 +153,15 @@ public class Bootstrap {
                 }).collect(Collectors.toList()));
 
                 ObjectMapper objectMapper = new ObjectMapper();
+                ServiceDefinitionEntity sde = new ServiceDefinitionEntity();
+                sde.setActive(true);
+                sde.setVersion("1.0");
+
                 try {
-                    service.setServiceDefinitionJson(objectMapper.writeValueAsString(serviceDefinition));
+                    sde.setDefinition(objectMapper.writeValueAsString(serviceDefinition));
+                    //service.setServiceDefinitionJson(objectMapper.writeValueAsString(serviceDefinition));
+                    service.getServiceDefinitions().add(sde);
+                    sde.setService(service);
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }

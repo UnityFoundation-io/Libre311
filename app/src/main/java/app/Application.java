@@ -15,10 +15,9 @@
 package app;
 
 import io.micronaut.runtime.Micronaut;
+import java.sql.SQLException;
 
-public class Application {
-
-    public static void main(String[] args) {
+public class Application { public static void main(String[] args) {
         Micronaut.run(Application.class, args);
     }
 }
