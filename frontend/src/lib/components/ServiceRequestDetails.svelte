@@ -18,7 +18,7 @@
 		visible = !visible;
 	}
 
-	function getStatus(serviceRequest: ServiceRequest): string {
+	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
 			case 'Closed': {
 				return 'success';
