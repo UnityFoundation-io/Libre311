@@ -20,6 +20,7 @@ import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
 import app.model.service.servicedefinition.ServiceDefinition;
+import app.security.RequiresPermissions;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
@@ -47,6 +48,9 @@ import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
+
+import static app.security.Permission.LIBRE311_REQUEST_EDIT_SUBTENANT;
+import static app.security.Permission.LIBRE311_REQUEST_VIEW_SYSTEM;
 
 @Controller("/api")
 @Secured(SecurityRule.IS_ANONYMOUS)
@@ -275,9 +279,11 @@ public class RootController {
     }
 
     @Get(value =  "/requests/download")
-    @Secured(SecurityRule.IS_AUTHENTICATED)
+//    @Secured(SecurityRule.IS_AUTHENTICATED)
+    @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_EDIT_SUBTENANT})
     @ExecuteOn(TaskExecutors.IO)
-    public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO) throws MalformedURLException {
+    public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
+                                                @Header("Authorization") String authorizationHeader) throws MalformedURLException {
         return serviceRequestService.getAllServiceRequests(requestDTO);
     }
 
