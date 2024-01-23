@@ -9,9 +9,9 @@
 	export let prevPage: string | undefined = undefined;
 	export let nextPage: string | undefined = undefined;
 
-	$: intermediate = (pagination.pageNumber + 1) * pagination.size;
-	$: upperBound = Math.min(intermediate, pagination.totalSize);
-	$: lowerBound = intermediate - pagination.size;
+	$: maxUpperBound = (pagination.pageNumber + 1) * pagination.size;
+	$: upperBound = Math.min(maxUpperBound, pagination.totalSize);
+	$: lowerBound = maxUpperBound - pagination.size + 1;
 </script>
 
 <div class="text-base font-semibold text-slate-600">
