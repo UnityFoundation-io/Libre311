@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import MapListToggle from '$lib/components/MapListToggle.svelte';
 
 	const ctx = useServiceRequestsContext();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
@@ -14,6 +15,10 @@
 <div class="flex items-center justify-center">
 	{#if $serviceRequestsRes.type === 'success'}
 		<div class="w-full max-w-lg">
+			<div class="flex justify-center my-4">
+				<MapListToggle />
+			</div>
+
 			<div class="flex justify-center">
 				<Pagination
 					pagination={$serviceRequestsRes.value.metadata.pagination}

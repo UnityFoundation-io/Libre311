@@ -41,7 +41,9 @@
   <div slot="main-content">
     <div class="w-full h-screen relative flex">
       <Breakpoint>
-        <MapListToggle slot='is-mobile'/>
+        <div class="absolute left-1/2 top-5 z-[1] -translate-x-1/2" slot="is-mobile">
+          <MapListToggle/>
+        </div>
       </Breakpoint>
 
       <MapComponent bounds={mapBounds} zoom={16}>

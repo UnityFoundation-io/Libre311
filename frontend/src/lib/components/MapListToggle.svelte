@@ -1,12 +1,10 @@
-<div class="absolute left-1/2 top-5 z-[1] -translate-x-1/2">
-	<div class="toggle">
-		<button class="rounded-l-lg">
-			<a href="/issues/map"> Map </a>
-		</button>
-		<button class="rounded-r-lg">
-			<a href="/issues/list"> List </a>
-		</button>
-	</div>
+<div class="toggle">
+	<button class="rounded-l-lg">
+		<a href="/issues/map"> Map </a>
+	</button>
+	<button class="rounded-r-lg">
+		<a href="/issues/list"> List </a>
+	</button>
 </div>
 
 <style>
