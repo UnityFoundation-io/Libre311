@@ -10,7 +10,7 @@
 	console.log(selectedServiceRequest);
 </script>
 
-<a href={linkResolver.issuesMap($page.url)}>Back to map</a>
+<a href={linkResolver.issuesList($page.url)}>Back to list</a>
 
 {#if $selectedServiceRequest}
 <div class="flex items-center justify-center">
