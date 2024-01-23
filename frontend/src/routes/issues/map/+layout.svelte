@@ -7,6 +7,8 @@
   import MapComponent from '$lib/components/MapComponent.svelte';
   import MapMarkerCircle from '$lib/components/MapMarkerCircle.svelte'
   import MapMarkerWaypoint from '$lib/components/MapMarkerWaypoint.svelte';
+  import Breakpoint from '$lib/components/Breakpoint.svelte';
+  import MapListToggle from '$lib/components/MapListToggle.svelte';
 
   // Type imports
   import type { LatLngExpression } from 'leaflet';
@@ -37,7 +39,11 @@
 <SideBarMainContentLayout>
   <slot slot="side-bar" />
   <div slot="main-content">
-    <div class="w-full h-screen">
+    <div class="w-full h-screen relative flex">
+      <Breakpoint>
+        <MapListToggle slot='is-mobile'/>
+      </Breakpoint>
+
       <MapComponent bounds={mapBounds} zoom={16}>
         {#if $serviceRequestsResponseStore.type === 'success'}
           {#each $serviceRequestsResponseStore.value.serviceRequests as req}
