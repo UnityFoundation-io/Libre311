@@ -5,13 +5,11 @@
 		useServiceRequestsResponseStore
 	} from '$lib/context/ServiceRequestsContext';
 
-  // Map imports
-  import L from 'leaflet';
-  import MapComponent from '$lib/components/MapComponent.svelte';
-  import MapMarkerCircle from '$lib/components/MapMarkerCircle.svelte'
-  import MapMarkerWaypoint from '$lib/components/MapMarkerWaypoint.svelte';
-  import Breakpoint from '$lib/components/Breakpoint.svelte';
-  import MapListToggle from '$lib/components/MapListToggle.svelte';
+	// Map imports
+	import L from 'leaflet';
+	import MapComponent from '$lib/components/MapComponent.svelte';
+	import MapMarkerCircle from '$lib/components/MapMarkerCircle.svelte';
+	import MapMarkerWaypoint from '$lib/components/MapMarkerWaypoint.svelte';
 
 	// Type imports
 	import type { LatLngExpression } from 'leaflet';
@@ -62,12 +60,7 @@
 <SideBarMainContentLayout>
 	<slot slot="side-bar" />
 	<div slot="main-content">
-		<div class="h-screen w-full relative flex">
-     <Breakpoint>
-        <div class="absolute left-1/2 top-5 z-[1] -translate-x-1/2" slot="is-mobile">
-          <MapListToggle/>
-        </div>
-      </Breakpoint>
+		<div class="h-screen w-full">
 			<MapComponent bounds={mapBounds}>
 				{#if $serviceRequestsResponseStore.type === 'success'}
 					{#each $serviceRequestsResponseStore.value.serviceRequests as req (req.service_request_id)}
