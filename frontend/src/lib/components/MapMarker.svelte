@@ -1,40 +1,21 @@
 <script lang="ts">
-  import { onMount, onDestroy, getContext, setContext } from 'svelte';
-  import L from 'leaflet';
+	import { onMount, onDestroy, getContext, createEventDispatcher } from 'svelte';
+	import L from 'leaflet';
 
-  export let latLng: L.LatLngExpression;
+	export let latLng: L.LatLngExpression;
+	export let options: L.MarkerOptions | undefined = undefined;
 
-  let marker: L.Marker | undefined;
-  let markerElement: HTMLElement;
+	let marker: L.Marker | undefined;
 
-  const { getMap }: { getMap: () => L.Map | undefined } = getContext('map');
-  const map = getMap();
+	const dispatch = createEventDispatcher<{ click: L.LeafletMouseEvent }>();
+	const map = getContext<{ getMap: () => L.Map }>('map').getMap();
 
-  setContext('layer', {
-    getLayer: () => marker
-  });
+	onMount(() => {
+		marker = L.marker(latLng, options).addTo(map);
+		marker.addEventListener('click', (e) => dispatch('click', e));
+	});
 
-  onMount(() => {
-    if (map) {
-      let icon = L.divIcon({
-        html: markerElement,
-        className: 'map-marker',
-        iconSize: [12, 12],
-        iconAnchor: [12, 12]
-      });
-
-      marker = L.marker(latLng, { icon }).addTo(map);
-    }
-  });
-
-  onDestroy(() => {
-    marker?.remove();
-    marker = undefined;
-  })
+	onDestroy(() => {
+		marker?.remove();
+	});
 </script>
-
-<div bind:this={markerElement}>
-  {#if marker}
-    <slot />
-  {/if}
-</div>
