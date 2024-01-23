@@ -102,7 +102,7 @@ export function createServiceRequestsContext(
 	page.subscribe(async (page: Page<Record<string, string>, string | null>) => {
 		if (page.route.id === '/issues/map/[issue_id]') {
 			await handleIssueDetailsPageNav(page);
-		} else if (page.route.id === '/issues/map') {
+		} else if (page.route.id === '/issues/map' || page.route.id === '/issues/list') {
 			await handleMapPageNav(page);
 		}
 	});

@@ -48,7 +48,7 @@
 	</Libre311ContextProvider>
 {:else if contextProviderProps.type == 'inProgress'}
 	<!-- todo nice looking components for loading and error-->
-	<SplashLoading/>
+	<SplashLoading />
 {:else}
 	<h1>something went wrong</h1>
 {/if}

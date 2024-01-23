@@ -12,9 +12,9 @@ const config = {
 			fallback: 'index.html'
 		}),
 		alias: {
-			$media: "src/media/*"
+			$media: 'src/media/*'
 		}
-	},
+	}
 };
 
 export default config;
