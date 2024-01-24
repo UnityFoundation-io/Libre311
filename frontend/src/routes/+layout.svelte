@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
 	import Bars3 from '$lib/components/Svg/Bars3.svelte';
+	import SplashLoading from '$lib/components/SplashLoading.svelte';
 	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
 	import '../app.pcss';
@@ -11,7 +12,7 @@
 		ASYNC_IN_PROGRESS,
 		type AsyncResult
 	} from '$lib/services/http';
-	import { Libre311ServiceImpl, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
+	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
 
 	const libre311ServiceProps: Libre311ServiceProps = {
 		baseURL: import.meta.env.VITE_BACKEND_URL
@@ -21,7 +22,7 @@
 
 	async function createLibre311ContextProps(serviceProps: Libre311ServiceProps) {
 		try {
-			const service = await Libre311ServiceImpl.create({ baseURL: serviceProps.baseURL });
+			const service = await libre311Factory({ baseURL: serviceProps.baseURL });
 			contextProviderProps = asAsyncSuccess({ service });
 		} catch (error) {
 			contextProviderProps = asAsyncFailure(error);
@@ -47,7 +48,7 @@
 	</Libre311ContextProvider>
 {:else if contextProviderProps.type == 'inProgress'}
 	<!-- todo nice looking components for loading and error-->
-	<h1>preparing libre311</h1>
+	<SplashLoading />
 {:else}
 	<h1>something went wrong</h1>
 {/if}

@@ -1,0 +1,20 @@
+{
+	"metadata": {
+		"app": "Libre311",
+		"content": "Libre311 Share the location of a walking, biking, or transit issues"
+	},
+	"environment": {
+		"loading": "Loading Environment"
+	},
+	"sidebar": {
+		"title": "Requests"
+	},
+	"serviceRequest": {
+		"description": "Description:",
+		"detail": "Details:",
+		"citizen_contact": "Citizen Contact:",
+		"agency_contact": "Agency Contact:",
+		"expected_datetime": "Estimated Fix:",
+		"service_notes": "Service Notes"
+	}
+}
