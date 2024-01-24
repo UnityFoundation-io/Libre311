@@ -1,23 +1,24 @@
 <script lang="ts">
-  import MapMarker from "./MapMarker.svelte";
+	import L from 'leaflet';
 
-  // Icons
-  import WaypointClosed from '$lib/assets/waypoint-closed.png';
-  import WaypointOpen from '$lib/assets/waypoint-open.png';
+	import WaypointClosed from '$lib/assets/waypoint-closed.png';
+	import WaypointOpen from '$lib/assets/waypoint-open.png';
+	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 
-	import type { ServiceRequest } from "$lib/services/Libre311/Libre311";
-  
-  export let serviceRequest: ServiceRequest;
+	import { iconPositionOpts } from '$lib/utils/functions';
+	import MapMarker from './MapMarker.svelte';
 
-  const waypointLookupMap = {
-    'Closed': WaypointClosed,
-    'Open': WaypointOpen
-  }
+	export let serviceRequest: ServiceRequest;
+
+	const waypointLookupMap = {
+		Closed: WaypointClosed,
+		Open: WaypointOpen
+	};
+
+	const icon = L.icon({
+		iconUrl: waypointLookupMap[serviceRequest.status],
+		...iconPositionOpts(128 / 169, 35, 'bottom-center')
+	});
 </script>
 
-<MapMarker latLng={[+serviceRequest.lat, +serviceRequest.long]} >
-  <img alt={serviceRequest.status}
-    class="size-10"
-    src={waypointLookupMap[serviceRequest.status]} 
-  />
-</MapMarker>
+<MapMarker on:click latLng={[+serviceRequest.lat, +serviceRequest.long]} options={{ icon }} />

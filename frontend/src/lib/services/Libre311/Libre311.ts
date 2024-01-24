@@ -129,16 +129,24 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 // attribute[code1]=value1
 // ServiceDefinitionAttributeCode
 type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
-// todo revisit params, they list a ton of optional that we may want to require
 // todo will likely need the recaptcha value here
-export type CreateServiceRequestParams = HasServiceCode & {
-	lat: string;
-	lng: string;
-	address_string: string;
-	attributes: AttributeResponse[];
-	description: string;
-	media_url?: string;
-};
+export const ContactInformationSchema = z.object({
+	first_name: z.string(),
+	last_name: z.string(),
+	phone: z.string(), // todo add validation => https://www.npmjs.com/package/libphonenumber-js
+	email: z.string().email()
+});
+
+export type ContactInformation = z.infer<typeof ContactInformationSchema>;
+export type CreateServiceRequestParams = HasServiceCode &
+	ContactInformation & {
+		lat: string;
+		lng: string;
+		address_string: string;
+		attributes: AttributeResponse[];
+		description: string;
+		media_url?: string;
+	};
 
 export const OpenServiceRequestStatusSchema = z.literal('Open');
 export const ClosedServiceRequestStatusSchema = z.literal('Closed');
