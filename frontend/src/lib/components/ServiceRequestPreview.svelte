@@ -51,16 +51,11 @@
 
 		{#if serviceRequest.media_url}
 			<div class="rounded-md bg-[#D9D9D9]">
-				<a
-					class="mx-auto flex overflow-y-hidden overflow-x-scroll rounded-md"
-					href={`/issues/map/${serviceRequest.service_request_id}`}
-				>
-					<img
-						class="h-[300px] w-full rounded-b-none"
-						alt="service-request"
-						src={serviceRequest.media_url}
-					/>
-				</a>
+				<img
+					class="h-[300px] w-full rounded-md"
+					alt="service-request"
+					src={serviceRequest.media_url}
+				/>
 			</div>
 		{/if}
 
