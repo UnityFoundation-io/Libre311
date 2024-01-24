@@ -62,7 +62,7 @@
 <SideBarMainContentLayout>
 	<slot slot="side-bar" />
 	<div slot="main-content">
-		<div class="h-screen w-full">
+		<div class="h-screen w-full relative flex">
      <Breakpoint>
         <div class="absolute left-1/2 top-5 z-[1] -translate-x-1/2" slot="is-mobile">
           <MapListToggle/>
