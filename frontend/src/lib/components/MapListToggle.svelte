@@ -14,7 +14,6 @@
 
 	button {
 		padding: 0.5rem 2rem;
-		border: 2px solid hsl(var(--secondary));
 		background-color: hsl(var(--primary));
 		color: hsl(var(--primary-content));
 	}
