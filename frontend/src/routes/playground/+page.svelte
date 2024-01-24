@@ -76,7 +76,7 @@
     />
 
     <div class="flex justify-between mx-8 my-4">
-      <Button>Back</Button>
+      <Button href="/issues/map">Back</Button>
       <Button type="primary">Submit</Button>
     </div>
     
