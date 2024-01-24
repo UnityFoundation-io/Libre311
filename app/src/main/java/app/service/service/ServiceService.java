@@ -39,23 +39,13 @@ public class ServiceService {
     }
 
     public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
-        Page<Service> servicePage;
-        if (jurisdictionId == null) {
-            servicePage = serviceRepository.findAll(pageable);
-        } else {
-            servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
-        }
+        Page<Service> servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
 
         return servicePage.map(ServiceDTO::new);
     }
 
     public String getServiceDefinition(String serviceCode, String jurisdictionId) {
-        Optional<Service> serviceOptional;
-        if (jurisdictionId == null) {
-            serviceOptional = serviceRepository.findByServiceCode(serviceCode);
-        } else {
-            serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
-        }
+        Optional<Service> serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
 
         if (serviceOptional.isEmpty()) {
             LOG.error("Service not found.");

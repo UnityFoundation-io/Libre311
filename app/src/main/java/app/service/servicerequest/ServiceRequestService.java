@@ -96,7 +96,8 @@ public class ServiceRequestService {
             return null;
         }
 
-        Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
+        Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCodeAndJurisdictionId(
+                serviceRequestDTO.getServiceCode(), jurisdictionId);
 
         if (serviceByServiceCodeOptional.isEmpty()) {
             LOG.error("Corresponding service not found.");
@@ -331,7 +332,7 @@ public class ServiceRequestService {
 
         if (StringUtils.hasText(serviceRequestIds)) {
             List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
-            return serviceRequestRepository.findByIdIn(requestIds, pageable);
+            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, pageable);
         }
 
         return getJurisdictionServiceRequests(jurisdictionId, pageable, serviceCode, status, startDate, endDate);
@@ -449,7 +450,7 @@ public class ServiceRequestService {
         if (serviceName == null) {
             byServiceName = Optional.empty();
         } else {
-            byServiceName = serviceRequestRepository.findByServiceServiceNameIlike(serviceName);
+            byServiceName = serviceRequestRepository.findByServiceServiceNameIlikeAndJurisdictionId(serviceName, jurisdictionId);
         }
 
         return getJurisdictionServiceRequests(jurisdictionId, byServiceName, status, startDate, endDate);
