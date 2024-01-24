@@ -19,25 +19,26 @@ import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
-import app.model.service.servicedefinition.*;
+import app.model.service.servicedefinition.AttributeDataType;
+import app.model.service.servicedefinition.AttributeValue;
+import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.convert.format.MapFormat;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.runtime.event.annotation.EventListener;
 import io.micronaut.runtime.server.event.ServerStartupEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Requires(property = "app-data.bootstrap.data.enabled", value = StringUtils.TRUE)
 @ConfigurationProperties("app-data.bootstrap")
@@ -152,19 +153,13 @@ public class Bootstrap {
                     return serviceDefinitionAttribute;
                 }).collect(Collectors.toList()));
 
-                ObjectMapper objectMapper = new ObjectMapper();
                 ServiceDefinitionEntity sde = new ServiceDefinitionEntity();
                 sde.setActive(true);
                 sde.setVersion("1.0");
 
-                try {
-                    sde.setDefinition(objectMapper.writeValueAsString(serviceDefinition));
-                    //service.setServiceDefinitionJson(objectMapper.writeValueAsString(serviceDefinition));
-                    service.getServiceDefinitions().add(sde);
-                    sde.setService(service);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
+                sde.setDefinition(serviceDefinition);
+                service.getServiceDefinitions().add(sde);
+                sde.setService(service);
             }
 
             Service savedService = serviceRepository.save(service);

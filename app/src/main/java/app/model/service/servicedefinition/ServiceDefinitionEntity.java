@@ -3,6 +3,7 @@ package app.model.service.servicedefinition;
 
 import app.model.service.Service;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,7 +24,8 @@ public class ServiceDefinitionEntity {
   private Boolean active;
 
   @Column(columnDefinition = "TEXT")
-  private String definition;  // JSON representation of service definition
+  @Convert(converter = ServiceDefinitionConverter.class)
+  private ServiceDefinition definition;
 
   @ManyToOne
   private Service service;
@@ -52,11 +54,11 @@ public class ServiceDefinitionEntity {
     this.active = active;
   }
 
-  public String getDefinition() {
+  public ServiceDefinition getDefinition() {
     return definition;
   }
 
-  public void setDefinition(String definition) {
+  public void setDefinition(ServiceDefinition definition) {
     this.definition = definition;
   }
 

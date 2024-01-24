@@ -17,17 +17,13 @@ package app.service.service;
 import app.dto.service.ServiceDTO;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
-import app.service.storage.StorageService;
+import app.model.service.servicedefinition.ServiceDefinition;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
-import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Singleton
 public class ServiceService {
@@ -49,7 +45,7 @@ public class ServiceService {
         return servicePage.map(ServiceDTO::new);
     }
 
-    public String getServiceDefinition(String serviceCode, String jurisdictionId) {
+    public ServiceDefinition getServiceDefinition(String serviceCode, String jurisdictionId) {
         Optional<Service> serviceOptional;
         if (jurisdictionId == null) {
             serviceOptional = serviceRepository.findByServiceCode(serviceCode);
@@ -60,11 +56,11 @@ public class ServiceService {
         if (serviceOptional.isEmpty()) {
             LOG.error("Service not found.");
             return null;
-        } else if (serviceOptional.get().getServiceDefinitionJson() == null) {
+        } else if (serviceOptional.get().getServiceDefinitions().isEmpty()) {
             LOG.error("Service Definition is null.");
             return null;
         }
 
-        return serviceOptional.get().getServiceDefinitionJson();
+        return serviceOptional.get().getServiceDefinitions().get(0).getDefinition();
     }
 }

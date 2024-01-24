@@ -15,6 +15,7 @@
 package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.service.servicedefinition.ServiceDefinition;
 import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
@@ -120,7 +121,7 @@ public class Service {
         this.type = type;
     }
 
-    public String getServiceDefinitionJson() {
+    public ServiceDefinition getServiceDefinitionJson() {
         if (serviceDefinitions.isEmpty()) return null;
         return serviceDefinitions.get(0).getDefinition();
     }
