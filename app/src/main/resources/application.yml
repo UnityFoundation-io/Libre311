@@ -58,6 +58,10 @@ micronaut:
 datasources:
   default:
     db-type: ${LIBRE311_DB_TYPE}
+test-resources:
+  containers:
+    mysql:
+      image-name: mysql:8.2
 jpa:
   default:
     entity-scan:

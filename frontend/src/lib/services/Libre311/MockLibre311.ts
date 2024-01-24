@@ -80,10 +80,10 @@ const serviceRequests: ServiceRequest[] = [
 		description:
 			'City of New Haven stop posting automatic responses because people may think that when they post it gets immediate human  attention',
 		address: '200 Orange St New Haven, Connecticut, 06510',
-		lat: '41.3071110182325',
+		lat: '41.307941',
 		service_request_id: 4,
 		requested_datetime: '2023-03-29T14:36:43-04:00',
-		long: '-72.9235610239783',
+		long: '-72.916881',
 		service_code: '51',
 		status: 'Closed',
 		zipcode: '06510',
@@ -100,10 +100,10 @@ const serviceRequests: ServiceRequest[] = [
 		description:
 			'Bus shelter on 270 Temple St. New Haven broken glass that could cause injury to a person. ',
 		address: '270 Temple St New Haven, CT, 06511, USA',
-		lat: '41.3083092093462',
+		lat: '41.318331',
 		service_request_id: 5,
 		requested_datetime: '2023-03-27T15:05:50-04:00',
-		long: '-72.9258607025516',
+		long: '-72.928335',
 		service_code: '22112',
 		status: 'Open',
 		zipcode: '06511',
@@ -120,10 +120,10 @@ const serviceRequests: ServiceRequest[] = [
 	{
 		description: 'Street lamp is out',
 		address: '950 Chapel St New Haven, CT, 06510, USA',
-		lat: '41.3067298619134',
+		lat: '41.316726',
 		service_request_id: 6,
 		requested_datetime: '2023-03-24T10:34:58-04:00',
-		long: '-72.9277214850559',
+		long: '-72.944871',
 		service_code: '124',
 		status: 'Open',
 		zipcode: '06510',
@@ -141,10 +141,10 @@ const serviceRequests: ServiceRequest[] = [
 		description:
 			'City of New Haven stop posting automatic responses because people may think that when they post it gets immediate human  attention',
 		address: '200 Orange St New Haven, Connecticut, 06510',
-		lat: '41.3071110182325',
+		lat: '41.310274',
 		service_request_id: 7,
 		requested_datetime: '2023-03-29T14:36:43-04:00',
-		long: '-72.9235610239783',
+		long: '-72.947411',
 		service_code: '51',
 		status: 'Closed',
 		zipcode: '06510',
@@ -161,10 +161,10 @@ const serviceRequests: ServiceRequest[] = [
 		description:
 			'Bus shelter on 270 Temple St. New Haven broken glass that could cause injury to a person. ',
 		address: '270 Temple St New Haven, CT, 06511, USA',
-		lat: '41.3083092093462',
+		lat: '41.295307',
 		service_request_id: 8,
 		requested_datetime: '2023-03-27T15:05:50-04:00',
-		long: '-72.9258607025516',
+		long: '-72.935272',
 		service_code: '22112',
 		status: 'Open',
 		zipcode: '06511',
@@ -181,10 +181,10 @@ const serviceRequests: ServiceRequest[] = [
 	{
 		description: 'Street lamp is out',
 		address: '950 Chapel St New Haven, CT, 06510, USA',
-		lat: '41.3067298619134',
+		lat: '41.307699',
 		service_request_id: 9,
 		requested_datetime: '2023-03-24T10:34:58-04:00',
-		long: '-72.9277214850559',
+		long: '-72.932086',
 		service_code: '124',
 		status: 'Open',
 		zipcode: '06510',
@@ -202,10 +202,10 @@ const serviceRequests: ServiceRequest[] = [
 		description:
 			'City of New Haven stop posting automatic responses because people may think that when they post it gets immediate human  attention',
 		address: '200 Orange St New Haven, Connecticut, 06510',
-		lat: '41.3071110182325',
+		lat: '41.312727',
 		service_request_id: 10,
 		requested_datetime: '2023-03-29T14:36:43-04:00',
-		long: '-72.9235610239783',
+		long: '-72.928617',
 		service_code: '51',
 		status: 'Closed',
 		zipcode: '06510',
@@ -222,10 +222,10 @@ const serviceRequests: ServiceRequest[] = [
 		description:
 			'Bus shelter on 270 Temple St. New Haven broken glass that could cause injury to a person. ',
 		address: '270 Temple St New Haven, CT, 06511, USA',
-		lat: '41.3083092093462',
+		lat: '41.317514',
 		service_request_id: 11,
 		requested_datetime: '2023-03-27T15:05:50-04:00',
-		long: '-72.9258607025516',
+		long: '-72.929585',
 		service_code: '22112',
 		status: 'Open',
 		zipcode: '06511',
@@ -242,10 +242,10 @@ const serviceRequests: ServiceRequest[] = [
 	{
 		description: 'Street lamp is out',
 		address: '950 Chapel St New Haven, CT, 06510, USA',
-		lat: '41.3067298619134',
+		lat: '41.336396',
 		service_request_id: 12,
 		requested_datetime: '2023-03-24T10:34:58-04:00',
-		long: '-72.9277214850559',
+		long: '-72.888005',
 		service_code: '124',
 		status: 'Open',
 		zipcode: '06510',
@@ -301,7 +301,6 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		console.log(params);
 		const pagination: Pagination = {
 			offset: 0,
 			pageNumber: params.pageNumber ?? 0,
@@ -313,10 +312,8 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 		const start = pagination.pageNumber * pagination.size;
 		const end = start + pagination.size;
 
-		console.log({ start, end });
-
 		const requests = serviceRequests.slice(start, end);
-		console.log({ requests });
+
 		return {
 			serviceRequests: requests,
 			metadata: {
@@ -330,7 +327,7 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 			(record) => record.service_request_id === params.service_request_id
 		);
 		if (!req) throw new Error('Not found');
-		console.log({ req });
+
 		return req;
 	}
 }
