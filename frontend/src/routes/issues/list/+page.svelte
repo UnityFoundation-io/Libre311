@@ -1,4 +1,5 @@
 <script lang="ts">
+	import messages from '$media/messages.json';
 	import ServiceRequestPreview from '$lib/components/ServiceRequestPreview.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { page } from '$app/stores';
@@ -19,7 +20,9 @@
 				<MapListToggle />
 			</div>
 
-			<div class="flex justify-center">
+			<div class="flex justify-center items-center">
+				<strong class="mr-2 text-lg">{messages["sidebar"]["title"]}</strong>
+
 				<Pagination
 					pagination={$serviceRequestsRes.value.metadata.pagination}
 					nextPage={linkResolver.nextIssuesPage(
