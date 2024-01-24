@@ -6,8 +6,6 @@
 
 	const selectedServiceRequest = useSelectedServiceRequestStore();
 	const linkResolver = useLibre311Context().linkResolver;
-
-	console.log(selectedServiceRequest);
 </script>
 
 <a href={linkResolver.issuesList($page.url)}>Back to list</a>
