@@ -16,8 +16,6 @@ package app.dto.servicerequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.Nullable;
-import io.micronaut.http.annotation.QueryValue;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
