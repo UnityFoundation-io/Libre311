@@ -61,19 +61,6 @@ public class CustomHttpResponseFilter implements HttpServerFilter {
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(exists -> !exists
                         ? Mono.just(HttpResponse.notFound(List.of(NOT_FOUND_ERROR)))
-//                        : Mono.just(chain.proceed(request));
-                        : Mono.from(Publishers.map(chain.proceed(request), (mutableHttpResponse -> mutableHttpResponse.headers(
-                                Map.of(
-                                    // Please see svelte.config.js for CSP configuration
-                                    // "Content-Security-Policy", "default-src 'self'",
-                                    // "Content-Security-Policy-Report-Only", "default-src 'self'",
-                                        "Strict-Transport-Security", "max-age=31536000; includeSubDomains",
-                                        "Permissions-Policy", "geolocation=(*), magnetometer=(*), " + "camera=(self), display-capture=(self), " +
-                                                "fullscreen=(self), " + "payment=(), microphone=()",
-                                        "X-Frame-Options", "DENY",
-                                        "X-Content-Type-Options", "nosniff",
-                                        HttpHeaders.REFERRER_POLICY, "no-referrer"
-                                )))))
-                );
+                        : Mono.from(chain.proceed(request)));
     }
 }
