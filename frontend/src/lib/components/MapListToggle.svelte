@@ -1,10 +1,13 @@
 <div class="toggle">
-	<button class="rounded-l-lg">
-		<a href="/issues/map"> Map </a>
-	</button>
-	<button class="rounded-r-lg">
-		<a href="/issues/list"> List </a>
-	</button>
+	
+		<a href="/issues/map"> 
+      <button class="rounded-l-lg"> Map </button>
+    </a>
+
+	
+		<a href="/issues/list"> 
+      <button class="rounded-r-lg">List </button>
+    </a>
 </div>
 
 <style>
