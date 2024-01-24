@@ -19,6 +19,8 @@ import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
+import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
@@ -279,6 +281,13 @@ public class RootController {
     @ExecuteOn(TaskExecutors.IO)
     public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO) throws MalformedURLException {
         return serviceRequestService.getAllServiceRequests(requestDTO);
+    }
+
+    @Get(value =  "/config")
+    @Secured(SecurityRule.IS_AUTHENTICATED)
+    @ExecuteOn(TaskExecutors.IO)
+    public JurisdictionInfoResponse getJurisdictionInfo(@Header("Host") String hostHeader) {
+        return new JurisdictionInfoResponse();
     }
 
     private void sanitizeXmlContent(ServiceRequestDTO serviceRequestDTO) {
