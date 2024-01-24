@@ -16,7 +16,9 @@ package app.security;
 
 import app.model.jurisdiction.JurisdictionRepository;
 import io.micronaut.core.async.publisher.Publishers;
-import io.micronaut.http.*;
+import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.annotation.Filter;
 import io.micronaut.http.filter.HttpServerFilter;
 import io.micronaut.http.filter.ServerFilterChain;
@@ -26,9 +28,8 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
-@Filter(value = {"/api/services/**", "/api/requests/**"})
+@Filter(value = {"/api/services/**", "/api/requests/**", "/api/admin/**"})
 public class CustomHttpResponseFilter implements HttpServerFilter {
 
     private static final Map<String, String> BAD_REQUEST_ERROR = Map.of(

@@ -454,7 +454,6 @@ public class RootControllerTest {
         updateServiceDTO.setServiceCode("INNER_CITY_BUS_STOPS");
         updateServiceDTO.setServiceName("Inner City Bust Stops");
         updateServiceDTO.setDescription("Issues pertaining to inner city bus stops.");
-        updateServiceDTO.setJurisdictionId("town.gov");
 
         ServiceDefinition serviceDefinitionUpdate = new ServiceDefinition();
         serviceDefinitionUpdate.setServiceCode("INNER_CITY_BUS_STOPS");
@@ -478,7 +477,7 @@ public class RootControllerTest {
         updateServiceDTO.setServiceDefinitionJson(json);
 
         Map payload = mapper.convertValue(updateServiceDTO, Map.class);
-        request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId(), payload)
+        request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId()+"?jurisdiction_id=town.gov", payload)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         response = client.toBlocking().exchange(request, ServiceDTO[].class);
         assertEquals(OK, response.getStatus());
@@ -517,7 +516,7 @@ public class RootControllerTest {
     public void canUpdateServiceRequestIfAuthenticated() {
         HttpResponse<?> response;
 
-        response = createServiceRequest("201", "12345 Fairway",
+        response = createServiceRequest("001", "12345 Fairway",
                 Map.of("attribute[SDWLK]", "CRACKED"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
@@ -533,11 +532,10 @@ public class RootControllerTest {
         patchServiceRequestDTO.setAgencyEmail("acme@example.com");
         patchServiceRequestDTO.setAgencyResponsible("Acme Concrete");
         patchServiceRequestDTO.setStatusNotes("Will investigate and remediate within 2 weeks");
-        patchServiceRequestDTO.setJurisdictionId("city.gov");
 
         Map payload = (new ObjectMapper()).convertValue(patchServiceRequestDTO, Map.class);
         HttpRequest<?> request = HttpRequest
-                .PATCH("/admin/requests/" + postResponseServiceRequestDTO.getId(), payload)
+                .PATCH("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", payload)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpRequest<?> finalRequest = request;
@@ -567,7 +565,7 @@ public class RootControllerTest {
 
         // update dates
         request = HttpRequest
-                .PATCH("admin/requests/" + postResponseServiceRequestDTO.getId(),
+                .PATCH("admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov",
                         Map.of(
                                 "jurisdiction_id", "city.gov",
                                 "closed_date", "2023-01-25T13:15:30Z",
@@ -592,7 +590,7 @@ public class RootControllerTest {
     public void canReadServiceRequestSensitiveInfoIfAuthenticated() {
         HttpResponse<?> response;
 
-        response = createServiceRequest("201", "12345 Fairway",
+        response = createServiceRequest("001", "12345 Fairway",
                 Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
@@ -632,10 +630,9 @@ public class RootControllerTest {
         serviceDTO.setServiceName(name);
         serviceDTO.setDescription(description);
         serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
-        serviceDTO.setJurisdictionId(jurisdictionId);
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceDTO, Map.class);
-        HttpRequest<?> request = HttpRequest.POST("/admin/services", payload)
+        HttpRequest<?> request = HttpRequest.POST("/admin/services?jurisdiction_id="+jurisdictionId, payload)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, ServiceDTO[].class);
     }
@@ -675,7 +672,7 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("/requests/download?jurisdiction_id=city.gov");
+        HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, byte[].class);
@@ -723,7 +720,7 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("/requests/download?jurisdiction_id=city.gov");
+        HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov");
 
         login();
 

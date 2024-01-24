@@ -44,7 +44,10 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -314,17 +317,11 @@ public class ServiceRequestService {
         return serviceRequest;
     }
 
-    public SensitiveServiceRequestDTO updateServiceRequest(Long serviceRequestId, PatchServiceRequestDTO serviceRequestDTO) {
-        Optional<ServiceRequest> serviceRequestOptional;
-        String jurisdictionId = serviceRequestDTO.getJurisdictionId();
-        if (jurisdictionId == null) {
-            serviceRequestOptional = serviceRequestRepository.findById(serviceRequestId);
-        } else {
-            serviceRequestOptional = serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
-        }
+    public SensitiveServiceRequestDTO updateServiceRequest(Long serviceRequestId, PatchServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
+        Optional<ServiceRequest> serviceRequestOptional = serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
 
         if (serviceRequestOptional.isEmpty()) {
-            LOG.error("Could not find Service Request with id {}.", serviceRequestId);
+            LOG.error("Could not find Service Request with id {} and jurisdiction id {}.", serviceRequestId, jurisdictionId);
             return null;
         }
 

@@ -63,23 +63,9 @@ public class ServiceService {
         return serviceOptional.get().getServiceDefinitionJson();
     }
 
-    public ServiceDTO createService(CreateServiceDTO serviceDTO) {
-        String jurisdictionId = serviceDTO.getJurisdictionId();
-        Jurisdiction jurisdiction = null;
-        boolean jurisdictionSupportEnabled = jurisdictionId != null;
-
-        // validate jurisdiction existence
-        if (jurisdictionSupportEnabled) {
-            // todo: validate if current user's permission allow creation of a service
-            Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById(jurisdictionId);
-            if (optionalJurisdiction.isEmpty()) {
-                LOG.error("Could not find Jurisdiction by id {}.", jurisdictionId);
-                return null;
-            }
-            jurisdiction = optionalJurisdiction.get();
-        }
-
-        if (serviceCodeAlreadyExists(jurisdictionSupportEnabled, serviceDTO.getServiceCode(), jurisdictionId)) {
+    public ServiceDTO createService(CreateServiceDTO serviceDTO, String jurisdictionId) {
+        Jurisdiction jurisdiction = jurisdictionRepository.findById(jurisdictionId).get();
+        if (serviceCodeAlreadyExists(serviceDTO.getServiceCode(), jurisdiction)) {
             return null;
         }
 
@@ -102,24 +88,17 @@ public class ServiceService {
         return new ServiceDTO(serviceRepository.save(service));
     }
 
-    public ServiceDTO updateService(Long serviceId, UpdateServiceDTO serviceDTO) {
-        boolean jurisdictionSupportEnabled = serviceDTO.getJurisdictionId() != null;
+    public ServiceDTO updateService(Long serviceId, UpdateServiceDTO serviceDTO, String jurisdictionId) {
 
-        Optional<Service> serviceOptional = serviceRepository.findById(serviceId);
+        Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
         if (serviceOptional.isEmpty()) {
             LOG.error("Service not found.");
             return null;
         }
 
         Service service = serviceOptional.get();
-        if (jurisdictionSupportEnabled &&
-                !service.getJurisdiction().getId().equals(serviceDTO.getJurisdictionId())) {
-            LOG.error("Cannot update jurisdiction.");
-            return null;
-        }
         if (serviceDTO.getServiceCode() != null) {
-            String jurisdictionId = jurisdictionSupportEnabled ? service.getJurisdiction().getId() : null;
-            if (serviceCodeAlreadyExists(jurisdictionSupportEnabled, serviceDTO.getServiceCode(), jurisdictionId)) {
+            if (serviceCodeAlreadyExists(serviceDTO.getServiceCode(), service.getJurisdiction())) {
                 return null;
             }
             service.setServiceCode(serviceDTO.getServiceCode());
@@ -144,13 +123,8 @@ public class ServiceService {
         return new ServiceDTO(serviceRepository.update(service));
     }
 
-    private boolean serviceCodeAlreadyExists(boolean jurisdictionSupportEnabled, String serviceCode, String jurisdictionId) {
-        boolean serviceCodeAlreadyExists;
-        if (jurisdictionSupportEnabled) {
-            serviceCodeAlreadyExists = serviceRepository.existsByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
-        } else {
-            serviceCodeAlreadyExists = serviceRepository.existsByServiceCode(serviceCode);
-        }
+    private boolean serviceCodeAlreadyExists(String serviceCode, Jurisdiction jurisdiction) {
+        boolean serviceCodeAlreadyExists = serviceRepository.existsByServiceCodeAndJurisdiction(serviceCode, jurisdiction);
         if (serviceCodeAlreadyExists) {
             LOG.error("Service with code {} already exists.", serviceCode);
             return true;

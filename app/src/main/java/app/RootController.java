@@ -15,7 +15,6 @@
 package app;
 
 import app.dto.discovery.DiscoveryDTO;
-import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
@@ -35,7 +34,6 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
-import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
@@ -43,7 +41,6 @@ import io.micronaut.security.rules.SecurityRule;
 import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -241,14 +238,6 @@ public class RootController {
         ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestDTO));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
-    }
-
-    @Get(value =  "/requests/download{?jurisdiction_id}")
-    @Secured(SecurityRule.IS_AUTHENTICATED)
-    @ExecuteOn(TaskExecutors.IO)
-    public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
-                                                @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
-        return serviceRequestService.getAllServiceRequests(requestDTO, jurisdiction_id);
     }
 
     private void sanitizeXmlContent(ServiceRequestDTO serviceRequestDTO) {

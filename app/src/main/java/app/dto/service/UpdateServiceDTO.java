@@ -23,9 +23,6 @@ public class UpdateServiceDTO {
     @JsonProperty("service_code")
     private String serviceCode;
 
-    @JsonProperty("jurisdiction_id")
-    private String jurisdictionId;
-
     @JsonProperty("service_name")
     private String serviceName;
 
@@ -43,14 +40,6 @@ public class UpdateServiceDTO {
 
     public void setServiceCode(String serviceCode) {
         this.serviceCode = serviceCode;
-    }
-
-    public String getJurisdictionId() {
-        return jurisdictionId;
-    }
-
-    public void setJurisdictionId(String jurisdictionId) {
-        this.jurisdictionId = jurisdictionId;
     }
 
     public String getServiceName() {
