@@ -21,12 +21,25 @@ import io.micronaut.http.annotation.Filter;
 import io.micronaut.http.filter.HttpServerFilter;
 import io.micronaut.http.filter.ServerFilterChain;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @Filter(value = {"/api/services/**", "/api/requests/**"})
 public class CustomHttpResponseFilter implements HttpServerFilter {
+
+    private static final Map<String, String> BAD_REQUEST_ERROR = Map.of(
+            "code", "400",
+            "description", "Request must include jurisdiction_id request parameter"
+    );
+
+    private static final Map<String, String> NOT_FOUND_ERROR = Map.of(
+            "code", "404",
+            "description", "Jurisdiction not found"
+    );
 
     private final JurisdictionRepository jurisdictionRepository;
 
@@ -36,37 +49,31 @@ public class CustomHttpResponseFilter implements HttpServerFilter {
 
     @Override
     public Publisher<MutableHttpResponse<?>> doFilter(HttpRequest<?> request, ServerFilterChain chain) {
+        return (Publisher<MutableHttpResponse<?>>) request.getParameters().getFirst("jurisdiction_id")
+                .map(jurisdictionId -> jurisdictionId.trim().isEmpty()
+                        ? Publishers.just(HttpResponse.badRequest(List.of(BAD_REQUEST_ERROR)))
+                        : verifyJurisdiction(jurisdictionId, chain, request))
+                .orElse(Publishers.just(HttpResponse.badRequest(List.of(BAD_REQUEST_ERROR))));
+    }
 
-        String jurisdictionId = request.getParameters().get("jurisdiction_id");
-
-        if(jurisdictionId == null || jurisdictionId.trim().isEmpty()) {
-            return Publishers.just(HttpResponse.badRequest(List.of(Map.of(
-                    "code", "400", "description",
-                    "Request must include jurisdiction_id request parameter")
-            )));
-        }
-
-        // todo: Address 'Possible call in non-blocking context'
-        if (!jurisdictionRepository.existsById(jurisdictionId)) {
-            return Publishers.just(HttpResponse.notFound(List.of(Map.of(
-                    "code", "404",
-                    "description", "jurisdiction_id not found."
-            ))));
-        }
-
-        // see https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
-        return Publishers.map(chain.proceed(request), mutableHttpResponse -> mutableHttpResponse.headers(Map.of(
-                // Please see svelte.config.js for CSP configuration
-//                "Content-Security-Policy", "default-src 'self'",
-//                "Content-Security-Policy-Report-Only", "default-src 'self'",
-
-                "Strict-Transport-Security", "max-age=31536000; includeSubDomains",
-                "Permissions-Policy", "geolocation=(*), magnetometer=(*), " +
-                        "camera=(self), display-capture=(self), fullscreen=(self), " +
-                        "payment=(), microphone=()",
-                "X-Frame-Options", "DENY",
-                "X-Content-Type-Options", "nosniff",
-                HttpHeaders.REFERRER_POLICY, "no-referrer"
-        )));
+    private Publisher<MutableHttpResponse<?>> verifyJurisdiction(String jurisdictionId, ServerFilterChain chain, HttpRequest<?> request) {
+        return Mono.fromCallable(() -> jurisdictionRepository.existsById(jurisdictionId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(exists -> !exists
+                        ? Mono.just(HttpResponse.notFound(List.of(NOT_FOUND_ERROR)))
+//                        : Mono.just(chain.proceed(request));
+                        : Mono.from(Publishers.map(chain.proceed(request), (mutableHttpResponse -> mutableHttpResponse.headers(
+                                Map.of(
+                                    // Please see svelte.config.js for CSP configuration
+                                    // "Content-Security-Policy", "default-src 'self'",
+                                    // "Content-Security-Policy-Report-Only", "default-src 'self'",
+                                        "Strict-Transport-Security", "max-age=31536000; includeSubDomains",
+                                        "Permissions-Policy", "geolocation=(*), magnetometer=(*), " + "camera=(self), display-capture=(self), " +
+                                                "fullscreen=(self), " + "payment=(), microphone=()",
+                                        "X-Frame-Options", "DENY",
+                                        "X-Content-Type-Options", "nosniff",
+                                        HttpHeaders.REFERRER_POLICY, "no-referrer"
+                                )))))
+                );
     }
 }
