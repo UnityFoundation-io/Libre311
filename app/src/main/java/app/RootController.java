@@ -255,9 +255,6 @@ public class RootController {
         if (serviceRequestDTO.getDescription() != null) {
             serviceRequestDTO.setDescription(XmlEscapers.xmlContentEscaper().escape(serviceRequestDTO.getDescription()));
         }
-        if (serviceRequestDTO.getStatusNotes() != null) {
-            serviceRequestDTO.setStatusNotes(XmlEscapers.xmlContentEscaper().escape(serviceRequestDTO.getStatusNotes()));
-        }
         if (serviceRequestDTO.getAddress() != null) {
             serviceRequestDTO.setAddress(XmlEscapers.xmlContentEscaper().escape(serviceRequestDTO.getAddress()));
         }

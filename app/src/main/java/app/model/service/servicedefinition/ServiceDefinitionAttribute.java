@@ -43,6 +43,17 @@ public class ServiceDefinitionAttribute {
     public ServiceDefinitionAttribute() {
     }
 
+    public ServiceDefinitionAttribute(String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription, List<AttributeValue> values) {
+        this.code = code;
+        this.variable = variable;
+        this.datatype = datatype;
+        this.required = required;
+        this.description = description;
+        this.attributeOrder = attributeOrder;
+        this.datatypeDescription = datatypeDescription;
+        this.values = values;
+    }
+
     public boolean isVariable() {
         return variable;
     }

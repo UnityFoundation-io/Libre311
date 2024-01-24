@@ -14,15 +14,11 @@
 
 package app.dto.service;
 
-import app.model.service.Service;
-import app.model.service.ServiceType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
 @Introspected
-public class ServiceDTO {
-
-    private Long id;
+public class UpdateServiceDTO {
 
     @JsonProperty("service_code")
     private String serviceCode;
@@ -35,31 +31,10 @@ public class ServiceDTO {
 
     private String description;
 
-    private boolean metadata;
+    @JsonProperty("service_definition")
+    private String serviceDefinitionJson;
 
-    private ServiceType type;
-
-    public ServiceDTO() {
-    }
-
-    public ServiceDTO(Service service) {
-        this.id = service.getId();
-        this.serviceCode = service.getServiceCode();
-        this.serviceName = service.getServiceName();
-        this.description = service.getDescription();
-        this.metadata = service.isMetadata();
-        this.type = service.getType();
-        if (service.getJurisdiction() != null) {
-            this.jurisdictionId = service.getJurisdiction().getId();
-        }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public UpdateServiceDTO() {
     }
 
     public String getServiceCode() {
@@ -94,19 +69,11 @@ public class ServiceDTO {
         this.description = description;
     }
 
-    public boolean isMetadata() {
-        return metadata;
+    public String getServiceDefinitionJson() {
+        return serviceDefinitionJson;
     }
 
-    public void setMetadata(boolean metadata) {
-        this.metadata = metadata;
-    }
-
-    public ServiceType getType() {
-        return type;
-    }
-
-    public void setType(ServiceType type) {
-        this.type = type;
+    public void setServiceDefinitionJson(String serviceDefinitionJson) {
+        this.serviceDefinitionJson = serviceDefinitionJson;
     }
 }
