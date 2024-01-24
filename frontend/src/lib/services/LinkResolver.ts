@@ -38,6 +38,6 @@ export class LinkResolver {
 		return this.createIssueLink(`/issues/map/${id}`, url);
 	}
 	issueDetailsMobile(url: URL, id: ServiceRequestId) {
-		return this.createIssueLink(`$/issues/${id}`, url);
+		return this.createIssueLink(`/issues/list/${id}`, url);
 	}
 }
