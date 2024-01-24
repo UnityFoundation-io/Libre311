@@ -14,6 +14,8 @@
 
 {#if $selectedServiceRequest}
 <div class="flex items-center justify-center">
-	<ServiceRequestDetails serviceRequest={$selectedServiceRequest} />
+	<div class="w-full md:w-3/4 lg:w-1/2">
+		<ServiceRequestDetails serviceRequest={$selectedServiceRequest} />
+	</div>
 </div>
 {/if}
