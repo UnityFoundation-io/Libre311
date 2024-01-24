@@ -45,7 +45,6 @@
           <MapListToggle/>
         </div>
       </Breakpoint>
-
       <MapComponent bounds={mapBounds} zoom={16}>
         {#if $serviceRequestsResponseStore.type === 'success'}
           {#each $serviceRequestsResponseStore.value.serviceRequests as req}
