@@ -4,6 +4,7 @@
 	import { mailIcon } from '$lib/assets/mailIcon.js';
 	import { phoneIcon } from '$lib/assets/phoneIcon.js';
 	import { emailValidator, type InputValidator } from '$lib/utils/functions';
+	import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
 	$: firstName = '';
 	$: lastName = '';
@@ -13,6 +14,7 @@
 	let firstNameError: string | undefined;
 	let lastNameError: string | undefined;
 	let emailError: string | undefined;
+	let phoneError: '';
 
 	function handleBack() {
 		console.log('TODO: back not implemented');
@@ -23,6 +25,7 @@
 		if (lastName == '') lastNameError = 'Last name required';
 
 		checkValid(emailValidator, email);
+		checkPhoneNumber();
 	}
 
 	function checkValid(validator: InputValidator<string>, value: string) {
@@ -32,6 +35,25 @@
 			emailError = isValid.error;
 		} else {
 			emailError = '';
+		}
+	}
+
+	function checkPhoneNumber() {
+		try {
+			const parsedPhoneNumber = parsePhoneNumber(phoneNumber, { defaultCountry: 'US' });
+
+			isValidPhoneNumber(parsedPhoneNumber.number);
+
+			phoneError = '';
+		} catch (e: any) {
+			let eString = e.toString();
+
+			let myString = eString.replace(/ParseError\d+:\s/, '');
+			myString = myString.replaceAll('_', ' ');
+			myString = myString.toLowerCase();
+			myString = myString.charAt(0).toUpperCase() + myString.slice(1);
+
+			phoneError = myString;
 		}
 	}
 </script>
@@ -83,6 +105,7 @@
 					type="text"
 					name="phone"
 					placeholder={messages['contact']['phone']['placeholder']}
+					error={phoneError}
 					bind:value={phoneNumber}
 				>
 					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
