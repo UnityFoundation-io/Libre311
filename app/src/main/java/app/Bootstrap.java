@@ -19,7 +19,10 @@ import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
-import app.model.service.servicedefinition.*;
+import app.model.service.servicedefinition.AttributeDataType;
+import app.model.service.servicedefinition.AttributeValue;
+import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -62,43 +65,41 @@ public class Bootstrap {
             List<String> jurisdictions = null;
             if(data.containsKey("jurisdictions")) {
                 jurisdictions = (List<String>) data.get("jurisdictions");
-                jurisdictions.stream().forEach(jurisdiction -> {
-                    jurisdictionRepository.save(new Jurisdiction(jurisdiction));
-                });
-            }
 
-            if(data.containsKey("services")) {
-
-                List<Map<String, ?>> services = (List<Map<String, ?>>) data.get("services");
-
-                // if jurisdictions exist, ensure each service contains one of the jurisdictions
                 if (jurisdictions != null && !jurisdictions.isEmpty()) {
-                    if (servicesAreValidWithRespectToJurisdictionsDeclaration(services, jurisdictions)) {
-                        processAndStoreServices(services, true);
-                    } else {
-                        LOG.error("Services and Service Definitions were not loaded due to missing or invalid jurisdiction");
+                    jurisdictions.stream().forEach(jurisdiction -> {
+                        jurisdictionRepository.save(new Jurisdiction(jurisdiction));
+                    });
+
+                    if(data.containsKey("services")) {
+                        List<Map<String, ?>> services = (List<Map<String, ?>>) data.get("services");
+                        if (servicesAreValidWithRespectToJurisdictionsDeclaration(services, jurisdictions)) {
+                            processAndStoreServices(services);
+                        } else {
+                            LOG.error("Services and Service Definitions were not loaded due to missing or invalid jurisdiction");
+                        }
                     }
                 } else {
-                    processAndStoreServices(services, false);
+                    LOG.error("Required jurisdiction ids are missing");
                 }
+            } else {
+                LOG.error("Required jurisdiction ids are missing");
             }
         }
     }
 
-    private void processAndStoreServices(List<Map<String, ?>> services, boolean multiJurisdictionIsSupported) {
+    private void processAndStoreServices(List<Map<String, ?>> services) {
 
         Map<String, Jurisdiction> jurisdictionMap = new HashMap<>();
-        if (multiJurisdictionIsSupported) {
-            List<String> distinctJurisdictions = services.stream()
-                    .map(stringMap -> (String) stringMap.get("jurisdiction"))
-                    .distinct()
-                    .collect(Collectors.toList());
+        List<String> distinctJurisdictions = services.stream()
+                .map(stringMap -> (String) stringMap.get("jurisdiction"))
+                .distinct()
+                .collect(Collectors.toList());
 
-            distinctJurisdictions.forEach(s -> {
-                Optional<Jurisdiction> byId = jurisdictionRepository.findById(s);
-                jurisdictionMap.put(s, byId.get());
-            });
-        }
+        distinctJurisdictions.forEach(s -> {
+            Optional<Jurisdiction> byId = jurisdictionRepository.findById(s);
+            jurisdictionMap.put(s, byId.get());
+        });
 
         services.stream().forEach(svc -> {
             String serviceName = (String) svc.get("serviceName");
@@ -108,13 +109,9 @@ public class Bootstrap {
             service.setType(ServiceType.valueOf(((String) svc.get("type")).toUpperCase()));
 
             Jurisdiction jurisdiction;
-            if (multiJurisdictionIsSupported) {
-                String jurisdictionStr = (String) svc.get("jurisdiction");
-                jurisdiction = jurisdictionMap.get(jurisdictionStr);
-                service.setJurisdiction(jurisdiction);
-            } else {
-                jurisdiction = null;
-            }
+            String jurisdictionStr = (String) svc.get("jurisdiction");
+            jurisdiction = jurisdictionMap.get(jurisdictionStr);
+            service.setJurisdiction(jurisdiction);
 
             if (svc.containsKey("serviceDefinition")) {
                 service.setMetadata(true);
@@ -180,10 +177,7 @@ public class Bootstrap {
                     serviceRequest.setServiceNotice((String) svcReq.get("service_notice"));
                     serviceRequest.setStatusNotes((String) svcReq.get("status_notes"));
                     serviceRequest.setService(savedService);
-
-                    if (multiJurisdictionIsSupported) {
-                        serviceRequest.setJurisdiction(jurisdiction);
-                    }
+                    serviceRequest.setJurisdiction(jurisdiction);
 
                     savedService.addServiceRequest(serviceRequest);
                 });

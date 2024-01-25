@@ -41,6 +41,7 @@ dependencies {
     implementation("io.micronaut.objectstorage:micronaut-object-storage-gcp")
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation('com.opencsv:opencsv:5.7.1')
+    implementation("io.micronaut.reactor:micronaut-reactor")
 
     String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
     if (databaseSelection != null) {
@@ -77,15 +78,3 @@ micronaut {
 tasks.withType(JavaCompile) {
     options.fork = true
 }
-
-tasks.register('copyClientResources', Copy) {
-    dependsOn ':frontend:build'
-    from "${project(':frontend').projectDir}/build"
-    into "${project(':app').buildDir}/resources/main/public"
-}
-
-processResources {
-    dependsOn 'copyClientResources'
-}
-
-

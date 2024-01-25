@@ -14,35 +14,54 @@
 
 package app.security;
 
+import app.model.jurisdiction.JurisdictionRepository;
 import io.micronaut.core.async.publisher.Publishers;
-import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.annotation.Filter;
 import io.micronaut.http.filter.HttpServerFilter;
 import io.micronaut.http.filter.ServerFilterChain;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
 import java.util.Map;
 
-@Filter("/**")
+@Filter(value = {"/api/services/**", "/api/requests/**", "/api/admin/**"})
 public class CustomHttpResponseFilter implements HttpServerFilter {
+
+    private static final Map<String, String> BAD_REQUEST_ERROR = Map.of(
+            "code", "400",
+            "description", "Request must include jurisdiction_id request parameter"
+    );
+
+    private static final Map<String, String> NOT_FOUND_ERROR = Map.of(
+            "code", "404",
+            "description", "Jurisdiction not found"
+    );
+
+    private final JurisdictionRepository jurisdictionRepository;
+
+    public CustomHttpResponseFilter(JurisdictionRepository jurisdictionRepository) {
+        this.jurisdictionRepository = jurisdictionRepository;
+    }
+
     @Override
     public Publisher<MutableHttpResponse<?>> doFilter(HttpRequest<?> request, ServerFilterChain chain) {
+        return (Publisher<MutableHttpResponse<?>>) request.getParameters().getFirst("jurisdiction_id")
+                .map(jurisdictionId -> jurisdictionId.trim().isEmpty()
+                        ? Publishers.just(HttpResponse.badRequest(List.of(BAD_REQUEST_ERROR)))
+                        : verifyJurisdiction(jurisdictionId, chain, request))
+                .orElse(Publishers.just(HttpResponse.badRequest(List.of(BAD_REQUEST_ERROR))));
+    }
 
-        // see https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
-        return Publishers.map(chain.proceed(request), mutableHttpResponse -> mutableHttpResponse.headers(Map.of(
-                // Please see svelte.config.js for CSP configuration
-//                "Content-Security-Policy", "default-src 'self'",
-//                "Content-Security-Policy-Report-Only", "default-src 'self'",
-
-                "Strict-Transport-Security", "max-age=31536000; includeSubDomains",
-                "Permissions-Policy", "geolocation=(*), magnetometer=(*), " +
-                        "camera=(self), display-capture=(self), fullscreen=(self), " +
-                        "payment=(), microphone=()",
-                "X-Frame-Options", "DENY",
-                "X-Content-Type-Options", "nosniff",
-                HttpHeaders.REFERRER_POLICY, "no-referrer"
-        )));
+    private Publisher<MutableHttpResponse<?>> verifyJurisdiction(String jurisdictionId, ServerFilterChain chain, HttpRequest<?> request) {
+        return Mono.fromCallable(() -> jurisdictionRepository.existsById(jurisdictionId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(exists -> !exists
+                        ? Mono.just(HttpResponse.notFound(List.of(NOT_FOUND_ERROR)))
+                        : Mono.from(chain.proceed(request)));
     }
 }

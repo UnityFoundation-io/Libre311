@@ -27,10 +27,6 @@ import java.time.Instant;
 public class GetServiceRequestsDTO {
 
     @Nullable
-    @QueryValue(value = "jurisdiction_id")
-    private String jurisdictionId;
-
-    @Nullable
     @QueryValue(value = "service_request_id")
     private String id;
 
@@ -107,14 +103,5 @@ public class GetServiceRequestsDTO {
 
     public void setPageable(Pageable pageable) {
         this.pageable = pageable;
-    }
-
-    @Nullable
-    public String getJurisdictionId() {
-        return jurisdictionId;
-    }
-
-    public void setJurisdictionId(@Nullable String jurisdictionId) {
-        this.jurisdictionId = jurisdictionId;
     }
 }

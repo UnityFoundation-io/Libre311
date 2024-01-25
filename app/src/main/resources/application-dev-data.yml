@@ -3,8 +3,10 @@ app-data:
   bootstrap:
     data:
       enabled: true
+      jurisdictions: ["city.gov", "town.gov"]
       services:
         - serviceCode: "001"
+          jurisdiction: "city.gov"
           serviceName: Sidewalk
           description: Sidewalk
           type: realtime
@@ -247,6 +249,7 @@ app-data:
               service_notice: null
               status_notes: null
         - serviceCode: "002"
+          jurisdiction: "town.gov"
           serviceName: Bus Stop
           description: Bus Stop
           type: realtime
@@ -391,6 +394,7 @@ app-data:
               service_notice: null
               status_notes: null
         - serviceCode: "003"
+          jurisdiction: "city.gov"
           serviceName: Bike Lane
           description: Bike Lane
           type: realtime
@@ -450,6 +454,7 @@ app-data:
               service_notice: null
               status_notes: null
         - serviceCode: "004"
+          jurisdiction: "town.gov"
           serviceName: Crosswalk
           description: Crosswalk
           type: realtime
@@ -474,6 +479,7 @@ app-data:
                   - key: "OTHER"
                     name: "Other"
         - serviceCode: "005"
+          jurisdiction: "city.gov"
           serviceName: Intersection
           description: Intersection
           type: realtime
@@ -498,6 +504,7 @@ app-data:
                   - key: "OTHER"
                     name: "Other"
         - serviceCode: "006"
+          jurisdiction: "town.gov"
           serviceName: Other
           description: Other
           type: realtime
