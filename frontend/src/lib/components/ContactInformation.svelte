@@ -10,43 +10,45 @@
 </script>
 
 <div class="flex h-full items-center justify-center">
-	<div class="h-full w-full md:w-3/4 lg:w-1/2">
-		<h1 class="text-lg">{messages['contact']['header']}</h1>
-		<p class="text-sm">{messages['contact']['body']}</p>
+	<div class="mx-4 flex flex-col" style="height: calc(100vh - var(--header-height));">
+		<div class="mt-4 flex-grow">
+			<h1 class="text-lg">{messages['contact']['header']}</h1>
+			<p class="my-2 text-sm">{messages['contact']['body']}</p>
 
-		<div class="my-2">
-			<Input allowClear type="text" name="firstName" placeholder="First Name">
-				<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
-			</Input>
-			<Input allowClear type="text" name="lastName" placeholder="Last Name"></Input>
+			<div class="my-2">
+				<Input allowClear type="text" name="firstName" placeholder="First Name">
+					<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
+				</Input>
+				<Input allowClear type="text" name="lastName" placeholder="Last Name"></Input>
+			</div>
+
+			<div class="my-2">
+				<Input
+					allowClear
+					name="email"
+					type="email"
+					placeholder={messages['contact']['email']['placeholder']}
+				>
+					<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
+					<Input.Leading slot="leading" data={mail} />
+				</Input>
+			</div>
+
+			<div class="my-2">
+				<Input
+					allowClear
+					type="text"
+					name="phone"
+					placeholder={messages['contact']['phone']['placeholder']}
+				>
+					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
+					<Input.Leading slot="leading" data={phone} />
+				</Input>
+			</div>
 		</div>
 
-		<div class="my-2">
-			<Input
-				allowClear
-				name="email"
-				type="email"
-				placeholder={messages['contact']['email']['placeholder']}
-			>
-				<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
-				<Input.Leading slot="leading" data={mail} />
-			</Input>
-		</div>
-
-		<div class="my-2">
-			<Input
-				allowClear
-				type="text"
-				name="phone"
-				placeholder={messages['contact']['phone']['placeholder']}
-			>
-				<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
-				<Input.Leading slot="leading" data={phone} />
-			</Input>
-		</div>
-
-		<div class="mt-4">
-			<div class="flex items-start justify-between">
+		<div class="mb-4">
+			<div class="flex items-center justify-between">
 				<button class="my-2 text-sm" type="submit" on:click|preventDefault={handleSubmit}>
 					{messages['contact']['button']['back']}
 				</button>
