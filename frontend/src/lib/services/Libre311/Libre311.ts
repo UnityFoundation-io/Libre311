@@ -130,11 +130,14 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 // ServiceDefinitionAttributeCode
 type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
 // todo will likely need the recaptcha value here
+
+export const EmailSchema = z.string().email();
+
 export const ContactInformationSchema = z.object({
 	first_name: z.string(),
 	last_name: z.string(),
 	phone: z.string(), // todo add validation => https://www.npmjs.com/package/libphonenumber-js
-	email: z.string().email()
+	email: EmailSchema
 });
 
 export type ContactInformation = z.infer<typeof ContactInformationSchema>;

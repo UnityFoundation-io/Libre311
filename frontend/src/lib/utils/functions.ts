@@ -1,4 +1,5 @@
 import L, { type PointTuple } from 'leaflet';
+import { z } from 'zod';
 
 export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,3 +44,22 @@ export function iconPositionOpts(
 		iconAnchor: createAnchor(iconSize, position)
 	};
 }
+
+export type InputValidationState<T> = { valid: false; error: string } | { valid: true; value: T };
+
+export type InputValidator<T> = (value: unknown) => InputValidationState<T>;
+
+export function inputValidatorFactory<T>(schema: z.ZodType<T, z.ZodTypeDef, T>): InputValidator<T> {
+    const validator: InputValidator<T> = (value: unknown) => {
+        const res = schema.safeParse(value);
+        if (res.success) return { valid: true, value: res.data };
+
+        const firstIssue = res.error.issues.at(0);
+        return { valid: false, error: firstIssue?.message ?? res.error.message };
+    };
+
+    return validator;
+}
+
+export const urlValidator: InputValidator<string> = inputValidatorFactory(z.string().url());
+export const emailValidator: InputValidator<string> = inputValidatorFactory(z.string().email());

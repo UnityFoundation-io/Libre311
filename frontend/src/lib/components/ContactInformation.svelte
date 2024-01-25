@@ -1,11 +1,38 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Input } from 'stwui';
-	import { mail } from '$lib/assets/mail.js';
-	import { phone } from '$lib/assets/phone.js';
+	import { mailIcon } from '$lib/assets/mailIcon.js';
+	import { phoneIcon } from '$lib/assets/phoneIcon.js';
+	import { emailValidator, type InputValidator } from '$lib/utils/functions';
+
+	$: firstName = '';
+	$: lastName = '';
+	$: phoneNumber = '';
+	$: email = '';
+
+	let firstNameError: string | undefined;
+	let lastNameError: string | undefined;
+	let emailError: string | undefined;
+
+	function handleBack() {
+		console.log('TODO: back not implemented');
+	}
 
 	function handleSubmit() {
-		console.log('YOU PRESSED A BUTTON');
+		if (firstName == '') firstNameError = 'First name required';
+		if (lastName == '') lastNameError = 'Last name required';
+
+		checkValid(emailValidator, email);
+	}
+
+	function checkValid(validator: InputValidator<string>, value: string) {
+		const isValid = validator(value);
+
+		if (!isValid.valid) {
+			emailError = isValid.error;
+		} else {
+			emailError = '';
+		}
 	}
 </script>
 
@@ -21,6 +48,8 @@
 					type="text"
 					name="firstName"
 					placeholder={messages['contact']['name']['first_name']['placeholder']}
+					error={firstNameError}
+					bind:value={firstName}
 				>
 					<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
 				</Input>
@@ -29,6 +58,8 @@
 					type="text"
 					name="lastName"
 					placeholder={messages['contact']['name']['last_name']['placeholder']}
+					error={lastNameError}
+					bind:value={lastName}
 				></Input>
 			</div>
 
@@ -38,9 +69,11 @@
 					name="email"
 					type="email"
 					placeholder={messages['contact']['email']['placeholder']}
+					bind:value={email}
+					error={emailError}
 				>
 					<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
-					<Input.Leading slot="leading" data={mail} />
+					<Input.Leading slot="leading" data={mailIcon} />
 				</Input>
 			</div>
 
@@ -50,16 +83,17 @@
 					type="text"
 					name="phone"
 					placeholder={messages['contact']['phone']['placeholder']}
+					bind:value={phoneNumber}
 				>
 					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
-					<Input.Leading slot="leading" data={phone} />
+					<Input.Leading slot="leading" data={phoneIcon} />
 				</Input>
 			</div>
 		</div>
 
 		<div class="mb-4">
 			<div class="flex items-center justify-between">
-				<button class="my-2 text-sm" type="submit" on:click|preventDefault={handleSubmit}>
+				<button class="my-2 text-sm" type="submit" on:click|preventDefault={handleBack}>
 					{messages['contact']['button']['back']}
 				</button>
 				<button class="submit my-2 text-sm" type="submit" on:click|preventDefault={handleSubmit}>
