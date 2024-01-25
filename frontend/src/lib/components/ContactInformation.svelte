@@ -1,0 +1,77 @@
+<script lang="ts">
+	import messages from '$media/messages.json';
+	import { Input } from 'stwui';
+	import { mail } from '$lib/assets/mail.js';
+	import { phone } from '$lib/assets/phone.js';
+
+	function handleSubmit() {
+		console.log('YOU PRESSED A BUTTON');
+	}
+</script>
+
+<div class="flex h-full items-center justify-center">
+	<div class="h-full w-full md:w-3/4 lg:w-1/2">
+		<h1 class="text-lg">{messages['contact']['header']}</h1>
+		<p class="text-sm">{messages['contact']['body']}</p>
+
+		<div class="my-2">
+			<Input allowClear type="text" name="firstName" placeholder="First Name">
+				<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
+			</Input>
+			<Input allowClear type="text" name="lastName" placeholder="Last Name"></Input>
+		</div>
+
+		<div class="my-2">
+			<Input
+				allowClear
+				name="email"
+				type="email"
+				placeholder={messages['contact']['email']['placeholder']}
+			>
+				<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
+				<Input.Leading slot="leading" data={mail} />
+			</Input>
+		</div>
+
+		<div class="my-2">
+			<Input
+				allowClear
+				type="text"
+				name="phone"
+				placeholder={messages['contact']['phone']['placeholder']}
+			>
+				<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
+				<Input.Leading slot="leading" data={phone} />
+			</Input>
+		</div>
+
+		<div class="mt-4">
+			<div class="flex items-start justify-between">
+				<button class="my-2 text-sm" type="submit" on:click|preventDefault={handleSubmit}>
+					{messages['contact']['button']['back']}
+				</button>
+				<button class="submit my-2 text-sm" type="submit" on:click|preventDefault={handleSubmit}>
+					{messages['contact']['button']['submit']}
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	.submit {
+		padding: 0.5rem 2rem;
+		background-color: hsl(var(--primary));
+		color: hsl(var(--primary-content));
+		border: 1px solid hsl(var(--primary));
+		/* position: relative; */
+		border-radius: 10px;
+	}
+
+	.submit:hover {
+		--tw-surface-opacity: 0.1;
+		border: 1px solid hsl(var(--primary));
+		color: hsl(var(--primary));
+		background-color: hsl(var(--primary) / var(--tw-surface-opacity));
+	}
+</style>

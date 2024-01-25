@@ -16,5 +16,27 @@
 		"agency_contact": "Agency Contact:",
 		"expected_datetime": "Estimated Fix:",
 		"service_notes": "Service Notes"
+	},
+	"contact": {
+		"header": "Add Contact Information",
+		"body": "We will only use the provided information to follow up on your request and will not use it for any other purposes",
+		"name": {
+			"label": "Name",
+			"first_name": {
+				"label": "Fi"
+			}
+		},
+		"phone": {
+			"label": "Phone",
+			"placeholder": "000-000-000"
+		},
+		"email": {
+			"label": "Email",
+			"placeholder": "example@email.com"
+		},
+		"button": {
+			"submit": "Submit Contact Details",
+			"back": "Back"
+		}
 	}
 }
