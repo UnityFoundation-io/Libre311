@@ -12,6 +12,9 @@
 	import messages from '$media/messages.json';
 
 	import { Button, Select, TextArea } from 'stwui';
+
+	// Service Definition Attributes
+	import StringServiceDefinitionAttribute from '$lib/components/ServiceDefinitionAttributes/StringServiceDefinitionAttribute.svelte';
 	import MultiSelectServiceDefinitionAttribute from '$lib/components/ServiceDefinitionAttributes/MultiSelectServiceDefinitionAttribute.svelte';
 
 	import type { SelectOption } from 'stwui/types';
@@ -74,6 +77,11 @@
 					{#if attribute.datatype === 'multivaluelist'}
 						<MultiSelectServiceDefinitionAttribute {attribute} on:change={(e) => console.log(e)} />
 					{/if}
+					<!--           
+          {#if attribute.datatype === 'string'}
+            <StringServiceDefinitionAttribute {attribute} on:change={(e) => console.log(e)}/>
+          {/if}
+           -->
 				{/each}
 			{/if}
 		{/if}

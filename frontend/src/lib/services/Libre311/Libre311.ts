@@ -76,6 +76,15 @@ export const NonListBasedServiceDefinitionAttributeSchema =
 		datatype: z.union([StringType, NumberType, DatetimeType, TextType])
 	});
 
+export const StringServiceDefinitionAttributeSchema =
+	NonListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: StringType
+	});
+
+export type StringServiceDefinitionAttribute = z.infer<
+	typeof StringServiceDefinitionAttributeSchema
+>;
+
 const AttributeValueSchema = z.object({
 	/**
 	 * The unique identifier associated with an option for singlevaluelist or multivaluelist. This is analogous to the value attribute in an html option tag.
