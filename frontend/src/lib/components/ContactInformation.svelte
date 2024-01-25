@@ -141,7 +141,6 @@
 		background-color: hsl(var(--primary));
 		color: hsl(var(--primary-content));
 		border: 1px solid hsl(var(--primary));
-		/* position: relative; */
 		border-radius: 10px;
 	}
 
