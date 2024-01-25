@@ -15,13 +15,20 @@
 package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.service.group.ServiceGroup;
+import app.model.service.keyword.ServiceKeyword;
+import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import app.model.servicerequest.ServiceRequest;
+import java.util.HashSet;
+import java.util.Set;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "services")
@@ -31,20 +38,31 @@ public class Service {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String serviceCode;
 
     @ManyToOne
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
 
-    @Column(columnDefinition = "TEXT")
-    private String serviceDefinitionJson;
-
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
+    @Column(columnDefinition = "TEXT")
+    private String keywords;
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinTable(name="service_service_groups",
+        joinColumns={@JoinColumn(name="service_id")},
+        inverseJoinColumns={@JoinColumn(name="service_group_id")})
+    private Set<ServiceGroup> serviceGroups = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinTable(name="service_service_keywords",
+        joinColumns={@JoinColumn(name="service_id")},
+        inverseJoinColumns={@JoinColumn(name="service_keyword_id")})
+    private Set<ServiceKeyword> serviceKeywords = new HashSet<>();
 
     private boolean metadata = false;
 
@@ -54,6 +72,12 @@ public class Service {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "service")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "service_id")
+    @Where(clause = "active = true")
+    private List<ServiceDefinitionEntity> serviceDefinitions = new ArrayList<>();
 
 
     public Service(String serviceName) {
@@ -110,14 +134,10 @@ public class Service {
         this.type = type;
     }
 
-    public String getServiceDefinitionJson() {
-        return serviceDefinitionJson;
+    public ServiceDefinition getServiceDefinitionJson() {
+        if (serviceDefinitions.isEmpty()) return null;
+        return serviceDefinitions.get(0).getDefinition();
     }
-
-    public void setServiceDefinitionJson(String serviceDefinitionJson) {
-        this.serviceDefinitionJson = serviceDefinitionJson;
-    }
-
     public Long getId() {
         return id;
     }
@@ -136,5 +156,38 @@ public class Service {
 
     public void addServiceRequest(ServiceRequest serviceRequest) {
         serviceRequests.add(serviceRequest);
+    }
+
+    public List<ServiceDefinitionEntity> getServiceDefinitions() {
+        return serviceDefinitions;
+    }
+
+    public void setServiceDefinitions(
+        List<ServiceDefinitionEntity> serviceDefinitions) {
+        this.serviceDefinitions = serviceDefinitions;
+    }
+
+    public String getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
+    }
+
+    public Set<ServiceGroup> getServiceGroups() {
+        return serviceGroups;
+    }
+
+    public void setServiceGroups(Set<ServiceGroup> serviceGroups) {
+        this.serviceGroups = serviceGroups;
+    }
+
+    public Set<ServiceKeyword> getServiceKeywords() {
+        return serviceKeywords;
+    }
+
+    public void setServiceKeywords(Set<ServiceKeyword> serviceKeywords) {
+        this.serviceKeywords = serviceKeywords;
     }
 }

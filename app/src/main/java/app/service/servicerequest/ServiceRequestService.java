@@ -23,6 +23,8 @@ import app.model.service.servicedefinition.AttributeDataType;
 import app.model.service.servicedefinition.AttributeValue;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
+import app.model.servicerequest.MissingActiveServiceDefinitionException;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
@@ -86,15 +88,15 @@ public class ServiceRequestService {
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO) {
-        if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
-            LOG.error("ReCaptcha verification failed.");
-            return null;
-        }
+      if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
+        LOG.error("ReCaptcha verification failed.");
+        return null;
+      }
 
-        if (!validMediaUrl(serviceRequestDTO.getMediaUrl())) {
-            LOG.error("Media URL is invalid.");
-            return null;
-        }
+      if (!validMediaUrl(serviceRequestDTO.getMediaUrl())) {
+        LOG.error("Media URL is invalid.");
+        return null;
+      }
 
         Optional<Service> serviceByServiceCodeOptional;
         if (serviceRequestDTO.getJurisdictionId() == null) {
@@ -104,55 +106,64 @@ public class ServiceRequestService {
                     serviceRequestDTO.getServiceCode(), serviceRequestDTO.getJurisdictionId());
         }
 
-        if (serviceByServiceCodeOptional.isEmpty()) {
-            LOG.error("Corresponding service not found.");
-            return null; // todo return 'corresponding service not found
-        }
+      if (serviceByServiceCodeOptional.isEmpty()) {
+        LOG.error("Corresponding service not found.");
+        return null; // todo return 'corresponding service not found
+      }
 
-        if (serviceRequestDTO.getJurisdictionId() != null &&
-                !serviceRequestDTO.getJurisdictionId().equals(serviceByServiceCodeOptional.get().getJurisdiction().getId())) {
-            LOG.error("Mismatch between jurisdiction_id provided and Service's associated jurisdiction.");
-            return null;
-        }
+      if (serviceRequestDTO.getJurisdictionId() != null &&
+          !serviceRequestDTO.getJurisdictionId()
+              .equals(serviceByServiceCodeOptional.get().getJurisdiction().getId())) {
+        LOG.error(
+            "Mismatch between jurisdiction_id provided and Service's associated jurisdiction.");
+        return null;
+      }
 
-        // validate if a location is provided
-        boolean latLongProvided = StringUtils.hasText(serviceRequestDTO.getLatitude()) &&
-                StringUtils.hasText(serviceRequestDTO.getLongitude());
+      // validate if a location is provided
+      boolean latLongProvided = StringUtils.hasText(serviceRequestDTO.getLatitude()) &&
+                                StringUtils.hasText(serviceRequestDTO.getLongitude());
 
-        if (!latLongProvided &&
-                StringUtils.isEmpty(serviceRequestDTO.getAddressString()) &&
-                StringUtils.isEmpty(serviceRequestDTO.getAddressId())) {
-            LOG.error("Address or lat/long not provided.");
-            return null; // todo throw exception
-        }
+      if (!latLongProvided &&
+          StringUtils.isEmpty(serviceRequestDTO.getAddressString()) &&
+          StringUtils.isEmpty(serviceRequestDTO.getAddressId())) {
+        LOG.error("Address or lat/long not provided.");
+        return null; // todo throw exception
+      }
 
-        // validate if additional attributes are required
-        List<ServiceDefinitionAttribute> requestAttributes = null;
-        Service service = serviceByServiceCodeOptional.get();
-        if (service.isMetadata()) {
-            // get service definition
-            String serviceDefinitionJson = service.getServiceDefinitionJson();
-            if (serviceDefinitionJson == null || serviceDefinitionJson.isBlank()) {
-                LOG.error("Service definition does not exists despite service requiring it.");
-                return null; // should not be in this state and admin needs to be aware.
-            }
-
-            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionJson);
-            if (requestAttributes.isEmpty()) {
-                LOG.error("Submitted Service Request does not contain any attribute values.");
-                return null; // todo throw exception - must provide attributes
-            }
-            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionJson, requestAttributes)) {
-                LOG.error("Submitted Service Request does not contain required attribute values.");
-                return null; // todo throw exception (validation)
-            }
-        }
+      // validate if additional attributes are required
+      List<ServiceDefinitionAttribute> requestAttributes = null;
+      Service service = serviceByServiceCodeOptional.get();
+      if (service.isMetadata()) {
+          // get service definition
+          List<ServiceDefinitionEntity> serviceDefinitions = service.getServiceDefinitions();
+          if (serviceDefinitions.isEmpty() || serviceDefinitions.get(0).getDefinition() == null) {
+              LOG.error("Service definition does not exists despite service requiring it.");
+              return null; // should not be in this state and admin needs to be aware.
+          }
+          ServiceDefinition serviceDefinition = serviceDefinitions.get(0).getDefinition();
+          requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinition);
+          if (requestAttributes.isEmpty()) {
+              LOG.error("Submitted Service Request does not contain any attribute values.");
+              return null; // todo throw exception - must provide attributes
+          }
+          if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinition,
+              requestAttributes)) {
+              LOG.error("Submitted Service Request does not contain required attribute values.");
+              return null; // todo throw exception (validation)
+          }
+      }
 
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
         if (requestAttributes != null) {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 serviceRequest.setAttributesJson(objectMapper.writeValueAsString(requestAttributes));
+                serviceRequest.setServiceDefinition(
+                    service.getServiceDefinitions().stream()
+                        .filter(sde -> sde.getActive()).findFirst().orElseThrow(
+                            ()-> new MissingActiveServiceDefinitionException()
+                        )
+                );
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -166,13 +177,10 @@ public class ServiceRequestService {
         return mediaUrl.startsWith(storageUrlUtil.getBucketUrlString());
     }
 
-    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, List<ServiceDefinitionAttribute> requestAttributes) {
+    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(ServiceDefinition serviceDefinition, List<ServiceDefinitionAttribute> requestAttributes) {
         // deserialize
-        ObjectMapper objectMapper = new ObjectMapper();
         boolean containsAllRequiredAttrs = false;
-        try {
             // collect all required attributes
-            ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
             List<String> requiredCodes = serviceDefinition.getAttributes().stream()
                     .filter(ServiceDefinitionAttribute::isRequired)
                     .map(ServiceDefinitionAttribute::getCode)
@@ -184,22 +192,11 @@ public class ServiceRequestService {
                     .collect(Collectors.toList());
             containsAllRequiredAttrs = requestCodes.containsAll(requiredCodes);
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
         return containsAllRequiredAttrs;
     }
 
-    private List<ServiceDefinitionAttribute> buildUserResponseAttributesFromRequest(HttpRequest<?> request, String serviceDefinitionJson) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ServiceDefinition serviceDefinition;
-        try {
-            serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
+    private List<ServiceDefinitionAttribute> buildUserResponseAttributesFromRequest(HttpRequest<?> request, ServiceDefinition serviceDefinition) {
         Optional<Map> body = request.getBody(Map.class);
 
         List<ServiceDefinitionAttribute> attributes = new ArrayList<>();

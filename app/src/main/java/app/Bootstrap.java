@@ -19,25 +19,31 @@ import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
-import app.model.service.servicedefinition.*;
+import app.model.service.group.ServiceGroup;
+import app.model.service.group.ServiceGroupRepository;
+import app.model.service.keyword.ServiceKeyword;
+import app.model.service.keyword.ServiceKeywordRepository;
+import app.model.service.servicedefinition.AttributeDataType;
+import app.model.service.servicedefinition.AttributeValue;
+import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.convert.format.MapFormat;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.runtime.event.annotation.EventListener;
 import io.micronaut.runtime.server.event.ServerStartupEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Requires(property = "app-data.bootstrap.data.enabled", value = StringUtils.TRUE)
 @ConfigurationProperties("app-data.bootstrap")
@@ -48,14 +54,20 @@ public class Bootstrap {
 
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
+    private final ServiceGroupRepository groupRepository;
+    private final ServiceKeywordRepository keywordRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository,
+        ServiceGroupRepository groupRepository, ServiceKeywordRepository keywordRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
+        this.groupRepository = groupRepository;
+        this.keywordRepository = keywordRepository;
     }
 
     @EventListener
+    @Transactional
     public void devData(ServerStartupEvent event) {
         if(data != null) {
 
@@ -106,7 +118,20 @@ public class Bootstrap {
             service.setServiceCode((String) svc.get("serviceCode"));
             service.setDescription((String) svc.get("description"));
             service.setType(ServiceType.valueOf(((String) svc.get("type")).toUpperCase()));
-
+            List<String> groups = (List<String>) svc.get("groups");
+            if (groups != null) {
+                groups.forEach(groupName -> {
+                    ServiceGroup group = groupRepository.findByName(groupName).orElse(new ServiceGroup(groupName));
+                    service.getServiceGroups().add(group);
+                });
+            }
+            List<String> keywords = (List<String>) svc.get("keywords");
+            if (keywords != null) {
+                keywords.forEach(keywordName -> {
+                    ServiceKeyword keyword = keywordRepository.findByName(keywordName).orElse(new ServiceKeyword(keywordName));
+                    service.getServiceKeywords().add(keyword);
+                });
+            }
             Jurisdiction jurisdiction;
             if (multiJurisdictionIsSupported) {
                 String jurisdictionStr = (String) svc.get("jurisdiction");
@@ -152,16 +177,16 @@ public class Bootstrap {
                     return serviceDefinitionAttribute;
                 }).collect(Collectors.toList()));
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                try {
-                    service.setServiceDefinitionJson(objectMapper.writeValueAsString(serviceDefinition));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
+                ServiceDefinitionEntity sde = new ServiceDefinitionEntity();
+                sde.setActive(true);
+                sde.setVersion("1.0");
+
+                sde.setDefinition(serviceDefinition);
+                service.getServiceDefinitions().add(sde);
+                sde.setService(service);
             }
 
-            Service savedService = serviceRepository.save(service);
-
+            Service savedService = serviceRepository.update(service);
             if (svc.containsKey("serviceRequests")) {
                 List<Map> serviceRequests = (List<Map>) svc.get("serviceRequests");
 
