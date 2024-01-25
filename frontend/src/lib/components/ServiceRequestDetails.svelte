@@ -52,13 +52,7 @@
 		<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>
 
 		{#if serviceRequest.media_url}
-			<div class="mx-auto flex overflow-y-hidden overflow-x-scroll rounded-md bg-[#D9D9D9]">
-				<img
-					class="h-[300px] w-full rounded-b-none"
-					alt="service-request"
-					src={serviceRequest.media_url}
-				/>
-			</div>
+			<div class="serviceImage" style={`background-image: url('${serviceRequest.media_url}');`}/>
 		{/if}
 
 		<div class="mt-2 flow-root">
@@ -138,5 +132,14 @@
 <style>
 	h1 {
 		color: hsl(var(--primary));
+	}
+	.serviceImage {
+		height: 0;
+		padding-top: 56.25%;
+		overflow-x: hidden;
+		overflow-y: hidden;
+		background-position: center;
+		background-size: cover;
+		border-radius: 10px;
 	}
 </style>

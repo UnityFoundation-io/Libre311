@@ -49,7 +49,6 @@ import java.net.MalformedURLException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,7 +96,13 @@ public class ServiceRequestService {
             return null;
         }
 
-        Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
+        Optional<Service> serviceByServiceCodeOptional;
+        if (serviceRequestDTO.getJurisdictionId() == null) {
+            serviceByServiceCodeOptional = serviceRepository.findByServiceCode(serviceRequestDTO.getServiceCode());
+        } else {
+            serviceByServiceCodeOptional = serviceRepository.findByServiceCodeAndJurisdictionId(
+                    serviceRequestDTO.getServiceCode(), serviceRequestDTO.getJurisdictionId());
+        }
 
         if (serviceByServiceCodeOptional.isEmpty()) {
             LOG.error("Corresponding service not found.");
@@ -315,6 +320,73 @@ public class ServiceRequestService {
         return serviceRequest;
     }
 
+    public SensitiveServiceRequestDTO updateServiceRequest(Long serviceRequestId, PatchServiceRequestDTO serviceRequestDTO) {
+        Optional<ServiceRequest> serviceRequestOptional;
+        String jurisdictionId = serviceRequestDTO.getJurisdictionId();
+        if (jurisdictionId == null) {
+            serviceRequestOptional = serviceRequestRepository.findById(serviceRequestId);
+        } else {
+            serviceRequestOptional = serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
+        }
+
+        if (serviceRequestOptional.isEmpty()) {
+            LOG.error("Could not find Service Request with id {}.", serviceRequestId);
+            return null;
+        }
+
+        ServiceRequest serviceRequest = serviceRequestOptional.get();
+        applyPatch(serviceRequestDTO, serviceRequest);
+
+        return convertToSensitiveDTO(serviceRequestRepository.update(serviceRequest));
+    }
+
+    private static void applyPatch(PatchServiceRequestDTO serviceRequestDTO, ServiceRequest serviceRequest) {
+        if (serviceRequestDTO.getStatus() != null) {
+            serviceRequest.setStatus(serviceRequestDTO.getStatus());
+        }
+        if (serviceRequestDTO.getPriority() != null) {
+            serviceRequest.setPriority(serviceRequestDTO.getPriority());
+        }
+        if (serviceRequestDTO.getAgency_email() != null) {
+            serviceRequest.setAgencyEmail(serviceRequestDTO.getAgency_email());
+        }
+        if (serviceRequestDTO.getService_notice() != null) {
+            serviceRequest.setServiceNotice(serviceRequestDTO.getService_notice());
+        }
+        if (serviceRequestDTO.getStatus_notes() != null) {
+            serviceRequest.setStatusNotes(serviceRequestDTO.getStatus_notes());
+        }
+        if (serviceRequestDTO.getAgency_responsible() != null) {
+            serviceRequest.setAgencyResponsible(serviceRequestDTO.getAgency_responsible());
+        }
+        if (serviceRequestDTO.getExpected_date() != null) {
+            serviceRequest.setExpectedDate(serviceRequestDTO.getExpected_date());
+        }
+        if (serviceRequestDTO.getClosed_date() != null) {
+            serviceRequest.setClosedDate(serviceRequestDTO.getClosed_date());
+        }
+        if (serviceRequestDTO.getStatus_notes() != null) {
+            serviceRequest.setStatusNotes(serviceRequestDTO.getStatus_notes());
+        }
+    }
+
+    private static SensitiveServiceRequestDTO convertToSensitiveDTO(ServiceRequest serviceRequest) {
+        SensitiveServiceRequestDTO serviceRequestDTO = new SensitiveServiceRequestDTO(serviceRequest);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String attributesJson = serviceRequest.getAttributesJson();
+        if (attributesJson != null) {
+            try {
+                ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
+                serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return serviceRequestDTO;
+    }
+
     public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO) {
         return getServiceRequestPage(requestDTO).map(ServiceRequestService::convertToDTO);
     }
@@ -440,14 +512,25 @@ public class ServiceRequestService {
     }
 
     public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
+        return findServiceRequest(serviceRequestId, jurisdictionId)
+                .map(ServiceRequestService::convertToDTO)
+                .orElse(null);
+    }
+
+    public SensitiveServiceRequestDTO getSensitiveServiceRequest(Long serviceRequestId, String jurisdictionId) {
+        return findServiceRequest(serviceRequestId, jurisdictionId)
+                .map(ServiceRequestService::convertToSensitiveDTO)
+                .orElse(null);
+    }
+
+    private Optional<ServiceRequest> findServiceRequest(Long serviceRequestId, String jurisdictionId) {
         Optional<ServiceRequest> serviceRequestOptional;
         if (jurisdictionId == null) {
             serviceRequestOptional = serviceRequestRepository.findById(serviceRequestId);
         } else {
             serviceRequestOptional = serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
         }
-
-        return serviceRequestOptional.map(ServiceRequestService::convertToDTO).orElse(null);
+        return serviceRequestOptional;
     }
 
     public StreamedFile getAllServiceRequests(DownloadRequestsArgumentsDTO downloadRequestsArgumentsDTO) throws MalformedURLException {
