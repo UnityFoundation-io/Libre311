@@ -122,7 +122,7 @@ public class Bootstrap {
             if (groups != null) {
                 groups.forEach(groupName -> {
                     ServiceGroup group = groupRepository.findByName(groupName).orElse(new ServiceGroup(groupName));
-                    service.getServiceGroups().add(group);
+                    service.addServiceGroup(group);
                 });
             }
             List<String> keywords = (List<String>) svc.get("keywords");

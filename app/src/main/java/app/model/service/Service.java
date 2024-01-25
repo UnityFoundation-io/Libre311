@@ -174,8 +174,10 @@ public class Service {
         this.keywords = keywords;
     }
 
-    public Set<ServiceGroup> getServiceGroups() {
-        return serviceGroups;
+    public void addServiceGroup(ServiceGroup serviceGroup) {
+        if (serviceGroups.isEmpty()) {
+            serviceGroups.add(serviceGroup);
+        }
     }
 
     public void setServiceGroups(Set<ServiceGroup> serviceGroups) {
