@@ -14,10 +14,7 @@
 
 package app.model.service.group;
 
-import app.model.service.Service;
 import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.model.Page;
-import io.micronaut.data.model.Pageable;
 import io.micronaut.data.repository.PageableRepository;
 import java.util.Optional;
 
