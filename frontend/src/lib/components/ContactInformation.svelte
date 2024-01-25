@@ -89,8 +89,8 @@
 					name="email"
 					type="email"
 					placeholder={messages['contact']['email']['placeholder']}
-					bind:value={email}
 					error={emailError}
+					bind:value={email}
 				>
 					<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
 					<Input.Leading slot="leading" data={mailIcon} />
