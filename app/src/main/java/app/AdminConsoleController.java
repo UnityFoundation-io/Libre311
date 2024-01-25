@@ -20,6 +20,7 @@ import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
+import app.security.RequiresPermissions;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import io.micronaut.http.MediaType;
@@ -34,6 +35,9 @@ import jakarta.annotation.Nullable;
 import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
+
+import static app.security.Permission.LIBRE311_REQUEST_EDIT_SUBTENANT;
+import static app.security.Permission.LIBRE311_REQUEST_VIEW_SYSTEM;
 
 @Controller("/api/admin")
 @Secured(SecurityRule.IS_AUTHENTICATED)
@@ -83,7 +87,9 @@ public class AdminConsoleController {
 
     @Get(value =  "/requests/download{?jurisdiction_id}")
     @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_EDIT_SUBTENANT})
     public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
+                                                @Header("Authorization") String authorizationHeader,
                                                 @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
         return serviceRequestService.getAllServiceRequests(requestDTO, jurisdiction_id);
     }

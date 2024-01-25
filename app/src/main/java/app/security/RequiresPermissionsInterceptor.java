@@ -22,17 +22,19 @@ public class RequiresPermissionsInterceptor implements MethodInterceptor<Object,
 
     @Override
     public Object intercept(MethodInvocationContext<Object, Object> context) {
+        String jurisdictionId = (String) context.getParameters().get("jurisdiction_id").getValue();
+
         Optional<MutableArgumentValue<?>> bearerToken = context.getParameters().values().stream()
                 .filter(mutableArgumentValue -> mutableArgumentValue.getValue().toString().toLowerCase().contains("bearer"))
                 .findFirst();
         if (bearerToken.isEmpty()) {
             throw new IllegalArgumentException("Bearer token was not included.");
         }
-        String token = (String) bearerToken.get().getValue();
+        String token = bearerToken.get().getValue().toString();
 
         Collection<String> declaredPermissions = context.getValues(RequiresPermissions.class, String.class).values();
 
-        if (!unityAuthService.isUserPermittedForAction(token.toLowerCase(), declaredPermissions)) {
+        if (!unityAuthService.isUserPermittedForAction(token, jurisdictionId, declaredPermissions)) {
             throw new RuntimeException("Not Authorized.");
         }
 

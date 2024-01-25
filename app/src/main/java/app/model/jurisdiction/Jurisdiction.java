@@ -16,6 +16,7 @@ package app.model.jurisdiction;
 
 import app.model.service.Service;
 import app.model.servicerequest.ServiceRequest;
+import app.model.tenant.Tenant;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -30,6 +31,10 @@ public class Jurisdiction {
     @Id
     private String id;
 
+    @ManyToOne
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private Tenant tenant;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Service> services = new HashSet<>();
@@ -38,8 +43,9 @@ public class Jurisdiction {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ServiceRequest> serviceRequests = new HashSet<>();
 
-    public Jurisdiction(String id) {
+    public Jurisdiction(String id, Tenant tenant) {
         this.id = id;
+        this.tenant = tenant;
     }
 
     public Jurisdiction() {}
@@ -50,6 +56,14 @@ public class Jurisdiction {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public Set<Service> getServices() {

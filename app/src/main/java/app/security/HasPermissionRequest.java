@@ -9,7 +9,7 @@ import java.util.List;
 public class HasPermissionRequest {
 
     @NotNull
-    private Long tenantId;
+    private String tenantId;
     @NotNull
     private String serviceId;
     private List<String> permissions;
@@ -17,17 +17,17 @@ public class HasPermissionRequest {
     public HasPermissionRequest() {
     }
 
-    public HasPermissionRequest(Long tenantId, String serviceId, List<String> permissions) {
+    public HasPermissionRequest(String tenantId, String serviceId, List<String> permissions) {
         this.tenantId = tenantId;
         this.serviceId = serviceId;
         this.permissions = permissions;
     }
 
-    public Long getTenantId() {
+    public String getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(Long tenantId) {
+    public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
 

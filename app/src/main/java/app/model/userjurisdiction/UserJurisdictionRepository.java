@@ -4,9 +4,9 @@ import app.model.user.User;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.CrudRepository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserJurisdictionRepository extends CrudRepository<UserJurisdiction, Long> {
-    List<UserJurisdiction> findByUser(User user);
+    Optional<UserJurisdiction> findByUserAndJurisdictionId(User user, String jurisdictionId);
 }
