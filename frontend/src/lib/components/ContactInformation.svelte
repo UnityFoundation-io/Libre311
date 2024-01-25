@@ -21,8 +21,16 @@
 	}
 
 	function handleSubmit() {
-		if (firstName == '') firstNameError = 'First name required';
-		if (lastName == '') lastNameError = 'Last name required';
+		if (firstName == '') {
+			firstNameError = 'First name required';
+		} else {
+			firstNameError = '';
+		}
+		if (lastName == '') {
+			lastNameError = 'Last name required';
+		} else {
+			lastNameError = '';
+		}
 
 		checkValid(emailValidator, email);
 		checkPhoneNumber();
