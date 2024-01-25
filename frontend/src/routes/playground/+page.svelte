@@ -7,10 +7,13 @@
 		ServiceCode,
 		ServiceDefinition
 	} from '$lib/services/Libre311/Libre311';
+
 	import { ASYNC_IN_PROGRESS, asAsyncSuccess, type AsyncResult } from '$lib/services/http';
 	import messages from '$media/messages.json';
 
 	import { Button, Select, TextArea } from 'stwui';
+	import MultiSelectServiceDefinitionAttribute from '$lib/components/ServiceDefinitionAttributes/MultiSelectServiceDefinitionAttribute.svelte';
+
 	import type { SelectOption } from 'stwui/types';
 	import { onMount } from 'svelte';
 
@@ -18,7 +21,7 @@
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let selectedServiceCode: ServiceCode | undefined;
-	let serviceDefinition: ServiceDefinition | undefined;
+	let serviceDefinition: AsyncResult<ServiceDefinition> | undefined;
 
 	$: if (selectedServiceCode) getServiceDefinition(selectedServiceCode);
 
@@ -48,7 +51,7 @@
 
 	async function getServiceDefinition(service_code: ServiceCode) {
 		const res = await libre311.getServiceDefinition({ service_code });
-		serviceDefinition = res;
+		serviceDefinition = asAsyncSuccess(res);
 	}
 
 	onMount(async () => {
@@ -81,21 +84,14 @@
 					{/each}
 				</Select.Options>
 			</Select>
-		{/if}
-
-		<Select
-			name="select-2"
-			placeholder="Issue Details"
-			multiple
-			options={details}
-			class="relative mx-8 my-4"
-		>
-			<Select.Options slot="options">
-				{#each details as detail}
-					<Select.Options.Option option={detail} />
+			{#if serviceDefinition?.type === 'success'}
+				{#each serviceDefinition.value.attributes as attribute}
+					{#if attribute.datatype === 'multivaluelist'}
+						<MultiSelectServiceDefinitionAttribute {attribute} on:change={(e) => console.log(e)} />
+					{/if}
 				{/each}
-			</Select.Options>
-		</Select>
+			{/if}
+		{/if}
 
 		<TextArea name="comments" placeholder="Citizen Comments" class="relative mx-8 my-4" />
 

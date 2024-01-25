@@ -92,9 +92,24 @@ export const ListBasedServiceDefinitionAttributeSchema =
 		values: z.array(AttributeValueSchema)
 	});
 
+export const MultiSelectServiceDefinitionAttributeSchema =
+	ListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: MultiValueListType
+	});
+
+export const SingleValueListServiceDefinitionAttributeSchema =
+	ListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: SingleValueListType
+	});
+
+export type MultiSelectServiceDefinitionAttribute = z.infer<
+	typeof MultiSelectServiceDefinitionAttributeSchema
+>;
+
 export const ServiceDefinitionAttributeSchema = z.union([
 	NonListBasedServiceDefinitionAttributeSchema,
-	ListBasedServiceDefinitionAttributeSchema
+	MultiSelectServiceDefinitionAttributeSchema,
+	SingleValueListServiceDefinitionAttributeSchema
 ]);
 
 type ServiceDefinitionAttribute = z.infer<typeof ServiceDefinitionAttributeSchema>;
