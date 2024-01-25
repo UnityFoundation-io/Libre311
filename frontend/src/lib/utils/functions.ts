@@ -61,5 +61,18 @@ export function inputValidatorFactory<T>(schema: z.ZodType<T, z.ZodTypeDef, T>):
     return validator;
 }
 
+export function checkValid(validator: InputValidator<string>, value: string) {
+	const isValid = validator(value);
+	let error: string;
+
+	if (!isValid.valid) {
+		error = isValid.error;
+	} else {
+		error = '';
+	}
+
+	return error;
+}
+
 export const urlValidator: InputValidator<string> = inputValidatorFactory(z.string().url());
 export const emailValidator: InputValidator<string> = inputValidatorFactory(z.string().email());

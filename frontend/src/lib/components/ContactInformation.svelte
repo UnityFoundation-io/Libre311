@@ -3,7 +3,7 @@
 	import { Input } from 'stwui';
 	import { mailIcon } from '$lib/assets/mailIcon.js';
 	import { phoneIcon } from '$lib/assets/phoneIcon.js';
-	import { emailValidator, type InputValidator } from '$lib/utils/functions';
+	import { emailValidator, checkValid } from '$lib/utils/functions';
 	import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
 	$: firstName = '';
@@ -32,18 +32,8 @@
 			lastNameError = '';
 		}
 
-		checkValid(emailValidator, email);
+		emailError = checkValid(emailValidator, email);
 		checkPhoneNumber();
-	}
-
-	function checkValid(validator: InputValidator<string>, value: string) {
-		const isValid = validator(value);
-
-		if (!isValid.valid) {
-			emailError = isValid.error;
-		} else {
-			emailError = '';
-		}
 	}
 
 	function checkPhoneNumber() {
