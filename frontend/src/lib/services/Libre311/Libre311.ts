@@ -1,7 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
-import { MockLibre311ServiceImpl } from './MockLibre311';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -81,7 +80,7 @@ const AttributeValueSchema = z.object({
 	/**
 	 * The unique identifier associated with an option for singlevaluelist or multivaluelist. This is analogous to the value attribute in an html option tag.
 	 */
-	key: z.number(),
+	key: z.string(),
 	/**
 	 * The human readable title of an option for singlevaluelist or multivaluelist. This is analogous to the innerhtml text node of an html option tag.
 	 */
@@ -238,15 +237,6 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
-// https://wiki.open311.org/GeoReport_v2/
-export interface Open311Service {
-	getServiceList(): Promise<GetServiceListResponse>;
-	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
-	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
-	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
-}
-
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 }
@@ -303,6 +293,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getServiceList({ jurisdiction_id: this.jurisdictionId })
 		);
+
 		return GetServiceListResponseSchema.parse(res.data);
 	}
 
@@ -351,5 +342,5 @@ export class Libre311ServiceImpl implements Libre311Service {
 }
 
 export async function libre311Factory(props: Libre311ServiceProps): Promise<Libre311Service> {
-	return MockLibre311ServiceImpl.create(props);
+	return Libre311ServiceImpl.create(props);
 }

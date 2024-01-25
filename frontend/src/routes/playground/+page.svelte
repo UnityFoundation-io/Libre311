@@ -1,85 +1,108 @@
 <script lang="ts">
-  import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-  import messages from '$media/messages.json';
+	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import type {
+		GetServiceListResponse,
+		Service,
+		ServiceCode,
+		ServiceDefinition
+	} from '$lib/services/Libre311/Libre311';
+	import { ASYNC_IN_PROGRESS, asAsyncSuccess, type AsyncResult } from '$lib/services/http';
+	import messages from '$media/messages.json';
 
-  import { Button, Select, TextArea } from "stwui";
-  import type { SelectOption } from "stwui/types";
+	import { Button, Select, TextArea } from 'stwui';
+	import type { SelectOption } from 'stwui/types';
+	import { onMount } from 'svelte';
 
-  let selectedIssueType: String;
-  
-  const options: SelectOption[] = [
-    {
-      value: 'option_1',
-      label: 'Option 1'
-    },
-    {
-      value: 'option_2',
-      label: 'Option 2',
-    },
-    {
-      value: 'option_3',
-      label: 'Option 3'
-    }
-  ];
+	const libre311 = useLibre311Service();
 
-  const details: SelectOption[] = [
-    {
-      value: 'detail_1',
-      label: 'Detail 1'
-    },
-    {
-      value: 'detail_2',
-      label: 'Detail 2'
-    },
-    {
-      value: 'detail_3',
-      label: 'Detail 3'
-    }
-  ]
+	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
+	let selectedServiceCode: ServiceCode | undefined;
+	let serviceDefinition: ServiceDefinition | undefined;
 
+	$: if (selectedServiceCode) getServiceDefinition(selectedServiceCode);
 
-  function issueTypeChange(e: Event) {
-    selectedIssueType = e.target.value;
-    console.log(selectedIssueType)
-  }
-  
+	const details: SelectOption[] = [
+		{
+			value: 'detail_1',
+			label: 'Detail 1'
+		},
+		{
+			value: 'detail_2',
+			label: 'Detail 2'
+		},
+		{
+			value: 'detail_3',
+			label: 'Detail 3'
+		}
+	];
+
+	function issueTypeChange(e: Event) {
+		const target = e.target as HTMLSelectElement;
+		selectedServiceCode = target.value;
+	}
+
+	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
+		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
+	}
+
+	async function getServiceDefinition(service_code: ServiceCode) {
+		const res = await libre311.getServiceDefinition({ service_code });
+		serviceDefinition = res;
+	}
+
+	onMount(async () => {
+		const res = await libre311.getServiceList();
+		serviceList = asAsyncSuccess(res);
+	});
+
+	$: console.log(serviceList);
+	$: console.log(serviceDefinition);
 </script>
 
-
 <SideBarMainContentLayout>
-  <slot slot="side-bar">
-    <div class="relative mx-8 my-4">{messages['reporting']['timestamp']}</div>
-    <div class="relative mx-8 my-4">
-      {messages['reporting']['location']}
-    </div>
+	<slot slot="side-bar">
+		<div class="relative mx-8 my-4">{messages['reporting']['timestamp']}</div>
+		<div class="relative mx-8 my-4">
+			{messages['reporting']['location']}
+		</div>
+		{#if serviceList.type === 'success'}
+			{@const selectOptions = createSelectOptions(serviceList.value)}
+			<Select
+				name="select-1"
+				placeholder="Issue Type"
+				on:change={issueTypeChange}
+				options={selectOptions}
+				class="relative mx-8 my-4"
+			>
+				<Select.Options slot="options">
+					{#each selectOptions as option}
+						<Select.Options.Option {option} />
+					{/each}
+				</Select.Options>
+			</Select>
+		{/if}
 
-    <Select name="select-1" placeholder="Issue Type" on:change={issueTypeChange} {options}
-      class="relative mx-8 my-4">
-      <Select.Options slot="options">
-        {#each options as option}
-          <Select.Options.Option {option} />
-        {/each}
-      </Select.Options>
-    </Select>
+		<Select
+			name="select-2"
+			placeholder="Issue Details"
+			multiple
+			options={details}
+			class="relative mx-8 my-4"
+		>
+			<Select.Options slot="options">
+				{#each details as detail}
+					<Select.Options.Option option={detail} />
+				{/each}
+			</Select.Options>
+		</Select>
 
-    <Select name="select-2" placeholder="Issue Details" multiple options={details}
-      class="relative mx-8 my-4">
-      <Select.Options slot="options">
-        {#each details as detail}
-          <Select.Options.Option option={detail} />
-        {/each}
-      </Select.Options>
-    </Select>
+		<TextArea name="comments" placeholder="Citizen Comments" class="relative mx-8 my-4" />
 
-    <TextArea name="comments" placeholder="Citizen Comments" 
-      class="relative mx-8 my-4"
-    />
-
-    <div class="flex justify-between mx-8 my-4">
-      <Button href="/issues/map">Back</Button>
-      <Button type="primary">Submit</Button>
-    </div>
-    
-  </slot>
-  <div slot="main-content">map goes here </div>
+		<div class="mx-8 my-4 flex justify-between">
+			<Button href="/issues/map">Back</Button>
+			<Button type="primary">Submit</Button>
+		</div>
+	</slot>
+	<div slot="main-content">map goes here</div>
 </SideBarMainContentLayout>
