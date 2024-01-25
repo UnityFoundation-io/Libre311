@@ -15,9 +15,13 @@
 package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.service.group.ServiceGroup;
+import app.model.service.keyword.ServiceKeyword;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import app.model.servicerequest.ServiceRequest;
+import java.util.HashSet;
+import java.util.Set;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -48,8 +52,17 @@ public class Service {
     private String description;
     @Column(columnDefinition = "TEXT")
     private String keywords;
-    @Column(columnDefinition = "TEXT")
-    private String groups;
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinTable(name="service_service_groups",
+        joinColumns={@JoinColumn(name="service_id")},
+        inverseJoinColumns={@JoinColumn(name="service_group_id")})
+    private Set<ServiceGroup> serviceGroups = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinTable(name="service_service_keywords",
+        joinColumns={@JoinColumn(name="service_id")},
+        inverseJoinColumns={@JoinColumn(name="service_keyword_id")})
+    private Set<ServiceKeyword> serviceKeywords = new HashSet<>();
 
     private boolean metadata = false;
 
@@ -162,11 +175,19 @@ public class Service {
         this.keywords = keywords;
     }
 
-    public String getGroups() {
-        return groups;
+    public Set<ServiceGroup> getServiceGroups() {
+        return serviceGroups;
     }
 
-    public void setGroups(String groups) {
-        this.groups = groups;
+    public void setServiceGroups(Set<ServiceGroup> serviceGroups) {
+        this.serviceGroups = serviceGroups;
+    }
+
+    public Set<ServiceKeyword> getServiceKeywords() {
+        return serviceKeywords;
+    }
+
+    public void setServiceKeywords(Set<ServiceKeyword> serviceKeywords) {
+        this.serviceKeywords = serviceKeywords;
     }
 }

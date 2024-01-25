@@ -109,13 +109,27 @@ public class RootControllerTest {
         HttpResponse<?> response;
 
         response = createServiceRequest("001", "12345 Fairway",
-                Map.of("attribute[SDWLK]", "NARROW"));
+            Map.of("attribute[SDWLK]", "NARROW"));
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
         assertTrue(optional.isPresent());
         PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
         assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
-                .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+    }
+
+    @Test
+    public void canCreateServiceRequestWithKeywordsAndGroups() {
+        HttpResponse<?> response;
+
+        response = createServiceRequest("001", "12345 Fairway",
+            Map.of("attribute[SDWLK]", "NARROW"));
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        assertTrue(optional.isPresent());
+        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
+        assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
+            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
     }
 
     @Test

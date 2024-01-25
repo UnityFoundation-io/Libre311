@@ -7,6 +7,12 @@ app-data:
           serviceName: Sidewalk
           description: Sidewalk
           type: realtime
+          groups:
+            - "GROUP1"
+            - "GROUP2"
+          keywords:
+            - "KEYWORD1"
+            - "KEYWORD2"
           serviceDefinition:
             attributes:
               - variable: true
@@ -78,6 +84,12 @@ app-data:
           serviceName: Bus Stop
           description: Bus Stop
           type: realtime
+          groups:
+            - "GROUP1"
+            - "GROUP3"
+          keywords:
+            - "KEYWORD3"
+            - "KEYWORD4"
           serviceDefinition:
             attributes:
               - variable: true
