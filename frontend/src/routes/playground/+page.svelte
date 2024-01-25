@@ -25,21 +25,6 @@
 
 	$: if (selectedServiceCode) getServiceDefinition(selectedServiceCode);
 
-	const details: SelectOption[] = [
-		{
-			value: 'detail_1',
-			label: 'Detail 1'
-		},
-		{
-			value: 'detail_2',
-			label: 'Detail 2'
-		},
-		{
-			value: 'detail_3',
-			label: 'Detail 3'
-		}
-	];
-
 	function issueTypeChange(e: Event) {
 		const target = e.target as HTMLSelectElement;
 		selectedServiceCode = target.value;
