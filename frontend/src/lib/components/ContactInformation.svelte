@@ -16,10 +16,20 @@
 			<p class="my-2 text-sm">{messages['contact']['body']}</p>
 
 			<div class="my-2">
-				<Input allowClear type="text" name="firstName" placeholder="First Name">
+				<Input
+					allowClear
+					type="text"
+					name="firstName"
+					placeholder={messages['contact']['name']['first_name']['placeholder']}
+				>
 					<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
 				</Input>
-				<Input allowClear type="text" name="lastName" placeholder="Last Name"></Input>
+				<Input
+					allowClear
+					type="text"
+					name="lastName"
+					placeholder={messages['contact']['name']['last_name']['placeholder']}
+				></Input>
 			</div>
 
 			<div class="my-2">
