@@ -36,6 +36,12 @@
 		emailError = checkValid(emailValidator, data.email);
 		phoneError = checkPhoneNumber(data.phone);
 	}
+
+	function formatPhoneNumber() {
+		data.phone = data.phone
+			.replace(/\D/g, '') // Remove non-digit characters
+			.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); // Format with hyphens
+	}
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -87,6 +93,7 @@
 					placeholder={messages['contact']['phone']['placeholder']}
 					error={phoneError}
 					bind:value={data.phone}
+					on:input={formatPhoneNumber}
 				>
 					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
 					<Input.Leading slot="leading" data={phoneIcon} />
