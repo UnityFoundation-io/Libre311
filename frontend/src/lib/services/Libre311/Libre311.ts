@@ -61,9 +61,9 @@ export const BaseServiceDefinitionAttributeSchema = z.object({
 	datatype: DatatypeUnionSchema,
 	required: z.boolean(),
 	/**
-	 * A description of the datatype which helps the user provide their input
+	 * A description of the datatype which helps the user provide their input (the placeholder text essentially)
 	 */
-	datatype_description: z.string().nullish(), // probably is the helperText
+	datatype_description: z.string().nullish(),
 	order: z.number(),
 	/**
 	 * The actual question
@@ -71,42 +71,35 @@ export const BaseServiceDefinitionAttributeSchema = z.object({
 	description: z.string()
 });
 
-export const NonListBasedServiceDefinitionAttributeSchema =
-	BaseServiceDefinitionAttributeSchema.extend({
-		datatype: z.union([StringType, NumberType, DatetimeType, TextType])
-	});
-
-export const StringServiceDefinitionAttributeSchema =
-	NonListBasedServiceDefinitionAttributeSchema.extend({
-		datatype: StringType
-	});
+export const StringServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend({
+	datatype: StringType
+});
 
 export type StringServiceDefinitionAttribute = z.infer<
 	typeof StringServiceDefinitionAttributeSchema
 >;
 
-export const DateTimeServiceDefinitionAttributeSchema =
-	NonListBasedServiceDefinitionAttributeSchema.extend({
+export const DateTimeServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend(
+	{
 		datatype: DatetimeType
-	});
+	}
+);
 
 export type DateTimeServiceDefinitionAttribute = z.infer<
 	typeof DateTimeServiceDefinitionAttributeSchema
 >;
 
-export const NumberServiceDefinitionAttributeSchema =
-	NonListBasedServiceDefinitionAttributeSchema.extend({
-		datatype: NumberType
-	});
+export const NumberServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend({
+	datatype: NumberType
+});
 
 export type NumberServiceDefinitionAttribute = z.infer<
 	typeof NumberServiceDefinitionAttributeSchema
 >;
 
-export const TextServiceDefinitionAttributeSchema =
-	NonListBasedServiceDefinitionAttributeSchema.extend({
-		datatype: TextType
-	});
+export const TextServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend({
+	datatype: TextType
+});
 
 export type TextServiceDefinitionAttribute = z.infer<typeof TextServiceDefinitionAttributeSchema>;
 
@@ -145,7 +138,10 @@ export type SingleValueListServiceDefinitionAttribute = z.infer<
 >;
 
 export const ServiceDefinitionAttributeSchema = z.union([
-	NonListBasedServiceDefinitionAttributeSchema,
+	StringServiceDefinitionAttributeSchema,
+	DateTimeServiceDefinitionAttributeSchema,
+	TextServiceDefinitionAttributeSchema,
+	NumberServiceDefinitionAttributeSchema,
 	MultiSelectServiceDefinitionAttributeSchema,
 	SingleValueListServiceDefinitionAttributeSchema
 ]);
@@ -179,7 +175,7 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 
 // user response values from  ServiceDefinitionAttributeSchema.
 // attribute[code1]=value1
-// ServiceDefinitionAttributeCode
+// todo consider adding BaseServiceDefinitionAttributeSchema["description"] so that ui can show what the question was later on
 type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
 // todo will likely need the recaptcha value here
 export const ContactInformationSchema = z.object({

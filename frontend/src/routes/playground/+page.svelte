@@ -14,8 +14,8 @@
 	import { Button, Select, TextArea } from 'stwui';
 
 	// Service Definition Attributes
-	import StringServiceDefinitionAttribute from '$lib/components/ServiceDefinitionAttributes/StringServiceDefinitionAttribute.svelte';
-	import MultiSelectServiceDefinitionAttribute from '$lib/components/ServiceDefinitionAttributes/MultiSelectServiceDefinitionAttribute.svelte';
+	import StringServiceDefinitionAttribute from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/StringServiceDefinitionAttribute.svelte';
+	import MultiSelectServiceDefinitionAttribute from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/MultiSelectServiceDefinitionAttribute.svelte';
 
 	import type { SelectOption } from 'stwui/types';
 	import { onMount } from 'svelte';
