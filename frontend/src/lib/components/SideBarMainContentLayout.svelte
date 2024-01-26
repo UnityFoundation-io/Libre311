@@ -17,7 +17,7 @@
 	}
 	.main-content {
 		flex-grow: 1;
-		max-height: calc(100vh - var(--header-height));
+		height: 100%;
 	}
 
 	.collapsable-side-bar {
@@ -25,6 +25,7 @@
 	}
 
 	.side-bar {
+		position: relative;
 		width: 400px;
 	}
 
