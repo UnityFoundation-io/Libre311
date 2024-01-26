@@ -6,6 +6,7 @@
 	import { checkPhoneNumber } from '$lib/utils/functions';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import { createUnvalidatedInput, emailValidator } from '$lib/utils/validation';
+	import { createEventDispatcher } from 'svelte';
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
@@ -13,6 +14,8 @@
 	let lastNameError: string | undefined;
 	let emailError: string | undefined;
 	let phoneError: string | undefined;
+
+	const dispatch = createEventDispatcher();
 
 	function handleBack() {
 		console.log('TODO: back not implemented');
@@ -27,6 +30,14 @@
 		let emailValidity = emailValidator(createUnvalidatedInput(params.email));
 		emailError = emailValidity.type == 'invalid' ? emailValidity.error : '';
 		phoneError = checkPhoneNumber(params.phone);
+
+		if (
+			(firstNameError == '' || firstNameError == undefined) &&
+			(lastNameError == '' || lastNameError == undefined) &&
+			(emailError == '' || emailError == undefined) &&
+			(phoneError == '' || phoneError == undefined)
+		)
+			dispatch('stepChange');
 	}
 
 	function formatPhoneNumber() {
