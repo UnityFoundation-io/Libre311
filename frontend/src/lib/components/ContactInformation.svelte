@@ -103,10 +103,10 @@
 
 		<div class="mb-4">
 			<div class="flex items-center justify-between">
-				<button class="my-2 text-sm" type="submit" on:click|preventDefault={handleBack}>
+				<button class="my-2 text-sm" type="button" on:click|preventDefault={handleBack}>
 					{messages['contact']['button']['back']}
 				</button>
-				<button class="submit my-2 text-sm" type="submit" on:click|preventDefault={handleSubmit}>
+				<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
 					{messages['contact']['button']['submit']}
 				</button>
 			</div>
