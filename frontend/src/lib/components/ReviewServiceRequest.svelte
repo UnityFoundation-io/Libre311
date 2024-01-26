@@ -9,7 +9,7 @@
 <div class="flex h-full items-center justify-center">
 	<div class="mx-4 flex flex-col" style="height: calc(100vh - var(--header-height));">
 		<div class="mt-4 flex-grow">
-			<h1 class="text-xlg">{messages['reviewServiceRequest']['title']}</h1>
+			<h1 class="text-lg">{messages['reviewServiceRequest']['title']}</h1>
 			<p class="my-2 text-sm">
 				{messages['reviewServiceRequest']['sub_heading']}
 			</p>
