@@ -126,7 +126,7 @@
 	.submit:hover {
 		--tw-surface-opacity: 0.1;
 		border: 1px solid hsl(var(--primary));
-		color: hsl(var(--primary));
-		background-color: hsl(var(--primary) / var(--tw-surface-opacity));
+		color: hsl(var(--content));
+		background-color: hsl(var(--surface) / var(--tw-surface-opacity));
 	}
 </style>
