@@ -3,8 +3,9 @@
 	import { Input } from 'stwui';
 	import { mailIcon } from '$lib/assets/mailIcon.js';
 	import { phoneIcon } from '$lib/assets/phoneIcon.js';
-	import { emailValidator, checkValid, checkPhoneNumber } from '$lib/utils/functions';
+	import { checkPhoneNumber } from '$lib/utils/functions';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
+	import { createUnvalidatedInput, optionalEmailValidator } from '$lib/utils/validation';
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
@@ -18,18 +19,13 @@
 	}
 
 	function handleSubmit() {
-		if (params.first_name == '') {
-			firstNameError = 'First name required';
-		} else {
-			firstNameError = '';
-		}
-		if (params.last_name == '') {
-			lastNameError = 'Last name required';
-		} else {
-			lastNameError = '';
-		}
+		firstNameError =
+			params.first_name == '' || params.first_name == undefined ? 'First name required' : '';
+		lastNameError =
+			params.last_name == '' || params.last_name == undefined ? 'Last name required' : '';
 
-		emailError = checkValid(emailValidator, params.email);
+		let emailValidity = optionalEmailValidator(createUnvalidatedInput(params.email));
+		emailError = emailValidity.type == 'invalid' ? emailValidity.error : '';
 		phoneError = checkPhoneNumber(params.phone);
 	}
 

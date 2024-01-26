@@ -1,5 +1,4 @@
 import L, { type PointTuple } from 'leaflet';
-import { z } from 'zod';
 import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
 export function sleep(ms: number) {
@@ -66,35 +65,3 @@ export function checkPhoneNumber(phoneNumber: string | undefined): string {
 		return errorString;
 	}
 }
-
-export type InputValidationState<T> = { valid: false; error: string } | { valid: true; value: T };
-
-export type InputValidator<T> = (value: unknown) => InputValidationState<T>;
-
-export function inputValidatorFactory<T>(schema: z.ZodType<T, z.ZodTypeDef, T>): InputValidator<T> {
-    const validator: InputValidator<T> = (value: unknown) => {
-        const res = schema.safeParse(value);
-        if (res.success) return { valid: true, value: res.data };
-
-        const firstIssue = res.error.issues.at(0);
-        return { valid: false, error: firstIssue?.message ?? res.error.message };
-    };
-
-    return validator;
-}
-
-export function checkValid(validator: InputValidator<string>, value: string) {
-	const isValid = validator(value);
-	let error: string;
-
-	if (!isValid.valid) {
-		error = isValid.error;
-	} else {
-		error = '';
-	}
-
-	return error;
-}
-
-export const urlValidator: InputValidator<string> = inputValidatorFactory(z.string().url());
-export const emailValidator: InputValidator<string> = inputValidatorFactory(z.string().email());
