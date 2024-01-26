@@ -7,13 +7,14 @@ import app.model.userjurisdiction.UserJurisdictionRepository;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Singleton
@@ -34,7 +35,7 @@ public class UnityAuthService {
         this.userJurisdictionRepository = userJurisdictionRepository;
     }
 
-    public boolean isUserPermittedForAction(String token, String jurisdictionId, Collection<String> permissions) {
+    public boolean isUserPermittedForAction(String token, String jurisdictionId, List<String> permissions) {
 
         String jwtSubstring;
         if (token.startsWith("Bearer ")){
@@ -69,16 +70,24 @@ public class UnityAuthService {
             return false;
         }
 
-        HasPermissionRequest hasPermissionRequest = new HasPermissionRequest(
-                tenantId,
-                serviceId,
-                new ArrayList<>(permissions));
+        HasPermissionRequest hasPermissionRequest = new HasPermissionRequest(tenantId, serviceId, permissions);
 
         boolean hasPermission;
         try {
-            hasPermission = client.hasPermission(hasPermissionRequest, token);
-        } catch (Exception e) {
-            LOG.error("Returned {}", e.getMessage());
+            HttpResponse<HasPermissionResponse> hasPermissionResponseHttpResponse = client.hasPermission(hasPermissionRequest, token);
+            Optional<HasPermissionResponse> body = hasPermissionResponseHttpResponse.getBody(HasPermissionResponse.class);
+            if (body.isEmpty()) {
+                return false;
+            }
+            hasPermission = body.get().isHasPermission();
+        } catch (HttpClientResponseException e) {
+            Optional<HasPermissionResponse> body = e.getResponse().getBody(HasPermissionResponse.class);
+            if (body.isEmpty()) {
+                LOG.error("Returned {}", e.getMessage());
+            } else {
+                LOG.error("Returned {}", (body.get().getErrorMessage() == null ? e.getMessage() : e.getStatus()));
+            }
+
             return false;
         }
 

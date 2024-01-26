@@ -4,11 +4,12 @@ import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.type.MutableArgumentValue;
-import io.micronaut.core.value.OptionalValues;
 import jakarta.inject.Singleton;
 
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 @InterceptorBean(RequiresPermissions.class)
@@ -32,7 +33,9 @@ public class RequiresPermissionsInterceptor implements MethodInterceptor<Object,
         }
         String token = bearerToken.get().getValue().toString();
 
-        Collection<String> declaredPermissions = context.getValues(RequiresPermissions.class, String.class).values();
+        List<String> declaredPermissions = context.getValues(RequiresPermissions.class, String[].class).values().stream()
+                .flatMap((Function<String[], Stream<String>>) strings -> Arrays.stream(strings).map(s -> Permission.valueOf(s).getPermission()))
+                .distinct().collect(Collectors.toList());
 
         if (!unityAuthService.isUserPermittedForAction(token, jurisdictionId, declaredPermissions)) {
             throw new RuntimeException("Not Authorized.");

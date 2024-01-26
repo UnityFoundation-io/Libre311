@@ -36,8 +36,7 @@ import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import static app.security.Permission.LIBRE311_REQUEST_EDIT_SUBTENANT;
-import static app.security.Permission.LIBRE311_REQUEST_VIEW_SYSTEM;
+import static app.security.Permission.*;
 
 @Controller("/api/admin")
 @Secured(SecurityRule.IS_AUTHENTICATED)
@@ -87,7 +86,7 @@ public class AdminConsoleController {
 
     @Get(value =  "/requests/download{?jurisdiction_id}")
     @ExecuteOn(TaskExecutors.IO)
-    @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_EDIT_SUBTENANT})
+    @RequiresPermissions({LIBRE311_REQUEST_VIEW_SUBTENANT})
     public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
                                                 @Header("Authorization") String authorizationHeader,
                                                 @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
