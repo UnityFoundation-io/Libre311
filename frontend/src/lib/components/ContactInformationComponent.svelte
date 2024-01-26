@@ -11,7 +11,7 @@
 	let firstNameError: string | undefined;
 	let lastNameError: string | undefined;
 	let emailError: string | undefined;
-	let phoneError: '';
+	let phoneError: string | undefined;
 
 	function handleBack() {
 		console.log('TODO: back not implemented');
