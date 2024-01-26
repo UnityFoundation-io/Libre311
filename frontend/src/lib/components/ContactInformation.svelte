@@ -4,9 +4,9 @@
 	import { mailIcon } from '$lib/assets/mailIcon.js';
 	import { phoneIcon } from '$lib/assets/phoneIcon.js';
 	import { emailValidator, checkValid, checkPhoneNumber } from '$lib/utils/functions';
-	import type { ContactInformation } from '$lib/services/Libre311/Libre311';
+	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 
-	export let data: ContactInformation;
+	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
 	let firstNameError: string | undefined;
 	let lastNameError: string | undefined;
@@ -15,30 +15,26 @@
 
 	function handleBack() {
 		console.log('TODO: back not implemented');
-		data.first_name = '';
-		data.last_name = '';
-		data.email = '';
-		data.phone = '';
 	}
 
 	function handleSubmit() {
-		if (data.first_name == '') {
+		if (params.first_name == '') {
 			firstNameError = 'First name required';
 		} else {
 			firstNameError = '';
 		}
-		if (data.last_name == '') {
+		if (params.last_name == '') {
 			lastNameError = 'Last name required';
 		} else {
 			lastNameError = '';
 		}
 
-		emailError = checkValid(emailValidator, data.email);
-		phoneError = checkPhoneNumber(data.phone);
+		emailError = checkValid(emailValidator, params.email);
+		phoneError = checkPhoneNumber(params.phone);
 	}
 
 	function formatPhoneNumber() {
-		data.phone = data.phone
+		params.phone = params.phone
 			.replace(/\D/g, '') // Remove non-digit characters
 			.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); // Format with hyphens
 	}
@@ -57,7 +53,7 @@
 					name="firstName"
 					placeholder={messages['contact']['name']['first_name']['placeholder']}
 					error={firstNameError}
-					bind:value={data.first_name}
+					bind:value={params.first_name}
 				>
 					<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
 				</Input>
@@ -67,7 +63,7 @@
 					name="lastName"
 					placeholder={messages['contact']['name']['last_name']['placeholder']}
 					error={lastNameError}
-					bind:value={data.last_name}
+					bind:value={params.last_name}
 				></Input>
 			</div>
 
@@ -78,10 +74,10 @@
 					type="email"
 					placeholder={messages['contact']['email']['placeholder']}
 					error={emailError}
-					bind:value={data.email}
+					bind:value={params.email}
 				>
 					<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
-					<Input.Leading slot="leading" data={mailIcon} />
+					<Input.Leading slot="leading" params={mailIcon} />
 				</Input>
 			</div>
 
@@ -92,11 +88,11 @@
 					name="phone"
 					placeholder={messages['contact']['phone']['placeholder']}
 					error={phoneError}
-					bind:value={data.phone}
+					bind:value={params.phone}
 					on:input={formatPhoneNumber}
 				>
 					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
-					<Input.Leading slot="leading" data={phoneIcon} />
+					<Input.Leading slot="leading" params={phoneIcon} />
 				</Input>
 			</div>
 		</div>

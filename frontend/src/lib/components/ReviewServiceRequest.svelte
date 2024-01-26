@@ -1,9 +1,9 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import ServiceRequestDetails from './ServiceRequestDetails.svelte';
 
-	export let data: ServiceRequest;
+	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -15,7 +15,7 @@
 			</p>
 
 			<div class="my-4">
-				<ServiceRequestDetails serviceRequest={data} />
+				<ServiceRequestDetails serviceRequest={params} />
 			</div>
 		</div>
 
