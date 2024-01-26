@@ -7,6 +7,7 @@
 
 <InputNumber
 	name="number"
+	on:change
 	showSpin
 	placeholder={attribute.datatype_description ?? undefined}
 	class="relative mx-8 my-4"

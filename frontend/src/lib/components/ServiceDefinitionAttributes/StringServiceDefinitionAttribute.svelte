@@ -7,6 +7,7 @@
 
 <Input
 	name="string"
+	on:change
 	placeholder={attribute.datatype_description ?? undefined}
 	class="relative mx-8 my-4"
 >

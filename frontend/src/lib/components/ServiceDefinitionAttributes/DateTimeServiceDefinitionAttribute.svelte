@@ -7,6 +7,7 @@
 
 <DatePicker
 	name="datetime"
+	on:change
 	label={attribute.datatype_description ?? undefined}
 	showTime
 	class="relative mx-8 my-4"
