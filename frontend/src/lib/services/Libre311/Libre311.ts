@@ -85,6 +85,31 @@ export type StringServiceDefinitionAttribute = z.infer<
 	typeof StringServiceDefinitionAttributeSchema
 >;
 
+export const DateTimeServiceDefinitionAttributeSchema =
+	NonListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: DatetimeType
+	});
+
+export type DateTimeServiceDefinitionAttribute = z.infer<
+	typeof DateTimeServiceDefinitionAttributeSchema
+>;
+
+export const NumberServiceDefinitionAttributeSchema =
+	NonListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: NumberType
+	});
+
+export type NumberServiceDefinitionAttribute = z.infer<
+	typeof NumberServiceDefinitionAttributeSchema
+>;
+
+export const TextServiceDefinitionAttributeSchema =
+	NonListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: TextType
+	});
+
+export type TextServiceDefinitionAttribute = z.infer<typeof TextServiceDefinitionAttributeSchema>;
+
 const AttributeValueSchema = z.object({
 	/**
 	 * The unique identifier associated with an option for singlevaluelist or multivaluelist. This is analogous to the value attribute in an html option tag.
@@ -113,6 +138,10 @@ export const SingleValueListServiceDefinitionAttributeSchema =
 
 export type MultiSelectServiceDefinitionAttribute = z.infer<
 	typeof MultiSelectServiceDefinitionAttributeSchema
+>;
+
+export type SingleValueListServiceDefinitionAttribute = z.infer<
+	typeof SingleValueListServiceDefinitionAttributeSchema
 >;
 
 export const ServiceDefinitionAttributeSchema = z.union([

@@ -1,22 +1,21 @@
 <script lang="ts">
 	import { Select } from 'stwui';
 	import type { SelectOption } from 'stwui/types';
-	import type { MultiSelectServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
+	import type { SingleValueListServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
 
-	export let attribute: MultiSelectServiceDefinitionAttribute;
+	export let attribute: SingleValueListServiceDefinitionAttribute;
 
 	$: selectOptions = createSelectOptions(attribute);
 
-	function createSelectOptions(res: MultiSelectServiceDefinitionAttribute): SelectOption[] {
+	function createSelectOptions(res: SingleValueListServiceDefinitionAttribute): SelectOption[] {
 		return res.values.map((s) => ({ value: s.key, label: s.name }));
 	}
 </script>
 
 <Select
-	name="multiselect"
+	name="singleselect"
 	on:change
 	placeholder={attribute.datatype_description ?? undefined}
-	multiple
 	options={selectOptions}
 	class="relative mx-8 my-4"
 >
