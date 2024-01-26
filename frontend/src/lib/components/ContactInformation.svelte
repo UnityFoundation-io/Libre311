@@ -5,7 +5,7 @@
 	import { phoneIcon } from '$lib/assets/phoneIcon.js';
 	import { checkPhoneNumber } from '$lib/utils/functions';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
-	import { createUnvalidatedInput, optionalEmailValidator } from '$lib/utils/validation';
+	import { createUnvalidatedInput, emailValidator } from '$lib/utils/validation';
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
@@ -24,7 +24,7 @@
 		lastNameError =
 			params.last_name == '' || params.last_name == undefined ? 'Last name required' : '';
 
-		let emailValidity = optionalEmailValidator(createUnvalidatedInput(params.email));
+		let emailValidity = emailValidator(createUnvalidatedInput(params.email));
 		emailError = emailValidity.type == 'invalid' ? emailValidity.error : '';
 		phoneError = checkPhoneNumber(params.phone);
 	}
