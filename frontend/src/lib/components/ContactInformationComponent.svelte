@@ -3,13 +3,10 @@
 	import { Input } from 'stwui';
 	import { mailIcon } from '$lib/assets/mailIcon.js';
 	import { phoneIcon } from '$lib/assets/phoneIcon.js';
-	import { emailValidator, checkValid } from '$lib/utils/functions';
-	import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
+	import { emailValidator, checkValid, checkPhoneNumber } from '$lib/utils/functions';
+	import type { ContactInformation } from '$lib/services/Libre311/Libre311';
 
-	$: firstName = '';
-	$: lastName = '';
-	$: phoneNumber = '';
-	$: email = '';
+	export let data: ContactInformation;
 
 	let firstNameError: string | undefined;
 	let lastNameError: string | undefined;
@@ -18,41 +15,26 @@
 
 	function handleBack() {
 		console.log('TODO: back not implemented');
+		data.first_name = '';
+		data.last_name = '';
+		data.email = '';
+		data.phone = '';
 	}
 
 	function handleSubmit() {
-		if (firstName == '') {
+		if (data.first_name == '') {
 			firstNameError = 'First name required';
 		} else {
 			firstNameError = '';
 		}
-		if (lastName == '') {
+		if (data.last_name == '') {
 			lastNameError = 'Last name required';
 		} else {
 			lastNameError = '';
 		}
 
-		emailError = checkValid(emailValidator, email);
-		checkPhoneNumber();
-	}
-
-	function checkPhoneNumber() {
-		try {
-			const parsedPhoneNumber = parsePhoneNumber(phoneNumber, { defaultCountry: 'US' });
-
-			isValidPhoneNumber(parsedPhoneNumber.number);
-
-			phoneError = '';
-		} catch (e: any) {
-			let eString = e.toString();
-
-			let myString = eString.replace(/ParseError\d+:\s/, '');
-			myString = myString.replaceAll('_', ' ');
-			myString = myString.toLowerCase();
-			myString = myString.charAt(0).toUpperCase() + myString.slice(1);
-
-			phoneError = myString;
-		}
+		emailError = checkValid(emailValidator, data.email);
+		phoneError = checkPhoneNumber(data.phone);
 	}
 </script>
 
@@ -69,7 +51,7 @@
 					name="firstName"
 					placeholder={messages['contact']['name']['first_name']['placeholder']}
 					error={firstNameError}
-					bind:value={firstName}
+					bind:value={data.first_name}
 				>
 					<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
 				</Input>
@@ -79,7 +61,7 @@
 					name="lastName"
 					placeholder={messages['contact']['name']['last_name']['placeholder']}
 					error={lastNameError}
-					bind:value={lastName}
+					bind:value={data.last_name}
 				></Input>
 			</div>
 
@@ -90,7 +72,7 @@
 					type="email"
 					placeholder={messages['contact']['email']['placeholder']}
 					error={emailError}
-					bind:value={email}
+					bind:value={data.email}
 				>
 					<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
 					<Input.Leading slot="leading" data={mailIcon} />
@@ -104,7 +86,7 @@
 					name="phone"
 					placeholder={messages['contact']['phone']['placeholder']}
 					error={phoneError}
-					bind:value={phoneNumber}
+					bind:value={data.phone}
 				>
 					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
 					<Input.Leading slot="leading" data={phoneIcon} />
