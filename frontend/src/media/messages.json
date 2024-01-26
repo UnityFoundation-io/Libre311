@@ -16,5 +16,11 @@
 		"agency_contact": "Agency Contact:",
 		"expected_datetime": "Estimated Fix:",
 		"service_notes": "Service Notes"
+	},
+	"reviewServiceRequest": {
+		"title": "Review Request",
+		"sub_heading": "Please review the request details below before submitting the request",
+		"button_edit": "Edit",
+		"button_submit": "Submit Request"
 	}
 }
