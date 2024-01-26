@@ -295,8 +295,8 @@ public class RootController {
     @Get(value =  "/config")
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @ExecuteOn(TaskExecutors.IO)
-    public JurisdictionInfoResponse getJurisdictionInfo(@Header("Host") String hostHeader) {
-        return new JurisdictionInfoResponse();
+    public JurisdictionInfoResponse getJurisdictionInfo(@Header("Host") String hostName) {
+        return jurisdictionService.findJurisdictionByHostName(hostName);
     }
 
     private void sanitizeXmlContent(ServiceRequestDTO serviceRequestDTO) {

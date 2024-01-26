@@ -30,6 +30,10 @@ public class Jurisdiction {
     @Id
     private String id;
 
+    private String name;
+
+    private String hostName;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Service> services = new HashSet<>();
@@ -40,6 +44,12 @@ public class Jurisdiction {
 
     public Jurisdiction(String id) {
         this.id = id;
+    }
+
+    public Jurisdiction(String id, String name, String hostName) {
+        this.id = id;
+        this.name = name;
+        this.hostName = hostName;
     }
 
     public Jurisdiction() {}
@@ -66,5 +76,21 @@ public class Jurisdiction {
 
     public void setServiceRequests(Set<ServiceRequest> serviceRequests) {
         this.serviceRequests = serviceRequests;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 }
