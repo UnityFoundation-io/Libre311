@@ -17,6 +17,31 @@
 		"expected_datetime": "Estimated Fix:",
 		"service_notes": "Service Notes"
 	},
+	"contact": {
+		"header": "Add Contact Information",
+		"body": "We will only use the provided information to follow up on your request and will not use it for any other purposes",
+		"name": {
+			"label": "Name",
+			"first_name": {
+				"placeholder": "First name"
+			},
+			"last_name": {
+				"placeholder": "Last name"
+			}
+		},
+		"phone": {
+			"label": "Phone",
+			"placeholder": "000-000-000"
+		},
+		"email": {
+			"label": "Email",
+			"placeholder": "example@email.com"
+		},
+		"button": {
+			"submit": "Submit Contact Details",
+			"back": "Back"
+		}
+	},
 	"reviewServiceRequest": {
 		"title": "Review Request",
 		"sub_heading": "Please review the request details below before submitting the request",
