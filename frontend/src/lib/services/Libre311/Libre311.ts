@@ -71,6 +71,8 @@ export const BaseServiceDefinitionAttributeSchema = z.object({
 	description: z.string()
 });
 
+export type BaseServiceDefinitionAttribute = z.infer<typeof BaseServiceDefinitionAttributeSchema>;
+
 export const StringServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend({
 	datatype: StringType
 });
@@ -113,6 +115,9 @@ const AttributeValueSchema = z.object({
 	 */
 	name: z.string()
 });
+
+export type AttributeValue = z.infer<typeof AttributeValueSchema>;
+
 export const ListBasedServiceDefinitionAttributeSchema =
 	BaseServiceDefinitionAttributeSchema.extend({
 		datatype: z.union([SingleValueListType, MultiValueListType]),
@@ -146,7 +151,7 @@ export const ServiceDefinitionAttributeSchema = z.union([
 	SingleValueListServiceDefinitionAttributeSchema
 ]);
 
-type ServiceDefinitionAttribute = z.infer<typeof ServiceDefinitionAttributeSchema>;
+export type ServiceDefinitionAttribute = z.infer<typeof ServiceDefinitionAttributeSchema>;
 
 const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 	attributes: z.array(ServiceDefinitionAttributeSchema)
@@ -175,8 +180,8 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 
 // user response values from  ServiceDefinitionAttributeSchema.
 // attribute[code1]=value1
-// todo consider adding BaseServiceDefinitionAttributeSchema["description"] so that ui can show what the question was later on
-type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
+// todo consider adding AttributeValue[name] so that ui can reflect the values later on
+export type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
 // todo will likely need the recaptcha value here
 export const ContactInformationSchema = z.object({
 	first_name: z.string(),
