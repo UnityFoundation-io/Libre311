@@ -14,13 +14,13 @@
 
 package app.service.jurisdiction;
 
+import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.jurisdiction.JurisdictionRepository;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class JurisdictionService {
@@ -55,5 +55,11 @@ public class JurisdictionService {
         }
 
         return List.of();
+    }
+
+    public JurisdictionInfoResponse findJurisdictionByHostName(String hostName) {
+        return jurisdictionRepository.findByRemoteHostsNameEquals(hostName)
+            .map(jurisdiction -> new JurisdictionInfoResponse(jurisdiction.getId(), jurisdiction.getName()))
+            .orElse(null);
     }
 }

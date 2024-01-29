@@ -18,6 +18,10 @@ import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.*;
+import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.JurisdictionInfoResponse;
+import app.model.jurisdiction.JurisdictionRepository;
+import app.model.jurisdiction.RemoteHost;
 import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.AttributeDataType;
 import app.model.service.servicedefinition.AttributeValue;
@@ -60,7 +64,7 @@ import java.util.Optional;
 import static io.micronaut.http.HttpStatus.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@MicronautTest(environments={"test-jurisdiction-support"})
+@MicronautTest(environments={"test-jurisdiction-support"}, transactional = false)
 public class JurisdictionSupportRootControllerTest {
 
     @Inject
@@ -84,6 +88,9 @@ public class JurisdictionSupportRootControllerTest {
 
     @Inject
     DbCleanup dbCleanup;
+
+    @Inject
+    JurisdictionRepository jurisdictionRepository;
 
     @BeforeEach
     void setup() {
@@ -613,6 +620,24 @@ public class JurisdictionSupportRootControllerTest {
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void getJurisdictionTest() {
+        RemoteHost h = new RemoteHost("host1");
+        Jurisdiction j = new Jurisdiction("1", "jurisdiction1", null);
+        h.setJurisdiction(j);
+        j.getRemoteHosts().add(h);
+        jurisdictionRepository.save(j);
+        login();
+
+        HttpRequest<?> request = HttpRequest.GET("/config")
+            .header("host", "host1");
+        HttpResponse<JurisdictionInfoResponse> response = client.toBlocking()
+            .exchange(request, JurisdictionInfoResponse.class);
+        JurisdictionInfoResponse infoResponse = response.getBody().get();
+        assertEquals(infoResponse.getId(), "1");
+        assertEquals(infoResponse.getName(), "jurisdiction1");
     }
 
     private HttpResponse<?> createService(String code, String name, String jurisdictionId) {
