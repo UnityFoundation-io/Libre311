@@ -1,3 +1,4 @@
+import type { PointTuple } from 'leaflet';
 import {
 	type GetServiceRequestsParams,
 	type Libre311Service,
@@ -11,8 +12,10 @@ import {
 	type JurisdictionConfig,
 	type ServiceDefinition,
 	type HasServiceCode,
-	type Libre311ServiceProps
+	type Libre311ServiceProps,
+	ReverseGeocodeResponseSchema
 } from './Libre311';
+import axios from 'axios';
 
 const serviceRequests: ServiceRequest[] = [
 	{
@@ -266,6 +269,11 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 
 	private constructor(jurisdictionConfig: JurisdictionConfig) {
 		this.jurisdictionConfig = jurisdictionConfig;
+	}
+	async reverseGeocode(coords: PointTuple): Promise<{ display_name: string }> {
+		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords[0]}&lon=${coords[1]}`;
+		const res = await axios.get<unknown>(url);
+		return ReverseGeocodeResponseSchema.parse(res.data);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars

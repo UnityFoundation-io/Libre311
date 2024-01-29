@@ -51,6 +51,7 @@
 		"@types/leaflet": "^1.9.8",
 		"axios": "^1.6.2",
 		"leaflet": "^1.9.4",
+		"leaflet-geosearch": "^3.11.0",
 		"zod": "^3.22.4"
 	}
 }

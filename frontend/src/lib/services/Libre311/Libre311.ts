@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
+import L from 'leaflet';
 import { MockLibre311ServiceImpl } from './MockLibre311';
 
 const JurisdicationIdSchema = z.string();
@@ -250,8 +251,15 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
+export const ReverseGeocodeResponseSchema = z.object({
+	display_name: z.string()
+});
+
+export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema>;
+
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
+	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -300,6 +308,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	getJurisdictionConfig(): JurisdictionConfig {
 		return this.jurisdictionConfig;
+	}
+
+	async reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse> {
+		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${String(coords[0])}&lon=${String(coords[1])}}`;
+		const res = await axios.get<unknown>(url);
+		return ReverseGeocodeResponseSchema.parse(res.data);
 	}
 
 	async getServiceList(): Promise<GetServiceListResponse> {
