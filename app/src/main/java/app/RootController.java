@@ -18,14 +18,17 @@ import app.dto.discovery.DiscoveryDTO;
 import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
-import app.dto.servicerequest.*;
+import app.dto.servicerequest.GetServiceRequestsDTO;
+import app.dto.servicerequest.PostRequestServiceRequestDTO;
+import app.dto.servicerequest.PostResponseServiceRequestDTO;
+import app.dto.servicerequest.ServiceRequestDTO;
+import app.dto.servicerequest.ServiceRequestList;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -36,17 +39,22 @@ import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.*;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Consumes;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.annotation.RequestBean;
 import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-
-import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
+import javax.validation.Valid;
 
 @Controller("/api")
 @Secured(SecurityRule.IS_ANONYMOUS)
@@ -139,7 +147,7 @@ public class RootController {
     @Get(uris = {"/services/{serviceCode}{?jurisdiction_id}", "/services/{serviceCode}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceDefinitionJson(String serviceCode, @Nullable String jurisdiction_id) {
+    public ServiceDefinition getServiceDefinitionJson(String serviceCode, @Nullable String jurisdiction_id) {
         List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
         if (!errors.isEmpty()) {
             return null;
@@ -158,9 +166,7 @@ public class RootController {
         }
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String serviceDefinitionStr = serviceService.getServiceDefinition(serviceCode, jurisdiction_id);
-        ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionStr, ServiceDefinition.class);
+        ServiceDefinition serviceDefinition = serviceService.getServiceDefinition(serviceCode, jurisdiction_id);
 
         return xmlMapper.writeValueAsString(serviceDefinition);
     }

@@ -22,6 +22,7 @@ import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.data.model.Page;
@@ -54,7 +55,7 @@ public class ServiceService {
         return servicePage.map(ServiceDTO::new);
     }
 
-    public String getServiceDefinition(String serviceCode, String jurisdictionId) {
+    public ServiceDefinition getServiceDefinition(String serviceCode, String jurisdictionId) {
         Optional<Service> serviceOptional;
         if (jurisdictionId == null) {
             serviceOptional = serviceRepository.findByServiceCode(serviceCode);
@@ -65,7 +66,7 @@ public class ServiceService {
         if (serviceOptional.isEmpty()) {
             LOG.error("Service not found.");
             return null;
-        } else if (serviceOptional.get().getServiceDefinitionJson() == null) {
+        } else if (serviceOptional.get().getServiceDefinitions().isEmpty()) {
             LOG.error("Service Definition is null.");
             return null;
         }
@@ -96,9 +97,10 @@ public class ServiceService {
         Service service = new Service();
 
         if (serviceDTO.getServiceDefinitionJson() != null) {
-            if (serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson())) {
+            ServiceDefinition sd = serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson());
+            if (sd != null) {
                 service.setMetadata(true);
-                service.setServiceDefinitionJson(serviceDTO.getServiceDefinitionJson());
+                service.getServiceDefinitions().add(new ServiceDefinitionEntity("1", true, sd));
             } else {
                 LOG.error("Service Definition JSON format is invalid.");
                 return null;
@@ -142,9 +144,18 @@ public class ServiceService {
             service.setServiceName(serviceDTO.getServiceName());
         }
         if (serviceDTO.getServiceDefinitionJson() != null) {
-            if (serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson())) {
+            ServiceDefinition sd = serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson());
+            if (sd != null) {
                 service.setMetadata(true);
-                service.setServiceDefinitionJson(serviceDTO.getServiceDefinitionJson());
+                ServiceDefinitionEntity existingSde = null;
+                if (service.getServiceDefinitions().isEmpty()) {
+                    existingSde = new ServiceDefinitionEntity("1", true, sd);
+                } else {
+                    existingSde = service.getServiceDefinitions().get(0);
+                    existingSde.setActive(false);
+                }
+                service.getServiceDefinitions().add(new ServiceDefinitionEntity(
+                    getNextVersionNumber(existingSde), true, sd));
             } else {
                 LOG.error("Service Definition JSON format is invalid.");
                 return null;
@@ -152,6 +163,10 @@ public class ServiceService {
         }
 
         return new ServiceDTO(serviceRepository.update(service));
+    }
+
+    private static String getNextVersionNumber(ServiceDefinitionEntity existingSde) {
+        return ""+(Long.parseLong(existingSde.getVersion()) + 1);
     }
 
     private boolean serviceCodeAlreadyExists(boolean jurisdictionSupportEnabled, String serviceCode, String jurisdictionId) {
@@ -168,12 +183,13 @@ public class ServiceService {
         return false;
     }
 
-    private boolean serviceDefinitionFormatIsValid(String serviceDefinitionJson) {
+    private ServiceDefinition serviceDefinitionFormatIsValid(String serviceDefinitionJson) {
+        ServiceDefinition sd;
         try {
-            (new ObjectMapper()).readValue(serviceDefinitionJson, ServiceDefinition.class);
+            sd = (new ObjectMapper()).readValue(serviceDefinitionJson, ServiceDefinition.class);
         } catch (JsonProcessingException e) {
-            return false;
+            return null;
         }
-        return true;
+        return sd;
     }
 }

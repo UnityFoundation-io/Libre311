@@ -70,6 +70,7 @@ jpa:
       hibernate:
         hbm2ddl:
           auto: ${LIBRE311_AUTO_SCHEMA_GEN:update}
+#        show_sql: true
 netty:
   default:
     allocator:

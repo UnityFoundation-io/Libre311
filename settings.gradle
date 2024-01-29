@@ -1,1 +1,1 @@
-include 'app', 'frontend'
+include 'app'

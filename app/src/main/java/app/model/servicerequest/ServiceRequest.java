@@ -16,6 +16,7 @@ package app.model.servicerequest;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.service.Service;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.DateCreated;
 import io.micronaut.data.annotation.DateUpdated;
@@ -41,6 +42,10 @@ public class ServiceRequest {
     @ManyToOne
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
+
+    @ManyToOne
+    @JoinColumn(name = "service_definition_id")
+    private ServiceDefinitionEntity serviceDefinition;
 
     @Nullable
     @Column(columnDefinition = "TEXT")
@@ -345,7 +350,6 @@ public class ServiceRequest {
     public void setClosedDate(@Nullable Instant closedDate) {
         this.closedDate = closedDate;
     }
-
     public void setExpectedDate(@Nullable Instant expectedDate) {
         this.expectedDate = expectedDate;
     }
@@ -353,6 +357,14 @@ public class ServiceRequest {
     @Nullable
     public String getAgencyEmail() {
         return agencyEmail;
+    }
+    public ServiceDefinitionEntity getServiceDefinition() {
+        return serviceDefinition;
+    }
+
+    public void setServiceDefinition(
+        ServiceDefinitionEntity serviceDefinition) {
+        this.serviceDefinition = serviceDefinition;
     }
 
     public void setAgencyEmail(@Nullable String agencyEmail) {
