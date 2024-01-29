@@ -2,6 +2,8 @@
 	import SelectLocation from '$lib/components/CreateServiceRequest/SelectLocation.svelte';
 	import UploadFile from '$lib/components/CreateServiceRequest/UploadFile.svelte';
 	import MapComponent from '$lib/components/MapComponent.svelte';
+	import ContactInformation from '$lib/components/CreateServiceRequest/ContactInformation.svelte';
+	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
 
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import WaypointOpen from '$lib/assets/waypoint-open.png';
@@ -34,6 +36,8 @@
 	const componentMap: Map<CreateServiceRequestSteps, ComponentType> = new Map();
 	componentMap.set(CreateServiceRequestSteps.LOCATION, SelectLocation);
 	componentMap.set(CreateServiceRequestSteps.PHOTO, UploadFile);
+	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
+	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);
 
 	function gotoNextStep() {
 		goto(`/issue/create?step=${++step}`);
@@ -75,7 +79,7 @@
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
 		{:else if step == CreateServiceRequestSteps.REVIEW}
-			<h1>review component</h1>
+			<ReviewServiceRequest {params} />
 		{:else}
 			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
 		{/if}
