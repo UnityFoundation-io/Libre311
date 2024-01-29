@@ -18,4 +18,10 @@
 	onDestroy(() => {
 		marker?.remove();
 	});
+
+	$: updateLatLng(latLng);
+
+	function updateLatLng(latLng: L.LatLngExpression) {
+		marker?.setLatLng(latLng);
+	}
 </script>

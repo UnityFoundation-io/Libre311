@@ -31,6 +31,12 @@ public class Jurisdiction {
     @Id
     private String id;
 
+    private String name;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<RemoteHost> remoteHosts = new HashSet<>();
+
     @ManyToOne
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
@@ -46,6 +52,12 @@ public class Jurisdiction {
     public Jurisdiction(String id, Tenant tenant) {
         this.id = id;
         this.tenant = tenant;
+    }
+
+    public Jurisdiction(String id, String name, RemoteHost remoteHost) {
+        this.id = id;
+        this.name = name;
+        remoteHosts.add(remoteHost);
     }
 
     public Jurisdiction() {}
@@ -81,4 +93,21 @@ public class Jurisdiction {
     public void setServiceRequests(Set<ServiceRequest> serviceRequests) {
         this.serviceRequests = serviceRequests;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Set<RemoteHost> getRemoteHosts() {
+        return remoteHosts;
+    }
+
+    public void setRemoteHosts(Set<RemoteHost> remoteHosts) {
+        this.remoteHosts = remoteHosts;
+    }
+
 }

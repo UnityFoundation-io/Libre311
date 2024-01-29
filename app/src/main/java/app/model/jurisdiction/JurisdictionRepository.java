@@ -16,7 +16,10 @@ package app.model.jurisdiction;
 
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.PageableRepository;
+import java.util.Optional;
 
 @Repository
 public interface JurisdictionRepository extends PageableRepository<Jurisdiction, String> {
+
+  Optional<Jurisdiction> findByRemoteHostsNameEquals(String hosts);
 }
