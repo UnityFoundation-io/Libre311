@@ -1,8 +1,8 @@
 <script lang="ts">
 	import SelectLocation from '$lib/components/CreateServiceRequest/SelectLocation.svelte';
 	import MapComponent from '$lib/components/MapComponent.svelte';
-	import ContactInformation from '$lib/components/ContactInformation.svelte';
-	import ReviewServiceRequest from '$lib/components/ReviewServiceRequest.svelte';
+	import ContactInformation from '$lib/components/CreateServiceRequest/ContactInformation.svelte';
+	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
 
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import WaypointOpen from '$lib/assets/waypoint-open.png';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
-	import ServiceRequestDetails from './ServiceRequestDetails.svelte';
+	import ServiceRequestDetails from '../ServiceRequestDetails.svelte';
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 </script>
