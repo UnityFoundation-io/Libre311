@@ -14,7 +14,10 @@
 	import { goto } from '$app/navigation';
 	import MapGeosearch from '$lib/components/MapGeosearch.svelte';
 	import type { ComponentEvents } from 'svelte';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import Breakpoint from '$lib/components/Breakpoint.svelte';
+	import { Button } from 'stwui';
+	import { page } from '$app/stores';
 
 	let step: CreateServiceRequestSteps = CreateServiceRequestSteps.LOCATION;
 	let params: Partial<CreateServiceRequestParams> = {};
@@ -22,6 +25,7 @@
 	let loadingLocation: boolean = false;
 
 	const libre311 = useLibre311Service();
+	const linkResolver = useLibre311Context().linkResolver;
 	const icon = L.icon({
 		iconUrl: WaypointOpen,
 		...iconPositionOpts(128 / 169, 45, 'bottom-center')
@@ -79,5 +83,13 @@
 			<MapMarker on:click latLng={centerPos} options={{ icon }} />
 			<MapGeosearch on:geosearch={handleGeosearch} />
 		</MapComponent>
+		<Breakpoint>
+			<div class="display absolute inset-x-0 bottom-6 flex justify-center gap-2" slot="is-mobile">
+				<Button type="primary" href={linkResolver.issuesMap($page.url)}>Cancel</Button>
+				<Button loading={loadingLocation} on:click={confirmLocation} type="primary"
+					>Select Location</Button
+				>
+			</div>
+		</Breakpoint>
 	</div>
 </SideBarMainContentLayout>
