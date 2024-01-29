@@ -17,9 +17,15 @@ package app;
 import app.dto.discovery.DiscoveryDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
-import app.dto.servicerequest.*;
+import app.dto.servicerequest.GetServiceRequestsDTO;
+import app.dto.servicerequest.PostRequestServiceRequestDTO;
+import app.dto.servicerequest.PostResponseServiceRequestDTO;
+import app.dto.servicerequest.ServiceRequestDTO;
+import app.dto.servicerequest.ServiceRequestList;
+import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.service.discovery.DiscoveryEndpointService;
+import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,7 +39,14 @@ import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.*;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Consumes;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Header;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.annotation.RequestBean;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
@@ -51,11 +64,13 @@ public class RootController {
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
     private final DiscoveryEndpointService discoveryEndpointService;
+    private final JurisdictionService jurisdictionService;
 
     public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService,
-                          DiscoveryEndpointService discoveryEndpointService) {
+                          DiscoveryEndpointService discoveryEndpointService, JurisdictionService jurisdictionService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
+        this.jurisdictionService = jurisdictionService;
         this.discoveryEndpointService = discoveryEndpointService;
     }
 
@@ -238,6 +253,13 @@ public class RootController {
         ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestDTO));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
+    }
+
+    @Get(value =  "/config")
+    @Secured(SecurityRule.IS_AUTHENTICATED)
+    @ExecuteOn(TaskExecutors.IO)
+    public JurisdictionInfoResponse getJurisdictionInfo(@Header("Host") String hostName) {
+        return jurisdictionService.findJurisdictionByHostName(hostName);
     }
 
     private void sanitizeXmlContent(ServiceRequestDTO serviceRequestDTO) {

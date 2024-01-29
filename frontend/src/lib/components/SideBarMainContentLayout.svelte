@@ -1,5 +1,11 @@
+<script lang="ts">
+	export let sideBarBreakpointActive = true;
+</script>
+
 <div class="layout-container">
-	<aside class="side-content"><slot name="side-bar" /></aside>
+	<aside class="side-bar" class:collapsable-side-bar={sideBarBreakpointActive}>
+		<slot name="side-bar" />
+	</aside>
 	<div class="main-content"><slot name="main-content" /></div>
 </div>
 
@@ -11,12 +17,16 @@
 	}
 	.main-content {
 		flex-grow: 1;
-		max-height: calc(100vh - var(--header-height));
+		height: 100%;
 	}
 
-	.side-content {
-		width: 400px;
+	.collapsable-side-bar {
 		display: none;
+	}
+
+	.side-bar {
+		position: relative;
+		width: 400px;
 	}
 
 	aside {
@@ -25,7 +35,7 @@
 	}
 
 	@media (min-width: 64rem) {
-		.side-content {
+		.collapsable-side-bar {
 			display: unset;
 		}
 	}
