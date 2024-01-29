@@ -1,6 +1,6 @@
 <script lang="ts">
 	import SelectLocation from '$lib/components/CreateServiceRequest/SelectLocation.svelte';
-	import UploadFile from '$lib/components/CreateServiceRequest/UploadFile.svelte';
+	import UploadFile from '$lib/components/CreateServiceRequest/UploadFileDesktop.svelte';
 	import MapComponent from '$lib/components/MapComponent.svelte';
 
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
