@@ -22,5 +22,10 @@
 		"sub_heading": "Please review the request details below before submitting the request",
 		"button_edit": "Edit",
 		"button_submit": "Submit Request"
+	},
+	"photo": {
+		"upload": "Upload An Image",
+		"no_upload": "Continue Without Photo",
+		"back": "Back"
 	}
 }

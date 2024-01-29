@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SelectLocation from '$lib/components/CreateServiceRequest/SelectLocation.svelte';
+	import UploadFile from '$lib/components/CreateServiceRequest/UploadFile.svelte';
 	import MapComponent from '$lib/components/MapComponent.svelte';
 
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
@@ -19,6 +20,7 @@
 
 	const componentMap: Map<CreateServiceRequestSteps, ComponentType> = new Map();
 	componentMap.set(CreateServiceRequestSteps.LOCATION, SelectLocation);
+	componentMap.set(CreateServiceRequestSteps.PHOTO, UploadFile);
 
 	function handleChange(e: CustomEvent<Partial<CreateServiceRequestParams>>) {
 		const changedParams = e.detail;
