@@ -21,5 +21,5 @@ import java.util.Optional;
 @Repository
 public interface JurisdictionRepository extends PageableRepository<Jurisdiction, String> {
 
-  Optional<Jurisdiction> findByHostName(String hostName);
+  Optional<Jurisdiction> findByRemoteHostsNameEquals(String hosts);
 }

@@ -21,6 +21,7 @@ import app.dto.servicerequest.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.jurisdiction.JurisdictionRepository;
+import app.model.jurisdiction.RemoteHost;
 import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.AttributeDataType;
 import app.model.service.servicedefinition.AttributeValue;
@@ -623,7 +624,11 @@ public class JurisdictionSupportRootControllerTest {
 
     @Test
     public void getJurisdictionTest() {
-        jurisdictionRepository.save(new Jurisdiction("1", "jurisdiction1", "host1"));
+        RemoteHost h = new RemoteHost("host1");
+        Jurisdiction j = new Jurisdiction("1", "jurisdiction1", null);
+        h.setJurisdiction(j);
+        j.getRemoteHosts().add(h);
+        jurisdictionRepository.save(j);
         login();
 
         HttpRequest<?> request = HttpRequest.GET("/config")

@@ -9,7 +9,8 @@
         </encoder>
     </appender>
 
-<!--    <logger name="io.micronaut.http.client" level="TRACE"/>-->
+    <!--    <logger name="io.micronaut.http.client" level="TRACE"/>-->
+<!--        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>-->
 
     <root level="info">
         <appender-ref ref="STDOUT" />

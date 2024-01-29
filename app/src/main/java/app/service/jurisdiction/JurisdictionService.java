@@ -58,7 +58,7 @@ public class JurisdictionService {
     }
 
     public JurisdictionInfoResponse findJurisdictionByHostName(String hostName) {
-        return jurisdictionRepository.findByHostName(hostName)
+        return jurisdictionRepository.findByRemoteHostsNameEquals(hostName)
             .map(jurisdiction -> new JurisdictionInfoResponse(jurisdiction.getId(), jurisdiction.getName()))
             .orElse(null);
     }
