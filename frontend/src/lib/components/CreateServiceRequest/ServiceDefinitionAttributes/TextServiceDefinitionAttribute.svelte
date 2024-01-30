@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { TextArea } from 'stwui';
-	import type { TextServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
-	import { readonly } from 'svelte/store';
+	import type { TextServiceDefinitionAttributeInput } from './shared';
 
-	export let attribute: TextServiceDefinitionAttribute;
+	export let input: TextServiceDefinitionAttributeInput;
+	$: attribute = input.attribute;
 </script>
 
 <TextArea
+	bind:value={input.value}
+	error={input.error}
 	name="text"
 	placeholder={attribute.datatype_description ?? undefined}
-	readonly
 	class="relative mx-8 my-4"
 >
 	<TextArea.Label slot="label">{attribute.description}</TextArea.Label>

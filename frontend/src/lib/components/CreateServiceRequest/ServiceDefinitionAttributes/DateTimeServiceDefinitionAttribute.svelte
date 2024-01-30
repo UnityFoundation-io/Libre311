@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { DatePicker } from 'stwui';
-	import type { DateTimeServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
+	import type { DateTimeServiceDefinitionAttributeInput } from './shared';
 
-	export let attribute: DateTimeServiceDefinitionAttribute;
+	export let input: DateTimeServiceDefinitionAttributeInput;
+	$: attribute = input.attribute;
 </script>
 
 <DatePicker
+	bind:value={input.value}
+	error={input.error}
 	name="datetime"
-	on:change
 	label={attribute.datatype_description ?? undefined}
 	showTime
 	class="relative mx-8 my-4"

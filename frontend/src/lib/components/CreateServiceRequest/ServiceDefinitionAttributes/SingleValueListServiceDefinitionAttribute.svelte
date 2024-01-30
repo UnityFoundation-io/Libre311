@@ -2,8 +2,10 @@
 	import { Select } from 'stwui';
 	import type { SelectOption } from 'stwui/types';
 	import type { SingleValueListServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
+	import type { SingleValueListServiceDefinitionAttributeInput } from './shared';
 
-	export let attribute: SingleValueListServiceDefinitionAttribute;
+	export let input: SingleValueListServiceDefinitionAttributeInput;
+	$: attribute = input.attribute;
 
 	$: selectOptions = createSelectOptions(attribute);
 
@@ -13,8 +15,9 @@
 </script>
 
 <Select
+	bind:value={input.value}
+	error={input.error}
 	name="singleselect"
-	on:change
 	placeholder={attribute.datatype_description ?? undefined}
 	options={selectOptions}
 	class="relative mx-8 my-4"
