@@ -6,6 +6,11 @@
 	"environment": {
 		"loading": "Loading Environment"
 	},
+  "reporting": {
+    "timestamp": "Timestamp: ",
+    "location": "Location: ",
+    "citizen_comments": "Citizen Comments"
+  },
 	"sidebar": {
 		"title": "Requests"
 	},
