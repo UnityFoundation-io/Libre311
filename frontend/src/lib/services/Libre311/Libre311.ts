@@ -1,3 +1,4 @@
+import type { AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
@@ -191,15 +192,15 @@ export const ContactInformationSchema = z.object({
 });
 
 export type ContactInformation = z.infer<typeof ContactInformationSchema>;
-export type CreateServiceRequestParams = HasServiceCode &
-	ContactInformation & {
-		lat: string;
-		lng: string;
-		address_string: string;
-		attributes: AttributeResponse[];
-		description: string;
-		media_url?: string;
-	};
+export type CreateServiceRequestParams = ContactInformation & {
+	lat: string;
+	lng: string;
+	address_string: string;
+	attributeMap: AttributeInputMap;
+	description: string;
+	media_url?: string;
+	service: Service;
+};
 
 export const OpenServiceRequestStatusSchema = z.literal('Open');
 export const ClosedServiceRequestStatusSchema = z.literal('Closed');
@@ -351,7 +352,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse> {
-		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${String(coords[0])}&lon=${String(coords[1])}}`;
+		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords[0]}&lon=${coords[1]}`;
 		const res = await axios.get<unknown>(url);
 		return ReverseGeocodeResponseSchema.parse(res.data);
 	}
@@ -374,6 +375,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
+		// todo transform CreateServiceRequestParams into backend value
 		console.log(params);
 		throw Error('Not Implemented');
 	}
