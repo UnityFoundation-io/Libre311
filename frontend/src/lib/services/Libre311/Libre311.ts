@@ -150,6 +150,7 @@ export type CreateServiceRequestParams = HasServiceCode &
 		attributes: AttributeResponse[];
 		description: string;
 		media_url?: string;
+		service_name: string;
 	};
 
 export const OpenServiceRequestStatusSchema = z.literal('Open');
