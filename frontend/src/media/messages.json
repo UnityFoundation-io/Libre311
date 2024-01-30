@@ -43,8 +43,7 @@
 		}
 	},
 	"reviewServiceRequest": {
-		"title": "Review Request",
-		"sub_heading": "Please review the request details below before submitting the request",
+		"title": "Service Request Review",
 		"button_edit": "Edit",
 		"button_submit": "Submit Request"
 	}
