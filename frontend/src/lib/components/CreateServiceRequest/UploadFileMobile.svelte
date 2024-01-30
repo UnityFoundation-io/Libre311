@@ -9,9 +9,8 @@
 			<input type="file" id="actual-btn" accept="image/*" capture="environment" hidden />
 			<label for="actual-btn">{messages['photo']['take_photo']}</label>
 
-			<Button type="primary" on:click={() => {}}>
-				{messages['photo']['camera_roll']}
-			</Button>
+			<input type="file" id="camera-roll-btn" accept="image/*" hidden />
+			<label for="camera-roll-btn">{messages['photo']['camera_roll']}</label>
 
 			<Button type="link" on:click={() => {}}>
 				{messages['photo']['no_upload']}
