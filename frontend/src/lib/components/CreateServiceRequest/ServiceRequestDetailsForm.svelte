@@ -23,6 +23,7 @@
 	import NumberServiceDefinitionAttribute from './ServiceDefinitionAttributes/NumberServiceDefinitionAttribute.svelte';
 	import TextServiceDefinitionAttribute from './ServiceDefinitionAttributes/TextServiceDefinitionAttribute.svelte';
 	import type { AttributeSelection } from './ServiceDefinitionAttributes/shared';
+	import { map } from 'leaflet';
 
 	// export let params: Readyonly<Partial<CreateServiceRequestParams>> = {};
 	//
@@ -65,7 +66,6 @@
 	});
 
 	function updateAttributeResponseMap(e: CustomEvent<AttributeSelection>) {
-		if (!e.detail) return;
 		attributeResponseMap.set(e.detail.code, e.detail.attributeResponse);
 		attributeResponseMap = attributeResponseMap;
 	}
@@ -80,6 +80,7 @@
 	}
 
 	async function getServiceDefinition(service_code: ServiceCode) {
+		attributeResponseMap = new Map();
 		selectedServiceDefinition = undefined;
 		if (
 			serviceList.type === 'success' &&

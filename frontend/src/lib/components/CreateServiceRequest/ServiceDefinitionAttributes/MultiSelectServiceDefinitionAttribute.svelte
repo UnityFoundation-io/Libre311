@@ -40,7 +40,6 @@
 <Select
 	bind:value={selectOptionsKeyArray}
 	name="multiselect"
-	on:change
 	placeholder={attribute.datatype_description ?? undefined}
 	multiple
 	options={selectOptions}
