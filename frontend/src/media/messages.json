@@ -53,6 +53,7 @@
 		"camera_roll": "Camera Roll",
 		"take_photo": "Take Photo",
 		"no_upload": "Continue Without Photo",
-		"back": "Back"
+		"back": "Back",
+		"submit": "Submit"
 	}
 }

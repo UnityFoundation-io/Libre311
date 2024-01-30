@@ -338,4 +338,9 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 
 		return req;
 	}
+
+	async uploadImage(file: File): Promise<unknown> {
+		console.log('Not Implemented');
+		return 0;
+	}
 }
