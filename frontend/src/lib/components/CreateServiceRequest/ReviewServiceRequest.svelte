@@ -21,7 +21,7 @@
 </script>
 
 <div class="flex h-full items-center justify-center">
-	<div class="mx-4 flex w-full flex-col" style="height: calc(100vh - var(--header-height));">
+	<div class="mx-4 flex h-full w-full flex-col">
 		<div class="mt-4 flex-grow">
 			<h1 class="text-lg">{messages['reviewServiceRequest']['title']}</h1>
 

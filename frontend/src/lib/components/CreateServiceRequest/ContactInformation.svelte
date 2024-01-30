@@ -48,7 +48,7 @@
 </script>
 
 <div class="flex h-full items-center justify-center">
-	<div class="mx-4 flex flex-col" style="height: calc(100vh - var(--header-height));">
+	<div class="mx-4 flex h-full flex-col">
 		<div class="mt-4 flex-grow">
 			<h1 class="text-lg">{messages['contact']['header']}</h1>
 			<p class="my-2 text-sm">{messages['contact']['body']}</p>
