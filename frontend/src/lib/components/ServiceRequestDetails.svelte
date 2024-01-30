@@ -2,11 +2,11 @@
 	import messages from '$media/messages.json';
 	import { Badge, Card } from 'stwui';
 	import { Dropdown } from 'stwui';
-	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import type { CreateServiceRequestParams, ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import clockIcon from '$lib/assets/Clock.svg';
 
-	export let serviceRequest: ServiceRequest;
+	export let serviceRequest: ServiceRequest | Readonly<Partial<CreateServiceRequestParams>>;
 
 	let visible: boolean = false;
 
@@ -52,7 +52,7 @@
 		<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>
 
 		{#if serviceRequest.media_url}
-			<div class="serviceImage" style={`background-image: url('${serviceRequest.media_url}');`}/>
+			<div class="serviceImage" style={`background-image: url('${serviceRequest.media_url}');`} />
 		{/if}
 
 		<div class="mt-2 flow-root">

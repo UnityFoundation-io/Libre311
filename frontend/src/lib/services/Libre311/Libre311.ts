@@ -184,11 +184,14 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 // todo consider adding AttributeValue[name] so that ui can reflect the values later on
 export type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
 // todo will likely need the recaptcha value here
+
+export const EmailSchema = z.string().email();
+
 export const ContactInformationSchema = z.object({
-	first_name: z.string(),
-	last_name: z.string(),
-	phone: z.string(), // todo add validation => https://www.npmjs.com/package/libphonenumber-js
-	email: z.string().email()
+	first_name: z.string().optional(),
+	last_name: z.string().optional(),
+	phone: z.string().optional(), // todo add validation => https://www.npmjs.com/package/libphonenumber-js
+	email: EmailSchema.optional()
 });
 
 export type ContactInformation = z.infer<typeof ContactInformationSchema>;
@@ -230,7 +233,8 @@ export const ServiceRequestSchema = z
 		media_url: z.string().nullish()
 	})
 	.merge(HasServiceRequestIdSchema)
-	.merge(HasServiceCodeSchema);
+	.merge(HasServiceCodeSchema)
+	.merge(ContactInformationSchema);
 
 export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 
