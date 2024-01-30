@@ -65,7 +65,7 @@
 
 	<div slot="is-mobile" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div class="grid grid-rows-2 gap-3">
+			<div class="grid grid-rows-4 gap-3">
 				<input
 					type="file"
 					id="actual-btn"
@@ -78,6 +78,19 @@
 
 				<input type="file" name="photo" id="camera-roll-btn" accept="image/*" hidden bind:files />
 				<label for="camera-roll-btn">{messages['photo']['camera_roll']}</label>
+
+				<Button
+					type="link"
+					on:click={() => {
+						dispatch('stepChange');
+					}}
+				>
+					{messages['photo']['no_upload']}
+				</Button>
+
+				<Button type="link" on:click={() => {}}>
+					{messages['photo']['back']}
+				</Button>
 			</div>
 		</div>
 	</div>
@@ -92,6 +105,5 @@
 		text-align: center;
 		border-radius: 0.3rem;
 		cursor: pointer;
-		margin-top: 1rem;
 	}
 </style>
