@@ -42,7 +42,7 @@ const TextType = z.literal('text');
 const SingleValueListType = z.literal('singlevaluelist');
 const MultiValueListType = z.literal('multivaluelist');
 
-const DatatypeUnionSchema = z.union([
+export const DatatypeUnionSchema = z.union([
 	StringType,
 	NumberType,
 	DatetimeType,
@@ -50,6 +50,8 @@ const DatatypeUnionSchema = z.union([
 	SingleValueListType,
 	MultiValueListType
 ]);
+
+export type DatatypeUnion = z.infer<typeof DatatypeUnionSchema>;
 
 // const ServiceDefinitionAttributeCode
 export const BaseServiceDefinitionAttributeSchema = z.object({
