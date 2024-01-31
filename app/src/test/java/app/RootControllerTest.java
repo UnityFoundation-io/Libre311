@@ -31,10 +31,8 @@ import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
-import app.util.DbCleanup;
-import app.util.MockAuthenticationFetcher;
-import app.util.MockReCaptchaService;
-import app.util.MockSecurityService;
+import app.security.HasPermissionResponse;
+import app.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
@@ -91,12 +89,20 @@ public class RootControllerTest {
     JurisdictionRepository jurisdictionRepository;
 
     @Inject
+    MockUnityAuthClient mockUnityAuthClient;
+
+    @Inject
+    MockUnityAuthService mockUnityAuthService;
+
+    @Inject
     DbCleanup dbCleanup;
 
     @BeforeEach
     void setup() {
         dbCleanup.cleanupServiceRequests();
         mockAuthenticationFetcher.setAuthentication(null);
+        mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, null)));
+        mockUnityAuthService.setUserPermittedForAction(true);
     }
 
     void login() {
@@ -679,7 +685,8 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov");
+        HttpRequest<?> request = HttpRequest.GET("/admin/requests/download?jurisdiction_id=city.gov")
+                .header("Authorization", "Bearer token.text.here");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, byte[].class);
@@ -727,7 +734,8 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov");
+        HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov")
+                .header("Authorization", "Bearer token.text.here");
 
         login();
 
