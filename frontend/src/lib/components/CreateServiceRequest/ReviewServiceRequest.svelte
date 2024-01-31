@@ -37,7 +37,7 @@
 				{/if}
 
 				<div class="serviceTitle mt-2 flow-root">
-					<h1 class="float-left text-lg">{params.service_name}</h1>
+					<h1 class="float-left text-lg">{params.service.service_name}</h1>
 				</div>
 
 				<div class="mb-2">
@@ -46,7 +46,7 @@
 
 				<div class="mb-1">
 					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-					<p class="text-sm">{params.description}</p>
+					<p class="text-sm">{params.service.description}</p>
 				</div>
 
 				{#if name}

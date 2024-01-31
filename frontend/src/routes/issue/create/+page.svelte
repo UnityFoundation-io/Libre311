@@ -78,7 +78,7 @@
 	function isCreateServiceRequestParams(
 		partial: Partial<CreateServiceRequestParams>
 	): partial is CreateServiceRequestParams {
-		if (partial?.address_string && partial?.attributes && partial?.service_code) return true;
+		if (partial?.address_string && partial?.attributeMap && partial?.service) return true;
 		throw new Error('Previous steps are missing data');
 	}
 </script>

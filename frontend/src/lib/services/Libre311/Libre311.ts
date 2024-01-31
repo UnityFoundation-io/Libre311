@@ -201,7 +201,7 @@ export type CreateServiceRequestParams = ContactInformation & {
 	lng: string;
 	address_string: string;
 	attributeMap: AttributeInputMap;
-	description: string;
+	description?: string;
 	media_url?: string;
 	service: Service;
 };
