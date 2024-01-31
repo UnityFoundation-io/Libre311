@@ -6,6 +6,11 @@
 	"environment": {
 		"loading": "Loading Environment"
 	},
+  "reporting": {
+    "timestamp": "Timestamp: ",
+    "location": "Location: ",
+    "citizen_comments": "Citizen Comments"
+  },
 	"sidebar": {
 		"title": "Requests"
 	},
@@ -46,5 +51,13 @@
 		"title": "Service Request Review",
 		"button_edit": "Edit",
 		"button_submit": "Submit Request"
+	},
+	"photo": {
+		"upload": "Upload An Image",
+		"camera_roll": "Camera Roll",
+		"take_photo": "Take Photo",
+		"no_upload": "Continue Without Photo",
+		"back": "Back",
+		"submit": "Submit"
 	}
 }
