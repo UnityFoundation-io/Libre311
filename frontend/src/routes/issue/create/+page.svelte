@@ -96,7 +96,9 @@
 	<div slot="main-content" class="relative h-full">
 		<MapComponent center={[41.308281, -72.924164]} zoom={14} on:boundsChanged={boundsChanged}>
 			<MapMarker on:click latLng={centerPos} options={{ icon }} />
-			<MapGeosearch on:geosearch={handleGeosearch} />
+			{#if step == CreateServiceRequestSteps.LOCATION}
+				<MapGeosearch on:geosearch={handleGeosearch} />
+			{/if}
 		</MapComponent>
 		<Breakpoint>
 			<div class="display absolute inset-x-0 bottom-6 flex justify-center gap-2" slot="is-mobile">
