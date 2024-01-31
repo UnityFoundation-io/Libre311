@@ -10,77 +10,45 @@ import type {
 	TextServiceDefinitionAttribute
 } from '$lib/services/Libre311/Libre311';
 
-export type ServiceDefinitionAttributeInput<T extends ServiceDefinitionAttribute, K> = {
+type ServiceDefinitionAttributeLookupMap = {
+	multivaluelist: MultiSelectServiceDefinitionAttribute;
+	singlevaluelist: SingleValueListServiceDefinitionAttribute;
+	string: StringServiceDefinitionAttribute;
+	number: NumberServiceDefinitionAttribute;
+	datetime: DateTimeServiceDefinitionAttribute;
+	text: TextServiceDefinitionAttribute;
+};
+
+export type ServiceDefinitionAttributeInput<
+	T extends keyof ServiceDefinitionAttributeLookupMap,
+	K
+> = {
+	datatype: T;
 	error?: string; // an error if the attribute value is not valid (ie a value is required and no value was provided)
-	attribute: T; // a reference to the corresponding attribute
+	attribute: ServiceDefinitionAttributeLookupMap[T]; // a reference to the corresponding attribute
 	value?: K; // the actual form input value
 };
 
 export type MultiSelectServiceDefinitionAttributeInput = ServiceDefinitionAttributeInput<
-	MultiSelectServiceDefinitionAttribute,
+	'multivaluelist',
 	string[]
 >;
 
-export function isMultiSelectServiceDefinitionAttributeInput(
-	maybeMultiselect: ServiceDefinitionAttributeInputUnion
-): maybeMultiselect is MultiSelectServiceDefinitionAttributeInput {
-	return maybeMultiselect.attribute.datatype === 'multivaluelist';
-}
-
 export type SingleValueListServiceDefinitionAttributeInput = ServiceDefinitionAttributeInput<
-	SingleValueListServiceDefinitionAttribute,
+	'singlevaluelist',
 	string
 >;
 
-export function isSingleValueListServiceDefinitionAttributeInput(
-	maybeMultiselect: ServiceDefinitionAttributeInputUnion
-): maybeMultiselect is SingleValueListServiceDefinitionAttributeInput {
-	return maybeMultiselect.attribute.datatype === 'singlevaluelist';
-}
+export type StringServiceDefinitionInput = ServiceDefinitionAttributeInput<'string', string>;
 
-export type StringServiceDefinitionInput = ServiceDefinitionAttributeInput<
-	StringServiceDefinitionAttribute,
-	string
->;
-
-export function isStringServiceDefinitionInput(
-	maybeString: ServiceDefinitionAttributeInputUnion
-): maybeString is StringServiceDefinitionInput {
-	return maybeString.attribute.datatype === 'string';
-}
-
-export type NumberServiceDefinitionInput = ServiceDefinitionAttributeInput<
-	NumberServiceDefinitionAttribute,
-	number
->;
-
-export function isNumberServiceDefinitionInput(
-	maybeNumber: ServiceDefinitionAttributeInputUnion
-): maybeNumber is NumberServiceDefinitionInput {
-	return maybeNumber.attribute.datatype === 'number';
-}
+export type NumberServiceDefinitionInput = ServiceDefinitionAttributeInput<'number', number>;
 
 export type DateTimeServiceDefinitionAttributeInput = ServiceDefinitionAttributeInput<
-	DateTimeServiceDefinitionAttribute,
+	'datetime',
 	Date
 >;
 
-export function isDateTimeServiceDefinitionAttributeInput(
-	maybeDateTime: ServiceDefinitionAttributeInputUnion
-): maybeDateTime is DateTimeServiceDefinitionAttributeInput {
-	return maybeDateTime.attribute.datatype === 'datetime';
-}
-
-export type TextServiceDefinitionAttributeInput = ServiceDefinitionAttributeInput<
-	TextServiceDefinitionAttribute,
-	string
->;
-
-export function isTextServiceDefinitionAttributeInput(
-	maybeText: ServiceDefinitionAttributeInputUnion
-): maybeText is TextServiceDefinitionAttributeInput {
-	return maybeText.attribute.datatype === 'text';
-}
+export type TextServiceDefinitionAttributeInput = ServiceDefinitionAttributeInput<'text', string>;
 
 type ServiceDefinitionAttributeInputUnion =
 	| MultiSelectServiceDefinitionAttributeInput
@@ -107,59 +75,37 @@ export function createAttributeInputMap(
 	for (const attribute of serviceDefinition.attributes) {
 		switch (attribute.datatype) {
 			case 'multivaluelist':
-				attributeInputMap.set(attribute.code, createInputProps(attribute, []));
+				attributeInputMap.set(attribute.code, createInputProps('multivaluelist', attribute, []));
 				break;
 			case 'singlevaluelist':
 				attributeInputMap.set(
 					attribute.code,
-					createInputProps<SingleValueListServiceDefinitionAttribute, string | undefined>(
-						attribute,
-						undefined
-					)
+					createInputProps('singlevaluelist', attribute, undefined)
 				);
 				break;
 			case 'datetime':
-				attributeInputMap.set(
-					attribute.code,
-					createInputProps<DateTimeServiceDefinitionAttribute, Date | undefined>(
-						attribute,
-						undefined
-					)
-				);
+				attributeInputMap.set(attribute.code, createInputProps('datetime', attribute, undefined));
 				break;
 			case 'number':
-				attributeInputMap.set(
-					attribute.code,
-					createInputProps<NumberServiceDefinitionAttribute, number | undefined>(
-						attribute,
-						undefined
-					)
-				);
+				attributeInputMap.set(attribute.code, createInputProps('number', attribute, undefined));
 				break;
 			case 'string':
-				attributeInputMap.set(
-					attribute.code,
-					createInputProps<StringServiceDefinitionAttribute, string | undefined>(
-						attribute,
-						undefined
-					)
-				);
+				attributeInputMap.set(attribute.code, createInputProps('string', attribute, undefined));
 				break;
 			case 'text':
-				attributeInputMap.set(
-					attribute.code,
-					createInputProps<TextServiceDefinitionAttribute, string | undefined>(attribute, undefined)
-				);
+				attributeInputMap.set(attribute.code, createInputProps('text', attribute, undefined));
 		}
 	}
 	return attributeInputMap;
 }
 
-export function createInputProps<T extends ServiceDefinitionAttribute, K>(
-	attribute: T,
+export function createInputProps<T extends keyof ServiceDefinitionAttributeLookupMap, K>(
+	datatype: T,
+	attribute: ServiceDefinitionAttributeLookupMap[T],
 	startingVal: K
 ): ServiceDefinitionAttributeInput<T, K> {
 	return {
+		datatype: datatype,
 		attribute,
 		value: startingVal
 	};
