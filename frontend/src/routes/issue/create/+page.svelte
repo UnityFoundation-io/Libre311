@@ -1,6 +1,9 @@
 <script lang="ts">
 	import SelectLocation from '$lib/components/CreateServiceRequest/SelectLocation.svelte';
+	import UploadFile from '$lib/components/CreateServiceRequest/UploadFile.svelte';
 	import MapComponent from '$lib/components/MapComponent.svelte';
+	import ContactInformation from '$lib/components/CreateServiceRequest/ContactInformation.svelte';
+	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
 
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import WaypointOpen from '$lib/assets/waypoint-open.png';
@@ -18,6 +21,7 @@
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
+	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 
 	let step: CreateServiceRequestSteps = CreateServiceRequestSteps.LOCATION;
 	let params: Partial<CreateServiceRequestParams> = {};
@@ -32,6 +36,10 @@
 	});
 	const componentMap: Map<CreateServiceRequestSteps, ComponentType> = new Map();
 	componentMap.set(CreateServiceRequestSteps.LOCATION, SelectLocation);
+	componentMap.set(CreateServiceRequestSteps.PHOTO, UploadFile);
+	componentMap.set(CreateServiceRequestSteps.DETAILS, ServiceRequestDetailsForm);
+	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
+	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);
 
 	function gotoNextStep() {
 		goto(`/issue/create?step=${++step}`);
@@ -66,14 +74,21 @@
 		centerPos = [location.y, location.x];
 		params.address_string = location.label;
 	}
+
+	function isCreateServiceRequestParams(
+		partial: Partial<CreateServiceRequestParams>
+	): partial is CreateServiceRequestParams {
+		if (partial?.address_string && partial?.attributeMap && partial?.service) return true;
+		throw new Error('Previous steps are missing data');
+	}
 </script>
 
 <SideBarMainContentLayout sideBarBreakpointActive={step == CreateServiceRequestSteps.LOCATION}>
 	<div slot="side-bar" class="h-full">
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
-		{:else if step == CreateServiceRequestSteps.REVIEW}
-			<h1>review component</h1>
+		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestParams(params)}
+			<ReviewServiceRequest {params} />
 		{:else}
 			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
 		{/if}

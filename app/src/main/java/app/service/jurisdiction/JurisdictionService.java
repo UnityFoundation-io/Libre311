@@ -17,12 +17,9 @@ package app.service.jurisdiction;
 import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.jurisdiction.JurisdictionRepository;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class JurisdictionService {
-    private static final Logger LOG = LoggerFactory.getLogger(JurisdictionService.class);
     private final JurisdictionRepository jurisdictionRepository;
 
     public JurisdictionService(JurisdictionRepository jurisdictionRepository) {

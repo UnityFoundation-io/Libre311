@@ -6,6 +6,11 @@
 	"environment": {
 		"loading": "Loading Environment"
 	},
+  "reporting": {
+    "timestamp": "Timestamp: ",
+    "location": "Location: ",
+    "citizen_comments": "Citizen Comments"
+  },
 	"sidebar": {
 		"title": "Requests"
 	},
@@ -17,10 +22,42 @@
 		"expected_datetime": "Estimated Fix:",
 		"service_notes": "Service Notes"
 	},
+	"contact": {
+		"header": "Add Contact Information",
+		"body": "We will only use the provided information to follow up on your request and will not use it for any other purposes",
+		"name": {
+			"label": "Name",
+			"first_name": {
+				"placeholder": "First name"
+			},
+			"last_name": {
+				"placeholder": "Last name"
+			}
+		},
+		"phone": {
+			"label": "Phone",
+			"placeholder": "000-000-000"
+		},
+		"email": {
+			"label": "Email",
+			"placeholder": "example@email.com"
+		},
+		"button": {
+			"submit": "Submit Contact Details",
+			"back": "Back"
+		}
+	},
 	"reviewServiceRequest": {
-		"title": "Review Request",
-		"sub_heading": "Please review the request details below before submitting the request",
+		"title": "Service Request Review",
 		"button_edit": "Edit",
 		"button_submit": "Submit Request"
+	},
+	"photo": {
+		"upload": "Upload An Image",
+		"camera_roll": "Camera Roll",
+		"take_photo": "Take Photo",
+		"no_upload": "Continue Without Photo",
+		"back": "Back",
+		"submit": "Submit"
 	}
 }
