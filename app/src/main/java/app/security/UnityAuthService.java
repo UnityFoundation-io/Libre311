@@ -63,7 +63,7 @@ public class UnityAuthService {
                 return false;
             }
 
-            tenantId = jurisdictionUserOptional.get().getJurisdiction().getTenant().getId();
+            tenantId = jurisdictionUserOptional.get().getJurisdiction().getTenantId();
 
         } catch (ParseException e) {
             LOG.error("Unable to parse JWT token.");

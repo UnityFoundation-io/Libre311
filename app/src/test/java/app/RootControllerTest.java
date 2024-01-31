@@ -754,7 +754,7 @@ public class RootControllerTest {
     @Test
     public void getJurisdictionTest() {
         RemoteHost h = new RemoteHost("host1");
-        Jurisdiction j = new Jurisdiction("1", "jurisdiction1", null);
+        Jurisdiction j = new Jurisdiction("1", "acme", "jurisdiction1", null);
         h.setJurisdiction(j);
         j.getRemoteHosts().add(h);
         jurisdictionRepository.save(j);

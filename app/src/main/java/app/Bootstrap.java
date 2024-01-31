@@ -25,8 +25,6 @@ import app.model.service.servicedefinition.ServiceDefinition;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
-import app.model.tenant.Tenant;
-import app.model.tenant.TenantRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.ConfigurationProperties;
@@ -53,31 +51,24 @@ public class Bootstrap {
 
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
-    private final TenantRepository tenantRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, TenantRepository tenantRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
-        this.tenantRepository = tenantRepository;
     }
 
     @EventListener
     public void devData(ServerStartupEvent event) {
         if(data != null) {
+            if(data.containsKey("jurisdictions")) {
+                List<Map<String, ?>> jurisdictions = (List<Map<String, ?>>) data.get("jurisdictions");
+                jurisdictions.forEach(juridictionsMap -> {
+                    Jurisdiction jurisdiction = jurisdictionRepository.save(
+                            new Jurisdiction((String) juridictionsMap.get("id"), (String) juridictionsMap.get("tenant")));
 
-            if(data.containsKey("tenants")) {
-                List<Map<String, ?>> tenants = (List<Map<String, ?>>) data.get("tenants");
-                tenants.forEach(tenantsMap -> {
-                    Tenant tenant = tenantRepository.save(new Tenant((String) tenantsMap.get("id")));
-
-                    List<Map<String, ?>> jurisdictions = (List<Map<String, ?>>) tenantsMap.get("jurisdictions");
-                    jurisdictions.forEach(juridictionsMap -> {
-                        Jurisdiction jurisdiction = jurisdictionRepository.save(new Jurisdiction((String) juridictionsMap.get("id"), tenant));
-
-                        List<Map<String, ?>> services = (List<Map<String, ?>>) juridictionsMap.get("services");
-                        processAndStoreServices(services, jurisdiction);
-                    });
+                    List<Map<String, ?>> services = (List<Map<String, ?>>) juridictionsMap.get("services");
+                    processAndStoreServices(services, jurisdiction);
                 });
             }
         }

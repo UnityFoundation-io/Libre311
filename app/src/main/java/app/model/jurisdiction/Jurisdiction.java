@@ -16,11 +16,11 @@ package app.model.jurisdiction;
 
 import app.model.service.Service;
 import app.model.servicerequest.ServiceRequest;
-import app.model.tenant.Tenant;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,13 +33,12 @@ public class Jurisdiction {
 
     private String name;
 
+    @NotBlank
+    private String tenantId;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
-
-    @ManyToOne
-    @JoinColumn(name = "tenant_id", nullable = false)
-    private Tenant tenant;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -49,13 +48,14 @@ public class Jurisdiction {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ServiceRequest> serviceRequests = new HashSet<>();
 
-    public Jurisdiction(String id, Tenant tenant) {
+    public Jurisdiction(String id, String tenantId) {
         this.id = id;
-        this.tenant = tenant;
+        this.tenantId = tenantId;
     }
 
-    public Jurisdiction(String id, String name, RemoteHost remoteHost) {
+    public Jurisdiction(String id, String tenantId, String name, RemoteHost remoteHost) {
         this.id = id;
+        this.tenantId = tenantId;
         this.name = name;
         remoteHosts.add(remoteHost);
     }
@@ -70,12 +70,12 @@ public class Jurisdiction {
         this.id = id;
     }
 
-    public Tenant getTenant() {
-        return tenant;
+    public String getTenantId() {
+        return tenantId;
     }
 
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public Set<Service> getServices() {
