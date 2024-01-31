@@ -1,7 +1,6 @@
 <script lang="ts" context="module">
-	// instead do boundsChanged and pass L.LatLngBounds which provides a method to get the center
 	export type Events = {
-		centerChanged: L.LatLng;
+		boundsChanged: L.LatLngBounds;
 	};
 </script>
 
@@ -25,9 +24,8 @@
 		}
 
 		map = L.map(mapElement);
-		// todo center doesn't change? can we derive the center from the bounds?
-		map.addEventListener('zoomend', () => dispatch('centerChanged', map.getCenter()));
-		map.addEventListener('dragend', () => dispatch('centerChanged', map.getCenter()));
+		map.addEventListener('zoom', () => dispatch('boundsChanged', map.getBounds()));
+		map.addEventListener('drag', () => dispatch('boundsChanged', map.getBounds()));
 
 		L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
 			attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,&copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`

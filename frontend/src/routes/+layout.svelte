@@ -5,6 +5,7 @@
 	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
 	import '../app.pcss';
+	import '../../node_modules/leaflet-geosearch/dist/geosearch.css';
 
 	import {
 		asAsyncFailure,
@@ -72,6 +73,6 @@
 	}
 
 	main {
-		height: calc(100vh - var(--header-height));
+		height: calc(100dvh - var(--header-height));
 	}
 </style>

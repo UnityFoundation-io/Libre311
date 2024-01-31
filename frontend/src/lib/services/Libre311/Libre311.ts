@@ -1,7 +1,7 @@
+import type { AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
-import { MockLibre311ServiceImpl } from './MockLibre311';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -62,9 +62,9 @@ export const BaseServiceDefinitionAttributeSchema = z.object({
 	datatype: DatatypeUnionSchema,
 	required: z.boolean(),
 	/**
-	 * A description of the datatype which helps the user provide their input
+	 * A description of the datatype which helps the user provide their input (the placeholder text essentially)
 	 */
-	datatype_description: z.string().nullish(), // probably is the helperText
+	datatype_description: z.string().nullish(),
 	order: z.number(),
 	/**
 	 * The actual question
@@ -72,33 +72,87 @@ export const BaseServiceDefinitionAttributeSchema = z.object({
 	description: z.string()
 });
 
-export const NonListBasedServiceDefinitionAttributeSchema =
-	BaseServiceDefinitionAttributeSchema.extend({
-		datatype: z.union([StringType, NumberType, DatetimeType, TextType])
-	});
+export type BaseServiceDefinitionAttribute = z.infer<typeof BaseServiceDefinitionAttributeSchema>;
+
+export const StringServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend({
+	datatype: StringType
+});
+
+export type StringServiceDefinitionAttribute = z.infer<
+	typeof StringServiceDefinitionAttributeSchema
+>;
+
+export const DateTimeServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend(
+	{
+		datatype: DatetimeType
+	}
+);
+
+export type DateTimeServiceDefinitionAttribute = z.infer<
+	typeof DateTimeServiceDefinitionAttributeSchema
+>;
+
+export const NumberServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend({
+	datatype: NumberType
+});
+
+export type NumberServiceDefinitionAttribute = z.infer<
+	typeof NumberServiceDefinitionAttributeSchema
+>;
+
+export const TextServiceDefinitionAttributeSchema = BaseServiceDefinitionAttributeSchema.extend({
+	datatype: TextType
+});
+
+export type TextServiceDefinitionAttribute = z.infer<typeof TextServiceDefinitionAttributeSchema>;
 
 const AttributeValueSchema = z.object({
 	/**
 	 * The unique identifier associated with an option for singlevaluelist or multivaluelist. This is analogous to the value attribute in an html option tag.
 	 */
-	key: z.number(),
+	key: z.string(),
 	/**
 	 * The human readable title of an option for singlevaluelist or multivaluelist. This is analogous to the innerhtml text node of an html option tag.
 	 */
 	name: z.string()
 });
+
+export type AttributeValue = z.infer<typeof AttributeValueSchema>;
+
 export const ListBasedServiceDefinitionAttributeSchema =
 	BaseServiceDefinitionAttributeSchema.extend({
 		datatype: z.union([SingleValueListType, MultiValueListType]),
 		values: z.array(AttributeValueSchema)
 	});
 
+export const MultiSelectServiceDefinitionAttributeSchema =
+	ListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: MultiValueListType
+	});
+
+export const SingleValueListServiceDefinitionAttributeSchema =
+	ListBasedServiceDefinitionAttributeSchema.extend({
+		datatype: SingleValueListType
+	});
+
+export type MultiSelectServiceDefinitionAttribute = z.infer<
+	typeof MultiSelectServiceDefinitionAttributeSchema
+>;
+
+export type SingleValueListServiceDefinitionAttribute = z.infer<
+	typeof SingleValueListServiceDefinitionAttributeSchema
+>;
+
 export const ServiceDefinitionAttributeSchema = z.union([
-	NonListBasedServiceDefinitionAttributeSchema,
-	ListBasedServiceDefinitionAttributeSchema
+	StringServiceDefinitionAttributeSchema,
+	DateTimeServiceDefinitionAttributeSchema,
+	TextServiceDefinitionAttributeSchema,
+	NumberServiceDefinitionAttributeSchema,
+	MultiSelectServiceDefinitionAttributeSchema,
+	SingleValueListServiceDefinitionAttributeSchema
 ]);
 
-type ServiceDefinitionAttribute = z.infer<typeof ServiceDefinitionAttributeSchema>;
+export type ServiceDefinitionAttribute = z.infer<typeof ServiceDefinitionAttributeSchema>;
 
 const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 	attributes: z.array(ServiceDefinitionAttributeSchema)
@@ -127,26 +181,30 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 
 // user response values from  ServiceDefinitionAttributeSchema.
 // attribute[code1]=value1
-// ServiceDefinitionAttributeCode
-type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
+// todo consider adding AttributeValue[name] so that ui can reflect the values later on
+export type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
 // todo will likely need the recaptcha value here
+
+export const EmailSchema = z.string().email();
+
 export const ContactInformationSchema = z.object({
-	first_name: z.string(),
-	last_name: z.string(),
-	phone: z.string(), // todo add validation => https://www.npmjs.com/package/libphonenumber-js
-	email: z.string().email()
+	first_name: z.string().optional(),
+	last_name: z.string().optional(),
+	phone: z.string().optional(), // todo add validation => https://www.npmjs.com/package/libphonenumber-js
+	email: EmailSchema.optional()
 });
 
 export type ContactInformation = z.infer<typeof ContactInformationSchema>;
-export type CreateServiceRequestParams = HasServiceCode &
-	ContactInformation & {
-		lat: string;
-		lng: string;
-		address_string: string;
-		attributes: AttributeResponse[];
-		description: string;
-		media_url?: string;
-	};
+
+export type CreateServiceRequestParams = ContactInformation & {
+	lat: string;
+	lng: string;
+	address_string: string;
+	attributeMap: AttributeInputMap;
+	description: string;
+	media_url?: string;
+	service: Service;
+};
 
 export const OpenServiceRequestStatusSchema = z.literal('Open');
 export const ClosedServiceRequestStatusSchema = z.literal('Closed');
@@ -176,7 +234,8 @@ export const ServiceRequestSchema = z
 		media_url: z.string().nullish()
 	})
 	.merge(HasServiceRequestIdSchema)
-	.merge(HasServiceCodeSchema);
+	.merge(HasServiceCodeSchema)
+	.merge(ContactInformationSchema);
 
 export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 
@@ -238,17 +297,16 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
-// https://wiki.open311.org/GeoReport_v2/
-export interface Open311Service {
-	getServiceList(): Promise<GetServiceListResponse>;
-	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
-	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
-	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
-}
+export const ReverseGeocodeResponseSchema = z.object({
+	display_name: z.string()
+});
+
+export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema>;
 
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
+	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
+	uploadImage(file: File): Promise<unknown>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -299,10 +357,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 		return this.jurisdictionConfig;
 	}
 
+	async reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse> {
+		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords[0]}&lon=${coords[1]}`;
+		const res = await axios.get<unknown>(url);
+		return ReverseGeocodeResponseSchema.parse(res.data);
+	}
+
 	async getServiceList(): Promise<GetServiceListResponse> {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getServiceList({ jurisdiction_id: this.jurisdictionId })
 		);
+
 		return GetServiceListResponseSchema.parse(res.data);
 	}
 
@@ -316,6 +381,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
+		// todo transform CreateServiceRequestParams into backend value
 		console.log(params);
 		throw Error('Not Implemented');
 	}
@@ -348,8 +414,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 		console.log(params);
 		throw Error('Not Implemented');
 	}
+
+	async uploadImage(file: File): Promise<unknown> {
+		throw Error('Not Implemented');
+	}
 }
 
 export async function libre311Factory(props: Libre311ServiceProps): Promise<Libre311Service> {
-	return MockLibre311ServiceImpl.create(props);
+	return Libre311ServiceImpl.create(props);
 }
