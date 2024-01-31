@@ -46,7 +46,7 @@
 
 <style>
 	.splashLoad {
-		height: 100vh;
+		height: 100dvh;
 		background-color: hsl(var(--background));
 		color: hsl(var(--content));
 	}

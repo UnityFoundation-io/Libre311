@@ -195,6 +195,7 @@ export const ContactInformationSchema = z.object({
 });
 
 export type ContactInformation = z.infer<typeof ContactInformationSchema>;
+
 export type CreateServiceRequestParams = ContactInformation & {
 	lat: string;
 	lng: string;

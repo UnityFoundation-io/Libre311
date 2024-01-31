@@ -74,13 +74,20 @@
 		centerPos = [location.y, location.x];
 		params.address_string = location.label;
 	}
+
+	function isCreateServiceRequestParams(
+		partial: Partial<CreateServiceRequestParams>
+	): partial is CreateServiceRequestParams {
+		if (partial?.address_string && partial?.attributes && partial?.service_code) return true;
+		throw new Error('Previous steps are missing data');
+	}
 </script>
 
 <SideBarMainContentLayout sideBarBreakpointActive={step == CreateServiceRequestSteps.LOCATION}>
 	<div slot="side-bar" class="h-full">
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
-		{:else if step == CreateServiceRequestSteps.REVIEW}
+		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestParams(params)}
 			<ReviewServiceRequest {params} />
 		{:else}
 			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />

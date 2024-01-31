@@ -73,6 +73,6 @@
 	}
 
 	main {
-		height: calc(100vh - var(--header-height));
+		height: calc(100dvh - var(--header-height));
 	}
 </style>
