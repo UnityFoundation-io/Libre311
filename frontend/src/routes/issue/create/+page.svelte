@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SelectLocation from '$lib/components/CreateServiceRequest/SelectLocation.svelte';
+	import UploadFile from '$lib/components/CreateServiceRequest/UploadFile.svelte';
 	import MapComponent from '$lib/components/MapComponent.svelte';
 	import ContactInformation from '$lib/components/CreateServiceRequest/ContactInformation.svelte';
 	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
@@ -35,6 +36,7 @@
 	});
 	const componentMap: Map<CreateServiceRequestSteps, ComponentType> = new Map();
 	componentMap.set(CreateServiceRequestSteps.LOCATION, SelectLocation);
+	componentMap.set(CreateServiceRequestSteps.PHOTO, UploadFile);
 	componentMap.set(CreateServiceRequestSteps.DETAILS, ServiceRequestDetailsForm);
 	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
 	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);

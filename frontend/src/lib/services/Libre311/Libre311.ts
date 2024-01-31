@@ -305,6 +305,7 @@ export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
+	uploadImage(file: File): Promise<unknown>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -410,6 +411,10 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	async getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest> {
 		console.log(params);
+		throw Error('Not Implemented');
+	}
+
+	async uploadImage(file: File): Promise<unknown> {
 		throw Error('Not Implemented');
 	}
 }
