@@ -21,6 +21,7 @@
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
+	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 
 	let step: CreateServiceRequestSteps = CreateServiceRequestSteps.LOCATION;
 	let params: Partial<CreateServiceRequestParams> = {};
@@ -36,6 +37,7 @@
 	const componentMap: Map<CreateServiceRequestSteps, ComponentType> = new Map();
 	componentMap.set(CreateServiceRequestSteps.LOCATION, SelectLocation);
 	componentMap.set(CreateServiceRequestSteps.PHOTO, UploadFile);
+	componentMap.set(CreateServiceRequestSteps.DETAILS, ServiceRequestDetailsForm);
 	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
 	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);
 
