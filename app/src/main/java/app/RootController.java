@@ -15,14 +15,9 @@
 package app;
 
 import app.dto.discovery.DiscoveryDTO;
-import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
-import app.dto.servicerequest.GetServiceRequestsDTO;
-import app.dto.servicerequest.PostRequestServiceRequestDTO;
-import app.dto.servicerequest.PostResponseServiceRequestDTO;
-import app.dto.servicerequest.ServiceRequestDTO;
-import app.dto.servicerequest.ServiceRequestList;
+import app.dto.servicerequest.*;
 import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.service.discovery.DiscoveryEndpointService;
@@ -35,29 +30,21 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.xml.XmlEscapers;
-import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.Body;
-import io.micronaut.http.annotation.Consumes;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Header;
-import io.micronaut.http.annotation.Post;
-import io.micronaut.http.annotation.Produces;
-import io.micronaut.http.annotation.RequestBean;
-import io.micronaut.http.server.types.files.StreamedFile;
+import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import java.net.MalformedURLException;
+import jakarta.annotation.Nullable;
+
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import javax.validation.Valid;
 
 @Controller("/api")
 @Secured(SecurityRule.IS_ANONYMOUS)
@@ -98,11 +85,8 @@ public class RootController {
     @Get(uris = {"/services{?jurisdiction_id}", "/services.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<List<ServiceDTO>> indexJson(@Valid Pageable pageable, @Nullable String jurisdiction_id) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public HttpResponse<List<ServiceDTO>> indexJson(@Valid Pageable pageable,
+                                                    @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
         Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable, jurisdiction_id);
 
@@ -120,11 +104,8 @@ public class RootController {
     @Get("/services.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<String> indexXml(@Valid Pageable pageable, @Nullable String jurisdiction_id) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public HttpResponse<String> indexXml(@Valid Pageable pageable,
+                                         @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable, jurisdiction_id)
@@ -150,11 +131,8 @@ public class RootController {
     @Get(uris = {"/services/{serviceCode}{?jurisdiction_id}", "/services/{serviceCode}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceDefinitionJson(String serviceCode, @Nullable String jurisdiction_id) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public String getServiceDefinitionJson(String serviceCode,
+                                           @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
         return serviceService.getServiceDefinition(serviceCode, jurisdiction_id);
     }
@@ -162,11 +140,8 @@ public class RootController {
     @Get("/services/{serviceCode}.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceDefinitionXml(String serviceCode, @Nullable String jurisdiction_id) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public String getServiceDefinitionXml(String serviceCode,
+                                          @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().build();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -176,45 +151,38 @@ public class RootController {
         return xmlMapper.writeValueAsString(serviceDefinition);
     }
 
-    @Post(uris = {"/requests", "/requests.json"})
+    @Post(uris = {"/requests{?jurisdiction_id}", "/requests.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public List<PostResponseServiceRequestDTO> createServiceRequestJson(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public List<PostResponseServiceRequestDTO> createServiceRequestJson(HttpRequest<?> request,
+                                                                        @Valid @Body PostRequestServiceRequestDTO requestDTO,
+                                                                        @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
-        return List.of(serviceRequestService.createServiceRequest(request, requestDTO));
+        return List.of(serviceRequestService.createServiceRequest(request, requestDTO, jurisdiction_id));
     }
 
-    @Post("/requests.xml")
+    @Post("/requests.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public String createServiceRequestXml(HttpRequest<?> request, @Valid @Body PostRequestServiceRequestDTO requestDTO) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public String createServiceRequestXml(HttpRequest<?> request,
+                                          @Valid @Body PostRequestServiceRequestDTO requestDTO,
+                                          @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(request, requestDTO)));
+        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(request, requestDTO, jurisdiction_id)));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
     }
 
-    @Get(uris = {"/requests", "/requests.json"})
+    @Get(uris = {"/requests{?jurisdiction_id}", "/requests.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
+                                                                        @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO);
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, jurisdiction_id);
         return HttpResponse.ok(serviceRequestDTOPage.getContent())
                 .headers(Map.of(
                         "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
@@ -226,18 +194,15 @@ public class RootController {
                 ));
     }
 
-    @Get("/requests.xml")
+    @Get("/requests.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
+                                                      @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO)
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, jurisdiction_id)
                 .map(serviceRequestDTO -> {
                     sanitizeXmlContent(serviceRequestDTO);
                     return serviceRequestDTO;
@@ -258,11 +223,8 @@ public class RootController {
     @Get(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public List<ServiceRequestDTO> getServiceRequestJson(Long serviceRequestId, @Nullable String jurisdiction_id) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public List<ServiceRequestDTO> getServiceRequestJson(Long serviceRequestId,
+                                                         @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
         return List.of(serviceRequestService.getServiceRequest(serviceRequestId, jurisdiction_id));
     }
@@ -270,11 +232,8 @@ public class RootController {
     @Get("/requests/{serviceRequestId}.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceRequestXml(Long serviceRequestId, @Nullable String jurisdiction_id) throws JsonProcessingException {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public String getServiceRequestXml(Long serviceRequestId,
+                                       @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
@@ -283,13 +242,6 @@ public class RootController {
         ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestDTO));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
-    }
-
-    @Get(value =  "/requests/download")
-    @Secured(SecurityRule.IS_AUTHENTICATED)
-    @ExecuteOn(TaskExecutors.IO)
-    public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO) throws MalformedURLException {
-        return serviceRequestService.getAllServiceRequests(requestDTO);
     }
 
     @Get(value =  "/config")

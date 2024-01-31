@@ -17,44 +17,13 @@ package app.service.jurisdiction;
 import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.jurisdiction.JurisdictionRepository;
 import jakarta.inject.Singleton;
-import java.util.List;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class JurisdictionService {
-    private static final Logger LOG = LoggerFactory.getLogger(JurisdictionService.class);
     private final JurisdictionRepository jurisdictionRepository;
 
     public JurisdictionService(JurisdictionRepository jurisdictionRepository) {
         this.jurisdictionRepository = jurisdictionRepository;
-    }
-
-    public boolean jurisdictionSupportEnabled() {
-        return jurisdictionRepository.count() > 0;
-    }
-
-    public List<Map> validateJurisdictionSupport(String jurisdictionId) {
-        if (!jurisdictionSupportEnabled()) {
-            return List.of();
-        }
-
-        if (jurisdictionId == null) {
-            return List.of(Map.of(
-                    "code", "400",
-                    "description", "jurisdiction_id was not provided."
-            ));
-        }
-
-        if (jurisdictionRepository.findById(jurisdictionId).isEmpty()) {
-            return List.of(Map.of(
-                    "code", "404",
-                    "description", "jurisdiction_id not found."
-            ));
-        }
-
-        return List.of();
     }
 
     public JurisdictionInfoResponse findJurisdictionByHostName(String hostName) {

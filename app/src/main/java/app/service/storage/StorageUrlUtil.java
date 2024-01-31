@@ -15,7 +15,6 @@
 package app.service.storage;
 
 import io.micronaut.context.annotation.Property;
-import io.micronaut.context.annotation.Value;
 import jakarta.inject.Singleton;
 
 @Singleton

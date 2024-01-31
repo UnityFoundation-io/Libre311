@@ -133,18 +133,6 @@ The above data models and their respective data
 [repository interfaces](https://micronaut-projects.github.io/micronaut-data/latest/guide/#repositories)
 can be found in `app/src/main/java/app/model`.
 
-#### Initializing Services and Service Definitions in the Database
-Assuming DDL is enabled (see jpa.default.properties.hibernate.hbm2ddl.auto in application.yml),
-Services (or Issue Types) and their respective Service Definitions can be established before build time. To do so, modify
-the application-data.yml file, build the project, then include `data` in the MICRONAUT_ENVIRONMENTS environment variable
-before executing the application as a service.
-
-After initializing the data and before subsequent bootstrapping of the application, one should remove `data` from the
-MICRONAUT_ENVIRONMENTS environment variable so as not to receive database primary key conflicts when reloading the data
-outlined in application-data.yml.
-
-As of this writing, any modification or additions of Services and Service Definition must be done manually in the database.
-
 ### Service Layer
 Following the pattern of CRUD capabilities per resource, a service primarily interacts with its corresponding resource;
 however, each service pulls in (or rather, injects) other services/repository interfaces to provide additional features

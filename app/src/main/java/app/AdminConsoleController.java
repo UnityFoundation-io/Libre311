@@ -14,25 +14,26 @@
 
 package app;
 
+import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
-import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
-import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
+import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
+import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
+import java.net.MalformedURLException;
 import java.util.List;
-import java.util.Map;
 
 @Controller("/api/admin")
 @Secured(SecurityRule.IS_AUTHENTICATED)
@@ -40,62 +41,50 @@ public class AdminConsoleController {
 
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
-    private final JurisdictionService jurisdictionService;
 
-    public AdminConsoleController(ServiceService serviceService, ServiceRequestService serviceRequestService, JurisdictionService jurisdictionService) {
+    public AdminConsoleController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
-        this.jurisdictionService = jurisdictionService;
     }
 
-    @Post(uris = {"/services", "/services.json"})
+    @Post(uris = {"/services{?jurisdiction_id}", "/services.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
-        if (!errors.isEmpty()) {
-            return null;
-        }
-
-        return List.of(serviceService.createService(requestDTO));
+    public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
+                                              @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return List.of(serviceService.createService(requestDTO, jurisdiction_id));
     }
 
-    @Patch(uris = {"/services/{serviceId}", "/requests/{serviceId}.json"})
+    @Patch(uris = {"/services/{serviceId}{?jurisdiction_id}", "/requests/{serviceId}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
-        if (!errors.isEmpty()) {
-            return null;
-        }
-
-        return List.of(serviceService.updateService(serviceId, requestDTO));
+    public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
+                                              @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return List.of(serviceService.updateService(serviceId, requestDTO, jurisdiction_id));
     }
 
     @Get(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     public List<SensitiveServiceRequestDTO> getServiceRequestJson(Long serviceRequestId, @Nullable String jurisdiction_id) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(jurisdiction_id);
-        if (!errors.isEmpty()) {
-            return null;
-        }
-
         return List.of(serviceRequestService.getSensitiveServiceRequest(serviceRequestId, jurisdiction_id));
     }
 
-    @Patch(uris = {"/requests/{serviceRequestId}", "/requests/{serviceRequestId}.json"})
+    @Patch(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public List<SensitiveServiceRequestDTO> updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO) {
-        List<Map> errors = jurisdictionService.validateJurisdictionSupport(requestDTO.getJurisdictionId());
-        if (!errors.isEmpty()) {
-            return null;
-        }
+    public List<SensitiveServiceRequestDTO> updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO,
+                                                                     @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return List.of(serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id));
+    }
 
-        return List.of(serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO));
+    @Get(value =  "/requests/download{?jurisdiction_id}")
+    @ExecuteOn(TaskExecutors.IO)
+    public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
+                                                @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
+        return serviceRequestService.getAllServiceRequests(requestDTO, jurisdiction_id);
     }
 }

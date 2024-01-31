@@ -19,8 +19,6 @@ import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.Nullable;
-import io.micronaut.http.annotation.QueryValue;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
@@ -30,9 +28,6 @@ import java.util.Map;
 
 @Introspected
 public class PatchServiceRequestDTO {
-
-    @JsonProperty("jurisdiction_id")
-    private String jurisdictionId;
 
     private ServiceRequestStatus status;
 
@@ -62,14 +57,6 @@ public class PatchServiceRequestDTO {
 
 
     public PatchServiceRequestDTO() {}
-
-    public String getJurisdictionId() {
-        return jurisdictionId;
-    }
-
-    public void setJurisdictionId(String jurisdictionId) {
-        this.jurisdictionId = jurisdictionId;
-    }
 
     public ServiceRequestStatus getStatus() {
         return status;
