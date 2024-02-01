@@ -6,4 +6,4 @@
 
 <strong>{attributes.attribute.description}</strong>
 
-<div>{attributes.attribute.value.name}</div>
+<!-- TODO: -->

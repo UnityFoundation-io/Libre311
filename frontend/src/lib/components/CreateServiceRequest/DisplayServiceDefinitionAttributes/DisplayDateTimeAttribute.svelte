@@ -12,4 +12,4 @@
 
 <strong>{attributes.attribute.description}</strong>
 
-<div>{toTimeStamp(attributes.attribute.value.name)}</div>
+<!-- TODO: -->
