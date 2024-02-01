@@ -1,6 +1,12 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
+	import DisplayMultiAttribute from './DisplayServiceDefinitionAttributes/DisplayMultiAttribute.svelte';
+	import DisplaySingleAttribute from './DisplayServiceDefinitionAttributes/DisplaySingleAttribute.svelte';
+	import DisplayStringAttribute from './DisplayServiceDefinitionAttributes/DisplayStringAttribute.svelte';
+	import DisplayNumberAttribute from './DisplayServiceDefinitionAttributes/DisplayNumberAttribute.svelte';
+	import DisplayDateTimeAttribute from './DisplayServiceDefinitionAttributes/DisplayDateTimeAttribute.svelte';
+	import DisplayTextAttribute from './DisplayServiceDefinitionAttributes/DisplayTextAttribute.svelte';
 	import { Badge } from 'stwui';
 	import StepControls from './StepControls.svelte';
 
@@ -45,6 +51,24 @@
 					<p class="text-sm">{params.address_string}</p>
 				</div>
 
+				{#each params.attributeMap.values() as attributes}
+					<div class="mb-2">
+						{#if attributes.datatype == 'multivaluelist'}
+							<DisplayMultiAttribute {attributes} />
+						{:else if attributes.datatype == 'datetime'}
+							<DisplayDateTimeAttribute {attributes} />
+						{:else if attributes.datatype == 'string'}
+							<DisplayStringAttribute {attributes} />
+						{:else if attributes.datatype == 'singlevaluelist'}
+							<DisplaySingleAttribute {attributes} />
+						{:else if attributes.datatype == 'number'}
+							<DisplayNumberAttribute {attributes} />
+						{:else if attributes.datatype == 'text'}
+							<DisplayTextAttribute {attributes} />
+						{/if}
+					</div>
+				{/each}
+
 				<div class="mb-1">
 					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
 					<p class="text-sm">{params.service.description}</p>
@@ -80,20 +104,5 @@
 		background-position: center;
 		background-size: cover;
 		border-radius: 10px;
-	}
-
-	.submit {
-		padding: 0.5rem 2rem;
-		background-color: hsl(var(--primary));
-		color: hsl(var(--primary-content));
-		border: 1px solid hsl(var(--primary));
-		border-radius: 10px;
-	}
-
-	.submit:hover {
-		--tw-surface-opacity: 0.1;
-		border: 1px solid hsl(var(--primary));
-		color: hsl(var(--content));
-		background-color: hsl(var(--surface) / var(--tw-surface-opacity));
 	}
 </style>

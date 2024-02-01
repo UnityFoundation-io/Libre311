@@ -1,8 +1,8 @@
 import { z, ZodError } from 'zod';
 
-export type UnvalidatedInput = {
+export type UnvalidatedInput<T> = {
 	type: 'unvalidated';
-	value?: unknown;
+	value?: T;
 	error: undefined;
 };
 
@@ -20,11 +20,13 @@ export type InvalidInput = {
 
 export type ValidatedInput<T> = ValidInput<T> | InvalidInput;
 
-export type FormInputValue<T> = UnvalidatedInput | ValidatedInput<T>;
+export type FormInputValue<T> = UnvalidatedInput<T> | ValidatedInput<T>;
 
-export type InputValidator<T> = (value: UnvalidatedInput) => ValidatedInput<T>;
+export type InputValidator<T> = (value: UnvalidatedInput<T>) => ValidatedInput<T>;
 
-export function createUnvalidatedInput(startingValue: unknown = undefined): UnvalidatedInput {
+export function createUnvalidatedInput<T>(
+	startingValue: T | undefined = undefined
+): UnvalidatedInput<T> {
 	return {
 		type: 'unvalidated',
 		value: startingValue,
@@ -33,7 +35,7 @@ export function createUnvalidatedInput(startingValue: unknown = undefined): Unva
 }
 
 export function inputValidatorFactory<T>(schema: z.ZodType<T, z.ZodTypeDef, T>): InputValidator<T> {
-	const validator: InputValidator<T> = (input: UnvalidatedInput): ValidatedInput<T> => {
+	const validator: InputValidator<T> = (input: UnvalidatedInput<T>): ValidatedInput<T> => {
 		try {
 			const parsedValue = schema.parse(input.value);
 			return { error: undefined, type: 'valid', value: parsedValue };
