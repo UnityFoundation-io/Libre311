@@ -17,12 +17,13 @@
 
 	$: keys = attributes.value;
 	$: values = extractValues(attributes);
+	$: valueLength = values.length;
 </script>
 
 <strong>{attributes.attribute.description}</strong>
 
 <ul>
 	{#each values as value, i}
-		{value}{#if i < values - 1}<span>{', '}</span>{/if}
+		{value}{#if i < valueLength}<span>{', '}</span>{/if}
 	{/each}
 </ul>
