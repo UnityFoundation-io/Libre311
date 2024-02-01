@@ -11,8 +11,7 @@
 
 <style>
 	.layout-container {
-		display: flex;
-		grid-template-columns: 400px auto;
+		grid-template-columns: 100%;
 		height: 100%;
 	}
 	.main-content {
@@ -33,7 +32,11 @@
 		overflow-y: auto;
 	}
 
-	@media (min-width: 64rem) {
+	@media (min-width: 769px) {
+		.layout-container {
+			display: grid;
+			grid-template-columns: 400px auto;
+		}
 		.collapsable-side-bar {
 			display: unset;
 		}

@@ -63,7 +63,7 @@
 		</div>
 	</div>
 
-	<div slot="is-mobile" class="flex h-full w-full items-center justify-center">
+	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
 			<div class="grid grid-rows-4 gap-3">
 				<input

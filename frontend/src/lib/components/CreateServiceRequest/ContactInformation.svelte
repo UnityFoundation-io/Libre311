@@ -5,8 +5,9 @@
 	import { phoneIcon } from '$lib/assets/phoneIcon.js';
 	import { checkPhoneNumber } from '$lib/utils/functions';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
-	import { createUnvalidatedInput, emailValidator } from '$lib/utils/validation';
+	import { createUnvalidatedInput, nullishCoalesceEmailValidator } from '$lib/utils/validation';
 	import { createEventDispatcher } from 'svelte';
+	import type { StepChangeEvent } from './types';
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
@@ -15,19 +16,14 @@
 	let emailError: string | undefined;
 	let phoneError: string | undefined;
 
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<StepChangeEvent>();
 
 	function handleBack() {
 		console.log('TODO: back not implemented');
 	}
 
 	function handleSubmit() {
-		firstNameError =
-			params.first_name == '' || params.first_name == undefined ? 'First name required' : '';
-		lastNameError =
-			params.last_name == '' || params.last_name == undefined ? 'Last name required' : '';
-
-		let emailValidity = emailValidator(createUnvalidatedInput(params.email));
+		let emailValidity = nullishCoalesceEmailValidator(createUnvalidatedInput(params.email));
 		emailError = emailValidity.type == 'invalid' ? emailValidity.error : '';
 		phoneError = checkPhoneNumber(params.phone);
 
@@ -37,7 +33,7 @@
 			(emailError == '' || emailError == undefined) &&
 			(phoneError == '' || phoneError == undefined)
 		)
-			dispatch('stepChange');
+			dispatch('stepChange', params);
 	}
 
 	function formatPhoneNumber() {
@@ -109,9 +105,15 @@
 				<button class="my-2 text-sm" type="button" on:click|preventDefault={handleBack}>
 					{messages['contact']['button']['back']}
 				</button>
-				<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
-					{messages['contact']['button']['submit']}
-				</button>
+				{#if !params.first_name && !params.last_name && !params.email && !params.phone}
+					<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
+						{messages['contact']['button']['skip']}
+					</button>
+				{:else}
+					<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
+						{messages['contact']['button']['submit']}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
