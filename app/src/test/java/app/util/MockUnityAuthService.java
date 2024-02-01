@@ -21,30 +21,26 @@ import app.security.UnityAuthService;
 import io.micronaut.context.annotation.Replaces;
 import jakarta.inject.Singleton;
 
-import java.util.List;
-
 @Singleton
 @Replaces(UnityAuthService.class)
 public class MockUnityAuthService extends UnityAuthService {
 
-    // todo: write code that overrides jwt token parsing/validation
-
-    private boolean isUserPermittedForAction;
+    private String userEmail;
 
     public MockUnityAuthService(UnityAuthClient client, UserRepository userRepository, UserJurisdictionRepository userJurisdictionRepository) {
         super(client, userRepository, userJurisdictionRepository);
     }
 
     @Override
-    public boolean isUserPermittedForAction(String token, String jurisdictionId, List<String> permissions) {
-        return isUserPermittedForAction;
+    public String extractUserEmail(String jwtSubstring) {
+        return userEmail;
     }
 
-    public boolean isUserPermittedForAction() {
-        return isUserPermittedForAction;
+    public String getUserEmail() {
+        return userEmail;
     }
 
-    public void setUserPermittedForAction(boolean userPermittedForAction) {
-        isUserPermittedForAction = userPermittedForAction;
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }

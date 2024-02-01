@@ -47,8 +47,7 @@ public class UnityAuthService {
 
         String tenantId;
         try {
-            JWT parse = JWTParser.parse(jwtSubstring);
-            String subjectEmail = parse.getJWTClaimsSet().getSubject();
+            String subjectEmail = extractUserEmail(jwtSubstring);
             Optional<User> userOptional = userRepository.findByEmail(subjectEmail);
             if (userOptional.isEmpty()) {
                 LOG.error("Cannot find user in system.");
@@ -92,5 +91,10 @@ public class UnityAuthService {
         }
 
         return hasPermission;
+    }
+
+    public String extractUserEmail(String jwtSubstring) throws ParseException {
+        JWT parse = JWTParser.parse(jwtSubstring);
+        return parse.getJWTClaimsSet().getSubject();
     }
 }

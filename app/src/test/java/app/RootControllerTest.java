@@ -31,6 +31,10 @@ import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
+import app.model.user.User;
+import app.model.user.UserRepository;
+import app.model.userjurisdiction.UserJurisdiction;
+import app.model.userjurisdiction.UserJurisdictionRepository;
 import app.security.HasPermissionResponse;
 import app.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -80,13 +84,19 @@ public class RootControllerTest {
     ServiceRequestRepository serviceRequestRepository;
 
     @Inject
+    UserRepository userRepository;
+
+    @Inject
+    UserJurisdictionRepository userJurisdictionRepository;
+
+    @Inject
+    JurisdictionRepository jurisdictionRepository;
+
+    @Inject
     MockSecurityService mockSecurityService;
 
     @Inject
     MockAuthenticationFetcher mockAuthenticationFetcher;
-
-    @Inject
-    JurisdictionRepository jurisdictionRepository;
 
     @Inject
     MockUnityAuthClient mockUnityAuthClient;
@@ -102,7 +112,15 @@ public class RootControllerTest {
         dbCleanup.cleanupServiceRequests();
         mockAuthenticationFetcher.setAuthentication(null);
         mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, null)));
-        mockUnityAuthService.setUserPermittedForAction(true);
+
+        String userEmail = "person1@test.io";
+
+        mockUnityAuthService.setUserEmail(userEmail);
+
+        Jurisdiction jurisdiction = jurisdictionRepository.findById("city.gov").get();
+        Optional<User> userOptional = userRepository.findByEmail(userEmail);
+        User user = userOptional.orElseGet(() -> userRepository.save(new User(userEmail)));
+        userJurisdictionRepository.save(new UserJurisdiction(user, jurisdiction));
     }
 
     void login() {
@@ -415,6 +433,16 @@ public class RootControllerTest {
         assertEquals(BAD_REQUEST, exception.getStatus());
     }
 
+    @Test
+    public void cannotCreateServiceForAnotherJurisdictionIfAuthenticated() throws JsonProcessingException {
+        login();
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            createService("BIKELN010", "Bike Lane Obstruction", "town.gov");
+        });
+        assertEquals(INTERNAL_SERVER_ERROR, exception.getStatus());
+    }
+
     // update service
     @Test
     public void canUpdateServiceIfAuthenticated() throws JsonProcessingException {
@@ -454,7 +482,7 @@ public class RootControllerTest {
         ));
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(serviceDefinition);
-        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "Issues pertaining to bus stops", json, "town.gov");
+        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "Issues pertaining to bus stops", json, "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO[]> optional = response.getBody(ServiceDTO[].class);
         assertTrue(optional.isPresent());
@@ -490,7 +518,7 @@ public class RootControllerTest {
         updateServiceDTO.setServiceDefinitionJson(json);
 
         Map payload = mapper.convertValue(updateServiceDTO, Map.class);
-        request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId()+"?jurisdiction_id=town.gov", payload)
+        request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId()+"?jurisdiction_id=city.gov", payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         response = client.toBlocking().exchange(request, ServiceDTO[].class);
@@ -505,7 +533,7 @@ public class RootControllerTest {
         assertEquals("Issues pertaining to inner city bus stops.", serviceDTO1.getDescription());
 
 //        // get service definition
-        response = client.toBlocking().exchange("/services/"+serviceDTO1.getServiceCode()+"?jurisdiction_id=town.gov", String.class);
+        response = client.toBlocking().exchange("/services/"+serviceDTO1.getServiceCode()+"?jurisdiction_id=city.gov", String.class);
         assertEquals(HttpStatus.OK, response.status());
         Optional<String> serviceDefinitionOptional = response.getBody(String.class);
         assertTrue(serviceDefinitionOptional.isPresent());
