@@ -55,7 +55,7 @@
 
 	$: name = createName(params);
 
-	$: multivalueServiceAttributes = getMultiValueServiceAttributes(params);
+	$: multiValueServiceAttributes = getMultiValueServiceAttributes(params);
 	$: stringValueServiceAttributes = getStringValueServiceAttributes(params);
 </script>
 
@@ -83,8 +83,8 @@
 					<p class="text-sm">{params.address_string}</p>
 				</div>
 
-				{#if multivalueServiceAttributes}
-					{#each multivalueServiceAttributes as attributes}
+				{#if multiValueServiceAttributes}
+					{#each multiValueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayMultiSelectAttribute {attributes} />
 						</div>
