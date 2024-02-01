@@ -9,4 +9,4 @@
 
 <strong>{attributes.attribute.description}</strong>
 
-{attributes.attribute.value.name}
+<div>{attributes.attribute.value.name}</div>

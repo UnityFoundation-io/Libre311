@@ -3,8 +3,10 @@
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import DisplayMultiSelectAttribute from '../DisplayMultiSelectAttribute.svelte';
 	import DisplayStringSelectAttribute from '../DisplayStringSelectAttribute.svelte';
+	import DisplayDateTimeSelectAttribute from '../DisplayDateTimeSelectAttribute.svelte';
 	import { Badge } from 'stwui';
 	import type {
+		DateTimeServiceDefinitionAttributeInput,
 		MultiSelectServiceDefinitionAttributeInput,
 		NumberServiceDefinitionInput,
 		SingleValueListServiceDefinitionAttributeInput,
@@ -31,32 +33,38 @@
 			| SingleValueListServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'multivaluelist') {
+			if (
+				entry.attribute.datatype == 'multivaluelist' ||
+				entry.attribute.datatype == 'singlevaluelist'
+			)
 				serviceAttributes.push(entry);
-			} else if (entry.attribute.datatype == 'singlevaluelist') {
-				serviceAttributes.push(entry);
-			}
-
-			return serviceAttributes;
 		}
+		return serviceAttributes;
 	}
 
 	function getStringValueServiceAttributes(params: any) {
 		const serviceAttributes: StringServiceDefinitionInput[] | NumberServiceDefinitionInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'string' || entry.attribute.datatype == 'number') {
+			if (entry.attribute.datatype == 'string' || entry.attribute.datatype == 'number')
 				serviceAttributes.push(entry);
-			}
-
-			return serviceAttributes;
 		}
+		return serviceAttributes;
+	}
+
+	function getDateTimeValueServiceAttributes(params: any) {
+		const serviceAttributes: DateTimeServiceDefinitionAttributeInput[] = [];
+
+		for (const [key, entry] of params.attributeMap.entries()) {
+			if (entry.attribute.datatype == 'datetime') serviceAttributes.push(entry);
+		}
+		return serviceAttributes;
 	}
 
 	$: name = createName(params);
-
 	$: multiValueServiceAttributes = getMultiValueServiceAttributes(params);
 	$: stringValueServiceAttributes = getStringValueServiceAttributes(params);
+	$: dateTimeValueServiceAttributes = getDateTimeValueServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -95,6 +103,14 @@
 					{#each stringValueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayStringSelectAttribute {attributes} />
+						</div>
+					{/each}
+				{/if}
+
+				{#if dateTimeValueServiceAttributes}
+					{#each dateTimeValueServiceAttributes as attributes}
+						<div class="mb-2">
+							<DisplayDateTimeSelectAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
