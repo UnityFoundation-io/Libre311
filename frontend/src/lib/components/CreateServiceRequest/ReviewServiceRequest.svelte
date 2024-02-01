@@ -32,7 +32,7 @@
 			: '';
 	}
 
-	function getMultiValueServiceAttributes(params: CreateServiceRequestParams) {
+	function getMultiServiceAttributes(params: CreateServiceRequestParams) {
 		const serviceAttributes: MultiSelectServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
@@ -42,7 +42,7 @@
 		return serviceAttributes;
 	}
 
-	function getSingleValueServiceAttributes(params: CreateServiceRequestParams) {
+	function getSingleServiceAttributes(params: CreateServiceRequestParams) {
 		const serviceAttributes: SingleValueListServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
@@ -52,7 +52,7 @@
 		return serviceAttributes;
 	}
 
-	function getStringValueServiceAttributes(params: CreateServiceRequestParams) {
+	function getStringServiceAttributes(params: CreateServiceRequestParams) {
 		const serviceAttributes: StringServiceDefinitionInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
@@ -61,7 +61,7 @@
 		return serviceAttributes;
 	}
 
-	function getNumberValueServiceAttributes(params: CreateServiceRequestParams) {
+	function getNumberServiceAttributes(params: CreateServiceRequestParams) {
 		const serviceAttributes: NumberServiceDefinitionInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
@@ -70,7 +70,7 @@
 		return serviceAttributes;
 	}
 
-	function getDateTimeValueServiceAttributes(params: CreateServiceRequestParams) {
+	function getDateTimeServiceAttributes(params: CreateServiceRequestParams) {
 		const serviceAttributes: DateTimeServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
@@ -80,7 +80,7 @@
 		return serviceAttributes;
 	}
 
-	function getTextAreaServiceAttributes(params: CreateServiceRequestParams) {
+	function getTextServiceAttributes(params: CreateServiceRequestParams) {
 		const serviceAttributes: TextServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
@@ -91,12 +91,12 @@
 	}
 
 	$: name = createName(params);
-	$: multiValueServiceAttributes = getMultiValueServiceAttributes(params);
-	$: singleValueServiceAttributes = getSingleValueServiceAttributes(params);
-	$: stringValueServiceAttributes = getStringValueServiceAttributes(params);
-	$: numberValueServiceAttributes = getNumberValueServiceAttributes(params);
-	$: dateTimeValueServiceAttributes = getDateTimeValueServiceAttributes(params);
-	$: textValueServiceAttributes = getTextAreaServiceAttributes(params);
+	$: multiServiceAttributes = getMultiServiceAttributes(params);
+	$: singleServiceAttributes = getSingleServiceAttributes(params);
+	$: stringServiceAttributes = getStringServiceAttributes(params);
+	$: numberServiceAttributes = getNumberServiceAttributes(params);
+	$: dateTimeServiceAttributes = getDateTimeServiceAttributes(params);
+	$: textServiceAttributes = getTextServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -123,48 +123,48 @@
 					<p class="text-sm">{params.address_string}</p>
 				</div>
 
-				{#if multiValueServiceAttributes}
-					{#each multiValueServiceAttributes as attributes}
+				{#if multiServiceAttributes}
+					{#each multiServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayMultiAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
 
-				{#if singleValueServiceAttributes}
-					{#each singleValueServiceAttributes as attributes}
+				{#if singleServiceAttributes}
+					{#each singleServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplaySingleAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
 
-				{#if stringValueServiceAttributes}
-					{#each stringValueServiceAttributes as attributes}
+				{#if stringServiceAttributes}
+					{#each stringServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayStringAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
 
-				{#if numberValueServiceAttributes}
-					{#each numberValueServiceAttributes as attributes}
+				{#if numberServiceAttributes}
+					{#each numberServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayNumberAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
 
-				{#if dateTimeValueServiceAttributes}
-					{#each dateTimeValueServiceAttributes as attributes}
+				{#if dateTimeServiceAttributes}
+					{#each dateTimeServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayDateTimeAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
 
-				{#if textValueServiceAttributes}
-					{#each textValueServiceAttributes as attributes}
+				{#if textServiceAttributes}
+					{#each textServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayTextAttribute {attributes} />
 						</div>
