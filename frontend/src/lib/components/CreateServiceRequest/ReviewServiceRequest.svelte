@@ -45,7 +45,7 @@
 		const serviceAttributes: StringServiceDefinitionInput[] | NumberServiceDefinitionInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'string') {
+			if (entry.attribute.datatype == 'string' || entry.attribute.datatype == 'number') {
 				serviceAttributes.push(entry);
 			}
 
