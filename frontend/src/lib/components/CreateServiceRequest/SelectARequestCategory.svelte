@@ -80,7 +80,7 @@
 		placeholder="Request Type"
 		on:change={issueTypeChange}
 		options={selectOptions}
-		class="relative mx-8 my-4"
+		class="relative my-4"
 	>
 		<Select.Options slot="options">
 			{#each selectOptions as option}

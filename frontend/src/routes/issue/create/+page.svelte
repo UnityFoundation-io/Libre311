@@ -23,13 +23,15 @@
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 
-	let step: CreateServiceRequestSteps = CreateServiceRequestSteps.LOCATION;
+	const libre311 = useLibre311Service();
+	const linkResolver = useLibre311Context().linkResolver;
+
 	let params: Partial<CreateServiceRequestParams> = {};
 	let centerPos: PointTuple = [41.308281, -72.924164]; // todo we need to set the starting point on per tenant basis. decide if bounds or center/zoom or both will be used.
 	let loadingLocation: boolean = false;
 
-	const libre311 = useLibre311Service();
-	const linkResolver = useLibre311Context().linkResolver;
+	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
+
 	const icon = L.icon({
 		iconUrl: WaypointOpen,
 		...iconPositionOpts(128 / 169, 45, 'bottom-center')
@@ -41,14 +43,10 @@
 	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
 	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);
 
-	function gotoNextStep() {
-		goto(`/issue/create?step=${++step}`);
-	}
-
 	function handleChange(e: CustomEvent<Partial<CreateServiceRequestParams>>) {
 		const changedParams = e.detail;
 		params = { ...params, ...changedParams };
-		gotoNextStep();
+		goto(linkResolver.createIssuePageNext($page.url));
 	}
 
 	function boundsChanged(e: CustomEvent<L.LatLngBounds>) {
@@ -66,7 +64,7 @@
 			params.address_string = res.display_name;
 		}
 		params = params;
-		gotoNextStep();
+		goto(linkResolver.createIssuePageNext($page.url));
 	}
 
 	function handleGeosearch(e: ComponentEvents<MapGeosearch>['geosearch']) {
@@ -84,7 +82,7 @@
 </script>
 
 <CreateServiceRequestLayout {step}>
-	<div slot="side-bar" class="h-full">
+	<div slot="side-bar" class="mx-4 h-full">
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
 		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestParams(params)}

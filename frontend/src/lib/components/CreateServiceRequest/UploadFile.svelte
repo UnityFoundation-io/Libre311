@@ -6,14 +6,16 @@
 	import { Button } from 'stwui';
 	import { FilePicker } from 'stwui';
 	import { uploadIcon } from '$lib/assets/upload-icon.js';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import type { DropResult } from 'stwui/types';
+	import { page } from '$app/stores';
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
 	const dispatch = createEventDispatcher();
 
 	const libre311Service = useLibre311Service();
+	const linkResolver = useLibre311Context().linkResolver;
 
 	let files: FileList;
 
@@ -56,7 +58,7 @@
 					{messages['photo']['no_upload']}
 				</Button>
 
-				<Button type="link" on:click={() => {}}>
+				<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
 					{messages['photo']['back']}
 				</Button>
 			</div>
@@ -88,7 +90,7 @@
 					{messages['photo']['no_upload']}
 				</Button>
 
-				<Button type="link" on:click={() => {}}>
+				<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
 					{messages['photo']['back']}
 				</Button>
 			</div>
