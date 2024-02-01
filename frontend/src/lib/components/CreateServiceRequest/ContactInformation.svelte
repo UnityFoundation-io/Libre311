@@ -109,9 +109,15 @@
 				<button class="my-2 text-sm" type="button" on:click|preventDefault={handleBack}>
 					{messages['contact']['button']['back']}
 				</button>
-				<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
-					{messages['contact']['button']['submit']}
-				</button>
+				{#if !params.first_name && !params.last_name && !params.email && !params.phone}
+					<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
+						{messages['contact']['button']['skip']}
+					</button>
+				{:else}
+					<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
+						{messages['contact']['button']['submit']}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
