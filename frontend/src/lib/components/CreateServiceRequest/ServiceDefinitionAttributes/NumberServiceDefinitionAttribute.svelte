@@ -13,7 +13,7 @@
 	name="number"
 	showSpin
 	placeholder={attribute.datatype_description ?? undefined}
-	class="relative mx-8 my-4"
+	class="relative  my-4"
 >
 	<InputNumber.Label slot="label">{attribute.description}</InputNumber.Label>
 </InputNumber>

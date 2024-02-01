@@ -25,7 +25,7 @@
 	placeholder={input.attribute.datatype_description ?? undefined}
 	multiple
 	options={selectOptions}
-	class="relative mx-8 my-4"
+	class="relative  my-4"
 >
 	<Select.Label slot="label">{input.attribute.description}</Select.Label>
 	<Select.Options slot="options">

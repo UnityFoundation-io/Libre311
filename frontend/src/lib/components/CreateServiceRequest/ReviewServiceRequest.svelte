@@ -2,6 +2,7 @@
 	import messages from '$media/messages.json';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import { Badge } from 'stwui';
+	import StepControls from './StepControls.svelte';
 
 	export let params: CreateServiceRequestParams;
 
@@ -21,7 +22,7 @@
 </script>
 
 <div class="flex h-full items-center justify-center">
-	<div class="mx-4 flex h-full w-full flex-col">
+	<div class="flex h-full w-full flex-col">
 		<div class="mt-4 flex-grow">
 			<h1 class="text-lg">{messages['reviewServiceRequest']['title']}</h1>
 
@@ -58,16 +59,11 @@
 			</div>
 		</div>
 
-		<div class="mb-4">
-			<div class="flex items-center justify-between">
-				<button class="my-2 text-sm" type="button" on:click|preventDefault={() => {}}>
-					{messages['reviewServiceRequest']['button_edit']}
-				</button>
-				<button class="submit my-2 text-sm" type="button" on:click|preventDefault={() => {}}>
-					{messages['reviewServiceRequest']['button_submit']}
-				</button>
-			</div>
-		</div>
+		<StepControls on:click={() => alert('todo submit to server')}>
+			<svelte:fragment slot="submit-text"
+				>{messages['reviewServiceRequest']['button_submit']}</svelte:fragment
+			>
+		</StepControls>
 	</div>
 </div>
 
