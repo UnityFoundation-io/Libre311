@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StringServiceDefinitionInput } from './CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import type { StringServiceDefinitionInput } from '../ServiceDefinitionAttributes/shared';
 
 	export let attributes: StringServiceDefinitionInput;
 </script>

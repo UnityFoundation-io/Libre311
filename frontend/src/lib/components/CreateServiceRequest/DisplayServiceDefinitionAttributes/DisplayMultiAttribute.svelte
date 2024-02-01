@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MultiSelectServiceDefinitionAttributeInput } from './CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import type { MultiSelectServiceDefinitionAttributeInput } from '../ServiceDefinitionAttributes/shared';
 
 	export let attributes: MultiSelectServiceDefinitionAttributeInput;
 </script>

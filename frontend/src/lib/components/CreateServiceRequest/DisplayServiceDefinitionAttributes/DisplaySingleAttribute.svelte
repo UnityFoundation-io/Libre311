@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SingleValueListServiceDefinitionAttributeInput } from './CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import type { SingleValueListServiceDefinitionAttributeInput } from '../ServiceDefinitionAttributes/shared';
 
 	export let attributes: SingleValueListServiceDefinitionAttributeInput;
 </script>

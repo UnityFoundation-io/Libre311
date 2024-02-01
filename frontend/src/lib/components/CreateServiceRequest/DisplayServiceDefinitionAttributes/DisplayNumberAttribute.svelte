@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { NumberServiceDefinitionInput } from './CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import type { NumberServiceDefinitionInput } from '../ServiceDefinitionAttributes/shared';
 
 	export let attributes: NumberServiceDefinitionInput;
 </script>
