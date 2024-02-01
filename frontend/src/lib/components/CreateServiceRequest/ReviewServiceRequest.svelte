@@ -1,8 +1,8 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
-	import DisplayMultiSelectAttribute from '../DisplayMultiSelectAttribute.svelte';
-	import DisplayStringSelectAttribute from '../DisplayStringSelectAttribute.svelte';
+	import DisplayMultiSelectAttribute from '../DisplayMultiOrSingleSelectAttribute.svelte';
+	import DisplayStringSelectAttribute from '../DisplayStringOrNumberSelectAttribute.svelte';
 	import DisplayDateTimeSelectAttribute from '../DisplayDateTimeSelectAttribute.svelte';
 	import { Badge } from 'stwui';
 	import type {
@@ -27,7 +27,7 @@
 			: '';
 	}
 
-	function getMultiValueServiceAttributes(params: any) {
+	function getMultiOrSingleValueServiceAttributes(params: any) {
 		const serviceAttributes:
 			| MultiSelectServiceDefinitionAttributeInput[]
 			| SingleValueListServiceDefinitionAttributeInput[] = [];
@@ -42,7 +42,7 @@
 		return serviceAttributes;
 	}
 
-	function getStringValueServiceAttributes(params: any) {
+	function getStringOrNumberValueServiceAttributes(params: any) {
 		const serviceAttributes: StringServiceDefinitionInput[] | NumberServiceDefinitionInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
@@ -62,8 +62,8 @@
 	}
 
 	$: name = createName(params);
-	$: multiValueServiceAttributes = getMultiValueServiceAttributes(params);
-	$: stringValueServiceAttributes = getStringValueServiceAttributes(params);
+	$: multiOrSingleValueServiceAttributes = getMultiOrSingleValueServiceAttributes(params);
+	$: stringOrNumberValueServiceAttributes = getStringOrNumberValueServiceAttributes(params);
 	$: dateTimeValueServiceAttributes = getDateTimeValueServiceAttributes(params);
 </script>
 
@@ -91,16 +91,16 @@
 					<p class="text-sm">{params.address_string}</p>
 				</div>
 
-				{#if multiValueServiceAttributes}
-					{#each multiValueServiceAttributes as attributes}
+				{#if multiOrSingleValueServiceAttributes}
+					{#each multiOrSingleValueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayMultiSelectAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
 
-				{#if stringValueServiceAttributes}
-					{#each stringValueServiceAttributes as attributes}
+				{#if stringOrNumberValueServiceAttributes}
+					{#each stringOrNumberValueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayStringSelectAttribute {attributes} />
 						</div>
