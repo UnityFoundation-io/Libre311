@@ -1,11 +1,11 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
-	import DisplayMultiSelectAttribute from '../DisplayMultiSelectAttribute.svelte';
-	import DisplaySingleSelectAttribute from '../DisplaySingleSelectAttribute.svelte';
-	import DisplayStringSelectAttribute from '../DisplayStringSelectAttribute.svelte';
-	import DisplayNumberSelectAttribute from '../DisplayNumberSelectAttribute.svelte';
-	import DisplayDateTimeSelectAttribute from '../DisplayDateTimeSelectAttribute.svelte';
+	import DisplayMultiAttribute from './DisplayServiceDefinitionAttributes/DisplayMultiAttribute.svelte';
+	import DisplaySingleAttribute from './DisplayServiceDefinitionAttributes/DisplaySingleAttribute.svelte';
+	import DisplayStringAttribute from './DisplayServiceDefinitionAttributes/DisplayStringAttribute.svelte';
+	import DisplayNumberAttribute from './DisplayServiceDefinitionAttributes/DisplayNumberAttribute.svelte';
+	import DisplayDateTimeAttribute from './DisplayServiceDefinitionAttributes/DisplayDateTimeAttribute.svelte';
 	import { Badge } from 'stwui';
 	import type {
 		DateTimeServiceDefinitionAttributeInput,
@@ -112,7 +112,7 @@
 				{#if multiValueServiceAttributes}
 					{#each multiValueServiceAttributes as attributes}
 						<div class="mb-2">
-							<DisplayMultiSelectAttribute {attributes} />
+							<DisplayMultiAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
@@ -120,7 +120,7 @@
 				{#if singleValueServiceAttributes}
 					{#each singleValueServiceAttributes as attributes}
 						<div class="mb-2">
-							<DisplaySingleSelectAttribute {attributes} />
+							<DisplaySingleAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
@@ -128,7 +128,7 @@
 				{#if stringValueServiceAttributes}
 					{#each stringValueServiceAttributes as attributes}
 						<div class="mb-2">
-							<DisplayStringSelectAttribute {attributes} />
+							<DisplayStringAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
@@ -136,7 +136,7 @@
 				{#if numberValueServiceAttributes}
 					{#each numberValueServiceAttributes as attributes}
 						<div class="mb-2">
-							<DisplayNumberSelectAttribute {attributes} />
+							<DisplayNumberAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
@@ -144,7 +144,7 @@
 				{#if dateTimeValueServiceAttributes}
 					{#each dateTimeValueServiceAttributes as attributes}
 						<div class="mb-2">
-							<DisplayDateTimeSelectAttribute {attributes} />
+							<DisplayDateTimeAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}

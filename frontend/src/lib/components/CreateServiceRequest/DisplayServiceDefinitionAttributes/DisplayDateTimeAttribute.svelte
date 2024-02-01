@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DateTimeServiceDefinitionAttributeInput } from './CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import type { DateTimeServiceDefinitionAttributeInput } from '../ServiceDefinitionAttributes/shared';
 
 	export let attributes: DateTimeServiceDefinitionAttributeInput;
 
