@@ -23,6 +23,8 @@
 
 <ul>
 	{#each values as value}
-		{value}
+		<li>
+			{value}
+		</li>
 	{/each}
 </ul>

@@ -24,6 +24,8 @@
 
 <ul>
 	{#each values as value, i}
-		{value}{#if i < valueLength - 1}<span>{', '}</span>{/if}
+		<li>
+			{value}{#if i < valueLength - 1}<span>{', '}</span>{/if}
+		</li>
 	{/each}
 </ul>
