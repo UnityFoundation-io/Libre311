@@ -56,6 +56,6 @@ export const emailValidator: InputValidator<string> = inputValidatorFactory(z.st
 export const optionalEmailValidator = inputValidatorFactory(z.string().email().nullish());
 // if we need to allow empty strings and nullish values
 // // https://github.com/colinhacks/zod/issues/2513#issuecomment-1732405993
-// export const nullishCoalesceEmailValidator = inputValidatorFactory(
-// 	z.union([z.literal(''), z.string().email().nullish()])
-// );
+export const nullishCoalesceEmailValidator = inputValidatorFactory(
+	z.union([z.literal(''), z.string().email().nullish()])
+);
