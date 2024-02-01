@@ -12,7 +12,7 @@
 	name="datetime"
 	label={attribute.datatype_description ?? undefined}
 	showTime
-	class="relative mx-8 my-4"
+	class="relative  my-4"
 >
 	<DatePicker.Label slot="label">{attribute.description}</DatePicker.Label>
 	<!-- TODO: Data Prop -->

@@ -9,6 +9,10 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { StepChangeEvent } from './types';
 
+	import StepControls from './StepControls.svelte';
+
+	const dispatch = createEventDispatcher<StepChangeEvent>();
+
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
 	let firstNameError: string | undefined;
@@ -16,11 +20,10 @@
 	let emailError: string | undefined;
 	let phoneError: string | undefined;
 
-	const dispatch = createEventDispatcher<StepChangeEvent>();
-
-	function handleBack() {
-		console.log('TODO: back not implemented');
-	}
+	$: btnText =
+		params.first_name || params.last_name || params.email || params.phone
+			? messages['contact']['button']['submit']
+			: messages['contact']['button']['skip'];
 
 	function handleSubmit() {
 		let emailValidity = nullishCoalesceEmailValidator(createUnvalidatedInput(params.email));
@@ -44,7 +47,7 @@
 </script>
 
 <div class="flex h-full items-center justify-center">
-	<div class="mx-4 flex h-full flex-col">
+	<div class="flex h-full flex-col">
 		<div class="mt-4 flex-grow">
 			<h1 class="text-lg">{messages['contact']['header']}</h1>
 			<p class="my-2 text-sm">{messages['contact']['body']}</p>
@@ -100,38 +103,8 @@
 			</div>
 		</div>
 
-		<div class="mb-4">
-			<div class="flex items-center justify-between">
-				<button class="my-2 text-sm" type="button" on:click|preventDefault={handleBack}>
-					{messages['contact']['button']['back']}
-				</button>
-				{#if !params.first_name && !params.last_name && !params.email && !params.phone}
-					<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
-						{messages['contact']['button']['skip']}
-					</button>
-				{:else}
-					<button class="submit my-2 text-sm" type="button" on:click|preventDefault={handleSubmit}>
-						{messages['contact']['button']['submit']}
-					</button>
-				{/if}
-			</div>
-		</div>
+		<StepControls on:click={handleSubmit}>
+			<svelte:fragment slot="submit-text">{btnText}</svelte:fragment>
+		</StepControls>
 	</div>
 </div>
-
-<style>
-	.submit {
-		padding: 0.5rem 2rem;
-		background-color: hsl(var(--primary));
-		color: hsl(var(--primary-content));
-		border: 1px solid hsl(var(--primary));
-		border-radius: 10px;
-	}
-
-	.submit:hover {
-		--tw-surface-opacity: 0.1;
-		border: 1px solid hsl(var(--primary));
-		color: hsl(var(--content));
-		background-color: hsl(var(--surface) / var(--tw-surface-opacity));
-	}
-</style>

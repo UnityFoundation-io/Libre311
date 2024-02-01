@@ -20,7 +20,7 @@
 	name="singleselect"
 	placeholder={attribute.datatype_description ?? undefined}
 	options={selectOptions}
-	class="relative mx-8 my-4"
+	class="relative my-4"
 >
 	<Select.Label slot="label">{attribute.description}</Select.Label>
 	<Select.Options slot="options">
