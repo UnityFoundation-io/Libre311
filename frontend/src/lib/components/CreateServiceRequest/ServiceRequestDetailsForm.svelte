@@ -16,13 +16,7 @@
 	import SelectARequestCategory from './SelectARequestCategory.svelte';
 	import {
 		createAttributeInputMap,
-		type AttributeInputMap,
-		isMultiSelectServiceDefinitionAttributeInput,
-		isSingleValueListServiceDefinitionAttributeInput,
-		isDateTimeServiceDefinitionAttributeInput,
-		isStringServiceDefinitionInput,
-		isNumberServiceDefinitionInput,
-		isTextServiceDefinitionAttributeInput
+		type AttributeInputMap
 	} from './ServiceDefinitionAttributes/shared';
 	import { createEventDispatcher, type ComponentEvents } from 'svelte';
 	import type { StepChangeEvent } from './types';
@@ -35,7 +29,15 @@
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> | undefined;
 	let selectedService: Service | undefined = params.service;
 
-	$: if (selectedService) getServiceDefinition(selectedService);
+	$: updateAttributeMap(selectedService);
+
+	function updateAttributeMap(service: Service | undefined) {
+		if (!service) {
+			asyncAttributeInputMap = undefined;
+			return;
+		}
+		getServiceDefinition(service);
+	}
 
 	async function getServiceDefinition(selectedService: Service) {
 		asyncAttributeInputMap = undefined;
@@ -50,65 +52,48 @@
 
 	function validate() {
 		const errMsg = 'This value is required';
+		if (!asyncAttributeInputMap || asyncAttributeInputMap.type !== 'success') return;
 
-		if (asyncAttributeInputMap?.type === 'success') {
-			let hasError = false;
-			for (const input of asyncAttributeInputMap.value.values()) {
-				if (input.attribute.required) {
-					if (isMultiSelectServiceDefinitionAttributeInput(input)) {
+		let hasError = false;
+		for (const input of asyncAttributeInputMap.value.values()) {
+			if (input.attribute.required) {
+				switch (input.datatype) {
+					case 'multivaluelist':
+					case 'string':
+					case 'text':
 						if (input.value && input.value.length > 0) input.error = '';
 						else {
 							hasError = true;
 							input.error = errMsg;
 						}
-					} else if (isDateTimeServiceDefinitionAttributeInput(input)) {
+						break;
+					case 'datetime':
+					case 'singlevaluelist':
+					case 'number':
 						if (input.value) input.error = '';
 						else {
 							hasError = true;
 							input.error = errMsg;
 						}
-					} else if (isStringServiceDefinitionInput(input)) {
-						if (input.value && input.value.length > 0) input.error = '';
-						else {
-							hasError = true;
-							input.error = errMsg;
-						}
-					} else if (isSingleValueListServiceDefinitionAttributeInput(input)) {
-						if (input.value) input.error = '';
-						else {
-							hasError = true;
-							input.error = errMsg;
-						}
-					} else if (isNumberServiceDefinitionInput(input)) {
-						if (input.value) input.error = '';
-						else {
-							hasError = true;
-							input.error = errMsg;
-						}
-					} else if (isTextServiceDefinitionAttributeInput(input)) {
-						if (input.value && input.value.length > 0) input.error = '';
-						else {
-							hasError = true;
-							input.error = errMsg;
-						}
-					} else {
+						break;
+					default:
 						throw Error('Illegal argument, attribute datatype not supported');
-					}
-				} else {
-					input.error = undefined;
 				}
-			}
-			// if no errors, dispatch
-			if (!hasError) {
-				if (!selectedService) throw Error('Service must be selected');
-				const updatedParams: Partial<CreateServiceRequestParams> = {
-					attributeMap: asyncAttributeInputMap.value,
-					service: selectedService
-				};
-				dispatch('stepChange', updatedParams);
 			} else {
-				asyncAttributeInputMap = asAsyncSuccess(asyncAttributeInputMap.value);
+				input.error = undefined;
 			}
+		}
+
+		// if no errors, dispatch
+		if (!hasError) {
+			if (!selectedService) throw Error('Service must be selected');
+			const updatedParams = {
+				attributeMap: asyncAttributeInputMap.value,
+				service: selectedService
+			};
+			dispatch('stepChange', updatedParams);
+		} else {
+			asyncAttributeInputMap = asAsyncSuccess(asyncAttributeInputMap.value);
 		}
 	}
 
@@ -121,17 +106,17 @@
 	<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
 	{#if asyncAttributeInputMap?.type == 'success'}
 		{#each asyncAttributeInputMap.value.values() as input}
-			{#if isMultiSelectServiceDefinitionAttributeInput(input)}
+			{#if input.datatype == 'multivaluelist'}
 				<MultiSelectServiceDefinitionAttribute {input} />
-			{:else if isDateTimeServiceDefinitionAttributeInput(input)}
+			{:else if input.datatype == 'datetime'}
 				<DateTimeServiceDefinitionAttribute {input} />
-			{:else if isStringServiceDefinitionInput(input)}
+			{:else if input.datatype == 'string'}
 				<StringServiceDefinitionAttribute {input} />
-			{:else if isSingleValueListServiceDefinitionAttributeInput(input)}
+			{:else if input.datatype == 'singlevaluelist'}
 				<SingleValueListServiceDefinitionAttribute {input} />
-			{:else if isNumberServiceDefinitionInput(input)}
+			{:else if input.datatype == 'number'}
 				<NumberServiceDefinitionAttribute {input} />
-			{:else if isTextServiceDefinitionAttributeInput(input)}
+			{:else if input.datatype == 'text'}
 				<TextServiceDefinitionAttribute {input} />
 			{/if}
 		{/each}

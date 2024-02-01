@@ -24,25 +24,25 @@
 
 <script lang="ts">
 	import { GeoSearchControl, OpenStreetMapProvider, SearchControl } from 'leaflet-geosearch';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
 
 	const map = getContext<{ getMap: () => L.Map }>('map').getMap();
+	const provider = new OpenStreetMapProvider({
+		params: {
+			countrycodes: 'us'
+		}
+	});
+	const control = GeoSearchControl({
+		provider,
+		style: 'bar',
+		showMarker: false
+	});
+
 	const dispatch = createEventDispatcher<{
 		geosearch: GeosearchShowLocationEvent;
 	}>();
 
 	onMount(() => {
-		const provider = new OpenStreetMapProvider({
-			params: {
-				countrycodes: 'us'
-			}
-		});
-		const control = GeoSearchControl({
-			provider,
-			style: 'bar',
-			showMarker: false
-		});
-
 		map.addControl(control);
 		map.on('geosearch/showlocation', (e) => {
 			if (isGeosearchShowLocationEvent(e)) {
@@ -51,5 +51,9 @@
 				throw new Error('leaflet-geosearch API Change');
 			}
 		});
+	});
+
+	onDestroy(() => {
+		map.removeControl(control);
 	});
 </script>

@@ -16,29 +16,32 @@
 		type AsyncResult,
 		asAsyncFailure
 	} from '$lib/services/http';
-	import { Select } from 'stwui';
+	import { Button, Progress, Select } from 'stwui';
 	import type { SelectOption } from 'stwui/types';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { arrowPath } from '../Svg/outline/arrowPath';
 
 	export let params: Partial<CreateServiceRequestParams>;
 
 	const libre311 = useLibre311Service();
-	const dispatch = createEventDispatcher<{ serviceSelected: Service }>();
+	const dispatch = createEventDispatcher<{ serviceSelected: Service | undefined }>();
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let selectedServiceCode: ServiceCode | undefined = params?.service?.service_code;
 	let selectedService: Service | undefined;
+
 	$: if (selectedServiceCode && serviceList.type === 'success') {
 		selectedService = findService(selectedServiceCode);
 		dispatch('serviceSelected', selectedService);
 	}
 
-	onMount(() => {
+	onMount(fetchServiceList);
+
+	function fetchServiceList() {
 		if (cachedServiceList) {
 			serviceList = asAsyncSuccess(cachedServiceList);
 			return;
 		}
-
 		libre311
 			.getServiceList()
 			.then((res) => {
@@ -46,7 +49,7 @@
 				serviceList = asAsyncSuccess(res);
 			})
 			.catch((err) => (serviceList = asAsyncFailure(err)));
-	});
+	}
 
 	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
 		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
@@ -54,11 +57,7 @@
 
 	function findService(serviceCode: ServiceCode) {
 		if (serviceList.type == 'success') {
-			const selectedService = serviceList.value.find((s) => s.service_code == serviceCode);
-			if (!selectedService) {
-				throw new Error('No service found with that service code');
-			}
-			return selectedService;
+			return (selectedService = serviceList.value.find((s) => s.service_code == serviceCode));
 		}
 		throw Error('Service list not loaded');
 	}
@@ -78,7 +77,7 @@
 	<Select
 		value={selectedServiceCode}
 		name="select-1"
-		placeholder="Issue Type"
+		placeholder="Request Type"
 		on:change={issueTypeChange}
 		options={selectOptions}
 		class="relative mx-8 my-4"
@@ -89,4 +88,33 @@
 			{/each}
 		</Select.Options>
 	</Select>
+{:else if serviceList.type === 'inProgress'}
+	<Select
+		disabled
+		value={selectedServiceCode}
+		name="select-1"
+		placeholder="Loading Request Types..."
+		on:change={issueTypeChange}
+		options={[]}
+		class="relative mx-8 my-4"
+	></Select>
+	<div class="mx-8 my-4">
+		<Progress value={0} indeterminate />
+	</div>
+{:else}
+	<Select
+		disabled
+		value={selectedServiceCode}
+		name="select-1"
+		placeholder="Failed to Load Request Types"
+		on:change={issueTypeChange}
+		options={[]}
+		class="relative mx-8 my-4"
+	></Select>
+	<div class="flex content-center justify-center">
+		<Button on:click={() => fetchServiceList()} type="primary">
+			<Button.Leading data={arrowPath} slot="leading" />
+			Reload
+		</Button>
+	</div>
 {/if}
