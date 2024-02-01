@@ -17,7 +17,59 @@
 			: '';
 	}
 
+	type ServiceAttributes = {
+		question: string;
+		values: number | string | string[] | undefined;
+	};
+
+	function getServiceAttributes(params: any) {
+		const serviceAttributes: ServiceAttributes[] = [];
+
+		for (const [key, entry] of params.attributeMap.entries()) {
+			if (entry.attribute.datatype == 'multivaluelist') {
+				let attributeValues: string[] = [];
+
+				for (let i = 0; i < entry.attribute.values.length; i++) {
+					attributeValues.push(entry.attribute.values[i].name);
+				}
+				serviceAttributes.push({
+					question: entry.attribute.description,
+					values: attributeValues
+				});
+			} else if (entry.attribute.datatype == 'singlevaluelist') {
+				let attributeValues: string[] = [];
+
+				for (let i = 0; i < entry.attribute.values.length; i++) {
+					attributeValues.push(entry.attribute.values[i].name);
+				}
+				serviceAttributes.push({
+					question: entry.attribute.description,
+					values: attributeValues
+				});
+			} else if (entry.attribute.datatype == 'string') {
+				let attributeValues: string = entry.attribute.values[0].name;
+
+				serviceAttributes.push({
+					question: entry.attribute.description,
+					values: attributeValues
+				});
+			} else if (entry.attribute.datatype == 'number') {
+				let attributeValues: number = entry.attribute.values[0].name;
+
+				serviceAttributes.push({
+					question: entry.attribute.description,
+					values: attributeValues
+				});
+			}
+
+			console.log(serviceAttributes);
+			return serviceAttributes;
+		}
+	}
+
 	$: name = createName(params);
+
+	$: serviceAttributes = getServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -43,6 +95,24 @@
 				<div class="mb-2">
 					<p class="text-sm">{params.address_string}</p>
 				</div>
+
+				{#if serviceAttributes}
+					{#each serviceAttributes as attributes}
+						<div class="mb-2">
+							<strong>{attributes.question}</strong>
+
+							{#if attributes.values && attributes.values.length && attributes.values.length > 0}
+								<ul>
+									{#each attributes.values as value, i}
+										{value}{#if i < attributes.values.length - 1}<span>{', '}</span>{/if}
+									{/each}
+								</ul>
+							{:else}
+								<div>{attributes.values}</div>
+							{/if}
+						</div>
+					{/each}
+				{/if}
 
 				<div class="mb-1">
 					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
