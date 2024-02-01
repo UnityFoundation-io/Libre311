@@ -16,8 +16,7 @@ micronaut:
         signatures:
           secret:
             generator:
-              secret: pleaseChangeThisSecretForANewOne
-              jws-algorithm: HS256
+              secret: '"${UNITY_SIGNATURE_SECRET:123456789012345123456789012345123456789012345123456789012345123456789012345}"'
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:3000/?login-failed=true
