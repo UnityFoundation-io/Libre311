@@ -31,6 +31,7 @@
 			if (entry.attribute.datatype == 'multivaluelist') {
 				serviceAttributes.push(entry);
 			} else if (entry.attribute.datatype == 'singlevaluelist') {
+				serviceAttributes.push(entry);
 			} else if (entry.attribute.datatype == 'string') {
 			} else if (entry.attribute.datatype == 'number') {
 			} else if (entry.attribute.dataype == 'datetime') {
