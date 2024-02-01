@@ -123,7 +123,12 @@
 						<TextServiceDefinitionAttribute {input} />
 					{/if}
 				{/each}
-				<TextArea name="comments" placeholder="Description" class="relative  my-4" />
+				<TextArea
+					bind:value={params.description}
+					name="comments"
+					placeholder="Description"
+					class="relative  my-4"
+				/>
 			</div>
 		{/if}
 	</div>
