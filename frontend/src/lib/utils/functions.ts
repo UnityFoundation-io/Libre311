@@ -1,5 +1,4 @@
 import L, { type PointTuple } from 'leaflet';
-import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
 export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -46,20 +45,21 @@ export function iconPositionOpts(
 }
 
 export function checkPhoneNumber(phoneNumber: string | undefined): string {
-	if (phoneNumber == undefined) {
+	if (phoneNumber == undefined || phoneNumber == '') {
 		return '';
 	}
 
-	if (phoneNumber.length !== 12) {
-		return 'Invalid phone number';
-	}
+	// if (phoneNumber.length !== 12) {
+	// 	return 'Invalid phone number';
+	// }
 
 	try {
-		isValidPhoneNumber(parsePhoneNumber(phoneNumber, { defaultCountry: 'US' }).number);
+		// <-- libphonenumber-js -->
+		// isValidPhoneNumber(parsePhoneNumberWithError(phoneNumber, 'US').number);
 
 		return '';
-	} catch (e: any) {
-		let errorString = e.toString();
+	} catch (e: unknown) {
+		let errorString = new String(e).toString();
 
 		errorString = errorString.replace(/ParseError\d+:\s/, '');
 		errorString = errorString.replaceAll('_', ' ');
