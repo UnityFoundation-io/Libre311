@@ -5,7 +5,6 @@
 	import ContactInformation from '$lib/components/CreateServiceRequest/ContactInformation.svelte';
 	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
 
-	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import WaypointOpen from '$lib/assets/waypoint-open.png';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import { iconPositionOpts } from '$lib/utils/functions';
@@ -22,6 +21,7 @@
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
+	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 
 	let step: CreateServiceRequestSteps = CreateServiceRequestSteps.LOCATION;
 	let params: Partial<CreateServiceRequestParams> = {};
@@ -83,7 +83,7 @@
 	}
 </script>
 
-<SideBarMainContentLayout sideBarBreakpointActive={step == CreateServiceRequestSteps.LOCATION}>
+<CreateServiceRequestLayout {step}>
 	<div slot="side-bar" class="h-full">
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
@@ -101,7 +101,7 @@
 			{/if}
 		</MapComponent>
 		<Breakpoint>
-			<div class="display absolute inset-x-0 bottom-6 flex justify-center gap-2" slot="is-mobile">
+			<div class="display absolute inset-x-0 bottom-6 flex justify-center gap-2" slot="is-tablet">
 				<Button type="primary" href={linkResolver.issuesMap($page.url)}>Cancel</Button>
 				<Button loading={loadingLocation} on:click={confirmLocation} type="primary"
 					>Select Location</Button
@@ -109,4 +109,4 @@
 			</div>
 		</Breakpoint>
 	</div>
-</SideBarMainContentLayout>
+</CreateServiceRequestLayout>

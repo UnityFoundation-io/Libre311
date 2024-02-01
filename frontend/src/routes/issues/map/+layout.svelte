@@ -63,7 +63,7 @@
 	<slot slot="side-bar" />
 	<div slot="main-content" class="relative flex h-full">
 		<Breakpoint>
-			<div class="absolute left-1/2 top-5 z-[1] -translate-x-1/2" slot="is-mobile">
+			<div slot="is-mobile-or-tablet" class="absolute left-1/2 top-5 z-[1] -translate-x-1/2">
 				<MapListToggle />
 			</div>
 		</Breakpoint>
