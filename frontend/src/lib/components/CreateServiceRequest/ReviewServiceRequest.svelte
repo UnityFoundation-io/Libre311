@@ -1,8 +1,10 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
-	import DisplayMultiSelectAttribute from '../DisplayMultiOrSingleSelectAttribute.svelte';
-	import DisplayStringSelectAttribute from '../DisplayStringOrNumberSelectAttribute.svelte';
+	import DisplayMultiSelectAttribute from '../DisplayMultiSelectAttribute.svelte';
+	import DisplaySingleSelectAttribute from '../DisplaySingleSelectAttribute.svelte';
+	import DisplayStringSelectAttribute from '../DisplayStringSelectAttribute.svelte';
+	import DisplayNumberSelectAttribute from '../DisplayNumberSelectAttribute.svelte';
 	import DisplayDateTimeSelectAttribute from '../DisplayDateTimeSelectAttribute.svelte';
 	import { Badge } from 'stwui';
 	import type {
@@ -27,43 +29,59 @@
 			: '';
 	}
 
-	function getMultiOrSingleValueServiceAttributes(params: any) {
-		const serviceAttributes:
-			| MultiSelectServiceDefinitionAttributeInput[]
-			| SingleValueListServiceDefinitionAttributeInput[] = [];
+	function getMultiValueServiceAttributes(params: CreateServiceRequestParams) {
+		const serviceAttributes: MultiSelectServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
-			if (
-				entry.attribute.datatype == 'multivaluelist' ||
-				entry.attribute.datatype == 'singlevaluelist'
-			)
-				serviceAttributes.push(entry);
+			if (entry.attribute.datatype == 'multivaluelist')
+				serviceAttributes.push(entry as MultiSelectServiceDefinitionAttributeInput);
 		}
 		return serviceAttributes;
 	}
 
-	function getStringOrNumberValueServiceAttributes(params: any) {
-		const serviceAttributes: StringServiceDefinitionInput[] | NumberServiceDefinitionInput[] = [];
+	function getSingleValueServiceAttributes(params: CreateServiceRequestParams) {
+		const serviceAttributes: SingleValueListServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'string' || entry.attribute.datatype == 'number')
-				serviceAttributes.push(entry);
+			if (entry.attribute.datatype == 'singlevaluelist')
+				serviceAttributes.push(entry as SingleValueListServiceDefinitionAttributeInput);
 		}
 		return serviceAttributes;
 	}
 
-	function getDateTimeValueServiceAttributes(params: any) {
+	function getStringValueServiceAttributes(params: CreateServiceRequestParams) {
+		const serviceAttributes: StringServiceDefinitionInput[] = [];
+
+		for (const [key, entry] of params.attributeMap.entries()) {
+			if (entry.attribute.datatype == 'string') serviceAttributes.push(entry as any);
+		}
+		return serviceAttributes;
+	}
+
+	function getNumberValueServiceAttributes(params: CreateServiceRequestParams) {
+		const serviceAttributes: NumberServiceDefinitionInput[] = [];
+
+		for (const [key, entry] of params.attributeMap.entries()) {
+			if (entry.attribute.datatype == 'number') serviceAttributes.push(entry as any);
+		}
+		return serviceAttributes;
+	}
+
+	function getDateTimeValueServiceAttributes(params: CreateServiceRequestParams) {
 		const serviceAttributes: DateTimeServiceDefinitionAttributeInput[] = [];
 
 		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'datetime') serviceAttributes.push(entry);
+			if (entry.attribute.datatype == 'datetime')
+				serviceAttributes.push(entry as DateTimeServiceDefinitionAttributeInput);
 		}
 		return serviceAttributes;
 	}
 
 	$: name = createName(params);
-	$: multiOrSingleValueServiceAttributes = getMultiOrSingleValueServiceAttributes(params);
-	$: stringOrNumberValueServiceAttributes = getStringOrNumberValueServiceAttributes(params);
+	$: multiValueServiceAttributes = getMultiValueServiceAttributes(params);
+	$: singleValueServiceAttributes = getSingleValueServiceAttributes(params);
+	$: stringValueServiceAttributes = getStringValueServiceAttributes(params);
+	$: numberValueServiceAttributes = getNumberValueServiceAttributes(params);
 	$: dateTimeValueServiceAttributes = getDateTimeValueServiceAttributes(params);
 </script>
 
@@ -91,18 +109,34 @@
 					<p class="text-sm">{params.address_string}</p>
 				</div>
 
-				{#if multiOrSingleValueServiceAttributes}
-					{#each multiOrSingleValueServiceAttributes as attributes}
+				{#if multiValueServiceAttributes}
+					{#each multiValueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayMultiSelectAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
 
-				{#if stringOrNumberValueServiceAttributes}
-					{#each stringOrNumberValueServiceAttributes as attributes}
+				{#if singleValueServiceAttributes}
+					{#each singleValueServiceAttributes as attributes}
+						<div class="mb-2">
+							<DisplaySingleSelectAttribute {attributes} />
+						</div>
+					{/each}
+				{/if}
+
+				{#if stringValueServiceAttributes}
+					{#each stringValueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayStringSelectAttribute {attributes} />
+						</div>
+					{/each}
+				{/if}
+
+				{#if numberValueServiceAttributes}
+					{#each numberValueServiceAttributes as attributes}
+						<div class="mb-2">
+							<DisplayNumberSelectAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
