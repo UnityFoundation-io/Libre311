@@ -22,7 +22,7 @@
 			: '';
 	}
 
-	function getServiceAttributes(params: any) {
+	function getMultivalueServiceAttributes(params: any) {
 		const serviceAttributes:
 			| MultiSelectServiceDefinitionAttributeInput[]
 			| SingleValueListServiceDefinitionAttributeInput[] = [];
@@ -32,21 +32,20 @@
 				serviceAttributes.push(entry);
 			} else if (entry.attribute.datatype == 'singlevaluelist') {
 				serviceAttributes.push(entry);
-			} else if (entry.attribute.datatype == 'string') {
-			} else if (entry.attribute.datatype == 'number') {
-			} else if (entry.attribute.dataype == 'datetime') {
+				// } else if (entry.attribute.datatype == 'string') {
+				// } else if (entry.attribute.datatype == 'number') {
+				// } else if (entry.attribute.dataype == 'datetime') {
 			} else {
 				throw Error('Invalid attribute datatype');
 			}
 
-			console.log(serviceAttributes);
 			return serviceAttributes;
 		}
 	}
 
 	$: name = createName(params);
 
-	$: serviceAttributes = getServiceAttributes(params);
+	$: multivalueServiceAttributes = getMultivalueServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -73,8 +72,8 @@
 					<p class="text-sm">{params.address_string}</p>
 				</div>
 
-				{#if serviceAttributes}
-					{#each serviceAttributes as attributes}
+				{#if multivalueServiceAttributes}
+					{#each multivalueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayMultiSelectAttribute {attributes} />
 						</div>
