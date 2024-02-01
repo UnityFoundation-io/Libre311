@@ -3,13 +3,12 @@
 
 	export let attributes: DateTimeServiceDefinitionAttributeInput;
 
-	function toTimeStamp(timeStamp: string | null | undefined) {
+	function toTimeStamp(timeStamp: Date | null | undefined) {
 		return timeStamp
-			? `${new Date(timeStamp).toLocaleDateString()} ${new Date(timeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+			? `${timeStamp.toLocaleDateString()} ${timeStamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
 			: '';
 	}
 </script>
 
 <strong>{attributes.attribute.description}</strong>
-
-<!-- TODO: -->
+<div>{toTimeStamp(attributes.value)}</div>

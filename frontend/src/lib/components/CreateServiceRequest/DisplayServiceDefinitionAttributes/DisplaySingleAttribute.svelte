@@ -3,28 +3,18 @@
 
 	export let attributes: SingleValueListServiceDefinitionAttributeInput;
 
-	function extractValues(attributes: SingleValueListServiceDefinitionAttributeInput) {
-		let values: string[] = [];
-
+	function extractAttributeValueNames(attributes: SingleValueListServiceDefinitionAttributeInput) {
+		const keys = attributes.value;
 		for (let attribute of attributes.attribute.values) {
 			if (keys && keys.includes(attribute.key)) {
-				values.push(attribute.name);
+				return attribute.name;
 			}
 		}
-
-		return values;
 	}
 
-	$: keys = attributes.value;
-	$: values = extractValues(attributes);
+	$: value = extractAttributeValueNames(attributes);
 </script>
 
 <strong>{attributes.attribute.description}</strong>
 
-<ul>
-	{#each values as value}
-		<li>
-			{value}
-		</li>
-	{/each}
-</ul>
+<div>{value}</div>

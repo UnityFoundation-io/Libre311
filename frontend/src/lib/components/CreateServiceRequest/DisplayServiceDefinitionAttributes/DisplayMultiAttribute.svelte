@@ -3,9 +3,10 @@
 
 	export let attributes: MultiSelectServiceDefinitionAttributeInput;
 
-	function extractValues(attributes: MultiSelectServiceDefinitionAttributeInput) {
+	function extractAttributeValueNames(attributes: MultiSelectServiceDefinitionAttributeInput) {
 		let values: string[] = [];
 
+		const keys = attributes.value;
 		for (let attribute of attributes.attribute.values) {
 			if (keys && keys.includes(attribute.key)) {
 				values.push(attribute.name);
@@ -15,17 +16,8 @@
 		return values;
 	}
 
-	$: keys = attributes.value;
-	$: values = extractValues(attributes);
-	$: valueLength = values.length;
+	$: values = extractAttributeValueNames(attributes);
 </script>
 
 <strong>{attributes.attribute.description}</strong>
-
-<ul>
-	{#each values as value, i}
-		<li>
-			{value}{#if i < valueLength - 1}<span>{', '}</span>{/if}
-		</li>
-	{/each}
-</ul>
+<div>{values.join(', ')}</div>

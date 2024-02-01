@@ -8,14 +8,6 @@
 	import DisplayDateTimeAttribute from './DisplayServiceDefinitionAttributes/DisplayDateTimeAttribute.svelte';
 	import DisplayTextAttribute from './DisplayServiceDefinitionAttributes/DisplayTextAttribute.svelte';
 	import { Badge } from 'stwui';
-	import type {
-		DateTimeServiceDefinitionAttributeInput,
-		MultiSelectServiceDefinitionAttributeInput,
-		NumberServiceDefinitionInput,
-		SingleValueListServiceDefinitionAttributeInput,
-		StringServiceDefinitionInput,
-		TextServiceDefinitionAttributeInput
-	} from './ServiceDefinitionAttributes/shared';
 	import StepControls from './StepControls.svelte';
 
 	export let params: CreateServiceRequestParams;
@@ -32,71 +24,7 @@
 			: '';
 	}
 
-	function getMultiServiceAttributes(params: CreateServiceRequestParams) {
-		const serviceAttributes: MultiSelectServiceDefinitionAttributeInput[] = [];
-
-		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'multivaluelist')
-				serviceAttributes.push(entry as MultiSelectServiceDefinitionAttributeInput);
-		}
-		return serviceAttributes;
-	}
-
-	function getSingleServiceAttributes(params: CreateServiceRequestParams) {
-		const serviceAttributes: SingleValueListServiceDefinitionAttributeInput[] = [];
-
-		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'singlevaluelist')
-				serviceAttributes.push(entry as SingleValueListServiceDefinitionAttributeInput);
-		}
-		return serviceAttributes;
-	}
-
-	function getStringServiceAttributes(params: CreateServiceRequestParams) {
-		const serviceAttributes: StringServiceDefinitionInput[] = [];
-
-		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'string') serviceAttributes.push(entry as any);
-		}
-		return serviceAttributes;
-	}
-
-	function getNumberServiceAttributes(params: CreateServiceRequestParams) {
-		const serviceAttributes: NumberServiceDefinitionInput[] = [];
-
-		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'number') serviceAttributes.push(entry as any);
-		}
-		return serviceAttributes;
-	}
-
-	function getDateTimeServiceAttributes(params: CreateServiceRequestParams) {
-		const serviceAttributes: DateTimeServiceDefinitionAttributeInput[] = [];
-
-		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'datetime')
-				serviceAttributes.push(entry as DateTimeServiceDefinitionAttributeInput);
-		}
-		return serviceAttributes;
-	}
-
-	function getTextServiceAttributes(params: CreateServiceRequestParams) {
-		const serviceAttributes: TextServiceDefinitionAttributeInput[] = [];
-
-		for (const [key, entry] of params.attributeMap.entries()) {
-			if (entry.attribute.datatype == 'text')
-				serviceAttributes.push(entry as TextServiceDefinitionAttributeInput);
-		}
-		return serviceAttributes;
-	}
-
 	$: name = createName(params);
-	$: multiServiceAttributes = getMultiServiceAttributes(params);
-	$: singleServiceAttributes = getSingleServiceAttributes(params);
-	$: stringServiceAttributes = getStringServiceAttributes(params);
-	$: numberServiceAttributes = getNumberServiceAttributes(params);
-	$: dateTimeServiceAttributes = getDateTimeServiceAttributes(params);
-	$: textServiceAttributes = getTextServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -123,53 +51,23 @@
 					<p class="text-sm">{params.address_string}</p>
 				</div>
 
-				{#if multiServiceAttributes}
-					{#each multiServiceAttributes as attributes}
-						<div class="mb-2">
+				{#each params.attributeMap.values() as attributes}
+					<div class="mb-2">
+						{#if attributes.datatype == 'multivaluelist'}
 							<DisplayMultiAttribute {attributes} />
-						</div>
-					{/each}
-				{/if}
-
-				{#if singleServiceAttributes}
-					{#each singleServiceAttributes as attributes}
-						<div class="mb-2">
-							<DisplaySingleAttribute {attributes} />
-						</div>
-					{/each}
-				{/if}
-
-				{#if stringServiceAttributes}
-					{#each stringServiceAttributes as attributes}
-						<div class="mb-2">
-							<DisplayStringAttribute {attributes} />
-						</div>
-					{/each}
-				{/if}
-
-				{#if numberServiceAttributes}
-					{#each numberServiceAttributes as attributes}
-						<div class="mb-2">
-							<DisplayNumberAttribute {attributes} />
-						</div>
-					{/each}
-				{/if}
-
-				{#if dateTimeServiceAttributes}
-					{#each dateTimeServiceAttributes as attributes}
-						<div class="mb-2">
+						{:else if attributes.datatype == 'datetime'}
 							<DisplayDateTimeAttribute {attributes} />
-						</div>
-					{/each}
-				{/if}
-
-				{#if textServiceAttributes}
-					{#each textServiceAttributes as attributes}
-						<div class="mb-2">
+						{:else if attributes.datatype == 'string'}
+							<DisplayStringAttribute {attributes} />
+						{:else if attributes.datatype == 'singlevaluelist'}
+							<DisplaySingleAttribute {attributes} />
+						{:else if attributes.datatype == 'number'}
+							<DisplayNumberAttribute {attributes} />
+						{:else if attributes.datatype == 'text'}
 							<DisplayTextAttribute {attributes} />
-						</div>
-					{/each}
-				{/if}
+						{/if}
+					</div>
+				{/each}
 
 				<div class="mb-1">
 					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
@@ -206,20 +104,5 @@
 		background-position: center;
 		background-size: cover;
 		border-radius: 10px;
-	}
-
-	.submit {
-		padding: 0.5rem 2rem;
-		background-color: hsl(var(--primary));
-		color: hsl(var(--primary-content));
-		border: 1px solid hsl(var(--primary));
-		border-radius: 10px;
-	}
-
-	.submit:hover {
-		--tw-surface-opacity: 0.1;
-		border: 1px solid hsl(var(--primary));
-		color: hsl(var(--content));
-		background-color: hsl(var(--surface) / var(--tw-surface-opacity));
 	}
 </style>
