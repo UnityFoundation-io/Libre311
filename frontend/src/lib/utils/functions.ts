@@ -1,4 +1,7 @@
 import L, { type PointTuple } from 'leaflet';
+import libphonenumber from 'google-libphonenumber';
+
+const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
 
 export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,15 +52,9 @@ export function checkPhoneNumber(phoneNumber: string | undefined): string {
 		return '';
 	}
 
-	// if (phoneNumber.length !== 12) {
-	// 	return 'Invalid phone number';
-	// }
-
 	try {
-		// <-- libphonenumber-js -->
-		// isValidPhoneNumber(parsePhoneNumberWithError(phoneNumber, 'US').number);
-
-		return '';
+		const res = phoneUtil.isValidNumberForRegion(phoneUtil.parse(phoneNumber, 'US'), 'US');
+		return res ? '' : 'Invalid Number';
 	} catch (e: unknown) {
 		let errorString = new String(e).toString();
 
