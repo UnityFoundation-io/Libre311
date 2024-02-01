@@ -50,6 +50,10 @@ export function checkPhoneNumber(phoneNumber: string | undefined): string {
 		return '';
 	}
 
+	if (phoneNumber.length !== 12) {
+		return 'Invalid phone number';
+	}
+
 	try {
 		isValidPhoneNumber(parsePhoneNumber(phoneNumber, { defaultCountry: 'US' }).number);
 
