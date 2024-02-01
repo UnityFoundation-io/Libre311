@@ -6,13 +6,15 @@
 	import DisplayStringAttribute from './DisplayServiceDefinitionAttributes/DisplayStringAttribute.svelte';
 	import DisplayNumberAttribute from './DisplayServiceDefinitionAttributes/DisplayNumberAttribute.svelte';
 	import DisplayDateTimeAttribute from './DisplayServiceDefinitionAttributes/DisplayDateTimeAttribute.svelte';
+	import DisplayTextAttribute from './DisplayServiceDefinitionAttributes/DisplayTextAttribute.svelte';
 	import { Badge } from 'stwui';
 	import type {
 		DateTimeServiceDefinitionAttributeInput,
 		MultiSelectServiceDefinitionAttributeInput,
 		NumberServiceDefinitionInput,
 		SingleValueListServiceDefinitionAttributeInput,
-		StringServiceDefinitionInput
+		StringServiceDefinitionInput,
+		TextServiceDefinitionAttributeInput
 	} from './ServiceDefinitionAttributes/shared';
 	import StepControls from './StepControls.svelte';
 
@@ -78,12 +80,23 @@
 		return serviceAttributes;
 	}
 
+	function getTextAreaServiceAttributes(params: CreateServiceRequestParams) {
+		const serviceAttributes: TextServiceDefinitionAttributeInput[] = [];
+
+		for (const [key, entry] of params.attributeMap.entries()) {
+			if (entry.attribute.datatype == 'text')
+				serviceAttributes.push(entry as TextServiceDefinitionAttributeInput);
+		}
+		return serviceAttributes;
+	}
+
 	$: name = createName(params);
 	$: multiValueServiceAttributes = getMultiValueServiceAttributes(params);
 	$: singleValueServiceAttributes = getSingleValueServiceAttributes(params);
 	$: stringValueServiceAttributes = getStringValueServiceAttributes(params);
 	$: numberValueServiceAttributes = getNumberValueServiceAttributes(params);
 	$: dateTimeValueServiceAttributes = getDateTimeValueServiceAttributes(params);
+	$: textValueServiceAttributes = getTextAreaServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -146,6 +159,14 @@
 					{#each dateTimeValueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayDateTimeAttribute {attributes} />
+						</div>
+					{/each}
+				{/if}
+
+				{#if textValueServiceAttributes}
+					{#each textValueServiceAttributes as attributes}
+						<div class="mb-2">
+							<DisplayTextAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
