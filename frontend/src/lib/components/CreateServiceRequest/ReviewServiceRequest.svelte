@@ -22,7 +22,7 @@
 			: '';
 	}
 
-	function getMultivalueServiceAttributes(params: any) {
+	function getMultiValueServiceAttributes(params: any) {
 		const serviceAttributes:
 			| MultiSelectServiceDefinitionAttributeInput[]
 			| SingleValueListServiceDefinitionAttributeInput[] = [];
@@ -45,7 +45,7 @@
 
 	$: name = createName(params);
 
-	$: multivalueServiceAttributes = getMultivalueServiceAttributes(params);
+	$: multivalueServiceAttributes = getMultiValueServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
