@@ -22,7 +22,7 @@
 <strong>{attributes.attribute.description}</strong>
 
 <ul>
-	{#each values as value, i}
-		{value}{#if i < values - 1}<span>{', '}</span>{/if}
+	{#each values as value}
+		{value}
 	{/each}
 </ul>
