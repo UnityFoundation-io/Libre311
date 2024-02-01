@@ -54,7 +54,9 @@ public class AdminConsoleController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_VIEW_SUBTENANT})
     public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
+                                              @Header("Authorization") String authorizationHeader,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceService.createService(requestDTO, jurisdiction_id));
     }
@@ -63,7 +65,9 @@ public class AdminConsoleController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SUBTENANT})
     public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
+                                              @Header("Authorization") String authorizationHeader,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceService.updateService(serviceId, requestDTO, jurisdiction_id));
     }
@@ -71,7 +75,10 @@ public class AdminConsoleController {
     @Get(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public List<SensitiveServiceRequestDTO> getServiceRequestJson(Long serviceRequestId, @Nullable String jurisdiction_id) {
+    @RequiresPermissions({LIBRE311_REQUEST_VIEW_SUBTENANT})
+    public List<SensitiveServiceRequestDTO> getServiceRequestJson(Long serviceRequestId,
+                                                                  @Header("Authorization") String authorizationHeader,
+                                                                  @Nullable String jurisdiction_id) {
         return List.of(serviceRequestService.getSensitiveServiceRequest(serviceRequestId, jurisdiction_id));
     }
 
@@ -79,7 +86,9 @@ public class AdminConsoleController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_REQUEST_EDIT_SUBTENANT})
     public List<SensitiveServiceRequestDTO> updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO,
+                                                                     @Header("Authorization") String authorizationHeader,
                                                                      @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id));
     }

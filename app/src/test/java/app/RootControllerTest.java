@@ -491,6 +491,7 @@ public class RootControllerTest {
 
         Map payload = mapper.convertValue(updateServiceDTO, Map.class);
         request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId()+"?jurisdiction_id=town.gov", payload)
+                .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         response = client.toBlocking().exchange(request, ServiceDTO[].class);
         assertEquals(OK, response.getStatus());
@@ -549,6 +550,7 @@ public class RootControllerTest {
         Map payload = (new ObjectMapper()).convertValue(patchServiceRequestDTO, Map.class);
         HttpRequest<?> request = HttpRequest
                 .PATCH("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", payload)
+                .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpRequest<?> finalRequest = request;
@@ -584,6 +586,7 @@ public class RootControllerTest {
                                 "closed_date", "2023-01-25T13:15:30Z",
                                 "expected_date", "2023-01-15T13:15:30Z"
                         ))
+                .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
@@ -613,7 +616,8 @@ public class RootControllerTest {
         PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
 
         // unauthenticated read attempt
-        HttpRequest<?> request = HttpRequest.GET("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov");
+        HttpRequest<?> request = HttpRequest.GET("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov")
+                .header("Authorization", "Bearer token.text.here");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
@@ -646,6 +650,7 @@ public class RootControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceDTO, Map.class);
         HttpRequest<?> request = HttpRequest.POST("/admin/services?jurisdiction_id="+jurisdictionId, payload)
+                .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, ServiceDTO[].class);
     }
@@ -790,6 +795,7 @@ public class RootControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceDTO, Map.class);
         HttpRequest<?> request = HttpRequest.POST("/admin/services", payload)
+                .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, ServiceDTO[].class);
     }
@@ -804,6 +810,7 @@ public class RootControllerTest {
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
+                .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
     }
