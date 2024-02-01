@@ -2,10 +2,13 @@
 	import messages from '$media/messages.json';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import DisplayMultiSelectAttribute from '../DisplayMultiSelectAttribute.svelte';
+	import DisplayStringSelectAttribute from '../DisplayStringSelectAttribute.svelte';
 	import { Badge } from 'stwui';
 	import type {
 		MultiSelectServiceDefinitionAttributeInput,
-		SingleValueListServiceDefinitionAttributeInput
+		NumberServiceDefinitionInput,
+		SingleValueListServiceDefinitionAttributeInput,
+		StringServiceDefinitionInput
 	} from './ServiceDefinitionAttributes/shared';
 
 	export let params: CreateServiceRequestParams;
@@ -32,11 +35,18 @@
 				serviceAttributes.push(entry);
 			} else if (entry.attribute.datatype == 'singlevaluelist') {
 				serviceAttributes.push(entry);
-				// } else if (entry.attribute.datatype == 'string') {
-				// } else if (entry.attribute.datatype == 'number') {
-				// } else if (entry.attribute.dataype == 'datetime') {
-			} else {
-				throw Error('Invalid attribute datatype');
+			}
+
+			return serviceAttributes;
+		}
+	}
+
+	function getStringValueServiceAttributes(params: any) {
+		const serviceAttributes: StringServiceDefinitionInput[] | NumberServiceDefinitionInput[] = [];
+
+		for (const [key, entry] of params.attributeMap.entries()) {
+			if (entry.attribute.datatype == 'string') {
+				serviceAttributes.push(entry);
 			}
 
 			return serviceAttributes;
@@ -46,6 +56,7 @@
 	$: name = createName(params);
 
 	$: multivalueServiceAttributes = getMultiValueServiceAttributes(params);
+	$: stringValueServiceAttributes = getStringValueServiceAttributes(params);
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -76,6 +87,14 @@
 					{#each multivalueServiceAttributes as attributes}
 						<div class="mb-2">
 							<DisplayMultiSelectAttribute {attributes} />
+						</div>
+					{/each}
+				{/if}
+
+				{#if stringValueServiceAttributes}
+					{#each stringValueServiceAttributes as attributes}
+						<div class="mb-2">
+							<DisplayStringSelectAttribute {attributes} />
 						</div>
 					{/each}
 				{/if}
