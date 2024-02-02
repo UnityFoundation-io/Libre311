@@ -4,6 +4,8 @@ import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.type.MutableArgumentValue;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 
 import java.util.*;
@@ -38,7 +40,7 @@ public class RequiresPermissionsInterceptor implements MethodInterceptor<Object,
                 .distinct().collect(Collectors.toList());
 
         if (!unityAuthService.isUserPermittedForAction(token, jurisdictionId, declaredPermissions)) {
-            throw new RuntimeException("Not Authorized.");
+            throw new HttpStatusException(HttpStatus.UNAUTHORIZED, "Not Authorized.");
         }
 
         return context.proceed();
