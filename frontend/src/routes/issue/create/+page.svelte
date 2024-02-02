@@ -99,7 +99,10 @@
 			{/if}
 		</MapComponent>
 		<Breakpoint>
-			<div class="display absolute inset-x-0 bottom-6 flex justify-center gap-2" slot="is-tablet">
+			<div
+				class="display absolute inset-x-0 bottom-6 flex justify-center gap-2"
+				slot="is-mobile-or-tablet"
+			>
 				<Button type="primary" href={linkResolver.issuesMap($page.url)}>Cancel</Button>
 				<Button loading={loadingLocation} on:click={confirmLocation} type="primary"
 					>Select Location</Button
