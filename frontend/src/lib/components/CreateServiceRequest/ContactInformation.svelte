@@ -3,7 +3,7 @@
 	import { Input } from 'stwui';
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
 	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
-	import { checkPhoneNumber } from '$lib/utils/functions';
+	import { checkName, checkPhoneNumber } from '$lib/utils/functions';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import { createUnvalidatedInput, nullishCoalesceEmailValidator } from '$lib/utils/validation';
 	import { createEventDispatcher } from 'svelte';
@@ -27,6 +27,9 @@
 
 	function handleSubmit() {
 		let emailValidity = nullishCoalesceEmailValidator(createUnvalidatedInput(params.email));
+
+		firstNameError = checkName(params.first_name);
+		lastNameError = checkName(params.last_name);
 		emailError = emailValidity.type == 'invalid' ? emailValidity.error : '';
 		phoneError = checkPhoneNumber(params.phone);
 

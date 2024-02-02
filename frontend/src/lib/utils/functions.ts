@@ -45,6 +45,16 @@ export function iconPositionOpts(
 	};
 }
 
+export function checkName(name: string | undefined): string {
+	if (name == undefined || name == '') return '';
+
+	let nameRegex =
+		/^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð\-'. ]+$/gm;
+
+	if (name.match(nameRegex)) return '';
+	else return 'Name not valid';
+}
+
 export function checkPhoneNumber(phoneNumber: string | undefined): string {
 	if (phoneNumber == undefined) {
 		return '';
