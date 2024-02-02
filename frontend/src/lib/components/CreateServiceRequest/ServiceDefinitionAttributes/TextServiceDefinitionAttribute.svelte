@@ -11,7 +11,7 @@
 	error={input.error}
 	name="text"
 	placeholder={attribute.datatype_description ?? undefined}
-	class="relative mx-8 my-4"
+	class="relative my-4"
 >
 	<TextArea.Label slot="label">{attribute.description}</TextArea.Label>
 </TextArea>

@@ -5,15 +5,17 @@
 	import messages from '$media/messages.json';
 	import { Button } from 'stwui';
 	import { FilePicker } from 'stwui';
-	import { uploadIcon } from '$lib/assets/upload-icon.js';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { uploadIcon } from '$lib/components/Svg/outline/upload-icon.js';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import type { DropResult } from 'stwui/types';
+	import { page } from '$app/stores';
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
 	const dispatch = createEventDispatcher();
 
 	const libre311Service = useLibre311Service();
+	const linkResolver = useLibre311Context().linkResolver;
 
 	let files: FileList;
 
@@ -56,14 +58,14 @@
 					{messages['photo']['no_upload']}
 				</Button>
 
-				<Button type="link" on:click={() => {}}>
+				<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
 					{messages['photo']['back']}
 				</Button>
 			</div>
 		</div>
 	</div>
 
-	<div slot="is-mobile" class="flex h-full w-full items-center justify-center">
+	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
 			<div class="grid grid-rows-4 gap-3">
 				<input
@@ -88,7 +90,7 @@
 					{messages['photo']['no_upload']}
 				</Button>
 
-				<Button type="link" on:click={() => {}}>
+				<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
 					{messages['photo']['back']}
 				</Button>
 			</div>

@@ -1,3 +1,4 @@
+import type { CreateServiceRequestSteps } from '$lib/components/CreateServiceRequest/types';
 import type { Pagination, ServiceRequestId } from './Libre311/Libre311';
 
 export class LinkResolver {
@@ -39,5 +40,18 @@ export class LinkResolver {
 	}
 	issueDetailsMobile(url: URL, id: ServiceRequestId) {
 		return this.createIssueLink(`/issues/list/${id}`, url);
+	}
+
+	createIssuePageGetCurrentStep(url: URL): CreateServiceRequestSteps {
+		return Number(url.searchParams.get('step')) ?? 0;
+	}
+
+	createIssuePageNext(url: URL) {
+		let currentStep = this.createIssuePageGetCurrentStep(url);
+		return `/issue/create?step=${++currentStep}`;
+	}
+	createIssuePagePrevious(url: URL) {
+		let currentStep = this.createIssuePageGetCurrentStep(url);
+		return `/issue/create?step=${--currentStep}`;
 	}
 }

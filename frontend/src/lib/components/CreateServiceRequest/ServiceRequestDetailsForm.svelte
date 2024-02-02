@@ -20,6 +20,7 @@
 	} from './ServiceDefinitionAttributes/shared';
 	import { createEventDispatcher, type ComponentEvents } from 'svelte';
 	import type { StepChangeEvent } from './types';
+	import StepControls from './StepControls.svelte';
 
 	export let params: Partial<CreateServiceRequestParams>;
 
@@ -102,26 +103,46 @@
 	}
 </script>
 
-<form>
-	<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
-	{#if asyncAttributeInputMap?.type == 'success'}
-		{#each asyncAttributeInputMap.value.values() as input}
-			{#if input.datatype == 'multivaluelist'}
-				<MultiSelectServiceDefinitionAttribute {input} />
-			{:else if input.datatype == 'datetime'}
-				<DateTimeServiceDefinitionAttribute {input} />
-			{:else if input.datatype == 'string'}
-				<StringServiceDefinitionAttribute {input} />
-			{:else if input.datatype == 'singlevaluelist'}
-				<SingleValueListServiceDefinitionAttribute {input} />
-			{:else if input.datatype == 'number'}
-				<NumberServiceDefinitionAttribute {input} />
-			{:else if input.datatype == 'text'}
-				<TextServiceDefinitionAttribute {input} />
-			{/if}
-		{/each}
-		<TextArea name="comments" placeholder="Description" class="relative mx-8 my-4" />
+<form class="flex-container">
+	<div>
+		<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
+		{#if asyncAttributeInputMap?.type == 'success'}
+			<div>
+				{#each asyncAttributeInputMap.value.values() as input}
+					{#if input.datatype == 'multivaluelist'}
+						<MultiSelectServiceDefinitionAttribute {input} />
+					{:else if input.datatype == 'datetime'}
+						<DateTimeServiceDefinitionAttribute {input} />
+					{:else if input.datatype == 'string'}
+						<StringServiceDefinitionAttribute {input} />
+					{:else if input.datatype == 'singlevaluelist'}
+						<SingleValueListServiceDefinitionAttribute {input} />
+					{:else if input.datatype == 'number'}
+						<NumberServiceDefinitionAttribute {input} />
+					{:else if input.datatype == 'text'}
+						<TextServiceDefinitionAttribute {input} />
+					{/if}
+				{/each}
+				<TextArea
+					bind:value={params.description}
+					name="comments"
+					placeholder="Description"
+					class="relative  my-4"
+				/>
+			</div>
+		{/if}
+	</div>
 
-		<button type="submit" on:click|preventDefault={validate}>Submit</button>
-	{/if}
+	<StepControls on:click={validate}>
+		<svelte:fragment slot="submit-text">Confirm Details</svelte:fragment>
+	</StepControls>
 </form>
+
+<style>
+	.flex-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		height: 100%;
+	}
+</style>

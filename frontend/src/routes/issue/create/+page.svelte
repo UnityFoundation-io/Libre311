@@ -5,7 +5,6 @@
 	import ContactInformation from '$lib/components/CreateServiceRequest/ContactInformation.svelte';
 	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
 
-	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import WaypointOpen from '$lib/assets/waypoint-open.png';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import { iconPositionOpts } from '$lib/utils/functions';
@@ -22,14 +21,17 @@
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
+	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 
-	let step: CreateServiceRequestSteps = CreateServiceRequestSteps.LOCATION;
+	const libre311 = useLibre311Service();
+	const linkResolver = useLibre311Context().linkResolver;
+
 	let params: Partial<CreateServiceRequestParams> = {};
 	let centerPos: PointTuple = [41.308281, -72.924164]; // todo we need to set the starting point on per tenant basis. decide if bounds or center/zoom or both will be used.
 	let loadingLocation: boolean = false;
 
-	const libre311 = useLibre311Service();
-	const linkResolver = useLibre311Context().linkResolver;
+	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
+
 	const icon = L.icon({
 		iconUrl: WaypointOpen,
 		...iconPositionOpts(128 / 169, 45, 'bottom-center')
@@ -41,14 +43,10 @@
 	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
 	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);
 
-	function gotoNextStep() {
-		goto(`/issue/create?step=${++step}`);
-	}
-
 	function handleChange(e: CustomEvent<Partial<CreateServiceRequestParams>>) {
 		const changedParams = e.detail;
 		params = { ...params, ...changedParams };
-		gotoNextStep();
+		goto(linkResolver.createIssuePageNext($page.url));
 	}
 
 	function boundsChanged(e: CustomEvent<L.LatLngBounds>) {
@@ -66,7 +64,7 @@
 			params.address_string = res.display_name;
 		}
 		params = params;
-		gotoNextStep();
+		goto(linkResolver.createIssuePageNext($page.url));
 	}
 
 	function handleGeosearch(e: ComponentEvents<MapGeosearch>['geosearch']) {
@@ -83,8 +81,8 @@
 	}
 </script>
 
-<SideBarMainContentLayout sideBarBreakpointActive={step == CreateServiceRequestSteps.LOCATION}>
-	<div slot="side-bar" class="h-full">
+<CreateServiceRequestLayout {step}>
+	<div slot="side-bar" class="mx-4 h-full">
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
 		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestParams(params)}
@@ -101,7 +99,10 @@
 			{/if}
 		</MapComponent>
 		<Breakpoint>
-			<div class="display absolute inset-x-0 bottom-6 flex justify-center gap-2" slot="is-mobile">
+			<div
+				class="display absolute inset-x-0 bottom-6 flex justify-center gap-2"
+				slot="is-mobile-or-tablet"
+			>
 				<Button type="primary" href={linkResolver.issuesMap($page.url)}>Cancel</Button>
 				<Button loading={loadingLocation} on:click={confirmLocation} type="primary"
 					>Select Location</Button
@@ -109,4 +110,4 @@
 			</div>
 		</Breakpoint>
 	</div>
-</SideBarMainContentLayout>
+</CreateServiceRequestLayout>
