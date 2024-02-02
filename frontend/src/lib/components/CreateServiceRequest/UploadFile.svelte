@@ -10,13 +10,29 @@
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 
-	let input: any;
+	let input;
 	let container;
-	let image: any;
+	let image;
+
+	export let params: Readonly<Partial<CreateServiceRequestParams>>;
+
+	const dispatch = createEventDispatcher();
+
+	const linkResolver = useLibre311Context().linkResolver;
 
 	function onChange() {
+		uploadImage(input.files[0]);
+	}
+
+	function desktopDropFiles(dropFiles: DropResult) {
+		for (const file of dropFiles.accepted) {
+			console.log(`${file.name}: ${file.size} bytes`);
+			uploadImage(file);
+		}
+	}
+
+	function uploadImage(file: File) {
 		const updatedParams = Object.assign(params);
-		const file = input.files[0];
 
 		if (file) {
 			// updatedParams.media_url = file.name;
@@ -30,37 +46,6 @@
 			reader.readAsDataURL(file);
 
 			return;
-		}
-	}
-
-	export let params: Readonly<Partial<CreateServiceRequestParams>>;
-
-	const dispatch = createEventDispatcher();
-
-	const libre311Service = useLibre311Service();
-	const linkResolver = useLibre311Context().linkResolver;
-
-	function desktopDropFiles(dropFiles: DropResult) {
-		const updatedParams2 = Object.assign(params);
-
-		for (const file of dropFiles.accepted) {
-			console.log(`${file.name}: ${file.size} bytes`);
-			console.log(file);
-			// libre311Service.uploadImage(file);
-
-			if (file) {
-				// updatedParams.media_url = file.name;
-
-				const reader = new FileReader();
-				reader.addEventListener('load', function () {
-					image.setAttribute('src', reader.result);
-					updatedParams2.media_url = reader.result;
-					dispatch('stepChange', updatedParams2);
-				});
-				reader.readAsDataURL(file);
-
-				return;
-			}
 		}
 	}
 </script>
