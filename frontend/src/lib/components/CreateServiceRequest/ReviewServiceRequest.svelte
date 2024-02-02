@@ -69,10 +69,12 @@
 					</div>
 				{/each}
 
-				<div class="mb-1">
-					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-					<p class="text-sm">{params.description}</p>
-				</div>
+				{#if params.description}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['description']}</strong>
+						<p class="text-sm">{params.description}</p>
+					</div>
+				{/if}
 
 				{#if name}
 					<div class="mb-1">
