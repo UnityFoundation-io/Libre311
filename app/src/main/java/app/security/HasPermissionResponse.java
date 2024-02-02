@@ -20,14 +20,19 @@ import io.micronaut.core.annotation.Nullable;
 @Introspected
 public class HasPermissionResponse {
     private boolean hasPermission;
+
+    @Nullable
+    private String userEmail;
+
     @Nullable
     private String errorMessage;
 
     public HasPermissionResponse() {
     }
 
-    public HasPermissionResponse(boolean hasPermission, @Nullable String errorMessage) {
+    public HasPermissionResponse(boolean hasPermission, @Nullable String userEmail, @Nullable String errorMessage) {
         this.hasPermission = hasPermission;
+        this.userEmail = userEmail;
         this.errorMessage = errorMessage;
     }
 
@@ -37,6 +42,15 @@ public class HasPermissionResponse {
 
     public void setHasPermission(boolean hasPermission) {
         this.hasPermission = hasPermission;
+    }
+
+    @Nullable
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(@Nullable String userEmail) {
+        this.userEmail = userEmail;
     }
 
     @Nullable
