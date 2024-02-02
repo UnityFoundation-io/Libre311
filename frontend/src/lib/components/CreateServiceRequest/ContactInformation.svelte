@@ -3,7 +3,7 @@
 	import { Input } from 'stwui';
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
 	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
-	import { checkName, checkPhoneNumber } from '$lib/utils/functions';
+
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import {
 		createInput,
