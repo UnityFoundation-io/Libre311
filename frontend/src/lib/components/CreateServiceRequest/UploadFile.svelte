@@ -5,7 +5,7 @@
 	import messages from '$media/messages.json';
 	import { Button } from 'stwui';
 	import { FilePicker } from 'stwui';
-	import { uploadIcon } from '$lib/assets/upload-icon.js';
+	import { uploadIcon } from '$lib/components/Svg/outline/upload-icon.js';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';

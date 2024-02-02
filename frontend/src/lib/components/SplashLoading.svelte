@@ -1,6 +1,6 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { rocketLaunch } from '$lib/assets/rocket-launch.js';
+	import { rocketLaunch } from '$lib/components/Svg/outline/rocket-launch.js';
 	import { Progress } from 'stwui';
 	import { fade, draw } from 'svelte/transition';
 	import { onMount } from 'svelte';
