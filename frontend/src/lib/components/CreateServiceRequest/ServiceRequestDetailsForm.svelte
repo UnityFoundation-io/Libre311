@@ -105,6 +105,9 @@
 
 <form class="flex-container">
 	<div>
+		<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+			<img class="w-full" src={params.media_url} alt="preview" />
+		</div>
 		<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
 		{#if asyncAttributeInputMap?.type == 'success'}
 			<div>

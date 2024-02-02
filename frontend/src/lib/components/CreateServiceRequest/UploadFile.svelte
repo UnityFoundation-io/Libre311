@@ -10,6 +10,29 @@
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 
+	let input: any;
+	let container;
+	let image: any;
+
+	function onChange() {
+		const updatedParams = Object.assign(params);
+		const file = input.files[0];
+
+		if (file) {
+			// updatedParams.media_url = file.name;
+
+			const reader = new FileReader();
+			reader.addEventListener('load', function () {
+				image.setAttribute('src', reader.result);
+				updatedParams.media_url = reader.result;
+				dispatch('stepChange', updatedParams);
+			});
+			reader.readAsDataURL(file);
+
+			return;
+		}
+	}
+
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
 	const dispatch = createEventDispatcher();
@@ -17,23 +40,28 @@
 	const libre311Service = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
 
-	let files: FileList;
-
-	$: if (files) {
-		uploadFiles(files);
-	}
-
 	function desktopDropFiles(dropFiles: DropResult) {
-		uploadFiles(dropFiles.accepted);
-	}
+		const updatedParams2 = Object.assign(params);
 
-	function uploadFiles(files: FileList | File[]) {
-		for (const file of files) {
+		for (const file of dropFiles.accepted) {
 			console.log(`${file.name}: ${file.size} bytes`);
-			libre311Service.uploadImage(file);
-		}
+			console.log(file);
+			// libre311Service.uploadImage(file);
 
-		dispatch('stepChange');
+			if (file) {
+				// updatedParams.media_url = file.name;
+
+				const reader = new FileReader();
+				reader.addEventListener('load', function () {
+					image.setAttribute('src', reader.result);
+					updatedParams2.media_url = reader.result;
+					dispatch('stepChange', updatedParams2);
+				});
+				reader.readAsDataURL(file);
+
+				return;
+			}
+		}
 	}
 </script>
 
@@ -67,19 +95,30 @@
 
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div class="grid grid-rows-4 gap-3">
+			<div bind:this={container} class="grid grid-rows-1 gap-3">
 				<input
 					type="file"
 					id="actual-btn"
 					accept="image/*"
 					capture="environment"
 					hidden
-					bind:files
+					bind:this={input}
+					on:change={onChange}
 				/>
 				<label for="actual-btn">{messages['photo']['take_photo']}</label>
 
-				<input type="file" name="photo" id="camera-roll-btn" accept="image/*" hidden bind:files />
+				<input
+					type="file"
+					name="photo"
+					id="camera-roll-btn"
+					accept="image/*"
+					hidden
+					bind:this={input}
+					on:change={onChange}
+				/>
 				<label for="camera-roll-btn">{messages['photo']['camera_roll']}</label>
+
+				<div bind:this={image}></div>
 
 				<Button
 					type="link"
