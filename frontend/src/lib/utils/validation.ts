@@ -1,4 +1,5 @@
 import { z, ZodError } from 'zod';
+import libphonenumber from 'google-libphonenumber';
 
 export type UnvalidatedInput<T> = {
 	type: 'unvalidated';
@@ -75,5 +76,33 @@ export const optionalCoalesceNameValidator = inputValidatorFactory(
 
 // allow alphabetical characters including accents, empty strings and undefined
 export const optionalCoalescePhoneNumberValidator = inputValidatorFactory(
-	z.union([z.literal(''), z.string().optional()]) // todo add custom validator from library
+	z.union([
+		z.literal(''),
+		z
+			.string()
+			.superRefine((val, ctx) => {
+				const defaultErr = {
+					code: z.ZodIssueCode.custom,
+					message: 'Phone number is invalid'
+				};
+				try {
+					const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
+					const parsed = phoneUtil.parseAndKeepRawInput(val, 'US');
+					const valid = phoneUtil.isValidNumberForRegion(parsed, 'US');
+					if (!valid) {
+						ctx.addIssue(defaultErr);
+					}
+				} catch (error: unknown) {
+					if (error instanceof Error) {
+						ctx.addIssue({
+							code: z.ZodIssueCode.custom,
+							message: error.message
+						});
+					} else {
+						ctx.addIssue(defaultErr);
+					}
+				}
+			})
+			.optional()
+	])
 );

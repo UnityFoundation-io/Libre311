@@ -3,7 +3,8 @@ import {
 	createInput,
 	optionalEmailValidator,
 	emailValidator,
-	optionalCoalesceNameValidator
+	optionalCoalesceNameValidator,
+	optionalCoalescePhoneNumberValidator
 } from './validation';
 
 describe('emailValidator', () => {
@@ -70,4 +71,44 @@ describe('optionalCoalesceNameValidator', () => {
 		expect(res.type).toBe('valid');
 		expect(res.value).toBe('Santiago Peña');
 	});
+});
+
+describe('optionalCoalescePhoneNumberValidator', () => {
+	it('no input is valid', () => {
+		const res = optionalCoalescePhoneNumberValidator(createInput());
+		expect(res.type).toBe('valid');
+		expect(res.value).toBe(undefined);
+	});
+	it('empty string is valid', () => {
+		const res = optionalCoalescePhoneNumberValidator(createInput(''));
+		expect(res.type).toBe('valid');
+	});
+	// https://github.com/ruimarinho/google-libphonenumber/blob/master/test/phone-util_test.js
+	const validNumbers = [
+		'202-456-1414',
+		'(202) 456-1414',
+		'+1 (202) 456-1414',
+		'202.456.1414',
+		'202/4561414',
+		'1 202 456 1414',
+		'+12024561414',
+		'1 202-456-1414'
+	];
+	for (const validNum of validNumbers) {
+		it(`phone number: ${validNum} passes`, () => {
+			const res = optionalCoalescePhoneNumberValidator(createInput(validNum));
+			expect(res.type).toBe('valid');
+			expect(res.value).toBe(validNum);
+		});
+	}
+
+	const invalidNumbers = ['123456', '111111111111111111111', '63622286'];
+
+	for (const invalidNum of invalidNumbers) {
+		it(`phone number: ${invalidNum} fails`, () => {
+			const res = optionalCoalescePhoneNumberValidator(createInput(invalidNum));
+			expect(res.type).toBe('invalid');
+			expect(res.error).toBeTruthy();
+		});
+	}
 });
