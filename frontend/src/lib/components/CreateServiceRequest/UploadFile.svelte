@@ -10,9 +10,9 @@
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 
-	let input;
+	let input: HTMLInputElement;
 	let container;
-	let image;
+	let image: HTMLDivElement;
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
@@ -21,7 +21,7 @@
 	const linkResolver = useLibre311Context().linkResolver;
 
 	function onChange() {
-		uploadImage(input.files[0]);
+		if (input.files) uploadImage(input.files[0]);
 	}
 
 	function desktopDropFiles(dropFiles: DropResult) {
@@ -39,9 +39,11 @@
 
 			const reader = new FileReader();
 			reader.addEventListener('load', function () {
-				image.setAttribute('src', reader.result);
-				updatedParams.media_url = reader.result;
-				dispatch('stepChange', updatedParams);
+				if (reader.result) {
+					image.setAttribute('src', reader.result);
+					updatedParams.media_url = reader.result;
+					dispatch('stepChange', updatedParams);
+				}
 			});
 			reader.readAsDataURL(file);
 
