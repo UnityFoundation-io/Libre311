@@ -39,15 +39,12 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
-import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.rules.SecurityRule;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
 @Controller("/api")
-@Secured(SecurityRule.IS_ANONYMOUS)
 public class RootController {
 
     private final ServiceService serviceService;
@@ -245,7 +242,6 @@ public class RootController {
     }
 
     @Get(value =  "/config")
-    @Secured(SecurityRule.IS_AUTHENTICATED)
     @ExecuteOn(TaskExecutors.IO)
     public JurisdictionInfoResponse getJurisdictionInfo(@Header("Host") String hostName) {
         return jurisdictionService.findJurisdictionByHostName(hostName);

@@ -14,23 +14,6 @@ micronaut:
         urls:
           - "http://localhost:8080"
   security:
-    authentication: bearer
-    token:
-      jwt:
-        signatures:
-          secret:
-            generator:
-              secret: ${UNITY_SIGNATURE_SECRET}
-    endpoints:
-      introspection:
-        path: /api/token_info
-      logout:
-        path: /api/logout
-        get-allowed: true
-      login:
-        path: /api/login
-      oauth:
-        path: /api/oauth/access_token
     intercept-url-map:
       - pattern: /info
         http-method: GET

@@ -93,16 +93,7 @@ public class RootControllerTest {
     JurisdictionRepository jurisdictionRepository;
 
     @Inject
-    MockSecurityService mockSecurityService;
-
-    @Inject
-    MockAuthenticationFetcher mockAuthenticationFetcher;
-
-    @Inject
     MockUnityAuthClient mockUnityAuthClient;
-
-    @Inject
-    MockUnityAuthService mockUnityAuthService;
 
     @Inject
     DbCleanup dbCleanup;
@@ -110,21 +101,25 @@ public class RootControllerTest {
     @BeforeEach
     void setup() {
         dbCleanup.cleanupServiceRequests();
-        mockAuthenticationFetcher.setAuthentication(null);
-        mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, null)));
+        setAuthHasPermissionSuccessResponse(false);
 
         String userEmail = "person1@test.io";
-
-        mockUnityAuthService.setUserEmail(userEmail);
-
         Jurisdiction jurisdiction = jurisdictionRepository.findById("city.gov").get();
         Optional<User> userOptional = userRepository.findByEmail(userEmail);
         User user = userOptional.orElseGet(() -> userRepository.save(new User(userEmail)));
         userJurisdictionRepository.save(new UserJurisdiction(user, jurisdiction));
     }
 
-    void login() {
-        mockAuthenticationFetcher.setAuthentication(mockSecurityService.getAuthentication().get());
+    private void setAuthHasPermissionSuccessResponse(boolean success) {
+        if (success) {
+            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person1@test.io", null)));
+        } else {
+            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(false, "person1@test.io", "Unauthorized")));
+        }
+    }
+
+    void authLogin() {
+        setAuthHasPermissionSuccessResponse(true);
     }
 
     // create
@@ -345,7 +340,7 @@ public class RootControllerTest {
         });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
-        login();
+        authLogin();
 
         // success, bare minimum
         response = createService("BIKELN007", "Bike Lane Obstruction", "city.gov");
@@ -434,13 +429,16 @@ public class RootControllerTest {
     }
 
     @Test
-    public void cannotCreateServiceForAnotherJurisdictionIfAuthenticated() throws JsonProcessingException {
-        login();
+    public void cannotCreateServiceForAnotherJurisdictionIfAuthenticated() {
+
+        // Checks whether the user has the permission to create a service in their own jurisdiction, but does
+        // not have a user-jurisdiction record locally.
+        mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person2@test.com", null)));
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
             createService("BIKELN010", "Bike Lane Obstruction", "town.gov");
         });
-        assertEquals(INTERNAL_SERVER_ERROR, exception.getStatus());
+        assertEquals(UNAUTHORIZED, exception.getStatus());
     }
 
     // update service
@@ -449,7 +447,7 @@ public class RootControllerTest {
         HttpResponse<?> response;
         HttpRequest<?> request;
 
-        login();
+        authLogin();
 
         // create
         ServiceDefinition serviceDefinition = new ServiceDefinition();
@@ -587,7 +585,7 @@ public class RootControllerTest {
         });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
-        login();
+        authLogin();
 
         // update
         response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
@@ -652,7 +650,7 @@ public class RootControllerTest {
         });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
-        login();
+        authLogin();
 
         response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
         assertEquals(HttpStatus.OK, response.status());
@@ -726,7 +724,7 @@ public class RootControllerTest {
         });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
-        login();
+        authLogin();
 
         response = client.toBlocking().exchange(request, byte[].class);
         assertEquals(HttpStatus.OK, response.getStatus());
@@ -770,7 +768,7 @@ public class RootControllerTest {
         HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov")
                 .header("Authorization", "Bearer token.text.here");
 
-        login();
+        authLogin();
 
         response = client.toBlocking().exchange(request, byte[].class);
         assertEquals(HttpStatus.OK, response.getStatus());
@@ -799,7 +797,7 @@ public class RootControllerTest {
         h.setJurisdiction(j);
         j.getRemoteHosts().add(h);
         jurisdictionRepository.save(j);
-        login();
+        authLogin();
 
         HttpRequest<?> request = HttpRequest.GET("/config")
                 .header("host", "host1");
