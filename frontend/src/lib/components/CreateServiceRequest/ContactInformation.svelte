@@ -1,8 +1,8 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Input } from 'stwui';
-	import { mailIcon } from '$lib/assets/mailIcon.js';
-	import { phoneIcon } from '$lib/assets/phoneIcon.js';
+	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
+	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
 	import { checkPhoneNumber } from '$lib/utils/functions';
 	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import { createUnvalidatedInput, nullishCoalesceEmailValidator } from '$lib/utils/validation';
