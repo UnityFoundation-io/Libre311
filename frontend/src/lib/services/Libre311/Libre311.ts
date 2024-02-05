@@ -419,7 +419,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	async uploadImage(fileData: string): Promise<string> {
 		try {
-			const res = await axios.post("http:://localhost:8080/api/image", {
+			const res = await this.axiosInstance.post('/image', {
 			  g_recaptcha_response: 'TODO',
 			  image: fileData,
 			});
