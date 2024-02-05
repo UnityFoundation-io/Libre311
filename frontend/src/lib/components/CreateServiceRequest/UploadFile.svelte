@@ -6,7 +6,7 @@
 	import { Button } from 'stwui';
 	import { FilePicker } from 'stwui';
 	import { uploadIcon } from '$lib/components/Svg/outline/upload-icon.js';
-	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 	import { stageImage } from '$lib/stores/serviceRequestImageUpload';
@@ -17,16 +17,18 @@
 
 	const dispatch = createEventDispatcher();
 
+	const libre311Service = useLibre311Service();
+
 	const linkResolver = useLibre311Context().linkResolver;
 
-	function onChange() {
-		if (input.files) uploadImage(input.files[0]);
+	async function onChange() {
+		if (input.files) await uploadImage(input.files[0]);
 	}
 
-	function desktopDropFiles(dropFiles: DropResult) {
+	async function desktopDropFiles(dropFiles: DropResult) {
 		for (const file of dropFiles.accepted) {
 			console.log(`${file.name}: ${file.size} bytes`);
-			uploadImage(file);
+			await uploadImage(file);
 		}
 	}
 
@@ -34,13 +36,16 @@
 		const updatedParams = Object.assign(params);
 
 		if (file) {
-			updatedParams.media_url = file.name;
-
 			const reader = new FileReader();
-			reader.addEventListener('load', function () {
+			reader.addEventListener('load', async function () {
 				if (reader.result) {
 					const result: String = new String(reader.result);
-					stageImage(result.toString());
+					const imageData = result.toString();
+					stageImage(imageData);
+
+					const media_url = await libre311Service.uploadImage(imageData);
+					updatedParams.media_url = media_url;
+
 					dispatch('stepChange', updatedParams);
 				}
 			});

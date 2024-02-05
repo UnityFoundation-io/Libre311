@@ -9,7 +9,7 @@
 	import DisplayTextAttribute from './DisplayServiceDefinitionAttributes/DisplayTextAttribute.svelte';
 	import { Badge } from 'stwui';
 	import StepControls from './StepControls.svelte';
-	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
+	// import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
 
 	export let params: CreateServiceRequestParams;
 
@@ -40,10 +40,15 @@
 
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>
 
-				{#if $serviceRequestImageUpload}
+				<!-- TODO: Delete this -->
+				<!-- {#if $serviceRequestImageUpload}
 					<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
 						<img class="w-full" src={$serviceRequestImageUpload} alt="preview" />
 					</div>
+				{/if} -->
+
+				{#if params.media_url}
+					<div class="serviceImage" style={`background-image: url('${params.media_url}');`} />
 				{/if}
 
 				<div class="serviceTitle mt-2 flow-root">
@@ -97,5 +102,15 @@
 <style>
 	.serviceTitle {
 		color: hsl(var(--primary));
+	}
+
+	.serviceImage {
+		height: 0;
+		padding-top: 56.25%;
+		overflow-x: hidden;
+		overflow-y: hidden;
+		background-position: center;
+		background-size: cover;
+		border-radius: 10px;
 	}
 </style>

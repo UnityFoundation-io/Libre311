@@ -308,7 +308,7 @@ export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
-	uploadImage(file: File): Promise<unknown>;
+	uploadImage(fileData: string): Promise<unknown>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -417,8 +417,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 		throw Error('Not Implemented');
 	}
 
-	async uploadImage(file: File): Promise<unknown> {
-		throw Error('Not Implemented');
+	async uploadImage(fileData: string): Promise<string> {
+		try {
+			const res = await axios.post("http:://localhost:8080/api/image", {
+			  g_recaptcha_response: 'TODO',
+			  image: fileData,
+			});
+			console.log(res);
+
+			const mediaUrl: string = res.data;
+			return mediaUrl;
+		  } catch (err) {
+			console.log(err);
+			return 'http://tinyurl.com/ufskhh54';	// Fake data
+		}
 	}
 }
 
