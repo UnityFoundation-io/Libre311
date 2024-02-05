@@ -5,6 +5,7 @@
 	import { Dropdown } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
+	import { toTimeStamp } from '$lib/utils/functions';
 
 	export let serviceRequest: ServiceRequest;
 	export let detailsLink: string;
@@ -30,10 +31,6 @@
 		}
 		return 'error';
 	}
-
-	function toTimeStamp(serviceRequest: ServiceRequest) {
-		return `${new Date(serviceRequest.requested_datetime).toLocaleDateString()} ${new Date(serviceRequest.requested_datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-	}
 </script>
 
 <Card>
@@ -47,7 +44,7 @@
 			>
 		</div>
 
-		<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest)}</p>
+		<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>
 
 		{#if serviceRequest.media_url}
 			<div class="rounded-md bg-[#D9D9D9]">

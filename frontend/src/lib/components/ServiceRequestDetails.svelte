@@ -5,6 +5,7 @@
 	import type { CreateServiceRequestParams, ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import clockIcon from '$lib/assets/Clock.svg';
+	import { toTimeStamp } from '$lib/utils/functions';
 
 	export let serviceRequest: ServiceRequest | Readonly<Partial<CreateServiceRequestParams>>;
 
@@ -29,12 +30,6 @@
 			default:
 				return 'error';
 		}
-	}
-
-	function toTimeStamp(timeStamp: string | null | undefined) {
-		return timeStamp
-			? `${new Date(timeStamp).toLocaleDateString()} ${new Date(timeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-			: '';
 	}
 </script>
 
