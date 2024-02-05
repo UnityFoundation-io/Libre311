@@ -9,6 +9,7 @@
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
+	import { stageImage } from '$lib/stores/serviceRequestImageUpload';
 
 	let input: HTMLInputElement;
 
@@ -33,12 +34,12 @@
 		const updatedParams = Object.assign(params);
 
 		if (file) {
-			// updatedParams.media_url = file.name;
+			updatedParams.media_url = file.name;
 
 			const reader = new FileReader();
 			reader.addEventListener('load', function () {
 				if (reader.result) {
-					updatedParams.media_url = reader.result;
+					stageImage(reader.result);
 					dispatch('stepChange', updatedParams);
 				}
 			});

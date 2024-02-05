@@ -21,6 +21,7 @@
 	import { createEventDispatcher, type ComponentEvents } from 'svelte';
 	import type { StepChangeEvent } from './types';
 	import StepControls from './StepControls.svelte';
+	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
 
 	export let params: Partial<CreateServiceRequestParams>;
 
@@ -105,9 +106,9 @@
 
 <form class="flex-container">
 	<div>
-		{#if params.media_url}
+		{#if $serviceRequestImageUpload}
 			<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-				<img class="w-full" src={params.media_url} alt="preview" />
+				<img class="w-full" src={$serviceRequestImageUpload} alt="preview" />
 			</div>
 		{/if}
 		<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
