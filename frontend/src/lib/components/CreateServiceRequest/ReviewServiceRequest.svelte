@@ -40,7 +40,7 @@
 
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>
 
-				{#if serviceRequestImageUpload}
+				{#if $serviceRequestImageUpload}
 					<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
 						<img class="w-full" src={$serviceRequestImageUpload} alt="preview" />
 					</div>

@@ -39,7 +39,8 @@
 			const reader = new FileReader();
 			reader.addEventListener('load', function () {
 				if (reader.result) {
-					stageImage(reader.result);
+					const result: String = new String(reader.result);
+					stageImage(result.toString());
 					dispatch('stepChange', updatedParams);
 				}
 			});
