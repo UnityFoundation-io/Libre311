@@ -22,13 +22,15 @@
 	const linkResolver = useLibre311Context().linkResolver;
 
 	async function onChange() {
-		if (input.files) await uploadImage(input.files[0]);
+		if (input.files && input.files.length < 2) await uploadImage(input.files[0]);
+		else throw new Error('Can only upload a single image.');
 	}
 
 	async function desktopDropFiles(dropFiles: DropResult) {
 		for (const file of dropFiles.accepted) {
 			console.log(`${file.name}: ${file.size} bytes`);
 			await uploadImage(file);
+			return; // Only upload single file
 		}
 	}
 
