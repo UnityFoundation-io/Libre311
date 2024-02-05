@@ -11,7 +11,6 @@
 	import { page } from '$app/stores';
 
 	let input: HTMLInputElement;
-	let container;
 	let image: HTMLDivElement;
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
@@ -82,7 +81,7 @@
 
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div bind:this={container} class="grid grid-rows-1 gap-3">
+			<div class="grid grid-rows-1 gap-3">
 				<input
 					type="file"
 					id="actual-btn"
