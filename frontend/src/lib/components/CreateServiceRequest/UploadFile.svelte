@@ -39,7 +39,6 @@
 			const reader = new FileReader();
 			reader.addEventListener('load', function () {
 				if (reader.result) {
-					image.setAttribute('src', reader.result);
 					updatedParams.media_url = reader.result;
 					dispatch('stepChange', updatedParams);
 				}
@@ -103,8 +102,6 @@
 					on:change={onChange}
 				/>
 				<label for="camera-roll-btn">{messages['photo']['camera_roll']}</label>
-
-				<div bind:this={image}></div>
 
 				<Button
 					type="link"
