@@ -11,7 +11,6 @@
 	import { page } from '$app/stores';
 
 	let input: HTMLInputElement;
-	let image: HTMLDivElement;
 
 	export let params: Readonly<Partial<CreateServiceRequestParams>>;
 
