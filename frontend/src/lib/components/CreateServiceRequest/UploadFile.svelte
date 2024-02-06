@@ -26,7 +26,6 @@
 
 	async function desktopDropFiles(dropFiles: DropResult) {
 		for (const file of dropFiles.accepted) {
-			console.log(`${file.name}: ${file.size} bytes`);
 			await uploadImage(file);
 			return; // Only upload single file
 		}
