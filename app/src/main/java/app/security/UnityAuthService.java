@@ -4,6 +4,7 @@ import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.user.User;
 import app.model.user.UserRepository;
+import app.model.userjurisdiction.UserJurisdiction;
 import app.model.userjurisdiction.UserJurisdictionRepository;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpResponse;
@@ -28,7 +29,9 @@ public class UnityAuthService {
     private final UserJurisdictionRepository userJurisdictionRepository;
 
 
-    public UnityAuthService(UnityAuthClient client, UserRepository userRepository, JurisdictionRepository jurisdictionRepository, UserJurisdictionRepository userJurisdictionRepository) {
+    public UnityAuthService(UnityAuthClient client, UserRepository userRepository,
+                            JurisdictionRepository jurisdictionRepository,
+                            UserJurisdictionRepository userJurisdictionRepository) {
         this.client = client;
         this.userRepository = userRepository;
         this.jurisdictionRepository = jurisdictionRepository;
@@ -52,7 +55,9 @@ public class UnityAuthService {
             if (body.isEmpty()) {
                 return false;
             }
-            hasPermission = body.get().isHasPermission() && existsInLocalUserJurisdictionTable(body.get().getUserEmail(), jurisdictionId);
+
+            hasPermission = body.get().isHasPermission() &&
+                    validateUserExistenceAndPermissions(body.get().getUserEmail(), body.get().getPermissions(), jurisdictionId);
         } catch (HttpClientResponseException e) {
             Optional<HasPermissionResponse> body = e.getResponse().getBody(HasPermissionResponse.class);
             if (body.isEmpty()) {
@@ -67,12 +72,20 @@ public class UnityAuthService {
         return hasPermission;
     }
 
-    private boolean existsInLocalUserJurisdictionTable(String userEmail, String jurisdictionId) {
+    private boolean validateUserExistenceAndPermissions(String userEmail, List<String> permissions, String jurisdictionId) {
         Optional<User> userOptional = userRepository.findByEmail(userEmail);
         if (userOptional.isEmpty()) {
             return false;
         }
         User user = userOptional.get();
-        return userJurisdictionRepository.findByUserAndJurisdictionId(user, jurisdictionId).isPresent();
+        Optional<UserJurisdiction> jurisdictionUserOptional = userJurisdictionRepository.findByUserAndJurisdictionId(user, jurisdictionId);
+        return jurisdictionUserOptional.isPresent() && validatePermissions(permissions, jurisdictionUserOptional.get());
+    }
+
+    private boolean validatePermissions(List<String> permissions, UserJurisdiction userJurisdiction) {
+        if (permissions != null && permissions.stream().allMatch(s -> s.contains("_ADMIN_") && s.endsWith("-SUBTENANT"))) {
+            return userJurisdiction.isUserAdmin();
+        }
+        return true;
     }
 }

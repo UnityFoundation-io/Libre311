@@ -14,7 +14,6 @@ public class UserJurisdiction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @NonNull
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private User user;
@@ -23,12 +22,15 @@ public class UserJurisdiction {
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private Jurisdiction jurisdiction;
 
+    private boolean isUserAdmin = false;
+
     public UserJurisdiction() {
     }
 
-    public UserJurisdiction(@NonNull User user, @NonNull Jurisdiction jurisdiction) {
+    public UserJurisdiction(@NonNull User user, @NonNull Jurisdiction jurisdiction, boolean isUserAdmin) {
         this.user = user;
         this.jurisdiction = jurisdiction;
+        this.isUserAdmin = isUserAdmin;
     }
 
     public Long getId() {
@@ -55,5 +57,13 @@ public class UserJurisdiction {
 
     public void setJurisdiction(@NonNull Jurisdiction jurisdiction) {
         this.jurisdiction = jurisdiction;
+    }
+
+    public boolean isUserAdmin() {
+        return isUserAdmin;
+    }
+
+    public void setUserAdmin(boolean userAdmin) {
+        isUserAdmin = userAdmin;
     }
 }

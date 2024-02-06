@@ -101,25 +101,25 @@ public class RootControllerTest {
     @BeforeEach
     void setup() {
         dbCleanup.cleanupServiceRequests();
-        setAuthHasPermissionSuccessResponse(false);
+        setAuthHasPermissionSuccessResponse(false, null);
 
         String userEmail = "person1@test.io";
         Jurisdiction jurisdiction = jurisdictionRepository.findById("city.gov").get();
         Optional<User> userOptional = userRepository.findByEmail(userEmail);
         User user = userOptional.orElseGet(() -> userRepository.save(new User(userEmail)));
-        userJurisdictionRepository.save(new UserJurisdiction(user, jurisdiction));
+        userJurisdictionRepository.save(new UserJurisdiction(user, jurisdiction, true));
     }
 
-    private void setAuthHasPermissionSuccessResponse(boolean success) {
+    private void setAuthHasPermissionSuccessResponse(boolean success, List<String> permissions) {
         if (success) {
-            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person1@test.io", null)));
+            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person1@test.io", null, permissions)));
         } else {
-            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(false, "person1@test.io", "Unauthorized")));
+            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(false, "person1@test.io", "Unauthorized", permissions)));
         }
     }
 
     void authLogin() {
-        setAuthHasPermissionSuccessResponse(true);
+        setAuthHasPermissionSuccessResponse(true, null);
     }
 
     // create
@@ -433,7 +433,7 @@ public class RootControllerTest {
 
         // Checks whether the user has the permission to create a service in their own jurisdiction, but does
         // not have a user-jurisdiction record locally.
-        mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person2@test.com", null)));
+        mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person2@test.com", null, List.of("LIBRE311_ADMIN_VIEW_SUBTENANT"))));
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
             createService("BIKELN010", "Bike Lane Obstruction", "town.gov");

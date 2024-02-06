@@ -17,6 +17,8 @@ package app.security;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
 
+import java.util.List;
+
 @Introspected
 public class HasPermissionResponse {
     private boolean hasPermission;
@@ -27,13 +29,16 @@ public class HasPermissionResponse {
     @Nullable
     private String errorMessage;
 
+    private List<String> permissions;
+
     public HasPermissionResponse() {
     }
 
-    public HasPermissionResponse(boolean hasPermission, @Nullable String userEmail, @Nullable String errorMessage) {
+    public HasPermissionResponse(boolean hasPermission, @Nullable String userEmail, @Nullable String errorMessage, List<String> permissions) {
         this.hasPermission = hasPermission;
         this.userEmail = userEmail;
         this.errorMessage = errorMessage;
+        this.permissions = permissions;
     }
 
     public boolean isHasPermission() {
@@ -60,5 +65,13 @@ public class HasPermissionResponse {
 
     public void setErrorMessage(@Nullable String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public List<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
     }
 }
