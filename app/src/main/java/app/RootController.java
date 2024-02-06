@@ -30,6 +30,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.xml.XmlEscapers;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpRequest;
@@ -38,16 +39,12 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
-import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.rules.SecurityRule;
-import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
 @Controller("/api")
-@Secured(SecurityRule.IS_ANONYMOUS)
 public class RootController {
 
     private final ServiceService serviceService;
@@ -245,7 +242,6 @@ public class RootController {
     }
 
     @Get(value =  "/config")
-    @Secured(SecurityRule.IS_AUTHENTICATED)
     @ExecuteOn(TaskExecutors.IO)
     public JurisdictionInfoResponse getJurisdictionInfo(@Header("Host") String hostName) {
         return jurisdictionService.findJurisdictionByHostName(hostName);

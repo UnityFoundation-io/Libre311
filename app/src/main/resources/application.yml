@@ -3,34 +3,17 @@ gcp:
 
 micronaut:
   application:
-    name: app
+    name: Libre311
   object-storage:
     gcp:
       default:
         bucket: ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
+  http:
+    services:
+      auth:
+        urls:
+          - "http://localhost:8080"
   security:
-    authentication: cookie
-    oauth2:
-      login-uri: "/api/oauth/login{/provider}"
-      callback-uri: "/api/oauth/callback{/provider}"
-      clients:
-        google:
-          client-id: ${GOOGLE_CLIENT_ID:`your-client-id-here.apps.googleusercontent.com`}
-          client-secret: ${GOOGLE_CLIENT_SECRET:`googleClientSecret`}
-          openid:
-            authorization:
-              prompt: select_account
-            issuer: "https://accounts.google.com"
-    endpoints:
-      introspection:
-        path: /api/token_info
-      logout:
-        path: /api/logout
-        get-allowed: true
-      login:
-        path: /api/login
-      oauth:
-        path: /api/oauth/access_token
     intercept-url-map:
       - pattern: /info
         http-method: GET
