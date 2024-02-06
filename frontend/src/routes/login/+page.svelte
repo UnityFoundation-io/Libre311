@@ -20,6 +20,8 @@
 
 	function login() {
 		emailInput = emailValidator(emailInput);
+
+		alert('TODO: login todo');
 	}
 </script>
 
