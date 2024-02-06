@@ -27,7 +27,7 @@
 </script>
 
 <div class="flex h-full w-full items-center justify-center">
-	<div class="flex-col sm:w-3/4">
+	<div class="w-full flex-col">
 		<div class="m-4 flex flex-col items-center justify-center">
 			{#if visible}
 				<div class="size-28">
