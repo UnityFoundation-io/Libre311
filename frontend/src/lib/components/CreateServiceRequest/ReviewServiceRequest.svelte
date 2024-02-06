@@ -9,9 +9,12 @@
 	import DisplayTextAttribute from './DisplayServiceDefinitionAttributes/DisplayTextAttribute.svelte';
 	import { Badge } from 'stwui';
 	import StepControls from './StepControls.svelte';
-	// import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
+	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
 
 	export let params: CreateServiceRequestParams;
+
+	const libre311Service = useLibre311Service();
 
 	function createName(params: CreateServiceRequestParams) {
 		if (params.first_name || params.last_name)
@@ -23,6 +26,14 @@
 		return timeStamp
 			? `${new Date(timeStamp).toLocaleDateString()} ${new Date(timeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
 			: '';
+	}
+
+	async function submitToServer() {
+		const updatedParams = Object.assign(params);
+
+		updatedParams.media_url = await libre311Service.uploadImage($serviceRequestImageUpload);
+
+		alert('todo submit to server');
 	}
 
 	$: name = createName(params);
@@ -40,15 +51,10 @@
 
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>
 
-				<!-- TODO: Delete this -->
-				<!-- {#if $serviceRequestImageUpload}
+				{#if $serviceRequestImageUpload}
 					<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
 						<img class="w-full" src={$serviceRequestImageUpload} alt="preview" />
 					</div>
-				{/if} -->
-
-				{#if params.media_url}
-					<div class="serviceImage" style={`background-image: url('${params.media_url}');`} />
 				{/if}
 
 				<div class="serviceTitle mt-2 flow-root">
@@ -91,7 +97,7 @@
 			</div>
 		</div>
 
-		<StepControls on:click={() => alert('todo submit to server')}>
+		<StepControls on:click={submitToServer}>
 			<svelte:fragment slot="submit-text"
 				>{messages['reviewServiceRequest']['button_submit']}</svelte:fragment
 			>

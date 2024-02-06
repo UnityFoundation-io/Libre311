@@ -17,8 +17,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	const libre311Service = useLibre311Service();
-
 	const linkResolver = useLibre311Context().linkResolver;
 
 	async function onChange() {
@@ -35,20 +33,13 @@
 	}
 
 	function uploadImage(file: File) {
-		const updatedParams = Object.assign(params);
-
 		if (file) {
 			const reader = new FileReader();
 			reader.addEventListener('load', async function () {
 				if (reader.result) {
 					const result: String = new String(reader.result);
-					const imageData = result.toString();
-					stageImage(imageData);
-
-					const media_url = await libre311Service.uploadImage(imageData);
-					updatedParams.media_url = media_url;
-
-					dispatch('stepChange', updatedParams);
+					stageImage(result.toString());
+					dispatch('stepChange');
 				}
 			});
 			reader.readAsDataURL(file);
