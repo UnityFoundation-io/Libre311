@@ -2,28 +2,23 @@
 	import messages from '$media/messages.json';
 	import { rocketLaunch } from '$lib/components/Svg/outline/rocket-launch.js';
 	import { Button, Card, Input } from 'stwui';
-	import {
-		createInput,
-		optionalCoalesceEmailValidator,
-		type FormInputValue
-	} from '$lib/utils/validation';
 	import { fade, draw } from 'svelte/transition';
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { type FormInputValue } from '$lib/utils/validation';
+	import { dispatchEventFunctionFactory, type EventDispatchTypeMap } from './shared';
 
-	let emailInput: FormInputValue<string | undefined> = createInput('');
-	let passwordInput: FormInputValue<string | undefined> = createInput('');
+	const dispatch = createEventDispatcher<EventDispatchTypeMap>();
+
+	export let emailInput: FormInputValue<string | undefined>;
+	export let passwordInput: FormInputValue<string | undefined>;
 
 	let visible = false;
-
-	async function login() {
-		emailInput = optionalCoalesceEmailValidator(emailInput);
-
-		alert('TODO');
-	}
 
 	onMount(() => {
 		visible = true;
 	});
+
+	const { onChange, onSubmit } = dispatchEventFunctionFactory(dispatch);
 </script>
 
 <div
@@ -62,11 +57,13 @@
 		<div class="m-4">
 			<Input
 				allowClear
-				name="email"
+				id="email-desktop"
 				type="email"
+				name="email-desktop"
 				placeholder={messages['login']['email']['placeholder']}
 				error={emailInput.error}
-				bind:value={emailInput.value}
+				value={emailInput.value}
+				on:change={(e) => onChange(e, 'email')}
 			>
 				<Input.Label slot="label">{messages['login']['email']['label']}</Input.Label>
 			</Input>
@@ -75,19 +72,21 @@
 		<div class="m-4">
 			<Input
 				allowClear
+				id="password-desktop"
 				type="password"
-				name="password"
+				name="password-desktop"
 				showPasswordToggle={true}
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
-				bind:value={passwordInput.value}
+				value={passwordInput.value}
+				on:change={(e) => onChange(e, 'password')}
 			>
 				<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
 			</Input>
 		</div>
 
 		<div class="m-4">
-			<Button type="primary" on:click={login}>
+			<Button type="primary" on:click={onSubmit}>
 				{messages['login']['submit']}
 			</Button>
 		</div>
