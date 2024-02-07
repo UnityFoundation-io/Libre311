@@ -24,13 +24,9 @@
 		emailInput = emailValidator(emailInput);
 
 		if (emailInput.value && passwordInput.value) {
-			try {
-				const authService = useUnityAuthService();
-				const res = await authService.login(emailInput.value, passwordInput.value);
-				console.log(res);
-			} catch (e) {
-				throw new Error(e?.toString());
-			}
+			const authService = useUnityAuthService();
+			const res = await authService.login(emailInput.value, passwordInput.value);
+			console.log(res);
 		}
 	}
 

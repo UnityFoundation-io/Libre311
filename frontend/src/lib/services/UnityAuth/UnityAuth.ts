@@ -39,13 +39,16 @@ export class UnityAuthServiceImpl implements UnityAuthService {
 	}
 
 	async login(email: string, password: string): Promise<UnityAuthLoginResponse> {
-		console.log('LOGIN');
-		return {
-			access_token: 'test',
-			token_type: 'Bearer',
-			expires_in: 3600,
-			username: 'Jack'
-		};
+		try {
+			const res = await this.axiosInstance.post('/login', {
+				username: email,
+				password: password
+			});
+
+			return UnityAuthLoginResponseSchema.parse(res.data);
+		} catch (e) {
+			throw new Error(e?.toString());
+		}
 	}
 
 }
