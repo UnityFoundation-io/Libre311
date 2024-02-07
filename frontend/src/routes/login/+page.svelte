@@ -4,6 +4,8 @@
 	import type { EventDispatchTypeMap } from '$lib/components/Login/shared';
 	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator } from '$lib/utils/validation';
+	import { useUnityAuthService } from '$lib/context/Libre311Context';
+	import { onMount } from 'svelte';
 
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
@@ -18,11 +20,21 @@
 		}
 	}
 
-	function login() {
+	async function login() {
 		emailInput = emailValidator(emailInput);
 
-		alert('TODO: login todo');
+		if (emailInput.value && passwordInput.value) {
+			try {
+				const authService = useUnityAuthService();
+				const res = await authService.login(emailInput.value, passwordInput.value);
+				console.log(res);
+			} catch (e) {
+				throw new Error(e?.toString());
+			}
+		}
 	}
+
+	onMount(login);
 </script>
 
 <Breakpoint>

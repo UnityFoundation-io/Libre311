@@ -15,15 +15,20 @@
 	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { recaptchaServiceFactory } from '$lib/services/RecaptchaService';
+	import type { UnityAuthServiceProps } from '$lib/services/UnityAuth/UnityAuth';
 
 	const mode: Mode = getModeFromEnv(import.meta.env);
 	const recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
+	const unityAuthServiceProps: UnityAuthServiceProps = {
+		baseURL: String(import.meta.env.VITE_AUTH_URL)
+	};
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
 
 	const synchronousContextProviderProps: Omit<Libre311ContextProviderProps, 'service'> = {
 		recaptchaKey,
-		mode
+		mode,
+		unityAuthServiceProps
 	};
 
 	async function initLibre311ContextProps(serviceProps: Libre311ServiceProps) {
