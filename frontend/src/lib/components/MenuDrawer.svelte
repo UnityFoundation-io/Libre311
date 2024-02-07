@@ -3,10 +3,10 @@
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { Button, Drawer, Menu, Portal } from 'stwui';
 
-	import mapSVG from '$lib/assets/map.svg';
-	import paintBrushSVG from '$lib/assets/paint-brush.svg';
-	import pencilSVG from '$lib/assets/pencil-square.svg';
-	import tableSVG from '$lib/assets/table-cells.svg';
+	import { mapIcon } from './Svg/outline/mapIcon';
+	import { paintBrushIcon } from './Svg/outline/paintBrushIcon';
+	import { pencilIcon } from './Svg/outline/pencilIcon';
+	import { tableIcon } from './Svg/outline/tableIcon';
 
 	export let open: boolean;
 
@@ -28,26 +28,26 @@
 		{
 			key: 'table',
 			label: 'Service Request Table',
-			data: tableSVG,
+			data: tableIcon,
 			href: linkResolver.issuesList($page.url)
 		},
 		{
 			key: 'map',
 			label: 'Request Map',
-			data: mapSVG,
+			data: mapIcon,
 			href: linkResolver.issuesMap($page.url)
 		}
 		// TODO: Add appropriate URLs
 		// {
 		// 	key: 'manager',
 		// 	label: 'Service Definition Manager',
-		// 	data: pencilSVG,
+		// 	data: pencilIcon,
 		// 	href: '#manager'
 		// },
 		// {
 		// 	key: 'editor',
 		// 	label: 'Theme Editor',
-		// 	data: paintBrushSVG,
+		// 	data: paintBrushIcon,
 		// 	href: '#editor'
 		// }
 	];
