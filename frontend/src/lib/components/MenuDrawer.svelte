@@ -29,26 +29,27 @@
 			key: 'table',
 			label: 'Service Request Table',
 			data: tableSVG,
-			href: '#table'
+			href: linkResolver.issuesList($page.url)
 		},
 		{
 			key: 'map',
 			label: 'Request Map',
 			data: mapSVG,
 			href: linkResolver.issuesMap($page.url)
-		},
-		{
-			key: 'manager',
-			label: 'Service Definition Manager',
-			data: pencilSVG,
-			href: '#manager'
-		},
-		{
-			key: 'editor',
-			label: 'Theme Editor',
-			data: paintBrushSVG,
-			href: '#editor'
 		}
+		// TODO: Add appropriate URLs
+		// {
+		// 	key: 'manager',
+		// 	label: 'Service Definition Manager',
+		// 	data: pencilSVG,
+		// 	href: '#manager'
+		// },
+		// {
+		// 	key: 'editor',
+		// 	label: 'Theme Editor',
+		// 	data: paintBrushSVG,
+		// 	href: '#editor'
+		// }
 	];
 </script>
 

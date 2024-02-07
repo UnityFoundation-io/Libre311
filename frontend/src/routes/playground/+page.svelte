@@ -17,5 +17,5 @@
 
 		<MenuDrawer bind:open={isOpen} />
 	</slot>
-	<div slot="main-content" class="relative flex h-full">map</div>
+	<div slot="main-content" class="relative flex h-full" />
 </SideBarMainContentLayout>
