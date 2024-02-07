@@ -1,4 +1,3 @@
-import type { AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
@@ -199,15 +198,15 @@ export const ContactInformationSchema = z.object({
 
 export type ContactInformation = z.infer<typeof ContactInformationSchema>;
 
-export type CreateServiceRequestParams = ContactInformation & {
-	lat: string;
-	lng: string;
-	address_string: string;
-	attributeMap: AttributeInputMap;
-	description?: string;
-	media_url?: string;
-	service: Service;
-};
+export type CreateServiceRequestParams = HasServiceCode &
+	ContactInformation & {
+		lat: string;
+		lng: string;
+		address_string: string;
+		attributes: AttributeResponse[];
+		description?: string;
+		media_url?: string;
+	};
 
 export const OpenServiceRequestStatusSchema = z.literal('Open');
 export const ClosedServiceRequestStatusSchema = z.literal('Closed');
@@ -325,7 +324,8 @@ const ROUTES = {
 		`/services?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
-	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`
+	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
+	postServiceRequest: (jurisdictionId: string) => `/requests?jurisdiction_id${jurisdictionId}`
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -402,9 +402,11 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
-		// todo transform CreateServiceRequestParams into backend value
-		console.log(params);
-		throw Error('Not Implemented');
+		const res = await this.axiosInstance.post<unknown>(
+			ROUTES.postServiceRequest(this.jurisdictionId),
+			params
+		);
+		return CreateServiceRequestResponseSchema.parse(res);
 	}
 
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {

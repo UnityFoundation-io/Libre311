@@ -1,5 +1,4 @@
 import type {
-	CreateServiceRequestParams,
 	DateTimeServiceDefinitionAttribute,
 	MultiSelectServiceDefinitionAttribute,
 	NumberServiceDefinitionAttribute,
@@ -9,6 +8,7 @@ import type {
 	StringServiceDefinitionAttribute,
 	TextServiceDefinitionAttribute
 } from '$lib/services/Libre311/Libre311';
+import type { CreateServiceRequestUIParams } from '../shared';
 
 type ServiceDefinitionAttributeLookupMap = {
 	multivaluelist: MultiSelectServiceDefinitionAttribute;
@@ -65,7 +65,7 @@ export type AttributeInputMap = Map<
 
 export function createAttributeInputMap(
 	serviceDefinition: ServiceDefinition,
-	params: Partial<CreateServiceRequestParams>
+	params: Partial<CreateServiceRequestUIParams>
 ) {
 	if (params?.service?.service_code && params?.attributeMap) {
 		return params.attributeMap;

@@ -5,7 +5,6 @@
 <script lang="ts">
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type {
-		CreateServiceRequestParams,
 		GetServiceListResponse,
 		Service,
 		ServiceCode
@@ -20,8 +19,9 @@
 	import type { SelectOption } from 'stwui/types';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { arrowPath } from '../Svg/outline/arrowPath';
+	import type { CreateServiceRequestUIParams } from './shared';
 
-	export let params: Partial<CreateServiceRequestParams>;
+	export let params: Partial<CreateServiceRequestUIParams>;
 
 	const libre311 = useLibre311Service();
 	const dispatch = createEventDispatcher<{ serviceSelected: Service | undefined }>();
