@@ -80,7 +80,7 @@
 
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div class="grid grid-rows-1 gap-3">
+			<div class="grid grid-rows-4 gap-3">
 				<input
 					type="file"
 					id="actual-btn"
