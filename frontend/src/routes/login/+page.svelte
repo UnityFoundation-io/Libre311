@@ -27,6 +27,7 @@
 		if (emailInput.value && passwordInput.value) {
 			const res = await authService.login(emailInput.value, passwordInput.value);
 			console.log(res);
+			alert(`LOGGED IN AS: ${res.username}`);
 		}
 	}
 </script>
