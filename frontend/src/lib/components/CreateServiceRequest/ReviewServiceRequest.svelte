@@ -1,5 +1,6 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
+	import { onMount } from 'svelte';
 	import DisplayMultiAttribute from './DisplayServiceDefinitionAttributes/DisplayMultiAttribute.svelte';
 	import DisplaySingleAttribute from './DisplayServiceDefinitionAttributes/DisplaySingleAttribute.svelte';
 	import DisplayStringAttribute from './DisplayServiceDefinitionAttributes/DisplayStringAttribute.svelte';
@@ -10,11 +11,12 @@
 	import StepControls from './StepControls.svelte';
 	import { toCreateServiceRequestParams, type CreateServiceRequestUIParams } from './shared';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
 
 	const libre311 = useLibre311Service();
 
 	export let params: CreateServiceRequestUIParams;
+
+	let imageData: string | undefined;
 
 	function createName(params: CreateServiceRequestUIParams) {
 		if (params.first_name || params.last_name)
@@ -38,6 +40,18 @@
 		const res = await libre311.createServiceRequest(toCreateServiceRequestParams(params));
 	}
 
+	onMount(() => {
+		if (params.file) {
+			let reader = new FileReader();
+			reader.readAsDataURL(params.file);
+
+			reader.onloadend = function () {
+				const result: String = new String(reader.result);
+				imageData = result.toString();
+			};
+		}
+	});
+
 	$: name = createName(params);
 </script>
 
@@ -53,9 +67,9 @@
 
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>
 
-				{#if $serviceRequestImageUpload}
+				{#if imageData}
 					<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-						<img class="w-full" src={$serviceRequestImageUpload} alt="preview" />
+						<img class="w-full" src={imageData} alt="preview" />
 					</div>
 				{/if}
 

@@ -6,10 +6,9 @@
 	import { Button } from 'stwui';
 	import { FilePicker } from 'stwui';
 	import { uploadIcon } from '$lib/components/Svg/outline/upload-icon.js';
-	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
-	import { stageImage } from '$lib/stores/serviceRequestImageUpload';
 	import type { CreateServiceRequestUIParams } from './shared';
 
 	let input: HTMLInputElement;
@@ -41,7 +40,6 @@
 			reader.addEventListener('load', async function () {
 				if (reader.result) {
 					const result: String = new String(reader.result);
-					stageImage(result.toString());
 					dispatch('stepChange', updatedParams);
 				}
 			});
