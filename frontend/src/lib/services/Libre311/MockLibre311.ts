@@ -12,7 +12,6 @@ import {
 	type JurisdictionConfig,
 	type ServiceDefinition,
 	type HasServiceCode,
-	type Libre311ServiceProps,
 	ReverseGeocodeResponseSchema
 } from './Libre311';
 import axios from 'axios';
@@ -276,8 +275,7 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 		return ReverseGeocodeResponseSchema.parse(res.data);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	public static async create(props: Libre311ServiceProps) {
+	public static async create(): Promise<Libre311Service> {
 		// todo uncomment when /config endpoint exists code the jurisdiction_id
 		// const jurisdictionConfig = await getJurisdictionConfig();
 		const jurisdictionConfig = {
@@ -339,8 +337,8 @@ export class MockLibre311ServiceImpl implements Libre311Service {
 		return req;
 	}
 
-	async uploadImage(file: File): Promise<unknown> {
-		console.log('Not Implemented');
-		return 0;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async uploadImage(file: File): Promise<string> {
+		return 'https://seeclickfix.com/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMDJycmc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--0e11181caadcd8da758f96b7196a69f8d20f5388/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RUdGMWRHOWZiM0pwWlc1MFZEb0tjM1J5YVhCVU9ndHlaWE5wZW1WSklndzRNREI0TmpBd0Jqc0dWQT09IiwiZXhwIjpudWxsLCJwdXIiOiJ2YXJpYXRpb24ifX0=--ee2a5b821fe0552ba6053903421e37a595d06845/Temple%20St.%20&%20Elm%20St%20Bus%20Stop%20Shelter%20Window%20Damage%20(4).jpg';
 	}
 }
