@@ -325,7 +325,7 @@ const ROUTES = {
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
-	postServiceRequest: (jurisdictionId: string) => `/requests?jurisdiction_id${jurisdictionId}`
+	postServiceRequest: (jurisdictionId: string) => `/requests?jurisdiction_id=${jurisdictionId}`
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
