@@ -43,3 +43,9 @@ export function iconPositionOpts(
 		iconAnchor: createAnchor(iconSize, position)
 	};
 }
+
+export function toTimeStamp(timeStamp: Date | string | null | undefined) {
+	return timeStamp
+		? `${new Date(timeStamp).toLocaleDateString()} ${new Date(timeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+		: '';
+}
