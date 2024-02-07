@@ -1,15 +1,19 @@
 <script lang="ts">
-	import { Drawer, Menu, Portal } from 'stwui';
+	import { page } from '$app/stores';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { Button, Drawer, Menu, Portal } from 'stwui';
 
 	import mapSVG from '$lib/assets/map.svg';
 	import paintBrushSVG from '$lib/assets/paint-brush.svg';
 	import pencilSVG from '$lib/assets/pencil-square.svg';
 	import tableSVG from '$lib/assets/table-cells.svg';
 
-	export let open: boolean = false;
+	export let open: boolean;
+
+	const linkResolver = useLibre311Context().linkResolver;
 
 	function toggleDrawer() {
-		open = !open;
+		open ? (open = false) : (open = true);
 	}
 
 	// Menu
@@ -31,7 +35,7 @@
 			key: 'map',
 			label: 'Request Map',
 			data: mapSVG,
-			href: '#map'
+			href: linkResolver.issuesMap($page.url)
 		},
 		{
 			key: 'manager',
