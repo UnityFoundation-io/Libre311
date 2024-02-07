@@ -4,7 +4,6 @@
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
 	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
 
-	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import {
 		createInput,
 		optionalCoalesceNameValidator,
@@ -13,13 +12,13 @@
 		optionalCoalescePhoneNumberValidator
 	} from '$lib/utils/validation';
 	import { createEventDispatcher } from 'svelte';
-	import type { StepChangeEvent } from './types';
+	import type { CreateServiceRequestUIParams, StepChangeEvent } from './shared';
 
 	import StepControls from './StepControls.svelte';
 
 	const dispatch = createEventDispatcher<StepChangeEvent>();
 
-	export let params: Readonly<Partial<CreateServiceRequestParams>>;
+	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
 
 	let firstNameInput: FormInputValue<string | undefined> = createInput(params.first_name);
 	let lastNameInput: FormInputValue<string | undefined> = createInput(params.last_name);
