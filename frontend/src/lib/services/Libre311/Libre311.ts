@@ -2,6 +2,7 @@ import type { AttributeInputMap } from '$lib/components/CreateServiceRequest/Ser
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
+import type { RecaptchaService } from '../RecaptchaService';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -215,14 +216,13 @@ export const ServiceRequestStatusSchema = z.union([
 	ClosedServiceRequestStatusSchema
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusSchema>;
-
+const urlSchema = z.string().url();
 export const ServiceRequestSchema = z
 	.object({
 		status: ServiceRequestStatusSchema,
 		status_notes: z.string().nullish(),
 		service_name: z.string(),
-		description: z.string().nullish(), // this seems like it should be required as a bareminimum
-		// detail: z.array(z.string()),
+		description: z.string().nullish(),
 		agency_responsible: z.string().nullish(), // SeeClickFix guarantees this as known at time of creation
 		service_notice: z.string().nullish(),
 		requested_datetime: z.string(),
@@ -233,7 +233,7 @@ export const ServiceRequestSchema = z
 		zipcode: z.string(),
 		lat: z.string(),
 		long: z.string(),
-		media_url: z.string().nullish()
+		media_url: urlSchema.nullish()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -308,14 +308,16 @@ export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
-	uploadImage(file: File): Promise<unknown>;
+	uploadImage(file: File): Promise<string>;
 }
 
 const Libre311ServicePropsSchema = z.object({
 	baseURL: z.string()
 });
 
-export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema>;
+export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema> & {
+	recaptchaService: RecaptchaService;
+};
 
 const ROUTES = {
 	getJurisdictionConfig: '/config',
@@ -333,19 +335,36 @@ async function getJurisdictionConfig(): Promise<JurisdictionConfig> {
 	return JurisdictionConfigSchema.parse(res.data);
 }
 
+class Libre311ServiceError extends Error {
+	name: string;
+	constructor(name: string, message?: string, options?: ErrorOptions) {
+		super(message, options);
+		this.name = name;
+	}
+}
+
+class UnsupportedImageType extends Libre311ServiceError {
+	constructor(message?: string, options?: ErrorOptions) {
+		super('UnsupportedImageType', message, options);
+	}
+}
+
 export class Libre311ServiceImpl implements Libre311Service {
 	private axiosInstance: AxiosInstance;
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
+	private recaptchaService: RecaptchaService;
+	private supportedImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
 
 	private constructor(props: Libre311ServiceProps & { jurisdictionConfig: JurisdictionConfig }) {
 		Libre311ServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
 		this.jurisdictionConfig = props.jurisdictionConfig;
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
+		this.recaptchaService = props.recaptchaService;
 	}
 
-	public static async create(props: Libre311ServiceProps) {
+	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
 		// todo uncomment when /config endpoint exists code the jurisdiction_id
 		// const jurisdictionConfig = await getJurisdictionConfig();
 		const jurisdictionConfig = {
@@ -417,8 +436,38 @@ export class Libre311ServiceImpl implements Libre311Service {
 		throw Error('Not Implemented');
 	}
 
-	async uploadImage(file: File): Promise<unknown> {
-		throw Error('Not Implemented');
+	async uploadImage(file: File): Promise<string> {
+		if (!this.supportedImageTypes.includes(file.type)) {
+			throw new UnsupportedImageType(
+				`Supported image types are ${this.supportedImageTypes.join(', ')}`
+			);
+		}
+		const token = await this.recaptchaService.execute('upload_image');
+		const asDataUrl = await this.convertToDataURL(file);
+		const res = await this.axiosInstance.post<unknown>('/image', {
+			image: asDataUrl,
+			g_recaptcha_response: token
+		});
+
+		return urlSchema.parse(res.data);
+	}
+
+	private async convertToDataURL(file: File): Promise<string> {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.addEventListener(
+				'load',
+				() => {
+					if (typeof reader.result === 'string') {
+						resolve(reader.result);
+					} else {
+						reject('Unsupported Operation');
+					}
+				},
+				false
+			);
+			reader.readAsDataURL(file);
+		});
 	}
 }
 
