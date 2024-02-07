@@ -354,7 +354,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
 	private recaptchaService: RecaptchaService;
-	private supportedImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
+	public static readonly supportedImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
 
 	private constructor(props: Libre311ServiceProps & { jurisdictionConfig: JurisdictionConfig }) {
 		Libre311ServicePropsSchema.parse(props);

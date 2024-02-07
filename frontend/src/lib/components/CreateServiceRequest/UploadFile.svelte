@@ -1,8 +1,5 @@
 <script lang="ts">
-	import {
-		Libre311ServiceImpl,
-		type CreateServiceRequestParams
-	} from '$lib/services/Libre311/Libre311';
+	import { Libre311ServiceImpl } from '$lib/services/Libre311/Libre311';
 	import { createEventDispatcher } from 'svelte';
 	import Breakpoint from '../Breakpoint.svelte';
 	import messages from '$media/messages.json';
@@ -22,11 +19,18 @@
 
 	const linkResolver = useLibre311Context().linkResolver;
 
+	const allowedExtensions = Libre311ServiceImpl.supportedImageTypes.map((s) => {
+		return s.slice(s.indexOf('/') + 1);
+	});
+
 	async function onChange() {
 		if (input.files && input.files.length < 2) dispatchFile(input.files[0]);
 	}
 
 	function desktopDropFiles(dropFiles: DropResult) {
+		if (dropFiles.rejected) {
+			console.log('Unsupported file type');
+		}
 		for (const file of dropFiles.accepted) {
 			dispatchFile(file);
 			return; // Only upload single file
@@ -42,7 +46,7 @@
 	<div slot="is-desktop" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
 			<div class="mb-4">
-				<FilePicker onDrop={desktopDropFiles}>
+				<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
 					<FilePicker.Icon slot="icon" data={uploadIcon} />
 					<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
 					<FilePicker.Description slot="description">Drag & Drop your file</FilePicker.Description>
