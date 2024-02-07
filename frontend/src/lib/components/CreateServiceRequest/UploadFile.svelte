@@ -1,5 +1,8 @@
 <script lang="ts">
-	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
+	import {
+		Libre311ServiceImpl,
+		type CreateServiceRequestParams
+	} from '$lib/services/Libre311/Libre311';
 	import { createEventDispatcher } from 'svelte';
 	import Breakpoint from '../Breakpoint.svelte';
 	import messages from '$media/messages.json';
@@ -13,40 +16,25 @@
 
 	let input: HTMLInputElement;
 
-	export let params: Readonly<Partial<CreateServiceRequestParams>>;
+	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
 
 	const dispatch = createEventDispatcher();
 
 	const linkResolver = useLibre311Context().linkResolver;
 
 	async function onChange() {
-		if (input.files && input.files.length < 2) await uploadImage(input.files[0]);
-		else throw new Error('Can only upload a single image.');
+		if (input.files && input.files.length < 2) dispatchFile(input.files[0]);
 	}
 
-	async function desktopDropFiles(dropFiles: DropResult) {
+	function desktopDropFiles(dropFiles: DropResult) {
 		for (const file of dropFiles.accepted) {
-			await uploadImage(file);
+			dispatchFile(file);
 			return; // Only upload single file
 		}
 	}
 
-	function uploadImage(file: File) {
-		if (file) {
-			const updatedParams: CreateServiceRequestUIParams = Object.assign(params);
-			updatedParams.file = file;
-
-			const reader = new FileReader();
-			reader.addEventListener('load', async function () {
-				if (reader.result) {
-					const result: String = new String(reader.result);
-					dispatch('stepChange', updatedParams);
-				}
-			});
-			reader.readAsDataURL(file);
-
-			return;
-		}
+	function dispatchFile(file: File) {
+		dispatch('stepChange', { file });
 	}
 </script>
 
@@ -65,7 +53,7 @@
 				<Button
 					type="primary"
 					on:click={() => {
-						dispatch('stepChange');
+						dispatch('stepChange', { file: undefined });
 					}}
 				>
 					{messages['photo']['no_upload']}
@@ -106,7 +94,7 @@
 				<Button
 					type="link"
 					on:click={() => {
-						dispatch('stepChange');
+						dispatch('stepChange', { file: undefined });
 					}}
 				>
 					{messages['photo']['no_upload']}
