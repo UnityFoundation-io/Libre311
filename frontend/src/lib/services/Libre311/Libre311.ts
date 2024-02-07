@@ -437,6 +437,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async uploadImage(file: File): Promise<string> {
+		console.log(file);
+
 		if (!this.supportedImageTypes.includes(file.type)) {
 			throw new UnsupportedImageType(
 				`Supported image types are ${this.supportedImageTypes.join(', ')}`

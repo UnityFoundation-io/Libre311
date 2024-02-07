@@ -10,6 +10,7 @@
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 	import { stageImage } from '$lib/stores/serviceRequestImageUpload';
+	import { stageFile } from '$lib/stores/serviceRequestFile';
 
 	let input: HTMLInputElement;
 
@@ -33,6 +34,8 @@
 
 	function uploadImage(file: File) {
 		if (file) {
+			stageFile(file);
+
 			const reader = new FileReader();
 			reader.addEventListener('load', async function () {
 				if (reader.result) {

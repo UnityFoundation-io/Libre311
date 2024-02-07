@@ -11,6 +11,7 @@
 	import StepControls from './StepControls.svelte';
 	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { serviceRequestFile } from '$lib/stores/serviceRequestFile';
 
 	export let params: CreateServiceRequestParams;
 
@@ -30,9 +31,7 @@
 
 	async function submitToServer() {
 		const updatedParams = Object.assign(params);
-
-		updatedParams.media_url = await libre311Service.uploadImage($serviceRequestImageUpload);
-
+		updatedParams.media_url = await libre311Service.uploadImage($serviceRequestFile);
 		alert('todo submit to server');
 	}
 
