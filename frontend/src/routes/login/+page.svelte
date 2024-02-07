@@ -5,7 +5,8 @@
 	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator } from '$lib/utils/validation';
 	import { useUnityAuthService } from '$lib/context/Libre311Context';
-	import { onMount } from 'svelte';
+
+	const authService = useUnityAuthService();
 
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
@@ -24,13 +25,10 @@
 		emailInput = emailValidator(emailInput);
 
 		if (emailInput.value && passwordInput.value) {
-			const authService = useUnityAuthService();
 			const res = await authService.login(emailInput.value, passwordInput.value);
 			console.log(res);
 		}
 	}
-
-	onMount(login);
 </script>
 
 <Breakpoint>
