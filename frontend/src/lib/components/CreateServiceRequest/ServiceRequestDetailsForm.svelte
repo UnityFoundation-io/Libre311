@@ -2,7 +2,6 @@
 
 <script lang="ts">
 	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import type { CreateServiceRequestParams, Service } from '$lib/services/Libre311/Libre311';
 	import { asAsyncSuccess, type AsyncResult } from '$lib/services/http';
 	import { TextArea } from 'stwui';
 
@@ -19,11 +18,12 @@
 		type AttributeInputMap
 	} from './ServiceDefinitionAttributes/shared';
 	import { createEventDispatcher, type ComponentEvents } from 'svelte';
-	import type { StepChangeEvent } from './types';
+	import type { CreateServiceRequestUIParams, StepChangeEvent } from './shared';
 	import StepControls from './StepControls.svelte';
 	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
+	import type { Service } from '$lib/services/Libre311/Libre311';
 
-	export let params: Partial<CreateServiceRequestParams>;
+	export let params: Partial<CreateServiceRequestUIParams>;
 
 	const libre311 = useLibre311Service();
 	const dispatch = createEventDispatcher<StepChangeEvent>();

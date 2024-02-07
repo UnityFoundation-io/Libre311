@@ -12,7 +12,10 @@
 	import L, { type PointTuple } from 'leaflet';
 	import MapMarker from '$lib/components/MapMarker.svelte';
 	import type { ComponentType } from 'svelte';
-	import { CreateServiceRequestSteps } from '$lib/components/CreateServiceRequest/types';
+	import {
+		CreateServiceRequestSteps,
+		type CreateServiceRequestUIParams
+	} from '$lib/components/CreateServiceRequest/shared';
 	import { goto } from '$app/navigation';
 	import MapGeosearch from '$lib/components/MapGeosearch.svelte';
 	import type { ComponentEvents } from 'svelte';
@@ -26,7 +29,7 @@
 	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
 
-	let params: Partial<CreateServiceRequestParams> = {};
+	let params: Partial<CreateServiceRequestUIParams> = {};
 	let centerPos: PointTuple = [41.308281, -72.924164]; // todo we need to set the starting point on per tenant basis. decide if bounds or center/zoom or both will be used.
 	let loadingLocation: boolean = false;
 
@@ -73,9 +76,9 @@
 		params.address_string = location.label;
 	}
 
-	function isCreateServiceRequestParams(
-		partial: Partial<CreateServiceRequestParams>
-	): partial is CreateServiceRequestParams {
+	function isCreateServiceRequestUIParams(
+		partial: Partial<CreateServiceRequestUIParams>
+	): partial is CreateServiceRequestUIParams {
 		if (partial?.address_string && partial?.attributeMap && partial?.service) return true;
 		throw new Error('Previous steps are missing data');
 	}
@@ -85,7 +88,7 @@
 	<div slot="side-bar" class="mx-4 h-full">
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
-		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestParams(params)}
+		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
 			<ReviewServiceRequest {params} />
 		{:else}
 			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CreateServiceRequestSteps } from './types';
+	import { CreateServiceRequestSteps } from './shared';
 
 	export let step: CreateServiceRequestSteps;
 

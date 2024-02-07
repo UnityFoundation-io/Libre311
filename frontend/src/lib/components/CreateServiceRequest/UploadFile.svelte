@@ -10,7 +10,7 @@
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 	import { stageImage } from '$lib/stores/serviceRequestImageUpload';
-	import { stageFile } from '$lib/stores/serviceRequestFile';
+	import type { CreateServiceRequestUIParams } from './shared';
 
 	let input: HTMLInputElement;
 
@@ -34,14 +34,15 @@
 
 	function uploadImage(file: File) {
 		if (file) {
-			stageFile(file);
+			const updatedParams: CreateServiceRequestUIParams = Object.assign(params);
+			updatedParams.file = file;
 
 			const reader = new FileReader();
 			reader.addEventListener('load', async function () {
 				if (reader.result) {
 					const result: String = new String(reader.result);
 					stageImage(result.toString());
-					dispatch('stepChange');
+					dispatch('stepChange', updatedParams);
 				}
 			});
 			reader.readAsDataURL(file);

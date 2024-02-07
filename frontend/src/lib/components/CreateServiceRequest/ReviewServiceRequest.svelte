@@ -1,6 +1,5 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
 	import DisplayMultiAttribute from './DisplayServiceDefinitionAttributes/DisplayMultiAttribute.svelte';
 	import DisplaySingleAttribute from './DisplayServiceDefinitionAttributes/DisplaySingleAttribute.svelte';
 	import DisplayStringAttribute from './DisplayServiceDefinitionAttributes/DisplayStringAttribute.svelte';
@@ -9,15 +8,15 @@
 	import DisplayTextAttribute from './DisplayServiceDefinitionAttributes/DisplayTextAttribute.svelte';
 	import { Badge } from 'stwui';
 	import StepControls from './StepControls.svelte';
-	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
+	import { toCreateServiceRequestParams, type CreateServiceRequestUIParams } from './shared';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import { serviceRequestFile } from '$lib/stores/serviceRequestFile';
+	import { serviceRequestImageUpload } from '$lib/stores/serviceRequestImageUpload';
 
-	export let params: CreateServiceRequestParams;
+	const libre311 = useLibre311Service();
 
-	const libre311Service = useLibre311Service();
+	export let params: CreateServiceRequestUIParams;
 
-	function createName(params: CreateServiceRequestParams) {
+	function createName(params: CreateServiceRequestUIParams) {
 		if (params.first_name || params.last_name)
 			return `${params.first_name ?? ''} ${params.last_name ?? ''}`;
 	}
@@ -29,10 +28,14 @@
 			: '';
 	}
 
-	async function submitToServer() {
-		const updatedParams = Object.assign(params);
-		updatedParams.media_url = await libre311Service.uploadImage($serviceRequestFile);
-		alert('todo submit to server');
+	async function submitServiceReq() {
+		let mediaUrl: string | undefined = undefined;
+		if (params.file) {
+			mediaUrl = await libre311.uploadImage(params.file);
+		}
+		params.media_url = mediaUrl;
+
+		const res = await libre311.createServiceRequest(toCreateServiceRequestParams(params));
 	}
 
 	$: name = createName(params);
@@ -98,7 +101,7 @@
 			</div>
 		</div>
 
-		<StepControls on:click={submitToServer}>
+		<StepControls on:click={submitServiceReq}>
 			<svelte:fragment slot="submit-text"
 				>{messages['reviewServiceRequest']['button_submit']}</svelte:fragment
 			>
