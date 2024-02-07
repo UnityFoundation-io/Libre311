@@ -10,6 +10,10 @@
 
 	export let open: boolean;
 
+	export let handleClose: () => void;
+
+	$: console.log({ child: open });
+
 	const linkResolver = useLibre311Context().linkResolver;
 
 	function toggleDrawer() {
@@ -55,7 +59,7 @@
 
 <Portal>
 	{#if open}
-		<Drawer handleClose={toggleDrawer} placement="left">
+		<Drawer {handleClose} placement="left">
 			<Drawer.Content slot="content">
 				<Menu>
 					{#each items as item}

@@ -1,11 +1,12 @@
 <script lang="ts">
-	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
-	import Bars3 from '$lib/components/Svg/Bars3.svelte';
 	import SplashLoading from '$lib/components/SplashLoading.svelte';
-	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
+	import Bars3 from '$lib/components/Svg/Bars3.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
-	import '../app.pcss';
+	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
 	import '../../node_modules/leaflet-geosearch/dist/geosearch.css';
+	import '../app.pcss';
+
+	import MenuDrawer from '$lib/components/MenuDrawer.svelte';
 
 	import {
 		asAsyncFailure,
@@ -14,12 +15,21 @@
 		type AsyncResult
 	} from '$lib/services/http';
 	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
+	import { Drawer, Menu } from 'stwui';
 
 	const libre311ServiceProps: Libre311ServiceProps = {
 		baseURL: import.meta.env.VITE_BACKEND_URL
 	};
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
+
+	let open: boolean = false;
+
+	$: console.log({ parentOpen: open });
+
+	function closeDrawer() {
+		open = false;
+	}
 
 	async function createLibre311ContextProps(serviceProps: Libre311ServiceProps) {
 		try {
@@ -40,10 +50,27 @@
 			<div class="controls">
 				<!-- todo move inside of map -->
 				<!-- <Funnel /> -->
-				<Bars3 />
+				<button
+					type="button"
+					on:click={() => {
+						console.log({ before: open });
+						open = !open;
+						console.log({ after: open });
+					}}
+				>
+					<Bars3 />
+				</button>
 			</div>
 		</header>
 		<main>
+			<!-- <Drawer handleClose={closeDrawer} placement="left">
+				<Drawer.Content slot="content">
+					<Menu>
+						<h1>Hello</h1>
+					</Menu>
+				</Drawer.Content>
+			</Drawer> -->
+			<MenuDrawer {open} handleClose={closeDrawer} />
 			<slot />
 		</main>
 	</Libre311ContextProvider>
