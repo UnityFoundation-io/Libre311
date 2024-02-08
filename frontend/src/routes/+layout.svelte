@@ -60,13 +60,6 @@
 			</div>
 		</header>
 		<main>
-			<!-- <Drawer handleClose={closeDrawer} placement="left">
-				<Drawer.Content slot="content">
-					<Menu>
-						<h1>Hello</h1>
-					</Menu>
-				</Drawer.Content>
-			</Drawer> -->
 			<MenuDrawer {open} handleClose={closeDrawer} />
 			<slot />
 		</main>
