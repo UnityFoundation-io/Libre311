@@ -1,10 +1,12 @@
 <script lang="ts">
-	import Bars3 from '$lib/components/Svg/Bars3.svelte';
 	import SplashLoading from '$lib/components/SplashLoading.svelte';
-	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
+	import Bars3 from '$lib/components/Svg/Bars3.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
-	import '../app.pcss';
+	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
 	import '../../node_modules/leaflet-geosearch/dist/geosearch.css';
+	import '../app.pcss';
+
+	import MenuDrawer from '$lib/components/MenuDrawer.svelte';
 
 	import {
 		asAsyncFailure,
@@ -20,6 +22,12 @@
 	const recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
+
+	let open: boolean = false;
+
+	function closeDrawer() {
+		open = false;
+	}
 
 	const synchronousContextProviderProps: Omit<Libre311ContextProviderProps, 'service'> = {
 		recaptchaKey,
@@ -44,12 +52,24 @@
 {#if contextProviderProps.type == 'success'}
 	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
 		<header>
-			<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
 			<div class="controls">
-				<Bars3 />
+				<!-- todo move inside of map -->
+				<!-- <Funnel /> -->
+				<button
+					type="button"
+					on:click={() => {
+						console.log({ before: open });
+						open = !open;
+						console.log({ after: open });
+					}}
+				>
+					<Bars3 />
+				</button>
+				<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
 			</div>
 		</header>
 		<main>
+			<MenuDrawer {open} handleClose={closeDrawer} />
 			<slot />
 		</main>
 	</Libre311ContextProvider>

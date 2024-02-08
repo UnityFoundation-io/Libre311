@@ -14,7 +14,7 @@
 	import MapListToggle from '$lib/components/MapListToggle.svelte';
 
 	// Type imports
-	import type { LatLngExpression } from 'leaflet';
+	import type { LatLngExpression, LatLngTuple } from 'leaflet';
 	import type { Maybe } from '$lib/utils/types';
 	import type { ServiceRequest, ServiceRequestsResponse } from '$lib/services/Libre311/Libre311';
 	import type { AsyncResult } from '$lib/services/http';
@@ -43,10 +43,12 @@
 		if (res.type !== 'success') {
 			return L.latLngBounds([initialView]);
 		}
-		const latLngs: LatLngExpression[] = res.value.serviceRequests.map((req) => [
-			+req.lat,
-			+req.long
-		]);
+		let latLngs: LatLngTuple[] = res.value.serviceRequests.map((req) => [+req.lat, +req.long]);
+
+		if (latLngs.length === 0) {
+			const defaultTuple: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
+			latLngs = defaultTuple;
+		}
 		return L.latLngBounds(latLngs);
 	}
 
