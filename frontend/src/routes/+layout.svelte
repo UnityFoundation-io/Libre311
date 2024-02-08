@@ -15,10 +15,11 @@
 		type AsyncResult
 	} from '$lib/services/http';
 	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
+	import { getModeFromEnv, type Mode } from '$lib/services/mode';
+	import { recaptchaServiceFactory } from '$lib/services/RecaptchaService';
 
-	const libre311ServiceProps: Libre311ServiceProps = {
-		baseURL: import.meta.env.VITE_BACKEND_URL
-	};
+	const mode: Mode = getModeFromEnv(import.meta.env);
+	const recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
 
@@ -28,16 +29,24 @@
 		open = false;
 	}
 
-	async function createLibre311ContextProps(serviceProps: Libre311ServiceProps) {
+	const synchronousContextProviderProps: Omit<Libre311ContextProviderProps, 'service'> = {
+		recaptchaKey,
+		mode
+	};
+
+	async function initLibre311ContextProps(serviceProps: Libre311ServiceProps) {
 		try {
-			const service = await libre311Factory({ baseURL: serviceProps.baseURL });
-			contextProviderProps = asAsyncSuccess({ service });
+			const service = await libre311Factory(serviceProps);
+			contextProviderProps = asAsyncSuccess({ ...synchronousContextProviderProps, service });
 		} catch (error) {
 			contextProviderProps = asAsyncFailure(error);
 		}
 	}
 
-	createLibre311ContextProps(libre311ServiceProps);
+	initLibre311ContextProps({
+		baseURL: import.meta.env.VITE_BACKEND_URL,
+		recaptchaService: recaptchaServiceFactory(mode, { recaptchaKey })
+	});
 </script>
 
 {#if contextProviderProps.type == 'success'}
@@ -65,9 +74,9 @@
 		</main>
 	</Libre311ContextProvider>
 {:else if contextProviderProps.type == 'inProgress'}
-	<!-- todo nice looking components for loading and error-->
 	<SplashLoading />
 {:else}
+	<!-- todo nice looking component for error-->
 	<h1>something went wrong</h1>
 {/if}
 
