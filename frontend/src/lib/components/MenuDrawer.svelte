@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
-	import { Button, Drawer, Menu, Portal } from 'stwui';
+	import { Drawer, Menu, Portal } from 'stwui';
 
 	import { mapIcon } from './Svg/outline/mapIcon';
 	import { paintBrushIcon } from './Svg/outline/paintBrushIcon';
@@ -58,7 +58,7 @@
 				<Menu>
 					{#each items as item}
 						<Menu.Item key={item.key} label={item.label} href={item.href} on:click={handleClose}>
-							<Menu.Item.Icon slot="icon" data={item.data} />
+							<Menu.Item.Icon slot="icon" data={item.data} fill="none" />
 						</Menu.Item>
 					{/each}
 				</Menu>
