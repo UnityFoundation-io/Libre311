@@ -15,7 +15,6 @@
 		type AsyncResult
 	} from '$lib/services/http';
 	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
-	import { Drawer, Menu } from 'stwui';
 
 	const libre311ServiceProps: Libre311ServiceProps = {
 		baseURL: import.meta.env.VITE_BACKEND_URL
@@ -24,8 +23,6 @@
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
 
 	let open: boolean = false;
-
-	$: console.log({ parentOpen: open });
 
 	function closeDrawer() {
 		open = false;
@@ -46,7 +43,6 @@
 {#if contextProviderProps.type == 'success'}
 	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
 		<header>
-			<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
 			<div class="controls">
 				<!-- todo move inside of map -->
 				<!-- <Funnel /> -->
@@ -60,6 +56,7 @@
 				>
 					<Bars3 />
 				</button>
+				<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
 			</div>
 		</header>
 		<main>

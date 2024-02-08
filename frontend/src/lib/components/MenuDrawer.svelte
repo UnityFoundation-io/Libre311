@@ -12,13 +12,7 @@
 
 	export let handleClose: () => void;
 
-	$: console.log({ child: open });
-
 	const linkResolver = useLibre311Context().linkResolver;
-
-	function toggleDrawer() {
-		open ? (open = false) : (open = true);
-	}
 
 	// Menu
 	interface MenuItem {
@@ -63,7 +57,7 @@
 			<Drawer.Content slot="content">
 				<Menu>
 					{#each items as item}
-						<Menu.Item key={item.key} label={item.label} href={item.href}>
+						<Menu.Item key={item.key} label={item.label} href={item.href} on:click={handleClose}>
 							<Menu.Item.Icon slot="icon" data={item.data} />
 						</Menu.Item>
 					{/each}
