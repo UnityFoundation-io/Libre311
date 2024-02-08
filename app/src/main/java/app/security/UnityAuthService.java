@@ -73,19 +73,25 @@ public class UnityAuthService {
     }
 
     private boolean validateUserExistenceAndPermissions(String userEmail, List<String> permissions, String jurisdictionId) {
+        if (permissions != null && permissions.stream().anyMatch(s -> s.endsWith("-SYSTEM") || s.endsWith("-TENANT"))) {
+            return true;
+        }
+
         Optional<User> userOptional = userRepository.findByEmail(userEmail);
         if (userOptional.isEmpty()) {
             return false;
         }
+
         User user = userOptional.get();
         Optional<UserJurisdiction> jurisdictionUserOptional = userJurisdictionRepository.findByUserAndJurisdictionId(user, jurisdictionId);
-        return jurisdictionUserOptional.isPresent() && validatePermissions(permissions, jurisdictionUserOptional.get());
-    }
-
-    private boolean validatePermissions(List<String> permissions, UserJurisdiction userJurisdiction) {
-        if (permissions != null && permissions.stream().allMatch(s -> s.contains("_ADMIN_") && s.endsWith("-SUBTENANT"))) {
-            return userJurisdiction.isUserAdmin();
+        if (jurisdictionUserOptional.isEmpty()) {
+            return false;
         }
+
+        if (permissions != null && permissions.stream().anyMatch(s -> s.contains("_ADMIN_"))) {
+            return jurisdictionUserOptional.get().isUserAdmin();
+        }
+
         return true;
     }
 }
