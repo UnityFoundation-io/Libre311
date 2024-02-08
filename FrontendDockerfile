@@ -1,0 +1,10 @@
+# Build the frontend and serve with nginx
+FROM node:18
+
+COPY frontend frontend
+WORKDIR frontend
+RUN npm install && npm run build
+
+FROM nginx:1.24.0-alpine
+
+COPY --from=0 /frontend/build /usr/share/nginx/html
