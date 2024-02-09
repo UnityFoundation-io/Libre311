@@ -88,10 +88,12 @@
 					</div>
 				{/if}
 
-				{#if name}
+				{#if name || params.email || params.phone}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
-						<p class="text-sm">{name}</p>
+						<p class="text-sm">{name ?? ''}</p>
+						<p class="text-sm">{params.email ?? ''}</p>
+						<p class="text-sm">{params.phone ?? ''}</p>
 					</div>
 				{/if}
 			</div>
