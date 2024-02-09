@@ -9,8 +9,8 @@
 	export let serviceRequest: ServiceRequest;
 
 	const circleLookupMap = {
-		Closed: Closed,
-		Open: Open
+		closed: Closed,
+		open: Open
 	};
 
 	const icon = L.icon({

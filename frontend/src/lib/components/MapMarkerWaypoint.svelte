@@ -11,8 +11,8 @@
 	export let serviceRequest: ServiceRequest;
 
 	const waypointLookupMap = {
-		Closed: WaypointClosed,
-		Open: WaypointOpen
+		closed: WaypointClosed,
+		open: WaypointOpen
 	};
 
 	const icon = L.icon({
