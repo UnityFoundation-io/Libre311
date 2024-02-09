@@ -41,11 +41,11 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
     List<Permission> declaredPermissions = resolvePermissionsFromAnnotation(methodRoute);
 
     Optional<String> maybeAuthorization = request.getHeaders().getAuthorization();
-    if (authentication == null || maybeAuthorization.isEmpty()) {
+    if (maybeAuthorization.isEmpty()) {
       return REJECTED;
     }
 
-    String bearerToken = maybeAuthorization.get().substring(7); // remove "Bearer: " prefix
+    String bearerToken = maybeAuthorization.get();
     List<String> declaredPermissionsAsStrings = declaredPermissions.stream()
         .map(Enum::toString).collect(Collectors.toList());
 

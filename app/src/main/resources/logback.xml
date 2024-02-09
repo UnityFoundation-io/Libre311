@@ -11,6 +11,7 @@
 
     <!--    <logger name="io.micronaut.http.client" level="TRACE"/>-->
 <!--        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>-->
+<!--    <logger name="io.micronaut.security" level="DEBUG"/>-->
 
     <root level="info">
         <appender-ref ref="STDOUT" />
