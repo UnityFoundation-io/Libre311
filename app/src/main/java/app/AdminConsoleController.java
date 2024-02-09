@@ -28,6 +28,8 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
@@ -36,6 +38,7 @@ import java.util.List;
 
 import static app.security.Permission.*;
 
+@Secured(SecurityRule.IS_ANONYMOUS)
 @Controller("/api/admin")
 public class AdminConsoleController {
 
