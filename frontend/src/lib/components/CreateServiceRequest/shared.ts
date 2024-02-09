@@ -20,7 +20,7 @@ export type StepChangeEvent = {
 
 export type CreateServiceRequestUIParams = ContactInformation & {
 	lat: string;
-	lng: string;
+	long: string;
 	address_string: string;
 	attributeMap: AttributeInputMap;
 	description?: string;

@@ -201,15 +201,15 @@ export type ContactInformation = z.infer<typeof ContactInformationSchema>;
 export type CreateServiceRequestParams = HasServiceCode &
 	ContactInformation & {
 		lat: string;
-		lng: string;
+		long: string;
 		address_string: string;
 		attributes: AttributeResponse[];
 		description?: string;
 		media_url?: string;
 	};
 
-export const OpenServiceRequestStatusSchema = z.literal('Open');
-export const ClosedServiceRequestStatusSchema = z.literal('Closed');
+export const OpenServiceRequestStatusSchema = z.literal('open');
+export const ClosedServiceRequestStatusSchema = z.literal('closed');
 export const ServiceRequestStatusSchema = z.union([
 	OpenServiceRequestStatusSchema,
 	ClosedServiceRequestStatusSchema
@@ -229,7 +229,7 @@ export const ServiceRequestSchema = z
 		expected_datetime: z.string().nullish(),
 		address: z.string(),
 		address_id: z.number().nullish(),
-		zipcode: z.string(),
+		zipcode: z.string().nullish(),
 		lat: z.string(),
 		long: z.string(),
 		media_url: urlSchema.nullish()
@@ -325,7 +325,10 @@ const ROUTES = {
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
-	postServiceRequest: (jurisdictionId: string) => `/requests?jurisdiction_id=${jurisdictionId}`
+	postServiceRequest: (params: HasJurisdictionId) =>
+		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
+	getServiceRequest: (params: HasJurisdictionId & HasServiceRequestId) =>
+		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -347,6 +350,19 @@ class UnsupportedImageType extends Libre311ServiceError {
 	constructor(message?: string, options?: ErrorOptions) {
 		super('UnsupportedImageType', message, options);
 	}
+}
+
+function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
+	const urlSearchParams = new URLSearchParams();
+	for (const [k, v] of Object.entries(params)) {
+		if (!v) continue;
+		if (Array.isArray(v)) {
+			v.forEach((val) => urlSearchParams.append(`attribute[${val.code}]`, val.value));
+		} else {
+			urlSearchParams.set(k, v);
+		}
+	}
+	return urlSearchParams;
 }
 
 export class Libre311ServiceImpl implements Libre311Service {
@@ -402,9 +418,15 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
+		const paramsWithRecapta = await this.recaptchaService.wrapWithRecaptcha(
+			params,
+			'create_service_request'
+		);
+		const urlSearchparams = toURLSearchParams(paramsWithRecapta);
+
 		const res = await this.axiosInstance.post<unknown>(
-			ROUTES.postServiceRequest(this.jurisdictionId),
-			params
+			ROUTES.postServiceRequest(this.jurisdictionConfig),
+			urlSearchparams
 		);
 		return CreateServiceRequestResponseSchema.parse(res);
 	}
@@ -415,27 +437,39 @@ export class Libre311ServiceImpl implements Libre311Service {
 		queryParams.append('page_size', '10');
 		queryParams.append('page', `${params.pageNumber ?? 0}`);
 
-		const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));
-		const serviceRequests = GetServiceRequestsResponseSchema.parse(res.data);
-		const pagination: Pagination = {
-			offset: res.headers['page-offset'],
-			pageNumber: res.headers['page-pagenumber'],
-			size: res.headers['page-totalsize'],
-			totalPages: res.headers['page-totalpages'],
-			totalSize: res.headers['page-totalsize']
-		};
+		try {
+			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));
+			const serviceRequests = GetServiceRequestsResponseSchema.parse(res.data);
+			const pagination: Pagination = {
+				offset: res.headers['page-offset'],
+				pageNumber: res.headers['page-pagenumber'],
+				size: res.headers['page-totalsize'],
+				totalPages: res.headers['page-totalpages'],
+				totalSize: res.headers['page-totalsize']
+			};
 
-		return {
-			serviceRequests,
-			metadata: {
-				pagination
-			}
-		};
+			return {
+				serviceRequests,
+				metadata: {
+					pagination
+				}
+			};
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
 	}
 
 	async getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest> {
-		console.log(params);
-		throw Error('Not Implemented');
+		try {
+			const res = await this.axiosInstance.get<unknown>(
+				ROUTES.getServiceRequest({ ...params, jurisdiction_id: this.jurisdictionId })
+			);
+			return ServiceRequestSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
 	}
 
 	async uploadImage(file: File): Promise<string> {
