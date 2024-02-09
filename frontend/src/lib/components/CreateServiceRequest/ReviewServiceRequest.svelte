@@ -1,5 +1,6 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
+	import { onMount } from 'svelte';
 	import DisplayMultiAttribute from './DisplayServiceDefinitionAttributes/DisplayMultiAttribute.svelte';
 	import DisplaySingleAttribute from './DisplayServiceDefinitionAttributes/DisplaySingleAttribute.svelte';
 	import DisplayStringAttribute from './DisplayServiceDefinitionAttributes/DisplayStringAttribute.svelte';
@@ -14,6 +15,8 @@
 	const libre311 = useLibre311Service();
 
 	export let params: CreateServiceRequestUIParams;
+
+	let imageData: string | undefined;
 
 	function createName(params: CreateServiceRequestUIParams) {
 		if (params.first_name || params.last_name)
@@ -33,8 +36,21 @@
 			mediaUrl = await libre311.uploadImage(params.file);
 		}
 		params.media_url = mediaUrl;
+
 		const res = await libre311.createServiceRequest(toCreateServiceRequestParams(params));
 	}
+
+	onMount(() => {
+		if (params.file) {
+			let reader = new FileReader();
+			reader.readAsDataURL(params.file);
+
+			reader.onloadend = function () {
+				const result: String = new String(reader.result);
+				imageData = result.toString();
+			};
+		}
+	});
 
 	$: name = createName(params);
 </script>
@@ -51,8 +67,10 @@
 
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>
 
-				{#if params.media_url}
-					<div class="serviceImage" style={`background-image: url('${params.media_url}');`} />
+				{#if imageData}
+					<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+						<img class="w-full" src={imageData} alt="preview" />
+					</div>
 				{/if}
 
 				<div class="serviceTitle mt-2 flow-root">

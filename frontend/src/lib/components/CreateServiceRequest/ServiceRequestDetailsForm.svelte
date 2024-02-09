@@ -1,6 +1,7 @@
 <script lang="ts" context="module"></script>
 
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import { asAsyncSuccess, type AsyncResult } from '$lib/services/http';
 	import { TextArea } from 'stwui';
@@ -29,6 +30,7 @@
 
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> | undefined;
 	let selectedService: Service | undefined = params.service;
+	let imageData: string | undefined;
 
 	$: updateAttributeMap(selectedService);
 
@@ -101,10 +103,27 @@
 	function handleServiceSelected(e: ComponentEvents<SelectARequestCategory>['serviceSelected']) {
 		selectedService = e.detail;
 	}
+
+	onMount(() => {
+		if (params.file) {
+			let reader = new FileReader();
+			reader.readAsDataURL(params.file);
+
+			reader.onloadend = function () {
+				const result: String = new String(reader.result);
+				imageData = result.toString();
+			};
+		}
+	});
 </script>
 
 <form class="flex-container">
 	<div>
+		{#if imageData}
+			<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+				<img class="w-full" src={imageData} alt="preview" />
+			</div>
+		{/if}
 		<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
 		{#if asyncAttributeInputMap?.type == 'success'}
 			<div>

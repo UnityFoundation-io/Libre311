@@ -354,7 +354,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
 	private recaptchaService: RecaptchaService;
-	private supportedImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
+	public static readonly supportedImageTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp'];
 
 	private constructor(props: Libre311ServiceProps & { jurisdictionConfig: JurisdictionConfig }) {
 		Libre311ServicePropsSchema.parse(props);
@@ -439,9 +439,9 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async uploadImage(file: File): Promise<string> {
-		if (!this.supportedImageTypes.includes(file.type)) {
+		if (!Libre311ServiceImpl.supportedImageTypes.includes(file.type)) {
 			throw new UnsupportedImageType(
-				`Supported image types are ${this.supportedImageTypes.join(', ')}`
+				`Supported image types are ${Libre311ServiceImpl.supportedImageTypes.join(', ')}`
 			);
 		}
 		const token = await this.recaptchaService.execute('upload_image');
