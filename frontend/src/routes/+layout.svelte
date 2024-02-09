@@ -3,6 +3,7 @@
 	import Bars3 from '$lib/components/Svg/Bars3.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
 	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
+	import SomethingWentWrong from '$lib/components/SomethingWentWrong.svelte';
 	import '../../node_modules/leaflet-geosearch/dist/geosearch.css';
 	import '../app.pcss';
 
@@ -81,8 +82,7 @@
 {:else if contextProviderProps.type == 'inProgress'}
 	<SplashLoading />
 {:else}
-	<!-- todo nice looking component for error-->
-	<h1>something went wrong</h1>
+	<SomethingWentWrong />
 {/if}
 
 <style>
