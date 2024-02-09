@@ -7,7 +7,7 @@
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 
-	export let serviceRequest: ServiceRequest | Readonly<Partial<CreateServiceRequestParams>>;
+	export let serviceRequest: ServiceRequest;
 
 	let visible: boolean = false;
 
@@ -21,10 +21,10 @@
 
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
-			case 'Closed': {
+			case 'closed': {
 				return 'success';
 			}
-			case 'Open': {
+			case 'open': {
 				return 'warn';
 			}
 			default:
@@ -70,7 +70,7 @@
 			<p class="text-sm">{serviceRequest.address}</p>
 		</div>
 
-		{#if serviceRequest.detail}
+		<!-- {#if serviceRequest.detail}
 			<div></div>
 
 			<div class="mb-1">
@@ -82,7 +82,7 @@
 					{/each}
 				</p>
 			</div>
-		{/if}
+		{/if} -->
 
 		<div class="mb-1">
 			<strong class="text-base">{messages['serviceRequest']['description']}</strong>

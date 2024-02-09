@@ -50,7 +50,7 @@
 	}
 
 	initLibre311ContextProps({
-		baseURL: import.meta.env.VITE_BACKEND_URL,
+		baseURL: import.meta.env.VITE_BACKEND_URL ?? '/api',
 		recaptchaService: recaptchaServiceFactory(mode, { recaptchaKey })
 	});
 </script>

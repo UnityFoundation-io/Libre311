@@ -22,10 +22,10 @@
 
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
-			case 'Closed': {
+			case 'closed': {
 				return 'success';
 			}
-			case 'Open': {
+			case 'open': {
 				return 'warn';
 			}
 		}
