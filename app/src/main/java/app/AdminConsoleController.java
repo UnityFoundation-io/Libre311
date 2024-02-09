@@ -28,8 +28,6 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
-import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.rules.SecurityRule;
 import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
@@ -38,7 +36,6 @@ import java.util.List;
 
 import static app.security.Permission.*;
 
-@Secured(SecurityRule.IS_ANONYMOUS)
 @Controller("/api/admin")
 public class AdminConsoleController {
 
@@ -56,7 +53,6 @@ public class AdminConsoleController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
-                                              @Header("Authorization") String authorizationHeader,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceService.createService(requestDTO, jurisdiction_id));
     }
@@ -67,7 +63,6 @@ public class AdminConsoleController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
-                                              @Header("Authorization") String authorizationHeader,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceService.updateService(serviceId, requestDTO, jurisdiction_id));
     }
@@ -77,7 +72,6 @@ public class AdminConsoleController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
     public List<SensitiveServiceRequestDTO> getServiceRequestJson(Long serviceRequestId,
-                                                                  @Header("Authorization") String authorizationHeader,
                                                                   @Nullable String jurisdiction_id) {
         return List.of(serviceRequestService.getSensitiveServiceRequest(serviceRequestId, jurisdiction_id));
     }
@@ -88,7 +82,6 @@ public class AdminConsoleController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_EDIT_SYSTEM, LIBRE311_REQUEST_EDIT_TENANT, LIBRE311_REQUEST_EDIT_SUBTENANT})
     public List<SensitiveServiceRequestDTO> updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO,
-                                                                     @Header("Authorization") String authorizationHeader,
                                                                      @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id));
     }
@@ -97,7 +90,6 @@ public class AdminConsoleController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
     public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
-                                                @Header("Authorization") String authorizationHeader,
                                                 @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
         return serviceRequestService.getAllServiceRequests(requestDTO, jurisdiction_id);
     }
