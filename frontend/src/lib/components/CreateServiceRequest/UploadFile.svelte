@@ -28,7 +28,7 @@
 	}
 
 	function desktopDropFiles(dropFiles: DropResult) {
-		if (dropFiles.rejected) {
+		if (dropFiles.rejected[0]) {
 			console.log('Unsupported file type');
 		}
 		for (const file of dropFiles.accepted) {
