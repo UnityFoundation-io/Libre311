@@ -1,5 +1,8 @@
 ---
 micronaut:
+  http:
+    client:
+      read-timeout: 1m
   server:
     cors:
       enabled: true
