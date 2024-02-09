@@ -59,7 +59,7 @@
 
 	async function confirmLocation() {
 		params.lat = String(centerPos[0]);
-		params.lng = String(centerPos[1]);
+		params.long = String(centerPos[1]);
 		if (!params.address_string) {
 			loadingLocation = true;
 			const res = await libre311.reverseGeocode(centerPos);
