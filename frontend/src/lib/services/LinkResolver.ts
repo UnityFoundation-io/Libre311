@@ -1,4 +1,4 @@
-import type { CreateServiceRequestSteps } from '$lib/components/CreateServiceRequest/types';
+import type { CreateServiceRequestSteps } from '$lib/components/CreateServiceRequest/shared';
 import type { Pagination, ServiceRequestId } from './Libre311/Libre311';
 
 export class LinkResolver {
