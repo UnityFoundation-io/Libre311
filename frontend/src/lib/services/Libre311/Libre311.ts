@@ -465,7 +465,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 			const res = await this.axiosInstance.get<unknown>(
 				ROUTES.getServiceRequest({ ...params, jurisdiction_id: this.jurisdictionId })
 			);
-			return ServiceRequestSchema.parse(res.data);
+			// the server returns an array with a single object.  Even though it is rather non-standard, it is how it was detailed in the spec.
+			return GetServiceRequestsResponseSchema.parse(res.data)[0];
 		} catch (error) {
 			console.log(error);
 			throw error;
