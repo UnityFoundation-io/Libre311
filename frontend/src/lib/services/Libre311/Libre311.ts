@@ -441,11 +441,11 @@ export class Libre311ServiceImpl implements Libre311Service {
 			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));
 			const serviceRequests = GetServiceRequestsResponseSchema.parse(res.data);
 			const pagination: Pagination = {
-				offset: res.headers['page-offset'],
-				pageNumber: res.headers['page-pagenumber'],
-				size: res.headers['page-totalsize'],
-				totalPages: res.headers['page-totalpages'],
-				totalSize: res.headers['page-totalsize']
+				offset: Number(res.headers['page-offset']),
+				pageNumber: Number(res.headers['page-pagenumber']),
+				size: Number(res.headers['page-totalsize']),
+				totalPages: Number(res.headers['page-totalpages']),
+				totalSize: Number(res.headers['page-totalsize'])
 			};
 
 			return {
