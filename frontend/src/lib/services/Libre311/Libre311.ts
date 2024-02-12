@@ -510,6 +510,5 @@ export class Libre311ServiceImpl implements Libre311Service {
 }
 
 export async function libre311Factory(props: Libre311ServiceProps): Promise<Libre311Service> {
-	// return Libre311ServiceImpl.create(props);
-	return MockLibre311ServiceImpl.create();	// TODO: Revert this! Just for testing
+	return Libre311ServiceImpl.create(props);
 }
