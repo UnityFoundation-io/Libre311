@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Badge, Card, Input, Table } from 'stwui';
 	import type { TableColumn } from 'stwui/types';
-
 	import { Drawer, Portal } from 'stwui';
+
+	export let serviceRequests;
 
 	let drawerLeftOpen = false;
 
@@ -48,19 +49,6 @@
 		created_at: string;
 	}
 
-	let data: { results: Item[] } = {
-		results: [
-			{
-				id: 'a',
-				project_name: 'Libre311',
-				status: 'Working on it',
-				city: 'St. Louis',
-				state: 'Misery',
-				created_at: 'Unity Foundation'
-			}
-		]
-	};
-
 	function openDrawerLeft() {
 		drawerLeftOpen = true;
 	}
@@ -86,13 +74,13 @@
 	<Card.Content slot="content" class="p-0 sm:p-0" style="height: calc(100% - 64px);">
 		<Table class="h-full overflow-hidden rounded-md" {columns}>
 			<Table.Body slot="body">
-				{#each data.results as item}
+				{#each serviceRequests as item}
 					<Table.Body.Row id="item.id" on:click={openDrawerLeft}>
-						<Table.Body.Row.Cell column={0}>{item.project_name}</Table.Body.Row.Cell>
+						<Table.Body.Row.Cell column={0}>{item.service_name}</Table.Body.Row.Cell>
 						<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
-						<Table.Body.Row.Cell column={2}>{item.city}</Table.Body.Row.Cell>
+						<Table.Body.Row.Cell column={2}>{item.address}</Table.Body.Row.Cell>
 						<Table.Body.Row.Cell column={3}>{item.state}</Table.Body.Row.Cell>
-						<Table.Body.Row.Cell column={4}>{item.created_at}</Table.Body.Row.Cell>
+						<Table.Body.Row.Cell column={4}>{item.requested_datetime}</Table.Body.Row.Cell>
 					</Table.Body.Row>
 				{/each}
 			</Table.Body>
