@@ -2,6 +2,10 @@
 	import { Badge, Card, Input, Table } from 'stwui';
 	import type { TableColumn } from 'stwui/types';
 
+	import { Drawer, Portal } from 'stwui';
+
+	let drawerLeftOpen = false;
+
 	const columns: TableColumn[] = [
 		{
 			column: 'project_name',
@@ -56,7 +60,23 @@
 			}
 		]
 	};
+
+	function openDrawerLeft() {
+		drawerLeftOpen = true;
+	}
+
+	function closeDrawerLeft() {
+		drawerLeftOpen = false;
+	}
 </script>
+
+<Portal>
+	{#if drawerLeftOpen}
+		<Drawer handleClose={closeDrawerLeft} placement="left">
+			<Drawer.Content slot="content">Drawer Content</Drawer.Content>
+		</Drawer>
+	{/if}
+</Portal>
 
 <Card bordered={false} class="h-[calc(100vh-14rem)]">
 	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
@@ -67,7 +87,7 @@
 		<Table class="h-full overflow-hidden rounded-md" {columns}>
 			<Table.Body slot="body">
 				{#each data.results as item}
-					<Table.Body.Row id="item.id">
+					<Table.Body.Row id="item.id" on:click={openDrawerLeft}>
 						<Table.Body.Row.Cell column={0}>{item.project_name}</Table.Body.Row.Cell>
 						<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
 						<Table.Body.Row.Cell column={2}>{item.city}</Table.Body.Row.Cell>
