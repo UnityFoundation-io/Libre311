@@ -20,6 +20,15 @@
 				return 'error';
 		}
 	}
+
+	function createName(serviceRequest: ServiceRequest) {
+		console.log(serviceRequest);
+
+		if (serviceRequest.first_name || serviceRequest.last_name)
+			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
+	}
+
+	$: name = createName(serviceRequest);
 </script>
 
 <Card>
@@ -69,10 +78,12 @@
 			<p class="text-sm">{serviceRequest.description}</p>
 		</div>
 
-		{#if serviceRequest.citizen_contact}
+		{#if name}
 			<div class="mb-1">
 				<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
-				<p class="text-sm">{serviceRequest.citizen_contact}</p>
+				<p class="text-sm">{name ?? ''}</p>
+				<p class="text-sm">{serviceRequest.email ?? ''}</p>
+				<p class="text-sm">{serviceRequest.phone ?? ''}</p>
 			</div>
 		{/if}
 
