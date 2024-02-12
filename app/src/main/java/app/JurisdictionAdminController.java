@@ -36,13 +36,13 @@ import java.util.List;
 
 import static app.security.Permission.*;
 
-@Controller("/api/admin")
-public class AdminConsoleController {
+@Controller("/api/jurisdiction-admin")
+public class JurisdictionAdminController {
 
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
 
-    public AdminConsoleController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
+    public JurisdictionAdminController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
     }

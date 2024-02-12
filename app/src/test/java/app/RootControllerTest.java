@@ -522,7 +522,7 @@ public class RootControllerTest {
         updateServiceDTO.setServiceDefinitionJson(json);
 
         Map payload = mapper.convertValue(updateServiceDTO, Map.class);
-        request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId()+"?jurisdiction_id=city.gov", payload)
+        request = HttpRequest.PATCH("/jurisdiction-admin/services/"+serviceDTO.getId()+"?jurisdiction_id=city.gov", payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         response = client.toBlocking().exchange(request, ServiceDTO[].class);
@@ -581,7 +581,7 @@ public class RootControllerTest {
 
         Map payload = (new ObjectMapper()).convertValue(patchServiceRequestDTO, Map.class);
         HttpRequest<?> request = HttpRequest
-                .PATCH("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", payload)
+                .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -612,7 +612,7 @@ public class RootControllerTest {
 
         // update dates
         request = HttpRequest
-                .PATCH("admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov",
+                .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov",
                         Map.of(
                                 "jurisdiction_id", "city.gov",
                                 "closed_date", "2023-01-25T13:15:30Z",
@@ -648,7 +648,7 @@ public class RootControllerTest {
         PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
 
         // unauthenticated read attempt
-        HttpRequest<?> request = HttpRequest.GET("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov")
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov")
                 .header("Authorization", "Bearer token.text.here");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
@@ -681,7 +681,7 @@ public class RootControllerTest {
         serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceDTO, Map.class);
-        HttpRequest<?> request = HttpRequest.POST("/admin/services?jurisdiction_id="+jurisdictionId, payload)
+        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, ServiceDTO[].class);
@@ -722,7 +722,7 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("/admin/requests/download?jurisdiction_id=city.gov")
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=city.gov")
                 .header("Authorization", "Bearer token.text.here");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
@@ -771,7 +771,7 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov")
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=city.gov")
                 .header("Authorization", "Bearer token.text.here");
 
         authLogin();
@@ -826,7 +826,7 @@ public class RootControllerTest {
         serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceDTO, Map.class);
-        HttpRequest<?> request = HttpRequest.POST("/admin/services", payload)
+        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services", payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, ServiceDTO[].class);
