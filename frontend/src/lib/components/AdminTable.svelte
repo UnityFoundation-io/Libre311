@@ -2,8 +2,16 @@
 	import { Badge, Card, Input, Table } from 'stwui';
 	import type { TableColumn } from 'stwui/types';
 	import { Drawer, Portal } from 'stwui';
+	import { page } from '$app/stores';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 
-	export let serviceRequests;
+	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
+	import Pagination from './Pagination.svelte';
+
+	const ctx = useServiceRequestsContext();
+	const serviceRequestsRes = ctx.serviceRequestsResponse;
+
+	const linkResolver = useLibre311Context().linkResolver;
 
 	let drawerLeftOpen = false;
 
@@ -49,32 +57,47 @@
 	}
 </script>
 
-<Portal>
-	{#if drawerLeftOpen}
-		<Drawer handleClose={closeDrawerLeft} placement="left">
-			<Drawer.Content slot="content">Drawer Content</Drawer.Content>
-		</Drawer>
-	{/if}
-</Portal>
+{#if $serviceRequestsRes.type === 'success'}
+	<Portal>
+		{#if drawerLeftOpen}
+			<Drawer handleClose={closeDrawerLeft} placement="left">
+				<Drawer.Content slot="content">Drawer Content</Drawer.Content>
+			</Drawer>
+		{/if}
+	</Portal>
 
-<Card bordered={false} class="h-[calc(100vh-14rem)]">
-	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
-		Card Header
-		<Input slot="extra" />
-	</Card.Header>
-	<Card.Content slot="content" class="p-0 sm:p-0" style="height: calc(100% - 64px);">
-		<Table class="h-full overflow-hidden rounded-md" {columns}>
-			<Table.Body slot="body">
-				{#each serviceRequests as item}
-					<Table.Body.Row id="item.id" on:click={openDrawerLeft}>
-						<Table.Body.Row.Cell column={0}>{item.service_name}</Table.Body.Row.Cell>
-						<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
-						<Table.Body.Row.Cell column={2}>{item.address}</Table.Body.Row.Cell>
-						<Table.Body.Row.Cell column={3}>{item.state}</Table.Body.Row.Cell>
-						<Table.Body.Row.Cell column={4}>{item.requested_datetime}</Table.Body.Row.Cell>
-					</Table.Body.Row>
-				{/each}
-			</Table.Body>
-		</Table>
-	</Card.Content>
-</Card>
+	<Card bordered={false} class="h-[calc(100vh-14rem)]">
+		<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
+			Card Header
+			<Input slot="extra" />
+		</Card.Header>
+		<Card.Content slot="content" class="p-0 sm:p-0" style="height: calc(100% - 64px);">
+			<Table class="h-full overflow-hidden rounded-md" {columns}>
+				<Table.Body slot="body">
+					{#each $serviceRequestsRes.value.serviceRequests as item}
+						<Table.Body.Row id="item.id" on:click={openDrawerLeft}>
+							<Table.Body.Row.Cell column={0}>{item.service_name}</Table.Body.Row.Cell>
+							<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
+							<Table.Body.Row.Cell column={2}>{item.address}</Table.Body.Row.Cell>
+							<Table.Body.Row.Cell column={4}>{item.requested_datetime}</Table.Body.Row.Cell>
+						</Table.Body.Row>
+					{/each}
+				</Table.Body>
+			</Table>
+		</Card.Content>
+	</Card>
+
+	<div class="flex justify-end">
+		<Pagination
+			pagination={$serviceRequestsRes.value.metadata.pagination}
+			nextPage={linkResolver.nextIssuesPage(
+				$serviceRequestsRes.value.metadata.pagination,
+				$page.url
+			)}
+			prevPage={linkResolver.prevIssuesPage(
+				$serviceRequestsRes.value.metadata.pagination,
+				$page.url
+			)}
+		/>
+	</div>
+{/if}
