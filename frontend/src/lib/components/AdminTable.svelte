@@ -1,3 +1,4 @@
+<!-- OLD CODE: Moved to routes/issues/table/+layout.svelte -->
 <script lang="ts">
 	import { Badge, Card, Input, Table } from 'stwui';
 	import type { TableColumn } from 'stwui/types';

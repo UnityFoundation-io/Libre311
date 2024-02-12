@@ -35,6 +35,10 @@ export class LinkResolver {
 		return this.createIssueLink('/issues/list', url);
 	}
 
+	issuesTable(url: URL) {
+		return this.createIssueLink('/issues/table', url);
+	}
+
 	issueDetailsDesktop(url: URL, id: ServiceRequestId) {
 		return this.createIssueLink(`/issues/map/${id}`, url);
 	}
