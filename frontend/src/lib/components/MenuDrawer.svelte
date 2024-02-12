@@ -27,7 +27,7 @@
 			key: 'table',
 			label: 'Service Request Table',
 			data: tableIcon,
-			href: linkResolver.issuesList($page.url)
+			href: linkResolver.issuesTable($page.url)
 		},
 		{
 			key: 'map',
