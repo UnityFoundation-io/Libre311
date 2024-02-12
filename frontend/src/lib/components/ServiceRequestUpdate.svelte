@@ -59,20 +59,6 @@
 			<p class="text-sm">{serviceRequest.address}</p>
 		</div>
 
-		<!-- {#if serviceRequest.detail}
-			<div></div>
-
-			<div class="mb-1">
-				<strong class="text-base">{messages['serviceRequest']['detail']}</strong>
-
-				<p class="text-sm">
-					{#each serviceRequest.detail as detail, i}
-						{detail}{#if i < serviceRequest.detail.length - 1}<span>, </span>{/if}
-					{/each}
-				</p>
-			</div>
-		{/if} -->
-
 		<div class="mb-1">
 			<strong class="text-base">{messages['serviceRequest']['description']}</strong>
 			<p class="text-sm">{serviceRequest.description}</p>
