@@ -1,4 +1,5 @@
 <script lang="ts">
+	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import { Card, Input, Table } from 'stwui';
 	import type { TableColumn } from 'stwui/types';
@@ -56,6 +57,26 @@
 	<SideBarMainContentLayout>
 		<slot slot="side-bar" />
 		<div slot="main-content" class="relative h-full flex-col">
+			<div class="m-3 flex items-center justify-between">
+				<div>
+					<p class="text-base">{messages['sidebar']['title']}</p>
+				</div>
+
+				<div>
+					<Pagination
+						pagination={$serviceRequestsRes.value.metadata.pagination}
+						nextPage={linkResolver.nextIssuesPage(
+							$serviceRequestsRes.value.metadata.pagination,
+							$page.url
+						)}
+						prevPage={linkResolver.prevIssuesPage(
+							$serviceRequestsRes.value.metadata.pagination,
+							$page.url
+						)}
+					/>
+				</div>
+			</div>
+
 			<Card bordered={false}>
 				<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
 					Card Header
@@ -76,20 +97,6 @@
 					</Table>
 				</Card.Content>
 			</Card>
-
-			<div class="flex justify-end">
-				<Pagination
-					pagination={$serviceRequestsRes.value.metadata.pagination}
-					nextPage={linkResolver.nextIssuesPage(
-						$serviceRequestsRes.value.metadata.pagination,
-						$page.url
-					)}
-					prevPage={linkResolver.prevIssuesPage(
-						$serviceRequestsRes.value.metadata.pagination,
-						$page.url
-					)}
-				/>
-			</div>
 		</div>
 	</SideBarMainContentLayout>
 {/if}
