@@ -8,6 +8,7 @@
 	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
+	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 
 	const linkResolver = useLibre311Context().linkResolver;
 
@@ -43,9 +44,9 @@
 		}
 	];
 
-	function openDrawer() {
+	function openDrawer(item: ServiceRequest) {
 		isDrawerOpen = true;
-		goto(`/issues/table/1`); // TODO
+		goto(`/issues/table/${item.service_request_id}`); // TODO
 	}
 
 	function closeDrawer() {
@@ -86,7 +87,7 @@
 					<Table {columns}>
 						<Table.Body slot="body">
 							{#each $serviceRequestsRes.value.serviceRequests as item}
-								<Table.Body.Row id="item-id" on:click={openDrawer}>
+								<Table.Body.Row id="item-id" on:click={openDrawer(item)}>
 									<Table.Body.Row.Cell column={0}>{item.service_name}</Table.Body.Row.Cell>
 									<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
 									<Table.Body.Row.Cell column={2}>{item.address}</Table.Body.Row.Cell>
