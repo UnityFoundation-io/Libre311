@@ -2,6 +2,7 @@ import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
+import { MockLibre311ServiceImpl } from './MockLibre311';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -509,5 +510,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 }
 
 export async function libre311Factory(props: Libre311ServiceProps): Promise<Libre311Service> {
-	return Libre311ServiceImpl.create(props);
+	// return Libre311ServiceImpl.create(props);
+	return MockLibre311ServiceImpl.create();	// TODO: Revert this! Just for testing
 }
