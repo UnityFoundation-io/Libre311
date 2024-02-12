@@ -169,14 +169,12 @@ const HasServiceRequestIdSchema = z.object({
 export type HasServiceRequestId = z.infer<typeof HasServiceRequestIdSchema>;
 export type ServiceRequestId = HasServiceRequestId['service_request_id'];
 
-export const CreateServiceRequestResponseSchema = z.array(
-	z
-		.object({
-			service_notice: z.string().nullish(),
-			account_id: z.number().nullish()
-		})
-		.merge(HasServiceRequestIdSchema)
-);
+export const CreateServiceRequestResponseSchema = z
+	.object({
+		service_notice: z.string().nullish(),
+		account_id: z.number().nullish()
+	})
+	.merge(HasServiceRequestIdSchema);
 
 export type CreateServiceRequestResponse = z.infer<typeof CreateServiceRequestResponseSchema>;
 
@@ -437,11 +435,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 		);
 		const urlSearchparams = toURLSearchParams(paramsWithRecapta);
 
-		const res = await this.axiosInstance.post<unknown>(
+		const res = await this.axiosInstance.post<InternalCreateServiceRequestResponse>(
 			ROUTES.postServiceRequest(this.jurisdictionConfig),
 			urlSearchparams
 		);
-		return InternalCreateServiceRequestResponseSchema.parse(res)[0];
+
+		return InternalCreateServiceRequestResponseSchema.parse(res.data)[0];
 	}
 
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
