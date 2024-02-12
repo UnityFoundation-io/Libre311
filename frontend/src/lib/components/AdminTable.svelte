@@ -40,15 +40,6 @@
 		}
 	];
 
-	interface Item extends Record<string, string> {
-		id: string;
-		project_name: string;
-		status: string;
-		city: string;
-		state: string;
-		created_at: string;
-	}
-
 	function openDrawerLeft() {
 		drawerLeftOpen = true;
 	}
