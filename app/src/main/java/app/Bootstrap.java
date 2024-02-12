@@ -62,44 +62,20 @@ public class Bootstrap {
     public void devData(ServerStartupEvent event) {
         if(data != null) {
 
-            List<String> jurisdictions = null;
             if(data.containsKey("jurisdictions")) {
-                jurisdictions = (List<String>) data.get("jurisdictions");
+                List<Map<String, ?>> jurisdictions = (List<Map<String, ?>>) data.get("jurisdictions");
+                jurisdictions.forEach(juridictionsMap -> {
+                    Jurisdiction jurisdiction = jurisdictionRepository.save(
+                            new Jurisdiction((String) juridictionsMap.get("id"), (String) juridictionsMap.get("tenant")));
 
-                if (jurisdictions != null && !jurisdictions.isEmpty()) {
-                    jurisdictions.stream().forEach(jurisdiction -> {
-                        jurisdictionRepository.save(new Jurisdiction(jurisdiction));
-                    });
-
-                    if(data.containsKey("services")) {
-                        List<Map<String, ?>> services = (List<Map<String, ?>>) data.get("services");
-                        if (servicesAreValidWithRespectToJurisdictionsDeclaration(services, jurisdictions)) {
-                            processAndStoreServices(services);
-                        } else {
-                            LOG.error("Services and Service Definitions were not loaded due to missing or invalid jurisdiction");
-                        }
-                    }
-                } else {
-                    LOG.error("Required jurisdiction ids are missing");
-                }
-            } else {
-                LOG.error("Required jurisdiction ids are missing");
+                    List<Map<String, ?>> services = (List<Map<String, ?>>) juridictionsMap.get("services");
+                    processAndStoreServices(services, jurisdiction);
+                });
             }
         }
     }
 
-    private void processAndStoreServices(List<Map<String, ?>> services) {
-
-        Map<String, Jurisdiction> jurisdictionMap = new HashMap<>();
-        List<String> distinctJurisdictions = services.stream()
-                .map(stringMap -> (String) stringMap.get("jurisdiction"))
-                .distinct()
-                .collect(Collectors.toList());
-
-        distinctJurisdictions.forEach(s -> {
-            Optional<Jurisdiction> byId = jurisdictionRepository.findById(s);
-            jurisdictionMap.put(s, byId.get());
-        });
+    private void processAndStoreServices(List<Map<String, ?>> services, Jurisdiction jurisdiction) {
 
         services.stream().forEach(svc -> {
             String serviceName = (String) svc.get("serviceName");
@@ -107,10 +83,6 @@ public class Bootstrap {
             service.setServiceCode((String) svc.get("serviceCode"));
             service.setDescription((String) svc.get("description"));
             service.setType(ServiceType.valueOf(((String) svc.get("type")).toUpperCase()));
-
-            Jurisdiction jurisdiction;
-            String jurisdictionStr = (String) svc.get("jurisdiction");
-            jurisdiction = jurisdictionMap.get(jurisdictionStr);
             service.setJurisdiction(jurisdiction);
 
             if (svc.containsKey("serviceDefinition")) {
@@ -184,13 +156,6 @@ public class Bootstrap {
             }
 
             serviceRepository.update(savedService);
-        });
-    }
-
-    private boolean servicesAreValidWithRespectToJurisdictionsDeclaration(List<Map<String, ?>> services, List<String> jurisdictions) {
-        return services.stream().noneMatch(service -> {
-            String jurisdiction = (String) service.get("jurisdiction");
-            return jurisdiction == null || !jurisdictions.contains(jurisdiction);
         });
     }
 
