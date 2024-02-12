@@ -38,18 +38,14 @@ public class UnityAuthService {
         this.userJurisdictionRepository = userJurisdictionRepository;
     }
 
-    public boolean isUserPermittedForJurisdictionAction(String token, String jurisdictionId, List<String> permissions) {
+    public boolean isUserPermittedForAction(String token, String jurisdictionId, List<String> permissions) {
+
         Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById(jurisdictionId);
         if (optionalJurisdiction.isEmpty()) {
             return false;
         }
 
         String tenantId = optionalJurisdiction.get().getTenantId();
-
-        return isUserPermittedForTenantAction(token, tenantId, permissions);
-    }
-
-    public boolean isUserPermittedForTenantAction(String token, String tenantId, List<String> permissions) {
         HasPermissionRequest hasPermissionRequest = new HasPermissionRequest(tenantId, serviceId, permissions);
 
         boolean hasPermission;
