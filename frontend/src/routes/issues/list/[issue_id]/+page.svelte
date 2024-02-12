@@ -13,7 +13,7 @@
 		<div class="h-full w-full md:w-3/4 lg:w-1/2">
 			<ServiceRequestDetails
 				serviceRequest={$selectedServiceRequest}
-				back={linkResolver.issuesMap($page.url)}
+				back={linkResolver.issuesList($page.url)}
 			/>
 		</div>
 	</div>
