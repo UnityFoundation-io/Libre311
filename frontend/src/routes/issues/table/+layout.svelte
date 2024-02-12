@@ -69,7 +69,7 @@
 									<Table.Body.Row.Cell column={0}>{item.service_name}</Table.Body.Row.Cell>
 									<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
 									<Table.Body.Row.Cell column={2}>{item.address}</Table.Body.Row.Cell>
-									<!-- <Table.Body.Row.Cell column={3}>{item.requested_datetime}</Table.Body.Row.Cell> -->
+									<Table.Body.Row.Cell column={3}>{item.requested_datetime}</Table.Body.Row.Cell>
 								</Table.Body.Row>
 							{/each}
 						</Table.Body>
