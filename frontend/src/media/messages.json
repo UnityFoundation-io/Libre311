@@ -68,6 +68,10 @@
 		"button_edit": "Edit",
 		"button_submit": "Submit Request"
 	},
+	"updateServiceRequest": {
+		"button_back": "Close",
+		"button_submit": "Update Request"
+	},
 	"photo": {
 		"upload": "Upload An Image",
 		"camera_roll": "Camera Roll",
