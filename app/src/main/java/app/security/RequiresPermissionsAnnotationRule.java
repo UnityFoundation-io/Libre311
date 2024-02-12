@@ -49,7 +49,7 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
     List<String> declaredPermissionsAsStrings = declaredPermissions.stream()
         .map(Enum::toString).collect(Collectors.toList());
 
-    if (unityAuthService.isUserPermittedForAction(bearerToken, resolveJurisdictionId(request),
+    if (unityAuthService.isUserPermittedForJurisdictionAction(bearerToken, resolveJurisdictionId(request),
         declaredPermissionsAsStrings)) {
       return ALLOWED;
     }
