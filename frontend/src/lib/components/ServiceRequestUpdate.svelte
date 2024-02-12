@@ -22,8 +22,6 @@
 	}
 
 	function createName(serviceRequest: ServiceRequest) {
-		console.log(serviceRequest);
-
 		if (serviceRequest.first_name || serviceRequest.last_name)
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
 	}
