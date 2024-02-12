@@ -4,7 +4,6 @@
 	import { Drawer, Portal } from 'stwui';
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
-
 	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import Pagination from './Pagination.svelte';
 
@@ -13,7 +12,7 @@
 
 	const linkResolver = useLibre311Context().linkResolver;
 
-	let drawerLeftOpen = false;
+	let isDrawerOpen = false;
 
 	const columns: TableColumn[] = [
 		{
@@ -48,20 +47,22 @@
 		}
 	];
 
-	function openDrawerLeft() {
-		drawerLeftOpen = true;
+	function openDrawer() {
+		isDrawerOpen = true;
 	}
 
-	function closeDrawerLeft() {
-		drawerLeftOpen = false;
+	function closeDrawer() {
+		isDrawerOpen = false;
 	}
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
 	<Portal>
-		{#if drawerLeftOpen}
-			<Drawer handleClose={closeDrawerLeft} placement="left">
-				<Drawer.Content slot="content">Drawer Content</Drawer.Content>
+		{#if isDrawerOpen}
+			<Drawer handleClose={closeDrawer} placement="right">
+				<Drawer.Content slot="content">
+					<div>Drawer Content</div>
+				</Drawer.Content>
 			</Drawer>
 		{/if}
 	</Portal>
@@ -75,7 +76,7 @@
 			<Table class="h-full overflow-hidden rounded-md" {columns}>
 				<Table.Body slot="body">
 					{#each $serviceRequestsRes.value.serviceRequests as item}
-						<Table.Body.Row id="item.id" on:click={openDrawerLeft}>
+						<Table.Body.Row id="item.id" on:click={openDrawer}>
 							<Table.Body.Row.Cell column={0}>{item.service_name}</Table.Body.Row.Cell>
 							<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
 							<Table.Body.Row.Cell column={2}>{item.address}</Table.Body.Row.Cell>
