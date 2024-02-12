@@ -170,14 +170,22 @@ const HasServiceRequestIdSchema = z.object({
 export type HasServiceRequestId = z.infer<typeof HasServiceRequestIdSchema>;
 export type ServiceRequestId = HasServiceRequestId['service_request_id'];
 
-export const CreateServiceRequestResponseSchema = z
-	.object({
-		service_notice: z.string().nullish(),
-		account_id: z.number().nullish()
-	})
-	.merge(HasServiceRequestIdSchema);
+export const CreateServiceRequestResponseSchema = z.array(
+	z
+		.object({
+			service_notice: z.string().nullish(),
+			account_id: z.number().nullish()
+		})
+		.merge(HasServiceRequestIdSchema)
+);
 
 export type CreateServiceRequestResponse = z.infer<typeof CreateServiceRequestResponseSchema>;
+
+export type InternalCreateServiceRequestResponse = z.infer<
+	typeof InternalCreateServiceRequestResponseSchema
+>;
+
+const InternalCreateServiceRequestResponseSchema = z.array(CreateServiceRequestResponseSchema);
 
 export const GetServiceListResponseSchema = z.array(ServiceSchema);
 export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema>;
@@ -371,7 +379,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
 	private recaptchaService: RecaptchaService;
-	public static readonly supportedImageTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp'];
+	public static readonly supportedImageTypes = [
+		'image/png',
+		'image/jpg',
+		'image/jpeg',
+		'image/webp'
+	];
 
 	private constructor(props: Libre311ServiceProps & { jurisdictionConfig: JurisdictionConfig }) {
 		Libre311ServicePropsSchema.parse(props);
@@ -429,7 +442,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 			ROUTES.postServiceRequest(this.jurisdictionConfig),
 			urlSearchparams
 		);
-		return CreateServiceRequestResponseSchema.parse(res);
+		return InternalCreateServiceRequestResponseSchema.parse(res)[0];
 	}
 
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
