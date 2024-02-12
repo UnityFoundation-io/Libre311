@@ -32,10 +32,12 @@
 	"serviceRequest": {
 		"description": "Description:",
 		"detail": "Details:",
+		"attributes": "Attributes:",
 		"citizen_contact": "Citizen Contact:",
 		"agency_contact": "Agency Contact:",
 		"expected_datetime": "Estimated Fix:",
-		"service_notes": "Service Notes"
+		"service_notice": "Service Notice:",
+		"status_notes": "Status Notes:"
 	},
 	"contact": {
 		"header": "Add Contact Information",

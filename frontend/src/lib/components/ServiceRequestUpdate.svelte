@@ -65,9 +65,43 @@
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
-				<div class="mb-1">
-					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-					<p class="text-sm">{serviceRequest.description}</p>
+				<!-- TODO -->
+				<!-- {#each serviceRequest.attributeMap.values() as attributes}
+					<div class="mb-2">
+						<strong class="text-base">{messages['serviceRequest']['attributes']}</strong>
+						{#if attributes.datatype == 'multivaluelist'}
+							<DisplayMultiAttribute {attributes} />
+						{:else if attributes.datatype == 'datetime'}
+							<DisplayDateTimeAttribute {attributes} />
+						{:else if attributes.datatype == 'string'}
+							<DisplayStringAttribute {attributes} />
+						{:else if attributes.datatype == 'singlevaluelist'}
+							<DisplaySingleAttribute {attributes} />
+						{:else if attributes.datatype == 'number'}
+							<DisplayNumberAttribute {attributes} />
+						{:else if attributes.datatype == 'text'}
+							<DisplayTextAttribute {attributes} />
+						{/if}
+					</div>
+				{/each} -->
+
+				{#if serviceRequest.description}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['description']}</strong>
+						<p class="text-sm">{serviceRequest.description ?? ''}</p>
+					</div>
+				{/if}
+
+				<div class="mb-1 flex">
+					<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+					<div class="flex items-center">
+						{#if serviceRequest.expected_datetime}
+							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
+						{:else}
+							<p class="text-sm">--</p>
+						{/if}
+						<img alt="clock" src={clockIcon} />
+					</div>
 				</div>
 
 				{#if name}
@@ -82,26 +116,21 @@
 				{#if serviceRequest.agency_responsible}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
-						<p class="text-sm">{serviceRequest.agency_responsible}</p>
+						<p class="text-sm">{serviceRequest.agency_responsible ?? ''}</p>
 					</div>
 				{/if}
 
-				<div class="mb-1 flex">
-					<img alt="clock" src={clockIcon} />
-					<strong class="ml-1 text-base">{messages['serviceRequest']['expected_datetime']}</strong>
-					<div class="ml-1 flex items-center">
-						{#if serviceRequest.expected_datetime}
-							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime)}</p>
-						{:else}
-							<p class="text-sm">--</p>
-						{/if}
+				{#if serviceRequest.service_notice}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+						<p class="text-sm">{serviceRequest.service_notice ?? ''}</p>
 					</div>
-				</div>
+				{/if}
 
 				{#if serviceRequest.status_notes}
 					<div class="mb-1">
-						<h2 class="text-base">{messages['serviceRequest']['service_notes']}</h2>
-						<p class="text-sm">{toTimeStamp(serviceRequest.status_notes)}</p>
+						<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
+						<p class="text-sm">{toTimeStamp(serviceRequest.status_notes) ?? ''}</p>
 					</div>
 				{/if}
 			</div>
