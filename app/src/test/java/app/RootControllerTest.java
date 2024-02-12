@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -76,6 +77,9 @@ public class RootControllerTest {
 
     @Inject
     MockReCaptchaService mockReCaptchaService;
+
+    @Inject
+    MockAuthenticationFetcher mockAuthenticationFetcher;
 
     @Inject
     ServiceRepository serviceRepository;
@@ -101,6 +105,7 @@ public class RootControllerTest {
     @BeforeEach
     void setup() {
         dbCleanup.cleanupServiceRequests();
+        mockAuthenticationFetcher.setAuthentication(null);
         setAuthHasPermissionSuccessResponse(false, null);
 
         String userEmail = "person1@test.io";
@@ -119,6 +124,7 @@ public class RootControllerTest {
     }
 
     void authLogin() {
+        mockAuthenticationFetcher.setAuthentication(DEFAULT_MOCK_AUTHENTICATION);
         setAuthHasPermissionSuccessResponse(true, null);
     }
 

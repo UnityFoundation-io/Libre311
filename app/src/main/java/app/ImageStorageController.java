@@ -21,10 +21,13 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 
 import javax.validation.Valid;
 
 @Controller("/api/image")
+@Secured(SecurityRule.IS_ANONYMOUS)
 public class ImageStorageController {
 
     private final StorageService storageService;

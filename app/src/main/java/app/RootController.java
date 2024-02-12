@@ -39,12 +39,15 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
 @Controller("/api")
+@Secured(SecurityRule.IS_ANONYMOUS)
 public class RootController {
 
     private final ServiceService serviceService;

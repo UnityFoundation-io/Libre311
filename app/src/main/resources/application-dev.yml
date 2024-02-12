@@ -1,5 +1,16 @@
 ---
 micronaut:
+  security:
+    token:
+      jwt:
+        signatures:
+          jwks:
+            unityauth: #Creates JwksSignature bean with unityauth qualifier
+              url: 'https://localhost:8081/keys'
+    redirect:
+      login-success: http://localhost:3000
+      login-failure: http://localhost:3000/?login-failed=true
+      logout: http://localhost:8080
   server:
     cors:
       enabled: true
