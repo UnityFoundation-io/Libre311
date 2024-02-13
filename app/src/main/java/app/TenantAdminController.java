@@ -40,7 +40,7 @@ public class TenantAdminController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT})
     public JurisdictionDTO createServiceJson(@Valid @Body CreateJurisdictionDTO requestDTO,
-                                                   @Nullable @QueryValue("tenant_id") String tenant_id) {
+                                                   @Nullable @QueryValue("tenant_id") Long tenant_id) {
         return jurisdictionService.createJurisdiction(requestDTO, tenant_id);
     }
 }

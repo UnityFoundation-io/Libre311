@@ -25,7 +25,7 @@ public class JurisdictionDTO {
     private String jurisdictionId;
 
     @JsonProperty("tenant_id")
-    private String tenantId;
+    private Long tenantId;
 
     @JsonProperty("name")
     private String name;
@@ -47,11 +47,11 @@ public class JurisdictionDTO {
         this.jurisdictionId = jurisdictionId;
     }
 
-    public String getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(String tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 

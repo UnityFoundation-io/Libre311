@@ -33,7 +33,7 @@ public class JurisdictionService {
             .map(JurisdictionDTO::new).orElse(null);
     }
 
-    public JurisdictionDTO createJurisdiction(CreateJurisdictionDTO requestDTO, String tenantId) {
+    public JurisdictionDTO createJurisdiction(CreateJurisdictionDTO requestDTO, Long tenantId) {
         if (jurisdictionRepository.existsById(requestDTO.getJurisdictionId())) {
             return null;
         }

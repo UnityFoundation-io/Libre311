@@ -52,7 +52,7 @@ public class UnityAuthService {
         this.jurisdictionUserRepository = jurisdictionUserRepository;
     }
 
-    public boolean isUserPermittedForTenantAction(String token, String tenantId, List<String> permissions) {
+    public boolean isUserPermittedForTenantAction(String token, Long tenantId, List<String> permissions) {
 
         HasPermissionRequest hasPermissionRequest = new HasPermissionRequest(tenantId, serviceId, permissions);
 

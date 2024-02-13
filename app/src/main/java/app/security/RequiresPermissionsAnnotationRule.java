@@ -74,7 +74,7 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
         if (jurisdictionId != null) {
             result = unityAuthService.isUserPermittedForJurisdictionAction(bearerToken, jurisdictionId, declaredPermissionsAsStrings);
         } else {
-            result = unityAuthService.isUserPermittedForTenantAction(bearerToken, tenantId, declaredPermissionsAsStrings);
+            result = unityAuthService.isUserPermittedForTenantAction(bearerToken, Long.valueOf(tenantId), declaredPermissionsAsStrings);
         }
 
         if (result) {

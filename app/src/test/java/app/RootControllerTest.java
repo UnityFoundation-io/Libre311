@@ -806,7 +806,7 @@ public class RootControllerTest {
         createJurisdictionDTO.setJurisdictionId("george.town");
         createJurisdictionDTO.setName("City of Georgetown");
 
-        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=acme", createJurisdictionDTO)
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
@@ -824,7 +824,7 @@ public class RootControllerTest {
         createJurisdictionDTO.setJurisdictionId("george.town");
         createJurisdictionDTO.setName("City of Georgetown");
 
-        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=acme", createJurisdictionDTO)
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
 
         HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
@@ -840,7 +840,7 @@ public class RootControllerTest {
         createJurisdictionDTO.setJurisdictionId("louisville.city");
         createJurisdictionDTO.setName("City of Louisville");
 
-        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=acme", createJurisdictionDTO)
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
 
         HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
