@@ -1,13 +1,28 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card, Select } from 'stwui';
+	import { Badge, Button, Card, Input, Select } from 'stwui';
 	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import Flag from '$lib/components/Svg/Flag.svelte';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import type { SelectOption } from 'stwui/types';
+	import {
+		createInput,
+		optionalCoalesceNameValidator,
+		type FormInputValue,
+		optionalCoalesceEmailValidator,
+		optionalCoalescePhoneNumberValidator
+	} from '$lib/utils/validation';
+	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
+	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
 
 	export let serviceRequest: ServiceRequest;
+
+	let agencyNameInput: FormInputValue<string | undefined | null> = createInput(
+		serviceRequest.agency_responsible //.name
+	);
+	let agencyEmailInput: FormInputValue<string | undefined> = createInput(''); // TODO
+	let agencyPhoneInput: FormInputValue<string | undefined> = createInput(''); // TODO
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -50,7 +65,30 @@
 		}
 	}
 
+	function formatPhoneNumber(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (target.value) {
+			let phoneNumber = target.value;
+			phoneNumber = phoneNumber
+				.replace(/\D/g, '') // Remove non-digit characters
+				.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); // Format with hyphens
+			return phoneNumber;
+		}
+	}
+
 	function updateServiceRequest() {
+		agencyNameInput = optionalCoalesceNameValidator(agencyNameInput);
+		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
+		agencyPhoneInput = optionalCoalescePhoneNumberValidator(agencyPhoneInput);
+
+		const resultSet = new Set([agencyNameInput.type, agencyEmailInput.type, agencyPhoneInput.type]);
+		if (resultSet.has('invalid')) return;
+
+		serviceRequest = {
+			...serviceRequest,
+			agency_responsible: agencyNameInput.value
+		};
+
 		console.log(serviceRequest);
 		const msg: string = `TODO: Update Service Request`;
 		alert(msg);
@@ -162,11 +200,11 @@
 					</div>
 				{/if}
 
-				<div class="my-3">
+				<div class="my-4">
 					<hr />
 				</div>
 
-				<div class="mb-1">
+				<div class="my-4">
 					<Select
 						name="select-status"
 						placeholder={serviceRequest.status.charAt(0).toUpperCase() +
@@ -181,6 +219,40 @@
 							{/each}
 						</Select.Options>
 					</Select>
+				</div>
+
+				<div class="my-4">
+					<Input
+						allowClear
+						type="text"
+						name="firstName"
+						placeholder={messages['serviceRequest']['agency_name']}
+						error={agencyNameInput.error}
+						bind:value={agencyNameInput.value}
+					>
+						<Input.Label slot="label">{messages['serviceRequest']['agency_contact']}</Input.Label>
+					</Input>
+					<Input
+						allowClear
+						name="email"
+						type="email"
+						placeholder={messages['contact']['email']['placeholder']}
+						error={agencyEmailInput.error}
+						bind:value={agencyEmailInput.value}
+					>
+						<Input.Leading slot="leading" data={mailIcon} />
+					</Input>
+					<Input
+						allowClear
+						type="text"
+						name="phone"
+						placeholder={messages['contact']['phone']['placeholder']}
+						error={agencyPhoneInput.error}
+						bind:value={agencyPhoneInput.value}
+						on:input={formatPhoneNumber}
+					>
+						<Input.Leading slot="leading" data={phoneIcon} />
+					</Input>
 				</div>
 			</div>
 
