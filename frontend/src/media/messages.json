@@ -40,8 +40,8 @@
 		"service_notice": "Service Notice:",
 		"service_notice_placeholder": "proposed service",
 		"status_notes": "Status Notes:",
-		"status": "Status",
-		"priority": "Priority"
+		"status": "Status:",
+		"priority": "Priority:"
 	},
 	"contact": {
 		"header": "Add Contact Information",
