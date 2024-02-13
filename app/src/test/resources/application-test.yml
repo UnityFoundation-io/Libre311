@@ -13,13 +13,20 @@ micronaut:
           - http://127.0.0.1:3000
 ---
 micronaut:
+  http:
+    services:
+      auth:
+        urls:
+          - http://localhost:8080
   security:
     token:
+      enabled: true
       jwt:
+        enabled: true
         signatures:
           jwks:
-            unityauth: #Creates JwksSignature bean with unityauth qualifier
-              url: 'https://localhost:8081/.well-known/jwks.json'
+            unity:
+              url: https://localhost:8081/keys
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:8080/failed-auth
