@@ -35,6 +35,7 @@
 		"attributes": "Attributes:",
 		"citizen_contact": "Citizen Contact:",
 		"agency_contact": "Agency Contact:",
+		"agency_name": "agency name",
 		"expected_datetime": "Estimated Fix:",
 		"service_notice": "Service Notice:",
 		"status_notes": "Status Notes:",
