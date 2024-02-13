@@ -14,7 +14,9 @@
 
 package app.service.jurisdiction;
 
-import app.model.jurisdiction.JurisdictionInfoResponse;
+import app.dto.jurisdiction.CreateJurisdictionDTO;
+import app.dto.jurisdiction.JurisdictionDTO;
+import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import jakarta.inject.Singleton;
 
@@ -26,9 +28,19 @@ public class JurisdictionService {
         this.jurisdictionRepository = jurisdictionRepository;
     }
 
-    public JurisdictionInfoResponse findJurisdictionByHostName(String hostName) {
+    public JurisdictionDTO findJurisdictionByHostName(String hostName) {
         return jurisdictionRepository.findByRemoteHostsNameEquals(hostName)
-            .map(jurisdiction -> new JurisdictionInfoResponse(jurisdiction.getId(), jurisdiction.getName()))
-            .orElse(null);
+            .map(JurisdictionDTO::new).orElse(null);
+    }
+
+    public JurisdictionDTO createJurisdiction(CreateJurisdictionDTO requestDTO, String tenantId) {
+        if (jurisdictionRepository.existsById(requestDTO.getJurisdictionId())) {
+            return null;
+        }
+
+        Jurisdiction jurisdiction = new Jurisdiction(requestDTO.getJurisdictionId(), tenantId);
+        jurisdiction.setName(requestDTO.getName());
+
+        return new JurisdictionDTO(jurisdictionRepository.save(jurisdiction));
     }
 }

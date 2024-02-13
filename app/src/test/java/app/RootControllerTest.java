@@ -15,12 +15,13 @@
 package app;
 
 import app.dto.discovery.DiscoveryDTO;
+import app.dto.jurisdiction.CreateJurisdictionDTO;
+import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.*;
 import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdiction.RemoteHost;
 import app.model.jurisdictionuser.JurisdictionUser;
@@ -797,6 +798,56 @@ public class RootControllerTest {
     }
 
     @Test
+    public void jurisdictionAdminCannotCreateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SUBTENANT"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("george.town");
+        createJurisdictionDTO.setName("City of Georgetown");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=acme", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
+    public void tenantAdminCanCreateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-TENANT"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("george.town");
+        createJurisdictionDTO.setName("City of Georgetown");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=acme", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+    }
+
+    @Test
+    public void systemAdminCanCreateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("louisville.city");
+        createJurisdictionDTO.setName("City of Louisville");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=acme", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+    }
+
+    @Test
     public void getJurisdictionTest() {
         RemoteHost h = new RemoteHost("host1");
         Jurisdiction j = new Jurisdiction("1", "acme", "jurisdiction1", null);
@@ -807,10 +858,10 @@ public class RootControllerTest {
 
         HttpRequest<?> request = HttpRequest.GET("/config")
                 .header("host", "host1");
-        HttpResponse<JurisdictionInfoResponse> response = client.toBlocking()
-                .exchange(request, JurisdictionInfoResponse.class);
-        JurisdictionInfoResponse infoResponse = response.getBody().get();
-        assertEquals(infoResponse.getId(), "1");
+        HttpResponse<JurisdictionDTO> response = client.toBlocking()
+                .exchange(request, JurisdictionDTO.class);
+        JurisdictionDTO infoResponse = response.getBody().get();
+        assertEquals(infoResponse.getJurisdictionId(), "1");
         assertEquals(infoResponse.getName(), "jurisdiction1");
     }
 
