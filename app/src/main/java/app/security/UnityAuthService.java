@@ -34,8 +34,8 @@ import java.util.Optional;
 public class UnityAuthService {
     private static final Logger LOG = LoggerFactory.getLogger(UnityAuthService.class);
 
-    @Property(name = "micronaut.application.name")
-    protected String serviceId;
+    @Property(name = "app.service-id")
+    protected Long serviceId;
 
     private final UnityAuthClient client;
     private final UserRepository userRepository;
@@ -59,7 +59,7 @@ public class UnityAuthService {
             return false;
         }
 
-        String tenantId = optionalJurisdiction.get().getTenantId();
+        Long tenantId = optionalJurisdiction.get().getTenantId();
         HasPermissionRequest hasPermissionRequest = new HasPermissionRequest(tenantId, serviceId, permissions);
 
         boolean hasPermission;
