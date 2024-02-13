@@ -129,6 +129,7 @@
 		serviceRequest = {
 			...serviceRequest,
 			agency_responsible: agencyNameInput.value,
+			agency_email: agencyEmailInput.value,
 			expected_datetime: expected_datetime.toISOString(),
 			service_notice: serviceNoticeInput.value,
 			status_notes: statusNotesInput.value
