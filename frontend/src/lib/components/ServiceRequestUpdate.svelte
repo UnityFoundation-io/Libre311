@@ -11,7 +11,8 @@
 		optionalCoalesceNameValidator,
 		type FormInputValue,
 		optionalCoalesceEmailValidator,
-		optionalCoalescePhoneNumberValidator
+		optionalCoalescePhoneNumberValidator,
+		optionalCoalesceStringValidator
 	} from '$lib/utils/validation';
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
 	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
@@ -25,6 +26,8 @@
 	);
 	let agencyEmailInput: FormInputValue<string | undefined> = createInput(''); // TODO
 	let agencyPhoneInput: FormInputValue<string | undefined> = createInput(''); // TODO
+
+	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(''); // TODO
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -105,14 +108,21 @@
 		agencyNameInput = optionalCoalesceNameValidator(agencyNameInput);
 		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
 		agencyPhoneInput = optionalCoalescePhoneNumberValidator(agencyPhoneInput);
+		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 
-		const resultSet = new Set([agencyNameInput.type, agencyEmailInput.type, agencyPhoneInput.type]);
+		const resultSet = new Set([
+			agencyNameInput.type,
+			agencyEmailInput.type,
+			agencyPhoneInput.type,
+			serviceNoticeInput.type
+		]);
 		if (resultSet.has('invalid')) return;
 
 		serviceRequest = {
 			...serviceRequest,
 			agency_responsible: agencyNameInput.value,
-			expected_datetime: expected_datetime.toISOString()
+			expected_datetime: expected_datetime.toISOString(),
+			service_notice: serviceNoticeInput.value
 		};
 
 		console.log(serviceRequest);
@@ -305,6 +315,19 @@
 							{/each}
 						</Select.Options>
 					</Select>
+				</div>
+
+				<div class="my-4">
+					<Input
+						allowClear
+						type="text"
+						name="firstName"
+						placeholder={messages['serviceRequest']['service_notice_placeholder']}
+						error={serviceNoticeInput.error}
+						bind:value={serviceNoticeInput.value}
+					>
+						<Input.Label slot="label">{messages['serviceRequest']['service_notice']}</Input.Label>
+					</Input>
 				</div>
 			</div>
 

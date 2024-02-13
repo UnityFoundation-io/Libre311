@@ -38,6 +38,7 @@
 		"agency_name": "agency name",
 		"expected_datetime": "Estimated Fix:",
 		"service_notice": "Service Notice:",
+		"service_notice_placeholder": "proposed service",
 		"status_notes": "Status Notes:",
 		"status": "Status",
 		"priority": "Priority"
