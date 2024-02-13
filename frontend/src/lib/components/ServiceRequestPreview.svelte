@@ -6,6 +6,7 @@
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import Flag from './Svg/Flag.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let detailsLink: string;
@@ -56,22 +57,11 @@
 			</div>
 		{/if}
 
-		<div class="mt-2 flow-root">
-			<a href={detailsLink}>
-				<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
-			</a>
-
-			<Dropdown class="float-right" bind:visible>
-				<button aria-label="dropdown toggle" slot="trigger" on:click={toggleDropdown} type="button">
-					<span class="sr-only">Open user menu</span>
-					<img src={dropDownIcon} alt="drop-down-menu" />
-				</button>
-				<Dropdown.Items slot="items">
-					<Dropdown.Items.Item on:click={closeDropdown} label="Item 1" />
-					<Dropdown.Items.Item on:click={closeDropdown} label="Item 2" />
-					<Dropdown.Items.Item on:click={closeDropdown} label="Item 3" />
-				</Dropdown.Items>
-			</Dropdown>
+		<div class="mb-2 mt-2 flow-root">
+			<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
+			<div class="float-right">
+				<Flag />
+			</div>
 		</div>
 
 		<div class="mb-2">
