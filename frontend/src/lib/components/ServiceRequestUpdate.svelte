@@ -15,6 +15,8 @@
 	} from '$lib/utils/validation';
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
 	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
+	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon.js';
+	import { DatePicker } from 'stwui';
 
 	export let serviceRequest: ServiceRequest;
 
@@ -86,7 +88,8 @@
 
 		serviceRequest = {
 			...serviceRequest,
-			agency_responsible: agencyNameInput.value
+			agency_responsible: agencyNameInput.value,
+			expected_datetime: expected_datetime.toISOString()
 		};
 
 		console.log(serviceRequest);
@@ -95,6 +98,7 @@
 	}
 
 	$: name = createName(serviceRequest);
+	$: expected_datetime = new Date();
 </script>
 
 <div class="flex h-full">
@@ -253,6 +257,13 @@
 					>
 						<Input.Leading slot="leading" data={phoneIcon} />
 					</Input>
+				</div>
+
+				<div class="my-4">
+					<DatePicker name="datetime" allowClear bind:value={expected_datetime}>
+						<DatePicker.Label slot="label">{'Estimated Completion Time'}</DatePicker.Label>
+						<DatePicker.Leading slot="leading" data={calendarIcon} />
+					</DatePicker>
 				</div>
 			</div>
 
