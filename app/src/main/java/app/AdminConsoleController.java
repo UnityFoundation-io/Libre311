@@ -29,6 +29,7 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
@@ -37,6 +38,7 @@ import java.util.List;
 
 @Controller("/api/admin")
 @Secured(SecurityRule.IS_AUTHENTICATED)
+@Tag(name = "Jurisdiction")
 public class AdminConsoleController {
 
     private final ServiceService serviceService;
