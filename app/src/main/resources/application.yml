@@ -12,14 +12,16 @@ micronaut:
     services:
       auth:
         urls:
-          - "http://localhost:8080"
+          - ${AUTH_BASE_URL}
   security:
     token:
+      enabled: true
       jwt:
+        enabled: true
         signatures:
           jwks:
-            unityauth:
-              url: ${UNITY_AUTH_JWKS_ENDPOINT} #alternatively we can supply the base and append '.well-known/jwks.json' if that convention is followed
+            unity:
+              url: ${AUTH_JWKS}
     intercept-url-map:
       - pattern: /info
         http-method: GET
@@ -68,6 +70,7 @@ netty:
     allocator:
       max-order: 3
 app:
+  service-id: ${LIBRE311_SERVICE_ID}
   discovery:
     changeset: ${LIBRE311_DISCOVERY_CHANGESET_DATETIME:`2012-09-14T08:00:00-07:00`}
     contact: ${LIBRE311_DISCOVERY_CONTACT_MESSAGE:`Contact admin@test.test for assistance`}
