@@ -100,7 +100,7 @@
 					bind:value={emailInput.value}
 				>
 					<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
-					<Input.Leading slot="leading" params={mailIcon} />
+					<Input.Leading slot="leading" data={mailIcon} />
 				</Input>
 			</div>
 
@@ -115,7 +115,7 @@
 					on:input={formatPhoneNumber}
 				>
 					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
-					<Input.Leading slot="leading" params={phoneIcon} />
+					<Input.Leading slot="leading" data={phoneIcon} />
 				</Input>
 			</div>
 		</div>
