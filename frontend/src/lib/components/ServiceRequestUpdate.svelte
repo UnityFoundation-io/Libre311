@@ -28,7 +28,7 @@
 
 	export let serviceRequest: SensitiveServiceRequest;
 
-	let agencyNameInput: FormInputValue<string | undefined> = createInput(
+	let agencyNameInput: FormInputValue<string | undefined | null> = createInput(
 		serviceRequest.agency_responsible
 	);
 	let agencyEmailInput: FormInputValue<string> = createInput(''); // TODO
@@ -114,7 +114,10 @@
 	}
 
 	async function updateServiceRequest() {
-		agencyNameInput = optionalCoalesceNameValidator(agencyNameInput);
+		if (agencyNameInput.value !== null || agencyNameInput.value !== undefined) {
+			let agency: string = new String(agencyNameInput.value).toString();
+			if (agency) agencyNameInput = optionalCoalesceNameValidator(createInput(agency));
+		}
 		agencyEmailInput = emailValidator(agencyEmailInput);
 		agencyPhoneInput = optionalCoalescePhoneNumberValidator(agencyPhoneInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
