@@ -13,7 +13,7 @@
 		createInput,
 		optionalCoalesceNameValidator,
 		type FormInputValue,
-		optionalCoalesceEmailValidator,
+		emailValidator,
 		optionalCoalescePhoneNumberValidator,
 		optionalCoalesceStringValidator
 	} from '$lib/utils/validation';
@@ -31,7 +31,7 @@
 	let agencyNameInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.agency_responsible
 	);
-	let agencyEmailInput: FormInputValue<string | undefined> = createInput(''); // TODO
+	let agencyEmailInput: FormInputValue<string> = createInput(''); // TODO
 	let agencyPhoneInput: FormInputValue<string | undefined> = createInput(''); // TODO
 
 	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(''); // TODO
@@ -115,7 +115,7 @@
 
 	async function updateServiceRequest() {
 		agencyNameInput = optionalCoalesceNameValidator(agencyNameInput);
-		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
+		agencyEmailInput = emailValidator(agencyEmailInput);
 		agencyPhoneInput = optionalCoalescePhoneNumberValidator(agencyPhoneInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
