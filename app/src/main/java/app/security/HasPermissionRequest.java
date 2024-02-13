@@ -23,33 +23,33 @@ import java.util.List;
 public class HasPermissionRequest {
 
     @NotNull
-    private String tenantId;
+    private Long tenantId;
     @NotNull
-    private String serviceId;
+    private Long serviceId;
     private List<String> permissions;
 
     public HasPermissionRequest() {
     }
 
-    public HasPermissionRequest(String tenantId, String serviceId, List<String> permissions) {
+    public HasPermissionRequest(Long tenantId, Long serviceId, List<String> permissions) {
         this.tenantId = tenantId;
         this.serviceId = serviceId;
         this.permissions = permissions;
     }
 
-    public String getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(String tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
-    public String getServiceId() {
+    public Long getServiceId() {
         return serviceId;
     }
 
-    public void setServiceId(String serviceId) {
+    public void setServiceId(Long serviceId) {
         this.serviceId = serviceId;
     }
 
