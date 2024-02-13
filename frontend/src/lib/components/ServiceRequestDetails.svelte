@@ -2,7 +2,7 @@
 	import messages from '$media/messages.json';
 	import { Badge, Button, Card } from 'stwui';
 	import { Dropdown } from 'stwui';
-	import type { CreateServiceRequestParams, ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
@@ -82,18 +82,18 @@
 				</div>
 
 				<!-- {#if serviceRequest.detail}
-			<div></div>
+					<div></div>
 
-			<div class="mb-1">
-				<strong class="text-base">{messages['serviceRequest']['detail']}</strong>
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['detail']}</strong>
 
-				<p class="text-sm">
-					{#each serviceRequest.detail as detail, i}
-						{detail}{#if i < serviceRequest.detail.length - 1}<span>, </span>{/if}
-					{/each}
-				</p>
-			</div>
-		{/if} -->
+						<p class="text-sm">
+							{#each serviceRequest.detail as detail, i}
+								{detail}{#if i < serviceRequest.detail.length - 1}<span>, </span>{/if}
+							{/each}
+						</p>
+					</div>
+				{/if} -->
 
 				<div class="mb-1">
 					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
