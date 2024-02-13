@@ -1,6 +1,6 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card, Input, Select } from 'stwui';
+	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
 	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import Flag from '$lib/components/Svg/Flag.svelte';
 	import clockIcon from '$lib/assets/Clock.svg';
@@ -29,6 +29,7 @@
 	let agencyPhoneInput: FormInputValue<string | undefined> = createInput(''); // TODO
 
 	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(''); // TODO
+	let statusNotesInput: FormInputValue<string | undefined> = createInput(''); // TODO
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -110,12 +111,14 @@
 		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
 		agencyPhoneInput = optionalCoalescePhoneNumberValidator(agencyPhoneInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
+		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
 
 		const resultSet = new Set([
 			agencyNameInput.type,
 			agencyEmailInput.type,
 			agencyPhoneInput.type,
-			serviceNoticeInput.type
+			serviceNoticeInput.type,
+			statusNotesInput.type
 		]);
 		if (resultSet.has('invalid')) return;
 
@@ -123,7 +126,8 @@
 			...serviceRequest,
 			agency_responsible: agencyNameInput.value,
 			expected_datetime: expected_datetime.toISOString(),
-			service_notice: serviceNoticeInput.value
+			service_notice: serviceNoticeInput.value,
+			status_notes: statusNotesInput.value
 		};
 
 		console.log(serviceRequest);
@@ -234,7 +238,7 @@
 				{#if serviceRequest.status_notes}
 					<div class="mb-1">
 						<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
-						<p class="text-sm">{toTimeStamp(serviceRequest.status_notes) ?? ''}</p>
+						<p class="text-sm">{serviceRequest.status_notes ?? ''}</p>
 					</div>
 				{/if}
 
@@ -330,6 +334,16 @@
 						<Input.Label slot="label">{messages['serviceRequest']['service_notice']}</Input.Label>
 						<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
 					</Input>
+				</div>
+
+				<div class="my-4 flex flex-col">
+					<p class="text-sm">{messages['serviceRequest']['status_notes']}</p>
+					<TextArea
+						bind:value={statusNotesInput.value}
+						name="comments"
+						placeholder="notes"
+						class="relative"
+					/>
 				</div>
 			</div>
 
