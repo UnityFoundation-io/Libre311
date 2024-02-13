@@ -17,6 +17,7 @@
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
 	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon.js';
+	import { wrenchScrewDriverIcon } from '$lib/components/Svg/outline/wrench-screwdriver';
 	import { DatePicker } from 'stwui';
 
 	export let serviceRequest: ServiceRequest;
@@ -327,6 +328,7 @@
 						bind:value={serviceNoticeInput.value}
 					>
 						<Input.Label slot="label">{messages['serviceRequest']['service_notice']}</Input.Label>
+						<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
 					</Input>
 				</div>
 			</div>
