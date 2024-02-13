@@ -6,5 +6,7 @@
 </script>
 
 {#if $selectedServiceRequest}
-	<ServiceRequestUpdate serviceRequest={$selectedServiceRequest} />
+	<div>
+		<ServiceRequestUpdate serviceRequest={$selectedServiceRequest} />
+	</div>
 {/if}
