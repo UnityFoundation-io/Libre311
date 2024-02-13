@@ -1,7 +1,10 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
-	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
+	import type {
+		SensitiveServiceRequest,
+		ServiceRequestStatus
+	} from '$lib/services/Libre311/Libre311';
 	import Flag from '$lib/components/Svg/Flag.svelte';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
@@ -23,9 +26,9 @@
 
 	const libre311 = useLibre311Service();
 
-	export let serviceRequest: ServiceRequest;
+	export let serviceRequest: SensitiveServiceRequest;
 
-	let agencyNameInput: FormInputValue<string | undefined | null> = createInput(
+	let agencyNameInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.agency_responsible
 	);
 	let agencyEmailInput: FormInputValue<string | undefined> = createInput(''); // TODO
@@ -65,7 +68,7 @@
 		}
 	];
 
-	function getStatus(serviceRequest: ServiceRequest) {
+	function getStatus(serviceRequest: SensitiveServiceRequest) {
 		switch (serviceRequest.status) {
 			case 'closed': {
 				return 'success';
@@ -78,7 +81,7 @@
 		}
 	}
 
-	function createName(serviceRequest: ServiceRequest) {
+	function createName(serviceRequest: SensitiveServiceRequest) {
 		if (serviceRequest.first_name || serviceRequest.last_name)
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
 	}
@@ -126,7 +129,7 @@
 		]);
 		if (resultSet.has('invalid')) return;
 
-		serviceRequest = {
+		const sensitiveServiceRequest: SensitiveServiceRequest = {
 			...serviceRequest,
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,
@@ -135,7 +138,7 @@
 			status_notes: statusNotesInput.value
 		};
 
-		const res = await libre311.updateServiceRequest(serviceRequest);
+		const res = await libre311.updateServiceRequest(sensitiveServiceRequest);
 		console.log(res);
 	}
 
