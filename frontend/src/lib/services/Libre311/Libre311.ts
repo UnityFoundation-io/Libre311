@@ -301,6 +301,7 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
+	updateServiceRequest(params: undefined): Promise<undefined>;
 	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
@@ -334,6 +335,8 @@ const ROUTES = {
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
+	patchServiceRequest: (params: HasJurisdictionId) =>
+		`/admin/requests/1?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequest: (params: HasJurisdictionId & HasServiceRequestId) =>
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };
@@ -439,6 +442,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 		const res = await this.axiosInstance.post<InternalCreateServiceRequestResponse>(
 			ROUTES.postServiceRequest(this.jurisdictionConfig),
 			urlSearchparams
+		);
+
+		return InternalCreateServiceRequestResponseSchema.parse(res.data)[0];
+	}
+
+	async updateServiceRequest(
+		params: undefined
+	): Promise<undefined> {
+
+		console.log(params);
+
+		const res = await this.axiosInstance.patch<InternalCreateServiceRequestResponse>(
+			ROUTES.patchServiceRequest(this.jurisdictionConfig),
+			params
 		);
 
 		return InternalCreateServiceRequestResponseSchema.parse(res.data)[0];
