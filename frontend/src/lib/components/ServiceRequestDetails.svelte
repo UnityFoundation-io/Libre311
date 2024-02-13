@@ -6,6 +6,7 @@
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import Flag from './Svg/Flag.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -42,9 +43,10 @@
 					<h2 class="float-left text-base tracking-wide">
 						#{serviceRequest.service_request_id}
 					</h2>
+
 					<Badge class="float-right text-sm" type={getStatus(serviceRequest)}
-						>{serviceRequest.status}</Badge
-					>
+						>{serviceRequest.status}
+					</Badge>
 				</div>
 
 				<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>
@@ -56,61 +58,41 @@
 					/>
 				{/if}
 
-				<div class="mt-2 flow-root">
+				<div class="mb-2 mt-2 flow-root">
 					<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
-
-					<Dropdown class="float-right" bind:visible>
-						<button
-							aria-label="dropdown toggle"
-							slot="trigger"
-							on:click={toggleDropdown}
-							type="button"
-						>
-							<span class="sr-only">Open user menu</span>
-							<img src={dropDownIcon} alt="drop-down-menu" />
-						</button>
-						<Dropdown.Items slot="items">
-							<Dropdown.Items.Item on:click={closeDropdown} label="Item 1" />
-							<Dropdown.Items.Item on:click={closeDropdown} label="Item 2" />
-							<Dropdown.Items.Item on:click={closeDropdown} label="Item 3" />
-						</Dropdown.Items>
-					</Dropdown>
+					<div class="float-right">
+						<Flag />
+					</div>
 				</div>
 
 				<div class="mb-2">
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
-				<!-- {#if serviceRequest.detail}
-					<div></div>
-
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['detail']}</strong>
-
-						<p class="text-sm">
-							{#each serviceRequest.detail as detail, i}
-								{detail}{#if i < serviceRequest.detail.length - 1}<span>, </span>{/if}
-							{/each}
-						</p>
+				<!-- TODO -->
+				<!-- {#each serviceRequest.attributeMap.values() as attributes}
+					<div class="mb-2">
+						<strong class="text-base">{messages['serviceRequest']['attributes']}</strong>
+						{#if attributes.datatype == 'multivaluelist'}
+							<DisplayMultiAttribute {attributes} />
+						{:else if attributes.datatype == 'datetime'}
+							<DisplayDateTimeAttribute {attributes} />
+						{:else if attributes.datatype == 'string'}
+							<DisplayStringAttribute {attributes} />
+						{:else if attributes.datatype == 'singlevaluelist'}
+							<DisplaySingleAttribute {attributes} />
+						{:else if attributes.datatype == 'number'}
+							<DisplayNumberAttribute {attributes} />
+						{:else if attributes.datatype == 'text'}
+							<DisplayTextAttribute {attributes} />
+						{/if}
 					</div>
-				{/if} -->
+				{/each} -->
 
-				<div class="mb-1">
-					<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-					<p class="text-sm">{serviceRequest.description}</p>
-				</div>
-
-				{#if serviceRequest.citizen_contact}
+				{#if serviceRequest.description}
 					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
-						<p class="text-sm">{serviceRequest.citizen_contact}</p>
-					</div>
-				{/if}
-
-				{#if serviceRequest.agency_responsible}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
-						<p class="text-sm">{serviceRequest.agency_responsible}</p>
+						<strong class="text-base">{messages['serviceRequest']['description']}</strong>
+						<p class="text-sm">{serviceRequest.description ?? ''}</p>
 					</div>
 				{/if}
 
@@ -126,10 +108,25 @@
 					</div>
 				</div>
 
+				{#if serviceRequest.agency_responsible}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
+						<p class="text-sm">{serviceRequest.agency_responsible ?? ''}</p>
+						<p class="text-sm">{serviceRequest.agency_email ?? ''}</p>
+					</div>
+				{/if}
+
+				{#if serviceRequest.service_notice}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+						<p class="text-sm">{serviceRequest.service_notice ?? ''}</p>
+					</div>
+				{/if}
+
 				{#if serviceRequest.status_notes}
 					<div class="mb-1">
-						<h2 class="text-base">{messages['serviceRequest']['service_notes']}</h2>
-						<p class="text-sm">{toTimeStamp(serviceRequest.status_notes)}</p>
+						<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
+						<p class="text-sm">{serviceRequest.status_notes ?? ''}</p>
 					</div>
 				{/if}
 			</div>
