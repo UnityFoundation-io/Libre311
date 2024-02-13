@@ -63,8 +63,21 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
         List<String> declaredPermissionsAsStrings = declaredPermissions.stream()
                 .map(Enum::toString).collect(Collectors.toList());
 
-        if (unityAuthService.isUserPermittedForAction(bearerToken, resolveJurisdictionId(request),
-                declaredPermissionsAsStrings)) {
+        String jurisdictionId = request.getParameters().get("jurisdiction_id");
+        String tenantId = request.getParameters().get("tenant_id");
+        if (jurisdictionId == null && tenantId == null) {
+            throw new IllegalArgumentException(
+                    "The Jurisdiction Id must exists as a query parameter when using @RequiresPermissions");
+        }
+
+        boolean result;
+        if (jurisdictionId != null) {
+            result = unityAuthService.isUserPermittedForJurisdictionAction(bearerToken, jurisdictionId, declaredPermissionsAsStrings);
+        } else {
+            result = unityAuthService.isUserPermittedForTenantAction(bearerToken, tenantId, declaredPermissionsAsStrings);
+        }
+
+        if (result) {
             return ALLOWED;
         }
 
@@ -82,14 +95,5 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
                     "Permissions must be defined when using @RequiresPermissions");
         }
         return Arrays.asList(optionalValue.get());
-    }
-
-    private String resolveJurisdictionId(HttpRequest<?> request) {
-        String jurisdictionId = request.getParameters().get("jurisdiction_id");
-        if (jurisdictionId == null) {
-            throw new IllegalArgumentException(
-                    "The Jurisdiction Id must exists as a query parameter when using @RequiresPermissions");
-        }
-        return jurisdictionId;
     }
 }

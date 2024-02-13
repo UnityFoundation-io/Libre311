@@ -52,7 +52,38 @@ public class UnityAuthService {
         this.jurisdictionUserRepository = jurisdictionUserRepository;
     }
 
-    public boolean isUserPermittedForAction(String token, String jurisdictionId, List<String> permissions) {
+    public boolean isUserPermittedForTenantAction(String token, String tenantId, List<String> permissions) {
+
+        HasPermissionRequest hasPermissionRequest = new HasPermissionRequest(tenantId, serviceId, permissions);
+
+        boolean hasPermission;
+        try {
+            HttpResponse<HasPermissionResponse> hasPermissionResponseHttpResponse = client.hasPermission(hasPermissionRequest, token);
+            Optional<HasPermissionResponse> body = hasPermissionResponseHttpResponse.getBody(HasPermissionResponse.class);
+            if (body.isEmpty()) {
+                return false;
+            }
+
+            hasPermission = body.get().isHasPermission() && validateTenantPermissions(body.get().getPermissions());
+        } catch (HttpClientResponseException e) {
+            Optional<HasPermissionResponse> body = e.getResponse().getBody(HasPermissionResponse.class);
+            if (body.isEmpty()) {
+                LOG.error("Returned {}", e.getMessage());
+            } else {
+                LOG.error("Returned {}", (body.get().getErrorMessage() == null ? e.getMessage() : e.getStatus()));
+            }
+
+            return false;
+        }
+
+        return hasPermission;
+    }
+
+    private boolean validateTenantPermissions(List<String> permissions) {
+        return permissions != null && permissions.stream().anyMatch(s -> s.endsWith("-SYSTEM") || s.endsWith("-TENANT"));
+    }
+
+    public boolean isUserPermittedForJurisdictionAction(String token, String jurisdictionId, List<String> permissions) {
 
         Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById(jurisdictionId);
         if (optionalJurisdiction.isEmpty()) {
