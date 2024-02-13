@@ -37,7 +37,8 @@
 		"agency_contact": "Agency Contact:",
 		"expected_datetime": "Estimated Fix:",
 		"service_notice": "Service Notice:",
-		"status_notes": "Status Notes:"
+		"status_notes": "Status Notes:",
+		"status": "Status"
 	},
 	"contact": {
 		"header": "Add Contact Information",
