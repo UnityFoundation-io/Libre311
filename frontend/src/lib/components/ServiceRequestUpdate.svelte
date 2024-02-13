@@ -1,12 +1,28 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card } from 'stwui';
-	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import { Badge, Button, Card, Select } from 'stwui';
+	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import Flag from '$lib/components/Svg/Flag.svelte';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import type { SelectOption } from 'stwui/types';
 
 	export let serviceRequest: ServiceRequest;
+
+	const statusOptions: SelectOption[] = [
+		{
+			value: 'open',
+			label: 'Open'
+		},
+		{
+			value: 'assigned',
+			label: 'Assigned'
+		},
+		{
+			value: 'closed',
+			label: 'Closed'
+		}
+	];
 
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
@@ -24,6 +40,20 @@
 	function createName(serviceRequest: ServiceRequest) {
 		if (serviceRequest.first_name || serviceRequest.last_name)
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
+	}
+
+	function updateStatus(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (target.value) {
+			const status = target.value as ServiceRequestStatus;
+			serviceRequest.status = status;
+		}
+	}
+
+	function updateServiceRequest() {
+		console.log(serviceRequest);
+		const msg: string = `TODO: Update Service Request`;
+		alert(msg);
 	}
 
 	$: name = createName(serviceRequest);
@@ -131,6 +161,27 @@
 						<p class="text-sm">{toTimeStamp(serviceRequest.status_notes) ?? ''}</p>
 					</div>
 				{/if}
+
+				<div class="my-3">
+					<hr />
+				</div>
+
+				<div class="mb-1">
+					<Select
+						name="select-status"
+						placeholder={serviceRequest.status.charAt(0).toUpperCase() +
+							serviceRequest.status.slice(1)}
+						options={statusOptions}
+						on:change={updateStatus}
+					>
+						<Select.Label slot="label">{messages['serviceRequest']['status']}</Select.Label>
+						<Select.Options slot="options">
+							{#each statusOptions as option}
+								<Select.Options.Option {option} />
+							{/each}
+						</Select.Options>
+					</Select>
+				</div>
 			</div>
 
 			<div class="m-2 flex items-center justify-between">
@@ -138,7 +189,7 @@
 					{messages['updateServiceRequest']['button_back']}
 				</Button>
 
-				<Button type="primary" on:click>
+				<Button type="primary" on:click={updateServiceRequest}>
 					{messages['updateServiceRequest']['button_submit']}
 				</Button>
 			</div>
