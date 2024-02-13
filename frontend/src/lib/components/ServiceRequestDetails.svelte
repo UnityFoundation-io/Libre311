@@ -114,15 +114,15 @@
 					</div>
 				{/if}
 
-				<div class="mb-1 flex">
-					<img alt="clock" src={clockIcon} />
-					<strong class="ml-1 text-base">{messages['serviceRequest']['expected_datetime']}</strong>
-					<div class="ml-1 flex items-center">
+				<div class="mb-1 flex flex-col">
+					<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+					<div class="flex items-center">
 						{#if serviceRequest.expected_datetime}
-							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime)}</p>
+							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
 						{:else}
 							<p class="text-sm">--</p>
 						{/if}
+						<img alt="clock" src={clockIcon} />
 					</div>
 				</div>
 
