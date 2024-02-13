@@ -185,7 +185,7 @@
 					</div>
 				{/if}
 
-				<div class="mb-1 flex">
+				<div class="mb-1 flex flex-col">
 					<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
 					<div class="flex items-center">
 						{#if serviceRequest.expected_datetime}
