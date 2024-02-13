@@ -151,7 +151,7 @@
 
 <div class="flex h-full">
 	<Card class="m-2">
-		<div class="flex h-full w-full flex-col">
+		<div class="flex h-full w-full flex-col" slot="content">
 			<div class="m-2 flex-grow">
 				<div class="flow-root">
 					<h2 class="float-left text-base tracking-wide">
