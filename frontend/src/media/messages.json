@@ -39,7 +39,8 @@
 		"expected_datetime": "Estimated Fix:",
 		"service_notice": "Service Notice:",
 		"status_notes": "Status Notes:",
-		"status": "Status"
+		"status": "Status",
+		"priority": "Priority"
 	},
 	"contact": {
 		"header": "Add Contact Information",

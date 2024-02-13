@@ -41,6 +41,21 @@
 		}
 	];
 
+	const priorityOptions: SelectOption[] = [
+		{
+			value: 'low',
+			label: 'Low'
+		},
+		{
+			value: 'medium',
+			label: 'Medium'
+		},
+		{
+			value: 'high',
+			label: 'High'
+		}
+	];
+
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
 			case 'closed': {
@@ -64,6 +79,14 @@
 		if (target.value) {
 			const status = target.value as ServiceRequestStatus;
 			serviceRequest.status = status;
+		}
+	}
+
+	function updatePriority(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (target.value) {
+			const priority = target.value;
+			serviceRequest.priority = priority;
 		}
 	}
 
@@ -266,6 +289,22 @@
 						>
 						<DatePicker.Leading slot="leading" data={calendarIcon} />
 					</DatePicker>
+				</div>
+
+				<div class="my-4">
+					<Select
+						name="select-priority"
+						placeholder={serviceRequest.priority ?? 'Low'}
+						options={priorityOptions}
+						on:change={updatePriority}
+					>
+						<Select.Label slot="label">{messages['serviceRequest']['priority']}</Select.Label>
+						<Select.Options slot="options">
+							{#each priorityOptions as option}
+								<Select.Options.Option {option} />
+							{/each}
+						</Select.Options>
+					</Select>
 				</div>
 			</div>
 
