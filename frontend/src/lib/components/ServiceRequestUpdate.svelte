@@ -19,11 +19,14 @@
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon.js';
 	import { wrenchScrewDriverIcon } from '$lib/components/Svg/outline/wrench-screwdriver';
 	import { DatePicker } from 'stwui';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
+
+	const libre311 = useLibre311Service();
 
 	export let serviceRequest: ServiceRequest;
 
 	let agencyNameInput: FormInputValue<string | undefined | null> = createInput(
-		serviceRequest.agency_responsible //.name
+		serviceRequest.agency_responsible
 	);
 	let agencyEmailInput: FormInputValue<string | undefined> = createInput(''); // TODO
 	let agencyPhoneInput: FormInputValue<string | undefined> = createInput(''); // TODO
@@ -36,10 +39,11 @@
 			value: 'open',
 			label: 'Open'
 		},
-		{
-			value: 'assigned',
-			label: 'Assigned'
-		},
+		// TODO
+		// {
+		// 	value: 'assigned',
+		// 	label: 'Assigned'
+		// },
 		{
 			value: 'closed',
 			label: 'Closed'
@@ -106,7 +110,7 @@
 		}
 	}
 
-	function updateServiceRequest() {
+	async function updateServiceRequest() {
 		agencyNameInput = optionalCoalesceNameValidator(agencyNameInput);
 		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
 		agencyPhoneInput = optionalCoalescePhoneNumberValidator(agencyPhoneInput);
@@ -130,9 +134,8 @@
 			status_notes: statusNotesInput.value
 		};
 
-		console.log(serviceRequest);
-		const msg: string = `TODO: Update Service Request`;
-		alert(msg);
+		const res = await libre311.updateServiceRequest(serviceRequest);
+		console.log(res);
 	}
 
 	$: name = createName(serviceRequest);
@@ -225,6 +228,7 @@
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
 						<p class="text-sm">{serviceRequest.agency_responsible ?? ''}</p>
+						<p class="text-sm">{serviceRequest.agency_email ?? ''}</p>
 					</div>
 				{/if}
 
