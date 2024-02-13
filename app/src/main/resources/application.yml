@@ -70,6 +70,7 @@ netty:
     allocator:
       max-order: 3
 app:
+  service-id: ${LIBRE311_SERVICE_ID}
   discovery:
     changeset: ${LIBRE311_DISCOVERY_CHANGESET_DATETIME:`2012-09-14T08:00:00-07:00`}
     contact: ${LIBRE311_DISCOVERY_CONTACT_MESSAGE:`Contact admin@test.test for assistance`}

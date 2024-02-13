@@ -4,7 +4,7 @@ app-data:
       enabled: true
       jurisdictions:
         - id: "city.gov"
-          tenant: "abc"
+          tenant: 1
           services:
             - serviceCode: "001"
               serviceName: Sidewalk
@@ -126,7 +126,7 @@ app-data:
                       - key: "OTHER"
                         name: "Other"
         - id: "town.gov"
-          tenant: "xyz"
+          tenant: 2
           services:
             - serviceCode: "002"
               serviceName: Bus Stop

@@ -66,7 +66,7 @@ public class Bootstrap {
                 List<Map<String, ?>> jurisdictions = (List<Map<String, ?>>) data.get("jurisdictions");
                 jurisdictions.forEach(juridictionsMap -> {
                     Jurisdiction jurisdiction = jurisdictionRepository.save(
-                            new Jurisdiction((String) juridictionsMap.get("id"), (String) juridictionsMap.get("tenant")));
+                            new Jurisdiction((String) juridictionsMap.get("id"), ((Integer) juridictionsMap.get("tenant")).longValue()));
 
                     List<Map<String, ?>> services = (List<Map<String, ?>>) juridictionsMap.get("services");
                     processAndStoreServices(services, jurisdiction);
