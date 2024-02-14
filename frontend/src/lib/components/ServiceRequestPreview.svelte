@@ -1,25 +1,12 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { goto } from '$app/navigation';
 	import { Badge, Card } from 'stwui';
-	import { Dropdown } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
-	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import Flag from './Svg/Flag.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let detailsLink: string;
-
-	let visible: boolean = false;
-
-	function closeDropdown() {
-		visible = false;
-	}
-
-	function toggleDropdown() {
-		visible = !visible;
-	}
 
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
@@ -30,7 +17,6 @@
 				return 'warn';
 			}
 		}
-		return 'error';
 	}
 </script>
 
