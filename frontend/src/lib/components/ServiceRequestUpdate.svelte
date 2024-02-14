@@ -126,7 +126,9 @@
 	}
 
 	$: name = createName(serviceRequest);
-	$: expected_datetime = new Date();
+	$: expected_datetime = serviceRequest.expected_datetime
+		? new Date(Date.parse(serviceRequest.expected_datetime))
+		: new Date();
 </script>
 
 <div class="flex h-full">
