@@ -58,7 +58,9 @@
 		{/if}
 
 		<div class="mb-2 mt-2 flow-root">
-			<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
+			<a href={detailsLink}>
+				<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
+			</a>
 			<div class="float-right">
 				<Flag />
 			</div>
