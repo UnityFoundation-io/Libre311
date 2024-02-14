@@ -231,7 +231,7 @@ export const ServiceRequestSchema = z
 		status_notes: z.string().nullish(),
 		service_name: z.string(),
 		description: z.string().nullish(),
-		agency_responsible: z.string().nullish(), // SeeClickFix guarantees this as known at time of creation
+		agency_responsible: z.string().optional(), // SeeClickFix guarantees this as known at time of creation
 		service_notice: z.string().nullish(),
 		requested_datetime: z.string(),
 		updated_datetime: z.string(),
