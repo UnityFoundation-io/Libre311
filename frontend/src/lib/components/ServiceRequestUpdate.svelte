@@ -238,9 +238,9 @@
 
 				<div class="my-4">
 					<DatePicker name="datetime" allowClear bind:value={expected_datetime}>
-						<DatePicker.Label slot="label"
-							>{messages['serviceRequest']['expected_datetime']}</DatePicker.Label
-						>
+						<DatePicker.Label slot="label">
+							{messages['serviceRequest']['expected_datetime']}
+						</DatePicker.Label>
 						<DatePicker.Leading slot="leading" data={calendarIcon} />
 					</DatePicker>
 				</div>
