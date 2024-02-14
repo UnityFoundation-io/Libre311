@@ -1,5 +1,23 @@
 ---
 micronaut:
+  http:
+    services:
+      auth:
+        urls:
+          - ${AUTH_BASE_URL:`http://localhost:8080`}
+  security:
+    token:
+      enabled: true
+      jwt:
+        enabled: true
+        signatures:
+          jwks:
+            unity:
+              url: ${AUTH_JWKS:`https://localhost:8081/keys`}
+    redirect:
+      login-success: http://localhost:3000
+      login-failure: http://localhost:3000/?login-failed=true
+      logout: http://localhost:8080
   server:
     cors:
       enabled: true
@@ -9,16 +27,5 @@ micronaut:
           - localhost:3000
           - http://127.0.0.1:3000
 ---
-micronaut:
-  security:
-    token:
-      jwt:
-        signatures:
-          secret:
-            generator:
-              secret: pleaseChangeThisSecretForANewOne
-              jws-algorithm: HS256
-    redirect:
-      login-success: http://localhost:3000
-      login-failure: http://localhost:3000/?login-failed=true
-      logout: http://localhost:8080
+app:
+  service-id: ${LIBRE311_SERVICE_ID}
