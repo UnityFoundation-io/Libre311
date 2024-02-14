@@ -8,16 +8,12 @@
 	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
-	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
 
 	const linkResolver = useLibre311Context().linkResolver;
 
 	const ctx = useServiceRequestsContext();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
-
-	console.log($serviceRequestsRes);
-
-	let isDrawerOpen = false;
 
 	let orderBy: string;
 
@@ -52,13 +48,9 @@
 		}
 	];
 
-	function openDrawer(item: ServiceRequest) {
-		isDrawerOpen = true;
-		goto(`/issues/table/${item.service_request_id}`); // TODO
-	}
-
-	function closeDrawer() {
-		isDrawerOpen = false;
+	function selectRow(service_request_id: ServiceRequestId) {
+		goto(`/issues/table/${service_request_id}`);
+		return;
 	}
 
 	function issueStatus(item: ServiceRequest): 'warn' | 'success' {
@@ -101,7 +93,7 @@
 						<Table.Header slot="header" {orderBy} class="space-x-8" />
 						<Table.Body slot="body">
 							{#each $serviceRequestsRes.value.serviceRequests as item}
-								<Table.Body.Row id="item-id" on:click={openDrawer(item)}>
+								<Table.Body.Row id="item-id" on:click={selectRow(item.service_request_id)}>
 									<Table.Body.Row.Cell class="w-[15%]" column={0}
 										>{item.service_name}</Table.Body.Row.Cell
 									>
