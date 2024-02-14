@@ -9,6 +9,7 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
 	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
+	import { toTimeStamp } from '$lib/utils/functions';
 
 	const linkResolver = useLibre311Context().linkResolver;
 
@@ -21,26 +22,26 @@
 		{
 			column: 'service_name',
 			label: 'Service Name',
-			placement: 'left',
-			class: 'w-[15%]'
+			placement: 'left'
+			// class: 'w-[10%]'
 		},
 		{
 			column: 'status',
 			label: 'Status',
-			placement: 'left',
-			class: 'w-[10%]'
+			placement: 'left'
+			// class: 'w-[10%]'
 		},
 		{
 			column: 'address',
 			label: 'Address',
-			placement: 'left',
-			class: 'w-[50%]'
+			placement: 'left'
+			// class: 'w-[50%]'
 		},
 		{
 			column: 'created_at',
 			label: 'Created',
-			placement: 'right',
-			class: 'w-[30%]'
+			placement: 'left'
+			// class: 'w-[30%]'
 		}
 	];
 
@@ -90,18 +91,25 @@
 						<Table.Body slot="body">
 							{#each $serviceRequestsRes.value.serviceRequests as item}
 								<Table.Body.Row id="item-id" on:click={selectRow(item.service_request_id)}>
-									<Table.Body.Row.Cell class="w-[15%]" column={0}
-										>{item.service_name}</Table.Body.Row.Cell
-									>
-									<Table.Body.Row.Cell class="w-[10%]" column={1}>
-										<Badge type={issueStatus(item)}>{item.status}</Badge>
+									<Table.Body.Row.Cell column={0}>
+										{item.service_name}
 									</Table.Body.Row.Cell>
-									<Table.Body.Row.Cell class="w-[50%]" column={2}
-										>{item.address}</Table.Body.Row.Cell
-									>
-									<Table.Body.Row.Cell class="w-[30%]" column={3}
-										>{item.requested_datetime}</Table.Body.Row.Cell
-									>
+
+									<Table.Body.Row.Cell column={1}>
+										<Badge type={issueStatus(item)}>
+											{item.status}
+										</Badge>
+									</Table.Body.Row.Cell>
+
+									<Table.Body.Row.Cell column={2}>
+										<p class="w-40 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+											{item.address}
+										</p>
+									</Table.Body.Row.Cell>
+
+									<Table.Body.Row.Cell column={3}>
+										{toTimeStamp(item.requested_datetime)}
+									</Table.Body.Row.Cell>
 								</Table.Body.Row>
 							{/each}
 						</Table.Body>
