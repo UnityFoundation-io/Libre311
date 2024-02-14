@@ -112,7 +112,11 @@
 			serviceNoticeInput.type,
 			statusNotesInput.type
 		]);
-		if (resultSet.has('invalid')) return;
+		if (resultSet.has('invalid')) {
+			// Refresh Inputs
+			agencyNameInput.value = '';
+			return;
+		}
 
 		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 			...serviceRequest,
