@@ -1,7 +1,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import { Card, Input, Table } from 'stwui';
+	import { Badge, Card, Input, Table } from 'stwui';
 	import type { TableColumn } from 'stwui/types';
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
@@ -60,6 +60,11 @@
 	function closeDrawer() {
 		isDrawerOpen = false;
 	}
+
+	function issueStatus(item: ServiceRequest): 'warn' | 'success' {
+		if (item.status === 'open') return 'warn';
+		else return 'success';
+	}
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -100,8 +105,9 @@
 									<Table.Body.Row.Cell class="w-[15%]" column={0}
 										>{item.service_name}</Table.Body.Row.Cell
 									>
-									<Table.Body.Row.Cell class="w-[10%]" column={1}>{item.status}</Table.Body.Row.Cell
-									>
+									<Table.Body.Row.Cell class="w-[10%]" column={1}>
+										<Badge type={issueStatus(item)}>{item.status}</Badge>
+									</Table.Body.Row.Cell>
 									<Table.Body.Row.Cell class="w-[50%]" column={2}
 										>{item.address}</Table.Body.Row.Cell
 									>
