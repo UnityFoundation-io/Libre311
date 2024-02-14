@@ -3,6 +3,7 @@ import axios from 'axios';
 import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
 import { MockLibre311ServiceImpl } from './MockLibre311';
+import type { UpdateSensitiveServiceRequestRequest, UpdateSensitiveServiceRequestResponse } from './types/UpdateSensitiveServiceRequest';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -247,23 +248,6 @@ export const ServiceRequestSchema = z
 
 export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 
-export const SensitiveServiceRequestSchema = z
-.object({
-	agency_email: EmailSchema.optional(),
-	service_notice: z.string().nullish(),
-	priority: z.string().nullish()
-})
-.merge(ServiceRequestSchema)
-
-export type SensitiveServiceRequest = z.infer<typeof SensitiveServiceRequestSchema>;
-
-export const SensitiveServiceRequestResponseSchema = z
-	.object({
-		service_request_id: z.number(),
-	})
-
-export type SensitiveServiceRequestResponse = z.infer<typeof SensitiveServiceRequestResponseSchema>;
-
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
 
@@ -318,7 +302,7 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	updateServiceRequest(params: SensitiveServiceRequest): Promise<SensitiveServiceRequestResponse>;
+	updateServiceRequest(params: UpdateSensitiveServiceRequestRequest): Promise<UpdateSensitiveServiceRequestResponse>;
 	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
@@ -465,8 +449,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async updateServiceRequest(
-		params: SensitiveServiceRequest
-	): Promise<SensitiveServiceRequestResponse> {
+		params: UpdateSensitiveServiceRequestRequest
+	): Promise<UpdateSensitiveServiceRequestResponse> {
 		const res = await this.axiosInstance.patch<InternalCreateServiceRequestResponse>(
 			ROUTES.patchServiceRequest(this.jurisdictionConfig),
 			params
