@@ -23,28 +23,24 @@
 			label: 'Service Name',
 			placement: 'left',
 			class: 'w-[15%]'
-			// class: 'w-[40%] md:w-[30%] lg:w-[20%]'
 		},
 		{
 			column: 'status',
 			label: 'Status',
 			placement: 'left',
 			class: 'w-[10%]'
-			// class: 'w-[40%] md:w-[30%] lg:w-[20%]'
 		},
 		{
 			column: 'address',
 			label: 'Address',
 			placement: 'left',
 			class: 'w-[50%]'
-			// class: 'hidden md:table-cell w-0 md:w-[30%] lg:w-[20%]'
 		},
 		{
 			column: 'created_at',
 			label: 'Created',
 			placement: 'right',
 			class: 'w-[30%]'
-			// class: 'w-[20%] md:w-[10%] lg:w-[20%]'
 		}
 	];
 
