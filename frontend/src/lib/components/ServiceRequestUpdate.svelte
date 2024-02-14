@@ -140,7 +140,6 @@
 		};
 
 		const res = await libre311.updateServiceRequest(sensitiveServiceRequest);
-		console.log(res);
 	}
 
 	$: name = createName(serviceRequest);
