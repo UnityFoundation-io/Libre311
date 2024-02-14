@@ -1,6 +1,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
+	import clockIcon from '$lib/assets/Clock.svg';
 	import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import Flag from '$lib/components/Svg/Flag.svelte';
 	import { toTimeStamp } from '$lib/utils/functions';
@@ -191,6 +192,18 @@
 						<p class="text-sm">{serviceRequest.description ?? ''}</p>
 					</div>
 				{/if}
+
+				<div class="mb-1 flex flex-col">
+					<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+					<div class="flex items-center">
+						{#if serviceRequest.expected_datetime}
+							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
+						{:else}
+							<p class="text-sm">--</p>
+						{/if}
+						<img alt="clock" src={clockIcon} />
+					</div>
+				</div>
 
 				{#if name}
 					<div class="mb-1">
