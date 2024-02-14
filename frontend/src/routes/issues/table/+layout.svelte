@@ -15,31 +15,39 @@
 	const ctx = useServiceRequestsContext();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
+	console.log($serviceRequestsRes);
+
 	let isDrawerOpen = false;
+
+	let orderBy: string;
 
 	const columns: TableColumn[] = [
 		{
-			column: 'project_name',
-			label: 'Project Name',
-			placement: 'left'
+			column: 'service_name',
+			label: 'Service Name',
+			placement: 'left',
+			class: 'w-[15%]'
 			// class: 'w-[40%] md:w-[30%] lg:w-[20%]'
 		},
 		{
 			column: 'status',
 			label: 'Status',
-			placement: 'left'
+			placement: 'left',
+			class: 'w-[10%]'
 			// class: 'w-[40%] md:w-[30%] lg:w-[20%]'
 		},
 		{
-			column: 'city',
-			label: 'City',
-			placement: 'left'
+			column: 'address',
+			label: 'Address',
+			placement: 'left',
+			class: 'w-[45%]'
 			// class: 'hidden md:table-cell w-0 md:w-[30%] lg:w-[20%]'
 		},
 		{
 			column: 'created_at',
 			label: 'Created',
-			placement: 'right'
+			placement: 'right',
+			class: 'w-[30%]'
 			// class: 'w-[20%] md:w-[10%] lg:w-[20%]'
 		}
 	];
@@ -84,14 +92,22 @@
 					<Input slot="extra" />
 				</Card.Header>
 				<Card.Content slot="content" class="p-0 sm:p-0" style="height: calc(100% - 64px);">
-					<Table {columns}>
+					<Table class="h-full overflow-hidden rounded-md" {columns}>
+						<Table.Header slot="header" {orderBy} class="space-x-8" />
 						<Table.Body slot="body">
 							{#each $serviceRequestsRes.value.serviceRequests as item}
 								<Table.Body.Row id="item-id" on:click={openDrawer(item)}>
-									<Table.Body.Row.Cell column={0}>{item.service_name}</Table.Body.Row.Cell>
-									<Table.Body.Row.Cell column={1}>{item.status}</Table.Body.Row.Cell>
-									<Table.Body.Row.Cell column={2}>{item.address}</Table.Body.Row.Cell>
-									<Table.Body.Row.Cell column={3}>{item.requested_datetime}</Table.Body.Row.Cell>
+									<Table.Body.Row.Cell class="w-[15%]" column={0}
+										>{item.service_name}</Table.Body.Row.Cell
+									>
+									<Table.Body.Row.Cell class="w-[10%]" column={1}>{item.status}</Table.Body.Row.Cell
+									>
+									<Table.Body.Row.Cell class="w-[50%]" column={2}
+										>{item.address}</Table.Body.Row.Cell
+									>
+									<Table.Body.Row.Cell class="w-[30%]" column={3}
+										>{item.requested_datetime}</Table.Body.Row.Cell
+									>
 								</Table.Body.Row>
 							{/each}
 						</Table.Body>
