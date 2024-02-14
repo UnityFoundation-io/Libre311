@@ -40,7 +40,7 @@
 			column: 'address',
 			label: 'Address',
 			placement: 'left',
-			class: 'w-[45%]'
+			class: 'w-[50%]'
 			// class: 'hidden md:table-cell w-0 md:w-[30%] lg:w-[20%]'
 		},
 		{
