@@ -1,10 +1,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
-	import type {
-		SensitiveServiceRequest,
-		ServiceRequestStatus
-	} from '$lib/services/Libre311/Libre311';
+	import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import Flag from '$lib/components/Svg/Flag.svelte';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
@@ -23,10 +20,11 @@
 	import { wrenchScrewDriverIcon } from '$lib/components/Svg/outline/wrench-screwdriver';
 	import { DatePicker } from 'stwui';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 
 	const libre311 = useLibre311Service();
 
-	export let serviceRequest: SensitiveServiceRequest;
+	export let serviceRequest: UpdateSensitiveServiceRequestRequest;
 
 	let agencyNameInput: FormInputValue<string | undefined | null> = createInput(
 		serviceRequest.agency_responsible
@@ -68,7 +66,7 @@
 		}
 	];
 
-	function getStatus(serviceRequest: SensitiveServiceRequest) {
+	function getStatus(serviceRequest: UpdateSensitiveServiceRequestRequest) {
 		switch (serviceRequest.status) {
 			case 'closed': {
 				return 'success';
@@ -81,7 +79,7 @@
 		}
 	}
 
-	function createName(serviceRequest: SensitiveServiceRequest) {
+	function createName(serviceRequest: UpdateSensitiveServiceRequestRequest) {
 		if (serviceRequest.first_name || serviceRequest.last_name)
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
 	}
@@ -132,7 +130,7 @@
 		]);
 		if (resultSet.has('invalid')) return;
 
-		const sensitiveServiceRequest: SensitiveServiceRequest = {
+		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 			...serviceRequest,
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,
