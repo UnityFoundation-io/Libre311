@@ -24,7 +24,7 @@
 
 	export let serviceRequest: UpdateSensitiveServiceRequestRequest;
 
-	let agencyNameInput: FormInputValue<string | undefined | null> = createInput(
+	let agencyNameInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.agency_responsible
 	);
 	let agencyEmailInput: FormInputValue<string> = createInput(''); // TODO
