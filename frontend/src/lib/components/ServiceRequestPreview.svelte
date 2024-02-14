@@ -56,15 +56,14 @@
 			<p class="text-sm">{serviceRequest.address}</p>
 		</div>
 
-		<div class="mb-1">
-			<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-		</div>
-
-		<div>
-			<p class="w-82 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-				{serviceRequest.description}
-			</p>
-		</div>
+		{#if serviceRequest.description}
+			<div class="mb-1">
+				<strong class="text-base">{messages['serviceRequest']['description']}</strong>
+				<p class="w-82 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+					{serviceRequest.description ?? ''}
+				</p>
+			</div>
+		{/if}
 	</div>
 </Card>
 
