@@ -10,11 +10,9 @@
 		optionalCoalesceNameValidator,
 		type FormInputValue,
 		emailValidator,
-		optionalCoalescePhoneNumberValidator,
 		optionalCoalesceStringValidator
 	} from '$lib/utils/validation';
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
-	import { phoneIcon } from '$lib/components/Svg/outline/phoneIcon.js';
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon.js';
 	import { wrenchScrewDriverIcon } from '$lib/components/Svg/outline/wrench-screwdriver';
 	import { DatePicker } from 'stwui';
@@ -29,7 +27,6 @@
 		serviceRequest.agency_responsible
 	);
 	let agencyEmailInput: FormInputValue<string> = createInput(''); // TODO
-	let agencyPhoneInput: FormInputValue<string | undefined> = createInput(''); // TODO
 
 	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(''); // TODO
 	let statusNotesInput: FormInputValue<string | undefined> = createInput(''); // TODO
@@ -99,31 +96,18 @@
 		}
 	}
 
-	function formatPhoneNumber(e: Event) {
-		const target = e.target as HTMLInputElement;
-		if (target.value) {
-			let phoneNumber = target.value;
-			phoneNumber = phoneNumber
-				.replace(/\D/g, '') // Remove non-digit characters
-				.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); // Format with hyphens
-			return phoneNumber;
-		}
-	}
-
 	async function updateServiceRequest() {
 		if (agencyNameInput.value !== null || agencyNameInput.value !== undefined) {
 			let agency: string = new String(agencyNameInput.value).toString();
 			if (agency) agencyNameInput = optionalCoalesceNameValidator(createInput(agency));
 		}
 		agencyEmailInput = emailValidator(agencyEmailInput);
-		agencyPhoneInput = optionalCoalescePhoneNumberValidator(agencyPhoneInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
 
 		const resultSet = new Set([
 			agencyNameInput.type,
 			agencyEmailInput.type,
-			agencyPhoneInput.type,
 			serviceNoticeInput.type,
 			statusNotesInput.type
 		]);
@@ -281,17 +265,6 @@
 						bind:value={agencyEmailInput.value}
 					>
 						<Input.Leading slot="leading" data={mailIcon} />
-					</Input>
-					<Input
-						allowClear
-						type="text"
-						name="phone"
-						placeholder={messages['contact']['phone']['placeholder']}
-						error={agencyPhoneInput.error}
-						bind:value={agencyPhoneInput.value}
-						on:input={formatPhoneNumber}
-					>
-						<Input.Leading slot="leading" data={phoneIcon} />
 					</Input>
 				</div>
 
