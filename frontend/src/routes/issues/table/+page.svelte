@@ -1,17 +1,47 @@
 <script lang="ts">
-	import { Card } from 'stwui';
+	import messages from '$media/messages.json';
+	import ServiceRequestPreview from '$lib/components/ServiceRequestPreview.svelte';
+
+	import Pagination from '$lib/components/Pagination.svelte';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { page } from '$app/stores';
+	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
+
+	const ctx = useServiceRequestsContext();
+	const serviceRequestsRes = ctx.serviceRequestsResponse;
+
+	const linkResolver = useLibre311Context().linkResolver;
 </script>
 
-<div class="flex h-full w-full">
-	<Card class="m-2 w-full" style="background-color: hsl(var(--surface));">
-		<div class="flex h-full w-full items-center justify-center">
-			<h1 class="text-l">Nothing selected</h1>
+{#if $serviceRequestsRes.type === 'success'}
+	<div class="m-3 flex items-center justify-between">
+		<div>
+			<p class="text-base">{messages['sidebar']['title']}</p>
 		</div>
-	</Card>
-</div>
 
-<style>
-	h1 {
-		color: hsl(var(--primary));
-	}
-</style>
+		<div>
+			<Pagination
+				pagination={$serviceRequestsRes.value.metadata.pagination}
+				nextPage={linkResolver.nextIssuesPage(
+					$serviceRequestsRes.value.metadata.pagination,
+					$page.url
+				)}
+				prevPage={linkResolver.prevIssuesPage(
+					$serviceRequestsRes.value.metadata.pagination,
+					$page.url
+				)}
+			/>
+		</div>
+	</div>
+
+	<ul>
+		{#each $serviceRequestsRes.value.serviceRequests as serviceRequest}
+			<li class="m-3">
+				<ServiceRequestPreview
+					{serviceRequest}
+					detailsLink={`/issues/table/${serviceRequest.service_request_id}`}
+				/>
+			</li>
+		{/each}
+	</ul>
+{/if}
