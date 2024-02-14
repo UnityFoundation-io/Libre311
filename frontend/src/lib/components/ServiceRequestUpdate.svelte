@@ -238,6 +238,31 @@
 				</div>
 
 				<div class="my-4">
+					<Select
+						name="select-priority"
+						placeholder={serviceRequest.priority ?? 'Low'}
+						options={priorityOptions}
+						on:change={updatePriority}
+					>
+						<Select.Label slot="label">{messages['serviceRequest']['priority']}</Select.Label>
+						<Select.Options slot="options">
+							{#each priorityOptions as option}
+								<Select.Options.Option {option} />
+							{/each}
+						</Select.Options>
+					</Select>
+				</div>
+
+				<div class="my-4">
+					<DatePicker name="datetime" allowClear bind:value={expected_datetime}>
+						<DatePicker.Label slot="label"
+							>{messages['serviceRequest']['expected_datetime']}</DatePicker.Label
+						>
+						<DatePicker.Leading slot="leading" data={calendarIcon} />
+					</DatePicker>
+				</div>
+
+				<div class="my-4">
 					<Input
 						allowClear
 						type="text"
@@ -269,31 +294,6 @@
 					>
 						<Input.Leading slot="leading" data={phoneIcon} />
 					</Input>
-				</div>
-
-				<div class="my-4">
-					<DatePicker name="datetime" allowClear bind:value={expected_datetime}>
-						<DatePicker.Label slot="label"
-							>{messages['serviceRequest']['expected_datetime']}</DatePicker.Label
-						>
-						<DatePicker.Leading slot="leading" data={calendarIcon} />
-					</DatePicker>
-				</div>
-
-				<div class="my-4">
-					<Select
-						name="select-priority"
-						placeholder={serviceRequest.priority ?? 'Low'}
-						options={priorityOptions}
-						on:change={updatePriority}
-					>
-						<Select.Label slot="label">{messages['serviceRequest']['priority']}</Select.Label>
-						<Select.Options slot="options">
-							{#each priorityOptions as option}
-								<Select.Options.Option {option} />
-							{/each}
-						</Select.Options>
-					</Select>
 				</div>
 
 				<div class="my-4">
