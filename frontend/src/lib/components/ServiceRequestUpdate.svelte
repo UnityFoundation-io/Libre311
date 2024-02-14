@@ -207,46 +207,12 @@
 					</div>
 				{/if}
 
-				<div class="mb-1 flex flex-col">
-					<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
-					<div class="flex items-center">
-						{#if serviceRequest.expected_datetime}
-							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
-						{:else}
-							<p class="text-sm">--</p>
-						{/if}
-						<img alt="clock" src={clockIcon} />
-					</div>
-				</div>
-
 				{#if name}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
 						<p class="text-sm">{name ?? ''}</p>
 						<p class="text-sm">{serviceRequest.email ?? ''}</p>
 						<p class="text-sm">{serviceRequest.phone ?? ''}</p>
-					</div>
-				{/if}
-
-				{#if serviceRequest.agency_responsible}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
-						<p class="text-sm">{serviceRequest.agency_responsible ?? ''}</p>
-						<p class="text-sm">{serviceRequest.agency_email ?? ''}</p>
-					</div>
-				{/if}
-
-				{#if serviceRequest.service_notice}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
-						<p class="text-sm">{serviceRequest.service_notice ?? ''}</p>
-					</div>
-				{/if}
-
-				{#if serviceRequest.status_notes}
-					<div class="mb-1">
-						<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
-						<p class="text-sm">{serviceRequest.status_notes ?? ''}</p>
 					</div>
 				{/if}
 
