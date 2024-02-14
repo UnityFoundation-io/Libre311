@@ -3,7 +3,6 @@
 	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
 	import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import Flag from '$lib/components/Svg/Flag.svelte';
-	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import type { SelectOption } from 'stwui/types';
 	import {
