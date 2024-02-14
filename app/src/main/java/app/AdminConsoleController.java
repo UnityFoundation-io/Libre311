@@ -36,7 +36,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 @Controller("/api/admin")
-@Secured(SecurityRule.IS_AUTHENTICATED)
+@Secured(SecurityRule.IS_ANONYMOUS)
 public class AdminConsoleController {
 
     private final ServiceService serviceService;
@@ -57,8 +57,6 @@ public class AdminConsoleController {
     }
 
     @Patch(uris = {"/services/{serviceId}{?jurisdiction_id}", "/requests/{serviceId}.json{?jurisdiction_id}"})
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
     public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
@@ -73,8 +71,6 @@ public class AdminConsoleController {
     }
 
     @Patch(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
     public List<SensitiveServiceRequestDTO> updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO,
                                                                      @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
