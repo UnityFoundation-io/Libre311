@@ -28,4 +28,4 @@ micronaut:
           - http://127.0.0.1:3000
 ---
 app:
-  service-id: ${LIBRE311_SERVICE_ID}
+  service-id: ${LIBRE311_SERVICE_ID:1}
