@@ -5,13 +5,18 @@
 	import type { TableColumn } from 'stwui/types';
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
-	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
+	import {
+		useSelectedServiceRequestStore,
+		useServiceRequestsContext
+	} from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
 	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import type { Maybe } from '$lib/utils/types';
 
 	const linkResolver = useLibre311Context().linkResolver;
+	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
 	const ctx = useServiceRequestsContext();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
@@ -54,6 +59,15 @@
 		if (item.status === 'open') return 'warn';
 		else return 'success';
 	}
+
+	function resolveStyleId(
+		serviceRequest: ServiceRequest,
+		selectedServiceRequest: Maybe<ServiceRequest>
+	) {
+		return serviceRequest.service_request_id === selectedServiceRequest?.service_request_id
+			? 'selected'
+			: 'item-id';
+	}
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -86,36 +100,53 @@
 					<Input slot="extra" />
 				</Card.Header>
 				<Card.Content slot="content" class="p-0 sm:p-0" style="height: calc(100% - 64px);">
-					<Table class="h-full overflow-hidden rounded-md" {columns}>
-						<Table.Header slot="header" {orderBy} class="space-x-8" />
-						<Table.Body slot="body">
-							{#each $serviceRequestsRes.value.serviceRequests as item}
-								<Table.Body.Row id="item-id" on:click={selectRow(item.service_request_id)}>
-									<Table.Body.Row.Cell column={0}>
-										{item.service_name}
-									</Table.Body.Row.Cell>
+					<div class="issues-table-override">
+						<Table class="h-full overflow-hidden rounded-md" {columns}>
+							<Table.Header slot="header" {orderBy} class="space-x-8" />
+							<Table.Body slot="body">
+								{#each $serviceRequestsRes.value.serviceRequests as item}
+									<Table.Body.Row
+										id={resolveStyleId(item, $selectedServiceRequestStore)}
+										on:click={selectRow(item.service_request_id)}
+									>
+										<Table.Body.Row.Cell column={0}>
+											{item.service_name}
+										</Table.Body.Row.Cell>
 
-									<Table.Body.Row.Cell column={1}>
-										<Badge type={issueStatus(item)}>
-											{item.status}
-										</Badge>
-									</Table.Body.Row.Cell>
+										<Table.Body.Row.Cell column={1}>
+											<Badge type={issueStatus(item)}>
+												{item.status}
+											</Badge>
+										</Table.Body.Row.Cell>
 
-									<Table.Body.Row.Cell column={2}>
-										<p class="w-40 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-											{item.address}
-										</p>
-									</Table.Body.Row.Cell>
+										<Table.Body.Row.Cell column={2}>
+											<p class="w-40 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+												{item.address}
+											</p>
+										</Table.Body.Row.Cell>
 
-									<Table.Body.Row.Cell column={3}>
-										{toTimeStamp(item.requested_datetime)}
-									</Table.Body.Row.Cell>
-								</Table.Body.Row>
-							{/each}
-						</Table.Body>
-					</Table>
+										<Table.Body.Row.Cell column={3}>
+											{toTimeStamp(item.requested_datetime)}
+										</Table.Body.Row.Cell>
+									</Table.Body.Row>
+								{/each}
+							</Table.Body>
+						</Table>
+					</div>
 				</Card.Content>
 			</Card>
 		</div>
 	</SideBarMainContentLayout>
 {/if}
+
+<style>
+	.issues-table-override :global(#selected) {
+		--tw-bg-opacity: 0.15;
+		background-color: hsl(var(--primary) / var(--tw-bg-opacity));
+	}
+
+	.issues-table-override :global(#item-id):hover {
+		--tw-bg-opacity: 0.15;
+		background-color: hsl(var(--primary) / var(--tw-bg-opacity));
+	}
+</style>
