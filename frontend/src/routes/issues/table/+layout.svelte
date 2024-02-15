@@ -27,28 +27,46 @@
 
 	const columns: TableColumn[] = [
 		{
+			column: 'issue_id',
+			label: 'Issue ID',
+			placement: 'left',
+			class: 'w-[7.5%]'
+		},
+		{
 			column: 'service_name',
 			label: 'Service Name',
-			placement: 'left'
-			// class: 'w-[10%]'
+			placement: 'left',
+			class: 'w-[12.5%]'
 		},
 		{
 			column: 'status',
 			label: 'Status',
-			placement: 'left'
-			// class: 'w-[10%]'
+			placement: 'left',
+			class: 'w-[10%]'
 		},
 		{
 			column: 'address',
 			label: 'Address',
-			placement: 'left'
-			// class: 'w-[50%]'
+			placement: 'left',
+			class: 'w-[25%]'
 		},
 		{
 			column: 'created_at',
 			label: 'Created',
-			placement: 'left'
-			// class: 'w-[30%]'
+			placement: 'left',
+			class: 'w-[15%]'
+		},
+		{
+			column: 'last_updated',
+			label: 'Last Updated',
+			placement: 'left',
+			class: 'w-[15%]'
+		},
+		{
+			column: 'expected_completion',
+			label: 'Expected Completion',
+			placement: 'left',
+			class: 'w-[15%]'
 		}
 	];
 
@@ -125,23 +143,35 @@
 										on:click={selectRow(item.service_request_id)}
 									>
 										<Table.Body.Row.Cell column={0}>
-											{item.service_name}
+											{item.service_request_id}
 										</Table.Body.Row.Cell>
 
 										<Table.Body.Row.Cell column={1}>
+											{item.service_name}
+										</Table.Body.Row.Cell>
+
+										<Table.Body.Row.Cell column={2}>
 											<Badge type={issueStatus(item)}>
 												{item.status}
 											</Badge>
 										</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={2}>
+										<Table.Body.Row.Cell column={3}>
 											<p class="w-40 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
 												{item.address}
 											</p>
 										</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={3}>
+										<Table.Body.Row.Cell column={4}>
 											{toTimeStamp(item.requested_datetime)}
+										</Table.Body.Row.Cell>
+
+										<Table.Body.Row.Cell column={5}>
+											{toTimeStamp(item.updated_datetime)}
+										</Table.Body.Row.Cell>
+
+										<Table.Body.Row.Cell column={6}>
+											{toTimeStamp(item.expected_datetime)}
 										</Table.Body.Row.Cell>
 									</Table.Body.Row>
 								{/each}
