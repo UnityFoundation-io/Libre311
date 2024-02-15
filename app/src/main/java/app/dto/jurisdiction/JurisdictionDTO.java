@@ -21,14 +21,23 @@ import io.micronaut.core.annotation.Introspected;
 @Introspected
 public class JurisdictionDTO {
 
+    private String name;
+
     @JsonProperty("jurisdiction_id")
     private String jurisdictionId;
 
     @JsonProperty("tenant_id")
     private Long tenantId;
 
-    @JsonProperty("name")
-    private String name;
+    // site settings
+    @JsonProperty("primary_color")
+    private String primaryColor;
+
+    @JsonProperty("primary_hover_color")
+    private String primaryHoverColor;
+
+    @JsonProperty("logo_media_url")
+    private String logoMediaUrl;
 
     public JurisdictionDTO() {
     }
@@ -37,6 +46,9 @@ public class JurisdictionDTO {
         this.jurisdictionId = jurisdiction.getId();
         this.name = jurisdiction.getName();
         this.tenantId = jurisdiction.getTenantId();
+        this.primaryColor = jurisdiction.getPrimaryColor();
+        this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
+        this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
     }
 
     public String getJurisdictionId() {
@@ -61,5 +73,29 @@ public class JurisdictionDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPrimaryColor() {
+        return primaryColor;
+    }
+
+    public void setPrimaryColor(String primaryColor) {
+        this.primaryColor = primaryColor;
+    }
+
+    public String getPrimaryHoverColor() {
+        return primaryHoverColor;
+    }
+
+    public void setPrimaryHoverColor(String primaryHoverColor) {
+        this.primaryHoverColor = primaryHoverColor;
+    }
+
+    public String getLogoMediaUrl() {
+        return logoMediaUrl;
+    }
+
+    public void setLogoMediaUrl(String logoMediaUrl) {
+        this.logoMediaUrl = logoMediaUrl;
     }
 }

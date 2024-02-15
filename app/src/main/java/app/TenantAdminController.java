@@ -16,6 +16,7 @@ package app;
 
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
+import app.dto.jurisdiction.PatchJurisdictionDTO;
 import app.security.RequiresPermissions;
 import app.service.jurisdiction.JurisdictionService;
 import io.micronaut.http.annotation.*;
@@ -39,8 +40,16 @@ public class TenantAdminController {
     @Post(uris = {"/jurisdictions{?tenant_id}", "/jurisdictions.json{?tenant_id}"})
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT})
-    public JurisdictionDTO createServiceJson(@Valid @Body CreateJurisdictionDTO requestDTO,
+    public JurisdictionDTO createJurisdictionJson(@Valid @Body CreateJurisdictionDTO requestDTO,
                                                    @Nullable @QueryValue("tenant_id") Long tenant_id) {
         return jurisdictionService.createJurisdiction(requestDTO, tenant_id);
+    }
+
+    @Patch(uris = {"/jurisdictions/{jurisdictionId}{?tenant_id}", "/jurisdictions/{jurisdictionId}.json{?tenant_id}"})
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT})
+    public JurisdictionDTO updateJurisdictionJson(String jurisdictionId, @Valid @Body PatchJurisdictionDTO requestDTO,
+                                             @Nullable @QueryValue("tenant_id") Long tenant_id) {
+        return jurisdictionService.updateJurisdiction(jurisdictionId, requestDTO);
     }
 }

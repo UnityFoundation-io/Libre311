@@ -1,17 +1,3 @@
-// Copyright 2023 Libre311 Authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package app.dto.jurisdiction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,14 +7,10 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 @Introspected
-public class CreateJurisdictionDTO {
+public class PatchJurisdictionDTO {
 
     @NotEmpty
     private String name;
-
-    @NotEmpty
-    @JsonProperty("jurisdiction_id")
-    private String jurisdictionId;
 
     // derived from https://regexr.com/39cgj
     @JsonProperty("primary_color")
@@ -42,15 +24,7 @@ public class CreateJurisdictionDTO {
     @JsonProperty("logo_media_url")
     private String logoMediaUrl;
 
-    public CreateJurisdictionDTO() {
-    }
-
-    public String getJurisdictionId() {
-        return jurisdictionId;
-    }
-
-    public void setJurisdictionId(String jurisdictionId) {
-        this.jurisdictionId = jurisdictionId;
+    public PatchJurisdictionDTO() {
     }
 
     public String getName() {

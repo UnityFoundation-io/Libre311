@@ -17,6 +17,7 @@ package app;
 import app.dto.discovery.DiscoveryDTO;
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
+import app.dto.jurisdiction.PatchJurisdictionDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
@@ -839,12 +840,74 @@ public class RootControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("louisville.city");
         createJurisdictionDTO.setName("City of Louisville");
+        createJurisdictionDTO.setPrimaryColor("#F2F2F2");
+        createJurisdictionDTO.setLogoMediaUrl("http://example.com/img/here");
 
         HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
 
         HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
         assertEquals(OK, response.getStatus());
+        Optional<JurisdictionDTO> optional = response.getBody(JurisdictionDTO.class);
+        assertTrue(optional.isPresent());
+        JurisdictionDTO jurisdictionDTO = optional.get();
+        assertEquals("louisville.city", jurisdictionDTO.getJurisdictionId());
+        assertEquals("#F2F2F2", jurisdictionDTO.getPrimaryColor());
+        assertEquals("http://example.com/img/here", jurisdictionDTO.getLogoMediaUrl());
+
+    }
+
+    @Test
+    public void cannotCanCreateAJurisdictionWithUntrustedCSSColorValue() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("louisville.city");
+        createJurisdictionDTO.setName("City of Louisville");
+        createJurisdictionDTO.setPrimaryColor("<SCRIPT type=\"text/javascript\">\n" + "var adr = '../evil.php?cakemonster=' + escape(document.cookie);\n" + "</SCRIPT>");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(BAD_REQUEST, exception.getStatus());
+    }
+
+    @Test
+    public void canUpdateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("ogdenville.city");
+        createJurisdictionDTO.setName("City of Ogdenville");
+        createJurisdictionDTO.setPrimaryColor("#F2F2F2");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+
+
+
+        // update
+        PatchJurisdictionDTO patchJurisdictionDTO = new PatchJurisdictionDTO();
+        patchJurisdictionDTO.setName("Ogdenville - America's Barley Basket");
+        patchJurisdictionDTO.setPrimaryColor("#F4F4F4");
+
+        request = HttpRequest.PATCH("/tenant-admin/jurisdictions/louisville.city?tenant_id=1", patchJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+        Optional<JurisdictionDTO> jurisdictionDTOOptional = response.getBody(JurisdictionDTO.class);
+        assertTrue(jurisdictionDTOOptional.isPresent());
+        JurisdictionDTO jurisdictionDTO = jurisdictionDTOOptional.get();
+        assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
+        assertEquals("#F4F4F4", jurisdictionDTO.getPrimaryColor());
     }
 
     @Test
