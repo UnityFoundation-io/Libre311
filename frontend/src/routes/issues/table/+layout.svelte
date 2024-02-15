@@ -80,7 +80,7 @@
 				</div>
 			</div>
 
-			<Card bordered={false}>
+			<Card bordered={true} class="m-2">
 				<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
 					Card Header
 					<Input slot="extra" />
