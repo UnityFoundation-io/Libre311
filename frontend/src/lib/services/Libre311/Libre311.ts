@@ -3,6 +3,7 @@ import axios from 'axios';
 import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
 import type { UpdateSensitiveServiceRequestRequest, UpdateSensitiveServiceRequestResponse } from './types/UpdateSensitiveServiceRequest';
+import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -316,6 +317,7 @@ export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
 	uploadImage(file: File): Promise<string>;
+	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -376,6 +378,7 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 }
 
 export class Libre311ServiceImpl implements Libre311Service {
+	private authTokenInterceptorId: number = -1;
 	private axiosInstance: AxiosInstance;
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
@@ -514,6 +517,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 		});
 
 		return urlSchema.parse(res.data);
+	}
+
+	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void {
+		if (authInfo) {
+			this.authTokenInterceptorId = this.axiosInstance.interceptors.request.use(function (config) {
+				config.headers['Authorization'] = `Bearer ${authInfo.access_token}`;
+				return config;
+			});
+		} else {
+			this.axiosInstance.interceptors.request.eject(this.authTokenInterceptorId);
+		}
 	}
 
 	private async convertToDataURL(file: File): Promise<string> {
