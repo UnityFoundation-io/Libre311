@@ -1,5 +1,9 @@
 import { type Libre311Service } from '$lib/services/Libre311/Libre311';
-import { unityAuthServiceFactory, type UnityAuthService, type UnityAuthServiceProps } from '$lib/services/UnityAuth/UnityAuth';
+import {
+	unityAuthServiceFactory,
+	type UnityAuthService,
+	type UnityAuthServiceProps
+} from '$lib/services/UnityAuth/UnityAuth';
 import { LinkResolver } from '$lib/services/LinkResolver';
 import type { Mode } from '$lib/services/mode';
 import { getContext, setContext } from 'svelte';
@@ -23,6 +27,7 @@ export type Libre311ContextProviderProps = {
 export function createLibre311Context(props: Libre311ContextProviderProps) {
 	const linkResolver = new LinkResolver();
 	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
+	unityAuthService.subscribe('login', props.service.setAuthInfo);
 	const ctx: Libre311Context = {
 		...props,
 		linkResolver,
