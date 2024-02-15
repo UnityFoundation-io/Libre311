@@ -14,6 +14,8 @@
 	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
+	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
+	import type { ComponentEvents } from 'svelte';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
@@ -68,6 +70,17 @@
 			? 'selected'
 			: 'item-id';
 	}
+
+	function handleSearchInput(e: ComponentEvents<any>['input']) {
+		const target = e.target as HTMLInputElement;
+
+		// Remove non-numeric characters from the input value
+		let sanitizedValue = target.value.replace(/\D/g, '');
+
+		if (e.target != null && e.target.value) {
+			e.target.value = sanitizedValue;
+		}
+	}
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -97,7 +110,9 @@
 			<Card bordered={true} class="m-2">
 				<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
 					Card Header
-					<Input slot="extra" />
+					<Input slot="extra" placeholder="#Request ID" on:input={handleSearchInput}>
+						<Input.Leading slot="trailing" data={magnifingGlassIcon} />
+					</Input>
 				</Card.Header>
 				<Card.Content slot="content" class="p-0 sm:p-0" style="height: calc(100% - 64px);">
 					<div class="issues-table-override">
