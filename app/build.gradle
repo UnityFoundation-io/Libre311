@@ -42,7 +42,6 @@ dependencies {
     implementation("io.micronaut.sql:micronaut-jdbc-tomcat")
     implementation("io.micronaut.objectstorage:micronaut-object-storage-gcp")
     implementation("io.micronaut.security:micronaut-security-jwt")
-    implementation("io.micronaut.security:micronaut-security-oauth2")
     implementation('com.opencsv:opencsv:5.7.1')
     implementation("io.micronaut.reactor:micronaut-reactor")
 
