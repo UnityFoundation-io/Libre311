@@ -16,7 +16,9 @@
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
 	import type { ComponentEvents } from 'svelte';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
 
+	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
@@ -89,7 +91,7 @@
 			: 'item-id';
 	}
 
-	function handleSearchInput(e: ComponentEvents<any>['input']) {
+	async function handleSearchInput(e: ComponentEvents<any>['input']) {
 		const target = e.target as HTMLInputElement;
 
 		// Remove non-numeric characters from the input value
@@ -97,6 +99,9 @@
 
 		if (e.target != null && e.target.value) {
 			e.target.value = sanitizedValue;
+
+			const res = await libre311.getServiceRequest({ service_request_id: Number(sanitizedValue) });
+			console.log(res);
 		}
 	}
 </script>
