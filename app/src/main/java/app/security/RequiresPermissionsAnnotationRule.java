@@ -67,7 +67,7 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
         String tenantId = request.getParameters().get("tenant_id");
         if (jurisdictionId == null && tenantId == null) {
             throw new IllegalArgumentException(
-                    "The Jurisdiction Id must exists as a query parameter when using @RequiresPermissions");
+                    "Either the Jurisdiction Id or Tenant Id must exist as a query parameter when using @RequiresPermissions");
         }
 
         boolean result;
