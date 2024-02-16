@@ -3,8 +3,7 @@ micronaut:
   http:
     services:
       auth:
-        urls:
-          - ${AUTH_BASE_URL:`http://localhost:8080`}
+        url: ${AUTH_BASE_URL:`http://localhost:8080`}
   security:
     token:
       enabled: true
