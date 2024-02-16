@@ -3,7 +3,10 @@ import axios from 'axios';
 import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
 import { MockLibre311ServiceImpl } from './MockLibre311';
-import type { UpdateSensitiveServiceRequestRequest, UpdateSensitiveServiceRequestResponse } from './types/UpdateSensitiveServiceRequest';
+import type {
+	UpdateSensitiveServiceRequestRequest,
+	UpdateSensitiveServiceRequestResponse
+} from './types/UpdateSensitiveServiceRequest';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -171,12 +174,14 @@ const HasServiceRequestIdSchema = z.object({
 export type HasServiceRequestId = z.infer<typeof HasServiceRequestIdSchema>;
 export type ServiceRequestId = HasServiceRequestId['service_request_id'];
 
-export const CreateServiceRequestResponseSchema = z
-	.object({
-		service_notice: z.string().nullish(),
-		account_id: z.number().nullish()
-	})
-	.merge(HasServiceRequestIdSchema);
+export const CreateServiceRequestResponseSchema = z.array(
+	z
+		.object({
+			service_notice: z.string().nullish(),
+			account_id: z.number().nullish()
+		})
+		.merge(HasServiceRequestIdSchema)
+);
 
 export type CreateServiceRequestResponse = z.infer<typeof CreateServiceRequestResponseSchema>;
 
@@ -302,7 +307,9 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	updateServiceRequest(params: UpdateSensitiveServiceRequestRequest): Promise<UpdateSensitiveServiceRequestResponse>;
+	updateServiceRequest(
+		params: UpdateSensitiveServiceRequestRequest
+	): Promise<UpdateSensitiveServiceRequestResponse>;
 	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
