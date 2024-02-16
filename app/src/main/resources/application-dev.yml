@@ -3,8 +3,7 @@ micronaut:
   http:
     services:
       auth:
-        urls:
-          - ${AUTH_BASE_URL:`http://localhost:8080`}
+        url: ${AUTH_BASE_URL:`http://localhost:8080`}
   security:
     token:
       enabled: true
@@ -28,4 +27,4 @@ micronaut:
           - http://127.0.0.1:3000
 ---
 app:
-  service-id: ${LIBRE311_SERVICE_ID:1}
+  service-id: ${LIBRE311_SERVICE_ID}

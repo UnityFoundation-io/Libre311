@@ -27,7 +27,9 @@ export type Libre311ContextProviderProps = {
 export function createLibre311Context(props: Libre311ContextProviderProps) {
 	const linkResolver = new LinkResolver();
 	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
+
 	unityAuthService.subscribe('login', (args) => props.service.setAuthInfo(args));
+
 	const ctx: Libre311Context = {
 		...props,
 		linkResolver,
