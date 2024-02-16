@@ -241,7 +241,7 @@ public class ServiceRequestService {
 
                         List<AttributeValue> attributeValues = serviceDefinitionAttribute.getValues();
                         if (attributeValues != null && v != null) {
-                            if (v.contains(",")){
+                            if (v.contains(",") && serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST){
                                 String[] attrResKeys = v.split(",");
                                 for (String attrResKey : attrResKeys) {
                                     values.add(new AttributeValue(attrResKey, getAttributeValueName(attrResKey, attributeValues)));
