@@ -227,23 +227,34 @@ export const ServiceRequestStatusSchema = z.union([
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusSchema>;
 const urlSchema = z.string().url();
+
+// represents the users responses to the various service definition attributes
+const SelectedValuesSchema = z.object({
+	code: z.string(),
+	datatype: DatatypeUnionSchema,
+	description: z.string(),
+	values: z.array(AttributeValueSchema) // key is the SelectOption value and name is the human readable option.  For displaying the value to users, show the name.
+});
+export type SelectedValue = z.infer<typeof SelectedValuesSchema>;
+
 export const ServiceRequestSchema = z
 	.object({
 		status: ServiceRequestStatusSchema,
-		status_notes: z.string().nullish(),
+		status_notes: z.string().optional(),
 		service_name: z.string(),
-		description: z.string().nullish(),
-		agency_responsible: z.string().optional(), // SeeClickFix guarantees this as known at time of creation
-		service_notice: z.string().nullish(),
+		description: z.string().optional(),
+		agency_responsible: z.string().optional(),
+		service_notice: z.string().optional(),
 		requested_datetime: z.string(),
 		updated_datetime: z.string(),
-		expected_datetime: z.string().nullish(),
+		expected_datetime: z.string().optional(),
 		address: z.string(),
-		address_id: z.number().nullish(),
-		zipcode: z.string().nullish(),
+		address_id: z.number().optional(),
+		zipcode: z.string().optional(),
 		lat: z.string(),
 		long: z.string(),
-		media_url: urlSchema.nullish()
+		media_url: urlSchema.optional(),
+		selected_values: z.array(SelectedValuesSchema).optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -376,7 +387,17 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 	for (const [k, v] of Object.entries(params)) {
 		if (!v) continue;
 		if (Array.isArray(v)) {
-			v.forEach((val) => urlSearchParams.append(`attribute[${val.code}]`, val.value));
+			const resultMap = v.reduce((resultMap, attrRes) => {
+				const resArr: string[] = resultMap.get(attrRes.code) ?? [];
+				resArr.push(attrRes.value);
+				resultMap.set(attrRes.code, resArr);
+
+				return resultMap;
+			}, new Map<ServiceCode, string[]>());
+
+			resultMap.forEach((value, code) => {
+				urlSearchParams.append(`attribute[${code}]`, value.join(','));
+			});
 		} else {
 			urlSearchParams.set(k, v);
 		}

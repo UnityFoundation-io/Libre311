@@ -6,6 +6,7 @@
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import SelectedValues from './SelectedValues.svelte';
 	import Flag from './Svg/Flag.svelte';
 
 	export let serviceRequest: ServiceRequest;
@@ -69,25 +70,9 @@
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
-				<!-- TODO -->
-				<!-- {#each serviceRequest.attributeMap.values() as attributes}
-					<div class="mb-2">
-						<strong class="text-base">{messages['serviceRequest']['attributes']}</strong>
-						{#if attributes.datatype == 'multivaluelist'}
-							<DisplayMultiAttribute {attributes} />
-						{:else if attributes.datatype == 'datetime'}
-							<DisplayDateTimeAttribute {attributes} />
-						{:else if attributes.datatype == 'string'}
-							<DisplayStringAttribute {attributes} />
-						{:else if attributes.datatype == 'singlevaluelist'}
-							<DisplaySingleAttribute {attributes} />
-						{:else if attributes.datatype == 'number'}
-							<DisplayNumberAttribute {attributes} />
-						{:else if attributes.datatype == 'text'}
-							<DisplayTextAttribute {attributes} />
-						{/if}
-					</div>
-				{/each} -->
+		<div class="mb-1">
+			<SelectedValues selectedValues={serviceRequest.selected_values} />
+		</div>
 
 				{#if serviceRequest.description}
 					<div class="mb-1">
