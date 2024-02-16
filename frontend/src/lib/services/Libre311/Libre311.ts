@@ -396,7 +396,6 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 			}, new Map<ServiceCode, string[]>());
 
 			resultMap.forEach((value, code) => {
-				console.log(value);
 				urlSearchParams.append(`attribute[${code}]`, value.join(','));
 			});
 		} else {
