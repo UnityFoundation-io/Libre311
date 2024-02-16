@@ -18,8 +18,7 @@ micronaut:
   http:
     services:
       auth:
-        urls:
-          - http://localhost:8080
+        url: http://localhost:8080
   security:
     token:
       enabled: true

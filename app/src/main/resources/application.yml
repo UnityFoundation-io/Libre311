@@ -11,8 +11,7 @@ micronaut:
   http:
     services:
       auth:
-        urls:
-          - ${AUTH_BASE_URL}
+        url: ${AUTH_BASE_URL}
   security:
     token:
       enabled: true

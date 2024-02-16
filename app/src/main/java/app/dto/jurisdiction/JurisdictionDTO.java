@@ -39,7 +39,15 @@ public class JurisdictionDTO {
     @JsonProperty("logo_media_url")
     private String logoMediaUrl;
 
+    @JsonProperty("auth_base_url")
+    private String unityAuthUrl;
+
     public JurisdictionDTO() {
+    }
+
+    public JurisdictionDTO(Jurisdiction jurisdiction, String unityAuthUrl) {
+        this(jurisdiction);
+        this.unityAuthUrl = unityAuthUrl;
     }
 
     public JurisdictionDTO(Jurisdiction jurisdiction) {
@@ -97,5 +105,13 @@ public class JurisdictionDTO {
 
     public void setLogoMediaUrl(String logoMediaUrl) {
         this.logoMediaUrl = logoMediaUrl;
+    }
+
+    public String getUnityAuthUrl() {
+        return unityAuthUrl;
+    }
+
+    public void setUnityAuthUrl(String unityAuthUrl) {
+        this.unityAuthUrl = unityAuthUrl;
     }
 }

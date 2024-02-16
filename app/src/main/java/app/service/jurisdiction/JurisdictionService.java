@@ -19,6 +19,7 @@ import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
+import io.micronaut.context.annotation.Property;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,12 @@ import java.util.Optional;
 
 @Singleton
 public class JurisdictionService {
+
     private static final Logger LOG = LoggerFactory.getLogger(JurisdictionService.class);
+
+    @Property(name = "micronaut.http.services.auth.url")
+    protected String authUrl;
+
     private final JurisdictionRepository jurisdictionRepository;
 
     public JurisdictionService(JurisdictionRepository jurisdictionRepository) {
@@ -36,7 +42,7 @@ public class JurisdictionService {
 
     public JurisdictionDTO findJurisdictionByHostName(String hostName) {
         return jurisdictionRepository.findByRemoteHostsNameEquals(hostName)
-            .map(JurisdictionDTO::new).orElse(null);
+            .map(jurisdiction -> new JurisdictionDTO(jurisdiction, authUrl)).orElse(null);
     }
 
     public JurisdictionDTO createJurisdiction(CreateJurisdictionDTO requestDTO, Long tenantId) {

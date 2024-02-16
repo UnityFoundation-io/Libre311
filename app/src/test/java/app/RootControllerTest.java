@@ -926,6 +926,8 @@ public class RootControllerTest {
         JurisdictionDTO infoResponse = response.getBody().get();
         assertEquals(infoResponse.getJurisdictionId(), "1");
         assertEquals(infoResponse.getName(), "jurisdiction1");
+        // from application-test.yml's property `micronaut.http.services.auth.urls`
+        assertEquals("http://localhost:8080", infoResponse.getUnityAuthUrl());
     }
 
     private HttpResponse<?> createService(String code, String name) {
