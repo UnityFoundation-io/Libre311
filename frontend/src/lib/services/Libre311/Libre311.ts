@@ -254,13 +254,15 @@ export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
 
-export type GetServiceRequestsParams = {
-	serviceCode?: ServiceCode;
-	startDate?: string;
-	endDate?: string;
-	status?: ServiceRequestStatus[];
-	pageNumber?: number;
-};
+export type GetServiceRequestsParams =
+	| ServiceRequestId[]
+	| {
+			serviceCode?: ServiceCode;
+			startDate?: string;
+			endDate?: string;
+			status?: ServiceRequestStatus[];
+			pageNumber?: number;
+	  };
 
 const JurisdictionConfigSchema = z
 	.object({
@@ -382,6 +384,19 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 	return urlSearchParams;
 }
 
+export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsParams) {
+	const queryParams = new URLSearchParams();
+
+	if (Array.isArray(params)) {
+		queryParams.append('service_request_id', params.join(','));
+	} else {
+		queryParams.append('page_size', '10');
+		queryParams.append('page', `${params.pageNumber ?? 0}`);
+		// TODO: apply other query filters
+	}
+	return queryParams;
+}
+
 export class Libre311ServiceImpl implements Libre311Service {
 	private authTokenInterceptorId: number = -1;
 	private axiosInstance: AxiosInstance;
@@ -467,10 +482,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		const queryParams = new URLSearchParams();
+		const queryParams = mapToServiceRequestsURLSearchParams(params);
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
-		queryParams.append('page_size', '10');
-		queryParams.append('page', `${params.pageNumber ?? 0}`);
 
 		try {
 			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));

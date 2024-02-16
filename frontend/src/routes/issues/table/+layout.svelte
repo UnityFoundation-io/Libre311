@@ -16,9 +16,7 @@
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
 	import type { ComponentEvents } from 'svelte';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
 
-	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
@@ -99,9 +97,11 @@
 
 		if (e.target != null && e.target.value) {
 			e.target.value = sanitizedValue;
+			const serviceRequestId = Number(e.target.value);
 
-			const res = await libre311.getServiceRequest({ service_request_id: Number(sanitizedValue) });
-			console.log(res);
+			ctx.applyServiceRequestParams([serviceRequestId], $page.url);
+		} else {
+			ctx.applyServiceRequestParams({}, $page.url);
 		}
 	}
 </script>
@@ -133,7 +133,7 @@
 			<Card bordered={true} class="m-2">
 				<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
 					Card Header
-					<Input slot="extra" placeholder="#Request ID" on:input={handleSearchInput}>
+					<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
 						<Input.Leading slot="trailing" data={magnifingGlassIcon} />
 					</Input>
 				</Card.Header>
