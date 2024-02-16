@@ -16,10 +16,15 @@ package app.service.jurisdiction;
 
 import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.jurisdiction.JurisdictionRepository;
+import io.micronaut.context.annotation.Property;
 import jakarta.inject.Singleton;
 
 @Singleton
 public class JurisdictionService {
+
+    @Property(name = "micronaut.http.services.auth.url")
+    protected String authUrl;
+
     private final JurisdictionRepository jurisdictionRepository;
 
     public JurisdictionService(JurisdictionRepository jurisdictionRepository) {
@@ -28,7 +33,7 @@ public class JurisdictionService {
 
     public JurisdictionInfoResponse findJurisdictionByHostName(String hostName) {
         return jurisdictionRepository.findByRemoteHostsNameEquals(hostName)
-            .map(jurisdiction -> new JurisdictionInfoResponse(jurisdiction.getId(), jurisdiction.getName()))
+            .map(jurisdiction -> new JurisdictionInfoResponse(jurisdiction.getId(), jurisdiction.getName(), authUrl))
             .orElse(null);
     }
 }
