@@ -2,7 +2,10 @@ import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
-import type { UpdateSensitiveServiceRequestRequest, UpdateSensitiveServiceRequestResponse } from './types/UpdateSensitiveServiceRequest';
+import type {
+	UpdateSensitiveServiceRequestRequest,
+	UpdateSensitiveServiceRequestResponse
+} from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 
 const JurisdicationIdSchema = z.string();
@@ -251,13 +254,15 @@ export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
 
-export type GetServiceRequestsParams = {
-	serviceCode?: ServiceCode;
-	startDate?: string;
-	endDate?: string;
-	status?: ServiceRequestStatus[];
-	pageNumber?: number;
-};
+export type GetServiceRequestsParams =
+	| ServiceRequestId[]
+	| {
+			serviceCode?: ServiceCode;
+			startDate?: string;
+			endDate?: string;
+			status?: ServiceRequestStatus[];
+			pageNumber?: number;
+	  };
 
 const JurisdictionConfigSchema = z
 	.object({
@@ -302,7 +307,9 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	updateServiceRequest(params: UpdateSensitiveServiceRequestRequest): Promise<UpdateSensitiveServiceRequestResponse>;
+	updateServiceRequest(
+		params: UpdateSensitiveServiceRequestRequest
+	): Promise<UpdateSensitiveServiceRequestResponse>;
 	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
@@ -375,6 +382,19 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 		}
 	}
 	return urlSearchParams;
+}
+
+export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsParams) {
+	const queryParams = new URLSearchParams();
+
+	if (Array.isArray(params)) {
+		queryParams.append('service_request_id', params.join(','));
+	} else {
+		queryParams.append('page_size', '10');
+		queryParams.append('page', `${params.pageNumber ?? 0}`);
+		// TODO: apply other query filters
+	}
+	return queryParams;
 }
 
 export class Libre311ServiceImpl implements Libre311Service {
@@ -462,10 +482,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		const queryParams = new URLSearchParams();
+		const queryParams = mapToServiceRequestsURLSearchParams(params);
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
-		queryParams.append('page_size', '10');
-		queryParams.append('page', `${params.pageNumber ?? 0}`);
 
 		try {
 			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));
