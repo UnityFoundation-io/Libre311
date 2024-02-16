@@ -16,24 +16,28 @@
 <div class="flex items-center justify-center">
 	{#if $serviceRequestsRes.type === 'success'}
 		<div class="w-full max-w-lg">
-			<div class="flex justify-center my-4">
+			<div class="my-4 flex justify-center">
 				<MapListToggle />
 			</div>
 
-			<div class="flex justify-center items-center">
-				<strong class="mr-2 text-lg">{messages["sidebar"]["title"]}</strong>
+			<div class="m-3 flex items-center justify-between">
+				<div>
+					<p class="text-base">{messages['sidebar']['title']}</p>
+				</div>
 
-				<Pagination
-					pagination={$serviceRequestsRes.value.metadata.pagination}
-					nextPage={linkResolver.nextIssuesPage(
-						$serviceRequestsRes.value.metadata.pagination,
-						$page.url
-					)}
-					prevPage={linkResolver.prevIssuesPage(
-						$serviceRequestsRes.value.metadata.pagination,
-						$page.url
-					)}
-				/>
+				<div>
+					<Pagination
+						pagination={$serviceRequestsRes.value.metadata.pagination}
+						nextPage={linkResolver.nextIssuesPage(
+							$serviceRequestsRes.value.metadata.pagination,
+							$page.url
+						)}
+						prevPage={linkResolver.prevIssuesPage(
+							$serviceRequestsRes.value.metadata.pagination,
+							$page.url
+						)}
+					/>
+				</div>
 			</div>
 
 			<ul>
