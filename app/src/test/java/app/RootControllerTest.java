@@ -523,8 +523,7 @@ public class RootControllerTest {
 
         Map payload = mapper.convertValue(updateServiceDTO, Map.class);
         request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId()+"?jurisdiction_id=city.gov", payload)
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+                .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, ServiceDTO[].class);
         assertEquals(OK, response.getStatus());
 
@@ -582,8 +581,7 @@ public class RootControllerTest {
         Map payload = (new ObjectMapper()).convertValue(patchServiceRequestDTO, Map.class);
         HttpRequest<?> request = HttpRequest
                 .PATCH("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", payload)
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+                .header("Authorization", "Bearer token.text.here");
 
         HttpRequest<?> finalRequest = request;
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
@@ -618,8 +616,7 @@ public class RootControllerTest {
                                 "closed_date", "2023-01-25T13:15:30Z",
                                 "expected_date", "2023-01-15T13:15:30Z"
                         ))
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+                .header("Authorization", "Bearer token.text.here");
 
         response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
         assertEquals(HttpStatus.OK, response.status());
