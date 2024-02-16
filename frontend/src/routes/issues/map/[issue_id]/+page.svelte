@@ -8,7 +8,9 @@
 	const linkResolver = useLibre311Context().linkResolver;
 </script>
 
-<a href={linkResolver.issuesMap($page.url)}>Back to map</a>
 {#if $selectedServiceRequest}
-	<ServiceRequestDetails serviceRequest={$selectedServiceRequest} />
+	<ServiceRequestDetails
+		serviceRequest={$selectedServiceRequest}
+		back={linkResolver.issuesMap($page.url)}
+	/>
 {/if}

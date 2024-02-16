@@ -1,24 +1,12 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { goto } from '$app/navigation';
 	import { Badge, Card } from 'stwui';
-	import { Dropdown } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
-	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import Flag from './Svg/Flag.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let detailsLink: string;
-
-	let visible: boolean = false;
-
-	function closeDropdown() {
-		visible = false;
-	}
-
-	function toggleDropdown() {
-		visible = !visible;
-	}
 
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
@@ -29,7 +17,6 @@
 				return 'warn';
 			}
 		}
-		return 'error';
 	}
 </script>
 
@@ -56,37 +43,27 @@
 			</div>
 		{/if}
 
-		<div class="mt-2 flow-root">
+		<div class="mb-2 mt-2 flow-root">
 			<a href={detailsLink}>
 				<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 			</a>
-
-			<Dropdown class="float-right" bind:visible>
-				<button aria-label="dropdown toggle" slot="trigger" on:click={toggleDropdown} type="button">
-					<span class="sr-only">Open user menu</span>
-					<img src={dropDownIcon} alt="drop-down-menu" />
-				</button>
-				<Dropdown.Items slot="items">
-					<Dropdown.Items.Item on:click={closeDropdown} label="Item 1" />
-					<Dropdown.Items.Item on:click={closeDropdown} label="Item 2" />
-					<Dropdown.Items.Item on:click={closeDropdown} label="Item 3" />
-				</Dropdown.Items>
-			</Dropdown>
+			<div class="float-right">
+				<Flag />
+			</div>
 		</div>
 
 		<div class="mb-2">
 			<p class="text-sm">{serviceRequest.address}</p>
 		</div>
 
-		<div class="mb-1">
-			<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-		</div>
-
-		<div>
-			<p class="w-82 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-				{serviceRequest.description}
-			</p>
-		</div>
+		{#if serviceRequest.description}
+			<div class="mb-1">
+				<strong class="text-base">{messages['serviceRequest']['description']}</strong>
+				<p class="w-82 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+					{serviceRequest.description ?? ''}
+				</p>
+			</div>
+		{/if}
 	</div>
 </Card>
 

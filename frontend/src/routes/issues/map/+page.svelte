@@ -13,21 +13,25 @@
 	const linkResolver = useLibre311Context().linkResolver;
 </script>
 
-<h1 class="mx-2 text-3xl">{messages['sidebar']['title']}</h1>
-
 {#if $serviceRequestsRes.type === 'success'}
-	<div class="flex justify-end">
-		<Pagination
-			pagination={$serviceRequestsRes.value.metadata.pagination}
-			nextPage={linkResolver.nextIssuesPage(
-				$serviceRequestsRes.value.metadata.pagination,
-				$page.url
-			)}
-			prevPage={linkResolver.prevIssuesPage(
-				$serviceRequestsRes.value.metadata.pagination,
-				$page.url
-			)}
-		/>
+	<div class="m-3 flex items-center justify-between">
+		<div>
+			<p class="text-base">{messages['sidebar']['title']}</p>
+		</div>
+
+		<div>
+			<Pagination
+				pagination={$serviceRequestsRes.value.metadata.pagination}
+				nextPage={linkResolver.nextIssuesPage(
+					$serviceRequestsRes.value.metadata.pagination,
+					$page.url
+				)}
+				prevPage={linkResolver.prevIssuesPage(
+					$serviceRequestsRes.value.metadata.pagination,
+					$page.url
+				)}
+			/>
+		</div>
 	</div>
 
 	<ul>

@@ -32,10 +32,16 @@
 	"serviceRequest": {
 		"description": "Description:",
 		"detail": "Details:",
+		"attributes": "Attributes:",
 		"citizen_contact": "Citizen Contact:",
 		"agency_contact": "Agency Contact:",
+		"agency_name": "agency name",
 		"expected_datetime": "Estimated Fix:",
-		"service_notes": "Service Notes"
+		"service_notice": "Service Notice:",
+		"service_notice_placeholder": "proposed service",
+		"status_notes": "Status Notes:",
+		"status": "Status:",
+		"priority": "Priority:"
 	},
 	"contact": {
 		"header": "Add Contact Information",
@@ -67,6 +73,10 @@
 		"title": "Service Request Review",
 		"button_edit": "Edit",
 		"button_submit": "Submit Request"
+	},
+	"updateServiceRequest": {
+		"button_back": "Close",
+		"button_submit": "Update Request"
 	},
 	"photo": {
 		"upload": "Upload An Image",

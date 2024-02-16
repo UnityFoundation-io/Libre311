@@ -28,6 +28,7 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
@@ -37,6 +38,7 @@ import java.util.List;
 import static app.security.Permission.*;
 
 @Controller("/api/admin")
+@Tag(name = "Jurisdiction")
 public class AdminConsoleController {
 
     private final ServiceService serviceService;
@@ -47,27 +49,26 @@ public class AdminConsoleController {
         this.serviceRequestService = serviceRequestService;
     }
 
-    @Post(uris = {"/services{?jurisdiction_id}", "/services.json{?jurisdiction_id}"})
+    @Post(uris = { "/services{?jurisdiction_id}", "/services.json{?jurisdiction_id}" })
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
-                                              @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceService.createService(requestDTO, jurisdiction_id));
     }
 
-    @Patch(uris = {"/services/{serviceId}{?jurisdiction_id}", "/requests/{serviceId}.json{?jurisdiction_id}"})
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Patch(uris = { "/services/{serviceId}{?jurisdiction_id}", "/requests/{serviceId}.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
-                                              @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return List.of(serviceService.updateService(serviceId, requestDTO, jurisdiction_id));
     }
 
-    @Get(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
+    @Get(uris = { "/requests/{serviceRequestId}{?jurisdiction_id}",
+            "/requests/{serviceRequestId}.json{?jurisdiction_id}" })
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
@@ -75,9 +76,8 @@ public class AdminConsoleController {
         return List.of(serviceRequestService.getSensitiveServiceRequest(serviceRequestId, jurisdiction_id));
     }
 
-    @Patch(uris = {"/requests/{serviceRequestId}{?jurisdiction_id}", "/requests/{serviceRequestId}.json{?jurisdiction_id}"})
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Patch(uris = { "/requests/{serviceRequestId}{?jurisdiction_id}",
+            "/requests/{serviceRequestId}.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_EDIT_SYSTEM, LIBRE311_REQUEST_EDIT_TENANT, LIBRE311_REQUEST_EDIT_SUBTENANT})
     public List<SensitiveServiceRequestDTO> updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO,
@@ -85,11 +85,11 @@ public class AdminConsoleController {
         return List.of(serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id));
     }
 
-    @Get(value =  "/requests/download{?jurisdiction_id}")
+    @Get(value = "/requests/download{?jurisdiction_id}")
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
     public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
-                                                @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
         return serviceRequestService.getAllServiceRequests(requestDTO, jurisdiction_id);
     }
 }

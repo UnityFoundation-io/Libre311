@@ -7,6 +7,7 @@
 	import { paintBrushIcon } from './Svg/outline/paintBrushIcon';
 	import { pencilIcon } from './Svg/outline/pencilIcon';
 	import { tableIcon } from './Svg/outline/tableIcon';
+	import { plusCircleIcon } from './Svg/outline/plusCircleIcon';
 
 	export let open: boolean;
 
@@ -24,10 +25,16 @@
 
 	const items: MenuItem[] = [
 		{
+			key: 'create',
+			label: 'Create Service Request',
+			data: plusCircleIcon,
+			href: '/issue/create'
+		},
+		{
 			key: 'table',
 			label: 'Service Request Table',
 			data: tableIcon,
-			href: linkResolver.issuesList($page.url)
+			href: linkResolver.issuesTable($page.url)
 		},
 		{
 			key: 'map',
