@@ -6,6 +6,7 @@
 	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import SelectedValues from './SelectedValues.svelte';
 
 	export let serviceRequest: ServiceRequest;
 
@@ -70,19 +71,9 @@
 			<p class="text-sm">{serviceRequest.address}</p>
 		</div>
 
-		<!-- {#if serviceRequest.detail}
-			<div></div>
-
-			<div class="mb-1">
-				<strong class="text-base">{messages['serviceRequest']['detail']}</strong>
-
-				<p class="text-sm">
-					{#each serviceRequest.detail as detail, i}
-						{detail}{#if i < serviceRequest.detail.length - 1}<span>, </span>{/if}
-					{/each}
-				</p>
-			</div>
-		{/if} -->
+		<div class="mb-1">
+			<SelectedValues selectedValues={serviceRequest.selected_values} />
+		</div>
 
 		<div class="mb-1">
 			<strong class="text-base">{messages['serviceRequest']['description']}</strong>

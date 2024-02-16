@@ -230,7 +230,7 @@ const SelectedValuesSchema = z.object({
 	description: z.string(),
 	values: z.array(AttributeValueSchema) // key is the SelectOption value and name is the human readable option.  For displaying the value to users, show the name.
 });
-export type SelectedValues = z.infer<typeof SelectedValuesSchema>;
+export type SelectedValue = z.infer<typeof SelectedValuesSchema>;
 
 export const ServiceRequestSchema = z
 	.object({
