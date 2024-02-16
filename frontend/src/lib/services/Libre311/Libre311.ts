@@ -174,14 +174,12 @@ const HasServiceRequestIdSchema = z.object({
 export type HasServiceRequestId = z.infer<typeof HasServiceRequestIdSchema>;
 export type ServiceRequestId = HasServiceRequestId['service_request_id'];
 
-export const CreateServiceRequestResponseSchema = z.array(
-	z
-		.object({
-			service_notice: z.string().nullish(),
-			account_id: z.number().nullish()
-		})
-		.merge(HasServiceRequestIdSchema)
-);
+export const CreateServiceRequestResponseSchema = z
+	.object({
+		service_notice: z.string().nullish(),
+		account_id: z.number().nullish()
+	})
+	.merge(HasServiceRequestIdSchema);
 
 export type CreateServiceRequestResponse = z.infer<typeof CreateServiceRequestResponseSchema>;
 
