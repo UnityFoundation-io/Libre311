@@ -19,6 +19,7 @@
 	import { DatePicker } from 'stwui';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
+	import SelectedValues from './SelectedValues.svelte';
 
 	const libre311 = useLibre311Service();
 
@@ -170,25 +171,9 @@
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
-				<!-- TODO -->
-				<!-- {#each serviceRequest.attributeMap.values() as attributes}
-					<div class="mb-2">
-						<strong class="text-base">{messages['serviceRequest']['attributes']}</strong>
-						{#if attributes.datatype == 'multivaluelist'}
-							<DisplayMultiAttribute {attributes} />
-						{:else if attributes.datatype == 'datetime'}
-							<DisplayDateTimeAttribute {attributes} />
-						{:else if attributes.datatype == 'string'}
-							<DisplayStringAttribute {attributes} />
-						{:else if attributes.datatype == 'singlevaluelist'}
-							<DisplaySingleAttribute {attributes} />
-						{:else if attributes.datatype == 'number'}
-							<DisplayNumberAttribute {attributes} />
-						{:else if attributes.datatype == 'text'}
-							<DisplayTextAttribute {attributes} />
-						{/if}
-					</div>
-				{/each} -->
+				<div class="mb-1">
+					<SelectedValues selectedValues={serviceRequest.selected_values} />
+				</div>
 
 				{#if serviceRequest.description}
 					<div class="mb-1">
