@@ -1,5 +1,8 @@
 ---
 micronaut:
+  http:
+    client:
+      read-timeout: 1m
   server:
     cors:
       enabled: true
@@ -14,10 +17,9 @@ micronaut:
     token:
       jwt:
         signatures:
-          secret:
-            generator:
-              secret: pleaseChangeThisSecretForANewOne
-              jws-algorithm: HS256
+          jwks:
+            unityauth: #Creates JwksSignature bean with unityauth qualifier
+              url: 'https://localhost:8081/.well-known/jwks.json'
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:8080/failed-auth

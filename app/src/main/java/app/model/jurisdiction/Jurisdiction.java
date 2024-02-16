@@ -20,6 +20,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +32,9 @@ public class Jurisdiction {
     private String id;
 
     private String name;
+
+    @NotBlank
+    private String tenantId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -44,12 +48,14 @@ public class Jurisdiction {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ServiceRequest> serviceRequests = new HashSet<>();
 
-    public Jurisdiction(String id) {
+    public Jurisdiction(String id, String tenantId) {
         this.id = id;
+        this.tenantId = tenantId;
     }
 
-    public Jurisdiction(String id, String name, RemoteHost remoteHost) {
+    public Jurisdiction(String id, String tenantId, String name, RemoteHost remoteHost) {
         this.id = id;
+        this.tenantId = tenantId;
         this.name = name;
         remoteHosts.add(remoteHost);
     }
@@ -96,4 +102,11 @@ public class Jurisdiction {
         this.remoteHosts = remoteHosts;
     }
 
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
 }

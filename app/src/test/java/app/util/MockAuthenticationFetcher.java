@@ -1,3 +1,4 @@
+package app.util;
 // Copyright 2023 Libre311 Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,8 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package app.util;
+// package app.util;
 
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.core.async.publisher.Publishers;
@@ -20,12 +20,28 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.filters.AuthenticationFetcher;
 import jakarta.inject.Singleton;
+import java.util.Map;
 import org.reactivestreams.Publisher;
 
 
 @Replaces(AuthenticationFetcher.class)
 @Singleton
 public class MockAuthenticationFetcher implements AuthenticationFetcher {
+
+    static class MockAuthentication implements Authentication {
+
+        @Override
+        public Map<String, Object> getAttributes() {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+    }
+
+    public static final Authentication DEFAULT_MOCK_AUTHENTICATION = new MockAuthentication();
 
 
     private Authentication authentication;
