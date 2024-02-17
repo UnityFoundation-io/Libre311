@@ -25,49 +25,50 @@
 
 	let orderBy: string;
 
+	// 14% * 7 = 98%
 	const columns: TableColumn[] = [
 		{
 			column: 'issue_id',
 			label: 'Issue ID',
 			placement: 'center',
-			class: 'w-1/6'
+			class: 'w-[14%]'
 		},
 		{
 			column: 'service_name',
 			label: 'Service Name',
 			placement: 'center',
-			class: 'w-1/6'
+			class: 'w-[14%]'
 		},
 		{
 			column: 'status',
 			label: 'Status',
 			placement: 'center',
-			class: 'w-1/6'
+			class: 'w-[14%]'
 		},
 		{
 			column: 'address',
 			label: 'Address',
 			placement: 'center',
-			class: 'hidden lg:table-cell w-1/6'
+			class: 'hidden xl:table-cell w-[14%]'
 		},
 		{
 			column: 'created_at',
 			label: 'Created',
 			placement: 'center',
-			class: 'hidden lg:table-cell w-1/6'
+			class: 'hidden lg:table-cell w-[14%]'
 		},
 		{
 			column: 'last_updated',
 			label: 'Last Updated',
 			placement: 'center',
-			class: 'hidden lg:table-cell w-1/6'
+			class: 'hidden lg:table-cell w-[14%]'
+		},
+		{
+			column: 'expected_completion',
+			label: 'Expected Completion',
+			placement: 'center',
+			class: 'hidden xl:table-cell w-[14%]'
 		}
-		// {
-		// 	column: 'expected_completion',
-		// 	label: 'Expected Completion',
-		// 	placement: 'center',
-		// 	class: 'hidden lg:table-cell'
-		// }
 	];
 
 	function selectRow(service_request_id: ServiceRequestId) {
@@ -169,7 +170,9 @@
 
 										<Table.Body.Row.Cell column={3}>
 											<div class="flex items-center justify-center">
-												<p class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+												<p
+													class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm 2xl:w-32"
+												>
 													{item.address}
 												</p>
 											</div>
@@ -187,11 +190,15 @@
 											</div>
 										</Table.Body.Row.Cell>
 
-										<!-- <Table.Body.Row.Cell column={6}>
+										<Table.Body.Row.Cell column={6}>
 											<div class="flex items-center justify-center">
-												{toAbbreviatedTimeStamp(item.expected_datetime)}
+												{#if item.expected_datetime}
+													{toAbbreviatedTimeStamp(item.expected_datetime)}
+												{:else}
+													--
+												{/if}
 											</div>
-										</Table.Body.Row.Cell> -->
+										</Table.Body.Row.Cell>
 									</Table.Body.Row>
 								{/each}
 							</Table.Body>
