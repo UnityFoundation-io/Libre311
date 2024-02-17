@@ -12,7 +12,7 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
 	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
-	import { toTimeStamp } from '$lib/utils/functions';
+	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
 	import type { ComponentEvents } from 'svelte';
@@ -29,45 +29,45 @@
 		{
 			column: 'issue_id',
 			label: 'Issue ID',
-			placement: 'left',
-			class: 'w-[7.5%]'
+			placement: 'center',
+			class: 'w-1/6'
 		},
 		{
 			column: 'service_name',
 			label: 'Service Name',
-			placement: 'left',
-			class: 'w-[12.5%]'
+			placement: 'center',
+			class: 'w-1/6'
 		},
 		{
 			column: 'status',
 			label: 'Status',
-			placement: 'left',
-			class: 'w-[10%]'
+			placement: 'center',
+			class: 'w-1/6'
 		},
 		{
 			column: 'address',
 			label: 'Address',
-			placement: 'left',
-			class: 'w-[25%]'
+			placement: 'center',
+			class: 'hidden lg:table-cell w-1/6'
 		},
 		{
 			column: 'created_at',
 			label: 'Created',
-			placement: 'left',
-			class: 'w-[15%]'
+			placement: 'center',
+			class: 'hidden lg:table-cell w-1/6'
 		},
 		{
 			column: 'last_updated',
 			label: 'Last Updated',
-			placement: 'left',
-			class: 'w-[15%]'
-		},
-		{
-			column: 'expected_completion',
-			label: 'Expected Completion',
-			placement: 'left',
-			class: 'w-[15%]'
+			placement: 'center',
+			class: 'hidden lg:table-cell w-1/6'
 		}
+		// {
+		// 	column: 'expected_completion',
+		// 	label: 'Expected Completion',
+		// 	placement: 'center',
+		// 	class: 'hidden lg:table-cell'
+		// }
 	];
 
 	function selectRow(service_request_id: ServiceRequestId) {
@@ -109,7 +109,7 @@
 {#if $serviceRequestsRes.type === 'success'}
 	<SideBarMainContentLayout>
 		<slot slot="side-bar" />
-		<div slot="main-content" class="relative h-full flex-col">
+		<div slot="main-content" class="relative flex h-full flex-col">
 			<div class="m-3 flex items-center justify-between">
 				<div>
 					<p class="text-base">{messages['sidebar']['title']}</p>
@@ -137,10 +137,10 @@
 						<Input.Leading slot="trailing" data={magnifingGlassIcon} />
 					</Input>
 				</Card.Header>
-				<Card.Content slot="content" class="p-0 sm:p-0" style="height: calc(100% - 64px);">
+				<Card.Content slot="content" class="p-0 sm:p-0">
 					<div class="issues-table-override">
 						<Table class="h-full overflow-hidden rounded-md" {columns}>
-							<Table.Header slot="header" {orderBy} class="space-x-8" />
+							<Table.Header slot="header" {orderBy} />
 							<Table.Body slot="body">
 								{#each $serviceRequestsRes.value.serviceRequests as item}
 									<Table.Body.Row
@@ -148,36 +148,50 @@
 										on:click={selectRow(item.service_request_id)}
 									>
 										<Table.Body.Row.Cell column={0}>
-											{item.service_request_id}
+											<div class="flex items-center justify-center">
+												{item.service_request_id}
+											</div>
 										</Table.Body.Row.Cell>
 
 										<Table.Body.Row.Cell column={1}>
-											{item.service_name}
+											<div class="flex items-center justify-center">
+												{item.service_name}
+											</div>
 										</Table.Body.Row.Cell>
 
 										<Table.Body.Row.Cell column={2}>
-											<Badge type={issueStatus(item)}>
-												{item.status}
-											</Badge>
+											<div class="flex items-center justify-center">
+												<Badge type={issueStatus(item)}>
+													{item.status}
+												</Badge>
+											</div>
 										</Table.Body.Row.Cell>
 
 										<Table.Body.Row.Cell column={3}>
-											<p class="w-40 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-												{item.address}
-											</p>
+											<div class="flex items-center justify-center">
+												<p class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+													{item.address}
+												</p>
+											</div>
 										</Table.Body.Row.Cell>
 
 										<Table.Body.Row.Cell column={4}>
-											{toTimeStamp(item.requested_datetime)}
+											<div class="flex items-center justify-center">
+												{toAbbreviatedTimeStamp(item.requested_datetime)}
+											</div>
 										</Table.Body.Row.Cell>
 
 										<Table.Body.Row.Cell column={5}>
-											{toTimeStamp(item.updated_datetime)}
+											<div class="flex items-center justify-center">
+												{toAbbreviatedTimeStamp(item.updated_datetime)}
+											</div>
 										</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={6}>
-											{toTimeStamp(item.expected_datetime)}
-										</Table.Body.Row.Cell>
+										<!-- <Table.Body.Row.Cell column={6}>
+											<div class="flex items-center justify-center">
+												{toAbbreviatedTimeStamp(item.expected_datetime)}
+											</div>
+										</Table.Body.Row.Cell> -->
 									</Table.Body.Row>
 								{/each}
 							</Table.Body>
