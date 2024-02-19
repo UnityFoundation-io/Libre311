@@ -27,7 +27,12 @@
 	options={selectOptions}
 	class="relative  my-4"
 >
-	<Select.Label slot="label">{input.attribute.description}</Select.Label>
+	<Select.Label slot="label">
+		{input.attribute.description}
+		{#if input.attribute.required}
+			<span class="text-red-600">*</span>
+		{/if}
+	</Select.Label>
 	<Select.Options slot="options">
 		{#each selectOptions as option}
 			<Select.Options.Option {option} />
