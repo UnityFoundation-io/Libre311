@@ -8,6 +8,7 @@
 	import { pencilIcon } from './Svg/outline/pencilIcon';
 	import { tableIcon } from './Svg/outline/tableIcon';
 	import { plusCircleIcon } from './Svg/outline/plusCircleIcon';
+	import { user } from './Svg/outline/user';
 
 	export let open: boolean;
 
@@ -41,7 +42,7 @@
 			label: 'Request Map',
 			data: mapIcon,
 			href: linkResolver.issuesMap($page.url)
-		}
+		},
 		// TODO: Add appropriate URLs
 		// {
 		// 	key: 'manager',
@@ -55,6 +56,12 @@
 		// 	data: paintBrushIcon,
 		// 	href: '#editor'
 		// }
+		{
+			key: 'login',
+			label: 'Login',
+			data: user,
+			href: '/login'
+		}
 	];
 </script>
 
