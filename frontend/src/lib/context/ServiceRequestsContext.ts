@@ -1,9 +1,11 @@
+import { goto } from '$app/navigation';
 import {
 	type GetServiceRequestsParams,
 	type Libre311Service,
 	type ServiceRequest,
 	type ServiceRequestsResponse,
-	EMPTY_PAGINATION
+	EMPTY_PAGINATION,
+	mapToServiceRequestsURLSearchParams
 } from '$lib/services/Libre311/Libre311';
 import {
 	asAsyncFailure,
@@ -22,14 +24,17 @@ const key = Symbol();
 export type ServiceRequestsContext = {
 	selectedServiceRequest: Readable<Maybe<ServiceRequest>>;
 	serviceRequestsResponse: Readable<AsyncResult<ServiceRequestsResponse>>;
-	// todo mapBounds store (map should re center whenever new serviceRequests are loaded)
-	// todo applyFilters function
-	// will need to have applyFilters function to filter data (this will reset the pagination) (takes filterable values and updates the URLSearchParams accordingly)
-	// 		will be Set<ServiceId> or something of to that effect.
+	applyServiceRequestParams(params: GetServiceRequestsParams, url: URL): void;
 };
 
 function toServiceRequestParams(searchParams: URLSearchParams) {
-	const params: GetServiceRequestsParams = {};
+	let params: GetServiceRequestsParams = {};
+
+	if (searchParams.get('service_request_id')) {
+		params = searchParams.get('service_request_id')?.split(',').map(Number) ?? [];
+		return params;
+	}
+
 	if (searchParams.get('pageNumber')) params.pageNumber = Number(searchParams.get('pageNumber'));
 
 	if (searchParams.get('serviceCode'))
@@ -107,9 +112,15 @@ export function createServiceRequestsContext(
 		}
 	});
 
+	function applyServiceRequestParams(params: GetServiceRequestsParams, url: URL) {
+		const queryParams = mapToServiceRequestsURLSearchParams(params);
+		goto(`${url.pathname}?${queryParams.toString()}`);
+	}
+
 	const ctx: ServiceRequestsContext = {
 		selectedServiceRequest,
-		serviceRequestsResponse
+		serviceRequestsResponse,
+		applyServiceRequestParams
 	};
 
 	setContext(key, ctx);

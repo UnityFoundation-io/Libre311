@@ -34,6 +34,7 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
@@ -197,11 +198,12 @@ public class ServiceRequestService {
             throw new RuntimeException(e);
         }
 
-        Optional<Map> body = request.getBody(Map.class);
+        Argument<Map<String, String>> type = Argument.mapOf(String.class, String.class);
+        Optional<Map<String, String>> body = request.getBody(type);
 
         List<ServiceDefinitionAttribute> attributes = new ArrayList<>();
         if (body.isPresent()) {
-            Map<String, Object> map = body.get();
+            Map<String, String> map = body.get();
             map.forEach((k, v) -> {
                 if (k.startsWith("attribute[")) {
                     String attributeCode = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
@@ -230,6 +232,7 @@ public class ServiceRequestService {
                     sda.setRequired(serviceDefinitionAttribute.isRequired());
                     sda.setVariable(serviceDefinitionAttribute.isVariable());
                     sda.setDatatype(serviceDefinitionAttribute.getDatatype());
+                    sda.setDescription(serviceDefinitionAttribute.getDescription());
 
                     List<AttributeValue> values = new ArrayList<>();
 
@@ -237,19 +240,21 @@ public class ServiceRequestService {
                             serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST) {
 
                         List<AttributeValue> attributeValues = serviceDefinitionAttribute.getValues();
-                        if (attributeValues != null) {
-                            if (v instanceof ArrayList) {
-                                ((ArrayList<?>) v).forEach(s -> {
-                                    values.add(new AttributeValue((String) s, getAttributeValueName((String) s, attributeValues)));
-                                });
-                            } else {
-                                values.add(new AttributeValue((String) v, getAttributeValueName((String) v, attributeValues)));
+                        if (attributeValues != null && v != null) {
+                            if (v.contains(",") && serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST){
+                                String[] attrResKeys = v.split(",");
+                                for (String attrResKey : attrResKeys) {
+                                    values.add(new AttributeValue(attrResKey, getAttributeValueName(attrResKey, attributeValues)));
+                                }
+                            }
+                            else {
+                                values.add(new AttributeValue(v, getAttributeValueName( v, attributeValues)));
                             }
                         }
                     } else {
                         // we need a way to capture the user's response. We will do so by adding an attribute value where
                         // the key is the code and the value is the user's response.
-                        values.add(new AttributeValue(attributeCode, (String) v));
+                        values.add(new AttributeValue(attributeCode, v));
                     }
 
                     sda.setValues(values);
