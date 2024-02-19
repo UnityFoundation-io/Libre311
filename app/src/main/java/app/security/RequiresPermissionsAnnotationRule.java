@@ -61,7 +61,7 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
 
         String bearerToken = maybeAuthorization.get();
         List<String> declaredPermissionsAsStrings = declaredPermissions.stream()
-                .map(Enum::toString).collect(Collectors.toList());
+                .map(Permission::getPermission).collect(Collectors.toList());
 
         if (unityAuthService.isUserPermittedForAction(bearerToken, resolveJurisdictionId(request),
                 declaredPermissionsAsStrings)) {
