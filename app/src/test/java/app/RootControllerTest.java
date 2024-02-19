@@ -837,7 +837,7 @@ public class RootControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("louisville.city");
         createJurisdictionDTO.setName("City of Louisville");
-        createJurisdictionDTO.setPrimaryColor("#F2F2F2");
+        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
         createJurisdictionDTO.setLogoMediaUrl("http://example.com/img/here");
 
         HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
@@ -849,7 +849,7 @@ public class RootControllerTest {
         assertTrue(optional.isPresent());
         JurisdictionDTO jurisdictionDTO = optional.get();
         assertEquals("louisville.city", jurisdictionDTO.getJurisdictionId());
-        assertEquals("#F2F2F2", jurisdictionDTO.getPrimaryColor());
+        assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
         assertEquals("http://example.com/img/here", jurisdictionDTO.getLogoMediaUrl());
 
     }
@@ -881,7 +881,7 @@ public class RootControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("ogdenville.city");
         createJurisdictionDTO.setName("City of Ogdenville");
-        createJurisdictionDTO.setPrimaryColor("#F2F2F2");
+        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
 
         HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
@@ -889,12 +889,10 @@ public class RootControllerTest {
         HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
         assertEquals(OK, response.getStatus());
 
-
-
         // update
         PatchJurisdictionDTO patchJurisdictionDTO = new PatchJurisdictionDTO();
         patchJurisdictionDTO.setName("Ogdenville - America's Barley Basket");
-        patchJurisdictionDTO.setPrimaryColor("#F4F4F4");
+        patchJurisdictionDTO.setPrimaryColor("221 83% 53%");
 
         request = HttpRequest.PATCH("/tenant-admin/jurisdictions/louisville.city?tenant_id=1", patchJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
@@ -904,7 +902,7 @@ public class RootControllerTest {
         assertTrue(jurisdictionDTOOptional.isPresent());
         JurisdictionDTO jurisdictionDTO = jurisdictionDTOOptional.get();
         assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
-        assertEquals("#F4F4F4", jurisdictionDTO.getPrimaryColor());
+        assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
     }
 
     @Test

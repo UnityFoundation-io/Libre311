@@ -12,13 +12,12 @@ public class PatchJurisdictionDTO {
     @NotEmpty
     private String name;
 
-    // derived from https://regexr.com/39cgj
     @JsonProperty("primary_color")
-    @Pattern(regexp = "(?:#|0x)(?:[a-f0-9]{3}|[a-f0-9]{6})\\b|(?:rgb|hsl)a?\\([^\\)]*\\)", flags = {Pattern.Flag.CASE_INSENSITIVE})
+    @Pattern(regexp = "(\\d+),?\\s?(\\.?\\d+%?),?\\s?(\\.?\\d+%?)")
     private String primaryColor;
 
     @JsonProperty("primary_hover_color")
-    @Pattern(regexp = "(?:#|0x)(?:[a-f0-9]{3}|[a-f0-9]{6})\\b|(?:rgb|hsl)a?\\([^\\)]*\\)", flags = {Pattern.Flag.CASE_INSENSITIVE})
+    @Pattern(regexp = "(\\d+),?\\s?(\\.?\\d+%?),?\\s?(\\.?\\d+%?)")
     private String primaryHoverColor;
 
     @JsonProperty("logo_media_url")
