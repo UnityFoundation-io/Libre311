@@ -8,6 +8,8 @@
 	import '../app.pcss';
 
 	import MenuDrawer from '$lib/components/MenuDrawer.svelte';
+	import { Avatar } from 'stwui';
+	import { Dropdown } from 'stwui';
 
 	import {
 		asAsyncFailure,
@@ -18,7 +20,11 @@
 	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { recaptchaServiceFactory } from '$lib/services/RecaptchaService';
-	import type { UnityAuthServiceProps } from '$lib/services/UnityAuth/UnityAuth';
+	import {
+		unityAuthServiceFactory,
+		type UnityAuthService,
+		type UnityAuthServiceProps
+	} from '$lib/services/UnityAuth/UnityAuth';
 
 	const mode: Mode = getModeFromEnv(import.meta.env);
 	const recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
@@ -27,6 +33,7 @@
 	};
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
+	let unityAuthService: UnityAuthService;
 
 	let open: boolean = false;
 
@@ -44,9 +51,22 @@
 		try {
 			const service = await libre311Factory(serviceProps);
 			contextProviderProps = asAsyncSuccess({ ...synchronousContextProviderProps, service });
+			unityAuthService = unityAuthServiceFactory(contextProviderProps.value.unityAuthServiceProps);
 		} catch (error) {
 			contextProviderProps = asAsyncFailure(error);
 		}
+	}
+
+	let isUserDropdownVisible: boolean = false;
+
+	function toggleDropdown() {
+		isUserDropdownVisible = !isUserDropdownVisible;
+	}
+
+	function logout() {
+		isUserDropdownVisible = false;
+		unityAuthService.logout();
+		alert('LOGGED OUT');
 	}
 
 	initLibre311ContextProps({
@@ -57,10 +77,8 @@
 
 {#if contextProviderProps.type == 'success'}
 	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
-		<header>
-			<div class="controls">
-				<!-- todo move inside of map -->
-				<!-- <Funnel /> -->
+		<header class="flex items-center justify-center">
+			<div class="flex gap-4">
 				<button
 					type="button"
 					on:click={() => {
@@ -73,6 +91,15 @@
 				</button>
 				<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
 			</div>
+
+			<Dropdown bind:visible={isUserDropdownVisible}>
+				<button slot="trigger" on:click={toggleDropdown}>
+					<Avatar src="broken_image.png" />
+				</button>
+				<Dropdown.Items slot="items">
+					<Dropdown.Items.Item on:click={logout} label="Logout"></Dropdown.Items.Item>
+				</Dropdown.Items>
+			</Dropdown>
 		</header>
 		<main>
 			<MenuDrawer {open} handleClose={closeDrawer} />
@@ -98,11 +125,6 @@
 		justify-content: space-between;
 		padding: 0 1rem;
 	}
-	.controls {
-		display: flex;
-		gap: 1rem;
-	}
-
 	main {
 		height: calc(100dvh - var(--header-height));
 	}

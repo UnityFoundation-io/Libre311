@@ -26,6 +26,7 @@ export type UnityAuthEventMap = {
 // Auth Interface
 export type UnityAuthService = BaseObservable<UnityAuthEventMap> & {
 	login(email: string, password: string): Promise<UnityAuthLoginResponse>;
+	logout(): void;
 };
 
 // Auth Implementation
@@ -58,6 +59,15 @@ export class UnityAuthServiceImpl
 		} catch (e) {
 			throw new Error(e?.toString());
 		}
+	}
+
+	logout() {
+		this.publish('login', {
+			access_token: '',
+			token_type: '',
+			expires_in: 0,
+			username: ''
+		});
 	}
 }
 
