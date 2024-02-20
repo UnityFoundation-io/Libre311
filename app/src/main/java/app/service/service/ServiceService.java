@@ -14,6 +14,8 @@
 
 package app.service.service;
 
+import app.dto.group.GroupDTO;
+import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
@@ -21,6 +23,8 @@ import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
+import app.model.service.group.ServiceGroup;
+import app.model.service.group.ServiceGroupRepository;
 import app.model.service.servicedefinition.ServiceDefinition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,10 +41,12 @@ public class ServiceService {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceService.class);
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
+    private final ServiceGroupRepository serviceGroupRepository;
 
-    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository) {
+    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
+        this.serviceGroupRepository = serviceGroupRepository;
     }
 
     public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
@@ -139,5 +145,54 @@ public class ServiceService {
             return false;
         }
         return true;
+    }
+
+    public Page<GroupDTO> getPageableGroups(Pageable pageable, String jurisdictionId) {
+        return serviceGroupRepository.findAllByJurisdictionId(jurisdictionId, pageable).map(GroupDTO::new);
+    }
+
+    public GroupDTO createGroup(CreateUpdateGroupDTO requestDTO, String jurisdictionId) {
+        Jurisdiction jurisdiction = jurisdictionRepository.findById(jurisdictionId).get();
+        if (groupAlreadyExists(requestDTO.getName(), jurisdiction)) {
+            return null;
+        }
+
+        ServiceGroup group = new ServiceGroup();
+        group.setJurisdiction(jurisdiction);
+        group.setName(requestDTO.getName());
+
+        return new GroupDTO(serviceGroupRepository.save(group));
+    }
+
+    public GroupDTO updateGroup(Long groupId, CreateUpdateGroupDTO requestDTO) {
+        Optional<ServiceGroup> groupOptional = serviceGroupRepository.findById(groupId);
+        if (groupOptional.isEmpty()) {
+            LOG.error("Group not found.");
+            return null;
+        }
+
+        ServiceGroup group = groupOptional.get();
+        if (requestDTO.getName() != null) {
+            if (groupAlreadyExists(requestDTO.getName(), group.getJurisdiction())) {
+                return null;
+            }
+            group.setName(requestDTO.getName());
+        }
+
+        return new GroupDTO(serviceGroupRepository.update(group));
+
+    }
+
+    private boolean groupAlreadyExists(String name, Jurisdiction jurisdiction) {
+        boolean serviceCodeAlreadyExists = serviceGroupRepository.existsByNameAndJurisdiction(name, jurisdiction);
+        if (serviceCodeAlreadyExists) {
+            LOG.error("Group with name {} already exists.", name);
+            return true;
+        }
+        return false;
+    }
+
+    public void deleteGroup(Long groupId) {
+        serviceGroupRepository.deleteById(groupId);
     }
 }

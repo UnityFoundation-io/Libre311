@@ -15,6 +15,8 @@
 package app;
 
 import app.dto.discovery.DiscoveryDTO;
+import app.dto.group.CreateUpdateGroupDTO;
+import app.dto.group.GroupDTO;
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
@@ -667,6 +669,61 @@ public class RootControllerTest {
         assertEquals(1, serviceRequestDTOS.length);
     }
 
+    // create, read, update, delete groups
+    @Test
+    void canPerformCrudActionsOnServiceGroupIfAuthenticated() {
+        HttpResponse<?> response;
+        HttpRequest<?> request;
+
+        authLogin();
+
+        // create
+        response = createGroup("Sanitation","city.gov");
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<GroupDTO[]> optional = response.getBody(GroupDTO[].class);
+        assertTrue(optional.isPresent());
+        GroupDTO[] postResponseGroupDTOS = optional.get();
+        assertTrue(postResponseGroupDTOS.length > 0);
+        GroupDTO groupDTO = postResponseGroupDTOS[0];
+
+        // list
+        request = HttpRequest.GET("/jurisdiction-admin/groups?jurisdiction_id=city.gov")
+                .header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, GroupDTO[].class);
+        assertEquals(OK, response.getStatus());
+        Optional<GroupDTO[]> listBody = response.getBody(GroupDTO[].class);
+        assertTrue(listBody.isPresent());
+        assertTrue(listBody.get().length > 0);
+
+        // update
+        CreateUpdateGroupDTO updateGroupDTO = new CreateUpdateGroupDTO();
+        updateGroupDTO.setName("Solid Waste Management");
+
+        request = HttpRequest.PATCH("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=city.gov", updateGroupDTO)
+                .header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, GroupDTO[].class);
+        assertEquals(OK, response.getStatus());
+
+        // verify all
+        Optional<GroupDTO[]> body = response.getBody(GroupDTO[].class);
+        assertTrue(body.isPresent());
+        GroupDTO groupDTO1 = body.get()[0];
+        assertEquals("Solid Waste Management", groupDTO1.getName());
+
+        // delete
+        request = HttpRequest.DELETE("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=city.gov")
+                .header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, GroupDTO[].class);
+        assertEquals(OK, response.getStatus());
+    }
+
+    private HttpResponse<?> createGroup(String name, String jurisdictionId) {
+        CreateUpdateGroupDTO groupDTO = new CreateUpdateGroupDTO();
+        groupDTO.setName(name);
+        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/groups?jurisdiction_id="+jurisdictionId, groupDTO)
+                .header("Authorization", "Bearer token.text.here");
+        return client.toBlocking().exchange(request, GroupDTO[].class);
+    }
 
     private HttpResponse<?> createService(String code, String name, String jurisdictionId) {
         return createService(code, name, null, null, jurisdictionId);
@@ -678,11 +735,8 @@ public class RootControllerTest {
         serviceDTO.setServiceName(name);
         serviceDTO.setDescription(description);
         serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map payload = objectMapper.convertValue(serviceDTO, Map.class);
-        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, payload)
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, serviceDTO)
+                .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, ServiceDTO[].class);
     }
 
