@@ -25,6 +25,7 @@ function useAccountState() {
 }
 
 const sampleUser: SampleAccount = { username: 'Josh', age: 24 };
+const sampleUser2: SampleAccount = { username: 'Jack', age: 29 };
 
 describe('Test EventBus pub/sub actions', () => {
 	const authEventBus = createEventBus<MockAuthEvents>();
@@ -58,6 +59,28 @@ describe('Test EventBus pub/sub actions', () => {
 		authEventBus.publish('login', sampleUser);
 
 		expect(getAccountState()).toBeUndefined();
+	});
+
+	it('Single subscriber is notified of multiple event changes', () => {
+		const { getAccountState, setAccountState } = useAccountState();
+
+		// Events
+		authEventBus.subscribe('login', setAccountState);
+		authEventBus.subscribe('logout', () => {
+			setAccountState(undefined);
+		});
+
+		// Login
+		authEventBus.publish('login', sampleUser);
+		expect(getAccountState()).toBe(sampleUser);
+
+		// Logout
+		authEventBus.publish('logout', void 0);
+		expect(getAccountState()).toBe(undefined);
+
+		// Log back in as another account
+		authEventBus.publish('login', sampleUser2);
+		expect(getAccountState()).toBe(sampleUser2);
 	});
 });
 
