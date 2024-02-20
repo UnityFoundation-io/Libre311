@@ -355,8 +355,8 @@ const ROUTES = {
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
-	patchServiceRequest: (params: HasJurisdictionId) =>
-		`/jurisdiction-admin/requests/1?jurisdiction_id=${params.jurisdiction_id}`,
+	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
+		`/jurisdiction-admin/requests/${service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequest: (params: HasJurisdictionId & HasServiceRequestId) =>
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };
@@ -495,7 +495,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse> {
 		const res = await this.axiosInstance.patch<InternalCreateServiceRequestResponse>(
-			ROUTES.patchServiceRequest(this.jurisdictionConfig),
+			ROUTES.patchServiceRequest(params.service_request_id, this.jurisdictionConfig),
 			params
 		);
 

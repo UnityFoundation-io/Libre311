@@ -61,7 +61,7 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
 
         String bearerToken = maybeAuthorization.get();
         List<String> declaredPermissionsAsStrings = declaredPermissions.stream()
-                .map(Enum::toString).collect(Collectors.toList());
+                .map(Permission::getPermission).collect(Collectors.toList());
 
         String jurisdictionId = request.getParameters().get("jurisdiction_id");
         String tenantId = request.getParameters().get("tenant_id");
