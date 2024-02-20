@@ -19,16 +19,15 @@ const UnityAuthLoginResponseSchema = z.object({
 });
 
 export type UnityAuthLoginResponse = z.infer<typeof UnityAuthLoginResponseSchema>;
-export type UnityAuthLogoutResponse = z.infer<typeof UnityAuthLoginResponseSchema>;
 
 export type UnityAuthEventMap = {
 	login: UnityAuthLoginResponse;
-	logout: UnityAuthLogoutResponse;
+	logout: void;
 };
 // Auth Interface
 export type UnityAuthService = BaseObservable<UnityAuthEventMap> & {
 	login(email: string, password: string): Promise<UnityAuthLoginResponse>;
-	logout(): UnityAuthLogoutResponse;
+	logout(): void;
 };
 
 // Auth Implementation
@@ -64,15 +63,7 @@ export class UnityAuthServiceImpl
 	}
 
 	logout() {
-		const response = {
-			access_token: '',
-			token_type: '',
-			expires_in: 0,
-			username: ''
-		};
-		this.publish('logout', response);
-
-		return response;
+		this.publish('logout', void 0);
 	}
 }
 

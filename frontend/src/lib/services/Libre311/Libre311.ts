@@ -336,6 +336,7 @@ export interface Libre311Service extends Open311Service {
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
 	uploadImage(file: File): Promise<string>;
 	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void;
+	removeAuthInfo(): void;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -567,6 +568,13 @@ export class Libre311ServiceImpl implements Libre311Service {
 		} else {
 			this.axiosInstance.interceptors.request.eject(this.authTokenInterceptorId);
 		}
+	}
+
+	removeAuthInfo(): void {
+		this.authTokenInterceptorId = this.axiosInstance.interceptors.request.use(function (config) {
+			config.headers['Authorization'] = ``;
+			return config;
+		});
 	}
 
 	private async convertToDataURL(file: File): Promise<string> {
