@@ -356,7 +356,7 @@ const ROUTES = {
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
-		`/admin/requests/${service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
+		`/jurisdiction-admin/requests/${service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequest: (params: HasJurisdictionId & HasServiceRequestId) =>
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };

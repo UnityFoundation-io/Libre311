@@ -15,10 +15,10 @@
 package app;
 
 import app.dto.discovery.DiscoveryDTO;
+import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
-import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.service.servicedefinition.ServiceDefinition;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
@@ -246,7 +246,7 @@ public class RootController {
 
     @Get(value =  "/config")
     @ExecuteOn(TaskExecutors.IO)
-    public JurisdictionInfoResponse getJurisdictionInfo(@Header("Host") String hostName) {
+    public JurisdictionDTO getJurisdictionInfo(@Header("Host") String hostName) {
         return jurisdictionService.findJurisdictionByHostName(hostName);
     }
 

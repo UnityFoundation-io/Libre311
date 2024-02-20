@@ -15,12 +15,14 @@
 package app;
 
 import app.dto.discovery.DiscoveryDTO;
+import app.dto.jurisdiction.CreateJurisdictionDTO;
+import app.dto.jurisdiction.JurisdictionDTO;
+import app.dto.jurisdiction.PatchJurisdictionDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.*;
 import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.JurisdictionInfoResponse;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdiction.RemoteHost;
 import app.model.jurisdictionuser.JurisdictionUser;
@@ -522,7 +524,7 @@ public class RootControllerTest {
         updateServiceDTO.setServiceDefinitionJson(json);
 
         Map payload = mapper.convertValue(updateServiceDTO, Map.class);
-        request = HttpRequest.PATCH("/admin/services/"+serviceDTO.getId()+"?jurisdiction_id=city.gov", payload)
+        request = HttpRequest.PATCH("/jurisdiction-admin/services/"+serviceDTO.getId()+"?jurisdiction_id=city.gov", payload)
                 .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, ServiceDTO[].class);
         assertEquals(OK, response.getStatus());
@@ -580,7 +582,7 @@ public class RootControllerTest {
 
         Map payload = (new ObjectMapper()).convertValue(patchServiceRequestDTO, Map.class);
         HttpRequest<?> request = HttpRequest
-                .PATCH("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", payload)
+                .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", payload)
                 .header("Authorization", "Bearer token.text.here");
 
         HttpRequest<?> finalRequest = request;
@@ -610,7 +612,7 @@ public class RootControllerTest {
 
         // update dates
         request = HttpRequest
-                .PATCH("admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov",
+                .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov",
                         Map.of(
                                 "jurisdiction_id", "city.gov",
                                 "closed_date", "2023-01-25T13:15:30Z",
@@ -645,7 +647,7 @@ public class RootControllerTest {
         PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
 
         // unauthenticated read attempt
-        HttpRequest<?> request = HttpRequest.GET("/admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov")
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov")
                 .header("Authorization", "Bearer token.text.here");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
@@ -678,7 +680,7 @@ public class RootControllerTest {
         serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceDTO, Map.class);
-        HttpRequest<?> request = HttpRequest.POST("/admin/services?jurisdiction_id="+jurisdictionId, payload)
+        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, ServiceDTO[].class);
@@ -719,7 +721,7 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("/admin/requests/download?jurisdiction_id=city.gov")
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=city.gov")
                 .header("Authorization", "Bearer token.text.here");
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
@@ -768,7 +770,7 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         // create service requests
-        HttpRequest<?> request = HttpRequest.GET("admin/requests/download?jurisdiction_id=city.gov")
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=city.gov")
                 .header("Authorization", "Bearer token.text.here");
 
         authLogin();
@@ -794,6 +796,116 @@ public class RootControllerTest {
     }
 
     @Test
+    public void jurisdictionAdminCannotCreateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SUBTENANT"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("george.town");
+        createJurisdictionDTO.setName("City of Georgetown");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
+    public void tenantAdminCanCreateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-TENANT"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("george.town");
+        createJurisdictionDTO.setName("City of Georgetown");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+    }
+
+    @Test
+    public void systemAdminCanCreateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("louisville.city");
+        createJurisdictionDTO.setName("City of Louisville");
+        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        createJurisdictionDTO.setLogoMediaUrl("http://example.com/img/here");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+        Optional<JurisdictionDTO> optional = response.getBody(JurisdictionDTO.class);
+        assertTrue(optional.isPresent());
+        JurisdictionDTO jurisdictionDTO = optional.get();
+        assertEquals("louisville.city", jurisdictionDTO.getJurisdictionId());
+        assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
+        assertEquals("http://example.com/img/here", jurisdictionDTO.getLogoMediaUrl());
+
+    }
+
+    @Test
+    public void cannotCanCreateAJurisdictionWithUntrustedCSSColorValue() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("louisville.city");
+        createJurisdictionDTO.setName("City of Louisville");
+        createJurisdictionDTO.setPrimaryColor("<SCRIPT type=\"text/javascript\">\n" + "var adr = '../evil.php?cakemonster=' + escape(document.cookie);\n" + "</SCRIPT>");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(BAD_REQUEST, exception.getStatus());
+    }
+
+    @Test
+    public void canUpdateAJurisdiction() {
+        authLogin();
+        setAuthHasPermissionSuccessResponse(true, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+
+        CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
+        createJurisdictionDTO.setJurisdictionId("ogdenville.city");
+        createJurisdictionDTO.setName("City of Ogdenville");
+        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
+
+        HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+
+        // update
+        PatchJurisdictionDTO patchJurisdictionDTO = new PatchJurisdictionDTO();
+        patchJurisdictionDTO.setName("Ogdenville - America's Barley Basket");
+        patchJurisdictionDTO.setPrimaryColor("221 83% 53%");
+
+        request = HttpRequest.PATCH("/tenant-admin/jurisdictions/louisville.city?tenant_id=1", patchJurisdictionDTO)
+                .header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+        Optional<JurisdictionDTO> jurisdictionDTOOptional = response.getBody(JurisdictionDTO.class);
+        assertTrue(jurisdictionDTOOptional.isPresent());
+        JurisdictionDTO jurisdictionDTO = jurisdictionDTOOptional.get();
+        assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
+        assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
+    }
+
+    @Test
     public void getJurisdictionTest() {
         RemoteHost h = new RemoteHost("host1");
         Jurisdiction j = new Jurisdiction("1", 1L, "jurisdiction1", null);
@@ -804,10 +916,10 @@ public class RootControllerTest {
 
         HttpRequest<?> request = HttpRequest.GET("/config")
                 .header("host", "host1");
-        HttpResponse<JurisdictionInfoResponse> response = client.toBlocking()
-                .exchange(request, JurisdictionInfoResponse.class);
-        JurisdictionInfoResponse infoResponse = response.getBody().get();
-        assertEquals(infoResponse.getId(), "1");
+        HttpResponse<JurisdictionDTO> response = client.toBlocking()
+                .exchange(request, JurisdictionDTO.class);
+        JurisdictionDTO infoResponse = response.getBody().get();
+        assertEquals(infoResponse.getJurisdictionId(), "1");
         assertEquals(infoResponse.getName(), "jurisdiction1");
         // from application-test.yml's property `micronaut.http.services.auth.urls`
         assertEquals("http://localhost:8080", infoResponse.getUnityAuthUrl());
@@ -825,7 +937,7 @@ public class RootControllerTest {
         serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceDTO, Map.class);
-        HttpRequest<?> request = HttpRequest.POST("/admin/services", payload)
+        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services", payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, ServiceDTO[].class);
