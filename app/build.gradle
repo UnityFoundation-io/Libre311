@@ -73,7 +73,7 @@ micronaut {
     }
     // see https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/#_configuring_the_test_resources_plugin
     testResources {
-        enabled = true
+        enabled = false
     }
 }
 
