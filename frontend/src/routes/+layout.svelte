@@ -8,8 +8,6 @@
 	import '../app.pcss';
 
 	import MenuDrawer from '$lib/components/MenuDrawer.svelte';
-	import { Avatar } from 'stwui';
-	import { Dropdown } from 'stwui';
 
 	import {
 		asAsyncFailure,
@@ -20,11 +18,8 @@
 	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { recaptchaServiceFactory } from '$lib/services/RecaptchaService';
-	import {
-		unityAuthServiceFactory,
-		type UnityAuthService,
-		type UnityAuthServiceProps
-	} from '$lib/services/UnityAuth/UnityAuth';
+	import { type UnityAuthServiceProps } from '$lib/services/UnityAuth/UnityAuth';
+	import User from '$lib/components/User.svelte';
 
 	const mode: Mode = getModeFromEnv(import.meta.env);
 	const recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
@@ -33,7 +28,6 @@
 	};
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
-	let unityAuthService: UnityAuthService;
 
 	let open: boolean = false;
 
@@ -51,22 +45,9 @@
 		try {
 			const service = await libre311Factory(serviceProps);
 			contextProviderProps = asAsyncSuccess({ ...synchronousContextProviderProps, service });
-			unityAuthService = unityAuthServiceFactory(contextProviderProps.value.unityAuthServiceProps);
 		} catch (error) {
 			contextProviderProps = asAsyncFailure(error);
 		}
-	}
-
-	let isUserDropdownVisible: boolean = false;
-
-	function toggleDropdown() {
-		isUserDropdownVisible = !isUserDropdownVisible;
-	}
-
-	function logout() {
-		isUserDropdownVisible = false;
-		unityAuthService.logout();
-		alert('LOGGED OUT');
 	}
 
 	initLibre311ContextProps({
@@ -92,14 +73,7 @@
 				<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
 			</div>
 
-			<Dropdown bind:visible={isUserDropdownVisible}>
-				<button slot="trigger" on:click={toggleDropdown}>
-					<Avatar src="broken_image.png" />
-				</button>
-				<Dropdown.Items slot="items">
-					<Dropdown.Items.Item on:click={logout} label="Logout"></Dropdown.Items.Item>
-				</Dropdown.Items>
-			</Dropdown>
+			<User />
 		</header>
 		<main>
 			<MenuDrawer {open} handleClose={closeDrawer} />
