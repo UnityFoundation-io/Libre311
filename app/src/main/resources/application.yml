@@ -97,3 +97,8 @@ app:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
   safesearch:
     key: ${SAFESEARCH_KEY:`safesearchKey`}
+
+flyway:
+  datasources:
+    default:
+      enabled: true
