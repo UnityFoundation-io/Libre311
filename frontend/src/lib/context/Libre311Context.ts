@@ -29,6 +29,7 @@ export function createLibre311Context(props: Libre311ContextProviderProps) {
 	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
 
 	unityAuthService.subscribe('login', (args) => props.service.setAuthInfo(args));
+	unityAuthService.subscribe('logout', () => props.service.setAuthInfo(undefined));
 
 	const ctx: Libre311Context = {
 		...props,
