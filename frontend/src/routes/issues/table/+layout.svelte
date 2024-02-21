@@ -172,7 +172,12 @@
 							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
 						>
 							<div class="mx-3">
-								<Select name="select-4" placeholder="Priority:" multiple options={priorityOptions}>
+								<Select
+									name="select-priority"
+									placeholder="Priority:"
+									multiple
+									options={priorityOptions}
+								>
 									<Select.Options slot="options">
 										{#each priorityOptions as option}
 											<Select.Options.Option {option} />
