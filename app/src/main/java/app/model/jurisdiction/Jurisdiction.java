@@ -36,6 +36,12 @@ public class Jurisdiction {
     @NotNull
     private Long tenantId;
 
+    private String primaryColor;
+
+    private String primaryHoverColor;
+
+    private String logoMediaUrl;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
@@ -108,5 +114,29 @@ public class Jurisdiction {
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getPrimaryColor() {
+        return primaryColor;
+    }
+
+    public void setPrimaryColor(String primaryColor) {
+        this.primaryColor = primaryColor;
+    }
+
+    public String getPrimaryHoverColor() {
+        return primaryHoverColor;
+    }
+
+    public void setPrimaryHoverColor(String primaryHoverColor) {
+        this.primaryHoverColor = primaryHoverColor;
+    }
+
+    public String getLogoMediaUrl() {
+        return logoMediaUrl;
+    }
+
+    public void setLogoMediaUrl(String logoMediaUrl) {
+        this.logoMediaUrl = logoMediaUrl;
     }
 }

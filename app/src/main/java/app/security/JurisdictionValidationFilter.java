@@ -29,8 +29,8 @@ import reactor.core.scheduler.Schedulers;
 import java.util.List;
 import java.util.Map;
 
-@Filter(value = {"/api/services/**", "/api/requests/**", "/api/admin/**"})
-public class CustomHttpResponseFilter implements HttpServerFilter {
+@Filter(value = {"/api/services/**", "/api/requests/**", "/api/jurisdiction-admin/**"})
+public class JurisdictionValidationFilter implements HttpServerFilter {
 
     private static final Map<String, String> BAD_REQUEST_ERROR = Map.of(
             "code", "400",
@@ -44,7 +44,7 @@ public class CustomHttpResponseFilter implements HttpServerFilter {
 
     private final JurisdictionRepository jurisdictionRepository;
 
-    public CustomHttpResponseFilter(JurisdictionRepository jurisdictionRepository) {
+    public JurisdictionValidationFilter(JurisdictionRepository jurisdictionRepository) {
         this.jurisdictionRepository = jurisdictionRepository;
     }
 
