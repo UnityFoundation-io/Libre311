@@ -16,6 +16,11 @@
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
 	import type { ComponentEvents } from 'svelte';
+	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
+	import { slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
+	import { Select } from 'stwui';
+	import type { SelectOption } from 'stwui/types';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
@@ -23,7 +28,23 @@
 	const ctx = useServiceRequestsContext();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
+	let isSearchFiltersOpen: boolean = false;
 	let orderBy: string;
+
+	const priorityOptions: SelectOption[] = [
+		{
+			value: 'low',
+			label: 'Low'
+		},
+		{
+			value: 'medium',
+			label: 'Medium'
+		},
+		{
+			value: 'high',
+			label: 'High'
+		}
+	];
 
 	// 14% * 7 = 98%
 	const columns: TableColumn[] = [
@@ -105,6 +126,10 @@
 			ctx.applyServiceRequestParams({}, $page.url);
 		}
 	}
+
+	async function handleFunnelClick() {
+		isSearchFiltersOpen = !isSearchFiltersOpen;
+	}
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -133,9 +158,34 @@
 
 			<Card bordered={true} class="m-2">
 				<Card.Header slot="header" class="flex items-center justify-end py-3 text-lg font-bold">
-					<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
-						<Input.Leading slot="trailing" data={magnifingGlassIcon} />
-					</Input>
+					{#if !isSearchFiltersOpen}
+						<div
+							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
+							class="mx-3"
+						>
+							<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
+								<Input.Leading slot="trailing" data={magnifingGlassIcon} />
+							</Input>
+						</div>
+					{:else}
+						<div
+							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
+						>
+							<div class="mx-3">
+								<Select name="select-4" placeholder="Priority:" multiple options={priorityOptions}>
+									<Select.Options slot="options">
+										{#each priorityOptions as option}
+											<Select.Options.Option {option} />
+										{/each}
+									</Select.Options>
+								</Select>
+							</div>
+						</div>
+					{/if}
+
+					<button on:click={handleFunnelClick}>
+						<Funnel />
+					</button>
 				</Card.Header>
 				<Card.Content slot="content" class="p-0 sm:p-0">
 					<div class="issues-table-override">
