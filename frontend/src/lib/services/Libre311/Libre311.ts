@@ -512,7 +512,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 			const pagination: Pagination = {
 				offset: Number(res.headers['page-offset']),
 				pageNumber: Number(res.headers['page-pagenumber']),
-				size: Number(res.headers['page-totalsize']),
+				size: Number(res.headers['page-size']),
 				totalPages: Number(res.headers['page-totalpages']),
 				totalSize: Number(res.headers['page-totalsize'])
 			};
