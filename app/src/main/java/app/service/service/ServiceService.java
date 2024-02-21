@@ -89,13 +89,7 @@ public class ServiceService {
             }
         }
 
-        Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO.getGroupId(), jurisdiction);
-        if (serviceGroupOptional.isPresent()) {
-            service.setServiceGroup(serviceGroupOptional.get());
-        } else {
-            LOG.error("Group not found.");
-            return null;
-        }
+        if (groupDoesNotExists(serviceDTO.getGroupId(), jurisdiction, service)) return null;
 
         service.setJurisdiction(jurisdiction);
         service.setServiceCode(serviceDTO.getServiceCode());
@@ -122,13 +116,7 @@ public class ServiceService {
         }
 
         if (serviceDTO.getGroupId() != null) {
-            Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO.getGroupId(), service.getJurisdiction());
-            if (serviceGroupOptional.isPresent()) {
-                service.setServiceGroup(serviceGroupOptional.get());
-            } else {
-                LOG.error("Group not found.");
-                return null;
-            }
+            if (groupDoesNotExists(serviceDTO.getGroupId(), service.getJurisdiction(), service)) return null;
         }
 
         if (serviceDTO.getDescription() != null) {
@@ -148,6 +136,17 @@ public class ServiceService {
         }
 
         return new ServiceDTO(serviceRepository.update(service));
+    }
+
+    private boolean groupDoesNotExists(Long serviceDTO, Jurisdiction jurisdiction, Service service) {
+        Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO, jurisdiction);
+        if (serviceGroupOptional.isPresent()) {
+            service.setServiceGroup(serviceGroupOptional.get());
+        } else {
+            LOG.error("Group not found.");
+            return true;
+        }
+        return false;
     }
 
     private boolean serviceCodeAlreadyExists(String serviceCode, Jurisdiction jurisdiction) {
