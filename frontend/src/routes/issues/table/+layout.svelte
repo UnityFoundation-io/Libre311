@@ -132,8 +132,7 @@
 			</div>
 
 			<Card bordered={true} class="m-2">
-				<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
-					Card Header
+				<Card.Header slot="header" class="flex items-center justify-end py-3 text-lg font-bold">
 					<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
 						<Input.Leading slot="trailing" data={magnifingGlassIcon} />
 					</Input>
