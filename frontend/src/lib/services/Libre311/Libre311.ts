@@ -275,9 +275,14 @@ export type GetServiceRequestsParams =
 			pageNumber?: number;
 	  };
 
+const latLngTupleSchema = z.tuple([z.number(), z.number()]);
+
+type LatLngTuple = z.infer<typeof latLngTupleSchema>;
+
 const JurisdictionConfigSchema = z
 	.object({
-		jurisdiction_name: z.string()
+		jurisdiction_name: z.string(),
+		bounds: z.array(latLngTupleSchema).min(1)
 	})
 	.merge(HasJurisdictionIdSchema);
 
@@ -442,9 +447,11 @@ export class Libre311ServiceImpl implements Libre311Service {
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
 		// todo uncomment when /config endpoint exists code the jurisdiction_id
 		// const jurisdictionConfig = await getJurisdictionConfig();
-		const jurisdictionConfig = {
+		const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
+		const jurisdictionConfig: JurisdictionConfig = {
 			jurisdiction_id: 'town.gov',
-			jurisdiction_name: 'Fayetteville, AR'
+			jurisdiction_name: 'New Haven, CT',
+			bounds: jurisdictionBounds
 		};
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
 	}
