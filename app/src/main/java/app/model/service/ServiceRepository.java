@@ -30,5 +30,5 @@ public interface ServiceRepository extends PageableRepository<Service, Long> {
     Optional<Service> findByServiceCodeAndJurisdictionId(String serviceCode, String jurisdictionId);
     Optional<Service> findByIdAndJurisdictionId(Long id, String jurisdictionId);
     boolean existsByServiceCodeAndJurisdiction(String serviceCode, Jurisdiction jurisdiction);
-    List<Service> findByServiceGroup(ServiceGroup serviceGroup);
+    Long countByServiceGroup(ServiceGroup serviceGroup);
 }

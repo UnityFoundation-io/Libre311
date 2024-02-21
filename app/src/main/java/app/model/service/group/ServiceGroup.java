@@ -35,6 +35,11 @@ public class ServiceGroup {
     public ServiceGroup() {
     }
 
+    public ServiceGroup(String name, Jurisdiction jurisdiction) {
+        this.name = name;
+        this.jurisdiction = jurisdiction;
+    }
+
     public Long getId() {
         return id;
     }

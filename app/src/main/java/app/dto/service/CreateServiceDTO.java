@@ -17,6 +17,7 @@ package app.dto.service;
 import io.micronaut.core.annotation.Introspected;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Introspected
 public class CreateServiceDTO extends UpdateServiceDTO {
@@ -46,5 +47,17 @@ public class CreateServiceDTO extends UpdateServiceDTO {
     @Override
     public void setServiceCode(String serviceCode) {
         super.setServiceCode(serviceCode);
+    }
+
+    @NotNull
+    @Override
+    public Long getGroupId() {
+        return super.getGroupId();
+    }
+
+    @NotNull
+    @Override
+    public void setGroupId(Long groupId) {
+        super.setGroupId(groupId);
     }
 }

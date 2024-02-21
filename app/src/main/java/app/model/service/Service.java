@@ -56,7 +56,7 @@ public class Service {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ServiceGroup serviceGroup;
 
     public Service(String serviceName) {

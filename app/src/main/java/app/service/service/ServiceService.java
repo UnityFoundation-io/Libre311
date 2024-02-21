@@ -30,12 +30,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Optional;
 
 @Singleton
@@ -88,15 +88,15 @@ public class ServiceService {
                 return null;
             }
         }
-        if (serviceDTO.getGroupId() != null) {
-            Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO.getGroupId(), jurisdiction);
-            if (serviceGroupOptional.isPresent()) {
-                service.setServiceGroup(serviceGroupOptional.get());
-            } else {
-                LOG.error("Service Definition JSON format is invalid.");
-                return null;
-            }
+
+        Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO.getGroupId(), jurisdiction);
+        if (serviceGroupOptional.isPresent()) {
+            service.setServiceGroup(serviceGroupOptional.get());
+        } else {
+            LOG.error("Group not found.");
+            return null;
         }
+
         service.setJurisdiction(jurisdiction);
         service.setServiceCode(serviceDTO.getServiceCode());
         service.setServiceName(serviceDTO.getServiceName());
@@ -126,7 +126,7 @@ public class ServiceService {
             if (serviceGroupOptional.isPresent()) {
                 service.setServiceGroup(serviceGroupOptional.get());
             } else {
-                LOG.error("Service Definition JSON format is invalid.");
+                LOG.error("Group not found.");
                 return null;
             }
         }
@@ -213,16 +213,15 @@ public class ServiceService {
         return false;
     }
 
-    @Transactional
     public void deleteGroup(Long groupId) {
         Optional<ServiceGroup> groupOptional = serviceGroupRepository.findById(groupId);
         if (groupOptional.isPresent()) {
             ServiceGroup serviceGroup = groupOptional.get();
-            List<Service> servicesByGroup = serviceRepository.findByServiceGroup(serviceGroup);
-            servicesByGroup.forEach(service -> service.setServiceGroup(null));
-            serviceRepository.saveAll(servicesByGroup);
-            serviceGroupRepository.delete(serviceGroup);
+            if (serviceRepository.countByServiceGroup(serviceGroup) == 0) {
+                serviceGroupRepository.delete(serviceGroup);
+            }
+        } else {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Cannot delete Group with existing Service associations.");
         }
-
     }
 }
