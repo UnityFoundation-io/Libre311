@@ -15,11 +15,13 @@
 package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.service.group.ServiceGroup;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.repository.PageableRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -28,4 +30,5 @@ public interface ServiceRepository extends PageableRepository<Service, Long> {
     Optional<Service> findByServiceCodeAndJurisdictionId(String serviceCode, String jurisdictionId);
     Optional<Service> findByIdAndJurisdictionId(Long id, String jurisdictionId);
     boolean existsByServiceCodeAndJurisdiction(String serviceCode, Jurisdiction jurisdiction);
+    List<Service> findByServiceGroup(ServiceGroup serviceGroup);
 }

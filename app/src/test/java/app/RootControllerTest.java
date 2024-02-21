@@ -391,7 +391,7 @@ public class RootControllerTest {
         ));
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(serviceDefinition);
-        response = createService("BUS_STOP", "Bike Lane Obstruction", "Bike Lane", json, "city.gov");
+        response = createService("BUS_STOP", "Bike Lane Obstruction", "Bike Lane", json, "city.gov", null);
         assertEquals(HttpStatus.OK, response.getStatus());
         optional = response.getBody(ServiceDTO[].class);
         assertTrue(optional.isPresent());
@@ -490,7 +490,7 @@ public class RootControllerTest {
         ));
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(serviceDefinition);
-        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "Issues pertaining to bus stops", json, "city.gov");
+        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "Issues pertaining to bus stops", json, "city.gov", null);
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO[]> optional = response.getBody(ServiceDTO[].class);
         assertTrue(optional.isPresent());
@@ -669,7 +669,6 @@ public class RootControllerTest {
         assertEquals(1, serviceRequestDTOS.length);
     }
 
-    // create, read, update, delete groups
     @Test
     void canPerformCrudActionsOnServiceGroupIfAuthenticated() {
         HttpResponse<?> response;
@@ -717,27 +716,43 @@ public class RootControllerTest {
         assertEquals(OK, response.getStatus());
     }
 
+    @Test
+    void canAssociateAGroupToAService() {
+        HttpResponse<?> response;
+        HttpRequest<?> request;
+
+        authLogin();
+
+        // create
+        response = createGroup("Animal Control","city.gov");
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<GroupDTO[]> groupOptional = response.getBody(GroupDTO[].class);
+        assertTrue(groupOptional.isPresent());
+        GroupDTO[] postResponseGroupDTOS = groupOptional.get();
+        assertTrue(postResponseGroupDTOS.length > 0);
+        GroupDTO groupDTO = postResponseGroupDTOS[0];
+
+        response = createService("DISTRESSED_ANIMAL", "Animal in Distress", "Report animal in distress",
+                null, "city.gov", groupDTO.getId());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<ServiceDTO[]> serviceOptional = response.getBody(ServiceDTO[].class);
+        assertTrue(serviceOptional.isPresent());
+        ServiceDTO[] postResponseServiceDTOS = serviceOptional.get();
+        assertTrue(postResponseServiceDTOS.length > 0);
+
+        // delete
+        request = HttpRequest.DELETE("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=city.gov")
+                .header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, GroupDTO[].class);
+        assertEquals(OK, response.getStatus());
+    }
+
     private HttpResponse<?> createGroup(String name, String jurisdictionId) {
         CreateUpdateGroupDTO groupDTO = new CreateUpdateGroupDTO();
         groupDTO.setName(name);
         HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/groups?jurisdiction_id="+jurisdictionId, groupDTO)
                 .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, GroupDTO[].class);
-    }
-
-    private HttpResponse<?> createService(String code, String name, String jurisdictionId) {
-        return createService(code, name, null, null, jurisdictionId);
-    }
-
-    private HttpResponse<?> createService(String code, String name, String description, String serviceDefinitionJson, String jurisdictionId) {
-        CreateServiceDTO serviceDTO = new CreateServiceDTO();
-        serviceDTO.setServiceCode(code);
-        serviceDTO.setServiceName(name);
-        serviceDTO.setDescription(description);
-        serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
-        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, serviceDTO)
-                .header("Authorization", "Bearer token.text.here");
-        return client.toBlocking().exchange(request, ServiceDTO[].class);
     }
 
     @Test
@@ -979,21 +994,19 @@ public class RootControllerTest {
         assertEquals("http://localhost:8080", infoResponse.getUnityAuthUrl());
     }
 
-    private HttpResponse<?> createService(String code, String name) {
-        return createService(code, name, null, null);
+    private HttpResponse<?> createService(String code, String name, String jurisdictionId) {
+        return createService(code, name, null, null, jurisdictionId, null);
     }
 
-    private HttpResponse<?> createService(String code, String name, String description, String serviceDefinitionJson) {
+    private HttpResponse<?> createService(String code, String name, String description, String serviceDefinitionJson, String jurisdictionId, Long groupId) {
         CreateServiceDTO serviceDTO = new CreateServiceDTO();
         serviceDTO.setServiceCode(code);
         serviceDTO.setServiceName(name);
         serviceDTO.setDescription(description);
         serviceDTO.setServiceDefinitionJson(serviceDefinitionJson);
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map payload = objectMapper.convertValue(serviceDTO, Map.class);
-        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services", payload)
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+        serviceDTO.setGroupId(groupId);
+        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, serviceDTO)
+                .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, ServiceDTO[].class);
     }
 

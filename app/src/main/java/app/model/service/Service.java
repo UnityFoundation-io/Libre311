@@ -15,6 +15,7 @@
 package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.service.group.ServiceGroup;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -55,6 +56,8 @@ public class Service {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
 
+    @ManyToOne
+    private ServiceGroup serviceGroup;
 
     public Service(String serviceName) {
         this.serviceName = serviceName;
@@ -136,5 +139,13 @@ public class Service {
 
     public void addServiceRequest(ServiceRequest serviceRequest) {
         serviceRequests.add(serviceRequest);
+    }
+
+    public ServiceGroup getServiceGroup() {
+        return serviceGroup;
+    }
+
+    public void setServiceGroup(ServiceGroup serviceGroup) {
+        this.serviceGroup = serviceGroup;
     }
 }

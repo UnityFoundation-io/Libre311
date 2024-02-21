@@ -20,8 +20,11 @@ import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.repository.PageableRepository;
 
+import java.util.Optional;
+
 @Repository
 public interface ServiceGroupRepository extends PageableRepository<ServiceGroup, Long> {
     Page<ServiceGroup> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
     boolean existsByNameAndJurisdiction(String name, Jurisdiction jurisdiction);
+    Optional<ServiceGroup> findByIdAndJurisdiction(Long id, Jurisdiction jurisdiction);
 }

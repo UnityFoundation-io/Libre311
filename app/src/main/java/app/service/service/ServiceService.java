@@ -34,6 +34,8 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Singleton
@@ -86,6 +88,15 @@ public class ServiceService {
                 return null;
             }
         }
+        if (serviceDTO.getGroupId() != null) {
+            Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO.getGroupId(), jurisdiction);
+            if (serviceGroupOptional.isPresent()) {
+                service.setServiceGroup(serviceGroupOptional.get());
+            } else {
+                LOG.error("Service Definition JSON format is invalid.");
+                return null;
+            }
+        }
         service.setJurisdiction(jurisdiction);
         service.setServiceCode(serviceDTO.getServiceCode());
         service.setServiceName(serviceDTO.getServiceName());
@@ -108,6 +119,16 @@ public class ServiceService {
                 return null;
             }
             service.setServiceCode(serviceDTO.getServiceCode());
+        }
+
+        if (serviceDTO.getGroupId() != null) {
+            Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO.getGroupId(), service.getJurisdiction());
+            if (serviceGroupOptional.isPresent()) {
+                service.setServiceGroup(serviceGroupOptional.get());
+            } else {
+                LOG.error("Service Definition JSON format is invalid.");
+                return null;
+            }
         }
 
         if (serviceDTO.getDescription() != null) {
@@ -192,7 +213,16 @@ public class ServiceService {
         return false;
     }
 
+    @Transactional
     public void deleteGroup(Long groupId) {
-        serviceGroupRepository.deleteById(groupId);
+        Optional<ServiceGroup> groupOptional = serviceGroupRepository.findById(groupId);
+        if (groupOptional.isPresent()) {
+            ServiceGroup serviceGroup = groupOptional.get();
+            List<Service> servicesByGroup = serviceRepository.findByServiceGroup(serviceGroup);
+            servicesByGroup.forEach(service -> service.setServiceGroup(null));
+            serviceRepository.saveAll(servicesByGroup);
+            serviceGroupRepository.delete(serviceGroup);
+        }
+
     }
 }
