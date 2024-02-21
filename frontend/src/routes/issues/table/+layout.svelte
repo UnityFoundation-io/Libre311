@@ -46,6 +46,17 @@
 		}
 	];
 
+	const statusOptions: SelectOption[] = [
+		{
+			value: 'open',
+			label: 'Open'
+		},
+		{
+			value: 'closed',
+			label: 'Closed'
+		}
+	];
+
 	// 14% * 7 = 98%
 	const columns: TableColumn[] = [
 		{
@@ -170,8 +181,9 @@
 					{:else}
 						<div
 							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
+							class="mx-3 flex"
 						>
-							<div class="mx-3">
+							<div class="mx-1">
 								<Select
 									name="select-priority"
 									placeholder="Priority:"
@@ -180,6 +192,16 @@
 								>
 									<Select.Options slot="options">
 										{#each priorityOptions as option}
+											<Select.Options.Option {option} />
+										{/each}
+									</Select.Options>
+								</Select>
+							</div>
+
+							<div class="mx-1">
+								<Select name="select-status" placeholder="Status:" multiple options={statusOptions}>
+									<Select.Options slot="options">
+										{#each statusOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
 									</Select.Options>
