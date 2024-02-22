@@ -1,9 +1,13 @@
+<script lang="ts" context="module">
+	let cachedServiceList: GetServiceListResponse | undefined = undefined;
+</script>
+
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import { Badge, Card, DatePicker, Input, Table } from 'stwui';
 	import { page } from '$app/stores';
-	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import {
 		useSelectedServiceRequestStore,
 		useServiceRequestsContext
@@ -11,6 +15,8 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
 	import type {
+		GetServiceListResponse,
+		ServiceCode,
 		ServiceRequest,
 		ServiceRequestId,
 		ServiceRequestStatus
@@ -18,20 +24,30 @@
 	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
-	import type { ComponentEvents } from 'svelte';
+	import { onMount, type ComponentEvents } from 'svelte';
 	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { Select } from 'stwui';
 	import { columns, priorityOptions, statusOptions } from './table';
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon';
+	import {
+		ASYNC_IN_PROGRESS,
+		asAsyncSuccess,
+		type AsyncResult,
+		asAsyncFailure
+	} from '$lib/services/http';
+	import type { SelectOption } from 'stwui/types';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
 	const ctx = useServiceRequestsContext();
+	const libre311 = useLibre311Service();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
+	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
+	let selectedServiceCode: ServiceCode | undefined;
 	let isSearchFiltersOpen: boolean = false;
 	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
@@ -57,6 +73,24 @@
 			: 'item-id';
 	}
 
+	function fetchServiceList() {
+		if (cachedServiceList) {
+			serviceList = asAsyncSuccess(cachedServiceList);
+			return;
+		}
+		libre311
+			.getServiceList()
+			.then((res) => {
+				cachedServiceList = res;
+				serviceList = asAsyncSuccess(res);
+			})
+			.catch((err) => (serviceList = asAsyncFailure(err)));
+	}
+
+	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
+		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
+	}
+
 	async function handleSearchInput(e: ComponentEvents<any>['input']) {
 		const target = e.target as HTMLInputElement;
 
@@ -78,14 +112,16 @@
 	}
 
 	async function handleFilterInput(
+		selectedServiceCode: ServiceCode | undefined,
 		statusInput: ServiceRequestStatus[],
 		startDate: Date,
 		endDate: Date
 	) {
-		if (statusInput || startDate || endDate) {
+		if (selectedServiceCode || statusInput || startDate || endDate) {
 			ctx.applyServiceRequestParams(
 				{
-					status: statusInput ?? '',
+					serviceCode: selectedServiceCode ?? '',
+					status: statusInput ?? [''],
 					startDate: startDate?.toISOString() ?? '',
 					endDate: endDate?.toISOString() ?? ''
 				},
@@ -96,7 +132,9 @@
 		}
 	}
 
-	$: handleFilterInput(statusInput, startDate, endDate);
+	onMount(fetchServiceList);
+
+	$: handleFilterInput(selectedServiceCode, statusInput, startDate, endDate);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -174,6 +212,27 @@
 									</Select.Options>
 								</Select>
 							</div>
+
+							{#if serviceList.type === 'success'}
+								{@const selectOptions = createSelectOptions(serviceList.value)}
+								<div class="mx-1">
+									<Select
+										bind:value={selectedServiceCode}
+										name="select-1"
+										placeholder="Request Type"
+										on:change={() => {}}
+										options={selectOptions}
+										class="relative my-4"
+									>
+										<Select.Label slot="label">Service</Select.Label>
+										<Select.Options slot="options">
+											{#each selectOptions as option}
+												<Select.Options.Option {option} />
+											{/each}
+										</Select.Options>
+									</Select>
+								</div>
+							{/if}
 
 							<div class="mx-1">
 								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
