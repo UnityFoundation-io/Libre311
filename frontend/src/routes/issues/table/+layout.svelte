@@ -77,14 +77,18 @@
 		isSearchFiltersOpen = !isSearchFiltersOpen;
 	}
 
-	async function handleStatusInput(statusInput: ServiceRequestStatus[]) {
-		ctx.applyServiceRequestParams({ status: statusInput }, $page.url);
-	}
-
-	async function handleDateInput(startDate: Date, endDate: Date) {
-		if (startDate || endDate) {
+	async function handleFilterInput(
+		statusInput: ServiceRequestStatus[],
+		startDate: Date,
+		endDate: Date
+	) {
+		if (statusInput || startDate || endDate) {
 			ctx.applyServiceRequestParams(
-				{ startDate: startDate?.toISOString() ?? '', endDate: endDate?.toISOString() ?? '' },
+				{
+					status: statusInput ?? '',
+					startDate: startDate?.toISOString() ?? '',
+					endDate: endDate?.toISOString() ?? ''
+				},
 				$page.url
 			);
 		} else {
@@ -92,8 +96,7 @@
 		}
 	}
 
-	$: handleStatusInput(statusInput);
-	$: handleDateInput(startDate, endDate);
+	$: handleFilterInput(statusInput, startDate, endDate);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
