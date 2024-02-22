@@ -73,18 +73,8 @@ public class JurisdictionAdminController {
     @Get(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_VIEW_SYSTEM, LIBRE311_ADMIN_VIEW_TENANT, LIBRE311_ADMIN_VIEW_SUBTENANT})
-    public HttpResponse<List<GroupDTO>> indexGroups(@Valid Pageable pageable, @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        Page<GroupDTO> groupDTOPage = serviceService.getPageableGroups(pageable, jurisdiction_id);
-
-        return HttpResponse.ok(groupDTOPage.getContent())
-                .headers(Map.of(
-                        "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
-                        "page-TotalSize", String.valueOf(groupDTOPage.getTotalSize()),
-                        "page-TotalPages", String.valueOf(groupDTOPage.getTotalPages()),
-                        "page-PageNumber", String.valueOf(groupDTOPage.getPageNumber()),
-                        "page-Offset", String.valueOf(groupDTOPage.getOffset()),
-                        "page-Size", String.valueOf(groupDTOPage.getSize())
-                ));
+    public Page<GroupDTO> indexGroups(@Valid Pageable pageable, @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceService.getPageableGroups(pageable, jurisdiction_id);
     }
 
     @Post(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })
