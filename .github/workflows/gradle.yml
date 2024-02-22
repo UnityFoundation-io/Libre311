@@ -57,14 +57,6 @@ jobs:
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
           arguments: 'app:build'
-      - name: Build with Gradle - PostgreSQL Datasource
-        if: ${{ success() }}
-        env:
-          LIBRE311_DATABASE_DEPENDENCY: org.postgresql:postgresql:42.4.2
-          LIBRE311_DB_TYPE: postgres
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: 'app:build'
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v3
         if: always()
