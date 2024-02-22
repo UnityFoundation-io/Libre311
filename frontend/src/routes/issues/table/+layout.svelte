@@ -81,25 +81,21 @@
 		ctx.applyServiceRequestParams({ status: statusInput }, $page.url);
 	}
 
-	async function handleStartDateInput(date: Date) {
-		if (date) {
-			ctx.applyServiceRequestParams({ startDate: date.toISOString() }, $page.url);
-		} else {
-			ctx.applyServiceRequestParams({}, $page.url);
-		}
-	}
+	async function handleDateInput(startDate: Date, endDate: Date) {
+		console.log(startDate, endDate);
 
-	async function handleEndDateInput(date: Date) {
-		if (date) {
-			ctx.applyServiceRequestParams({ endDate: date.toISOString() }, $page.url);
+		if (startDate || endDate) {
+			ctx.applyServiceRequestParams(
+				{ startDate: startDate?.toISOString() ?? '', endDate: endDate?.toISOString() ?? '' },
+				$page.url
+			);
 		} else {
 			ctx.applyServiceRequestParams({}, $page.url);
 		}
 	}
 
 	$: handleStatusInput(statusInput);
-	$: handleStartDateInput(startDate);
-	$: handleEndDateInput(endDate);
+	$: handleDateInput(startDate, endDate);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
