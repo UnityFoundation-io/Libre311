@@ -2,7 +2,6 @@
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import { Badge, Card, Input, Table } from 'stwui';
-	import type { TableColumn } from 'stwui/types';
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import {
@@ -24,7 +23,7 @@
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { Select } from 'stwui';
-	import type { SelectOption } from 'stwui/types';
+	import { columns, priorityOptions, statusOptions } from './table';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
@@ -35,78 +34,6 @@
 	let isSearchFiltersOpen: boolean = false;
 	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
-
-	const priorityOptions: SelectOption[] = [
-		{
-			value: 'low',
-			label: 'Low'
-		},
-		{
-			value: 'medium',
-			label: 'Medium'
-		},
-		{
-			value: 'high',
-			label: 'High'
-		}
-	];
-
-	const statusOptions: SelectOption[] = [
-		{
-			value: 'open',
-			label: 'Open'
-		},
-		{
-			value: 'closed',
-			label: 'Closed'
-		}
-	];
-
-	// 14% * 7 = 98%
-	const columns: TableColumn[] = [
-		{
-			column: 'issue_id',
-			label: 'Issue ID',
-			placement: 'center',
-			class: 'w-[14%]'
-		},
-		{
-			column: 'service_name',
-			label: 'Service Name',
-			placement: 'center',
-			class: 'w-[14%]'
-		},
-		{
-			column: 'status',
-			label: 'Status',
-			placement: 'center',
-			class: 'w-[14%]'
-		},
-		{
-			column: 'address',
-			label: 'Address',
-			placement: 'center',
-			class: 'hidden xl:table-cell w-[14%]'
-		},
-		{
-			column: 'created_at',
-			label: 'Created',
-			placement: 'center',
-			class: 'hidden lg:table-cell w-[14%]'
-		},
-		{
-			column: 'last_updated',
-			label: 'Last Updated',
-			placement: 'center',
-			class: 'hidden lg:table-cell w-[14%]'
-		},
-		{
-			column: 'expected_completion',
-			label: 'Expected Completion',
-			placement: 'center',
-			class: 'hidden xl:table-cell w-[14%]'
-		}
-	];
 
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(`/issues/table/${service_request_id}`);
