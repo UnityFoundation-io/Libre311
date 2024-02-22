@@ -28,3 +28,11 @@ micronaut:
 ---
 app:
   service-id: ${LIBRE311_SERVICE_ID}
+
+datasources:
+  default:
+    url: jdbc:mysql://localhost:3306/libre311?allowPublicKeyRetrieval=true&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: test
+    db-type: mysql
