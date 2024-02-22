@@ -82,8 +82,6 @@
 	}
 
 	async function handleDateInput(startDate: Date, endDate: Date) {
-		console.log(startDate, endDate);
-
 		if (startDate || endDate) {
 			ctx.applyServiceRequestParams(
 				{ startDate: startDate?.toISOString() ?? '', endDate: endDate?.toISOString() ?? '' },
