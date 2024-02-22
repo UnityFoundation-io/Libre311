@@ -11,7 +11,11 @@
 	} from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
-	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
+	import type {
+		ServiceRequest,
+		ServiceRequestId,
+		ServiceRequestStatus
+	} from '$lib/services/Libre311/Libre311';
 	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
@@ -29,6 +33,7 @@
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
 	let isSearchFiltersOpen: boolean = false;
+	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
 
 	const priorityOptions: SelectOption[] = [
@@ -141,6 +146,12 @@
 	async function handleFunnelClick() {
 		isSearchFiltersOpen = !isSearchFiltersOpen;
 	}
+
+	async function handleStatusInput(statusInput: ServiceRequestStatus[]) {
+		ctx.applyServiceRequestParams({ status: statusInput }, $page.url);
+	}
+
+	$: handleStatusInput(statusInput);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -199,7 +210,13 @@
 							</div>
 
 							<div class="mx-1">
-								<Select name="select-status" placeholder="Status:" multiple options={statusOptions}>
+								<Select
+									name="select-status"
+									placeholder="Status:"
+									multiple
+									options={statusOptions}
+									bind:value={statusInput}
+								>
 									<Select.Options slot="options">
 										{#each statusOptions as option}
 											<Select.Options.Option {option} />
