@@ -15,8 +15,14 @@
 package app.dto.jurisdiction;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.MapCoordinatePair;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Introspected
 public class JurisdictionDTO {
@@ -42,6 +48,8 @@ public class JurisdictionDTO {
     @JsonProperty("auth_base_url")
     private String unityAuthUrl;
 
+    private List<Map> bounds;
+
     public JurisdictionDTO() {
     }
 
@@ -57,6 +65,9 @@ public class JurisdictionDTO {
         this.primaryColor = jurisdiction.getPrimaryColor();
         this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
+        this.bounds = jurisdiction.getBounds().stream()
+                .map((Function<MapCoordinatePair, Map>) mapCoordinatePair -> Map.of(mapCoordinatePair.getLatitude(), mapCoordinatePair.getLongitude()))
+                .collect(Collectors.toList());
     }
 
     public String getJurisdictionId() {
@@ -113,5 +124,13 @@ public class JurisdictionDTO {
 
     public void setUnityAuthUrl(String unityAuthUrl) {
         this.unityAuthUrl = unityAuthUrl;
+    }
+
+    public List<Map> getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(List<Map> bounds) {
+        this.bounds = bounds;
     }
 }

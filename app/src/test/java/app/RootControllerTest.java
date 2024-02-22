@@ -24,6 +24,7 @@ import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
+import app.model.jurisdiction.MapCoordinatePair;
 import app.model.jurisdiction.RemoteHost;
 import app.model.jurisdictionuser.JurisdictionUser;
 import app.model.jurisdictionuser.JurisdictionUserRepository;
@@ -908,9 +909,12 @@ public class RootControllerTest {
 
     @Test
     public void getJurisdictionTest() {
-        RemoteHost h = new RemoteHost("host1");
         Jurisdiction j = new Jurisdiction("1", 1L, "jurisdiction1", null);
+        MapCoordinatePair coordinatePair = new MapCoordinatePair(41.31742721517005, -72.93918211751856);
+        coordinatePair.setJurisdiction(j);
+        RemoteHost h = new RemoteHost("host1");
         h.setJurisdiction(j);
+        j.getBounds().add(coordinatePair);
         j.getRemoteHosts().add(h);
         jurisdictionRepository.save(j);
         authLogin();
@@ -924,6 +928,8 @@ public class RootControllerTest {
         assertEquals(infoResponse.getName(), "jurisdiction1");
         // from application-test.yml's property `micronaut.http.services.auth.urls`
         assertEquals("http://localhost:8080", infoResponse.getUnityAuthUrl());
+        assertNotNull(infoResponse.getBounds());
+        assertFalse(infoResponse.getBounds().isEmpty());
     }
 
     private HttpResponse<?> createService(String code, String name) {

@@ -44,6 +44,10 @@ public class Jurisdiction {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<MapCoordinatePair> bounds = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
@@ -138,5 +142,13 @@ public class Jurisdiction {
 
     public void setLogoMediaUrl(String logoMediaUrl) {
         this.logoMediaUrl = logoMediaUrl;
+    }
+
+    public Set<MapCoordinatePair> getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(Set<MapCoordinatePair> bounds) {
+        this.bounds = bounds;
     }
 }
