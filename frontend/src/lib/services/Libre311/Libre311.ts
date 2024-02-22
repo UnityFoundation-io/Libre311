@@ -420,6 +420,7 @@ export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsPa
 		queryParams.append('page', `${params.pageNumber ?? 0}`);
 		// TODO: apply other query filters
 		queryParams.append('status', params.status?.join(',') ?? '');
+		queryParams.append('start_date', params.startDate ?? '');
 	}
 	return queryParams;
 }

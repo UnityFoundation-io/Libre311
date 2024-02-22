@@ -1,7 +1,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import { Badge, Card, Input, Table } from 'stwui';
+	import { Badge, Card, DatePicker, Input, Table } from 'stwui';
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import {
@@ -24,6 +24,7 @@
 	import { quintOut } from 'svelte/easing';
 	import { Select } from 'stwui';
 	import { columns, priorityOptions, statusOptions } from './table';
+	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
@@ -34,6 +35,7 @@
 	let isSearchFiltersOpen: boolean = false;
 	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
+	let startDate: Date;
 
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(`/issues/table/${service_request_id}`);
@@ -78,7 +80,17 @@
 		ctx.applyServiceRequestParams({ status: statusInput }, $page.url);
 	}
 
+	async function handleStartDateInput(date: Date) {
+		if (date) {
+			console.log(date);
+			ctx.applyServiceRequestParams({ startDate: date.toISOString() }, $page.url);
+		} else {
+			ctx.applyServiceRequestParams({}, $page.url);
+		}
+	}
+
 	$: handleStatusInput(statusInput);
+	$: handleStartDateInput(startDate);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -106,7 +118,10 @@
 			</div>
 
 			<Card bordered={true} class="m-2">
-				<Card.Header slot="header" class="flex items-center justify-end py-3 text-lg font-bold">
+				<Card.Header
+					slot="header"
+					class="flex h-24 items-center justify-end py-3 text-lg font-bold"
+				>
 					{#if !isSearchFiltersOpen}
 						<div
 							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
@@ -119,7 +134,7 @@
 					{:else}
 						<div
 							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
-							class="mx-3 flex"
+							class="mx-3 flex items-center"
 						>
 							<div class="mx-1">
 								<Select
@@ -128,6 +143,7 @@
 									multiple
 									options={priorityOptions}
 								>
+									<Select.Label slot="label">Status</Select.Label>
 									<Select.Options slot="options">
 										{#each priorityOptions as option}
 											<Select.Options.Option {option} />
@@ -144,12 +160,20 @@
 									options={statusOptions}
 									bind:value={statusInput}
 								>
+									<Select.Label slot="label">Priority</Select.Label>
 									<Select.Options slot="options">
 										{#each statusOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
 									</Select.Options>
 								</Select>
+							</div>
+
+							<div class="mx-1">
+								<DatePicker name="datetime" allowClear bind:value={startDate}>
+									<DatePicker.Label slot="label">Start Date</DatePicker.Label>
+									<DatePicker.Leading slot="leading" data={calendarIcon} />
+								</DatePicker>
 							</div>
 						</div>
 					{/if}
