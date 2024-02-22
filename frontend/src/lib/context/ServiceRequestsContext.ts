@@ -41,7 +41,7 @@ function toServiceRequestParams(searchParams: URLSearchParams) {
 		params.serviceCode = searchParams.get('serviceCode') ?? undefined;
 	if (searchParams.get('start_date'))
 		params.startDate = searchParams.get('start_date') ?? undefined;
-	if (searchParams.get('endDate')) params.endDate = searchParams.get('endDate') ?? undefined;
+	if (searchParams.get('end_date')) params.endDate = searchParams.get('end_date') ?? undefined;
 	// todo validate format
 	if (searchParams.get('status'))
 		params.status = searchParams.get('status')?.split(',') ?? undefined;

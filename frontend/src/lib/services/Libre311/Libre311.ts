@@ -421,6 +421,7 @@ export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsPa
 		// TODO: apply other query filters
 		queryParams.append('status', params.status?.join(',') ?? '');
 		queryParams.append('start_date', params.startDate ?? '');
+		queryParams.append('end_date', params.endDate ?? '');
 	}
 	return queryParams;
 }

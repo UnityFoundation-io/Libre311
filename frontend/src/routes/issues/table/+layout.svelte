@@ -36,6 +36,7 @@
 	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
 	let startDate: Date;
+	let endDate: Date;
 
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(`/issues/table/${service_request_id}`);
@@ -82,8 +83,15 @@
 
 	async function handleStartDateInput(date: Date) {
 		if (date) {
-			console.log(date);
 			ctx.applyServiceRequestParams({ startDate: date.toISOString() }, $page.url);
+		} else {
+			ctx.applyServiceRequestParams({}, $page.url);
+		}
+	}
+
+	async function handleEndDateInput(date: Date) {
+		if (date) {
+			ctx.applyServiceRequestParams({ endDate: date.toISOString() }, $page.url);
 		} else {
 			ctx.applyServiceRequestParams({}, $page.url);
 		}
@@ -91,6 +99,7 @@
 
 	$: handleStatusInput(statusInput);
 	$: handleStartDateInput(startDate);
+	$: handleEndDateInput(endDate);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -170,8 +179,15 @@
 							</div>
 
 							<div class="mx-1">
-								<DatePicker name="datetime" allowClear bind:value={startDate}>
+								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
 									<DatePicker.Label slot="label">Start Date</DatePicker.Label>
+									<DatePicker.Leading slot="leading" data={calendarIcon} />
+								</DatePicker>
+							</div>
+
+							<div class="mx-1">
+								<DatePicker name="end-datetime" allowClear bind:value={endDate}>
+									<DatePicker.Label slot="label">End Date</DatePicker.Label>
 									<DatePicker.Leading slot="leading" data={calendarIcon} />
 								</DatePicker>
 							</div>
