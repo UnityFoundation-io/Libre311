@@ -41,4 +41,4 @@ datasources:
 test-resources:
   containers:
     mysql:
-      image-name: mysql:8.2
+      image-name: mysql:8.0
