@@ -117,10 +117,8 @@ public class ServiceRequestService {
         boolean latLongProvided = StringUtils.hasText(serviceRequestDTO.getLatitude()) &&
                 StringUtils.hasText(serviceRequestDTO.getLongitude());
 
-        if (!latLongProvided &&
-                StringUtils.isEmpty(serviceRequestDTO.getAddressString()) &&
-                StringUtils.isEmpty(serviceRequestDTO.getAddressId())) {
-            LOG.error("Address or lat/long not provided.");
+        if (!latLongProvided) {
+            LOG.error("lat/long not provided.");
             return null; // todo throw exception
         }
 
