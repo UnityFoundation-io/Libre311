@@ -45,25 +45,8 @@ dependencies {
     implementation('com.opencsv:opencsv:5.7.1')
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
-
-    String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
-
-    if (databaseSelection != null) {
-        databaseSelection.split(',').each {part ->
-            runtimeOnly(part)
-        }
-    } else {
-        runtimeOnly("com.h2database:h2")
-    }
-
-    // apply database specific dependency for flyway.  None needed for H2.
-    String databaseType = System.getenv("LIBRE311_DB_TYPE")
-    if (databaseType == "mysql"){
-        runtimeOnly("org.flywaydb:flyway-mysql")
-    }
-    else if (databaseType == "postgresql"){
-        runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    }
+    runtimeOnly("org.flywaydb:flyway-mysql")
+    runtimeOnly("mysql:mysql-connector-java:8.0.31")
 }
 
 application {
