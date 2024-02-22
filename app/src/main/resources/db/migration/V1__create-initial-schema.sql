@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS jurisdiction_user (
     jurisdiction_id VARCHAR(255) NOT NULL,
     isUserAdmin BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES app_users(id) ON DELETE CASCADE,
-    FOREIGN KEY (jurisdiction_id) REFERENCES jurisdictions(id)
+    FOREIGN KEY (jurisdiction_id) REFERENCES jurisdictions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS services (
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS services (
     description TEXT,
     metadata BOOLEAN DEFAULT FALSE,
     type VARCHAR(255),
-    FOREIGN KEY (jurisdiction_id) REFERENCES jurisdictions(id)
+    FOREIGN KEY (jurisdiction_id) REFERENCES jurisdictions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS service_requests (
@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS service_requests (
     closed_date TIMESTAMP,
     date_created TIMESTAMP NOT NULL,
     date_updated TIMESTAMP NOT NULL,
-    FOREIGN KEY (services_id) REFERENCES services(id),
-    FOREIGN KEY (jurisdiction_id) REFERENCES jurisdictions(id)
+    FOREIGN KEY (services_id) REFERENCES services(id) ON DELETE CASCADE,
+    FOREIGN KEY (jurisdiction_id) REFERENCES jurisdictions(id) ON DELETE CASCADE
 );
 
 
