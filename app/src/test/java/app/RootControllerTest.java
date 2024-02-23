@@ -916,7 +916,7 @@ public class RootControllerTest {
         authLogin();
 
         HttpRequest<?> request = HttpRequest.GET("/config")
-                .header("host", "host1");
+                .header("referer", "http://host1");
         HttpResponse<JurisdictionDTO> response = client.toBlocking()
                 .exchange(request, JurisdictionDTO.class);
         JurisdictionDTO infoResponse = response.getBody().get();
