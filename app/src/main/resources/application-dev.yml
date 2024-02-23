@@ -36,3 +36,9 @@ datasources:
     username: root
     password: test
     db-type: mysql
+
+
+flyway:
+  datasources:
+    default:
+      baseline-on-migrate: true
