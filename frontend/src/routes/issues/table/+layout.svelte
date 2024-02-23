@@ -27,7 +27,6 @@
 	import { onMount, type ComponentEvents } from 'svelte';
 	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
 	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
 	import { Select } from 'stwui';
 	import { columns, priorityOptions, statusOptions } from './table';
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon';
@@ -166,18 +165,13 @@
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
-						<div
-							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
-						>
+						<div transition:slide|local={{ duration: 500 }}>
 							<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
 								<Input.Leading slot="trailing" data={magnifingGlassIcon} />
 							</Input>
 						</div>
 					{:else}
-						<div
-							class="flex flex-wrap justify-end"
-							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
-						>
+						<div class="flex flex-wrap justify-end" transition:slide|local={{ duration: 500 }}>
 							<div class="m-1">
 								<Select
 									name="select-priority"
