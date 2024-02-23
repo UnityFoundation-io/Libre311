@@ -175,7 +175,7 @@
 						</div>
 					{:else}
 						<div
-							class="flex flex-wrap"
+							class="flex flex-wrap justify-end"
 							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
 						>
 							<div class="m-1">
@@ -213,7 +213,7 @@
 
 							{#if serviceList.type === 'success'}
 								{@const selectOptions = createSelectOptions(serviceList.value)}
-								<div class="m-1">
+								<div class="m-1 min-w-52">
 									<Select
 										bind:value={selectedServiceCode}
 										name="select-1"
