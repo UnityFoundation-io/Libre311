@@ -15,12 +15,12 @@
 package app.dto.jurisdiction;
 
 import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.MapCoordinatePair;
+import app.model.jurisdiction.LatLong;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,7 +48,7 @@ public class JurisdictionDTO {
     @JsonProperty("auth_base_url")
     private String unityAuthUrl;
 
-    private List<Map> bounds;
+    private Set<Map> bounds;
 
     public JurisdictionDTO() {
     }
@@ -66,8 +66,10 @@ public class JurisdictionDTO {
         this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
         this.bounds = jurisdiction.getBounds().stream()
-                .map((Function<MapCoordinatePair, Map>) mapCoordinatePair -> Map.of(mapCoordinatePair.getLatitude(), mapCoordinatePair.getLongitude()))
-                .collect(Collectors.toList());
+                .map((Function<LatLong, Map>) latLong ->
+                        Map.of("latitude", latLong.getLatitude(),
+                                "longitude", latLong.getLongitude()))
+                .collect(Collectors.toSet());
     }
 
     public String getJurisdictionId() {
@@ -126,11 +128,11 @@ public class JurisdictionDTO {
         this.unityAuthUrl = unityAuthUrl;
     }
 
-    public List<Map> getBounds() {
+    public Set<Map> getBounds() {
         return bounds;
     }
 
-    public void setBounds(List<Map> bounds) {
+    public void setBounds(Set<Map> bounds) {
         this.bounds = bounds;
     }
 }

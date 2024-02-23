@@ -19,6 +19,7 @@ import io.micronaut.core.annotation.Introspected;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
+import java.util.Set;
 
 @Introspected
 public class CreateJurisdictionDTO {
@@ -40,6 +41,8 @@ public class CreateJurisdictionDTO {
 
     @JsonProperty("logo_media_url")
     private String logoMediaUrl;
+
+    private Set<LatLongDTO> bounds;
 
     public CreateJurisdictionDTO() {
     }
@@ -82,5 +85,13 @@ public class CreateJurisdictionDTO {
 
     public void setLogoMediaUrl(String logoMediaUrl) {
         this.logoMediaUrl = logoMediaUrl;
+    }
+
+    public Set<LatLongDTO> getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(Set<LatLongDTO> bounds) {
+        this.bounds = bounds;
     }
 }

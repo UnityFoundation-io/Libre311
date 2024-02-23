@@ -17,6 +17,7 @@ package app;
 import app.dto.discovery.DiscoveryDTO;
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
+import app.dto.jurisdiction.LatLongDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
@@ -24,7 +25,7 @@ import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
-import app.model.jurisdiction.MapCoordinatePair;
+import app.model.jurisdiction.LatLong;
 import app.model.jurisdiction.RemoteHost;
 import app.model.jurisdictionuser.JurisdictionUser;
 import app.model.jurisdictionuser.JurisdictionUserRepository;
@@ -62,10 +63,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.*;
@@ -884,6 +882,9 @@ public class RootControllerTest {
         createJurisdictionDTO.setJurisdictionId("ogdenville.city");
         createJurisdictionDTO.setName("City of Ogdenville");
         createJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        createJurisdictionDTO.setBounds(Set.of(
+                new LatLongDTO(41.31742721517005, -72.93918211751856),
+                new LatLongDTO(41.332810, -72.920166)));
 
         HttpRequest<?> request = HttpRequest.POST("/tenant-admin/jurisdictions?tenant_id=1", createJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
@@ -891,27 +892,35 @@ public class RootControllerTest {
         HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
         assertEquals(OK, response.getStatus());
 
+        Optional<JurisdictionDTO> optional = response.getBody(JurisdictionDTO.class);
+        assertTrue(optional.isPresent());
+        JurisdictionDTO jurisdictionDTO = optional.get();
+        assertFalse(jurisdictionDTO.getBounds().isEmpty());
+
         // update
         PatchJurisdictionDTO patchJurisdictionDTO = new PatchJurisdictionDTO();
         patchJurisdictionDTO.setName("Ogdenville - America's Barley Basket");
         patchJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        patchJurisdictionDTO.setBounds(Set.of(
+                new LatLongDTO(41.31742721517005, -72.93918211751856)));
 
-        request = HttpRequest.PATCH("/tenant-admin/jurisdictions/louisville.city?tenant_id=1", patchJurisdictionDTO)
+        request = HttpRequest.PATCH("/tenant-admin/jurisdictions/ogdenville.city?tenant_id=1", patchJurisdictionDTO)
                 .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, JurisdictionDTO.class);
         assertEquals(OK, response.getStatus());
         Optional<JurisdictionDTO> jurisdictionDTOOptional = response.getBody(JurisdictionDTO.class);
         assertTrue(jurisdictionDTOOptional.isPresent());
-        JurisdictionDTO jurisdictionDTO = jurisdictionDTOOptional.get();
+        jurisdictionDTO = jurisdictionDTOOptional.get();
         assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
         assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
+        assertFalse(jurisdictionDTO.getBounds().isEmpty());
+        assertEquals(1, jurisdictionDTO.getBounds().size());
     }
 
     @Test
     public void getJurisdictionTest() {
         Jurisdiction j = new Jurisdiction("1", 1L, "jurisdiction1", null);
-        MapCoordinatePair coordinatePair = new MapCoordinatePair(41.31742721517005, -72.93918211751856);
-        coordinatePair.setJurisdiction(j);
+        LatLong coordinatePair = new LatLong(41.31742721517005, -72.93918211751856, j);
         RemoteHost h = new RemoteHost("host1");
         h.setJurisdiction(j);
         j.getBounds().add(coordinatePair);

@@ -14,17 +14,25 @@
 
 package app.service.jurisdiction;
 
+import app.dto.jurisdiction.LatLongDTO;
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
+import app.model.jurisdiction.LatLong;
+import app.model.jurisdiction.LatLongRepository;
 import io.micronaut.context.annotation.Property;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.transaction.Transactional;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class JurisdictionService {
@@ -35,9 +43,11 @@ public class JurisdictionService {
     protected String authUrl;
 
     private final JurisdictionRepository jurisdictionRepository;
+    private final LatLongRepository latLongRepository;
 
-    public JurisdictionService(JurisdictionRepository jurisdictionRepository) {
+    public JurisdictionService(JurisdictionRepository jurisdictionRepository, LatLongRepository latLongRepository) {
         this.jurisdictionRepository = jurisdictionRepository;
+        this.latLongRepository = latLongRepository;
     }
 
     public JurisdictionDTO findJurisdictionByHostName(String hostName) {
@@ -56,7 +66,14 @@ public class JurisdictionService {
         jurisdiction.setPrimaryHoverColor(requestDTO.getPrimaryHoverColor());
         jurisdiction.setLogoMediaUrl(requestDTO.getLogoMediaUrl());
 
-        return new JurisdictionDTO(jurisdictionRepository.save(jurisdiction));
+        Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
+
+        Set<LatLongDTO> dtoBounds = requestDTO.getBounds();
+        if (dtoBounds != null) {
+            saveNewBounds(dtoBounds, savedJurisdiction);
+        }
+
+        return new JurisdictionDTO(jurisdictionRepository.update(savedJurisdiction));
     }
 
     public JurisdictionDTO updateJurisdiction(String jurisdictionId, PatchJurisdictionDTO requestDTO) {
@@ -70,10 +87,27 @@ public class JurisdictionService {
         Jurisdiction jurisdiction = jurisdictionOptional.get();
         applyPatch(requestDTO, jurisdiction);
 
+        Set<LatLongDTO> dtoBounds = requestDTO.getBounds();
+        if (dtoBounds != null) {
+            updateBounds(jurisdiction, dtoBounds);
+        }
+
         return new JurisdictionDTO(jurisdictionRepository.update(jurisdiction));
     }
 
-    private static void applyPatch(PatchJurisdictionDTO jurisdictionDTO, Jurisdiction jurisdiction) {
+    @Transactional
+    public void updateBounds(Jurisdiction jurisdiction, Set<LatLongDTO> dtoBounds) {
+        latLongRepository.deleteAll(jurisdiction.getBounds());
+        saveNewBounds(dtoBounds, jurisdiction);
+    }
+
+    private void saveNewBounds(Set<LatLongDTO> dtoBounds, Jurisdiction jurisdiction) {
+        Set<LatLong> newBounds = dtoBounds.stream().map(latLongDTO -> new LatLong(latLongDTO.getLatitude(), latLongDTO.getLongitude(), jurisdiction)).collect(Collectors.toSet());
+        Set<LatLong> savedBounds = new HashSet<>((List<LatLong>) latLongRepository.saveAll(newBounds));
+        jurisdiction.setBounds(savedBounds);
+    }
+
+    private void applyPatch(PatchJurisdictionDTO jurisdictionDTO, Jurisdiction jurisdiction) {
         if (jurisdictionDTO.getName() != null) {
             jurisdiction.setName(jurisdictionDTO.getName());
         }
