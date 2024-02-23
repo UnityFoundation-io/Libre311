@@ -179,7 +179,7 @@
 									multiple
 									options={priorityOptions}
 								>
-									<Select.Label slot="label">Status</Select.Label>
+									<Select.Label slot="label">Priority</Select.Label>
 									<Select.Options slot="options">
 										{#each priorityOptions as option}
 											<Select.Options.Option {option} />
@@ -196,7 +196,7 @@
 									options={statusOptions}
 									bind:value={statusInput}
 								>
-									<Select.Label slot="label">Priority</Select.Label>
+									<Select.Label slot="label">Status</Select.Label>
 									<Select.Options slot="options">
 										{#each statusOptions as option}
 											<Select.Options.Option {option} />
