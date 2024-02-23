@@ -161,15 +161,13 @@
 				</div>
 			</div>
 
-			<Card bordered={true} class="m-2">
-				<Card.Header
-					slot="header"
-					class="flex h-24 items-center justify-end py-3 text-lg font-bold"
-				>
+			<div
+				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
+			>
+				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
 						<div
 							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
-							class="mx-3"
 						>
 							<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
 								<Input.Leading slot="trailing" data={magnifingGlassIcon} />
@@ -177,10 +175,10 @@
 						</div>
 					{:else}
 						<div
+							class="flex flex-wrap"
 							transition:slide|local={{ delay: 100, duration: 500, easing: quintOut, axis: 'x' }}
-							class="mx-3 flex items-center"
 						>
-							<div class="mx-1">
+							<div class="m-1">
 								<Select
 									name="select-priority"
 									placeholder="Priority:"
@@ -196,7 +194,7 @@
 								</Select>
 							</div>
 
-							<div class="mx-1">
+							<div class="m-1">
 								<Select
 									name="select-status"
 									placeholder="Status:"
@@ -215,14 +213,13 @@
 
 							{#if serviceList.type === 'success'}
 								{@const selectOptions = createSelectOptions(serviceList.value)}
-								<div class="mx-1">
+								<div class="m-1">
 									<Select
 										bind:value={selectedServiceCode}
 										name="select-1"
 										placeholder="Request Type"
 										on:change={() => {}}
 										options={selectOptions}
-										class="relative my-4"
 									>
 										<Select.Label slot="label">Service</Select.Label>
 										<Select.Options slot="options">
@@ -234,14 +231,14 @@
 								</div>
 							{/if}
 
-							<div class="mx-1">
+							<div class="m-1">
 								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
 									<DatePicker.Label slot="label">Start Date</DatePicker.Label>
 									<DatePicker.Leading slot="leading" data={calendarIcon} />
 								</DatePicker>
 							</div>
 
-							<div class="mx-1">
+							<div class="m-1">
 								<DatePicker name="end-datetime" allowClear bind:value={endDate}>
 									<DatePicker.Label slot="label">End Date</DatePicker.Label>
 									<DatePicker.Leading slot="leading" data={calendarIcon} />
@@ -249,11 +246,14 @@
 							</div>
 						</div>
 					{/if}
+				</div>
 
-					<button on:click={handleFunnelClick}>
-						<Funnel />
-					</button>
-				</Card.Header>
+				<button class="mr-3" on:click={handleFunnelClick}>
+					<Funnel />
+				</button>
+			</div>
+
+			<Card bordered={true} class="m-2">
 				<Card.Content slot="content" class="p-0 sm:p-0">
 					<div class="issues-table-override">
 						<Table class="h-full overflow-hidden rounded-md" {columns}>
