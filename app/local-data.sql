@@ -24,13 +24,13 @@ VALUES (1, 'stlma', TRUE);
 -- Bus Stop Service
 INSERT INTO services (service_code, jurisdiction_id, service_name, description, type, service_definition_json, metadata)
 VALUES ('202', 'stlma', 'Bus Stop', 'For problems with bus stops', 'REALTIME',
-        '{"service_code": "202", "attributes": [{"variable": true, "code": "BUS_STOP", "datatype": "multivaluelist", "required": true, "datatypeDescription": "Please select one or more items.", "order": 1, "description": "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.", "values": [{"key": "UNSAFE", "name": "Unsafe location"}, {"key": "NO_SDWLK", "name": "No sidewalk"}, {"key": "MISSING_SIGN", "name": "Sign missing"}, {"key": "NO_SHELTER", "name": "No Shelter"}, {"key": "OTHER", "name": "Other"}]}]}',
+        '{"service_code": "202", "attributes": [{"variable": true, "code": "BUS_STOP", "datatype": "multivaluelist", "required": true, "datatype_description": "Please select one or more items.", "order": 1, "description": "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.", "values": [{"key": "UNSAFE", "name": "Unsafe location"}, {"key": "NO_SDWLK", "name": "No sidewalk"}, {"key": "MISSING_SIGN", "name": "Sign missing"}, {"key": "NO_SHELTER", "name": "No Shelter"}, {"key": "OTHER", "name": "Other"}]}]}',
         true);
 
 -- Crosswalk Service
 INSERT INTO services (service_code, jurisdiction_id, service_name, description, type, service_definition_json, metadata)
 VALUES ('204', 'stlma', 'Crosswalk', 'For issues with the crosswalks', 'REALTIME',
-        '{"service_code": "204", "attributes": [{"variable": true, "code": "CRSWLK", "datatype": "multivaluelist", "required": true, "datatypeDescription": "Please select one or more items.", "order": 1, "description": "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.", "values": [{"key": "ADA_ACCESS", "name": "ADA Access"}, {"key": "MISSING", "name": "Missing"}, {"key": "FADED", "name": "Faded or worn paint"}, {"key": "DRIVERS", "name": "Drivers failing to yield"}, {"key": "OTHER", "name": "Other"}]}]}',
+        '{"service_code": "204", "attributes": [{"variable": true, "code": "CRSWLK", "datatype": "multivaluelist", "required": true, "datatype_description": "Please select one or more items.", "order": 1, "description": "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.", "values": [{"key": "ADA_ACCESS", "name": "ADA Access"}, {"key": "MISSING", "name": "Missing"}, {"key": "FADED", "name": "Faded or worn paint"}, {"key": "DRIVERS", "name": "Drivers failing to yield"}, {"key": "OTHER", "name": "Other"}]}]}',
         true);
 
 -- Other Service
