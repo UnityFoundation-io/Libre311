@@ -48,10 +48,8 @@ public class ServiceRequest {
 
     // optional
 
-    @Nullable
     private String latitude;
 
-    @Nullable
     private String longitude;
 
     @Nullable
@@ -104,6 +102,7 @@ public class ServiceRequest {
     @Nullable
     private String serviceNotice;
 
+    @Column(name = "zipcode")
     @Nullable
     @Pattern(regexp = "^\\d{5}(?:[-\\s]\\d{4})?$")
     private String zipCode;

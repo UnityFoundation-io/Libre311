@@ -36,19 +36,24 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
+import io.micronaut.http.uri.UriBuilder;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 @Controller("/api")
 @Secured(SecurityRule.IS_ANONYMOUS)
 public class RootController {
+
+    private final static URI SWAGGER_UI = UriBuilder.of("/swagger-ui").path("index.html").build();
 
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
@@ -248,6 +253,12 @@ public class RootController {
     @ExecuteOn(TaskExecutors.IO)
     public JurisdictionDTO getJurisdictionInfo(@Header("Host") String hostName) {
         return jurisdictionService.findJurisdictionByHostName(hostName);
+    }
+
+    @Get("/swagger-ui")
+    @Hidden
+    HttpResponse<?> home() {
+        return HttpResponse.seeOther(SWAGGER_UI);
     }
 
     private void sanitizeXmlContent(ServiceRequestDTO serviceRequestDTO) {
