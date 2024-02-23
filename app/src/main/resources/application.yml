@@ -48,10 +48,6 @@ micronaut:
 datasources:
   default:
     db-type: ${LIBRE311_DB_TYPE}
-test-resources:
-  containers:
-    mysql:
-      image-name: mysql:8.2
 jpa:
   default:
     entity-scan:
@@ -97,3 +93,8 @@ app:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
   safesearch:
     key: ${SAFESEARCH_KEY:`safesearchKey`}
+
+flyway:
+  datasources:
+    default:
+      enabled: true

@@ -258,9 +258,10 @@ public class RootControllerTest {
     }
 
     @Test
-    public void cannotCreateServiceRequestIfAddressIsNotProvided() {
+    public void cannotCreateServiceRequestIfLatLngNotProvided() {
+        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO("006");
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
-            createServiceRequest("006", null, Map.of(), "town.gov");
+            createServiceRequest(serviceRequestDTO, Map.of(), "town.gov");
         });
         assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
     }
@@ -1016,7 +1017,7 @@ public class RootControllerTest {
         authLogin();
 
         HttpRequest<?> request = HttpRequest.GET("/config")
-                .header("host", "host1");
+                .header("referer", "http://host1");
         HttpResponse<JurisdictionDTO> response = client.toBlocking()
                 .exchange(request, JurisdictionDTO.class);
         JurisdictionDTO infoResponse = response.getBody().get();
@@ -1053,9 +1054,21 @@ public class RootControllerTest {
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes, String jurisdictionId) {
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(serviceCode);
         serviceRequestDTO.setgRecaptchaResponse("abc");
+        serviceRequestDTO.setLongitude("43.3434");
+        serviceRequestDTO.setLatitude("48.98");
         if (address != null) {
             serviceRequestDTO.setAddressString(address);
         }
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
+        payload.putAll(attributes);
+        HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
+                .header("Authorization", "Bearer token.text.here")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+        return client.toBlocking().exchange(request, Map.class);
+    }
+
+    private HttpResponse<?> createServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Map attributes, String jurisdictionId) {
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);

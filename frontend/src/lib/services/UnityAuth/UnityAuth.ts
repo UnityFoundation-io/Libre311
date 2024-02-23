@@ -22,10 +22,12 @@ export type UnityAuthLoginResponse = z.infer<typeof UnityAuthLoginResponseSchema
 
 export type UnityAuthEventMap = {
 	login: UnityAuthLoginResponse;
+	logout: void;
 };
 // Auth Interface
 export type UnityAuthService = BaseObservable<UnityAuthEventMap> & {
 	login(email: string, password: string): Promise<UnityAuthLoginResponse>;
+	logout(): void;
 };
 
 // Auth Implementation
@@ -58,6 +60,10 @@ export class UnityAuthServiceImpl
 		} catch (e) {
 			throw new Error(e?.toString());
 		}
+	}
+
+	logout() {
+		this.publish('logout', void 0);
 	}
 }
 

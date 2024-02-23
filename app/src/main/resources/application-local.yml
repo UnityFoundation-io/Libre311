@@ -27,4 +27,18 @@ micronaut:
           - http://127.0.0.1:3000
 ---
 app:
-  service-id: ${LIBRE311_SERVICE_ID}
+  service-id: ${LIBRE311_SERVICE_ID:1}
+
+datasources:
+  default:
+    url: jdbc:mysql://localhost:3306/libre311?allowPublicKeyRetrieval=true&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: test
+    db-type: mysql
+
+
+flyway:
+  datasources:
+    default:
+      baseline-on-migrate: true

@@ -44,6 +44,8 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation('com.opencsv:opencsv:5.7.1')
     implementation("io.micronaut.reactor:micronaut-reactor")
+    implementation("io.micronaut.flyway:micronaut-flyway")
+    runtimeOnly("org.flywaydb:flyway-mysql")
 
     String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
     if (databaseSelection != null) {
@@ -51,7 +53,7 @@ dependencies {
             runtimeOnly(part)
         }
     } else {
-        runtimeOnly("com.h2database:h2")
+        runtimeOnly("mysql:mysql-connector-java:8.0.31")
     }
 }
 

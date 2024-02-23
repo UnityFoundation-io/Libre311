@@ -25,10 +25,9 @@
 	import { matchesDesktopMedia } from '$lib/utils/functions';
 
 	const linkResolver = useLibre311Context().linkResolver;
+	const libre311 = useLibre311Context().service;
 	const serviceRequestsResponseStore = useServiceRequestsResponseStore();
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
-
-	const initialView: LatLngExpression = [41.3083092093462, -72.9258607025516];
 
 	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
 
@@ -40,15 +39,13 @@
 	}
 
 	function createMapBounds(res: AsyncResult<ServiceRequestsResponse>) {
-		if (res.type !== 'success') {
-			return L.latLngBounds([initialView]);
+		if (
+			res.type !== 'success' ||
+			(res.type === 'success' && res.value.serviceRequests.length === 0)
+		) {
+			return L.latLngBounds(libre311.getJurisdictionConfig().bounds);
 		}
 		let latLngs: LatLngTuple[] = res.value.serviceRequests.map((req) => [+req.lat, +req.long]);
-
-		if (latLngs.length === 0) {
-			const defaultTuple: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
-			latLngs = defaultTuple;
-		}
 		return L.latLngBounds(latLngs);
 	}
 

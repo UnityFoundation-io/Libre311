@@ -18,7 +18,8 @@
 	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { recaptchaServiceFactory } from '$lib/services/RecaptchaService';
-	import type { UnityAuthServiceProps } from '$lib/services/UnityAuth/UnityAuth';
+	import { type UnityAuthServiceProps } from '$lib/services/UnityAuth/UnityAuth';
+	import User from '$lib/components/User.svelte';
 
 	const mode: Mode = getModeFromEnv(import.meta.env);
 	const recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
@@ -57,10 +58,8 @@
 
 {#if contextProviderProps.type == 'success'}
 	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
-		<header>
-			<div class="controls">
-				<!-- todo move inside of map -->
-				<!-- <Funnel /> -->
+		<header class="flex items-center justify-center">
+			<div class="flex gap-4">
 				<button
 					type="button"
 					on:click={() => {
@@ -71,8 +70,10 @@
 				>
 					<Bars3 />
 				</button>
-				<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
+				<h1>{libre311Context.service.getJurisdictionConfig().name}</h1>
 			</div>
+
+			<User />
 		</header>
 		<main>
 			<MenuDrawer {open} handleClose={closeDrawer} />
@@ -98,11 +99,6 @@
 		justify-content: space-between;
 		padding: 0 1rem;
 	}
-	.controls {
-		display: flex;
-		gap: 1rem;
-	}
-
 	main {
 		height: calc(100dvh - var(--header-height));
 	}
