@@ -107,7 +107,7 @@ export function createServiceRequestsContext(
 	page.subscribe(async (page: Page<Record<string, string>, string | null>) => {
 		if (page.route.id?.endsWith('[issue_id]')) {
 			await handleIssueDetailsPageNav(page);
-		} else {
+		} else if (page.route.id?.startsWith('/issues')) {
 			await handleMapPageNav(page);
 		}
 	});
