@@ -418,7 +418,6 @@ export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsPa
 	} else {
 		queryParams.append('page_size', '10');
 		queryParams.append('page', `${params.pageNumber ?? 0}`);
-		// TODO: apply other query filters
 		queryParams.append('status', params.status?.join(',') ?? '');
 		queryParams.append('service_code', params.serviceCode ?? '');
 		queryParams.append('start_date', params.startDate ?? '');
