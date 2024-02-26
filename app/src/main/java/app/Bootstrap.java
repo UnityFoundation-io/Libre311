@@ -19,6 +19,8 @@ import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
+import app.model.service.group.ServiceGroup;
+import app.model.service.group.ServiceGroupRepository;
 import app.model.service.servicedefinition.AttributeDataType;
 import app.model.service.servicedefinition.AttributeValue;
 import app.model.service.servicedefinition.ServiceDefinition;
@@ -36,7 +38,6 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,11 +52,13 @@ public class Bootstrap {
 
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
+    private final ServiceGroupRepository serviceGroupRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
+        this.serviceGroupRepository = serviceGroupRepository;
     }
 
     @EventListener
@@ -68,14 +71,21 @@ public class Bootstrap {
                     Jurisdiction jurisdiction = jurisdictionRepository.save(
                             new Jurisdiction((String) juridictionsMap.get("id"), ((Integer) juridictionsMap.get("tenant")).longValue()));
 
+                    List<String> groups = (List<String>) juridictionsMap.get("groups");
+                    List<ServiceGroup> serviceGroups = processAndStoreGroups(groups, jurisdiction);
+
                     List<Map<String, ?>> services = (List<Map<String, ?>>) juridictionsMap.get("services");
-                    processAndStoreServices(services, jurisdiction);
+                    processAndStoreServices(services, jurisdiction, serviceGroups);
                 });
             }
         }
     }
 
-    private void processAndStoreServices(List<Map<String, ?>> services, Jurisdiction jurisdiction) {
+    private List<ServiceGroup> processAndStoreGroups(List<String> groups, Jurisdiction jurisdiction) {
+        return groups.stream().map(name -> serviceGroupRepository.save(new ServiceGroup(name, jurisdiction))).collect(Collectors.toList());
+    }
+
+    private void processAndStoreServices(List<Map<String, ?>> services, Jurisdiction jurisdiction, List<ServiceGroup> serviceGroups) {
 
         services.stream().forEach(svc -> {
             String serviceName = (String) svc.get("serviceName");
@@ -84,6 +94,11 @@ public class Bootstrap {
             service.setDescription((String) svc.get("description"));
             service.setType(ServiceType.valueOf(((String) svc.get("type")).toUpperCase()));
             service.setJurisdiction(jurisdiction);
+            String groupStr = (String) svc.get("group");
+            Optional<ServiceGroup> group = serviceGroups.stream()
+                    .filter(serviceGroup -> groupStr.equals(serviceGroup.getName()))
+                    .findFirst();
+            service.setServiceGroup(group.get());
 
             if (svc.containsKey("serviceDefinition")) {
                 service.setMetadata(true);

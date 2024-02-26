@@ -39,6 +39,9 @@ public class ServiceDTO {
 
     private ServiceType type;
 
+    @JsonProperty("group_id")
+    private Long groupId;
+
     public ServiceDTO() {
     }
 
@@ -48,6 +51,7 @@ public class ServiceDTO {
         this.serviceName = service.getServiceName();
         this.description = service.getDescription();
         this.metadata = service.isMetadata();
+        this.groupId = service.getServiceGroup().getId();
         this.type = service.getType();
         if (service.getJurisdiction() != null) {
             this.jurisdictionId = service.getJurisdiction().getId();
@@ -108,5 +112,13 @@ public class ServiceDTO {
 
     public void setType(ServiceType type) {
         this.type = type;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 }
