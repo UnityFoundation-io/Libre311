@@ -17,6 +17,7 @@ package app.model.service.group;
 import app.model.jurisdiction.Jurisdiction;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "service_groups")
@@ -26,6 +27,7 @@ public class ServiceGroup {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @NotEmpty
     private String name;
 
     @ManyToOne
