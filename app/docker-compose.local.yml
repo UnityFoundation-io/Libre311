@@ -12,6 +12,3 @@ services:
       MYSQL_DATABASE: libre311
     ports:
       - "3306:3306"
-    volumes:
-      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
-      - ./local-data.sql:/docker-entrypoint-initdb.d/local-data.sql
