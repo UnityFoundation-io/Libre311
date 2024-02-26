@@ -1,0 +1,332 @@
+[
+	{
+		"id": 1,
+		"name": "Group A",
+		"services": [
+			{
+				"id": 101,
+				"name": "Service X",
+				"attributes": [
+					{
+						"id": 201,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 202,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 203,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 204,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 205,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 102,
+				"name": "Service Y",
+				"attributes": [
+					{
+						"id": 206,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 207,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 208,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 209,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 210,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 103,
+				"name": "Service Z",
+				"attributes": [
+					{
+						"id": 211,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 212,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 213,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 214,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 215,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 104,
+				"name": "Service W",
+				"attributes": [
+					{
+						"id": 216,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 217,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 218,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 219,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 220,
+						"name": "Attribute 5"
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": 2,
+		"name": "Group B",
+		"services": [
+			{
+				"id": 105,
+				"name": "Service P",
+				"attributes": [
+					{
+						"id": 221,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 222,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 223,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 224,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 225,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 106,
+				"name": "Service Q",
+				"attributes": [
+					{
+						"id": 226,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 227,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 228,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 229,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 230,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 107,
+				"name": "Service R",
+				"attributes": [
+					{
+						"id": 231,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 232,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 233,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 234,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 235,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 108,
+				"name": "Service S",
+				"attributes": [
+					{
+						"id": 236,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 237,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 238,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 239,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 240,
+						"name": "Attribute 5"
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": 3,
+		"name": "Group C",
+		"services": [
+			{
+				"id": 109,
+				"name": "Service M",
+				"attributes": [
+					{
+						"id": 241,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 242,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 243,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 244,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 245,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 110,
+				"name": "Service N",
+				"attributes": [
+					{
+						"id": 246,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 247,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 248,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 249,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 250,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 111,
+				"name": "Service O",
+				"attributes": [
+					{
+						"id": 251,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 252,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 253,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 254,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 255,
+						"name": "Attribute 5"
+					}
+				]
+			},
+			{
+				"id": 112,
+				"name": "Service T",
+				"attributes": [
+					{
+						"id": 256,
+						"name": "Attribute 1"
+					},
+					{
+						"id": 257,
+						"name": "Attribute 2"
+					},
+					{
+						"id": 258,
+						"name": "Attribute 3"
+					},
+					{
+						"id": 259,
+						"name": "Attribute 4"
+					},
+					{
+						"id": 260,
+						"name": "Attribute 5"
+					}
+				]
+			}
+		]
+	}
+]
