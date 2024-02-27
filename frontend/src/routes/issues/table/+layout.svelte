@@ -113,9 +113,9 @@
 		const allServiceRequests = await libre311.getAllServiceRequests({});
 
 		// TODO: parse service definition answers
-		// for (let request of allServiceRequests) {
-		// 	delete request['selected_values'];
-		// }
+		for (let request of allServiceRequests) {
+			delete request['selected_values'];
+		}
 
 		const csvContent = convertToCSV(allServiceRequests);
 
