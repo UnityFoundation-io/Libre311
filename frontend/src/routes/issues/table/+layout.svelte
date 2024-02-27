@@ -6,7 +6,6 @@
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import { Badge, Button, Card, DatePicker, Input, Table } from 'stwui';
-  import type { TableColumn } from 'stwui/types';
 	import { page } from '$app/stores';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import {
@@ -15,7 +14,6 @@
 	} from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
-	import { type ServiceRequest, type ServiceRequestId } from '$lib/services/Libre311/Libre311';
 	import { saveAs } from 'file-saver';
 	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
 	import type {
@@ -42,10 +40,8 @@
 	} from '$lib/services/http';
 	import type { SelectOption } from 'stwui/types';
 
-	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
-
 	const ctx = useServiceRequestsContext();
 	const libre311 = useLibre311Service();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
