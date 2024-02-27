@@ -345,7 +345,8 @@ export interface Libre311Service extends Open311Service {
 }
 
 const Libre311ServicePropsSchema = z.object({
-	baseURL: z.string()
+	baseURL: z.string(),
+	jurisdictionConfig: JurisdictionConfigSchema
 });
 
 export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema> & {
@@ -367,16 +368,14 @@ const ROUTES = {
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
-async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
+export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
 	const res = await axios.get<JurisdictionConfig>(baseURL + ROUTES.getJurisdictionConfig);
-	try {
-		// todo parse the data to validate once the jurisdiction config returns bounds
-		return res.data;
-		// return JurisdictionConfigSchema.parse(res.data);
-	} catch (error: unknown) {
-		console.error(error);
-		throw error;
-	}
+
+	// todo parse the data to validate once the jurisdiction config returns bounds and remove the hardcoded bounds
+	const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
+	res.data.bounds = jurisdictionBounds;
+	return res.data;
+	// return JurisdictionConfigSchema.parse(res.data);
 }
 
 class Libre311ServiceError extends Error {
@@ -424,7 +423,10 @@ export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsPa
 	} else {
 		queryParams.append('page_size', '10');
 		queryParams.append('page', `${params.pageNumber ?? 0}`);
-		// TODO: apply other query filters
+		queryParams.append('status', params.status?.join(',') ?? '');
+		queryParams.append('service_code', params.serviceCode ?? '');
+		queryParams.append('start_date', params.startDate ?? '');
+		queryParams.append('end_date', params.endDate ?? '');
 	}
 	return queryParams;
 }
@@ -442,7 +444,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		'image/webp'
 	];
 
-	private constructor(props: Libre311ServiceProps & { jurisdictionConfig: JurisdictionConfig }) {
+	public constructor(props: Libre311ServiceProps) {
 		Libre311ServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
 		this.jurisdictionConfig = props.jurisdictionConfig;
@@ -637,6 +639,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 }
 
-export async function libre311Factory(props: Libre311ServiceProps): Promise<Libre311Service> {
-	return Libre311ServiceImpl.create(props);
+export function libre311Factory(props: Libre311ServiceProps): Libre311Service {
+	return new Libre311ServiceImpl(props);
 }
