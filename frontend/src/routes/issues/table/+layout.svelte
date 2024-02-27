@@ -251,16 +251,18 @@
 									</Table.Body.Row>
 								{/each}
 							</Table.Body>
+
+							<Table.Footer slot="footer">
+								<div class="m-2 flex justify-end">
+									<Button type="primary" on:click={handleDownloadCsv}>
+										Download CSV
+										<Button.Trailing data={arrowDownTray} slot="trailing" />
+									</Button>
+								</div>
+							</Table.Footer>
 						</Table>
 					</div>
 				</Card.Content>
-
-				<Card.Footer slot="footer">
-					<Button type="primary" on:click={handleDownloadCsv}>
-						Download CSV
-						<Button.Trailing data={arrowDownTray} slot="trailing" />
-					</Button>
-				</Card.Footer>
 			</Card>
 		</div>
 	</SideBarMainContentLayout>
