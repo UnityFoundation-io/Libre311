@@ -30,6 +30,7 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -181,6 +182,7 @@ public class TenantAdminControllerTest {
         assertTrue(optional.isPresent());
         JurisdictionDTO jurisdictionDTO = optional.get();
         assertTrue(jurisdictionDTO.getBounds().length > 0);
+        assertTrue(Arrays.deepEquals(bound, jurisdictionDTO.getBounds()));
 
         // update
         PatchJurisdictionDTO patchJurisdictionDTO = new PatchJurisdictionDTO();
@@ -206,6 +208,7 @@ public class TenantAdminControllerTest {
         assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
         assertTrue(jurisdictionDTO.getBounds().length > 0);
         assertEquals(5, jurisdictionDTO.getBounds().length);
+        assertTrue(Arrays.deepEquals(updateBound, jurisdictionDTO.getBounds()));
     }
 
     @Test
