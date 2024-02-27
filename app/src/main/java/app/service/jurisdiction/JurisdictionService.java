@@ -14,7 +14,6 @@
 
 package app.service.jurisdiction;
 
-import app.dto.jurisdiction.LatLongDTO;
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
@@ -28,10 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.transaction.Transactional;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -52,7 +48,16 @@ public class JurisdictionService {
 
     public JurisdictionDTO findJurisdictionByHostName(String hostName) {
         return jurisdictionRepository.findByRemoteHostsNameEquals(hostName)
-            .map(jurisdiction -> new JurisdictionDTO(jurisdiction, authUrl)).orElse(null);
+            .map(jurisdiction -> {
+                JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdiction, authUrl);
+
+                List<LatLong> bounds = latLongRepository.findAllByJurisdiction(jurisdiction);
+                jurisdictionDTO.setBounds(bounds.stream()
+                        .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
+                        .toArray(Double[][]::new));
+
+                return jurisdictionDTO;
+            }).orElse(null);
     }
 
     public JurisdictionDTO createJurisdiction(CreateJurisdictionDTO requestDTO, Long tenantId) {
@@ -68,12 +73,13 @@ public class JurisdictionService {
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
 
-        Set<LatLongDTO> dtoBounds = requestDTO.getBounds();
-        if (dtoBounds != null) {
-            saveNewBounds(dtoBounds, savedJurisdiction);
-        }
+        List<LatLong> bounds = saveNewBounds(requestDTO.getBounds(), savedJurisdiction);
+        JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdictionRepository.update(savedJurisdiction));
+        jurisdictionDTO.setBounds(bounds.stream()
+                .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
+                .toArray(Double[][]::new));
 
-        return new JurisdictionDTO(jurisdictionRepository.update(savedJurisdiction));
+        return jurisdictionDTO;
     }
 
     public JurisdictionDTO updateJurisdiction(String jurisdictionId, PatchJurisdictionDTO requestDTO) {
@@ -86,25 +92,48 @@ public class JurisdictionService {
 
         Jurisdiction jurisdiction = jurisdictionOptional.get();
         applyPatch(requestDTO, jurisdiction);
+        JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdictionRepository.update(jurisdiction));
 
-        Set<LatLongDTO> dtoBounds = requestDTO.getBounds();
+        Double[][] dtoBounds = requestDTO.getBounds();
         if (dtoBounds != null) {
-            updateBounds(jurisdiction, dtoBounds);
+            List<LatLong> savedBounds = updateBounds(jurisdiction, dtoBounds);
+            jurisdictionDTO.setBounds(savedBounds.stream()
+                    .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
+                    .toArray(Double[][]::new));
         }
 
-        return new JurisdictionDTO(jurisdictionRepository.update(jurisdiction));
+        return jurisdictionDTO;
     }
 
     @Transactional
-    public void updateBounds(Jurisdiction jurisdiction, Set<LatLongDTO> dtoBounds) {
-        latLongRepository.deleteAll(jurisdiction.getBounds());
-        saveNewBounds(dtoBounds, jurisdiction);
+    public List<LatLong> updateBounds(Jurisdiction jurisdiction, Double[][] dtoBounds) {
+        latLongRepository.deleteAll(latLongRepository.findAllByJurisdiction(jurisdiction));
+        return saveNewBounds(dtoBounds, jurisdiction);
     }
 
-    private void saveNewBounds(Set<LatLongDTO> dtoBounds, Jurisdiction jurisdiction) {
-        Set<LatLong> newBounds = dtoBounds.stream().map(latLongDTO -> new LatLong(latLongDTO.getLatitude(), latLongDTO.getLongitude(), jurisdiction)).collect(Collectors.toSet());
-        Set<LatLong> savedBounds = new HashSet<>((List<LatLong>) latLongRepository.saveAll(newBounds));
-        jurisdiction.setBounds(savedBounds);
+    private List<LatLong> saveNewBounds(Double[][] dtoBounds, Jurisdiction jurisdiction) {
+        List<LatLong> polygonalBound = checkValidPolygonBound(dtoBounds, jurisdiction);
+        List<LatLong> savedPolygonalBound = (List<LatLong>) latLongRepository.saveAll(polygonalBound);
+        jurisdiction.setBounds(savedPolygonalBound);
+
+        return savedPolygonalBound;
+    }
+
+    private List<LatLong> checkValidPolygonBound(Double[][] dtoBounds, Jurisdiction jurisdiction) {
+
+        if (Arrays.stream(dtoBounds).anyMatch(doubles -> doubles.length != 2)) {
+            throw new IllegalArgumentException("Invalid polygonal bound - should consist of tuple decimals values only.");
+        }
+
+        Double[] firstTuple = dtoBounds[0];
+        Double[] lastTuple = dtoBounds[dtoBounds.length - 1];
+        if (!(firstTuple[0].equals(lastTuple[0]) && firstTuple[1].equals(lastTuple[1]))) {
+            throw new IllegalArgumentException("Invalid polygonal bound - first element does not equal last.");
+        }
+
+        return Arrays.stream(dtoBounds)
+                .map(latLongTuple -> new LatLong(latLongTuple[0], latLongTuple[1], jurisdiction))
+                .collect(Collectors.toList());
     }
 
     private void applyPatch(PatchJurisdictionDTO jurisdictionDTO, Jurisdiction jurisdiction) {

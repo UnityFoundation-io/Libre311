@@ -21,7 +21,9 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -42,9 +44,9 @@ public class Jurisdiction {
 
     private String logoMediaUrl;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<LatLong> bounds = new HashSet<>();
+    private List<LatLong> bounds = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -144,11 +146,11 @@ public class Jurisdiction {
         this.logoMediaUrl = logoMediaUrl;
     }
 
-    public Set<LatLong> getBounds() {
+    public List<LatLong> getBounds() {
         return bounds;
     }
 
-    public void setBounds(Set<LatLong> bounds) {
+    public void setBounds(List<LatLong> bounds) {
         this.bounds = bounds;
     }
 }

@@ -17,6 +17,9 @@ package app.model.jurisdiction;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.PageableRepository;
 
+import java.util.List;
+
 @Repository
 public interface LatLongRepository extends PageableRepository<LatLong, Long> {
+    List<LatLong> findAllByJurisdiction(Jurisdiction jurisdiction);
 }
