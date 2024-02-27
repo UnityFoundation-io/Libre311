@@ -1,5 +1,6 @@
 import type { Mode } from './mode';
 import { z } from 'zod';
+import axios from 'axios';
 
 type RecaptchaToken = string;
 
@@ -46,4 +47,16 @@ export function recaptchaServiceFactory(
 	props: RecaptchaServiceProps
 ): RecaptchaService {
 	return mode === 'test' ? new MockRecaptchaService() : new RecaptchaServiceImpl(props);
+}
+
+export async function loadRecaptchaProps(mode: Mode): Promise<RecaptchaServiceProps> {
+	let recaptchaKey: string;
+	if (mode == 'production') {
+		recaptchaKey = await axios.get('/recaptcha-key');
+	} else if (mode == 'development') {
+		recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
+	} else {
+		recaptchaKey = 'sdfafdaf';
+	}
+	return { recaptchaKey };
 }

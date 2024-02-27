@@ -15,17 +15,10 @@
 		ASYNC_IN_PROGRESS,
 		type AsyncResult
 	} from '$lib/services/http';
-	import { libre311Factory, type Libre311ServiceProps } from '$lib/services/Libre311/Libre311';
+	import { getJurisdictionConfig } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
-	import { recaptchaServiceFactory } from '$lib/services/RecaptchaService';
-	import { type UnityAuthServiceProps } from '$lib/services/UnityAuth/UnityAuth';
+	import { loadRecaptchaProps } from '$lib/services/RecaptchaService';
 	import User from '$lib/components/User.svelte';
-
-	const mode: Mode = getModeFromEnv(import.meta.env);
-	const recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
-	const unityAuthServiceProps: UnityAuthServiceProps = {
-		baseURL: String(import.meta.env.VITE_AUTH_URL)
-	};
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
 
@@ -35,25 +28,34 @@
 		open = false;
 	}
 
-	const synchronousContextProviderProps: Omit<Libre311ContextProviderProps, 'service'> = {
-		recaptchaKey,
-		mode,
-		unityAuthServiceProps
-	};
-
-	async function initLibre311ContextProps(serviceProps: Libre311ServiceProps) {
+	async function initLibre311ContextProps() {
 		try {
-			const service = await libre311Factory(serviceProps);
-			contextProviderProps = asAsyncSuccess({ ...synchronousContextProviderProps, service });
+			const mode: Mode = getModeFromEnv(import.meta.env);
+			const libreBaseURL = String(import.meta.env.VITE_BACKEND_URL) ?? '/api';
+
+			const [recaptchaServiceProps, jurisdictionConfig] = await Promise.all([
+				loadRecaptchaProps(mode),
+				getJurisdictionConfig(libreBaseURL)
+			]);
+
+			const ctxProps: Libre311ContextProviderProps = {
+				mode: mode,
+				libreServiceProps: {
+					baseURL: libreBaseURL,
+					jurisdictionConfig
+				},
+				recaptchaServiceProps,
+				unityAuthServiceProps: { baseURL: String(import.meta.env.VITE_AUTH_URL) }
+			};
+
+			contextProviderProps = asAsyncSuccess(ctxProps);
 		} catch (error) {
+			console.error(error);
 			contextProviderProps = asAsyncFailure(error);
 		}
 	}
 
-	initLibre311ContextProps({
-		baseURL: import.meta.env.VITE_BACKEND_URL ?? '/api',
-		recaptchaService: recaptchaServiceFactory(mode, { recaptchaKey })
-	});
+	initLibre311ContextProps();
 </script>
 
 {#if contextProviderProps.type == 'success'}
@@ -63,9 +65,7 @@
 				<button
 					type="button"
 					on:click={() => {
-						console.log({ before: open });
 						open = !open;
-						console.log({ after: open });
 					}}
 				>
 					<Bars3 />
