@@ -115,9 +115,6 @@
 		// Sanatize Requests
 		for (let request of allServiceRequests) {
 			request.address = request.address.replace(/,/g, '');
-
-			// TODO: parse service definition answers
-			delete request['selected_values'];
 		}
 
 		const csvContent = convertToCSV(allServiceRequests);
@@ -136,9 +133,20 @@
 				return header
 					.split(',')
 					.map((key) => {
-						// If the object has a value for the current key, return it
-						// Otherwise, return an empty string
-						return obj[key] !== undefined && obj[key] !== null ? obj[key] : '';
+						// If the object has a value for the current key
+						if (obj[key] !== undefined && obj[key] !== null) {
+							// If the value is an object, stringify it as JSON
+							if (typeof obj[key] === 'object') {
+								// Ugly looking JSON (service definition answers)
+								return JSON.stringify(obj[key]).replace(/,/g, ' ');
+							} else {
+								// Otherwise, return the value as is
+								return obj[key];
+							}
+						} else {
+							// If the value is undefined or null, return an empty string
+							return '';
+						}
 					})
 					.join(',');
 			})
