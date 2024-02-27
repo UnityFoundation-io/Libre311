@@ -532,11 +532,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 				const totalSize = headers['page-totalsize'];
 				const serviceRequests = GetServiceRequestsResponseSchema.parse(res.data);
 
-				// sanatize the 'address' field by removing the comma's
-				for (let request of serviceRequests) {
-					request.address = request.address.replace(/,/g, '');
-				}
-
 				if (allServiceRequests.length == 0) allServiceRequests = serviceRequests;
 				else allServiceRequests = allServiceRequests.concat(serviceRequests);
 

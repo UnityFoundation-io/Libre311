@@ -112,8 +112,11 @@
 	async function handleDownloadCsv() {
 		const allServiceRequests = await libre311.getAllServiceRequests({});
 
-		// TODO: parse service definition answers
+		// Sanatize Requests
 		for (let request of allServiceRequests) {
+			request.address = request.address.replace(/,/g, '');
+
+			// TODO: parse service definition answers
 			delete request['selected_values'];
 		}
 
@@ -125,7 +128,21 @@
 
 	function convertToCSV(data: ServiceRequest[]) {
 		const header = Object.keys(data[0]).join(',');
-		const rows = data.map((obj) => Object.values(obj).join(',')).join('\n');
+
+		// Iterate over each object in the data array
+		const rows = data
+			.map((obj) => {
+				// Map over each key in the header
+				return header
+					.split(',')
+					.map((key) => {
+						// If the object has a value for the current key, return it
+						// Otherwise, return an empty string
+						return obj[key] !== undefined && obj[key] !== null ? obj[key] : '';
+					})
+					.join(',');
+			})
+			.join('\n');
 
 		return `${header}\n${rows}`;
 	}
