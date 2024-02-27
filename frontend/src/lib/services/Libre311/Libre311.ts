@@ -326,6 +326,7 @@ export interface Open311Service {
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse>;
+	getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]>;
 	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
@@ -508,6 +509,51 @@ export class Libre311ServiceImpl implements Libre311Service {
 		);
 
 		return InternalCreateServiceRequestResponseSchema.parse(res.data)[0];
+	}
+
+	async getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]> {
+		let pageNumber: number = 0;
+		let allServiceRequests: ServiceRequest[] = [];
+		const queryParams = mapToServiceRequestsURLSearchParams(params);
+		queryParams.append('jurisdiction_id', this.jurisdictionId);
+
+		const performRequest = async (
+			allServiceRequests: ServiceRequest[]
+		): Promise<ServiceRequest[]> => {
+			const newQueryParams = mapToServiceRequestsURLSearchParams({ pageNumber: pageNumber });
+			newQueryParams.append('jurisdiction_id', this.jurisdictionId);
+
+			try {
+				// first request
+				const res = await this.axiosInstance.get<unknown>(
+					ROUTES.getServiceRequests(newQueryParams)
+				);
+				const headers = res.headers;
+				const totalSize = headers['page-totalsize'];
+				const serviceRequests = GetServiceRequestsResponseSchema.parse(res.data);
+
+				// sanatize the 'address' field by removing the comma's
+				for (let request of serviceRequests) {
+					request.address = request.address.replace(/,/g, '');
+				}
+
+				if (allServiceRequests.length == 0) allServiceRequests = serviceRequests;
+				else allServiceRequests = allServiceRequests.concat(serviceRequests);
+
+				if (allServiceRequests.length < totalSize) {
+					// recursive requests
+					pageNumber = pageNumber + 1;
+					return await performRequest(allServiceRequests);
+				}
+
+				return allServiceRequests;
+			} catch (error) {
+				console.log(error);
+				throw error;
+			}
+		};
+
+		return await performRequest(allServiceRequests);
 	}
 
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {

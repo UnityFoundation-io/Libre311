@@ -1,22 +1,25 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import { Badge, Card, Input, Table } from 'stwui';
+	import { Badge, Button, Card, Input, Table } from 'stwui';
 	import type { TableColumn } from 'stwui/types';
 	import { page } from '$app/stores';
-	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import {
 		useSelectedServiceRequestStore,
 		useServiceRequestsContext
 	} from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
-	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
+	import { type ServiceRequest, type ServiceRequestId } from '$lib/services/Libre311/Libre311';
 	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
 	import type { ComponentEvents } from 'svelte';
+	import { saveAs } from 'file-saver';
+	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
 
+	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
@@ -104,6 +107,27 @@
 		} else {
 			ctx.applyServiceRequestParams({}, $page.url);
 		}
+	}
+
+	async function handleDownloadCsv() {
+		const allServiceRequests = await libre311.getAllServiceRequests({});
+
+		// TODO: parse service definition answers
+		// for (let request of allServiceRequests) {
+		// 	delete request['selected_values'];
+		// }
+
+		const csvContent = convertToCSV(allServiceRequests);
+
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+		saveAs(blob, 'service-requests.csv');
+	}
+
+	function convertToCSV(data: ServiceRequest[]) {
+		const header = Object.keys(data[0]).join(',');
+		const rows = data.map((obj) => Object.values(obj).join(',')).join('\n');
+
+		return `${header}\n${rows}`;
 	}
 </script>
 
@@ -205,6 +229,13 @@
 						</Table>
 					</div>
 				</Card.Content>
+
+				<Card.Footer slot="footer">
+					<Button type="primary" on:click={handleDownloadCsv}>
+						Download CSV
+						<Button.Trailing data={arrowDownTray} slot="trailing" />
+					</Button>
+				</Card.Footer>
 			</Card>
 		</div>
 	</SideBarMainContentLayout>
