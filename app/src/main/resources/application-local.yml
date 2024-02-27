@@ -41,4 +41,6 @@ datasources:
 flyway:
   datasources:
     default:
-      baseline-on-migrate: true
+      locations:
+        - classpath:db/migration
+        - classpath:local

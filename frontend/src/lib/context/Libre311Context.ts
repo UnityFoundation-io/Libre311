@@ -1,4 +1,8 @@
-import { type Libre311Service } from '$lib/services/Libre311/Libre311';
+import {
+	libre311Factory,
+	type Libre311Service,
+	type Libre311ServiceProps
+} from '$lib/services/Libre311/Libre311';
 import {
 	unityAuthServiceFactory,
 	type UnityAuthService,
@@ -7,6 +11,10 @@ import {
 import { LinkResolver } from '$lib/services/LinkResolver';
 import type { Mode } from '$lib/services/mode';
 import { getContext, setContext } from 'svelte';
+import {
+	recaptchaServiceFactory,
+	type RecaptchaServiceProps
+} from '$lib/services/RecaptchaService';
 
 const libre311CtxKey = Symbol();
 
@@ -18,21 +26,24 @@ export type Libre311Context = {
 };
 
 export type Libre311ContextProviderProps = {
-	service: Libre311Service;
+	libreServiceProps: Omit<Libre311ServiceProps, 'recaptchaService'>;
 	unityAuthServiceProps: UnityAuthServiceProps;
+	recaptchaServiceProps: RecaptchaServiceProps;
 	mode: Mode;
-	recaptchaKey: string;
 };
 
 export function createLibre311Context(props: Libre311ContextProviderProps) {
 	const linkResolver = new LinkResolver();
 	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
+	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
+	const libre311Service = libre311Factory({ ...props.libreServiceProps, recaptchaService });
 
-	unityAuthService.subscribe('login', (args) => props.service.setAuthInfo(args));
-	unityAuthService.subscribe('logout', () => props.service.setAuthInfo(undefined));
+	unityAuthService.subscribe('login', (args) => libre311Service.setAuthInfo(args));
+	unityAuthService.subscribe('logout', () => libre311Service.setAuthInfo(undefined));
 
 	const ctx: Libre311Context = {
-		...props,
+		mode: props.mode,
+		service: libre311Service,
 		linkResolver,
 		unityAuthService
 	};

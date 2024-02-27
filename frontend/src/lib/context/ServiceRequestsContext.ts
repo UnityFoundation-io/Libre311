@@ -37,13 +37,14 @@ function toServiceRequestParams(searchParams: URLSearchParams) {
 
 	if (searchParams.get('pageNumber')) params.pageNumber = Number(searchParams.get('pageNumber'));
 
-	if (searchParams.get('serviceCode'))
-		params.serviceCode = searchParams.get('serviceCode') ?? undefined;
-	if (searchParams.get('startDate')) params.startDate = searchParams.get('startDate') ?? undefined;
-	if (searchParams.get('endDate')) params.endDate = searchParams.get('endDate') ?? undefined;
+	if (searchParams.get('service_code'))
+		params.serviceCode = searchParams.get('service_code') ?? undefined;
+	if (searchParams.get('start_date'))
+		params.startDate = searchParams.get('start_date') ?? undefined;
+	if (searchParams.get('end_date')) params.endDate = searchParams.get('end_date') ?? undefined;
 	// todo validate format
-	const maybeStatusString = searchParams.get('status');
-	if (maybeStatusString) params.status = JSON.parse(maybeStatusString);
+	if (searchParams.get('status'))
+		params.status = searchParams.get('status')?.split(',') ?? undefined;
 
 	return params;
 }
