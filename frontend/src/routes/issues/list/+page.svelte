@@ -14,12 +14,12 @@
 </script>
 
 <div class="flex items-center justify-center">
-	{#if $serviceRequestsRes.type === 'success'}
-		<div class="w-full max-w-lg">
-			<div class="my-4 flex justify-center">
-				<MapListToggle />
-			</div>
+	<div class="w-full max-w-lg">
+		<div class="my-4 flex justify-center">
+			<MapListToggle />
+		</div>
 
+		{#if $serviceRequestsRes.type === 'success'}
 			<div class="m-3 flex items-center justify-between">
 				<div>
 					<p class="text-base">{messages['sidebar']['title']}</p>
@@ -53,6 +53,6 @@
 					</li>
 				{/each}
 			</ul>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>

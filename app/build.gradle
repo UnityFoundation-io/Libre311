@@ -46,7 +46,15 @@ dependencies {
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
     runtimeOnly("org.flywaydb:flyway-mysql")
-    runtimeOnly("mysql:mysql-connector-java:8.0.31")
+
+    String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
+    if (databaseSelection != null) {
+        databaseSelection.split(',').each {part ->
+            runtimeOnly(part)
+        }
+    } else {
+        runtimeOnly("mysql:mysql-connector-java:8.0.31")
+    }
 }
 
 application {

@@ -27,7 +27,7 @@ micronaut:
           - http://127.0.0.1:3000
 ---
 app:
-  service-id: ${LIBRE311_SERVICE_ID}
+  service-id: ${LIBRE311_SERVICE_ID:1}
 
 datasources:
   default:
@@ -36,3 +36,11 @@ datasources:
     username: root
     password: test
     db-type: mysql
+
+
+flyway:
+  datasources:
+    default:
+      locations:
+        - classpath:db/migration
+        - classpath:local

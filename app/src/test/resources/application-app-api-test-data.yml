@@ -5,10 +5,12 @@ app-data:
       jurisdictions:
         - id: "city.gov"
           tenant: 1
+          groups: ["Infrastructure"]
           services:
             - serviceCode: "001"
               serviceName: Sidewalk
               description: Sidewalk
+              group: "Infrastructure"
               type: realtime
               serviceDefinition:
                 attributes:
@@ -80,6 +82,7 @@ app-data:
             - serviceCode: "003"
               serviceName: Bike Lane
               description: Bike Lane
+              group: "Infrastructure"
               type: realtime
               serviceDefinition:
                 attributes:
@@ -104,6 +107,7 @@ app-data:
             - serviceCode: "005"
               serviceName: Intersection
               description: Intersection
+              group: "Infrastructure"
               type: realtime
               serviceDefinition:
                 attributes:
@@ -127,10 +131,12 @@ app-data:
                         name: "Other"
         - id: "town.gov"
           tenant: 2
+          groups: ["Infrastructure", "Unknown"]
           services:
             - serviceCode: "002"
               serviceName: Bus Stop
               description: Bus Stop
+              group: "Infrastructure"
               type: realtime
               serviceDefinition:
                 attributes:
@@ -155,6 +161,7 @@ app-data:
             - serviceCode: "004"
               serviceName: Crosswalk
               description: Crosswalk
+              group: "Infrastructure"
               type: realtime
               serviceDefinition:
                 attributes:
@@ -179,4 +186,5 @@ app-data:
             - serviceCode: "006"
               serviceName: Other
               description: Other
+              group: "Unknown"
               type: realtime

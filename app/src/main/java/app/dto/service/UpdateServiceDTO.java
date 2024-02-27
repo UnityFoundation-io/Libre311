@@ -31,6 +31,9 @@ public class UpdateServiceDTO {
     @JsonProperty("service_definition")
     private String serviceDefinitionJson;
 
+    @JsonProperty("group_id")
+    private Long groupId;
+
     public UpdateServiceDTO() {
     }
 
@@ -64,5 +67,13 @@ public class UpdateServiceDTO {
 
     public void setServiceDefinitionJson(String serviceDefinitionJson) {
         this.serviceDefinitionJson = serviceDefinitionJson;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 }

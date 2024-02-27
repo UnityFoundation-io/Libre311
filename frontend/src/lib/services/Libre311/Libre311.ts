@@ -281,7 +281,7 @@ type LatLngTuple = z.infer<typeof latLngTupleSchema>;
 
 const JurisdictionConfigSchema = z
 	.object({
-		jurisdiction_name: z.string(),
+		name: z.string(),
 		bounds: z.array(latLngTupleSchema).min(1)
 	})
 	.merge(HasJurisdictionIdSchema);
@@ -366,11 +366,16 @@ const ROUTES = {
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getJurisdictionConfig(): Promise<JurisdictionConfig> {
-	// todo don't use axios (will need to create axiosInstance or pass in the baseUrl)
-	const res = await axios.get<unknown>(ROUTES.getJurisdictionConfig);
-	return JurisdictionConfigSchema.parse(res.data);
+async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
+	const res = await axios.get<JurisdictionConfig>(baseURL + ROUTES.getJurisdictionConfig);
+	try {
+		// todo parse the data to validate once the jurisdiction config returns bounds
+		return res.data;
+		// return JurisdictionConfigSchema.parse(res.data);
+	} catch (error: unknown) {
+		console.error(error);
+		throw error;
+	}
 }
 
 class Libre311ServiceError extends Error {
@@ -445,14 +450,10 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
-		// todo uncomment when /config endpoint exists code the jurisdiction_id
-		// const jurisdictionConfig = await getJurisdictionConfig();
+		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
+		// todo remove once backend returns bounds info
 		const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
-		const jurisdictionConfig: JurisdictionConfig = {
-			jurisdiction_id: 'town.gov',
-			jurisdiction_name: 'New Haven, CT',
-			bounds: jurisdictionBounds
-		};
+		jurisdictionConfig.bounds = jurisdictionBounds;
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
 	}
 

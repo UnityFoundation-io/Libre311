@@ -70,7 +70,7 @@
 				>
 					<Bars3 />
 				</button>
-				<h1>{libre311Context.service.getJurisdictionConfig().jurisdiction_name}</h1>
+				<h1>{libre311Context.service.getJurisdictionConfig().name}</h1>
 			</div>
 
 			<User />

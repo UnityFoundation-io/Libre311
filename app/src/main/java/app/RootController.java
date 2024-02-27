@@ -46,6 +46,7 @@ import jakarta.annotation.Nullable;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -251,8 +252,8 @@ public class RootController {
 
     @Get(value =  "/config")
     @ExecuteOn(TaskExecutors.IO)
-    public JurisdictionDTO getJurisdictionInfo(@Header("Host") String hostName) {
-        return jurisdictionService.findJurisdictionByHostName(hostName);
+    public JurisdictionDTO getJurisdictionInfo(@Header("Referer") String referer) throws URISyntaxException {
+        return jurisdictionService.findJurisdictionByHostName(new URI(referer).getHost());
     }
 
     @Get("/swagger-ui")
