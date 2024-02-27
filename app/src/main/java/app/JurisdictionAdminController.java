@@ -15,6 +15,8 @@
 package app;
 
 import app.dto.download.DownloadRequestsArgumentsDTO;
+import app.dto.group.GroupDTO;
+import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
@@ -23,7 +25,9 @@ import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.security.RequiresPermissions;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
-import io.micronaut.http.MediaType;
+import io.micronaut.data.model.Page;
+import io.micronaut.data.model.Pageable;
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.server.types.files.StreamedFile;
 import io.micronaut.scheduling.TaskExecutors;
@@ -34,6 +38,7 @@ import jakarta.annotation.Nullable;
 import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 import static app.security.Permission.*;
 
@@ -50,8 +55,6 @@ public class JurisdictionAdminController {
     }
 
     @Post(uris = { "/services{?jurisdiction_id}", "/services.json{?jurisdiction_id}" })
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
@@ -67,9 +70,40 @@ public class JurisdictionAdminController {
         return List.of(serviceService.updateService(serviceId, requestDTO, jurisdiction_id));
     }
 
+    @Get(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_VIEW_SYSTEM, LIBRE311_ADMIN_VIEW_TENANT, LIBRE311_ADMIN_VIEW_SUBTENANT})
+    public Page<GroupDTO> indexGroups(@Valid Pageable pageable, @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceService.getPageableGroups(pageable, jurisdiction_id);
+    }
+
+    @Post(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public List<GroupDTO> createGroup(@Valid @Body CreateUpdateGroupDTO requestDTO,
+                                      @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return List.of(serviceService.createGroup(requestDTO, jurisdiction_id));
+    }
+
+    @Patch(uris = { "/groups/{groupId}{?jurisdiction_id}", "/groups/{groupId}.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public List<GroupDTO> updateGroup(Long groupId, @Valid @Body CreateUpdateGroupDTO requestDTO,
+                                              @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return List.of(serviceService.updateGroup(groupId, requestDTO));
+    }
+
+    @Delete(uris = { "/groups/{groupId}{?jurisdiction_id}", "/groups/{groupId}.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public HttpResponse deleteGroup(Long groupId,
+                                  @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        serviceService.deleteGroup(groupId);
+        return HttpResponse.ok();
+    }
+
     @Get(uris = { "/requests/{serviceRequestId}{?jurisdiction_id}",
             "/requests/{serviceRequestId}.json{?jurisdiction_id}" })
-    @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
     public List<SensitiveServiceRequestDTO> getServiceRequestJson(Long serviceRequestId, @Nullable String jurisdiction_id) {
