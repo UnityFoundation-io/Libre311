@@ -7,6 +7,7 @@ import type {
 	UpdateSensitiveServiceRequestResponse
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
+import type { CreateServiceRequest, CreateServiceResponse } from './types/CreateService';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -15,7 +16,7 @@ const HasJurisdictionIdSchema = z.object({
 export type HasJurisdictionId = z.infer<typeof HasJurisdictionIdSchema>;
 export type JurisdictionId = z.infer<typeof JurisdicationIdSchema>;
 
-const RealtimeServiceTypeSchema = z.literal('realtime');
+const RealtimeServiceTypeSchema = z.literal('REALTIME');
 const OtherServiceTypeSchema = z.literal('other'); // todo remove once second type is found
 const ServiceTypeSchema = z.union([RealtimeServiceTypeSchema, OtherServiceTypeSchema]); // todo what are the other types besides realtime?
 
@@ -322,6 +323,7 @@ export type ServiceRequestsResponse = {
 export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
+	createService(params: CreateServiceRequest): Promise<CreateServiceResponse>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
@@ -483,6 +485,23 @@ export class Libre311ServiceImpl implements Libre311Service {
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
 		return ServiceDefinitionSchema.parse(res.data);
+	}
+
+	async createService(params: CreateServiceRequest): Promise<CreateServiceResponse> {
+		console.log('CREATE SERVICE');
+		console.log(params);
+
+		// TODO
+		return {
+			id: 0,
+			service_code: 'string',
+			jurisdiction_id: 'string',
+			service_name: 'string',
+			description: 'string',
+			metadata: true,
+			type: 'REALTIME',
+			group_id: 0
+		};
 	}
 
 	async createServiceRequest(

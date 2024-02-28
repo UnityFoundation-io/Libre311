@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import type { CreateServiceResponse } from '$lib/services/Libre311/types/CreateService';
 	import {
 		stringValidator,
 		type FormInputValue,
@@ -43,23 +45,33 @@
 		}
 	];
 
-	function handleAddNewService() {
-		isAddServiceModalOpen = false;
+	const libre311 = useLibre311Service();
 
+	async function handleAddNewService() {
 		newServiceName = stringValidator(newServiceName);
 		newServiceCode = stringValidator(newServiceCode);
 		newServiceDescription = stringValidator(newServiceDescription);
+		newServiceDefinition = stringValidator(newServiceDefinition);
 		newServiceGroupId = numberValidator(newServiceGroupId);
 
 		const resultSet = new Set([
 			newServiceName.type,
 			newServiceCode.type,
 			newServiceDescription.type,
+			newServiceDefinition.type,
 			newServiceGroupId.type
 		]);
 		if (resultSet.has('invalid')) return;
 
-		alert('TODO: Add A New Service');
+		await libre311.createService({
+			service_code: newServiceCode.value ?? '',
+			service_name: newServiceName.value ?? '',
+			description: newServiceDescription.value ?? '',
+			service_definition: newServiceDefinition.value ?? '',
+			group_id: newServiceGroupId.value ?? -1
+		});
+
+		isAddServiceModalOpen = false;
 	}
 
 	let isAddServiceModalOpen: boolean = false;
@@ -67,6 +79,7 @@
 	let newServiceName: FormInputValue<string> = createInput();
 	let newServiceCode: FormInputValue<string> = createInput();
 	let newServiceDescription: FormInputValue<string> = createInput();
+	let newServiceDefinition: FormInputValue<string> = createInput();
 	let newServiceGroupId: FormInputValue<number> = createInput();
 </script>
 
@@ -88,7 +101,7 @@
 						error={newServiceCode.error}
 						bind:value={newServiceCode.value}
 					>
-						<Input.Label slot="label">Service Code:</Input.Label>
+						<Input.Label slot="label">Code:</Input.Label>
 					</Input>
 
 					<Input
@@ -97,7 +110,7 @@
 						error={newServiceName.error}
 						bind:value={newServiceName.value}
 					>
-						<Input.Label slot="label">Service Name:</Input.Label>
+						<Input.Label slot="label">Name:</Input.Label>
 					</Input>
 
 					<TextArea
@@ -109,13 +122,22 @@
 						<TextArea.Label slot="label">Description:</TextArea.Label>
 					</TextArea>
 
+					<TextArea
+						class="m-2"
+						name="new-service-definition"
+						error={newServiceDefinition.error}
+						bind:value={newServiceDefinition.value}
+					>
+						<TextArea.Label slot="label">Definition:</TextArea.Label>
+					</TextArea>
+
 					<InputNumber
 						class="m-2"
 						name="new-service-name"
 						error={newServiceGroupId.error}
 						bind:value={newServiceGroupId.value}
 					>
-						<Input.Label slot="label">Group ID:</Input.Label>
+						<InputNumber.Label slot="label">Group ID:</InputNumber.Label>
 					</InputNumber>
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
