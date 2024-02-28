@@ -362,7 +362,7 @@
 
 							<Table.Footer slot="footer">
 								<div class="m-2 flex justify-end">
-									<Button type="primary" on:click={handleDownloadCsv}>
+									<Button on:click={handleDownloadCsv}>
 										Download CSV
 										<Button.Trailing data={arrowDownTray} slot="trailing" />
 									</Button>
