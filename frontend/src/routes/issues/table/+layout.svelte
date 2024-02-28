@@ -1,75 +1,58 @@
+<script lang="ts" context="module">
+	let cachedServiceList: GetServiceListResponse | undefined = undefined;
+</script>
+
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import { Badge, Card, Input, Table } from 'stwui';
-	import type { TableColumn } from 'stwui/types';
+	import { Badge, Button, Card, DatePicker, Input, Table } from 'stwui';
 	import { page } from '$app/stores';
-	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import {
 		useSelectedServiceRequestStore,
 		useServiceRequestsContext
 	} from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
-	import type { ServiceRequest, ServiceRequestId } from '$lib/services/Libre311/Libre311';
+	import { saveAs } from 'file-saver';
+	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
+	import type {
+		GetServiceListResponse,
+		ServiceCode,
+		ServiceRequest,
+		ServiceRequestId,
+		ServiceRequestStatus
+	} from '$lib/services/Libre311/Libre311';
 	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
-	import type { ComponentEvents } from 'svelte';
+	import { onMount, type ComponentEvents } from 'svelte';
+	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
+	import { slide } from 'svelte/transition';
+	import { Select } from 'stwui';
+	import { columns, priorityOptions, statusOptions } from './table';
+	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon';
+	import {
+		ASYNC_IN_PROGRESS,
+		asAsyncSuccess,
+		type AsyncResult,
+		asAsyncFailure
+	} from '$lib/services/http';
+	import type { SelectOption } from 'stwui/types';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
-
 	const ctx = useServiceRequestsContext();
+	const libre311 = useLibre311Service();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
+	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
+	let selectedServiceCode: ServiceCode | undefined;
+	let isSearchFiltersOpen: boolean = false;
+	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
-
-	// 14% * 7 = 98%
-	const columns: TableColumn[] = [
-		{
-			column: 'issue_id',
-			label: 'Issue ID',
-			placement: 'center',
-			class: 'w-[14%]'
-		},
-		{
-			column: 'service_name',
-			label: 'Service Name',
-			placement: 'center',
-			class: 'w-[14%]'
-		},
-		{
-			column: 'status',
-			label: 'Status',
-			placement: 'center',
-			class: 'w-[14%]'
-		},
-		{
-			column: 'address',
-			label: 'Address',
-			placement: 'center',
-			class: 'hidden xl:table-cell w-[14%]'
-		},
-		{
-			column: 'created_at',
-			label: 'Created',
-			placement: 'center',
-			class: 'hidden lg:table-cell w-[14%]'
-		},
-		{
-			column: 'last_updated',
-			label: 'Last Updated',
-			placement: 'center',
-			class: 'hidden lg:table-cell w-[14%]'
-		},
-		{
-			column: 'expected_completion',
-			label: 'Expected Completion',
-			placement: 'center',
-			class: 'hidden xl:table-cell w-[14%]'
-		}
-	];
+	let startDate: Date;
+	let endDate: Date;
 
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(`/issues/table/${service_request_id}`);
@@ -90,6 +73,24 @@
 			: 'item-id';
 	}
 
+	function fetchServiceList() {
+		if (cachedServiceList) {
+			serviceList = asAsyncSuccess(cachedServiceList);
+			return;
+		}
+		libre311
+			.getServiceList()
+			.then((res) => {
+				cachedServiceList = res;
+				serviceList = asAsyncSuccess(res);
+			})
+			.catch((err) => (serviceList = asAsyncFailure(err)));
+	}
+
+	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
+		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
+	}
+
 	async function handleSearchInput(e: ComponentEvents<any>['input']) {
 		const target = e.target as HTMLInputElement;
 
@@ -105,6 +106,85 @@
 			ctx.applyServiceRequestParams({}, $page.url);
 		}
 	}
+
+	async function handleDownloadCsv() {
+		const allServiceRequests = await libre311.getAllServiceRequests({});
+
+		// Sanatize Requests
+		for (let request of allServiceRequests) {
+			request.address = request.address.replace(/,/g, '');
+		}
+
+		const csvContent = convertToCSV(allServiceRequests);
+
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+		saveAs(blob, 'service-requests.csv');
+	}
+
+	function convertToCSV(data: ServiceRequest[]) {
+		const delimiter = '\t';
+		const header = Object.keys(data[0]).join(delimiter);
+
+		// Iterate over each object in the data array
+		const rows = data
+			.map((obj) => {
+				// Map over each key in the header
+				return header
+					.split(delimiter)
+					.map((key) => {
+						// If the object has a value for the current key
+						if (
+							obj[key as keyof typeof obj] !== undefined &&
+							obj[key as keyof typeof obj] !== null
+						) {
+							// If the value is an object, stringify it as JSON
+							if (typeof obj[key as keyof typeof obj] === 'object') {
+								// Ugly looking JSON (service definition answers)
+								return JSON.stringify(obj[key as keyof typeof obj]);
+							} else {
+								// Otherwise, return the value as is
+								return obj[key as keyof typeof obj];
+							}
+						} else {
+							// If the value is undefined or null, return an empty string
+							return '';
+						}
+					})
+					.join(delimiter);
+			})
+			.join('\n');
+
+		return `${header}\n${rows}`;
+	}
+
+	async function handleFunnelClick() {
+		isSearchFiltersOpen = !isSearchFiltersOpen;
+	}
+
+	async function handleFilterInput(
+		selectedServiceCode: ServiceCode | undefined,
+		statusInput: ServiceRequestStatus[],
+		startDate: Date,
+		endDate: Date
+	) {
+		if (selectedServiceCode || statusInput || startDate || endDate) {
+			ctx.applyServiceRequestParams(
+				{
+					serviceCode: selectedServiceCode ?? '',
+					status: statusInput ?? [''],
+					startDate: startDate?.toISOString() ?? '',
+					endDate: endDate?.toISOString() ?? ''
+				},
+				$page.url
+			);
+		} else {
+			ctx.applyServiceRequestParams({}, $page.url);
+		}
+	}
+
+	onMount(fetchServiceList);
+
+	$: handleFilterInput(selectedServiceCode, statusInput, startDate, endDate);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -131,13 +211,94 @@
 				</div>
 			</div>
 
+			<div
+				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
+			>
+				<div class="m-3 flex items-center">
+					{#if !isSearchFiltersOpen}
+						<div transition:slide|local={{ duration: 500 }}>
+							<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
+								<Input.Leading slot="trailing" data={magnifingGlassIcon} />
+							</Input>
+						</div>
+					{:else}
+						<div class="flex flex-wrap justify-end" transition:slide|local={{ duration: 500 }}>
+							<div class="m-1">
+								<Select
+									name="select-priority"
+									placeholder="Priority:"
+									multiple
+									options={priorityOptions}
+								>
+									<Select.Label slot="label">Priority</Select.Label>
+									<Select.Options slot="options">
+										{#each priorityOptions as option}
+											<Select.Options.Option {option} />
+										{/each}
+									</Select.Options>
+								</Select>
+							</div>
+
+							<div class="m-1">
+								<Select
+									name="select-status"
+									placeholder="Status:"
+									multiple
+									options={statusOptions}
+									bind:value={statusInput}
+								>
+									<Select.Label slot="label">Status</Select.Label>
+									<Select.Options slot="options">
+										{#each statusOptions as option}
+											<Select.Options.Option {option} />
+										{/each}
+									</Select.Options>
+								</Select>
+							</div>
+
+							{#if serviceList.type === 'success'}
+								{@const selectOptions = createSelectOptions(serviceList.value)}
+								<div class="m-1 min-w-52">
+									<Select
+										bind:value={selectedServiceCode}
+										name="select-1"
+										placeholder="Request Type"
+										on:change={() => {}}
+										options={selectOptions}
+									>
+										<Select.Label slot="label">Service</Select.Label>
+										<Select.Options slot="options">
+											{#each selectOptions as option}
+												<Select.Options.Option {option} />
+											{/each}
+										</Select.Options>
+									</Select>
+								</div>
+							{/if}
+
+							<div class="m-1">
+								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
+									<DatePicker.Label slot="label">Start Date</DatePicker.Label>
+									<DatePicker.Leading slot="leading" data={calendarIcon} />
+								</DatePicker>
+							</div>
+
+							<div class="m-1">
+								<DatePicker name="end-datetime" allowClear bind:value={endDate}>
+									<DatePicker.Label slot="label">End Date</DatePicker.Label>
+									<DatePicker.Leading slot="leading" data={calendarIcon} />
+								</DatePicker>
+							</div>
+						</div>
+					{/if}
+				</div>
+
+				<button class="mr-3" on:click={handleFunnelClick}>
+					<Funnel />
+				</button>
+			</div>
+
 			<Card bordered={true} class="m-2">
-				<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
-					Card Header
-					<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
-						<Input.Leading slot="trailing" data={magnifingGlassIcon} />
-					</Input>
-				</Card.Header>
 				<Card.Content slot="content" class="p-0 sm:p-0">
 					<div class="issues-table-override">
 						<Table class="h-full overflow-hidden rounded-md" {columns}>
@@ -202,6 +363,15 @@
 									</Table.Body.Row>
 								{/each}
 							</Table.Body>
+
+							<Table.Footer slot="footer">
+								<div class="m-2 flex justify-end">
+									<Button on:click={handleDownloadCsv}>
+										Download CSV
+										<Button.Trailing data={arrowDownTray} slot="trailing" />
+									</Button>
+								</div>
+							</Table.Footer>
 						</Table>
 					</div>
 				</Card.Content>
