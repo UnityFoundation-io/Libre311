@@ -43,13 +43,13 @@
 			data: mapIcon,
 			href: linkResolver.issuesMap($page.url)
 		},
+		{
+			key: 'manager',
+			label: 'Service Definition Manager',
+			data: pencilIcon,
+			href: '/groups'
+		},
 		// TODO: Add appropriate URLs
-		// {
-		// 	key: 'manager',
-		// 	label: 'Service Definition Manager',
-		// 	data: pencilIcon,
-		// 	href: '#manager'
-		// },
 		// {
 		// 	key: 'editor',
 		// 	label: 'Theme Editor',

@@ -1,13 +1,12 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
-import { z } from 'zod';
+import { unknown, z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
 import type {
 	UpdateSensitiveServiceRequestRequest,
 	UpdateSensitiveServiceRequestResponse
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
-import type { CreateServiceRequest, CreateServiceResponse } from './types/CreateService';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -16,7 +15,7 @@ const HasJurisdictionIdSchema = z.object({
 export type HasJurisdictionId = z.infer<typeof HasJurisdictionIdSchema>;
 export type JurisdictionId = z.infer<typeof JurisdicationIdSchema>;
 
-const RealtimeServiceTypeSchema = z.literal('REALTIME');
+const RealtimeServiceTypeSchema = z.literal('realtime');
 const OtherServiceTypeSchema = z.literal('other'); // todo remove once second type is found
 const ServiceTypeSchema = z.union([RealtimeServiceTypeSchema, OtherServiceTypeSchema]); // todo what are the other types besides realtime?
 
@@ -266,6 +265,34 @@ export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
 
+// ***************** Create Service *************** //
+
+// Create Service - Request Schema
+export const CreateServiceRequestSchema = z.object({
+	service_code: z.string(),
+	service_name: z.string(),
+	description: z.string(),
+	service_definition: z.string(),
+	group_id: z.number()
+});
+
+//  Create Service - Response Schema
+export const CreateServiceResponseSchema = z
+	.object({
+		id: z.number(),
+		jurisdiction_id: z.string(),
+		group_id: z.number()
+	})
+	.merge(ServiceSchema);
+
+//  Create Service - Request Type
+export type CreateServiceRequest = z.infer<typeof CreateServiceRequestSchema>;
+
+// Create Service - Response Type
+export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
+
+// ************************************************ //
+
 export type GetServiceRequestsParams =
 	| ServiceRequestId[]
 	| {
@@ -362,6 +389,8 @@ const ROUTES = {
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
+	postService: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -488,20 +517,23 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async createService(params: CreateServiceRequest): Promise<CreateServiceResponse> {
-		console.log('CREATE SERVICE');
-		console.log(params);
+		let data;
 
-		// TODO
-		return {
-			id: 0,
-			service_code: 'string',
-			jurisdiction_id: 'string',
-			service_name: 'string',
-			description: 'string',
-			metadata: true,
-			type: 'REALTIME',
-			group_id: 0
-		};
+		try {
+			const res = await this.axiosInstance.post<unknown>(
+				ROUTES.postService(this.jurisdictionConfig),
+				params
+			);
+
+			if (res.data) {
+				data = res.data[0 as keyof typeof unknown];
+			}
+
+			return CreateServiceResponseSchema.parse(data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
 	}
 
 	async createServiceRequest(

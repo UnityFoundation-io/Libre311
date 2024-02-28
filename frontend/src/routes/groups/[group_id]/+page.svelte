@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import type { CreateServiceResponse } from '$lib/services/Libre311/types/CreateService';
 	import {
 		stringValidator,
 		type FormInputValue,
@@ -63,13 +62,15 @@
 		]);
 		if (resultSet.has('invalid')) return;
 
-		await libre311.createService({
-			service_code: newServiceCode.value ?? '',
-			service_name: newServiceName.value ?? '',
-			description: newServiceDescription.value ?? '',
-			service_definition: newServiceDefinition.value ?? '',
-			group_id: newServiceGroupId.value ?? -1
-		});
+		console.log(
+			await libre311.createService({
+				service_code: newServiceCode.value ?? '',
+				service_name: newServiceName.value ?? '',
+				description: newServiceDescription.value ?? '',
+				service_definition: newServiceDefinition.value ?? '',
+				group_id: newServiceGroupId.value ?? -1
+			})
+		);
 
 		isAddServiceModalOpen = false;
 	}
