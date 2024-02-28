@@ -47,6 +47,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -320,6 +321,26 @@ public class RootControllerTest {
         assertEquals(1, serviceRequestDTOS.length);
         assertTrue(Arrays.stream(serviceRequestDTOS).allMatch(
                 serviceRequestDTO -> "city.gov".equals(serviceRequestDTO.getJurisdictionId())));
+    }
+
+    @Test
+    public void authenticatedUsersCanViewSensitiveServiceRequestDetails() {
+        setAuthHasPermissionSuccessResponse(true, List.of());
+
+        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO("001");
+        serviceRequestDTO.setgRecaptchaResponse("abc");
+        serviceRequestDTO.setLongitude("43.3434");
+        serviceRequestDTO.setLatitude("48.98");
+        serviceRequestDTO.setEmail("private@test.com");
+
+        createServiceRequest(serviceRequestDTO, Map.of("attribute[SDWLK]", "NARROW"),
+            "city.gov");
+
+        var req = HttpRequest.GET("/requests?jurisdiction_id=city.gov").bearerAuth( "eyekljdsl");
+        HttpResponse<List<SensitiveServiceRequestDTO>> response = client.toBlocking().exchange(req,
+            Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertEquals(HttpStatus.OK, response.status());
+        assertEquals(serviceRequestDTO.getEmail(), response.getBody().orElseThrow().get(0).getEmail());
     }
 
     @Test
@@ -1063,7 +1084,7 @@ public class RootControllerTest {
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
-                .header("Authorization", "Bearer token.text.here")
+                .header("Authorization", "Bearer eydksjfskdlf")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
     }
