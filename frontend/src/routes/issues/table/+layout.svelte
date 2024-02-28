@@ -122,14 +122,15 @@
 	}
 
 	function convertToCSV(data: ServiceRequest[]) {
-		const header = Object.keys(data[0]).join(',');
+		const delimiter = '\t';
+		const header = Object.keys(data[0]).join(delimiter);
 
 		// Iterate over each object in the data array
 		const rows = data
 			.map((obj) => {
 				// Map over each key in the header
 				return header
-					.split(',')
+					.split(delimiter)
 					.map((key) => {
 						// If the object has a value for the current key
 						if (
@@ -139,7 +140,7 @@
 							// If the value is an object, stringify it as JSON
 							if (typeof obj[key as keyof typeof obj] === 'object') {
 								// Ugly looking JSON (service definition answers)
-								return JSON.stringify(obj[key as keyof typeof obj]).replace(/,/g, ' ');
+								return JSON.stringify(obj[key as keyof typeof obj]);
 							} else {
 								// Otherwise, return the value as is
 								return obj[key as keyof typeof obj];
@@ -149,7 +150,7 @@
 							return '';
 						}
 					})
-					.join(',');
+					.join(delimiter);
 			})
 			.join('\n');
 
