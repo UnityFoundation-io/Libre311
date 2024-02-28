@@ -60,8 +60,6 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
         }
 
         String bearerToken = maybeAuthorization.get();
-        List<String> declaredPermissionsAsStrings = declaredPermissions.stream()
-                .map(Permission::getPermission).collect(Collectors.toList());
 
         String jurisdictionId = request.getParameters().get("jurisdiction_id");
         String tenantId = request.getParameters().get("tenant_id");
@@ -72,9 +70,9 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
 
         boolean result;
         if (jurisdictionId != null) {
-            result = unityAuthService.isUserPermittedForJurisdictionAction(bearerToken, jurisdictionId, declaredPermissionsAsStrings);
+            result = unityAuthService.isUserPermittedForJurisdictionAction(bearerToken, jurisdictionId, declaredPermissions);
         } else {
-            result = unityAuthService.isUserPermittedForTenantAction(bearerToken, Long.valueOf(tenantId), declaredPermissionsAsStrings);
+            result = unityAuthService.isUserPermittedForTenantAction(bearerToken, Long.valueOf(tenantId), declaredPermissions);
         }
 
         if (result) {
