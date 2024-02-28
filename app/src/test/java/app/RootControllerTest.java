@@ -323,7 +323,7 @@ public class RootControllerTest {
     @Test
     public void getJurisdictionTest() {
         Jurisdiction j = new Jurisdiction("1", 1L, "jurisdiction1", null);
-        LatLong coordinatePair = new LatLong(41.31742721517005, -72.93918211751856, j);
+        LatLong coordinatePair = new LatLong(41.31742721517005, -72.93918211751856, j, 0);
         RemoteHost h = new RemoteHost("host1");
         h.setJurisdiction(j);
         j.getBounds().add(coordinatePair);

@@ -32,13 +32,16 @@ public class LatLong {
 
     private Double longitude;
 
+    private Integer orderPosition;
+
     public LatLong() {
     }
 
-    public LatLong(Double latitude, Double longitude, Jurisdiction jurisdiction) {
+    public LatLong(Double latitude, Double longitude, Jurisdiction jurisdiction, Integer orderPosition) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.jurisdiction = jurisdiction;
+        this.orderPosition = orderPosition;
     }
 
     public Long getId() {
@@ -71,5 +74,13 @@ public class LatLong {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public Integer getOrderPosition() {
+        return orderPosition;
+    }
+
+    public void setOrderPosition(Integer orderPosition) {
+        this.orderPosition = orderPosition;
     }
 }

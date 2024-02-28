@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -53,6 +54,7 @@ public class JurisdictionService {
 
                 List<LatLong> bounds = latLongRepository.findAllByJurisdiction(jurisdiction);
                 jurisdictionDTO.setBounds(bounds.stream()
+                        .sorted(Comparator.comparing(LatLong::getOrderPosition))
                         .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
                         .toArray(Double[][]::new));
 
@@ -76,6 +78,7 @@ public class JurisdictionService {
         List<LatLong> bounds = saveNewBounds(requestDTO.getBounds(), savedJurisdiction);
         JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdictionRepository.update(savedJurisdiction));
         jurisdictionDTO.setBounds(bounds.stream()
+                .sorted(Comparator.comparing(LatLong::getOrderPosition))
                 .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
                 .toArray(Double[][]::new));
 
@@ -98,6 +101,7 @@ public class JurisdictionService {
         if (dtoBounds != null) {
             List<LatLong> savedBounds = updateBounds(jurisdiction, dtoBounds);
             jurisdictionDTO.setBounds(savedBounds.stream()
+                    .sorted(Comparator.comparing(LatLong::getOrderPosition))
                     .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
                     .toArray(Double[][]::new));
         }
@@ -131,8 +135,12 @@ public class JurisdictionService {
             throw new IllegalArgumentException("Invalid polygonal bound - first element does not equal last.");
         }
 
+        AtomicInteger pos = new AtomicInteger(-1);
         return Arrays.stream(dtoBounds)
-                .map(latLongTuple -> new LatLong(latLongTuple[0], latLongTuple[1], jurisdiction))
+                .map(latLongTuple -> {
+                    pos.addAndGet(1);
+                    return new LatLong(latLongTuple[0], latLongTuple[1], jurisdiction, pos.get());
+                })
                 .collect(Collectors.toList());
     }
 
