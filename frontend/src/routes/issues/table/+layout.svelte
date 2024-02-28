@@ -132,14 +132,17 @@
 					.split(',')
 					.map((key) => {
 						// If the object has a value for the current key
-						if (obj[key] !== undefined && obj[key] !== null) {
+						if (
+							obj[key as keyof typeof obj] !== undefined &&
+							obj[key as keyof typeof obj] !== null
+						) {
 							// If the value is an object, stringify it as JSON
-							if (typeof obj[key] === 'object') {
+							if (typeof obj[key as keyof typeof obj] === 'object') {
 								// Ugly looking JSON (service definition answers)
-								return JSON.stringify(obj[key]).replace(/,/g, ' ');
+								return JSON.stringify(obj[key as keyof typeof obj]).replace(/,/g, ' ');
 							} else {
 								// Otherwise, return the value as is
-								return obj[key];
+								return obj[key as keyof typeof obj];
 							}
 						} else {
 							// If the value is undefined or null, return an empty string
