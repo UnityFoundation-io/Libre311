@@ -185,10 +185,12 @@ public class RootController {
     @Get(uris = {"/requests{?jurisdiction_id}", "/requests.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
-                                                                        @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, jurisdiction_id);
+    public HttpResponse<List<ServiceRequestDTO>> getServiceRequestsJson(
+        @Valid @RequestBean GetServiceRequestsDTO requestDTO,
+        @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id,
+        HttpRequest<?> request) {
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO,
+            jurisdiction_id, request.getHeaders().getAuthorization().orElse(null));
         return HttpResponse.ok(serviceRequestDTOPage.getContent())
                 .headers(Map.of(
                         "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
@@ -203,12 +205,16 @@ public class RootController {
     @Get("/requests.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<String> getServiceRequestsXml(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
-                                                      @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
+    public HttpResponse<String> getServiceRequestsXml(
+        @Valid @RequestBean GetServiceRequestsDTO requestDTO,
+        @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id,
+        HttpRequest<?> request)
+        throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
         xmlMapper.registerModule(new JavaTimeModule());
-        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO, jurisdiction_id)
+        Page<ServiceRequestDTO> serviceRequestDTOPage = serviceRequestService.findAll(requestDTO,
+                jurisdiction_id, request.getHeaders().getAuthorization().orElse(null))
                 .map(serviceRequestDTO -> {
                     sanitizeXmlContent(serviceRequestDTO);
                     return serviceRequestDTO;

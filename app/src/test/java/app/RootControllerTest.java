@@ -19,6 +19,7 @@ import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
+import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.dto.servicerequest.ServiceRequestDTO;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
@@ -26,10 +27,12 @@ import app.model.jurisdiction.LatLong;
 import app.model.jurisdiction.RemoteHost;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.security.HasPermissionResponse;
+import app.security.Permission;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockUnityAuthClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -40,6 +43,7 @@ import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -77,17 +81,19 @@ public class RootControllerTest {
         dbCleanup.cleanupServiceRequests();
     }
 
-    private void setAuthHasPermissionSuccessResponse(boolean success, List<String> permissions) {
+    private void setAuthHasPermissionSuccessResponse(boolean success, List<Permission> permissions) {
+        var permissionsAsString = permissions.stream()
+            .map(Permission::getPermission).collect(Collectors.toList());
         if (success) {
-            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person1@test.io", null, permissions)));
+            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person1@test.io", null, permissionsAsString)));
         } else {
-            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(false, "person1@test.io", "Unauthorized", permissions)));
+            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(false, "person1@test.io", "Unauthorized", permissionsAsString)));
         }
     }
 
     void authLogin() {
         mockAuthenticationFetcher.setAuthentication(DEFAULT_MOCK_AUTHENTICATION);
-        setAuthHasPermissionSuccessResponse(true, null);
+        setAuthHasPermissionSuccessResponse(true, List.of());
     }
 
     // create
@@ -273,6 +279,27 @@ public class RootControllerTest {
         assertEquals(1, serviceRequestDTOS.length);
         assertTrue(Arrays.stream(serviceRequestDTOS).allMatch(
                 serviceRequestDTO -> "city.gov".equals(serviceRequestDTO.getJurisdictionId())));
+    }
+
+
+    @Test
+    public void authenticatedUsersCanViewSensitiveServiceRequestDetails() {
+        setAuthHasPermissionSuccessResponse(true, List.of(Permission.LIBRE311_REQUEST_VIEW_TENANT));
+
+        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO("001");
+        serviceRequestDTO.setgRecaptchaResponse("abc");
+        serviceRequestDTO.setLongitude("43.3434");
+        serviceRequestDTO.setLatitude("48.98");
+        serviceRequestDTO.setEmail("private@test.com");
+
+        createServiceRequest(serviceRequestDTO, Map.of("attribute[SDWLK]", "NARROW"),
+            "city.gov");
+
+        var req = HttpRequest.GET("/requests?jurisdiction_id=city.gov").bearerAuth( "eyekljdsl");
+        HttpResponse<List<SensitiveServiceRequestDTO>> response = client.toBlocking().exchange(req,
+            Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertEquals(HttpStatus.OK, response.status());
+        assertEquals(serviceRequestDTO.getEmail(), response.getBody().orElseThrow().get(0).getEmail());
     }
 
     @Test

@@ -589,40 +589,6 @@ public class JurisdictionAdminControllerTest {
     }
 
     @Test
-    public void canReadServiceRequestSensitiveInfoIfAuthenticated() {
-        HttpResponse<?> response;
-
-        response = createServiceRequest("001", "12345 Fairway",
-                Map.of("attribute[SDWLK]", "NARROW"), "fakecity.gov");
-        assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
-        assertTrue(optional.isPresent());
-        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
-
-        PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
-
-        // unauthenticated read attempt
-        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=fakecity.gov")
-                .header("Authorization", "Bearer token.text.here");
-
-        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
-        });
-        assertEquals(UNAUTHORIZED, exception.getStatus());
-
-        authLogin();
-
-        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
-        assertEquals(HttpStatus.OK, response.status());
-
-        Optional<SensitiveServiceRequestDTO[]> bodyOptional = response.getBody(SensitiveServiceRequestDTO[].class);
-        assertTrue(bodyOptional.isPresent());
-        SensitiveServiceRequestDTO[] serviceRequestDTOS = bodyOptional.get();
-        assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
-        assertEquals(1, serviceRequestDTOS.length);
-    }
-
-    @Test
     public void canDownloadCSVFile() throws IOException {
         HttpResponse<?> response;
 

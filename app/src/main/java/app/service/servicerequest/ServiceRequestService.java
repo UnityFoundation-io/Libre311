@@ -27,6 +27,8 @@ import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
+import app.security.Permission;
+import app.security.UnityAuthService;
 import app.service.storage.StorageUrlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +44,8 @@ import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.inject.Singleton;
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,12 +68,16 @@ public class ServiceRequestService {
     private final ServiceRepository serviceRepository;
     private final ReCaptchaService reCaptchaService;
     private final StorageUrlUtil storageUrlUtil;
+    private final UnityAuthService unityAuthService;
 
-    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository, ServiceRepository serviceRepository, ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil) {
+    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository,
+            ServiceRepository serviceRepository, ReCaptchaService reCaptchaService,
+            StorageUrlUtil storageUrlUtil, UnityAuthService unityAuthService) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
         this.reCaptchaService = reCaptchaService;
         this.storageUrlUtil = storageUrlUtil;
+        this.unityAuthService = unityAuthService;
     }
 
     private static ServiceRequestDTO convertToDTO(ServiceRequest serviceRequest) {
@@ -381,8 +389,22 @@ public class ServiceRequestService {
         return serviceRequestDTO;
     }
 
-    public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
-        return getServiceRequestPage(requestDTO, jurisdictionId).map(ServiceRequestService::convertToDTO);
+    public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO, String jurisdictionId,
+            @Nullable String authorization) {
+
+        boolean canViewSensitive = false;
+        if (authorization != null){
+            canViewSensitive = unityAuthService.isUserPermittedForJurisdictionAction(authorization, jurisdictionId,
+                    List.of(Permission.LIBRE311_REQUEST_VIEW_SUBTENANT,
+                            Permission.LIBRE311_REQUEST_VIEW_TENANT, Permission.LIBRE311_REQUEST_VIEW_SYSTEM));
+        }
+
+        Function<ServiceRequest, ServiceRequestDTO> mapper = canViewSensitive
+                ? ServiceRequestService::convertToSensitiveDTO
+                : ServiceRequestService::convertToDTO;
+
+
+        return getServiceRequestPage(requestDTO, jurisdictionId).map(mapper);
     }
 
     private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
