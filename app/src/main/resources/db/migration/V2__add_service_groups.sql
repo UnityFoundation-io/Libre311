@@ -15,7 +15,7 @@ ALTER TABLE services
 
 UPDATE services s
     SET service_group_id = (SELECT id FROM service_groups sg WHERE sg.jurisdiction_id = s.jurisdiction_id AND sg.name = 'Default Service Group')
-    HERE service_group_id IS NULL;
+    WHERE service_group_id IS NULL;
 
 
 ALTER TABLE services
