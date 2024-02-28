@@ -5,7 +5,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import { Badge, Card, DatePicker, Input, Table } from 'stwui';
+	import { Badge, Button, Card, DatePicker, Input, Table } from 'stwui';
 	import { page } from '$app/stores';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import {
@@ -14,6 +14,8 @@
 	} from '$lib/context/ServiceRequestsContext';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
+	import { saveAs } from 'file-saver';
+	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
 	import type {
 		GetServiceListResponse,
 		ServiceCode,
@@ -40,7 +42,6 @@
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
-
 	const ctx = useServiceRequestsContext();
 	const libre311 = useLibre311Service();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
@@ -104,6 +105,56 @@
 		} else {
 			ctx.applyServiceRequestParams({}, $page.url);
 		}
+	}
+
+	async function handleDownloadCsv() {
+		const allServiceRequests = await libre311.getAllServiceRequests({});
+
+		// Sanatize Requests
+		for (let request of allServiceRequests) {
+			request.address = request.address.replace(/,/g, '');
+		}
+
+		const csvContent = convertToCSV(allServiceRequests);
+
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+		saveAs(blob, 'service-requests.csv');
+	}
+
+	function convertToCSV(data: ServiceRequest[]) {
+		const delimiter = '\t';
+		const header = Object.keys(data[0]).join(delimiter);
+
+		// Iterate over each object in the data array
+		const rows = data
+			.map((obj) => {
+				// Map over each key in the header
+				return header
+					.split(delimiter)
+					.map((key) => {
+						// If the object has a value for the current key
+						if (
+							obj[key as keyof typeof obj] !== undefined &&
+							obj[key as keyof typeof obj] !== null
+						) {
+							// If the value is an object, stringify it as JSON
+							if (typeof obj[key as keyof typeof obj] === 'object') {
+								// Ugly looking JSON (service definition answers)
+								return JSON.stringify(obj[key as keyof typeof obj]);
+							} else {
+								// Otherwise, return the value as is
+								return obj[key as keyof typeof obj];
+							}
+						} else {
+							// If the value is undefined or null, return an empty string
+							return '';
+						}
+					})
+					.join(delimiter);
+			})
+			.join('\n');
+
+		return `${header}\n${rows}`;
 	}
 
 	async function handleFunnelClick() {
@@ -312,6 +363,15 @@
 									</Table.Body.Row>
 								{/each}
 							</Table.Body>
+
+							<Table.Footer slot="footer">
+								<div class="m-2 flex justify-end">
+									<Button on:click={handleDownloadCsv}>
+										Download CSV
+										<Button.Trailing data={arrowDownTray} slot="trailing" />
+									</Button>
+								</div>
+							</Table.Footer>
 						</Table>
 					</div>
 				</Card.Content>
