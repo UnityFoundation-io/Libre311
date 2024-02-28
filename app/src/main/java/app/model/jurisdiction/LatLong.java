@@ -17,6 +17,7 @@ package app.model.jurisdiction;
 import javax.persistence.*;
 
 @Entity
+@Table(name = "boundary_coordinates")
 public class LatLong {
 
     @Id
@@ -24,7 +25,7 @@ public class LatLong {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "jurisdiction_id")
+    @JoinColumn(name = "jurisdiction_id", nullable = false)
     private Jurisdiction jurisdiction;
 
     private Double latitude;
