@@ -33,25 +33,7 @@
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let isDropDownVisable = false;
 	let groupId = Number($page.params.group_id);
-	let isAddServiceModalOpen: boolean = false;
 	let newServiceName: FormInputValue<string> = createInput();
-
-	async function handleAddNewService() {
-		newServiceName = stringValidator(newServiceName);
-
-		if (newServiceName.type != 'valid') {
-			return;
-		}
-
-		console.log(
-			await libre311.createService({
-				service_name: newServiceName.value,
-				group_id: groupId
-			})
-		);
-
-		isAddServiceModalOpen = false;
-	}
 
 	function fetchServiceList() {
 		if (cachedServiceList) {
@@ -69,6 +51,28 @@
 
 	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
 		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
+	}
+
+	async function handleAddNewService() {
+		if (serviceList.type !== 'success') {
+			return;
+		}
+
+		newServiceName = stringValidator(newServiceName);
+
+		if (newServiceName.type != 'valid') {
+			return;
+		}
+
+		const res = await libre311.createService({
+			service_name: newServiceName.value,
+			group_id: groupId
+		});
+
+		newServiceName.value = '';
+		isDropDownVisable = false;
+		serviceList.value.unshift(res);
+		serviceList = serviceList;
 	}
 
 	onMount(fetchServiceList);
