@@ -8,7 +8,7 @@
 	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
 	import type { SelectOption } from 'stwui/types';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
-	import { Breadcrumbs, Button, Card, Input, List, Modal, Portal } from 'stwui';
+	import { Breadcrumbs, Button, Card, Dropdown, Input, List, Modal, Portal } from 'stwui';
 	import { onMount } from 'svelte';
 	import {
 		ASYNC_IN_PROGRESS,
@@ -30,6 +30,12 @@
 
 	const libre311 = useLibre311Service();
 
+	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
+	let isDropDownVisable = false;
+	let groupId = Number($page.params.group_id);
+	let isAddServiceModalOpen: boolean = false;
+	let newServiceName: FormInputValue<string> = createInput();
+
 	async function handleAddNewService() {
 		newServiceName = stringValidator(newServiceName);
 
@@ -46,8 +52,6 @@
 
 		isAddServiceModalOpen = false;
 	}
-
-	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 
 	function fetchServiceList() {
 		if (cachedServiceList) {
@@ -68,58 +72,7 @@
 	}
 
 	onMount(fetchServiceList);
-
-	let groupId = Number($page.params.group_id);
-	let isAddServiceModalOpen: boolean = false;
-
-	let newServiceName: FormInputValue<string> = createInput();
 </script>
-
-<Portal>
-	{#if isAddServiceModalOpen}
-		<Modal
-			handleClose={() => {
-				isAddServiceModalOpen = false;
-			}}
-		>
-			<Modal.Content slot="content" class="max-h-full">
-				<Modal.Content.Header slot="header" class="h-16">
-					<h1 class="text-lg">Add A New Service</h1>
-				</Modal.Content.Header>
-				<Modal.Content.Body slot="body" class="overflow-y-auto">
-					<Input
-						class="m-2"
-						name="new-service-name"
-						error={newServiceName.error}
-						bind:value={newServiceName.value}
-					>
-						<Input.Label slot="label">Name:</Input.Label>
-					</Input>
-				</Modal.Content.Body>
-				<Modal.Content.Footer slot="footer">
-					<div class="flex items-center justify-center">
-						<Button
-							class="m-1 w-1/2"
-							on:click={() => {
-								isAddServiceModalOpen = false;
-							}}>Cancel</Button
-						>
-						<Button class="m-1 w-1/2" type="primary" on:click={handleAddNewService}>Add</Button>
-					</div>
-				</Modal.Content.Footer>
-			</Modal.Content>
-		</Modal>
-	{/if}
-</Portal>
-
-<div class="m-4 flex justify-end">
-	<Button
-		type="ghost"
-		on:click={() => {
-			isAddServiceModalOpen = true;
-		}}>{'+ Add Service'}</Button
-	>
-</div>
 
 <Card bordered={true} class="m-4">
 	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
@@ -130,11 +83,40 @@
 				</Breadcrumbs.Crumb>
 			{/each}
 		</Breadcrumbs>
+		<div class="flex justify-end">
+			<Button
+				type="ghost"
+				on:click={() => {
+					isDropDownVisable = true;
+				}}
+				>{'+ Add Service'}
+			</Button>
+		</div>
 	</Card.Header>
 	{#if serviceList.type === 'success'}
 		<Card.Content slot="content" class="p-0 sm:p-0">
 			{@const selectOptions = createSelectOptions(serviceList.value)}
 			<List>
+				{#if isDropDownVisable}
+					<div class="m-2 flex">
+						<Input
+							class="w-[80%]"
+							name="new-service-name"
+							error={newServiceName.error}
+							bind:value={newServiceName.value}
+						></Input>
+
+						<Button
+							class="w-[10%]"
+							on:click={() => {
+								isDropDownVisable = false;
+								newServiceName.value = undefined;
+							}}>Cancel</Button
+						>
+						<Button class="w-[10%]" type="primary" on:click={handleAddNewService}>Add</Button>
+					</div>
+				{/if}
+
 				{#each selectOptions as service}
 					<List.Item
 						on:click={() => goto(`/groups/1/services/${service.value}`)}
