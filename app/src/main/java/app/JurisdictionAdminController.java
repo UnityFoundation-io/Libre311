@@ -57,9 +57,9 @@ public class JurisdictionAdminController {
     @Post(uris = { "/services{?jurisdiction_id}", "/services.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public List<ServiceDTO> createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
+    public ServiceDTO createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return List.of(serviceService.createService(requestDTO, jurisdiction_id));
+        return serviceService.createService(requestDTO, jurisdiction_id);
     }
 
     @Patch(uris = { "/services/{serviceId}{?jurisdiction_id}", "/requests/{serviceId}.json{?jurisdiction_id}" })

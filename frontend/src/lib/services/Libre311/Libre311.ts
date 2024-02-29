@@ -265,6 +265,34 @@ export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
 
+// ***************** Create Service *************** //
+
+// Create Service - Request Schema
+export const CreateServiceRequestSchema = z.object({
+	service_code: z.string(),
+	service_name: z.string(),
+	description: z.string(),
+	service_definition: z.string(),
+	group_id: z.number()
+});
+
+//  Create Service - Response Schema
+export const CreateServiceResponseSchema = z
+	.object({
+		id: z.number(),
+		jurisdiction_id: z.string(),
+		group_id: z.number()
+	})
+	.merge(ServiceSchema);
+
+//  Create Service - Request Type
+export type CreateServiceParams = z.infer<typeof CreateServiceRequestSchema>;
+
+// Create Service - Response Type
+export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
+
+// ************************************************ //
+
 export type GetServiceRequestsParams =
 	| ServiceRequestId[]
 	| {
@@ -322,6 +350,7 @@ export type ServiceRequestsResponse = {
 export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
+	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
@@ -360,6 +389,8 @@ const ROUTES = {
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
+	postService: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -483,6 +514,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
 		return ServiceDefinitionSchema.parse(res.data);
+	}
+
+	async createService(params: CreateServiceParams): Promise<CreateServiceResponse> {
+		try {
+			const res = await this.axiosInstance.post<unknown>(
+				ROUTES.postService(this.jurisdictionConfig),
+				params
+			);
+
+			return CreateServiceResponseSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
 	}
 
 	async createServiceRequest(
