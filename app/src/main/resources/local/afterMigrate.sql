@@ -6,6 +6,14 @@ VALUES (1, 'stl_subtenant_admin@example.com');
 INSERT IGNORE INTO jurisdictions (id, name, tenant_id)
 VALUES ('stlma', 'St. Louis Metro Area', 1);
 
+-- Add jurisdiction boundary
+INSERT IGNORE INTO boundary_coordinates (id, latitude, longitude, order_position, jurisdiction_id)
+VALUES (1, -90.30025693587594, 38.68777201455936, 0, 'stlma'),
+       (2, -90.34433315946103, 38.61729515893717, 1, 'stlma'),
+       (3, -90.2360192439154, 38.61061640035771, 2, 'stlma'),
+       (4, -90.22097070151844, 38.7066943276854, 3, 'stlma'),
+       (5, -90.30025693587594, 38.68777201455936, 4, 'stlma');
+
 -- map the host to the jurisdiction
 INSERT IGNORE INTO remote_hosts (id, name, jurisdiction_id)
 VALUES (1, 'localhost', 'stlma');

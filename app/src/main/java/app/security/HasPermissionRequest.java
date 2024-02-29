@@ -18,6 +18,7 @@ import io.micronaut.core.annotation.Introspected;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Introspected
 public class HasPermissionRequest {
@@ -31,10 +32,11 @@ public class HasPermissionRequest {
     public HasPermissionRequest() {
     }
 
-    public HasPermissionRequest(Long tenantId, Long serviceId, List<String> permissions) {
+    public HasPermissionRequest(Long tenantId, Long serviceId, List<Permission> permissions) {
         this.tenantId = tenantId;
         this.serviceId = serviceId;
-        this.permissions = permissions;
+        this.permissions = permissions.stream()
+                .map(Permission::getPermission).collect(Collectors.toList());
     }
 
     public Long getTenantId() {
