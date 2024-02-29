@@ -53,22 +53,23 @@
 		newServiceDefinition = stringValidator(newServiceDefinition);
 		newServiceGroupId = numberValidator(newServiceGroupId);
 
-		const resultSet = new Set([
-			newServiceName.type,
-			newServiceCode.type,
-			newServiceDescription.type,
-			newServiceDefinition.type,
-			newServiceGroupId.type
-		]);
-		if (resultSet.has('invalid')) return;
+		if (
+			newServiceName.type != 'valid' ||
+			newServiceCode.type != 'valid' ||
+			newServiceDescription.type != 'valid' ||
+			newServiceDefinition.type != 'valid' ||
+			newServiceGroupId.type != 'valid'
+		) {
+			return;
+		}
 
 		console.log(
 			await libre311.createService({
-				service_code: newServiceCode.value ?? '',
-				service_name: newServiceName.value ?? '',
-				description: newServiceDescription.value ?? '',
-				service_definition: newServiceDefinition.value ?? '',
-				group_id: newServiceGroupId.value ?? -1
+				service_code: newServiceCode.value,
+				service_name: newServiceName.value,
+				description: newServiceDescription.value,
+				service_definition: newServiceDefinition.value,
+				group_id: newServiceGroupId.value
 			})
 		);
 

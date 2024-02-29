@@ -1,6 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
-import { unknown, z } from 'zod';
+import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
 import type {
 	UpdateSensitiveServiceRequestRequest,
@@ -517,19 +517,13 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async createService(params: CreateServiceRequest): Promise<CreateServiceResponse> {
-		let data;
-
 		try {
 			const res = await this.axiosInstance.post<unknown>(
 				ROUTES.postService(this.jurisdictionConfig),
 				params
 			);
 
-			if (res.data) {
-				data = res.data[0 as keyof typeof unknown];
-			}
-
-			return CreateServiceResponseSchema.parse(data);
+			return CreateServiceResponseSchema.parse(res.data);
 		} catch (error) {
 			console.log(error);
 			throw error;
