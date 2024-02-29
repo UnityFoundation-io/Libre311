@@ -547,12 +547,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse> {
-		const res = await this.axiosInstance.patch<InternalCreateServiceRequestResponse>(
+		const res = await this.axiosInstance.patch<unknown>(
 			ROUTES.patchServiceRequest(params.service_request_id, this.jurisdictionConfig),
 			params
 		);
 
-		return InternalCreateServiceRequestResponseSchema.parse(res.data)[0];
+		return CreateServiceRequestResponseSchema.parse(res.data);
 	}
 
 	async getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]> {
