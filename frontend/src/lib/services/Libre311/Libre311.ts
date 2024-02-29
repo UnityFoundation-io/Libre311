@@ -354,7 +354,7 @@ export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema> & 
 };
 
 const ROUTES = {
-	getJurisdictionConfig: '/config',
+	getJurisdictionConfig: '/api/config',
 	getServiceList: (params: HasJurisdictionId) =>
 		`/services?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
