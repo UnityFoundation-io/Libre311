@@ -8,7 +8,7 @@
 	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
 	import type { SelectOption } from 'stwui/types';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
-	import { Breadcrumbs, Button, Card, Dropdown, Input, List, Modal, Portal } from 'stwui';
+	import { Breadcrumbs, Button, Card, Input, List } from 'stwui';
 	import { onMount } from 'svelte';
 	import {
 		ASYNC_IN_PROGRESS,
