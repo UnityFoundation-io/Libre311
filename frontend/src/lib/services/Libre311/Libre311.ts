@@ -30,7 +30,7 @@ export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 export const ServiceSchema = z
 	.object({
 		service_name: z.string(),
-		description: z.string(),
+		description: z.string().optional(),
 		metadata: z.boolean(),
 		type: ServiceTypeSchema
 		// keywords: z.array(z.string()),
@@ -268,11 +268,8 @@ export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsRespon
 // ***************** Create Service *************** //
 
 // Create Service - Request Schema
-export const CreateServiceRequestSchema = z.object({
-	service_code: z.string(),
+export const CreateServiceParamsSchema = z.object({
 	service_name: z.string(),
-	description: z.string(),
-	service_definition: z.string(),
 	group_id: z.number()
 });
 
@@ -286,7 +283,7 @@ export const CreateServiceResponseSchema = z
 	.merge(ServiceSchema);
 
 //  Create Service - Request Type
-export type CreateServiceParams = z.infer<typeof CreateServiceRequestSchema>;
+export type CreateServiceParams = z.infer<typeof CreateServiceParamsSchema>;
 
 // Create Service - Response Type
 export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;

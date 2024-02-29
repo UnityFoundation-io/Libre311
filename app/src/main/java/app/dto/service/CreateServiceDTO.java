@@ -37,13 +37,11 @@ public class CreateServiceDTO extends UpdateServiceDTO {
         super.setServiceName(serviceName);
     }
 
-    @NotBlank
     @Override
     public String getServiceCode() {
         return super.getServiceCode();
     }
-
-    @NotBlank
+    
     @Override
     public void setServiceCode(String serviceCode) {
         super.setServiceCode(serviceCode);

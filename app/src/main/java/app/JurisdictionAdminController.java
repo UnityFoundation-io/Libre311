@@ -39,6 +39,7 @@ import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static app.security.Permission.*;
 
@@ -59,6 +60,9 @@ public class JurisdictionAdminController {
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public ServiceDTO createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        if (requestDTO.getServiceCode() == null) {
+            requestDTO.setServiceCode(UUID.randomUUID().toString());
+        }
         return serviceService.createService(requestDTO, jurisdiction_id);
     }
 

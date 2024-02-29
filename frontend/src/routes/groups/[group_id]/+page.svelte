@@ -1,23 +1,22 @@
+<script lang="ts" context="module">
+	let cachedServiceList: GetServiceListResponse | undefined = undefined;
+</script>
+
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
+	import type { SelectOption } from 'stwui/types';
+	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
+	import { Breadcrumbs, Button, Card, Input, List, Modal, Portal } from 'stwui';
+	import { onMount } from 'svelte';
 	import {
-		stringValidator,
-		type FormInputValue,
-		numberValidator,
-		createInput
-	} from '$lib/utils/validation';
-	import {
-		Breadcrumbs,
-		Button,
-		Card,
-		Input,
-		InputNumber,
-		List,
-		Modal,
-		Portal,
-		TextArea
-	} from 'stwui';
+		ASYNC_IN_PROGRESS,
+		asAsyncSuccess,
+		type AsyncResult,
+		asAsyncFailure
+	} from '$lib/services/http';
+	import { page } from '$app/stores';
 
 	interface Crumb {
 		label: string;
@@ -29,60 +28,51 @@
 		{ label: 'Services', href: '/groups/1/' }
 	];
 
-	const services = [
-		{
-			id: 1,
-			title: 'Animal Attack'
-		},
-		{
-			id: 2,
-			title: 'Playground Equipment'
-		},
-		{
-			id: 3,
-			title: 'Trail Maintenance'
-		}
-	];
-
 	const libre311 = useLibre311Service();
 
 	async function handleAddNewService() {
 		newServiceName = stringValidator(newServiceName);
-		newServiceCode = stringValidator(newServiceCode);
-		newServiceDescription = stringValidator(newServiceDescription);
-		newServiceDefinition = stringValidator(newServiceDefinition);
-		newServiceGroupId = numberValidator(newServiceGroupId);
 
-		if (
-			newServiceName.type != 'valid' ||
-			newServiceCode.type != 'valid' ||
-			newServiceDescription.type != 'valid' ||
-			newServiceDefinition.type != 'valid' ||
-			newServiceGroupId.type != 'valid'
-		) {
+		if (newServiceName.type != 'valid') {
 			return;
 		}
 
 		console.log(
 			await libre311.createService({
-				service_code: newServiceCode.value,
 				service_name: newServiceName.value,
-				description: newServiceDescription.value,
-				service_definition: newServiceDefinition.value,
-				group_id: newServiceGroupId.value
+				group_id: groupId
 			})
 		);
 
 		isAddServiceModalOpen = false;
 	}
 
+	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
+
+	function fetchServiceList() {
+		if (cachedServiceList) {
+			serviceList = asAsyncSuccess(cachedServiceList);
+			return;
+		}
+		libre311
+			.getServiceList()
+			.then((res) => {
+				cachedServiceList = res;
+				serviceList = asAsyncSuccess(res);
+			})
+			.catch((err) => (serviceList = asAsyncFailure(err)));
+	}
+
+	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
+		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
+	}
+
+	onMount(fetchServiceList);
+
+	let groupId = Number($page.params.group_id);
 	let isAddServiceModalOpen: boolean = false;
 
 	let newServiceName: FormInputValue<string> = createInput();
-	let newServiceCode: FormInputValue<string> = createInput();
-	let newServiceDescription: FormInputValue<string> = createInput();
-	let newServiceDefinition: FormInputValue<string> = createInput();
-	let newServiceGroupId: FormInputValue<number> = createInput();
 </script>
 
 <Portal>
@@ -99,48 +89,12 @@
 				<Modal.Content.Body slot="body" class="overflow-y-auto">
 					<Input
 						class="m-2"
-						name="new-service-code"
-						error={newServiceCode.error}
-						bind:value={newServiceCode.value}
-					>
-						<Input.Label slot="label">Code:</Input.Label>
-					</Input>
-
-					<Input
-						class="m-2"
 						name="new-service-name"
 						error={newServiceName.error}
 						bind:value={newServiceName.value}
 					>
 						<Input.Label slot="label">Name:</Input.Label>
 					</Input>
-
-					<TextArea
-						class="m-2"
-						name="new-service-description"
-						error={newServiceDescription.error}
-						bind:value={newServiceDescription.value}
-					>
-						<TextArea.Label slot="label">Description:</TextArea.Label>
-					</TextArea>
-
-					<TextArea
-						class="m-2"
-						name="new-service-definition"
-						error={newServiceDefinition.error}
-						bind:value={newServiceDefinition.value}
-					>
-						<TextArea.Label slot="label">Definition:</TextArea.Label>
-					</TextArea>
-
-					<InputNumber
-						class="m-2"
-						name="new-service-name"
-						error={newServiceGroupId.error}
-						bind:value={newServiceGroupId.value}
-					>
-						<InputNumber.Label slot="label">Group ID:</InputNumber.Label>
-					</InputNumber>
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
 					<div class="flex items-center justify-center">
@@ -177,16 +131,21 @@
 			{/each}
 		</Breadcrumbs>
 	</Card.Header>
-	<Card.Content slot="content" class="p-0 sm:p-0">
-		<List>
-			{#each services as service}
-				<List.Item
-					on:click={() => goto(`/groups/1/services/${service.id}`)}
-					class="cursor-pointer hover:bg-slate-100"
-				>
-					<div class="mx-4">{service.title}</div></List.Item
-				>
-			{/each}
-		</List>
-	</Card.Content>
+	{#if serviceList.type === 'success'}
+		<Card.Content slot="content" class="p-0 sm:p-0">
+			{@const selectOptions = createSelectOptions(serviceList.value)}
+			<List>
+				{#each selectOptions as service}
+					<List.Item
+						on:click={() => goto(`/groups/1/services/${service.value}`)}
+						class="cursor-pointer hover:bg-slate-100"
+					>
+						<div class="mx-4">{service.label}</div></List.Item
+					>
+				{/each}
+			</List>
+		</Card.Content>
+	{:else if serviceList.type === 'failure'}
+		{JSON.stringify(serviceList.error, null, 2)}
+	{/if}
 </Card>
