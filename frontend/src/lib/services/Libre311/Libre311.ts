@@ -453,6 +453,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
+		console.log({ props });
 		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
 		// todo remove once backend returns bounds info
 		const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
@@ -515,7 +516,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	async getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]> {
 		let pageNumber: number = 0;
-		let allServiceRequests: ServiceRequest[] = [];
+		const allServiceRequests: ServiceRequest[] = [];
 		const queryParams = mapToServiceRequestsURLSearchParams(params);
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
 
