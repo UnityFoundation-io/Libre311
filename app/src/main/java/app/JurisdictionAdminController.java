@@ -102,14 +102,6 @@ public class JurisdictionAdminController {
         return HttpResponse.ok();
     }
 
-    @Get(uris = { "/requests/{serviceRequestId}{?jurisdiction_id}",
-            "/requests/{serviceRequestId}.json{?jurisdiction_id}" })
-    @ExecuteOn(TaskExecutors.IO)
-    @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
-    public List<SensitiveServiceRequestDTO> getServiceRequestJson(Long serviceRequestId, @Nullable String jurisdiction_id) {
-        return List.of(serviceRequestService.getSensitiveServiceRequest(serviceRequestId, jurisdiction_id));
-    }
-
     @Patch(uris = { "/requests/{serviceRequestId}{?jurisdiction_id}",
             "/requests/{serviceRequestId}.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)

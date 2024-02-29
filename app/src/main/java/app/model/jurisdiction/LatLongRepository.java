@@ -14,14 +14,12 @@
 
 package app.model.jurisdiction;
 
-import io.micronaut.data.annotation.Join;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.PageableRepository;
-import java.util.Optional;
+
+import java.util.List;
 
 @Repository
-public interface JurisdictionRepository extends PageableRepository<Jurisdiction, String> {
-
-  @Join(value = "bounds", type = Join.Type.LEFT_FETCH)
-  Optional<Jurisdiction> findByRemoteHostsNameEquals(String hosts);
+public interface LatLongRepository extends PageableRepository<LatLong, Long> {
+    List<LatLong> findAllByJurisdiction(Jurisdiction jurisdiction);
 }

@@ -52,7 +52,7 @@ public class UnityAuthService {
         this.jurisdictionUserRepository = jurisdictionUserRepository;
     }
 
-    public boolean isUserPermittedForTenantAction(String token, Long tenantId, List<String> permissions) {
+    public boolean isUserPermittedForTenantAction(String token, Long tenantId, List<Permission> permissions) {
 
         HasPermissionRequest hasPermissionRequest = new HasPermissionRequest(tenantId, serviceId, permissions);
 
@@ -83,7 +83,7 @@ public class UnityAuthService {
         return permissions != null && permissions.stream().anyMatch(s -> s.endsWith("-SYSTEM") || s.endsWith("-TENANT"));
     }
 
-    public boolean isUserPermittedForJurisdictionAction(String token, String jurisdictionId, List<String> permissions) {
+    public boolean isUserPermittedForJurisdictionAction(String token, String jurisdictionId, List<Permission> permissions) {
 
         Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById(jurisdictionId);
         if (optionalJurisdiction.isEmpty()) {

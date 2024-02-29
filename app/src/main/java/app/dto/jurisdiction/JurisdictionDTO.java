@@ -42,6 +42,8 @@ public class JurisdictionDTO {
     @JsonProperty("auth_base_url")
     private String unityAuthUrl;
 
+    private Double[][] bounds;
+
     public JurisdictionDTO() {
     }
 
@@ -113,5 +115,13 @@ public class JurisdictionDTO {
 
     public void setUnityAuthUrl(String unityAuthUrl) {
         this.unityAuthUrl = unityAuthUrl;
+    }
+
+    public Double[][] getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(Double[][] bounds) {
+        this.bounds = bounds;
     }
 }
