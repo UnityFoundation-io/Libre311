@@ -369,6 +369,7 @@ const ROUTES = {
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
+	console.log('LibreBaseURL', baseURL);
 	const res = await axios.get<JurisdictionConfig>(baseURL + ROUTES.getJurisdictionConfig);
 
 	// todo parse the data to validate once the jurisdiction config returns bounds and remove the hardcoded bounds
