@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Breadcrumbs, Card, List } from 'stwui';
+	import { ellipsisSVG } from '$lib/components/Svg/outline/EllipsisVertical.svelte';
+	import { Breadcrumbs, Button, Card, List } from 'stwui';
 
 	interface Crumb {
 		label: string;
@@ -38,7 +39,16 @@
 					on:click={() => goto(`/groups/${group.id}`)}
 					class="cursor-pointer hover:bg-slate-100"
 				>
-					<div class="mx-4">{group.title}</div>
+					<List.Item.Content slot="content">
+						<List.Item.Content.Title slot="title" class="mx-4">
+							{group.title}
+						</List.Item.Content.Title>
+					</List.Item.Content>
+					<List.Item.Extra slot="extra" placement="start">
+						<Button type="ghost" shape="circle">
+							<Button.Icon data={ellipsisSVG} />
+						</Button>
+					</List.Item.Extra>
 				</List.Item>
 			{/each}
 		</List>

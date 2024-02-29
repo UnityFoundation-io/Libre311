@@ -186,7 +186,7 @@
 			{#each services as service}
 				<List.Item>
 					<List.Item.Content slot="content">
-						<List.Item.Content.Title slot="title">
+						<List.Item.Content.Title slot="title" class="mx-4">
 							{service.title}
 						</List.Item.Content.Title>
 					</List.Item.Content>
