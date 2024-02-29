@@ -17,6 +17,7 @@
 		asAsyncFailure
 	} from '$lib/services/http';
 	import { page } from '$app/stores';
+	import { slide } from 'svelte/transition';
 
 	interface Crumb {
 		label: string;
@@ -102,7 +103,7 @@
 			{@const selectOptions = createSelectOptions(serviceList.value)}
 			<List>
 				{#if isDropDownVisable}
-					<div class="m-2 flex">
+					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
 						<Input
 							class="w-[80%]"
 							name="new-service-name"
