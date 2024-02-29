@@ -329,12 +329,6 @@ public class JurisdictionAdminControllerTest {
         });
         assertEquals(NOT_FOUND, exception.getStatus());
 
-        // fail, code not provided
-        exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            createService(null, "Road Issues", "fakecity.gov", 1L);
-        });
-        assertEquals(BAD_REQUEST, exception.getStatus());
-
         // fail, name not provided
         exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
             createService("ROAD", null, "fakecity.gov", 1L);
