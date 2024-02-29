@@ -286,7 +286,7 @@ export const CreateServiceResponseSchema = z
 	.merge(ServiceSchema);
 
 //  Create Service - Request Type
-export type CreateServiceRequest = z.infer<typeof CreateServiceRequestSchema>;
+export type CreateServiceParams = z.infer<typeof CreateServiceRequestSchema>;
 
 // Create Service - Response Type
 export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
@@ -350,7 +350,7 @@ export type ServiceRequestsResponse = {
 export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
-	createService(params: CreateServiceRequest): Promise<CreateServiceResponse>;
+	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
@@ -516,7 +516,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		return ServiceDefinitionSchema.parse(res.data);
 	}
 
-	async createService(params: CreateServiceRequest): Promise<CreateServiceResponse> {
+	async createService(params: CreateServiceParams): Promise<CreateServiceResponse> {
 		try {
 			const res = await this.axiosInstance.post<unknown>(
 				ROUTES.postService(this.jurisdictionConfig),
