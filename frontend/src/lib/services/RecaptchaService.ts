@@ -51,6 +51,7 @@ export function recaptchaServiceFactory(
 
 export async function loadRecaptchaProps(mode: Mode): Promise<RecaptchaServiceProps> {
 	let recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
+	console.log({ mode });
 	if (!recaptchaKey) {
 		if (mode == 'production') {
 			recaptchaKey = await axios.get('/recaptcha/recaptcha-key');

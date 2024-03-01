@@ -48,6 +48,8 @@
 				unityAuthServiceProps: { baseURL: String(import.meta.env.VITE_AUTH_URL) }
 			};
 
+			console.log({ ctxProps });
+
 			contextProviderProps = asAsyncSuccess(ctxProps);
 		} catch (error) {
 			console.error(error);
