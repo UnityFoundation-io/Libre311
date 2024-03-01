@@ -24,6 +24,9 @@ const HasServiceCodeSchema = z.object({
 	service_code: ServiceCodeSchema
 });
 
+export const GroupSchema = z.object({ id: z.number(), name: z.string() });
+export type Group = z.infer<typeof GroupSchema>;
+
 export type HasServiceCode = z.infer<typeof HasServiceCodeSchema>;
 export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
@@ -189,6 +192,9 @@ export type InternalCreateServiceRequestResponse = z.infer<
 
 const InternalCreateServiceRequestResponseSchema = z.array(CreateServiceRequestResponseSchema);
 
+export const GetGroupListResponseSchema = z.array(GroupSchema);
+export type GetGroupListResponse = z.infer<typeof GetGroupListResponseSchema>;
+
 export const GetServiceListResponseSchema = z.array(ServiceSchema);
 export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema>;
 
@@ -264,6 +270,11 @@ export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
 
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
+
+// ***************** Create Group ***************** //
+export const CreateGroupParamsSchema = z.object({ name: z.string() });
+
+export type CreateGroupParams = z.infer<typeof CreateGroupParamsSchema>;
 
 // ***************** Create Service *************** //
 
@@ -368,6 +379,8 @@ export interface Libre311Service extends Open311Service {
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
 	uploadImage(file: File): Promise<string>;
 	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void;
+	getGroupList(): Promise<GetGroupListResponse>;
+	createGroup(params: CreateGroupParams): Promise<Group>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -386,6 +399,10 @@ const ROUTES = {
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
+	postGroup: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
+	getGroupList: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
 	postService: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
@@ -513,6 +530,28 @@ export class Libre311ServiceImpl implements Libre311Service {
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
 		return ServiceDefinitionSchema.parse(res.data);
+	}
+
+	async createGroup(params: CreateGroupParams): Promise<Group> {
+		try {
+			const res = await this.axiosInstance.post<unknown>(
+				ROUTES.postGroup(this.jurisdictionConfig),
+				params
+			);
+
+			return GroupSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	async getGroupList(): Promise<GetGroupListResponse> {
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getGroupList({ jurisdiction_id: this.jurisdictionId })
+		);
+
+		return GetGroupListResponseSchema.parse(res.data);
 	}
 
 	async createService(params: CreateServiceParams): Promise<CreateServiceResponse> {
