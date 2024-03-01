@@ -45,8 +45,10 @@
 					jurisdictionConfig
 				},
 				recaptchaServiceProps,
-				unityAuthServiceProps: { baseURL: String(import.meta.env.VITE_AUTH_URL) }
+				unityAuthServiceProps: { baseURL: jurisdictionConfig.auth_base_url }
 			};
+
+			console.log({ ctxProps });
 
 			contextProviderProps = asAsyncSuccess(ctxProps);
 		} catch (error) {

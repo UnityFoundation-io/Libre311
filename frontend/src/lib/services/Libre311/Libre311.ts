@@ -307,7 +307,8 @@ type LatLngTuple = z.infer<typeof latLngTupleSchema>;
 const JurisdictionConfigSchema = z
 	.object({
 		name: z.string(),
-		bounds: z.array(latLngTupleSchema).min(1)
+		bounds: z.array(latLngTupleSchema).min(1),
+		auth_base_url: z.string()
 	})
 	.merge(HasJurisdictionIdSchema);
 
@@ -397,7 +398,6 @@ const ROUTES = {
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
-	console.log('LibreBaseURL', baseURL);
 	const res = await axios.get<JurisdictionConfig>(baseURL + ROUTES.getJurisdictionConfig);
 
 	// todo parse the data to validate once the jurisdiction config returns bounds and remove the hardcoded bounds
