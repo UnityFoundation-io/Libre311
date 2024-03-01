@@ -7,7 +7,6 @@
 
 	import { ellipsisSVG } from '$lib/components/Svg/outline/EllipsisVertical.svelte';
 
-	let modalOpen: boolean = false;
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
 	import type { SelectOption } from 'stwui/types';
