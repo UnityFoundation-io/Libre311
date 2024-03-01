@@ -57,7 +57,7 @@ export async function loadRecaptchaProps(mode: Mode): Promise<RecaptchaServicePr
 
 	if (!recaptchaKey) {
 		if (mode == 'production') {
-			const res = await axios.get('/recaptcha/recaptcha-key');
+			const res = await axios.get<string>('/recaptcha/recaptcha-key');
 			recaptchaKey = res.data;
 		} else if (mode == 'development') {
 			throw new Error('VITE_GOOGLE_RECAPTCHA_KEY env variable must be set');
