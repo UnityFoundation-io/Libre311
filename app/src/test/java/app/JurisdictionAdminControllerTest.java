@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import io.micronaut.core.util.StringUtils;
+import io.micronaut.data.model.Page;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -193,20 +194,18 @@ public class JurisdictionAdminControllerTest {
         // create
         response = createGroup("Sanitation", "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<GroupDTO[]> optional = response.getBody(GroupDTO[].class);
+        Optional<GroupDTO> optional = response.getBody(GroupDTO.class);
         assertTrue(optional.isPresent());
-        GroupDTO[] postResponseGroupDTOS = optional.get();
-        assertTrue(postResponseGroupDTOS.length > 0);
-        GroupDTO groupDTO = postResponseGroupDTOS[0];
+        GroupDTO groupDTO = optional.get();
 
         // list
         request = HttpRequest.GET("/jurisdiction-admin/groups?jurisdiction_id=fakecity.gov")
                 .header("Authorization", "Bearer token.text.here");
-        response = client.toBlocking().exchange(request, GroupDTO[].class);
+        response = client.toBlocking().exchange(request, Page.class);
         assertEquals(OK, response.getStatus());
-        Optional<GroupDTO[]> listBody = response.getBody(GroupDTO[].class);
+        Optional<Page> listBody = response.getBody(Page.class);
         assertTrue(listBody.isPresent());
-        assertTrue(listBody.get().length > 0);
+        assertFalse(listBody.get().getContent().isEmpty());
 
         // update
         CreateUpdateGroupDTO updateGroupDTO = new CreateUpdateGroupDTO();
@@ -214,19 +213,19 @@ public class JurisdictionAdminControllerTest {
 
         request = HttpRequest.PATCH("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=fakecity.gov", updateGroupDTO)
                 .header("Authorization", "Bearer token.text.here");
-        response = client.toBlocking().exchange(request, GroupDTO[].class);
+        response = client.toBlocking().exchange(request, GroupDTO.class);
         assertEquals(OK, response.getStatus());
 
         // verify all
-        Optional<GroupDTO[]> body = response.getBody(GroupDTO[].class);
+        Optional<GroupDTO> body = response.getBody(GroupDTO.class);
         assertTrue(body.isPresent());
-        GroupDTO groupDTO1 = body.get()[0];
+        GroupDTO groupDTO1 = body.get();
         assertEquals("Solid Waste Management", groupDTO1.getName());
 
         // delete
         request = HttpRequest.DELETE("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=fakecity.gov")
                 .header("Authorization", "Bearer token.text.here");
-        response = client.toBlocking().exchange(request, GroupDTO[].class);
+        response = client.toBlocking().exchange(request, GroupDTO.class);
         assertEquals(OK, response.getStatus());
     }
 
@@ -264,10 +263,8 @@ public class JurisdictionAdminControllerTest {
         // success, bare minimum
         response = createService("BIKELN007", "Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<ServiceDTO[]> optional = response.getBody(ServiceDTO[].class);
+        Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
-        ServiceDTO[] postResponseServiceDTOS = optional.get();
-        assertTrue(postResponseServiceDTOS.length > 0);
 
         // success, all provided
         ServiceDefinition serviceDefinition = new ServiceDefinition();
@@ -302,11 +299,9 @@ public class JurisdictionAdminControllerTest {
         String json = mapper.writeValueAsString(serviceDefinition);
         response = createService("BUS_STOP", "Bike Lane Obstruction", "Bike Lane", json, "fakecity.gov", bikeln007Group.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
-        optional = response.getBody(ServiceDTO[].class);
+        optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
-        postResponseServiceDTOS = optional.get();
-        assertTrue(postResponseServiceDTOS.length > 0);
-        ServiceDTO serviceDTO = postResponseServiceDTOS[0];
+        ServiceDTO serviceDTO = optional.get();
         assertNotNull(serviceDTO.getJurisdictionId());
         assertEquals("fakecity.gov", serviceDTO.getJurisdictionId());
 
@@ -389,19 +384,15 @@ public class JurisdictionAdminControllerTest {
 
         response = createGroup("Group - Bus Stop 1","fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<GroupDTO[]> groupOptional = response.getBody(GroupDTO[].class);
+        Optional<GroupDTO> groupOptional = response.getBody(GroupDTO.class);
         assertTrue(groupOptional.isPresent());
-        GroupDTO[] postResponseGroupDTOS = groupOptional.get();
-        assertTrue(postResponseGroupDTOS.length > 0);
-        GroupDTO groupDTO = postResponseGroupDTOS[0];
+        GroupDTO groupDTO = groupOptional.get();
 
         response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "Issues pertaining to bus stops", json, "fakecity.gov", groupDTO.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<ServiceDTO[]> optional = response.getBody(ServiceDTO[].class);
+        Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
-        ServiceDTO[] postResponseServiceDTOS = optional.get();
-        assertTrue(postResponseServiceDTOS.length > 0);
-        ServiceDTO serviceDTO = postResponseServiceDTOS[0];
+        ServiceDTO serviceDTO = optional.get();
 
         assertEquals(groupDTO.getId(), serviceDTO.getGroupId());
 
@@ -413,11 +404,9 @@ public class JurisdictionAdminControllerTest {
 
         response = createGroup("Group - Bus Stop 2","fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<GroupDTO[]> secondGroupOptional = response.getBody(GroupDTO[].class);
+        Optional<GroupDTO> secondGroupOptional = response.getBody(GroupDTO.class);
         assertTrue(secondGroupOptional.isPresent());
-        postResponseGroupDTOS = secondGroupOptional.get();
-        assertTrue(postResponseGroupDTOS.length > 0);
-        GroupDTO secondGroupDTO = postResponseGroupDTOS[0];
+        GroupDTO secondGroupDTO = secondGroupOptional.get();
         updateServiceDTO.setGroupId(secondGroupDTO.getId());
 
         ServiceDefinition serviceDefinitionUpdate = new ServiceDefinition();
@@ -444,13 +433,13 @@ public class JurisdictionAdminControllerTest {
         Map payload = mapper.convertValue(updateServiceDTO, Map.class);
         request = HttpRequest.PATCH("/jurisdiction-admin/services/"+serviceDTO.getId()+"?jurisdiction_id=fakecity.gov", payload)
                 .header("Authorization", "Bearer token.text.here");
-        response = client.toBlocking().exchange(request, ServiceDTO[].class);
+        response = client.toBlocking().exchange(request, ServiceDTO.class);
         assertEquals(OK, response.getStatus());
 
         // verify all
-        Optional<ServiceDTO[]> body = response.getBody(ServiceDTO[].class);
+        Optional<ServiceDTO> body = response.getBody(ServiceDTO.class);
         assertTrue(body.isPresent());
-        ServiceDTO serviceDTO1 = body.get()[0];
+        ServiceDTO serviceDTO1 = body.get();
         assertEquals("INNER_CITY_BUS_STOPS", serviceDTO1.getServiceCode());
         assertEquals("Inner City Bust Stops", serviceDTO1.getServiceName());
         assertEquals("Issues pertaining to inner city bus stops.", serviceDTO1.getDescription());
@@ -487,19 +476,15 @@ public class JurisdictionAdminControllerTest {
         // create
         response = createGroup("Animal Control","fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<GroupDTO[]> groupOptional = response.getBody(GroupDTO[].class);
+        Optional<GroupDTO> groupOptional = response.getBody(GroupDTO.class);
         assertTrue(groupOptional.isPresent());
-        GroupDTO[] postResponseGroupDTOS = groupOptional.get();
-        assertTrue(postResponseGroupDTOS.length > 0);
-        GroupDTO groupDTO = postResponseGroupDTOS[0];
+        GroupDTO groupDTO = groupOptional.get();
 
         response = createService("DISTRESSED_ANIMAL", "Animal in Distress", "Report animal in distress",
                 null, "fakecity.gov", groupDTO.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<ServiceDTO[]> serviceOptional = response.getBody(ServiceDTO[].class);
+        Optional<ServiceDTO> serviceOptional = response.getBody(ServiceDTO.class);
         assertTrue(serviceOptional.isPresent());
-        ServiceDTO[] postResponseServiceDTOS = serviceOptional.get();
-        assertTrue(postResponseServiceDTOS.length > 0);
 
         // delete
         request = HttpRequest.DELETE("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=fakecity.gov")
@@ -537,22 +522,19 @@ public class JurisdictionAdminControllerTest {
 
         HttpRequest<?> finalRequest = request;
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            client.toBlocking().exchange(finalRequest, SensitiveServiceRequestDTO[].class);
+            client.toBlocking().exchange(finalRequest, SensitiveServiceRequestDTO.class);
         });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
         authLogin();
 
         // update
-        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
+        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO.class);
         assertEquals(HttpStatus.OK, response.status());
 
-        Optional<SensitiveServiceRequestDTO[]> bodyOptional = response.getBody(SensitiveServiceRequestDTO[].class);
+        Optional<SensitiveServiceRequestDTO> bodyOptional = response.getBody(SensitiveServiceRequestDTO.class);
         assertTrue(bodyOptional.isPresent());
-        SensitiveServiceRequestDTO[] serviceRequestDTOS = bodyOptional.get();
-        assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
-        assertEquals(1, serviceRequestDTOS.length);
-        SensitiveServiceRequestDTO updatedServiceRequestDTO = serviceRequestDTOS[0];
+        SensitiveServiceRequestDTO updatedServiceRequestDTO =bodyOptional.get();
         assertEquals("acme@example.com", updatedServiceRequestDTO.getAgencyEmail());
         assertEquals("To be fulfilled by Acme Concrete Co.", updatedServiceRequestDTO.getServiceNotice());
         assertEquals("Acme Concrete", updatedServiceRequestDTO.getAgencyResponsible());
@@ -570,14 +552,11 @@ public class JurisdictionAdminControllerTest {
                         ))
                 .header("Authorization", "Bearer token.text.here");
 
-        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO[].class);
+        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO.class);
         assertEquals(HttpStatus.OK, response.status());
-        bodyOptional = response.getBody(SensitiveServiceRequestDTO[].class);
+        bodyOptional = response.getBody(SensitiveServiceRequestDTO.class);
         assertTrue(bodyOptional.isPresent());
-        serviceRequestDTOS = bodyOptional.get();
-        assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
-        assertEquals(1, serviceRequestDTOS.length);
-        updatedServiceRequestDTO = serviceRequestDTOS[0];
+        updatedServiceRequestDTO = bodyOptional.get();
         assertNotNull(updatedServiceRequestDTO.getClosedDate());
         assertNotNull(updatedServiceRequestDTO.getExpectedDate());
     }
@@ -689,7 +668,7 @@ public class JurisdictionAdminControllerTest {
         serviceDTO.setGroupId(groupId);
         HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, serviceDTO)
                 .header("Authorization", "Bearer token.text.here");
-        return client.toBlocking().exchange(request, ServiceDTO[].class);
+        return client.toBlocking().exchange(request, ServiceDTO.class);
     }
 
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes, String jurisdictionId) {

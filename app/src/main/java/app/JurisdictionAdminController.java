@@ -69,9 +69,9 @@ public class JurisdictionAdminController {
     @Patch(uris = { "/services/{serviceId}{?jurisdiction_id}", "/requests/{serviceId}.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public List<ServiceDTO> updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
+    public ServiceDTO updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return List.of(serviceService.updateService(serviceId, requestDTO, jurisdiction_id));
+        return serviceService.updateService(serviceId, requestDTO, jurisdiction_id);
     }
 
     @Get(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })
@@ -84,17 +84,17 @@ public class JurisdictionAdminController {
     @Post(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public List<GroupDTO> createGroup(@Valid @Body CreateUpdateGroupDTO requestDTO,
+    public GroupDTO createGroup(@Valid @Body CreateUpdateGroupDTO requestDTO,
                                       @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return List.of(serviceService.createGroup(requestDTO, jurisdiction_id));
+        return serviceService.createGroup(requestDTO, jurisdiction_id);
     }
 
     @Patch(uris = { "/groups/{groupId}{?jurisdiction_id}", "/groups/{groupId}.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public List<GroupDTO> updateGroup(Long groupId, @Valid @Body CreateUpdateGroupDTO requestDTO,
+    public GroupDTO updateGroup(Long groupId, @Valid @Body CreateUpdateGroupDTO requestDTO,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return List.of(serviceService.updateGroup(groupId, requestDTO));
+        return serviceService.updateGroup(groupId, requestDTO);
     }
 
     @Delete(uris = { "/groups/{groupId}{?jurisdiction_id}", "/groups/{groupId}.json{?jurisdiction_id}" })
@@ -110,9 +110,9 @@ public class JurisdictionAdminController {
             "/requests/{serviceRequestId}.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_EDIT_SYSTEM, LIBRE311_REQUEST_EDIT_TENANT, LIBRE311_REQUEST_EDIT_SUBTENANT})
-    public List<SensitiveServiceRequestDTO> updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO,
+    public SensitiveServiceRequestDTO updateServiceRequestJson(Long serviceRequestId, @Valid @Body PatchServiceRequestDTO requestDTO,
                                                                      @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return List.of(serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id));
+        return serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id);
     }
 
     @Get(value = "/requests/download{?jurisdiction_id}")
