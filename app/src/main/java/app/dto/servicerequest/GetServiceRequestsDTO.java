@@ -14,6 +14,7 @@
 
 package app.dto.servicerequest;
 
+import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
@@ -45,6 +46,10 @@ public class GetServiceRequestsDTO {
     @Nullable
     @QueryValue
     private ServiceRequestStatus status;
+
+    @Nullable
+    @QueryValue
+    private ServiceRequestPriority priority;
 
     @Valid
     private Pageable pageable;
@@ -103,5 +108,14 @@ public class GetServiceRequestsDTO {
 
     public void setPageable(Pageable pageable) {
         this.pageable = pageable;
+    }
+
+    @Nullable
+    public ServiceRequestPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(@Nullable ServiceRequestPriority priority) {
+        this.priority = priority;
     }
 }

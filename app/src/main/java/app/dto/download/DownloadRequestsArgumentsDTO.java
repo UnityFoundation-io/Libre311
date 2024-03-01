@@ -14,6 +14,7 @@
 
 package app.dto.download;
 
+import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
@@ -39,6 +40,10 @@ public class DownloadRequestsArgumentsDTO {
     @Nullable
     @QueryValue
     private ServiceRequestStatus status;
+
+    @Nullable
+    @QueryValue
+    private ServiceRequestPriority priority;
 
 
     public DownloadRequestsArgumentsDTO() {
@@ -78,5 +83,14 @@ public class DownloadRequestsArgumentsDTO {
 
     public void setStatus(@Nullable ServiceRequestStatus status) {
         this.status = status;
+    }
+
+    @Nullable
+    public ServiceRequestPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(@Nullable ServiceRequestPriority priority) {
+        this.priority = priority;
     }
 }
