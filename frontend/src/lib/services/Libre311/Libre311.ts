@@ -30,7 +30,7 @@ export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 export const ServiceSchema = z
 	.object({
 		service_name: z.string(),
-		description: z.string(),
+		description: z.string().optional(),
 		metadata: z.boolean(),
 		type: ServiceTypeSchema
 		// keywords: z.array(z.string()),
@@ -268,11 +268,8 @@ export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsRespon
 // ***************** Create Service *************** //
 
 // Create Service - Request Schema
-export const CreateServiceRequestSchema = z.object({
-	service_code: z.string(),
+export const CreateServiceParamsSchema = z.object({
 	service_name: z.string(),
-	description: z.string(),
-	service_definition: z.string(),
 	group_id: z.number()
 });
 
@@ -286,7 +283,7 @@ export const CreateServiceResponseSchema = z
 	.merge(ServiceSchema);
 
 //  Create Service - Request Type
-export type CreateServiceParams = z.infer<typeof CreateServiceRequestSchema>;
+export type CreateServiceParams = z.infer<typeof CreateServiceParamsSchema>;
 
 // Create Service - Response Type
 export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
@@ -400,6 +397,7 @@ const ROUTES = {
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
+	console.log('LibreBaseURL', baseURL);
 	const res = await axios.get<JurisdictionConfig>(baseURL + ROUTES.getJurisdictionConfig);
 
 	// todo parse the data to validate once the jurisdiction config returns bounds and remove the hardcoded bounds
@@ -484,6 +482,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
+		console.log({ props });
 		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
 		// todo remove once backend returns bounds info
 		const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
@@ -550,17 +549,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse> {
-		const res = await this.axiosInstance.patch<InternalCreateServiceRequestResponse>(
+		const res = await this.axiosInstance.patch<unknown>(
 			ROUTES.patchServiceRequest(params.service_request_id, this.jurisdictionConfig),
 			params
 		);
 
-		return InternalCreateServiceRequestResponseSchema.parse(res.data)[0];
+		return CreateServiceRequestResponseSchema.parse(res.data);
 	}
 
 	async getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]> {
 		let pageNumber: number = 0;
-		let allServiceRequests: ServiceRequest[] = [];
+		const allServiceRequests: ServiceRequest[] = [];
 		const queryParams = mapToServiceRequestsURLSearchParams(params);
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
 

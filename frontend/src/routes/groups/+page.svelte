@@ -32,6 +32,7 @@
 			{/each}
 		</Breadcrumbs>
 	</Card.Header>
+
 	<Card.Content slot="content" class="p-0 sm:p-0">
 		<List>
 			{#each groups as group}
