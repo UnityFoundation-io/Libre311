@@ -201,11 +201,11 @@ public class JurisdictionAdminControllerTest {
         // list
         request = HttpRequest.GET("/jurisdiction-admin/groups?jurisdiction_id=fakecity.gov")
                 .header("Authorization", "Bearer token.text.here");
-        response = client.toBlocking().exchange(request, Page.class);
+        response = client.toBlocking().exchange(request, GroupDTO[].class);
         assertEquals(OK, response.getStatus());
-        Optional<Page> listBody = response.getBody(Page.class);
+        Optional<GroupDTO[]> listBody = response.getBody(GroupDTO[].class);
         assertTrue(listBody.isPresent());
-        assertFalse(listBody.get().getContent().isEmpty());
+        assertNotEquals(0, listBody.get().length);
 
         // update
         CreateUpdateGroupDTO updateGroupDTO = new CreateUpdateGroupDTO();
