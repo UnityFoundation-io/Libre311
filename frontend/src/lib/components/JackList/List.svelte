@@ -1,24 +1,9 @@
 <script lang="ts">
-	import type { SelectOption } from 'stwui/types';
-	import Item from './Item.svelte';
-	import { Button } from 'stwui';
-	import { ellipsisSVG } from '../Svg/outline/EllipsisVertical.svelte';
-	import { getJackListOptions } from './context';
-
-	export let items: SelectOption[];
+	export let visible = false;
 </script>
 
 <div class="jacklist">
-	{#each items as item, i}
-		<Item isActive={false}>
-			<div slot="content">{item.label}</div>
-			<!-- <div slot="icon">
-				<Button slot="trigger" type="ghost" shape="circle" on:click={handleExpandMenu}>
-					<Button.Icon data={ellipsisSVG} />
-				</Button>
-			</div> -->
-		</Item>
-	{/each}
+	<slot />
 </div>
 
 <style>

@@ -167,6 +167,12 @@ const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 
 export type ServiceDefinition = z.infer<typeof ServiceDefinitionSchema>;
 
+const HasGroupIdSchema = z.object({
+	group_id: z.number()
+});
+
+export type HasGroupId = z.infer<typeof HasGroupIdSchema>;
+
 const HasServiceRequestIdSchema = z.object({
 	service_request_id: z.number()
 });
@@ -348,6 +354,7 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
+	editService(params: unknown): Promise<unknown>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
@@ -388,6 +395,8 @@ const ROUTES = {
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
 	postService: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
+	patchService: (params: HasJurisdictionId & HasGroupId) =>
+		`/jurisdiction-admin/services/${params.group_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -523,6 +532,25 @@ export class Libre311ServiceImpl implements Libre311Service {
 			);
 
 			return CreateServiceResponseSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	async editService(params: CreateServiceParams): Promise<unknown> {
+		console.log('params:', params);
+
+		try {
+			const res = await this.axiosInstance.patch<unknown>(
+				ROUTES.patchService({
+					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id,
+					group_id: params.group_id
+				}),
+				params
+			);
+
+			return res.data;
 		} catch (error) {
 			console.log(error);
 			throw error;

@@ -86,7 +86,29 @@
 		serviceList = serviceList;
 	}
 
+	function handleEditButton(value: number) {
+		isContentDropDownVisable = true;
+		isIconDropDownVisable = false;
+
+		selectedServiceValue = value;
+	}
+
+	async function handleEditServiceButton(value: number, newServiceName: string) {
+		fetchServiceList();
+
+		const res = await libre311.editService({
+			service_name: newServiceName,
+			group_id: value
+		});
+	}
+
 	onMount(fetchServiceList);
+
+	let isContentDropDownVisable = false;
+	let isIconDropDownVisable = false;
+
+	let selectedServiceValue: number;
+	let editServiceName = '';
 </script>
 
 <Card bordered={true} class="m-4">
@@ -112,6 +134,86 @@
 	{#if serviceList.type === 'success'}
 		<Card.Content slot="content" class="p-0 sm:p-0">
 			{@const selectOptions = createSelectOptions(serviceList.value)}
+
+			<JackList>
+				{#if isDropDownVisable}
+					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
+						<Input
+							class="w-[80%]"
+							name="new-service-name"
+							error={newServiceName.error}
+							bind:value={newServiceName.value}
+						></Input>
+
+						<Button
+							class="w-[10%]"
+							on:click={() => {
+								isDropDownVisable = false;
+								newServiceName.value = undefined;
+							}}>Cancel</Button
+						>
+						<Button class="w-[10%]" type="primary" on:click={handleAddNewService}>Add</Button>
+					</div>
+				{/if}
+
+				{#each selectOptions as service}
+					<JackList.Item isActive={false}>
+						<div slot="content">
+							<div class="flex items-center justify-between">
+								{#if isContentDropDownVisable && selectedServiceValue == service.value}
+									<div class="m-2 flex">
+										<Input class="w-[80%]" name="new-service-name" bind:value={editServiceName}
+										></Input>
+
+										<Button
+											class="w-[10%]"
+											on:click={() => {
+												isContentDropDownVisable = false;
+												editServiceName = '';
+											}}
+										>
+											Cancel
+										</Button>
+										<Button
+											class="w-[10%]"
+											type="primary"
+											on:click={handleEditServiceButton(service.value, editServiceName)}
+											>Submit</Button
+										>
+									</div>
+								{:else}
+									<div class="m-2">
+										{service.label}
+									</div>
+								{/if}
+
+								<div class="dropdown">
+									<Button
+										slot="trigger"
+										type="ghost"
+										shape="circle"
+										on:click={() => {
+											isIconDropDownVisable = !isIconDropDownVisable;
+										}}
+									>
+										<Button.Icon data={ellipsisSVG} />
+									</Button>
+
+									<div
+										style:visibility={isIconDropDownVisable ? 'visible' : 'hidden'}
+										class="dropdown-left menu bg-base-100 rounded-box w-52 p-2 shadow"
+									>
+										<Button type="ghost" class="w-full" on:click={handleEditButton(service.value)}
+											>Edit {service.value}</Button
+										>
+									</div>
+								</div>
+							</div>
+						</div>
+					</JackList.Item>
+				{/each}
+			</JackList>
+
 			<List>
 				{#if isDropDownVisable}
 					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
@@ -165,13 +267,74 @@
 	{/if}
 </Card>
 
-<hr style="border: 2px solid red;margin: 0.375rem;" />
-
-<section class="m-4">
-	{#if serviceList.type === 'success'}
-		{@const selectOptions = createSelectOptions(serviceList.value)}
-		<JackList items={selectOptions}>
-			<JackList.Item></JackList.Item>
-		</JackList>
-	{/if}
-</section>
+<style>
+	.dropdown {
+		display: inline-block;
+		position: relative;
+	}
+	.dropdown > :focus {
+		outline-offset: 2px;
+		outline: 2px solid #0000;
+	}
+	.dropdown .dropdown-content {
+		visibility: hidden;
+		z-index: 50;
+		opacity: 0;
+		transform-origin: top;
+		--tw-scale-x: 0.95;
+		--tw-scale-y: 0.95;
+		transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate))
+			skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x))
+			scaleY(var(--tw-scale-y));
+		transition-property:
+			color,
+			background-color,
+			border-color,
+			-webkit-text-decoration-color,
+			text-decoration-color,
+			fill,
+			stroke,
+			opacity,
+			box-shadow,
+			transform,
+			filter,
+			backdrop-filter,
+			-webkit-text-decoration-color,
+			-webkit-backdrop-filter;
+		transition-duration: 0.2s;
+		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+		position: absolute;
+	}
+	.dropdown-end .dropdown-content {
+		right: 0;
+	}
+	.dropdown-left .dropdown-content {
+		transform-origin: 100%;
+		top: 0;
+		bottom: auto;
+		right: 100%;
+	}
+	.dropdown-right .dropdown-content {
+		transform-origin: 0;
+		top: 0;
+		bottom: auto;
+		left: 100%;
+	}
+	.dropdown-top .dropdown-content {
+		transform-origin: bottom;
+		top: auto;
+		bottom: 100%;
+	}
+	.dropdown-end.dropdown-right .dropdown-content,
+	.dropdown-end.dropdown-left .dropdown-content {
+		top: auto;
+		bottom: 0;
+	}
+	.dropdown.dropdown-open .dropdown-content,
+	.dropdown.dropdown-hover:hover .dropdown-content,
+	.dropdown:not(.dropdown-hover):focus .dropdown-content,
+	.dropdown:not(.dropdown-hover):focus-within .dropdown-content {
+		visibility: visible;
+		opacity: 1;
+	}
+</style>
