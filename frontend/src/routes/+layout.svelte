@@ -31,7 +31,7 @@
 	async function initLibre311ContextProps() {
 		try {
 			const mode: Mode = getModeFromEnv(import.meta.env);
-			const libreBaseURL = String(import.meta.env.VITE_BACKEND_URL) ?? '/api';
+			const libreBaseURL = String(import.meta.env.VITE_BACKEND_URL ?? '') || '/api';
 
 			const [recaptchaServiceProps, jurisdictionConfig] = await Promise.all([
 				loadRecaptchaProps(mode),
@@ -45,8 +45,10 @@
 					jurisdictionConfig
 				},
 				recaptchaServiceProps,
-				unityAuthServiceProps: { baseURL: String(import.meta.env.VITE_AUTH_URL) }
+				unityAuthServiceProps: { baseURL: jurisdictionConfig.auth_base_url }
 			};
+
+			console.log({ ctxProps });
 
 			contextProviderProps = asAsyncSuccess(ctxProps);
 		} catch (error) {

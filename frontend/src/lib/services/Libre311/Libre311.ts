@@ -307,7 +307,8 @@ type LatLngTuple = z.infer<typeof latLngTupleSchema>;
 const JurisdictionConfigSchema = z
 	.object({
 		name: z.string(),
-		bounds: z.array(latLngTupleSchema).min(1)
+		bounds: z.array(latLngTupleSchema).min(1),
+		auth_base_url: z.string()
 	})
 	.merge(HasJurisdictionIdSchema);
 
@@ -481,6 +482,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
+		console.log({ props });
 		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
 		// todo remove once backend returns bounds info
 		const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
@@ -547,17 +549,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse> {
-		const res = await this.axiosInstance.patch<InternalCreateServiceRequestResponse>(
+		const res = await this.axiosInstance.patch<unknown>(
 			ROUTES.patchServiceRequest(params.service_request_id, this.jurisdictionConfig),
 			params
 		);
 
-		return InternalCreateServiceRequestResponseSchema.parse(res.data)[0];
+		return CreateServiceRequestResponseSchema.parse(res.data);
 	}
 
 	async getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]> {
 		let pageNumber: number = 0;
-		let allServiceRequests: ServiceRequest[] = [];
+		const allServiceRequests: ServiceRequest[] = [];
 		const queryParams = mapToServiceRequestsURLSearchParams(params);
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
 

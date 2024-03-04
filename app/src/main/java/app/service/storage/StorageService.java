@@ -22,6 +22,7 @@ import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,9 @@ public class StorageService {
     private final ReCaptchaService reCaptchaService;
     private final GoogleImageSafeSearchService googleImageClassificationService;
     private final StorageUrlUtil storageUrlUtil;
+
+    private final Set<MediaType> supportedMediaTypes = Set.of(MediaType.IMAGE_PNG_TYPE,
+        MediaType.IMAGE_JPEG_TYPE, MediaType.IMAGE_WEBP_TYPE);
 
     public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, StorageUrlUtil storageUrlUtil) {
         this.objectStorage = objectStorage;
@@ -61,8 +65,9 @@ public class StorageService {
         String dataUri = base64Image.split(",")[0];
         MediaType mediaType = MediaType.of(dataUri.substring(dataUri.indexOf(":")+1, dataUri.indexOf(";")));
 
-        if (mediaType != MediaType.IMAGE_JPEG_TYPE && mediaType != MediaType.IMAGE_PNG_TYPE) {
-            LOG.error("File must be jpeg or png.");
+        if (!supportedMediaTypes.contains(mediaType)) {
+            LOG.error(String.format("File media type must be one of the following: %s",
+                supportedMediaTypes));
             return null;
         }
         String extension = mediaType.getExtension();
