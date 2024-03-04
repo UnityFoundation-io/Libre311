@@ -25,7 +25,13 @@ import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdiction.LatLong;
 import app.model.jurisdiction.RemoteHost;
+import app.model.service.Service;
+import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicerequest.ServiceRequest;
+import app.model.servicerequest.ServiceRequestPriority;
+import app.model.servicerequest.ServiceRequestRepository;
+import app.model.servicerequest.ServiceRequestStatus;
 import app.security.HasPermissionResponse;
 import app.security.Permission;
 import app.util.DbCleanup;
@@ -69,6 +75,12 @@ public class RootControllerTest {
 
     @Inject
     JurisdictionRepository jurisdictionRepository;
+
+    @Inject
+    ServiceRepository serviceRepository;
+
+    @Inject
+    ServiceRequestRepository serviceRequestRepository;
 
     @Inject
     MockUnityAuthClient mockUnityAuthClient;
@@ -281,7 +293,6 @@ public class RootControllerTest {
                 serviceRequestDTO -> "city.gov".equals(serviceRequestDTO.getJurisdictionId())));
     }
 
-
     @Test
     public void authenticatedUsersCanViewSensitiveServiceRequestDetails() {
         setAuthHasPermissionSuccessResponse(true, List.of(Permission.LIBRE311_REQUEST_VIEW_TENANT));
@@ -300,6 +311,75 @@ public class RootControllerTest {
             Argument.listOf(SensitiveServiceRequestDTO.class));
         assertEquals(HttpStatus.OK, response.status());
         assertEquals(serviceRequestDTO.getEmail(), response.getBody().orElseThrow().get(0).getEmail());
+    }
+
+    @Test
+    public void canFilterServiceRequests() {
+        setAuthHasPermissionSuccessResponse(true, List.of(Permission.LIBRE311_REQUEST_VIEW_TENANT));
+
+        Optional<Service> optionalService = serviceRepository.findByServiceCodeAndJurisdictionId("001", "city.gov");
+
+        ServiceRequest closedHighPriority = new ServiceRequest();
+        closedHighPriority.setStatus(ServiceRequestStatus.CLOSED);
+        closedHighPriority.setPriority(ServiceRequestPriority.HIGH);
+        closedHighPriority.setService(optionalService.get());
+        closedHighPriority.setJurisdiction(optionalService.get().getJurisdiction());
+        closedHighPriority.setLatitude("12.34");
+        closedHighPriority.setLongitude("56.78");
+        ServiceRequest closedHighSR = serviceRequestRepository.save(closedHighPriority);
+
+        ServiceRequest openLowPriority = new ServiceRequest();
+        openLowPriority.setStatus(ServiceRequestStatus.OPEN);
+        openLowPriority.setPriority(ServiceRequestPriority.LOW);
+        openLowPriority.setService(optionalService.get());
+        openLowPriority.setJurisdiction(optionalService.get().getJurisdiction());
+        openLowPriority.setLatitude("12.34");
+        openLowPriority.setLongitude("56.78");
+        ServiceRequest openLowSR = serviceRequestRepository.save(openLowPriority);
+
+        ServiceRequest assignedMedium = new ServiceRequest();
+        assignedMedium.setStatus(ServiceRequestStatus.ASSIGNED);
+        assignedMedium.setPriority(ServiceRequestPriority.MEDIUM);
+        assignedMedium.setService(optionalService.get());
+        assignedMedium.setJurisdiction(optionalService.get().getJurisdiction());
+        assignedMedium.setLatitude("12.34");
+        assignedMedium.setLongitude("56.78");
+        serviceRequestRepository.save(assignedMedium);
+
+        // filter high priority
+        HttpRequest<?> req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&priority=high").bearerAuth( "eyekljdsl");
+        HttpResponse<List<SensitiveServiceRequestDTO>> response = client.toBlocking().exchange(req,
+            Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertEquals(HttpStatus.OK, response.status());
+        Optional<List<SensitiveServiceRequestDTO>> body = response.getBody(Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertTrue(body.isPresent());
+        assertFalse(body.get().isEmpty());
+        assertTrue(body.get().stream().anyMatch(sensitiveServiceRequestDTO -> sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
+        assertEquals(1, body.get().size());
+
+        // filter open status
+        req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&status=open").bearerAuth( "eyekljdsl");
+        response = client.toBlocking().exchange(req,
+                Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertEquals(HttpStatus.OK, response.status());
+        body = response.getBody(Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertTrue(body.isPresent());
+        assertFalse(body.get().isEmpty());
+        assertTrue(body.get().stream().anyMatch(sensitiveServiceRequestDTO -> sensitiveServiceRequestDTO.getId().equals(openLowSR.getId())));
+        assertEquals(1, body.get().size());
+
+        // filter high and low priority
+        req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&priority=low&priority=high").bearerAuth( "eyekljdsl");
+        response = client.toBlocking().exchange(req,
+                Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertEquals(HttpStatus.OK, response.status());
+        body = response.getBody(Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertTrue(body.isPresent());
+        assertFalse(body.get().isEmpty());
+        assertTrue(body.get().stream().anyMatch(sensitiveServiceRequestDTO ->
+                sensitiveServiceRequestDTO.getId().equals(openLowSR.getId()) ||
+                        sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
+        assertEquals(2, body.get().size());
     }
 
     @Test
