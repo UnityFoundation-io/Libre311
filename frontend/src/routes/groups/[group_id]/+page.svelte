@@ -11,7 +11,8 @@
 	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
 	import type { SelectOption } from 'stwui/types';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
-	import { Breadcrumbs, Button, Card, Input, List } from 'stwui';
+	import { Breadcrumbs, Button, Card, Dropdown, Input, List } from 'stwui';
+	import { JackList } from '$lib/components/JackList';
 	import { onMount } from 'svelte';
 	import {
 		ASYNC_IN_PROGRESS,
@@ -38,6 +39,12 @@
 	let isDropDownVisable = false;
 	let groupId = Number($page.params.group_id);
 	let newServiceName: FormInputValue<string> = createInput();
+
+	let visible1 = false;
+
+	function toggleDropdown1() {
+		visible1 = !visible1;
+	}
 
 	function fetchServiceList() {
 		if (cachedServiceList) {
@@ -137,10 +144,17 @@
 								{service.label}
 							</List.Item.Content.Title>
 						</List.Item.Content>
+
 						<List.Item.Extra slot="extra" placement="start">
-							<Button type="ghost" shape="circle">
-								<Button.Icon data={ellipsisSVG} />
-							</Button>
+							<Dropdown bind:visible={visible1}>
+								<Button slot="trigger" type="ghost" shape="circle" on:click={toggleDropdown1}>
+									<Button.Icon data={ellipsisSVG} />
+								</Button>
+
+								<Dropdown.Items slot="items" class="w-[100px]">
+									<Button type="ghost" class="w-full">Edit</Button>
+								</Dropdown.Items>
+							</Dropdown>
 						</List.Item.Extra>
 					</List.Item>
 				{/each}
@@ -150,3 +164,14 @@
 		{JSON.stringify(serviceList.error, null, 2)}
 	{/if}
 </Card>
+
+<hr style="border: 2px solid red;margin: 0.375rem;" />
+
+<section class="m-4">
+	{#if serviceList.type === 'success'}
+		{@const selectOptions = createSelectOptions(serviceList.value)}
+		<JackList items={selectOptions}>
+			<JackList.Item></JackList.Item>
+		</JackList>
+	{/if}
+</section>
