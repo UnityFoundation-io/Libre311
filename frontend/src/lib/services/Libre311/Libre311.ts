@@ -29,6 +29,7 @@ export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
 export const ServiceSchema = z
 	.object({
+		id: z.number(),
 		service_name: z.string(),
 		description: z.string().optional(),
 		metadata: z.boolean(),
@@ -167,6 +168,12 @@ const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 
 export type ServiceDefinition = z.infer<typeof ServiceDefinitionSchema>;
 
+const HasIdSchema = z.object({
+	id: z.number()
+});
+
+export type HasId = z.infer<typeof HasIdSchema>;
+
 const HasGroupIdSchema = z.object({
 	group_id: z.number()
 });
@@ -294,6 +301,32 @@ export type CreateServiceParams = z.infer<typeof CreateServiceParamsSchema>;
 // Create Service - Response Type
 export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
 
+// ***************** Edit Service *************** //
+
+// Edit Service - Request Schema
+export const EditServiceParamsSchema = z.object({
+	id: z.number(),
+	service_name: z.string(),
+	group_id: z.number()
+});
+
+// Edit Service - Request Type
+export type EditServiceParams = z.infer<typeof EditServiceParamsSchema>;
+
+// Edit Service - Response Schema
+export const EditServiceResponseSchema = z.object({
+	id: z.number(),
+	service_code: z.string(),
+	jurisdiction_id: z.string(),
+	service_name: z.string(),
+	metadata: z.boolean(),
+	type: z.string(),
+	group_id: z.number()
+});
+
+// Edit Service - Response Type
+export type EditServiceResponse = z.infer<typeof EditServiceResponseSchema>;
+
 // ************************************************ //
 
 export type GetServiceRequestsParams =
@@ -396,8 +429,8 @@ const ROUTES = {
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
 	postService: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
-	patchService: (params: HasJurisdictionId & HasGroupId) =>
-		`/jurisdiction-admin/services/${params.group_id}`,
+	patchService: (params: HasJurisdictionId & HasId & HasGroupId) =>
+		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -538,19 +571,18 @@ export class Libre311ServiceImpl implements Libre311Service {
 		}
 	}
 
-	async editService(params: CreateServiceParams): Promise<unknown> {
-		console.log('params:', params);
-
+	async editService(params: EditServiceParams): Promise<EditServiceResponse> {
 		try {
 			const res = await this.axiosInstance.patch<unknown>(
 				ROUTES.patchService({
+					id: params.id,
 					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id,
 					group_id: params.group_id
 				}),
 				params
 			);
 
-			return res.data;
+			return EditServiceResponseSchema.parse(res.data);
 		} catch (error) {
 			console.log(error);
 			throw error;

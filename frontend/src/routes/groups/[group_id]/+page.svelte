@@ -61,7 +61,7 @@
 	}
 
 	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
-		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
+		return res.map((s) => ({ id: s.id, value: s.service_code, label: s.service_name }));
 	}
 
 	async function handleAddNewService() {
@@ -93,13 +93,19 @@
 		selectedServiceValue = value;
 	}
 
-	async function handleEditServiceButton(value: number, newServiceName: string) {
-		fetchServiceList();
-
+	async function handleEditServiceButton(id: number, groupId: number, newServiceName: string) {
 		const res = await libre311.editService({
+			id: id,
 			service_name: newServiceName,
-			group_id: value
+			group_id: groupId
 		});
+
+		isContentDropDownVisable = false;
+		// console.log('RES:', res);
+		// console.log('Service List:', serviceList);
+
+		let foundIndex = serviceList.value.findIndex((x) => x.id == res.id);
+		serviceList.value[foundIndex] = res;
 	}
 
 	onMount(fetchServiceList);
@@ -177,8 +183,11 @@
 										<Button
 											class="w-[10%]"
 											type="primary"
-											on:click={handleEditServiceButton(service.value, editServiceName)}
-											>Submit</Button
+											on:click={handleEditServiceButton(
+												service.id,
+												service.groupId,
+												editServiceName
+											)}>Submit</Button
 										>
 									</div>
 								{:else}
