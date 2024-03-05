@@ -14,12 +14,14 @@
 
 package app.dto.download;
 
+import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.annotation.QueryValue;
 
 import java.time.Instant;
+import java.util.List;
 
 @Introspected
 public class DownloadRequestsArgumentsDTO {
@@ -37,8 +39,12 @@ public class DownloadRequestsArgumentsDTO {
     private Instant endDate;
 
     @Nullable
-    @QueryValue
-    private ServiceRequestStatus status;
+    @QueryValue(value = "status")
+    private List<ServiceRequestStatus> statuses;
+
+    @Nullable
+    @QueryValue(value = "priority")
+    private List<ServiceRequestPriority> priorities;
 
 
     public DownloadRequestsArgumentsDTO() {
@@ -72,11 +78,20 @@ public class DownloadRequestsArgumentsDTO {
     }
 
     @Nullable
-    public ServiceRequestStatus getStatus() {
-        return status;
+    public List<ServiceRequestStatus> getStatuses() {
+        return statuses;
     }
 
-    public void setStatus(@Nullable ServiceRequestStatus status) {
-        this.status = status;
+    public void setStatuses(@Nullable List<ServiceRequestStatus> statuses) {
+        this.statuses = statuses;
+    }
+
+    @Nullable
+    public List<ServiceRequestPriority> getPriorities() {
+        return priorities;
+    }
+
+    public void setPriorities(@Nullable List<ServiceRequestPriority> priorities) {
+        this.priorities = priorities;
     }
 }

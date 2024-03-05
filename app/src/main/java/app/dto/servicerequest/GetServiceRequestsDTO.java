@@ -14,6 +14,7 @@
 
 package app.dto.servicerequest;
 
+import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
@@ -22,6 +23,7 @@ import io.micronaut.http.annotation.QueryValue;
 
 import javax.validation.Valid;
 import java.time.Instant;
+import java.util.List;
 
 @Introspected
 public class GetServiceRequestsDTO {
@@ -43,8 +45,12 @@ public class GetServiceRequestsDTO {
     private Instant endDate;
 
     @Nullable
-    @QueryValue
-    private ServiceRequestStatus status;
+    @QueryValue(value = "status")
+    private List<ServiceRequestStatus> statuses;
+
+    @Nullable
+    @QueryValue(value = "priority")
+    private List<ServiceRequestPriority> priorities;
 
     @Valid
     private Pageable pageable;
@@ -87,21 +93,29 @@ public class GetServiceRequestsDTO {
     public void setEndDate(@Nullable Instant endDate) {
         this.endDate = endDate;
     }
-
-    @Nullable
-    public ServiceRequestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(@Nullable ServiceRequestStatus status) {
-        this.status = status;
-    }
-
     public Pageable getPageable() {
         return pageable;
     }
 
     public void setPageable(Pageable pageable) {
         this.pageable = pageable;
+    }
+
+    @Nullable
+    public List<ServiceRequestStatus> getStatuses() {
+        return statuses;
+    }
+
+    public void setStatuses(@Nullable List<ServiceRequestStatus> statuses) {
+        this.statuses = statuses;
+    }
+
+    @Nullable
+    public List<ServiceRequestPriority> getPriorities() {
+        return priorities;
+    }
+
+    public void setPriorities(@Nullable List<ServiceRequestPriority> priorities) {
+        this.priorities = priorities;
     }
 }
