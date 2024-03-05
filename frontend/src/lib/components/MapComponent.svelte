@@ -9,6 +9,7 @@
 	import L, { type PointTuple } from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
 
+	export let locateOpts: L.LocateOptions | undefined = undefined;
 	export let bounds: L.LatLngBoundsExpression | undefined = undefined;
 	export let center: L.LatLngExpression | undefined = undefined;
 	export let zoom: number | undefined = undefined;
@@ -19,10 +20,6 @@
 	let mapElement: HTMLElement;
 
 	onMount(() => {
-		if (!bounds && !center) {
-			throw new Error('Must set either bounds, or view and zoom.');
-		}
-
 		map = L.map(mapElement);
 		map.addEventListener('zoom', () => dispatch('boundsChanged', map.getBounds()));
 		map.addEventListener('drag', () => dispatch('boundsChanged', map.getBounds()));
@@ -45,7 +42,7 @@
 			map.fitBounds(bounds);
 		} else if (center && zoom) {
 			map.setView(center, zoom);
-		}
+		} else if (locateOpts) map.locate(locateOpts);
 	}
 </script>
 
