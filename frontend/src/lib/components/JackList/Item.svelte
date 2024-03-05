@@ -1,16 +1,5 @@
 <script lang="ts">
-	import { getJackListOptions } from './context';
-
 	export let isActive = false;
-
-	const componentId = crypto.randomUUID();
-
-	const { activeComponentId } = getJackListOptions();
-
-	$: isActive = $activeComponentId == componentId;
-	// setActiveComponentId();
-	$: console.log('Active Component ID:', $activeComponentId);
-	$: console.log(isActive);
 </script>
 
 <div class="jacklist-item">

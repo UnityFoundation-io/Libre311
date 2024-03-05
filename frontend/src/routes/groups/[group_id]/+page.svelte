@@ -22,6 +22,7 @@
 	} from '$lib/services/http';
 	import { page } from '$app/stores';
 	import { slide } from 'svelte/transition';
+	import ToggleState from '$lib/components/ToggleState.svelte';
 
 	interface Crumb {
 		label: string;
@@ -161,7 +162,7 @@
 				{/if}
 
 				{#each selectOptions as service}
-					<JackList.Item isActive={false}>
+					<JackList.Item>
 						<div slot="content">
 							<div class="flex items-center justify-between">
 								{#if isContentDropDownVisable && selectedServiceValue == service.value}
@@ -192,29 +193,25 @@
 									</div>
 								{/if}
 
-								<div class="dropdown">
-									<Button
-										slot="trigger"
-										type="ghost"
-										shape="circle"
-										on:click={() => {
-											isIconDropDownVisable = !isIconDropDownVisable;
-										}}
-									>
-										<Button.Icon data={ellipsisSVG} />
-									</Button>
+								<ToggleState startingValue={false} let:show let:toggle>
+									<div class="dropdown">
+										<Button slot="trigger" type="ghost" shape="circle" on:click={toggle}>
+											<Button.Icon data={ellipsisSVG} />
+										</Button>
 
-									<div
-										style:visibility={isIconDropDownVisable ? 'visible' : 'hidden'}
-										class="dropdown-left menu bg-base-100 rounded-box w-52 p-2 shadow"
-									>
-										<Button
-											type="ghost"
-											class="w-full"
-											on:click={() => handleEditButton(service.value)}>Edit {service.value}</Button
+										<div
+											style:visibility={show ? 'visible' : 'hidden'}
+											class="dropdown-left menu bg-base-100 rounded-box w-52 p-2 shadow"
 										>
+											<Button
+												type="ghost"
+												class="w-full"
+												on:click={() => handleEditButton(service.value)}
+												>Edit {service.value}</Button
+											>
+										</div>
 									</div>
-								</div>
+								</ToggleState>
 							</div>
 						</div>
 					</JackList.Item>
