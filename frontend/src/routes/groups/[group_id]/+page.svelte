@@ -94,11 +94,13 @@
 		selectedServiceValue = value;
 	}
 
-	async function handleEditServiceButton(id: number, groupId: number, newServiceName: string) {
+	async function handleEditServiceButton(service) {
+		console.log(service);
+		console.log('New Name:', editServiceName);
+
 		const res = await libre311.editService({
-			id: id,
-			service_name: newServiceName,
-			group_id: groupId
+			id: service.id,
+			service_name: editServiceName
 		});
 
 		isContentDropDownVisable = false;
@@ -113,7 +115,7 @@
 	let isIconDropDownVisable = false;
 
 	let selectedServiceValue: number;
-	let editServiceName = '';
+	let editServiceName = 'test';
 </script>
 
 <Card bordered={true} class="m-4">
@@ -140,84 +142,6 @@
 		<Card.Content slot="content" class="p-0 sm:p-0">
 			{@const selectOptions = createSelectOptions(serviceList.value)}
 
-			<JackList>
-				{#if isDropDownVisable}
-					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
-						<Input
-							class="w-[80%]"
-							name="new-service-name"
-							error={newServiceName.error}
-							bind:value={newServiceName.value}
-						></Input>
-
-						<Button
-							class="w-[10%]"
-							on:click={() => {
-								isDropDownVisable = false;
-								newServiceName.value = undefined;
-							}}>Cancel</Button
-						>
-						<Button class="w-[10%]" type="primary" on:click={handleAddNewService}>Add</Button>
-					</div>
-				{/if}
-
-				{#each selectOptions as service}
-					<JackList.Item>
-						<div slot="content">
-							<div class="flex items-center justify-between">
-								{#if isContentDropDownVisable && selectedServiceValue == service.value}
-									<div class="m-2 flex">
-										<Input class="w-[80%]" name="new-service-name" bind:value={editServiceName}
-										></Input>
-
-										<Button
-											class="w-[10%]"
-											on:click={() => {
-												isContentDropDownVisable = false;
-												editServiceName = '';
-											}}
-										>
-											Cancel
-										</Button>
-										<Button
-											class="w-[10%]"
-											type="primary"
-											on:click={() =>
-												handleEditServiceButton(service.id, service.groupId, editServiceName)}
-											>Submit</Button
-										>
-									</div>
-								{:else}
-									<div class="m-2">
-										{service.label}
-									</div>
-								{/if}
-
-								<ToggleState startingValue={false} let:show let:toggle>
-									<div class="dropdown">
-										<Button slot="trigger" type="ghost" shape="circle" on:click={toggle}>
-											<Button.Icon data={ellipsisSVG} />
-										</Button>
-
-										<div
-											style:visibility={show ? 'visible' : 'hidden'}
-											class="dropdown-left menu bg-base-100 rounded-box w-52 p-2 shadow"
-										>
-											<Button
-												type="ghost"
-												class="w-full"
-												on:click={() => handleEditButton(service.value)}
-												>Edit {service.value}</Button
-											>
-										</div>
-									</div>
-								</ToggleState>
-							</div>
-						</div>
-					</JackList.Item>
-				{/each}
-			</JackList>
-
 			<List>
 				{#if isDropDownVisable}
 					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
@@ -241,27 +165,67 @@
 
 				{#each selectOptions as service}
 					<List.Item>
-						<List.Item.Content
-							class="cursor-pointer hover:bg-slate-100"
-							slot="content"
-							on:click={() => goto(`/groups/1/services/${service.value}`)}
-						>
-							<List.Item.Content.Title slot="title" class="mx-4">
-								{service.label}
-							</List.Item.Content.Title>
+						<List.Item.Leading slot="leading" placement="start">
+							<ToggleState startingValue={false} let:show let:toggle>
+								<Dropdown visible={show}>
+									<Button slot="trigger" type="ghost" shape="circle" on:click={toggle}>
+										<Button.Icon data={ellipsisSVG} />
+									</Button>
+
+									<Dropdown.Items slot="items" class="w-[100px]">
+										<Button
+											type="ghost"
+											class="w-full"
+											on:click={() => handleEditButton(service.value)}>Edit</Button
+										>
+									</Dropdown.Items>
+								</Dropdown>
+							</ToggleState>
+						</List.Item.Leading>
+
+						<List.Item.Content class="cursor-pointer hover:bg-slate-100" slot="content">
+							{#if isContentDropDownVisable && selectedServiceValue == service.value}
+								<List.Item.Content.Title slot="title" class="mx-4">
+									<Input name="new-service-name" bind:value={editServiceName}></Input>
+								</List.Item.Content.Title>
+							{:else}
+								<List.Item.Content.Title slot="title" class="mx-4">
+									{service.label}
+								</List.Item.Content.Title>
+							{/if}
 						</List.Item.Content>
 
-						<List.Item.Extra slot="extra" placement="start">
-							<Dropdown bind:visible={visible1}>
-								<Button slot="trigger" type="ghost" shape="circle" on:click={toggleDropdown1}>
-									<Button.Icon data={ellipsisSVG} />
+						{#if isContentDropDownVisable && selectedServiceValue == service.value}
+							<List.Item.Extra
+								slot="extra"
+								placement="start"
+								class="flex items-center justify-center"
+							>
+								<Button
+									class="text-red-600"
+									on:click={() => {
+										isContentDropDownVisable = false;
+										editServiceName = '';
+									}}
+								>
+									{'𐄂'}
 								</Button>
 
-								<Dropdown.Items slot="items" class="w-[100px]">
-									<Button type="ghost" class="w-full">Edit</Button>
-								</Dropdown.Items>
-							</Dropdown>
-						</List.Item.Extra>
+								<Button
+									class="w-[10%]"
+									type="primary"
+									on:click={() => handleEditServiceButton(service)}>{'✓'}</Button
+								>
+							</List.Item.Extra>
+						{:else}
+							<List.Item.Extra
+								slot="extra"
+								placement="start"
+								class="flex items-center justify-center"
+							>
+								<button on:click={() => goto(`/groups/1/services/${service.value}`)}>{'>'}</button>
+							</List.Item.Extra>
+						{/if}
 					</List.Item>
 				{/each}
 			</List>
