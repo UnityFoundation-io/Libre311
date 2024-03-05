@@ -16,15 +16,14 @@ package app.model.service.group;
 
 import app.model.jurisdiction.Jurisdiction;
 import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.model.Page;
-import io.micronaut.data.model.Pageable;
 import io.micronaut.data.repository.PageableRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ServiceGroupRepository extends PageableRepository<ServiceGroup, Long> {
-    Page<ServiceGroup> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
+    List<ServiceGroup> findAllByJurisdictionId(String jurisdictionId);
     boolean existsByNameAndJurisdiction(String name, Jurisdiction jurisdiction);
     Optional<ServiceGroup> findByIdAndJurisdiction(Long id, Jurisdiction jurisdiction);
 }
