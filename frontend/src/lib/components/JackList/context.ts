@@ -1,10 +1,4 @@
 import { writable } from 'svelte/store';
-// import type {
-//   AccordionOptions,
-//   ActiveComponentIdContext,
-//   ActiveComponentId,
-//   ColapseContext,
-// } from "./types";
 import { getContext, setContext } from 'svelte';
 import type { ActiveComponentId, ActiveComponentIdContext } from './types';
 

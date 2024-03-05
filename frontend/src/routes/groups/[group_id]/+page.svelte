@@ -101,8 +101,6 @@
 		});
 
 		isContentDropDownVisable = false;
-		// console.log('RES:', res);
-		// console.log('Service List:', serviceList);
 
 		let foundIndex = serviceList.value.findIndex((x) => x.id == res.id);
 		serviceList.value[foundIndex] = res;
