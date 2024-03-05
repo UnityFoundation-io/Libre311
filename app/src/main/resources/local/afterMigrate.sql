@@ -8,11 +8,12 @@ VALUES ('stlma', 'St. Louis Metro Area', 1);
 
 -- Add jurisdiction boundary
 INSERT IGNORE INTO boundary_coordinates (id, latitude, longitude, order_position, jurisdiction_id)
-VALUES (1, -90.30025693587594, 38.68777201455936, 0, 'stlma'),
-       (2, -90.34433315946103, 38.61729515893717, 1, 'stlma'),
-       (3, -90.2360192439154, 38.61061640035771, 2, 'stlma'),
-       (4, -90.22097070151844, 38.7066943276854, 3, 'stlma'),
-       (5, -90.30025693587594, 38.68777201455936, 4, 'stlma');
+VALUES (1, 38.82703279269242, -90.49033044152023, 0, 'stlma'),
+       (2, 38.597392575835784, -90.56676157292115, 1, 'stlma'),
+       (3, 38.38544522916203,  -90.37277483714392, 2, 'stlma'),
+       (4, 38.62881664652022, -90.16644447677419, 3, 'stlma'),
+       (5, 38.840026683304046, -90.24154815404624, 4, 'stlma'),
+       (6, 38.82703279269242, -90.49033044152023, 5, 'stlma');
 
 -- map the host to the jurisdiction
 INSERT IGNORE INTO remote_hosts (id, name, jurisdiction_id)
