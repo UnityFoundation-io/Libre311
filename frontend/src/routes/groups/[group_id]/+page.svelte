@@ -12,7 +12,6 @@
 	import type { SelectOption } from 'stwui/types';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
 	import { Breadcrumbs, Button, Card, Dropdown, Input, List } from 'stwui';
-	import { JackList } from '$lib/components/JackList';
 	import { onMount } from 'svelte';
 	import {
 		ASYNC_IN_PROGRESS,
@@ -183,15 +182,11 @@
 							</ToggleState>
 						</List.Item.Leading>
 
-						<List.Item.Content class="cursor-pointer hover:bg-slate-100" slot="content">
+						<List.Item.Content class="mx-4 cursor-pointer hover:bg-slate-100" slot="content">
 							{#if isContentDropDownVisable && selectedServiceValue == service.value}
-								<List.Item.Content.Title slot="title" class="mx-4">
-									<Input name="new-service-name" bind:value={editServiceName}></Input>
-								</List.Item.Content.Title>
+								<Input name="new-service-name" bind:value={editServiceName}></Input>
 							{:else}
-								<List.Item.Content.Title slot="title" class="mx-4">
-									{service.label}
-								</List.Item.Content.Title>
+								{service.label}
 							{/if}
 						</List.Item.Content>
 
@@ -234,75 +229,3 @@
 		{JSON.stringify(serviceList.error, null, 2)}
 	{/if}
 </Card>
-
-<style>
-	.dropdown {
-		display: inline-block;
-		position: relative;
-	}
-	.dropdown > :focus {
-		outline-offset: 2px;
-		outline: 2px solid #0000;
-	}
-	.dropdown .dropdown-content {
-		visibility: hidden;
-		z-index: 50;
-		opacity: 0;
-		transform-origin: top;
-		--tw-scale-x: 0.95;
-		--tw-scale-y: 0.95;
-		transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate))
-			skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x))
-			scaleY(var(--tw-scale-y));
-		transition-property:
-			color,
-			background-color,
-			border-color,
-			-webkit-text-decoration-color,
-			text-decoration-color,
-			fill,
-			stroke,
-			opacity,
-			box-shadow,
-			transform,
-			filter,
-			backdrop-filter,
-			-webkit-text-decoration-color,
-			-webkit-backdrop-filter;
-		transition-duration: 0.2s;
-		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-		position: absolute;
-	}
-	.dropdown-end .dropdown-content {
-		right: 0;
-	}
-	.dropdown-left .dropdown-content {
-		transform-origin: 100%;
-		top: 0;
-		bottom: auto;
-		right: 100%;
-	}
-	.dropdown-right .dropdown-content {
-		transform-origin: 0;
-		top: 0;
-		bottom: auto;
-		left: 100%;
-	}
-	.dropdown-top .dropdown-content {
-		transform-origin: bottom;
-		top: auto;
-		bottom: 100%;
-	}
-	.dropdown-end.dropdown-right .dropdown-content,
-	.dropdown-end.dropdown-left .dropdown-content {
-		top: auto;
-		bottom: 0;
-	}
-	.dropdown.dropdown-open .dropdown-content,
-	.dropdown.dropdown-hover:hover .dropdown-content,
-	.dropdown:not(.dropdown-hover):focus .dropdown-content,
-	.dropdown:not(.dropdown-hover):focus-within .dropdown-content {
-		visibility: visible;
-		opacity: 1;
-	}
-</style>
