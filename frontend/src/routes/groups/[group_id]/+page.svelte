@@ -181,11 +181,9 @@
 										<Button
 											class="w-[10%]"
 											type="primary"
-											on:click={handleEditServiceButton(
-												service.id,
-												service.groupId,
-												editServiceName
-											)}>Submit</Button
+											on:click={() =>
+												handleEditServiceButton(service.id, service.groupId, editServiceName)}
+											>Submit</Button
 										>
 									</div>
 								{:else}
@@ -210,8 +208,10 @@
 										style:visibility={isIconDropDownVisable ? 'visible' : 'hidden'}
 										class="dropdown-left menu bg-base-100 rounded-box w-52 p-2 shadow"
 									>
-										<Button type="ghost" class="w-full" on:click={handleEditButton(service.value)}
-											>Edit {service.value}</Button
+										<Button
+											type="ghost"
+											class="w-full"
+											on:click={() => handleEditButton(service.value)}>Edit {service.value}</Button
 										>
 									</div>
 								</div>
