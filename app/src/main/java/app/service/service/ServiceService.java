@@ -36,7 +36,9 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Singleton
 public class ServiceService {
@@ -167,8 +169,9 @@ public class ServiceService {
         return true;
     }
 
-    public Page<GroupDTO> getPageableGroups(Pageable pageable, String jurisdictionId) {
-        return serviceGroupRepository.findAllByJurisdictionId(jurisdictionId, pageable).map(GroupDTO::new);
+    public List<GroupDTO> getListGroups(String jurisdictionId) {
+        return serviceGroupRepository.findAllByJurisdictionId(jurisdictionId).stream()
+                .map(GroupDTO::new).collect(Collectors.toList());
     }
 
     public GroupDTO createGroup(CreateUpdateGroupDTO requestDTO, String jurisdictionId) {

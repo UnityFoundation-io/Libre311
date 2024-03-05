@@ -50,10 +50,15 @@ export function recaptchaServiceFactory(
 }
 
 export async function loadRecaptchaProps(mode: Mode): Promise<RecaptchaServiceProps> {
-	let recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
+	let recaptchaKey: string = '';
+	if (import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY) {
+		recaptchaKey = String(import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY);
+	}
+
 	if (!recaptchaKey) {
 		if (mode == 'production') {
-			recaptchaKey = await axios.get('/recaptcha/recaptcha-key');
+			const res = await axios.get<string>('/recaptcha/recaptcha-key');
+			recaptchaKey = res.data;
 		} else if (mode == 'development') {
 			throw new Error('VITE_GOOGLE_RECAPTCHA_KEY env variable must be set');
 		}
