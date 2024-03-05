@@ -399,12 +399,7 @@ const ROUTES = {
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
 	const res = await axios.get<JurisdictionConfig>(baseURL + ROUTES.getJurisdictionConfig);
-
-	// todo parse the data to validate once the jurisdiction config returns bounds and remove the hardcoded bounds
-	const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
-	res.data.bounds = jurisdictionBounds;
-	return res.data;
-	// return JurisdictionConfigSchema.parse(res.data);
+	return JurisdictionConfigSchema.parse(res.data);
 }
 
 class Libre311ServiceError extends Error {

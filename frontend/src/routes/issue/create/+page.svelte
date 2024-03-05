@@ -30,7 +30,7 @@
 	const linkResolver = useLibre311Context().linkResolver;
 
 	let params: Partial<CreateServiceRequestUIParams> = {};
-	let centerPos: PointTuple = [41.308281, -72.924164]; // todo we need to set the starting point on per tenant basis. decide if bounds or center/zoom or both will be used.
+	let centerPos: PointTuple = getStartingCenterPos();
 	let loadingLocation: boolean = false;
 
 	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
@@ -45,6 +45,11 @@
 	componentMap.set(CreateServiceRequestSteps.DETAILS, ServiceRequestDetailsForm);
 	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
 	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);
+
+	function getStartingCenterPos(): PointTuple {
+		const center = L.latLngBounds(libre311.getJurisdictionConfig().bounds).getCenter();
+		return [center.lat, center.lng];
+	}
 
 	function handleChange(e: CustomEvent<Partial<CreateServiceRequestParams>>) {
 		const changedParams = e.detail;
@@ -95,7 +100,7 @@
 		{/if}
 	</div>
 	<div slot="main-content" class="relative h-full">
-		<MapComponent center={[41.308281, -72.924164]} zoom={14} on:boundsChanged={boundsChanged}>
+		<MapComponent center={getStartingCenterPos()} zoom={14} on:boundsChanged={boundsChanged}>
 			<MapMarker on:click latLng={centerPos} options={{ icon }} />
 			{#if step == CreateServiceRequestSteps.LOCATION}
 				<MapGeosearch on:geosearch={handleGeosearch} />
