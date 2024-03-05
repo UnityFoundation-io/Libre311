@@ -49,7 +49,7 @@ export class UnityAuthServiceImpl
 
 	async login(email: string, password: string): Promise<UnityAuthLoginResponse> {
 		try {
-			const res = await this.axiosInstance.post('/login', {
+			const res = await this.axiosInstance.post('/api/login', {
 				username: email,
 				password: password
 			});
