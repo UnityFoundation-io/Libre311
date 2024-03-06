@@ -23,6 +23,8 @@
 	import { page } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import ToggleState from '$lib/components/ToggleState.svelte';
+	import { xMark } from '$lib/components/Svg/outline/XMark';
+	import { checkMark } from '$lib/components/Svg/outline/CheckMark.svelte';
 
 	interface Crumb {
 		label: string;
@@ -204,19 +206,28 @@
 								<div class="mx-2 flex items-center justify-center">
 									{#if isContentDropDownVisable && selectedServiceValue == service.value}
 										<Button
-											class="text-red-600"
+											aria-label="Close"
+											type="ghost"
 											on:click={() => {
 												isContentDropDownVisable = false;
 											}}
 										>
-											{'𐄂'}
+											<Button.Icon slot="icon" type="ghost" data={xMark} fill="red" stroke="red" />
 										</Button>
 
 										<Button
-											class="w-[10%]"
-											type="primary"
-											on:click={() => handleEditServiceButton(service)}>{'✓'}</Button
+											aria-label="Submit"
+											type="ghost"
+											on:click={() => handleEditServiceButton(service)}
 										>
+											<Button.Icon
+												slot="icon"
+												type="ghost"
+												data={checkMark}
+												fill="none"
+												stroke="green"
+											/>
+										</Button>
 									{:else}
 										<Button
 											type="ghost"
