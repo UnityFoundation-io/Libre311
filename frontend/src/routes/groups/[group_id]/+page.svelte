@@ -171,8 +171,6 @@
 						<div class="">
 							<ToggleState startingValue={false} let:show let:toggle>
 								<Dropdown visible={show}>
-									<!-- <button slot="trigger" class="button-override">Hello</button> -->
-
 									<Button type="ghost" slot="trigger" on:click={toggle}>
 										<Button.Icon slot="icon" type="ghost" data={ellipsisSVG} />
 									</Button>
