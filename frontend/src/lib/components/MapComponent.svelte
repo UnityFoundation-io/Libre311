@@ -13,6 +13,7 @@
 	export let bounds: L.LatLngBoundsExpression | undefined = undefined;
 	export let center: L.LatLngExpression | undefined = undefined;
 	export let zoom: number | undefined = undefined;
+	export let disabled: boolean = false;
 
 	const dispatch = createEventDispatcher<Events>();
 
@@ -36,6 +37,30 @@
 	setContext('map', {
 		getMap: () => map
 	});
+
+	$: toggleDisabled(map, disabled);
+
+	function toggleDisabled(map: L.Map | undefined, disabled: boolean) {
+		if (!map) return;
+		const zoomControl = document.querySelector<HTMLElement>('.leaflet-control-zoom');
+		if (disabled) {
+			if (zoomControl) {
+				zoomControl.style.display = 'none';
+			}
+			map.touchZoom.disable();
+			map.doubleClickZoom.disable();
+			map.scrollWheelZoom.disable();
+			map.dragging.disable();
+		} else {
+			if (zoomControl) {
+				zoomControl.style.display = 'unset';
+			}
+			map.touchZoom.enable();
+			map.doubleClickZoom.enable();
+			map.scrollWheelZoom.enable();
+			map.dragging.enable();
+		}
+	}
 
 	$: if (map) {
 		if (bounds) {
