@@ -101,6 +101,7 @@
 	</div>
 	<div slot="main-content" class="relative h-full">
 		<MapComponent
+			disabled={step != 0}
 			locateOpts={{ setView: true, maxZoom: 16, enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
 		>
