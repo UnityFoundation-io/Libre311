@@ -318,6 +318,12 @@ export const EditServiceParamsSchema = z.object({
 // Edit Service - Request Type
 export type EditServiceParams = z.infer<typeof EditServiceParamsSchema>;
 
+// ***************** Delete Service *************** //
+
+export type DeleteServiceParams = {
+	serviceId: number;
+};
+
 // ************************************************ //
 
 export type GetServiceRequestsParams =
@@ -380,6 +386,7 @@ export interface Open311Service {
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
 	editService(params: EditServiceParams): Promise<Service>;
+	deleteService(params: DeleteServiceParams): Promise<void>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
@@ -428,6 +435,8 @@ const ROUTES = {
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
 	patchService: (params: HasJurisdictionId & HasId<number>) =>
 		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteService: (params: DeleteServiceParams & HasJurisdictionId) =>
+		`/jurisdiction-admin/services/${params.serviceId}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -596,6 +605,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 			);
 
 			return ServiceSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	async deleteService(params: DeleteServiceParams): Promise<void> {
+		try {
+			const res = await this.axiosInstance.delete<unknown>(
+				ROUTES.deleteService({
+					...params,
+					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+				})
+			);
 		} catch (error) {
 			console.log(error);
 			throw error;

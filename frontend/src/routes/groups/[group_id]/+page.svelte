@@ -12,7 +12,7 @@
 	import type { GetServiceListResponse, Service } from '$lib/services/Libre311/Libre311';
 	import type { SelectOption } from 'stwui/types';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
-	import { Breadcrumbs, Button, Card, Dropdown, Input, List } from 'stwui';
+	import { Breadcrumbs, Button, Card, Dropdown, Input, List, Modal, Portal } from 'stwui';
 	import { onMount } from 'svelte';
 	import {
 		ASYNC_IN_PROGRESS,
@@ -40,8 +40,10 @@
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let isDropDownVisable = false;
+	let isDeleteModalOpen = false;
 	let groupId = Number($page.params.group_id);
 	let newServiceName: FormInputValue<string> = createInput();
+	let serviceToDelete: Service;
 
 	function fetchServiceList() {
 		if (cachedServiceList) {
@@ -85,6 +87,16 @@
 		editServiceName = service.service_name;
 	}
 
+	function handleDeleteButton(service: Service) {
+		isDeleteModalOpen = true;
+		serviceToDelete = service;
+		console.log(service);
+	}
+
+	function closeDeleteServiceModal() {
+		isDeleteModalOpen = false;
+	}
+
 	async function handleEditServiceButton(service: Service) {
 		if (serviceList.type !== 'success') return;
 
@@ -97,6 +109,21 @@
 
 		let foundIndex = serviceList.value.findIndex((x) => x.id == res.id);
 		serviceList.value[foundIndex] = res;
+	}
+
+	async function handleDeleteServiceButton() {
+		if (serviceList.type !== 'success') return;
+
+		isDeleteModalOpen = false;
+
+		await libre311.deleteService({
+			serviceId: serviceToDelete.id
+		});
+
+		let foundIndex = serviceList.value.findIndex((x) => x.id == serviceToDelete.id);
+		console.log(foundIndex);
+		delete serviceList.value[foundIndex];
+		serviceList = serviceList;
 	}
 
 	onMount(fetchServiceList);
@@ -171,6 +198,13 @@
 										<Button type="ghost" class="w-full" on:click={() => handleEditButton(service)}>
 											Edit
 										</Button>
+										<Button
+											type="ghost"
+											class="w-full"
+											on:click={() => handleDeleteButton(service)}
+										>
+											Delete
+										</Button>
 									</Dropdown.Items>
 								</Dropdown>
 							</ToggleState>
@@ -185,7 +219,7 @@
 									bind:value={editServiceName}
 								></Input>
 							{:else}
-								{service.service_name}
+								{service?.service_name ?? ''}
 							{/if}
 						</div>
 
@@ -224,6 +258,32 @@
 								</div>
 							</div>
 						</div>
+
+						<Portal>
+							{#if isDeleteModalOpen}
+								<Modal handleClose={closeDeleteServiceModal}>
+									<Modal.Content slot="content" class="max-h-full w-1/2">
+										<Modal.Content.Body slot="body" class="overflow-y-auto">
+											<div class="my-4 flex">
+												<strong>Remove Service: &nbsp;</strong>
+												{` ${serviceToDelete.service_name}`}
+											</div>
+
+											<div class="grid grid-cols-2 gap-2">
+												<Button class="col-span-1" type="ghost" on:click={closeDeleteServiceModal}
+													>Cancel</Button
+												>
+												<Button
+													class="col-span-1"
+													type="danger"
+													on:click={handleDeleteServiceButton}>Comfirm</Button
+												>
+											</div>
+										</Modal.Content.Body>
+									</Modal.Content>
+								</Modal>
+							{/if}
+						</Portal>
 					</List.Item>
 				{/each}
 			</List>
