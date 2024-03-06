@@ -98,7 +98,8 @@
 	async function handleEditServiceButton(service: SelectOption) {
 		const res = await libre311.editService({
 			id: service.id,
-			service_name: editServiceName
+			service_name: editServiceName,
+			group_id: service.service_code
 		});
 
 		isEditServiceInputVisible = false;
