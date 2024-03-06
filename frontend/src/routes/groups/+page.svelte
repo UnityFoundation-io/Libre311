@@ -1,6 +1,21 @@
+<script lang="ts" context="module">
+	let cachedGroupList: GetGroupListResponse | undefined = undefined;
+</script>
+
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Breadcrumbs, Card, List } from 'stwui';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import type { GetGroupListResponse } from '$lib/services/Libre311/Libre311';
+	import {
+		ASYNC_IN_PROGRESS,
+		asAsyncSuccess,
+		type AsyncResult,
+		asAsyncFailure
+	} from '$lib/services/http';
+	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
+	import { Breadcrumbs, Button, Card, Input, List } from 'stwui';
+	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 
 	interface Crumb {
 		label: string;
@@ -9,16 +24,47 @@
 
 	const crumbs: Crumb[] = [{ label: 'Groups', href: '/groups' }];
 
-	const groups = [
-		{
-			id: 1,
-			title: 'Parks Department'
-		},
-		{
-			id: 2,
-			title: 'Traffic'
+	const libre311 = useLibre311Service();
+
+	let groupList: AsyncResult<GetGroupListResponse> = ASYNC_IN_PROGRESS;
+	let isDropdownVisible = false;
+	let newGroupName: FormInputValue<string> = createInput();
+
+	function fetchGroupList() {
+		if (cachedGroupList) {
+			groupList = asAsyncSuccess(cachedGroupList);
 		}
-	];
+		libre311
+			.getGroupList()
+			.then((res) => {
+				cachedGroupList = res;
+				groupList = asAsyncSuccess(res);
+			})
+			.catch((err) => (groupList = asAsyncFailure(err)));
+	}
+
+	async function handleAddNewGroup() {
+		if (groupList.type !== 'success') return;
+
+		newGroupName = stringValidator(newGroupName);
+
+		if (newGroupName.type != 'valid') {
+			return;
+		}
+		try {
+			const res = await libre311.createGroup({
+				name: newGroupName.value
+			});
+			newGroupName.value = '';
+			isDropdownVisible = false;
+			groupList.value.unshift(res);
+			groupList = groupList;
+		} catch (error: unknown) {
+			groupList = asAsyncFailure(error);
+		}
+	}
+
+	onMount(fetchGroupList);
 </script>
 
 <Card bordered={true} class="m-4">
@@ -30,18 +76,51 @@
 				</Breadcrumbs.Crumb>
 			{/each}
 		</Breadcrumbs>
+		<div class="flex justify-end">
+			<Button
+				type="ghost"
+				on:click={() => {
+					isDropdownVisible = true;
+				}}
+				>{'+ Add Group'}
+			</Button>
+		</div>
 	</Card.Header>
+	{#if groupList.type === 'success'}
+		<Card.Content slot="content" class="p-0 sm:p-0">
+			<List>
+				{#if isDropdownVisible}
+					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
+						<Input
+							class="w-[80%]"
+							name="new-service-name"
+							error={newGroupName.error}
+							bind:value={newGroupName.value}
+						></Input>
 
-	<Card.Content slot="content" class="p-0 sm:p-0">
-		<List>
-			{#each groups as group}
-				<List.Item
-					on:click={() => goto(`/groups/${group.id}`)}
-					class="cursor-pointer hover:bg-slate-100"
-				>
-					<div class="mx-4">{group.title}</div>
-				</List.Item>
-			{/each}
-		</List>
-	</Card.Content>
+						<Button
+							class="w-[10%]"
+							on:click={() => {
+								isDropdownVisible = false;
+								newGroupName.value = undefined;
+							}}>Cancel</Button
+						>
+						<Button class="w-[10%]" type="primary" on:click={handleAddNewGroup}>Add</Button>
+					</div>
+				{/if}
+				{#each groupList.value as group}
+					<List.Item
+						on:click={() => goto(`/groups/${group.name}`)}
+						class="cursor-pointer hover:bg-slate-100"
+					>
+						<div class="mx-4">{group.name}</div>
+					</List.Item>
+				{/each}
+			</List>
+		</Card.Content>
+	{:else if groupList.type === 'failure'}
+		{JSON.stringify(groupList.error, null, 2)}
+	{:else if groupList.type === 'inProgress'}
+		<h2>Loading...</h2>
+	{/if}
 </Card>
