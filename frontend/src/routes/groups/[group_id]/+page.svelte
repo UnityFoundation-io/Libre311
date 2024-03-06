@@ -43,12 +43,6 @@
 	let groupId = Number($page.params.group_id);
 	let newServiceName: FormInputValue<string> = createInput();
 
-	let visible1 = false;
-
-	function toggleDropdown1() {
-		visible1 = !visible1;
-	}
-
 	function fetchServiceList() {
 		if (cachedServiceList) {
 			serviceList = asAsyncSuccess(cachedServiceList);
