@@ -7,6 +7,7 @@ import type {
 	UpdateSensitiveServiceRequestResponse
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
+import type { HasId } from '$lib/utils/types';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -32,6 +33,7 @@ export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
 export const ServiceSchema = z
 	.object({
+		id: z.number(),
 		service_name: z.string(),
 		description: z.string().optional(),
 		metadata: z.boolean(),
@@ -170,6 +172,12 @@ const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 
 export type ServiceDefinition = z.infer<typeof ServiceDefinitionSchema>;
 
+const HasGroupIdSchema = z.object({
+	group_id: z.number()
+});
+
+export type HasGroupId = z.infer<typeof HasGroupIdSchema>;
+
 const HasServiceRequestIdSchema = z.object({
 	service_request_id: z.number()
 });
@@ -299,6 +307,17 @@ export type CreateServiceParams = z.infer<typeof CreateServiceParamsSchema>;
 // Create Service - Response Type
 export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
 
+// ***************** Edit Service *************** //
+
+// Edit Service - Request Schema
+export const EditServiceParamsSchema = z.object({
+	id: z.number(),
+	service_name: z.string()
+});
+
+// Edit Service - Request Type
+export type EditServiceParams = z.infer<typeof EditServiceParamsSchema>;
+
 // ************************************************ //
 
 export type GetServiceRequestsParams =
@@ -360,6 +379,7 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
+	editService(params: EditServiceParams): Promise<Service>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
@@ -406,6 +426,8 @@ const ROUTES = {
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
 	postService: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
+	patchService: (params: HasJurisdictionId & HasId<number>) =>
+		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -557,6 +579,23 @@ export class Libre311ServiceImpl implements Libre311Service {
 			);
 
 			return CreateServiceResponseSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	async editService(params: EditServiceParams): Promise<Service> {
+		try {
+			const res = await this.axiosInstance.patch<unknown>(
+				ROUTES.patchService({
+					id: params.id,
+					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+				}),
+				params
+			);
+
+			return ServiceSchema.parse(res.data);
 		} catch (error) {
 			console.log(error);
 			throw error;
