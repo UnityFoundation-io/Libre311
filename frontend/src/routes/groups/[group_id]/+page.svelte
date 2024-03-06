@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 
 	import { ellipsisSVG } from '$lib/components/Svg/outline/EllipsisVertical.svelte';
+	import { chevronRightSvg } from '$lib/components/Svg/outline/ChevronRight.svelte';
 
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
@@ -86,11 +87,12 @@
 		serviceList = serviceList;
 	}
 
-	function handleEditButton(value: number) {
+	function handleEditButton(value: number, name: string) {
 		isContentDropDownVisable = true;
 		isIconDropDownVisable = false;
 
 		selectedServiceValue = value;
+		editServiceName = name;
 	}
 
 	async function handleEditServiceButton(service) {
@@ -114,7 +116,7 @@
 	let isIconDropDownVisable = false;
 
 	let selectedServiceValue: number;
-	let editServiceName = 'test';
+	let editServiceName;
 </script>
 
 <Card bordered={true} class="m-4">
@@ -163,64 +165,69 @@
 				{/if}
 
 				{#each selectOptions as service}
-					<List.Item>
-						<List.Item.Leading slot="leading" placement="start">
+					<List.Item class="flex items-center">
+						<div class="">
 							<ToggleState startingValue={false} let:show let:toggle>
 								<Dropdown visible={show}>
-									<Button slot="trigger" type="ghost" shape="circle" on:click={toggle}>
-										<Button.Icon data={ellipsisSVG} />
+									<!-- <button slot="trigger" class="button-override">Hello</button> -->
+
+									<Button type="ghost" slot="trigger" on:click={toggle}>
+										<Button.Icon slot="icon" type="ghost" data={ellipsisSVG} />
 									</Button>
 
 									<Dropdown.Items slot="items" class="w-[100px]">
 										<Button
 											type="ghost"
 											class="w-full"
-											on:click={() => handleEditButton(service.value)}>Edit</Button
+											on:click={() => handleEditButton(service.value, service.name)}>Edit</Button
 										>
 									</Dropdown.Items>
 								</Dropdown>
 							</ToggleState>
-						</List.Item.Leading>
+						</div>
 
-						<List.Item.Content class="mx-4 cursor-pointer hover:bg-slate-100" slot="content">
+						<div class="mx-4 w-full cursor-pointer hover:bg-slate-100">
 							{#if isContentDropDownVisable && selectedServiceValue == service.value}
-								<Input name="new-service-name" bind:value={editServiceName}></Input>
+								<Input
+									class="w-full"
+									type="text"
+									name="new-service-name"
+									bind:value={editServiceName}
+								></Input>
 							{:else}
 								{service.label}
 							{/if}
-						</List.Item.Content>
+						</div>
 
-						{#if isContentDropDownVisable && selectedServiceValue == service.value}
-							<List.Item.Extra
-								slot="extra"
-								placement="start"
-								class="flex items-center justify-center"
-							>
-								<Button
-									class="text-red-600"
-									on:click={() => {
-										isContentDropDownVisable = false;
-										editServiceName = '';
-									}}
-								>
-									{'𐄂'}
-								</Button>
+						<div class="">
+							<div class="flex justify-end">
+								<div class="mx-2 flex items-center justify-center">
+									{#if isContentDropDownVisable && selectedServiceValue == service.value}
+										<Button
+											class="text-red-600"
+											on:click={() => {
+												isContentDropDownVisable = false;
+											}}
+										>
+											{'𐄂'}
+										</Button>
 
-								<Button
-									class="w-[10%]"
-									type="primary"
-									on:click={() => handleEditServiceButton(service)}>{'✓'}</Button
-								>
-							</List.Item.Extra>
-						{:else}
-							<List.Item.Extra
-								slot="extra"
-								placement="start"
-								class="flex items-center justify-center"
-							>
-								<button on:click={() => goto(`/groups/1/services/${service.value}`)}>{'>'}</button>
-							</List.Item.Extra>
-						{/if}
+										<Button
+											class="w-[10%]"
+											type="primary"
+											on:click={() => handleEditServiceButton(service)}>{'✓'}</Button
+										>
+									{:else}
+										<Button
+											type="ghost"
+											on:click={() => goto(`/groups/1/services/${service.value}`)}
+										>
+											<Button.Icon data={chevronRightSvg} slot="icon" type="ghost"></Button.Icon>
+										</Button>
+									{/if}
+								</div>
+							</div>
+						</div>
 					</List.Item>
 				{/each}
 			</List>
