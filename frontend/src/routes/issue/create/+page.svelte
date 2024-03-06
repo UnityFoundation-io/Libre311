@@ -100,7 +100,10 @@
 		{/if}
 	</div>
 	<div slot="main-content" class="relative h-full">
-		<MapComponent center={getStartingCenterPos()} zoom={14} on:boundsChanged={boundsChanged}>
+		<MapComponent
+			locateOpts={{ setView: true, maxZoom: 16, enableHighAccuracy: true }}
+			on:boundsChanged={boundsChanged}
+		>
 			<MapMarker on:click latLng={centerPos} options={{ icon }} />
 			{#if step == CreateServiceRequestSteps.LOCATION}
 				<MapGeosearch on:geosearch={handleGeosearch} />
