@@ -9,7 +9,7 @@
 	import { chevronRightSvg } from '$lib/components/Svg/outline/ChevronRight.svelte';
 
 	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
+	import type { GetServiceListResponse, Service } from '$lib/services/Libre311/Libre311';
 	import type { SelectOption } from 'stwui/types';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
 	import { Breadcrumbs, Button, Card, Dropdown, Input, List } from 'stwui';
@@ -63,10 +63,6 @@
 			.catch((err) => (serviceList = asAsyncFailure(err)));
 	}
 
-	function createSelectOptions(res: GetServiceListResponse): SelectOption[] {
-		return res.map((s) => ({ id: s.id, value: s.service_code, label: s.service_name }));
-	}
-
 	async function handleAddNewService() {
 		if (serviceList.type !== 'success') {
 			return;
@@ -89,17 +85,18 @@
 		serviceList = serviceList;
 	}
 
-	function handleEditButton(service: SelectOption) {
+	function handleEditButton(service: Service) {
 		isEditServiceInputVisible = true;
-		editServiceValue = service.value;
-		editServiceName = service.label;
+		editServiceCode = service.service_code;
+		editServiceName = service.service_name;
 	}
 
-	async function handleEditServiceButton(service: SelectOption) {
+	async function handleEditServiceButton(service: Service) {
+		if (serviceList.type !== 'success') return;
+
 		const res = await libre311.editService({
 			id: service.id,
-			service_name: editServiceName,
-			group_id: service.service_code
+			service_name: editServiceName
 		});
 
 		isEditServiceInputVisible = false;
@@ -111,7 +108,7 @@
 	onMount(fetchServiceList);
 
 	let isEditServiceInputVisible = false;
-	let editServiceValue: number;
+	let editServiceCode: string;
 	let editServiceName: string;
 </script>
 
@@ -137,8 +134,6 @@
 
 	{#if serviceList.type === 'success'}
 		<Card.Content slot="content" class="p-0 sm:p-0">
-			{@const selectOptions = createSelectOptions(serviceList.value)}
-
 			<List>
 				{#if isDropDownVisable}
 					<div class="m-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
@@ -169,7 +164,7 @@
 					</div>
 				{/if}
 
-				{#each selectOptions as service}
+				{#each serviceList.value as service}
 					<List.Item class="flex items-center">
 						<div class="">
 							<ToggleState startingValue={false} let:show let:toggle>
@@ -188,7 +183,7 @@
 						</div>
 
 						<div class="mx-4 w-full cursor-pointer hover:bg-slate-100">
-							{#if isEditServiceInputVisible && editServiceValue == service.value}
+							{#if isEditServiceInputVisible && editServiceCode == service.service_code}
 								<Input
 									class="w-full"
 									type="text"
@@ -196,14 +191,14 @@
 									bind:value={editServiceName}
 								></Input>
 							{:else}
-								{service.label}
+								{service.service_name}
 							{/if}
 						</div>
 
 						<div class="">
 							<div class="flex justify-end">
 								<div class="mx-2 flex items-center justify-center">
-									{#if isEditServiceInputVisible && editServiceValue == service.value}
+									{#if isEditServiceInputVisible && editServiceCode == service.service_code}
 										<Button
 											aria-label="Close"
 											type="ghost"
@@ -230,7 +225,7 @@
 									{:else}
 										<Button
 											type="ghost"
-											on:click={() => goto(`/groups/1/services/${service.value}`)}
+											on:click={() => goto(`/groups/1/services/${service.service_code}`)}
 										>
 											<Button.Icon data={chevronRightSvg} slot="icon" type="ghost"></Button.Icon>
 										</Button>

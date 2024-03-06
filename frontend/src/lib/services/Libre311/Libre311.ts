@@ -301,26 +301,11 @@ export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
 // Edit Service - Request Schema
 export const EditServiceParamsSchema = z.object({
 	id: z.number(),
-	service_name: z.string(),
-	group_id: z.number()
+	service_name: z.string()
 });
 
 // Edit Service - Request Type
 export type EditServiceParams = z.infer<typeof EditServiceParamsSchema>;
-
-// Edit Service - Response Schema
-export const EditServiceResponseSchema = z.object({
-	id: z.number(),
-	service_code: z.string(),
-	jurisdiction_id: z.string(),
-	service_name: z.string(),
-	metadata: z.boolean(),
-	type: z.string(),
-	group_id: z.number()
-});
-
-// Edit Service - Response Type
-export type EditServiceResponse = z.infer<typeof EditServiceResponseSchema>;
 
 // ************************************************ //
 
@@ -383,7 +368,7 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
-	editService(params: EditServiceParams): Promise<EditServiceResponse>;
+	editService(params: EditServiceParams): Promise<Service>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
@@ -424,7 +409,7 @@ const ROUTES = {
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
 	postService: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
-	patchService: (params: HasJurisdictionId & HasId<number> & HasGroupId) =>
+	patchService: (params: HasJurisdictionId & HasId<number>) =>
 		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
@@ -566,18 +551,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 		}
 	}
 
-	async editService(params: EditServiceParams): Promise<EditServiceResponse> {
+	async editService(params: EditServiceParams): Promise<Service> {
 		try {
 			const res = await this.axiosInstance.patch<unknown>(
 				ROUTES.patchService({
 					id: params.id,
-					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id,
-					group_id: params.group_id
+					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
 				}),
 				params
 			);
 
-			return EditServiceResponseSchema.parse(res.data);
+			return ServiceSchema.parse(res.data);
 		} catch (error) {
 			console.log(error);
 			throw error;
