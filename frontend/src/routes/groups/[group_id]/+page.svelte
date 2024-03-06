@@ -217,10 +217,7 @@
 											/>
 										</Button>
 									{:else}
-										<Button
-											type="ghost"
-											on:click={() => goto(`/groups/1/services/${service.service_code}`)}
-										>
+										<Button type="ghost" href={`/groups/1/services/${service.service_code}`}>
 											<Button.Icon data={chevronRightSvg} slot="icon" type="ghost"></Button.Icon>
 										</Button>
 									{/if}
