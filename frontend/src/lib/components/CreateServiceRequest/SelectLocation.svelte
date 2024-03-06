@@ -18,4 +18,9 @@
 		>
 		<CancelButton />
 	</div>
+	<div class="absolute inset-x-0 bottom-0 bg-gray-100 text-xs">
+		This site is protected by reCAPTCHA and the Google.
+		<a class="text-[#2563eb]" href="https://policies.google.com/privacy">Privacy Policy</a> and
+		<a class="text-[#2563eb]" href="https://policies.google.com/terms">Terms of Service</a> apply.
+	</div>
 </div>
