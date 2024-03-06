@@ -14,7 +14,6 @@
 	} from '$lib/services/http';
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
 	import { Breadcrumbs, Button, Card, Input, List } from 'stwui';
-	import type { SelectOption } from 'stwui/types';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
@@ -25,19 +24,9 @@
 
 	const crumbs: Crumb[] = [{ label: 'Groups', href: '/groups' }];
 
-	const groups = [
-		{
-			id: 1,
-			name: 'Parks Department'
-		}
-	];
-
 	const libre311 = useLibre311Service();
 
-	let groupList: AsyncResult<GetGroupListResponse> = {
-		type: 'success',
-		value: groups
-	};
+	let groupList: AsyncResult<GetGroupListResponse> = ASYNC_IN_PROGRESS;
 	let isDropdownVisible = false;
 	let newGroupName: FormInputValue<string> = createInput();
 
@@ -52,10 +41,6 @@
 				groupList = asAsyncSuccess(res);
 			})
 			.catch((err) => (groupList = asAsyncFailure(err)));
-	}
-
-	function createSelectOptions(res: GetGroupListResponse): SelectOption[] {
-		return res.map((g) => ({ value: g.id, label: g.name }));
 	}
 
 	async function handleAddNewGroup() {
@@ -78,8 +63,6 @@
 			groupList = asAsyncFailure(error);
 		}
 	}
-
-	$: console.log(groupList);
 
 	onMount(fetchGroupList);
 </script>
@@ -105,7 +88,6 @@
 	</Card.Header>
 	{#if groupList.type === 'success'}
 		<Card.Content slot="content" class="p-0 sm:p-0">
-			{@const selectOptions = createSelectOptions(groupList.value)}
 			<List>
 				{#if isDropdownVisible}
 					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
@@ -126,8 +108,7 @@
 						<Button class="w-[10%]" type="primary" on:click={handleAddNewGroup}>Add</Button>
 					</div>
 				{/if}
-
-				{#each selectOptions as group}
+				{#each groupList.value as group}
 					<List.Item
 						on:click={() => goto(`/groups/${group.name}`)}
 						class="cursor-pointer hover:bg-slate-100"
