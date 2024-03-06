@@ -388,7 +388,7 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
-	editService(params: unknown): Promise<unknown>;
+	editService(params: unknown): Promise<EditServiceResponse>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
