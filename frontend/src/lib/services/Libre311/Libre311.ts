@@ -7,6 +7,7 @@ import type {
 	UpdateSensitiveServiceRequestResponse
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
+import type { HasId } from '$lib/utils/types';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -167,12 +168,6 @@ const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 });
 
 export type ServiceDefinition = z.infer<typeof ServiceDefinitionSchema>;
-
-const HasIdSchema = z.object({
-	id: z.number()
-});
-
-export type HasId = z.infer<typeof HasIdSchema>;
 
 const HasGroupIdSchema = z.object({
 	group_id: z.number()
@@ -429,7 +424,7 @@ const ROUTES = {
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
 	postService: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
-	patchService: (params: HasJurisdictionId & HasId & HasGroupId) =>
+	patchService: (params: HasJurisdictionId & HasId<number> & HasGroupId) =>
 		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
