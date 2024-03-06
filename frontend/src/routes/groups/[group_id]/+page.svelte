@@ -89,24 +89,19 @@
 		serviceList = serviceList;
 	}
 
-	function handleEditButton(value: number, name: string) {
-		isContentDropDownVisable = true;
-		isIconDropDownVisable = false;
-
-		selectedServiceValue = value;
-		editServiceName = name;
+	function handleEditButton(service: SelectOption) {
+		isEditServiceInputVisible = true;
+		editServiceValue = service.value;
+		editServiceName = service.label;
 	}
 
-	async function handleEditServiceButton(service) {
-		console.log(service);
-		console.log('New Name:', editServiceName);
-
+	async function handleEditServiceButton(service: SelectOption) {
 		const res = await libre311.editService({
 			id: service.id,
 			service_name: editServiceName
 		});
 
-		isContentDropDownVisable = false;
+		isEditServiceInputVisible = false;
 
 		let foundIndex = serviceList.value.findIndex((x) => x.id == res.id);
 		serviceList.value[foundIndex] = res;
@@ -114,11 +109,9 @@
 
 	onMount(fetchServiceList);
 
-	let isContentDropDownVisable = false;
-	let isIconDropDownVisable = false;
-
-	let selectedServiceValue: number;
-	let editServiceName;
+	let isEditServiceInputVisible = false;
+	let editServiceValue: number;
+	let editServiceName: string;
 </script>
 
 <Card bordered={true} class="m-4">
@@ -185,18 +178,16 @@
 									</Button>
 
 									<Dropdown.Items slot="items" class="w-[100px]">
-										<Button
-											type="ghost"
-											class="w-full"
-											on:click={() => handleEditButton(service.value, service.name)}>Edit</Button
-										>
+										<Button type="ghost" class="w-full" on:click={() => handleEditButton(service)}>
+											Edit
+										</Button>
 									</Dropdown.Items>
 								</Dropdown>
 							</ToggleState>
 						</div>
 
 						<div class="mx-4 w-full cursor-pointer hover:bg-slate-100">
-							{#if isContentDropDownVisable && selectedServiceValue == service.value}
+							{#if isEditServiceInputVisible && editServiceValue == service.value}
 								<Input
 									class="w-full"
 									type="text"
@@ -211,12 +202,12 @@
 						<div class="">
 							<div class="flex justify-end">
 								<div class="mx-2 flex items-center justify-center">
-									{#if isContentDropDownVisable && selectedServiceValue == service.value}
+									{#if isEditServiceInputVisible && editServiceValue == service.value}
 										<Button
 											aria-label="Close"
 											type="ghost"
 											on:click={() => {
-												isContentDropDownVisable = false;
+												isEditServiceInputVisible = false;
 											}}
 										>
 											<Button.Icon slot="icon" type="ghost" data={xMark} fill="red" stroke="red" />
