@@ -147,7 +147,7 @@
 
 			<List>
 				{#if isDropDownVisable}
-					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
+					<div class="m-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
 						<Input
 							class="w-[80%]"
 							name="new-service-name"
@@ -155,14 +155,23 @@
 							bind:value={newServiceName.value}
 						></Input>
 
-						<Button
-							class="w-[10%]"
-							on:click={() => {
-								isDropDownVisable = false;
-								newServiceName.value = undefined;
-							}}>Cancel</Button
-						>
-						<Button class="w-[10%]" type="primary" on:click={handleAddNewService}>Add</Button>
+						<div class="flex">
+							<Button
+								aria-label="Close"
+								type="ghost"
+								on:click={() => {
+									isDropDownVisable = false;
+									newServiceName.value = undefined;
+								}}
+							>
+								<Button.Icon slot="icon" type="ghost" data={xMark} fill="red" stroke="red" />
+							</Button>
+
+							<Button aria-label="Submit" type="ghost" on:click={handleAddNewService}>
+								<Button.Icon slot="icon" type="ghost" data={checkMark} fill="none" stroke="green"
+								></Button.Icon>
+							</Button>
+						</div>
 					</div>
 				{/if}
 
