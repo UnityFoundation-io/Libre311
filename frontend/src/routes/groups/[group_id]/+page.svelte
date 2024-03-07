@@ -90,7 +90,6 @@
 	function handleDeleteButton(service: Service) {
 		isDeleteModalOpen = true;
 		serviceToDelete = service;
-		console.log(service);
 	}
 
 	function closeDeleteServiceModal() {
@@ -121,7 +120,6 @@
 		});
 
 		let foundIndex = serviceList.value.findIndex((x) => x.id == serviceToDelete.id);
-		console.log(foundIndex);
 		delete serviceList.value[foundIndex];
 		serviceList = serviceList;
 	}
@@ -186,105 +184,115 @@
 				{/if}
 
 				{#each serviceList.value as service}
-					<List.Item class="flex items-center">
-						<div class="">
-							<ToggleState startingValue={false} let:show let:toggle>
-								<Dropdown visible={show}>
-									<Button type="ghost" slot="trigger" on:click={toggle}>
-										<Button.Icon slot="icon" type="ghost" data={ellipsisSVG} />
-									</Button>
-
-									<Dropdown.Items slot="items" class="w-[100px]">
-										<Button type="ghost" class="w-full" on:click={() => handleEditButton(service)}>
-											Edit
-										</Button>
-										<Button
-											type="ghost"
-											class="w-full"
-											on:click={() => handleDeleteButton(service)}
-										>
-											Delete
-										</Button>
-									</Dropdown.Items>
-								</Dropdown>
-							</ToggleState>
-						</div>
-
-						<div class="mx-4 w-full cursor-pointer hover:bg-slate-100">
-							{#if isEditServiceInputVisible && editServiceCode == service.service_code}
-								<Input
-									class="w-full"
-									type="text"
-									name="new-service-name"
-									bind:value={editServiceName}
-								></Input>
-							{:else}
-								{service?.service_name ?? ''}
-							{/if}
-						</div>
-
-						<div class="">
-							<div class="flex justify-end">
-								<div class="mx-2 flex items-center justify-center">
-									{#if isEditServiceInputVisible && editServiceCode == service.service_code}
-										<Button
-											aria-label="Close"
-											type="ghost"
-											on:click={() => {
-												isEditServiceInputVisible = false;
-											}}
-										>
-											<Button.Icon slot="icon" type="ghost" data={xMark} fill="red" stroke="red" />
+					{#if service !== undefined}
+						<List.Item class="flex items-center">
+							<div class="">
+								<ToggleState startingValue={false} let:show let:toggle>
+									<Dropdown visible={show}>
+										<Button type="ghost" slot="trigger" on:click={toggle}>
+											<Button.Icon slot="icon" type="ghost" data={ellipsisSVG} />
 										</Button>
 
-										<Button
-											aria-label="Submit"
-											type="ghost"
-											on:click={() => handleEditServiceButton(service)}
-										>
-											<Button.Icon
-												slot="icon"
+										<Dropdown.Items slot="items" class="w-[100px]">
+											<Button
 												type="ghost"
-												data={checkMark}
-												fill="none"
-												stroke="green"
-											/>
-										</Button>
-									{:else}
-										<Button type="ghost" href={`/groups/1/services/${service.service_code}`}>
-											<Button.Icon data={chevronRightSvg} slot="icon" type="ghost"></Button.Icon>
-										</Button>
-									{/if}
+												class="w-full"
+												on:click={() => handleEditButton(service)}
+											>
+												Edit
+											</Button>
+											<Button
+												type="ghost"
+												class="w-full"
+												on:click={() => handleDeleteButton(service)}
+											>
+												Delete
+											</Button>
+										</Dropdown.Items>
+									</Dropdown>
+								</ToggleState>
+							</div>
+
+							<div class="mx-4 w-full cursor-pointer hover:bg-slate-100">
+								{#if isEditServiceInputVisible && editServiceCode == service.service_code}
+									<Input
+										class="w-full"
+										type="text"
+										name="new-service-name"
+										bind:value={editServiceName}
+									></Input>
+								{:else}
+									{service?.service_name ?? ''}
+								{/if}
+							</div>
+
+							<div class="">
+								<div class="flex justify-end">
+									<div class="mx-2 flex items-center justify-center">
+										{#if isEditServiceInputVisible && editServiceCode == service.service_code}
+											<Button
+												aria-label="Close"
+												type="ghost"
+												on:click={() => {
+													isEditServiceInputVisible = false;
+												}}
+											>
+												<Button.Icon
+													slot="icon"
+													type="ghost"
+													data={xMark}
+													fill="red"
+													stroke="red"
+												/>
+											</Button>
+
+											<Button
+												aria-label="Submit"
+												type="ghost"
+												on:click={() => handleEditServiceButton(service)}
+											>
+												<Button.Icon
+													slot="icon"
+													type="ghost"
+													data={checkMark}
+													fill="none"
+													stroke="green"
+												/>
+											</Button>
+										{:else}
+											<Button type="ghost" href={`/groups/1/services/${service.service_code}`}>
+												<Button.Icon data={chevronRightSvg} slot="icon" type="ghost"></Button.Icon>
+											</Button>
+										{/if}
+									</div>
 								</div>
 							</div>
-						</div>
+						</List.Item>
+					{/if}
 
-						<Portal>
-							{#if isDeleteModalOpen}
-								<Modal handleClose={closeDeleteServiceModal}>
-									<Modal.Content slot="content" class="max-h-full w-1/2">
-										<Modal.Content.Body slot="body" class="overflow-y-auto">
-											<div class="my-4 flex">
-												<strong>Remove Service: &nbsp;</strong>
-												{` ${serviceToDelete.service_name}`}
-											</div>
+					<Portal>
+						{#if isDeleteModalOpen}
+							<Modal handleClose={closeDeleteServiceModal}>
+								<Modal.Content slot="content" class="max-h-full w-1/2">
+									<Modal.Content.Body slot="body" class="overflow-y-auto">
+										<div class="my-4 flex">
+											<strong>Remove Service: &nbsp;</strong>
+											{` ${serviceToDelete.service_name}`}
+										</div>
 
-											<div class="grid grid-cols-2 gap-2">
-												<Button class="col-span-1" type="ghost" on:click={closeDeleteServiceModal}
-													>Cancel</Button
-												>
-												<Button
-													class="col-span-1"
-													type="danger"
-													on:click={handleDeleteServiceButton}>Comfirm</Button
-												>
-											</div>
-										</Modal.Content.Body>
-									</Modal.Content>
-								</Modal>
-							{/if}
-						</Portal>
-					</List.Item>
+										<div class="grid grid-cols-2 gap-2">
+											<Button class="col-span-1" type="ghost" on:click={closeDeleteServiceModal}
+												>Cancel</Button
+											>
+											<Button class="col-span-1" type="danger" on:click={handleDeleteServiceButton}
+												>Comfirm</Button
+											>
+										</div>
+									</Modal.Content.Body>
+								</Modal.Content>
+							</Modal>
+						{/if}
+					</Portal>
 				{/each}
 			</List>
 		</Card.Content>
