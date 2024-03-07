@@ -110,7 +110,7 @@
 				{/if}
 				{#each groupList.value as group}
 					<List.Item
-						on:click={() => goto(`/groups/${group.name}`)}
+						on:click={() => goto(`/groups/${group.id}`)}
 						class="cursor-pointer hover:bg-slate-100"
 					>
 						<div class="mx-4">{group.name}</div>

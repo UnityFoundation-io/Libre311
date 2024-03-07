@@ -140,6 +140,15 @@ public class ServiceService {
         return new ServiceDTO(serviceRepository.update(service));
     }
 
+    public void deleteService(Long serviceId, String jurisdictionId) {
+        Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
+        if (serviceOptional.isEmpty()) {
+            LOG.error("Service not found.");
+        } else {
+            serviceRepository.deleteById(serviceId);
+        }
+    }
+
     private boolean groupDoesNotExists(Long serviceDTO, Jurisdiction jurisdiction, Service service) {
         Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO, jurisdiction);
         if (serviceGroupOptional.isPresent()) {
