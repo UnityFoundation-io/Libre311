@@ -11,6 +11,7 @@
 	import StepControls from './StepControls.svelte';
 	import { toCreateServiceRequestParams, type CreateServiceRequestUIParams } from './shared';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { goto } from '$app/navigation';
 
 	const libre311 = useLibre311Service();
 
@@ -38,6 +39,7 @@
 		params.media_url = mediaUrl;
 
 		const res = await libre311.createServiceRequest(toCreateServiceRequestParams(params));
+		goto('/issues/map');
 	}
 
 	onMount(() => {
@@ -128,15 +130,5 @@
 <style>
 	.serviceTitle {
 		color: hsl(var(--primary));
-	}
-
-	.serviceImage {
-		height: 0;
-		padding-top: 56.25%;
-		overflow-x: hidden;
-		overflow-y: hidden;
-		background-position: center;
-		background-size: cover;
-		border-radius: 10px;
 	}
 </style>
