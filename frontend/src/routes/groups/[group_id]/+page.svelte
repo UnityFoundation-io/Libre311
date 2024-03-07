@@ -285,7 +285,7 @@
 												>Cancel</Button
 											>
 											<Button class="col-span-1" type="danger" on:click={handleDeleteServiceButton}
-												>Comfirm</Button
+												>Confirm</Button
 											>
 										</div>
 									</Modal.Content.Body>
