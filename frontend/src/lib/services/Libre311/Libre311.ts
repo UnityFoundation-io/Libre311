@@ -495,10 +495,10 @@ export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsPa
 	} else {
 		queryParams.append('page_size', '10');
 		queryParams.append('page', `${params.pageNumber ?? 0}`);
-		queryParams.append('status', params.status?.join(',') ?? '');
-		queryParams.append('service_code', params.serviceCode ?? '');
-		queryParams.append('start_date', params.startDate ?? '');
-		queryParams.append('end_date', params.endDate ?? '');
+		params.status && queryParams.append('status', params.status?.join(','));
+		params.serviceCode && queryParams.append('service_code', params.serviceCode);
+		params.startDate && queryParams.append('start_date', params.startDate);
+		params.endDate && queryParams.append('end_date', params.endDate);
 	}
 	return queryParams;
 }

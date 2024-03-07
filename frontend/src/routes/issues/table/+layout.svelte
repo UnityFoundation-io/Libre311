@@ -167,19 +167,15 @@
 		startDate: Date,
 		endDate: Date
 	) {
-		if (selectedServiceCode || statusInput || startDate || endDate) {
-			ctx.applyServiceRequestParams(
-				{
-					serviceCode: selectedServiceCode ?? '',
-					status: statusInput ?? [''],
-					startDate: startDate?.toISOString() ?? '',
-					endDate: endDate?.toISOString() ?? ''
-				},
-				$page.url
-			);
-		} else {
-			ctx.applyServiceRequestParams({}, $page.url);
-		}
+		ctx.applyServiceRequestParams(
+			{
+				serviceCode: selectedServiceCode,
+				status: statusInput,
+				startDate: startDate?.toISOString(),
+				endDate: endDate?.toISOString()
+			},
+			$page.url
+		);
 	}
 
 	onMount(fetchServiceList);
