@@ -75,17 +75,6 @@
 			<div class="grid grid-rows-4 gap-3">
 				<input
 					type="file"
-					id="actual-btn"
-					accept="image/*"
-					capture="environment"
-					hidden
-					bind:this={input}
-					on:change={onChange}
-				/>
-				<label for="actual-btn">{messages['photo']['take_photo']}</label>
-
-				<input
-					type="file"
 					name="photo"
 					id="camera-roll-btn"
 					accept="image/*"
@@ -93,7 +82,7 @@
 					bind:this={input}
 					on:change={onChange}
 				/>
-				<label for="camera-roll-btn">{messages['photo']['camera_roll']}</label>
+				<label for="camera-roll-btn">{messages['photo']['upload']}</label>
 
 				<Button
 					type="link"
