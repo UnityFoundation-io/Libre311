@@ -258,6 +258,7 @@ export const ServiceRequestSchema = z
 		service_name: z.string(),
 		description: z.string().optional(),
 		agency_responsible: z.string().optional(),
+		agency_email: z.string().optional(),
 		service_notice: z.string().optional(),
 		requested_datetime: z.string(),
 		updated_datetime: z.string(),
@@ -268,7 +269,8 @@ export const ServiceRequestSchema = z
 		lat: z.string(),
 		long: z.string(),
 		media_url: urlSchema.optional(),
-		selected_values: z.array(SelectedValuesSchema).optional()
+		selected_values: z.array(SelectedValuesSchema).optional(),
+		priority: z.string().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
