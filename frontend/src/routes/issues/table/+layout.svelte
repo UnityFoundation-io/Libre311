@@ -313,11 +313,19 @@
 
 										<Table.Body.Row.Cell column={1}>
 											<div class="flex items-center justify-center">
-												{item.service_name}
+												{item.priority
+													? `${item.priority.charAt(0).toUpperCase()}${item.priority.slice(1)}`
+													: '--'}
 											</div>
 										</Table.Body.Row.Cell>
 
 										<Table.Body.Row.Cell column={2}>
+											<div class="flex items-center justify-center">
+												{item.service_name}
+											</div>
+										</Table.Body.Row.Cell>
+
+										<Table.Body.Row.Cell column={3}>
 											<div class="flex items-center justify-center">
 												<Badge type={issueStatus(item)}>
 													{item.status}
@@ -325,7 +333,7 @@
 											</div>
 										</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={3}>
+										<Table.Body.Row.Cell column={4}>
 											<div class="flex items-center justify-center">
 												<p
 													class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm 2xl:w-32"
@@ -335,19 +343,19 @@
 											</div>
 										</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={4}>
+										<Table.Body.Row.Cell column={5}>
 											<div class="flex items-center justify-center">
 												{toAbbreviatedTimeStamp(item.requested_datetime)}
 											</div>
 										</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={5}>
+										<Table.Body.Row.Cell column={6}>
 											<div class="flex items-center justify-center">
 												{toAbbreviatedTimeStamp(item.updated_datetime)}
 											</div>
 										</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={6}>
+										<Table.Body.Row.Cell column={7}>
 											<div class="flex items-center justify-center">
 												{#if item.expected_datetime}
 													{toAbbreviatedTimeStamp(item.expected_datetime)}
