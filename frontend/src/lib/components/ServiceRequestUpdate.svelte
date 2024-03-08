@@ -231,7 +231,9 @@
 				<div class="my-4">
 					<Select
 						name="select-priority"
-						placeholder={serviceRequest.priority ?? 'Low'}
+						placeholder={serviceRequest.priority
+							? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
+							: 'Low'}
 						options={priorityOptions}
 						on:change={updatePriority}
 					>

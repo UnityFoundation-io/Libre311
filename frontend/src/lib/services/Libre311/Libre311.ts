@@ -269,7 +269,8 @@ export const ServiceRequestSchema = z
 		lat: z.string(),
 		long: z.string(),
 		media_url: urlSchema.optional(),
-		selected_values: z.array(SelectedValuesSchema).optional()
+		selected_values: z.array(SelectedValuesSchema).optional(),
+		priority: z.string().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
