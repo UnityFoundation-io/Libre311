@@ -30,7 +30,9 @@
 	);
 	let agencyEmailInput: FormInputValue<string> = createInput(serviceRequest.agency_email);
 
-	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(''); // TODO
+	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(
+		serviceRequest.service_notice
+	);
 	let statusNotesInput: FormInputValue<string | undefined> = createInput(''); // TODO
 
 	const statusOptions: SelectOption[] = [
