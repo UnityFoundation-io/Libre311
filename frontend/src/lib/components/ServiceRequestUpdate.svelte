@@ -233,7 +233,7 @@
 						name="select-priority"
 						placeholder={serviceRequest.priority
 							? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
-							: 'Low'}
+							: '--'}
 						options={priorityOptions}
 						on:change={updatePriority}
 					>
