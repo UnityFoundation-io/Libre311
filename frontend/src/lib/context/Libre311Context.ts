@@ -15,6 +15,7 @@ import {
 	recaptchaServiceFactory,
 	type RecaptchaServiceProps
 } from '$lib/services/RecaptchaService';
+import { writable, type Writable } from 'svelte/store';
 
 const libre311CtxKey = Symbol();
 
@@ -23,6 +24,9 @@ export type Libre311Context = {
 	linkResolver: LinkResolver;
 	unityAuthService: UnityAuthService;
 	mode: Mode;
+	username: Writable<string>;
+	setUsername: (username: string) => void;
+	unsetUsername: () => void;
 };
 
 export type Libre311ContextProviderProps = {
@@ -37,6 +41,15 @@ export function createLibre311Context(props: Libre311ContextProviderProps) {
 	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
 	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
 	const libre311Service = libre311Factory({ ...props.libreServiceProps, recaptchaService });
+	const username: Writable<string> = writable('');
+
+	const setUsername = (newUsername: string) => {
+		username.update((u: string) => (u = newUsername));
+	};
+
+	const unsetUsername = () => {
+		username.update((u: string) => (u = ''));
+	};
 
 	unityAuthService.subscribe('login', (args) => libre311Service.setAuthInfo(args));
 	unityAuthService.subscribe('logout', () => libre311Service.setAuthInfo(undefined));
@@ -45,7 +58,10 @@ export function createLibre311Context(props: Libre311ContextProviderProps) {
 		mode: props.mode,
 		service: libre311Service,
 		linkResolver,
-		unityAuthService
+		unityAuthService,
+		username,
+		setUsername,
+		unsetUsername
 	};
 	setContext(libre311CtxKey, ctx);
 	return ctx;
