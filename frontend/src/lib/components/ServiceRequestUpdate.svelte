@@ -28,7 +28,7 @@
 	let agencyNameInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.agency_responsible
 	);
-	let agencyEmailInput: FormInputValue<string> = createInput(''); // TODO
+	let agencyEmailInput: FormInputValue<string> = createInput(serviceRequest.agency_email);
 
 	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(''); // TODO
 	let statusNotesInput: FormInputValue<string | undefined> = createInput(''); // TODO

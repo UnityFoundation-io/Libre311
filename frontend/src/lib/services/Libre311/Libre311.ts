@@ -258,6 +258,7 @@ export const ServiceRequestSchema = z
 		service_name: z.string(),
 		description: z.string().optional(),
 		agency_responsible: z.string().optional(),
+		agency_email: z.string().optional(),
 		service_notice: z.string().optional(),
 		requested_datetime: z.string(),
 		updated_datetime: z.string(),
