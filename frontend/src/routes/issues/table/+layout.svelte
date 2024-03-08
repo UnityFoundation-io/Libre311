@@ -108,53 +108,9 @@
 	}
 
 	async function handleDownloadCsv() {
-		const allServiceRequests = await libre311.getAllServiceRequests({});
-
-		// Sanatize Requests
-		for (let request of allServiceRequests) {
-			request.address = request.address.replace(/,/g, '');
-		}
-
-		const csvContent = convertToCSV(allServiceRequests);
-
-		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+		const allServiceRequests = await libre311.downloadServiceRequests({});
+		const blob = new Blob([allServiceRequests], { type: 'text/csv;charset=utf-8' });
 		saveAs(blob, 'service-requests.csv');
-	}
-
-	function convertToCSV(data: ServiceRequest[]) {
-		const delimiter = '\t';
-		const header = Object.keys(data[0]).join(delimiter);
-
-		// Iterate over each object in the data array
-		const rows = data
-			.map((obj) => {
-				// Map over each key in the header
-				return header
-					.split(delimiter)
-					.map((key) => {
-						// If the object has a value for the current key
-						if (
-							obj[key as keyof typeof obj] !== undefined &&
-							obj[key as keyof typeof obj] !== null
-						) {
-							// If the value is an object, stringify it as JSON
-							if (typeof obj[key as keyof typeof obj] === 'object') {
-								// Ugly looking JSON (service definition answers)
-								return JSON.stringify(obj[key as keyof typeof obj]);
-							} else {
-								// Otherwise, return the value as is
-								return obj[key as keyof typeof obj];
-							}
-						} else {
-							// If the value is undefined or null, return an empty string
-							return '';
-						}
-					})
-					.join(delimiter);
-			})
-			.join('\n');
-
-		return `${header}\n${rows}`;
 	}
 
 	async function handleFunnelClick() {
