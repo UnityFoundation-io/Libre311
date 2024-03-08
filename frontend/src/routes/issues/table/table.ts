@@ -3,8 +3,8 @@ import type { SelectOption, TableColumn } from 'stwui/types';
 // 12% * 8 = 96%
 export const columns: TableColumn[] = [
 	{
-		column: 'issue_id',
-		label: 'Issue ID',
+		column: 'service_request_id',
+		label: 'Request ID',
 		placement: 'center',
 		class: 'w-[12%]'
 	},
