@@ -33,7 +33,9 @@
 	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.service_notice
 	);
-	let statusNotesInput: FormInputValue<string | undefined> = createInput(''); // TODO
+	let statusNotesInput: FormInputValue<string | undefined> = createInput(
+		serviceRequest.status_notes
+	);
 
 	const statusOptions: SelectOption[] = [
 		{
