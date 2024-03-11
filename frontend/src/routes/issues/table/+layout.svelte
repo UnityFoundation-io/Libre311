@@ -336,6 +336,11 @@
 										Download CSV
 										<Button.Trailing data={arrowDownTray} slot="trailing" />
 									</Button>
+
+									<a
+										href="http://localhost:8081/api/jurisdiction-admin/requests/download?jurisdiction_id=stlma"
+										>Download</a
+									>
 								</div>
 							</Table.Footer>
 						</Table>
