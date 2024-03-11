@@ -396,7 +396,7 @@ export interface Open311Service {
 	getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]>;
 	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
-	downloadServiceRequests(params: GetServiceRequestsParams): Promise<string>;
+	downloadServiceRequests(params: string): Promise<string>;
 }
 
 export const ReverseGeocodeResponseSchema = z.object({
@@ -446,8 +446,7 @@ const ROUTES = {
 		`/jurisdiction-admin/requests/${service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequest: (params: HasJurisdictionId & HasServiceRequestId) =>
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
-	getServiceRequestsDownload: (qParams: URLSearchParams) =>
-		`/jurisdiction-admin/requests/download?${qParams.toString()}`
+	getServiceRequestsDownload: (params: string) => `/jurisdiction-admin/requests/download?${params}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -698,16 +697,11 @@ export class Libre311ServiceImpl implements Libre311Service {
 		return await performRequest(allServiceRequests);
 	}
 
-	async downloadServiceRequests(params: GetServiceRequestsParams): Promise<string> {
-		const queryParams = mapToServiceRequestsURLSearchParams(params);
-		queryParams.append('jurisdiction_id', this.jurisdictionId);
-
-		console.log('QUERY PARAMS:', queryParams.toString());
+	async downloadServiceRequests(params: string): Promise<string> {
+		params = `${params}&jurisdiction_id=${this.jurisdictionId}`;
 
 		try {
-			const res = await this.axiosInstance.get<unknown>(
-				ROUTES.getServiceRequestsDownload(queryParams)
-			);
+			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequestsDownload(params));
 
 			return String(res.data);
 		} catch (error) {

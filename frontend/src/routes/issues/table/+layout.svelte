@@ -108,7 +108,13 @@
 	}
 
 	async function handleDownloadCsv() {
-		const allServiceRequests = await libre311.downloadServiceRequests({});
+		let searchParams = $page.url.searchParams.toString();
+
+		// Remove `page` and `page_size`
+		searchParams = searchParams.replace(/page_size=\d+&page=\d+&/g, '');
+
+		const allServiceRequests = await libre311.downloadServiceRequests(searchParams);
+
 		const blob = new Blob([allServiceRequests], { type: 'text/csv;charset=utf-8' });
 		saveAs(blob, 'service-requests.csv');
 	}
