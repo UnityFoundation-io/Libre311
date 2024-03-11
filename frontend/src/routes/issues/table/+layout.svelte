@@ -47,7 +47,7 @@
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
-	let selectedServiceCode: ServiceCode | undefined;
+	let selectedServiceCode: ServiceCode[] | undefined;
 	let isSearchFiltersOpen: boolean = false;
 	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
@@ -162,7 +162,7 @@
 	}
 
 	async function handleFilterInput(
-		selectedServiceCode: ServiceCode | undefined,
+		selectedServiceCode: ServiceCode[] | undefined,
 		statusInput: ServiceRequestStatus[],
 		startDate: Date,
 		endDate: Date
@@ -208,7 +208,7 @@
 			</div>
 
 			<div
-				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
+				class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
@@ -259,6 +259,7 @@
 										bind:value={selectedServiceCode}
 										name="select-1"
 										placeholder="Request Type"
+										multiple
 										on:change={() => {}}
 										options={selectOptions}
 									>
