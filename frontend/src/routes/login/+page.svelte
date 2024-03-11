@@ -4,11 +4,10 @@
 	import type { EventDispatchTypeMap } from '$lib/components/Login/shared';
 	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator } from '$lib/utils/validation';
-	import { useLibre311Context, useUnityAuthService } from '$lib/context/Libre311Context';
+	import { useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
 
 	const authService = useUnityAuthService();
-	const libre311Context = useLibre311Context();
 
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
@@ -28,7 +27,6 @@
 
 		if (emailInput.value && passwordInput.value) {
 			const res = await authService.login(emailInput.value, passwordInput.value);
-			libre311Context.setUsername(res.username);
 			goto('/issues/table');
 		}
 	}

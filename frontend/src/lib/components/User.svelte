@@ -5,7 +5,7 @@
 
 	const unityAuthService = useLibre311Context().unityAuthService;
 	const libre311Context = useLibre311Context();
-	const username = libre311Context.username;
+	const user = libre311Context.user;
 
 	let isUserDropdownVisible: boolean = false;
 
@@ -16,14 +16,13 @@
 	function logout() {
 		isUserDropdownVisible = false;
 		unityAuthService.logout();
-		libre311Context.unsetUsername();
 		goto('/');
 	}
 </script>
 
 <Dropdown bind:visible={isUserDropdownVisible}>
 	<button slot="trigger" on:click={toggleDropdown}>
-		<Avatar initials={$username.charAt(0).toUpperCase()} />
+		<Avatar initials={$user?.username.charAt(0).toUpperCase()} />
 	</button>
 	<Dropdown.Items slot="items">
 		<Dropdown.Items.Item on:click={logout} label="Logout"></Dropdown.Items.Item>
