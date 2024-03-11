@@ -108,15 +108,13 @@
 	}
 
 	async function handleDownloadCsv() {
-		let searchParams = $page.url.searchParams.toString();
+		const searchParams = new URLSearchParams($page.url.searchParams);
+		searchParams.delete('page_size');
+		searchParams.delete('page');
 
-		// Remove `page` and `page_size`
-		searchParams = searchParams.replace(/page_size=\d+&page=\d+&/g, '');
+		const serviceRequestsBlob = await libre311.downloadServiceRequests(searchParams);
 
-		const allServiceRequests = await libre311.downloadServiceRequests(searchParams);
-
-		const blob = new Blob([allServiceRequests], { type: 'text/csv;charset=utf-8' });
-		saveAs(blob, 'service-requests.csv');
+		saveAs(serviceRequestsBlob, 'service-requests.csv');
 	}
 
 	async function handleFunnelClick() {
@@ -265,7 +263,7 @@
 								{#each $serviceRequestsRes.value.serviceRequests as item}
 									<Table.Body.Row
 										id={resolveStyleId(item, $selectedServiceRequestStore)}
-										on:click={selectRow(item.service_request_id)}
+										on:click={() => selectRow(item.service_request_id)}
 									>
 										<Table.Body.Row.Cell column={0}>
 											<div class="flex items-center justify-center">
@@ -336,11 +334,6 @@
 										Download CSV
 										<Button.Trailing data={arrowDownTray} slot="trailing" />
 									</Button>
-
-									<a
-										href="http://localhost:8081/api/jurisdiction-admin/requests/download?jurisdiction_id=stlma"
-										download>Download</a
-									>
 								</div>
 							</Table.Footer>
 						</Table>

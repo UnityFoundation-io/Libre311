@@ -386,23 +386,14 @@ export type ServiceRequestsResponse = {
 export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
-	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
-	editService(params: EditServiceParams): Promise<Service>;
-	deleteService(params: DeleteServiceParams): Promise<void>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	updateServiceRequest(
-		params: UpdateSensitiveServiceRequestRequest
-	): Promise<UpdateSensitiveServiceRequestResponse>;
-	getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]>;
 	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
-	downloadServiceRequests(params: string): Promise<string>;
 }
 
 export const ReverseGeocodeResponseSchema = z.object({
 	display_name: z.string()
 });
-
 export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema>;
 
 export interface Libre311Service extends Open311Service {
@@ -412,6 +403,13 @@ export interface Libre311Service extends Open311Service {
 	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void;
 	getGroupList(): Promise<GetGroupListResponse>;
 	createGroup(params: CreateGroupParams): Promise<Group>;
+	downloadServiceRequests(params: URLSearchParams): Promise<Blob>;
+	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
+	editService(params: EditServiceParams): Promise<Service>;
+	deleteService(params: DeleteServiceParams): Promise<void>;
+	updateServiceRequest(
+		params: UpdateSensitiveServiceRequestRequest
+	): Promise<UpdateSensitiveServiceRequestResponse>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -446,7 +444,8 @@ const ROUTES = {
 		`/jurisdiction-admin/requests/${service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequest: (params: HasJurisdictionId & HasServiceRequestId) =>
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
-	getServiceRequestsDownload: (params: string) => `/jurisdiction-admin/requests/download?${params}`
+	getServiceRequestsDownload: (params: URLSearchParams) =>
+		`/jurisdiction-admin/requests/download?${params.toString()}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -617,7 +616,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	async deleteService(params: DeleteServiceParams): Promise<void> {
 		try {
-			const res = await this.axiosInstance.delete<unknown>(
+			await this.axiosInstance.delete<unknown>(
 				ROUTES.deleteService({
 					...params,
 					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
@@ -657,53 +656,14 @@ export class Libre311ServiceImpl implements Libre311Service {
 		return CreateServiceRequestResponseSchema.parse(res.data);
 	}
 
-	async getAllServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequest[]> {
-		let pageNumber: number = 0;
-		const allServiceRequests: ServiceRequest[] = [];
-		const queryParams = mapToServiceRequestsURLSearchParams(params);
-		queryParams.append('jurisdiction_id', this.jurisdictionId);
-
-		const performRequest = async (
-			allServiceRequests: ServiceRequest[]
-		): Promise<ServiceRequest[]> => {
-			const newQueryParams = mapToServiceRequestsURLSearchParams({ pageNumber: pageNumber });
-			newQueryParams.append('jurisdiction_id', this.jurisdictionId);
-
-			try {
-				// first request
-				const res = await this.axiosInstance.get<unknown>(
-					ROUTES.getServiceRequests(newQueryParams)
-				);
-				const headers = res.headers;
-				const totalSize = headers['page-totalsize'];
-				const serviceRequests = GetServiceRequestsResponseSchema.parse(res.data);
-
-				if (allServiceRequests.length == 0) allServiceRequests = serviceRequests;
-				else allServiceRequests = allServiceRequests.concat(serviceRequests);
-
-				if (allServiceRequests.length < totalSize) {
-					// recursive requests
-					pageNumber = pageNumber + 1;
-					return await performRequest(allServiceRequests);
-				}
-
-				return allServiceRequests;
-			} catch (error) {
-				console.log(error);
-				throw error;
-			}
-		};
-
-		return await performRequest(allServiceRequests);
-	}
-
-	async downloadServiceRequests(params: string): Promise<string> {
-		params = `${params}&jurisdiction_id=${this.jurisdictionId}`;
+	async downloadServiceRequests(params: URLSearchParams): Promise<Blob> {
+		params.append('jurisdiction_id', this.jurisdictionId);
 
 		try {
-			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequestsDownload(params));
-
-			return String(res.data);
+			const res = await this.axiosInstance.get<Blob>(ROUTES.getServiceRequestsDownload(params), {
+				responseType: 'blob'
+			});
+			return res.data;
 		} catch (error) {
 			console.log(error);
 			throw error;
