@@ -54,8 +54,6 @@
 	let startDate: Date;
 	let endDate: Date;
 
-	const libreBaseURL = String(import.meta.env.VITE_BACKEND_URL ?? '') || '/api';
-
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(`/issues/table/${service_request_id}`);
 		return;
@@ -340,7 +338,7 @@
 									</Button>
 
 									<a
-										href={`${libreBaseURL}/jurisdiction-admin/requests/download?jurisdiction_id=stlma`}
+										href={`/api/jurisdiction-admin/requests/download?jurisdiction_id=stlma`}
 										download>Download</a
 									>
 								</div>
