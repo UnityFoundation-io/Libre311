@@ -339,7 +339,7 @@
 
 									<a
 										href="http://localhost:8081/api/jurisdiction-admin/requests/download?jurisdiction_id=stlma"
-										>Download</a
+										download>Download</a
 									>
 								</div>
 							</Table.Footer>
