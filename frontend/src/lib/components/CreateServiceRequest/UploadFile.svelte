@@ -12,6 +12,7 @@
 	import type { CreateServiceRequestUIParams } from './shared';
 
 	let input: HTMLInputElement;
+	let reuploadInput: HTMLInputElement;
 	let imageData: string | undefined;
 
 	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
@@ -26,6 +27,10 @@
 
 	async function onChange() {
 		if (input.files && input.files.length < 2) dispatchFile(input.files[0]);
+	}
+
+	async function reuploadImage() {
+		if (reuploadInput.files && reuploadInput.files.length < 2) dispatchFile(reuploadInput.files[0]);
 	}
 
 	function desktopDropFiles(dropFiles: DropResult) {
@@ -127,20 +132,50 @@
 
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div class="grid grid-rows-4 gap-3">
-				<input
-					type="file"
-					name="photo"
-					id="camera-roll-btn"
-					accept="image/*"
-					hidden
-					bind:this={input}
-					on:change={onChange}
-				/>
-				<label for="camera-roll-btn">{messages['photo']['upload']}</label>
+			{#if imageData}
+				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+					<img class="w-full" src={imageData} alt="preview" />
+				</div>
 
+				<div class="grid grid-rows-2 gap-2">
+					<input
+						type="file"
+						name="photo"
+						id="camera-roll-btn-reupload"
+						accept="image/*"
+						hidden
+						bind:this={reuploadInput}
+						on:change={reuploadImage}
+					/>
+					<label for="camera-roll-btn-reupload">{messages['photo']['change_image']}</label>
+
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
+					</Button>
+				</div>
+			{:else}
+				<div class="mb-2 grid">
+					<input
+						type="file"
+						name="photo"
+						id="camera-roll-btn"
+						accept="image/*"
+						hidden
+						bind:this={input}
+						on:change={onChange}
+					/>
+					<label for="camera-roll-btn">{messages['photo']['upload']}</label>
+				</div>
+			{/if}
+
+			<div class="grid grid-rows-2 gap-2">
 				<Button
-					type="link"
+					type="ghost"
 					on:click={() => {
 						dispatch('stepChange', { file: undefined });
 					}}
