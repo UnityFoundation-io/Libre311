@@ -36,7 +36,7 @@
 	let newGroupName: FormInputValue<string> = createInput();
 	let isEditGroupInputVisible: boolean = false;
 	let editGroupId: number;
-	let editGroupName: string;
+	let editGroupName: FormInputValue<string> = createInput();
 
 	function fetchGroupList() {
 		if (cachedGroupList) {
@@ -75,15 +75,17 @@
 	function handleEditButton(group: Group) {
 		isEditGroupInputVisible = true;
 		editGroupId = group.id;
-		editGroupName = group.name;
+		editGroupName.value = group.name;
 	}
 
 	async function handleEditGroupButton(group: Group) {
 		if (groupList.type !== 'success') return;
 
+		editGroupName = stringValidator(editGroupName);
+
 		const res = await libre311.editGroup({
 			id: group.id,
-			name: editGroupName
+			name: String(editGroupName.value)
 		});
 
 		isEditGroupInputVisible = false;
@@ -158,7 +160,11 @@
 
 						<div class="mx-4 w-full">
 							{#if isEditGroupInputVisible && editGroupId == group.id}
-								<Input class="w-full" type="text" name="new-service-name" bind:value={editGroupName}
+								<Input
+									class="w-full"
+									type="text"
+									name="new-service-name"
+									bind:value={editGroupName.value}
 								></Input>
 							{:else}
 								{group?.name ?? ''}
