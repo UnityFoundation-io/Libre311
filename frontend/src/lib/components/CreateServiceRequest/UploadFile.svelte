@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Libre311ServiceImpl } from '$lib/services/Libre311/Libre311';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import Breakpoint from '../Breakpoint.svelte';
 	import messages from '$media/messages.json';
 	import { Button } from 'stwui';
@@ -12,6 +12,7 @@
 	import type { CreateServiceRequestUIParams } from './shared';
 
 	let input: HTMLInputElement;
+	let imageData: string | undefined;
 
 	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
 
@@ -40,33 +41,87 @@
 	function dispatchFile(file: File) {
 		dispatch('stepChange', { file });
 	}
+
+	onMount(() => {
+		if (params.file) {
+			let reader = new FileReader();
+			reader.readAsDataURL(params.file);
+
+			reader.onloadend = function () {
+				const result: String = new String(reader.result);
+				imageData = result.toString();
+			};
+		}
+	});
 </script>
 
 <Breakpoint>
 	<div slot="is-desktop" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div class="mb-4">
-				<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
-					<FilePicker.Icon slot="icon" data={uploadIcon} />
-					<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
-					<FilePicker.Description slot="description">Drag & Drop your file</FilePicker.Description>
-				</FilePicker>
-			</div>
+			{#if imageData}
+				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+					<img class="w-full" src={imageData} alt="preview" />
+				</div>
 
-			<div class="grid grid-rows-2 gap-3">
-				<Button
-					type="primary"
-					on:click={() => {
-						dispatch('stepChange', { file: undefined });
-					}}
-				>
-					{messages['photo']['no_upload']}
-				</Button>
+				<div class="grid grid-rows-4 gap-2">
+					<input
+						type="file"
+						name="photo"
+						id="camera-roll-btn-desktop"
+						accept="image/*"
+						hidden
+						bind:this={input}
+						on:change={onChange}
+					/>
+					<label for="camera-roll-btn-desktop">{messages['photo']['change_image']}</label>
 
-				<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
-					{messages['photo']['back']}
-				</Button>
-			</div>
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
+					</Button>
+
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange', { file: undefined });
+						}}
+					>
+						{messages['photo']['no_upload']}
+					</Button>
+
+					<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
+						{messages['photo']['back']}
+					</Button>
+				</div>
+			{:else}
+				<div class="mb-4">
+					<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
+						<FilePicker.Icon slot="icon" data={uploadIcon} />
+						<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
+						<FilePicker.Description slot="description">Drag & Drop your file</FilePicker.Description
+						>
+					</FilePicker>
+				</div>
+
+				<div class="grid grid-rows-2 gap-2">
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange', { file: undefined });
+						}}
+					>
+						{messages['photo']['no_upload']}
+					</Button>
+
+					<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
+						{messages['photo']['back']}
+					</Button>
+				</div>
+			{/if}
 		</div>
 	</div>
 
