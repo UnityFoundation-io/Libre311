@@ -234,14 +234,14 @@
 
 							<div class="m-1">
 								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
-									<DatePicker.Label slot="label">Start Date</DatePicker.Label>
+									<DatePicker.Label slot="label">Reported After</DatePicker.Label>
 									<DatePicker.Leading slot="leading" data={calendarIcon} />
 								</DatePicker>
 							</div>
 
 							<div class="m-1">
 								<DatePicker name="end-datetime" allowClear bind:value={endDate}>
-									<DatePicker.Label slot="label">End Date</DatePicker.Label>
+									<DatePicker.Label slot="label">Reported Before</DatePicker.Label>
 									<DatePicker.Leading slot="leading" data={calendarIcon} />
 								</DatePicker>
 							</div>
