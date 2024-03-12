@@ -58,10 +58,11 @@
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
-				<div class="mb-1">
-					<SelectedValues selectedValues={serviceRequest.selected_values} />
-				</div>
-
+				{#if serviceRequest.selected_values}
+					<div class="mb-1">
+						<SelectedValues selectedValues={serviceRequest.selected_values} />
+					</div>
+				{/if}
 				{#if serviceRequest.description}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['description']}</strong>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SelectedValue } from '$lib/services/Libre311/Libre311';
 
-	export let selectedValues: SelectedValue[] = [];
+	export let selectedValues: SelectedValue[];
 </script>
 
 {#each selectedValues as selectedValue}
