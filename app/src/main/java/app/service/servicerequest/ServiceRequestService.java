@@ -19,10 +19,7 @@ import app.dto.download.DownloadServiceRequestDTO;
 import app.dto.servicerequest.*;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
-import app.model.service.servicedefinition.AttributeDataType;
-import app.model.service.servicedefinition.AttributeValue;
-import app.model.service.servicedefinition.ServiceDefinition;
-import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.service.servicedefinition.*;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
@@ -134,20 +131,16 @@ public class ServiceRequestService {
         // validate if additional attributes are required
         List<ServiceDefinitionAttribute> requestAttributes = null;
         Service service = serviceByServiceCodeOptional.get();
-        if (service.isMetadata()) {
+        if (service.getServiceDefinition() != null) {
             // get service definition
-            String serviceDefinitionJson = service.getServiceDefinitionJson();
-            if (serviceDefinitionJson == null || serviceDefinitionJson.isBlank()) {
-                LOG.error("Service definition does not exists despite service requiring it.");
-                return null; // should not be in this state and admin needs to be aware.
-            }
+            ServiceDefinitionEntity serviceDefinition = service.getServiceDefinition();
 
-            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionJson);
+            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinition);
             if (requestAttributes.isEmpty()) {
                 LOG.error("Submitted Service Request does not contain any attribute values.");
                 return null; // todo throw exception - must provide attributes
             }
-            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionJson, requestAttributes)) {
+            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinition, requestAttributes)) {
                 LOG.error("Submitted Service Request does not contain required attribute values.");
                 return null; // todo throw exception (validation)
             }
@@ -171,39 +164,22 @@ public class ServiceRequestService {
         return mediaUrl.startsWith(storageUrlUtil.getBucketUrlString());
     }
 
-    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, List<ServiceDefinitionAttribute> requestAttributes) {
-        // deserialize
-        ObjectMapper objectMapper = new ObjectMapper();
-        boolean containsAllRequiredAttrs = false;
-        try {
-            // collect all required attributes
-            ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
-            List<String> requiredCodes = serviceDefinition.getAttributes().stream()
-                    .filter(ServiceDefinitionAttribute::isRequired)
-                    .map(ServiceDefinitionAttribute::getCode)
-                    .collect(Collectors.toList());
+    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(ServiceDefinitionEntity serviceDefinition, List<ServiceDefinitionAttribute> requestAttributes) {
+        // collect all required attributes
+        List<String> requiredCodes = serviceDefinition.getAttributes().stream()
+                .filter(ServiceDefinitionAttributeEntity::isRequired)
+                .map(ServiceDefinitionAttributeEntity::getCode)
+                .collect(Collectors.toList());
 
-            // for each attr, check if it exists in requestAttributes
-            List<String> requestCodes = requestAttributes.stream()
-                    .map(ServiceDefinitionAttribute::getCode)
-                    .collect(Collectors.toList());
-            containsAllRequiredAttrs = requestCodes.containsAll(requiredCodes);
+        // for each attr, check if it exists in requestAttributes
+        List<String> requestCodes = requestAttributes.stream()
+                .map(ServiceDefinitionAttribute::getCode)
+                .collect(Collectors.toList());
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        return containsAllRequiredAttrs;
+        return requestCodes.containsAll(requiredCodes);
     }
 
-    private List<ServiceDefinitionAttribute> buildUserResponseAttributesFromRequest(HttpRequest<?> request, String serviceDefinitionJson) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ServiceDefinition serviceDefinition;
-        try {
-            serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    private List<ServiceDefinitionAttribute> buildUserResponseAttributesFromRequest(HttpRequest<?> request, ServiceDefinitionEntity serviceDefinition) {
 
         Argument<Map<String, String>> type = Argument.mapOf(String.class, String.class);
         Optional<Map<String, String>> body = request.getBody(type);
@@ -216,7 +192,7 @@ public class ServiceRequestService {
                     String attributeCode = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
 
                     // search for attribute by code in serviceDefinition
-                    Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeOptional = serviceDefinition.getAttributes().stream()
+                    Optional<ServiceDefinitionAttributeEntity> serviceDefinitionAttributeOptional = serviceDefinition.getAttributes().stream()
                             .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals(attributeCode))
                             .findFirst();
 
@@ -224,7 +200,7 @@ public class ServiceRequestService {
                     if (serviceDefinitionAttributeOptional.isEmpty()) {
                         return;
                     }
-                    ServiceDefinitionAttribute serviceDefinitionAttribute = serviceDefinitionAttributeOptional.get();
+                    ServiceDefinitionAttributeEntity serviceDefinitionAttribute = serviceDefinitionAttributeOptional.get();
 
                     // validate the value if necessary (number and dates)
                     if (v != null && !validValueType(v, serviceDefinitionAttribute.getDatatype())) {
@@ -246,7 +222,7 @@ public class ServiceRequestService {
                     if (serviceDefinitionAttribute.getDatatype() == AttributeDataType.SINGLEVALUELIST ||
                             serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST) {
 
-                        List<AttributeValue> attributeValues = serviceDefinitionAttribute.getValues();
+                        Set<AttributeValueEntity> attributeValues = serviceDefinitionAttribute.getAttributeValues();
                         if (attributeValues != null && v != null) {
                             if (v.contains(",") && serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST){
                                 String[] attrResKeys = v.split(",");
@@ -255,7 +231,7 @@ public class ServiceRequestService {
                                 }
                             }
                             else {
-                                values.add(new AttributeValue(v, getAttributeValueName( v, attributeValues)));
+                                values.add(new AttributeValue(v, getAttributeValueName(v, attributeValues)));
                             }
                         }
                     } else {
@@ -298,13 +274,13 @@ public class ServiceRequestService {
         return true;
     }
 
-    private String getAttributeValueName(String valueKey, List<AttributeValue> attributeValues) {
+    private String getAttributeValueName(String valueKey, Set<AttributeValueEntity> attributeValues) {
         String valueName = null;
-        Optional<AttributeValue> attributeValueOptional = attributeValues.stream()
-                .filter(attributeValue -> attributeValue.getKey().equals(valueKey)).findFirst();
+        Optional<AttributeValueEntity> attributeValueOptional = attributeValues.stream()
+                .filter(attributeValue -> attributeValue.getId().toString().equals(valueKey)).findFirst();
 
         if (attributeValueOptional.isPresent()) {
-            valueName = attributeValueOptional.get().getName();
+            valueName = attributeValueOptional.get().getValueName();
         }
 
         return valueName;

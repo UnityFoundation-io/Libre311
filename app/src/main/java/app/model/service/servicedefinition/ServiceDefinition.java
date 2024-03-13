@@ -26,6 +26,8 @@ import java.util.List;
 @JacksonXmlRootElement(localName = "service_definitions")
 public class ServiceDefinition {
 
+    private Long id;
+
     @JsonProperty("service_code")
     private String serviceCode;
 
@@ -34,6 +36,19 @@ public class ServiceDefinition {
     private List<ServiceDefinitionAttribute> attributes;
 
     public ServiceDefinition() {
+    }
+
+    public ServiceDefinition(Long id, String serviceCode) {
+        this.id = id;
+        this.serviceCode = serviceCode;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public List<ServiceDefinitionAttribute> getAttributes() {

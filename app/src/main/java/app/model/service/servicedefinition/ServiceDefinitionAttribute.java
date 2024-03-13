@@ -24,14 +24,16 @@ import java.util.List;
 @Introspected
 public class ServiceDefinitionAttribute {
 
+    private Long id;
+
     private String code;
-    private boolean variable;
+    private Boolean variable;
     private AttributeDataType datatype;
-    private boolean required;
+    private Boolean required;
     private String description;
 
     @JsonProperty("order")
-    private int attributeOrder;
+    private Integer attributeOrder;
 
     @JsonProperty("datatype_description")
     private String datatypeDescription;
@@ -43,7 +45,8 @@ public class ServiceDefinitionAttribute {
     public ServiceDefinitionAttribute() {
     }
 
-    public ServiceDefinitionAttribute(String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription, List<AttributeValue> values) {
+    public ServiceDefinitionAttribute(Long id, String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
+        this.id = id;
         this.code = code;
         this.variable = variable;
         this.datatype = datatype;
@@ -51,14 +54,21 @@ public class ServiceDefinitionAttribute {
         this.description = description;
         this.attributeOrder = attributeOrder;
         this.datatypeDescription = datatypeDescription;
-        this.values = values;
     }
 
-    public boolean isVariable() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean isVariable() {
         return variable;
     }
 
-    public void setVariable(boolean variable) {
+    public void setVariable(Boolean variable) {
         this.variable = variable;
     }
 
@@ -70,11 +80,11 @@ public class ServiceDefinitionAttribute {
         this.datatype = datatype;
     }
 
-    public boolean isRequired() {
+    public Boolean isRequired() {
         return required;
     }
 
-    public void setRequired(boolean required) {
+    public void setRequired(Boolean required) {
         this.required = required;
     }
 
@@ -86,11 +96,11 @@ public class ServiceDefinitionAttribute {
         this.datatypeDescription = datatypeDescription;
     }
 
-    public int getAttributeOrder() {
+    public Integer getAttributeOrder() {
         return attributeOrder;
     }
 
-    public void setAttributeOrder(int attributeOrder) {
+    public void setAttributeOrder(Integer attributeOrder) {
         this.attributeOrder = attributeOrder;
     }
 

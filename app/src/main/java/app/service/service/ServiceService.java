@@ -25,9 +25,7 @@ import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.service.servicedefinition.ServiceDefinition;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import app.model.service.servicedefinition.*;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpStatus;
@@ -36,8 +34,10 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -46,11 +46,17 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
     private final ServiceGroupRepository serviceGroupRepository;
+    private final ServiceDefinitionRepository serviceDefinitionRepository;
+    private final ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository;
+    private final AttributeValueRepository attributeValueRepository;
 
-    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository) {
+    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionRepository serviceDefinitionRepository, ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository, AttributeValueRepository attributeValueRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.serviceGroupRepository = serviceGroupRepository;
+        this.serviceDefinitionRepository = serviceDefinitionRepository;
+        this.serviceDefinitionAttributeRepository = serviceDefinitionAttributeRepository;
+        this.attributeValueRepository = attributeValueRepository;
     }
 
     public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
@@ -59,18 +65,20 @@ public class ServiceService {
         return servicePage.map(ServiceDTO::new);
     }
 
-    public String getServiceDefinition(String serviceCode, String jurisdictionId) {
+    public ServiceDefinition getServiceDefinition(String serviceCode, String jurisdictionId) {
         Optional<Service> serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
 
         if (serviceOptional.isEmpty()) {
             LOG.error("Service not found.");
             return null;
-        } else if (serviceOptional.get().getServiceDefinitionJson() == null) {
+        }
+        Service service = serviceOptional.get();
+        if (service.getServiceDefinition() == null) {
             LOG.error("Service Definition is null.");
             return null;
         }
 
-        return serviceOptional.get().getServiceDefinitionJson();
+        return convertToDTO(service.getServiceDefinition());
     }
 
     public ServiceDTO createService(CreateServiceDTO serviceDTO, String jurisdictionId) {
@@ -80,16 +88,6 @@ public class ServiceService {
         }
 
         Service service = new Service();
-
-        if (serviceDTO.getServiceDefinitionJson() != null) {
-            if (serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson())) {
-                service.setMetadata(true);
-                service.setServiceDefinitionJson(serviceDTO.getServiceDefinitionJson());
-            } else {
-                LOG.error("Service Definition JSON format is invalid.");
-                return null;
-            }
-        }
 
         if (groupDoesNotExists(serviceDTO.getGroupId(), jurisdiction, service)) return null;
 
@@ -127,15 +125,6 @@ public class ServiceService {
         if (serviceDTO.getServiceName() != null) {
             service.setServiceName(serviceDTO.getServiceName());
         }
-        if (serviceDTO.getServiceDefinitionJson() != null) {
-            if (serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson())) {
-                service.setMetadata(true);
-                service.setServiceDefinitionJson(serviceDTO.getServiceDefinitionJson());
-            } else {
-                LOG.error("Service Definition JSON format is invalid.");
-                return null;
-            }
-        }
 
         return new ServiceDTO(serviceRepository.update(service));
     }
@@ -158,15 +147,6 @@ public class ServiceService {
             return true;
         }
         return false;
-    }
-
-    private boolean serviceDefinitionFormatIsValid(String serviceDefinitionJson) {
-        try {
-            (new ObjectMapper()).readValue(serviceDefinitionJson, ServiceDefinition.class);
-        } catch (JsonProcessingException e) {
-            return false;
-        }
-        return true;
     }
 
     public List<GroupDTO> getListGroups(String jurisdictionId) {
@@ -225,5 +205,151 @@ public class ServiceService {
         } else {
             throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Cannot delete Group with existing Service associations.");
         }
+    }
+
+    @Transactional
+    public ServiceDefinition addServiceDefinitionAttributeToServiceDefinition(Long serviceId, ServiceDefinitionAttribute serviceDefinitionAttributeDTO, String jurisdictionId) {
+        Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
+        if (serviceOptional.isEmpty()) {
+            LOG.error("Service not found.");
+            return null;
+        }
+        Service service = serviceOptional.get();
+
+        ServiceDefinitionEntity serviceDefinition;
+        if (service.getServiceDefinition() == null) {
+            ServiceDefinitionEntity newServiceDefinition = new ServiceDefinitionEntity();
+            newServiceDefinition.setService(service);
+            serviceDefinition = serviceDefinitionRepository.save(newServiceDefinition);
+
+            addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, serviceDefinition);
+        } else {
+            serviceDefinition = service.getServiceDefinition();
+            addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, serviceDefinition);
+        }
+
+        service.setServiceDefinition(serviceDefinition);
+        serviceRepository.update(service);
+
+        return convertToDTO(serviceDefinition);
+    }
+
+    private ServiceDefinition convertToDTO(ServiceDefinitionEntity serviceDefinition) {
+        ServiceDefinition serviceDefinitionDTO = new ServiceDefinition(serviceDefinition.getId(), serviceDefinition.getService().getServiceCode());
+
+        if (serviceDefinition.getAttributes() != null) {
+            serviceDefinitionDTO.setAttributes(serviceDefinition.getAttributes().stream().map(serviceDefinitionAttributeEntity -> {
+                ServiceDefinitionAttribute serviceDefinitionAttributeDTO = new ServiceDefinitionAttribute(
+                        serviceDefinitionAttributeEntity.getId(),
+                        serviceDefinitionAttributeEntity.getCode(),
+                        serviceDefinitionAttributeEntity.isVariable(),
+                        serviceDefinitionAttributeEntity.getDatatype(),
+                        serviceDefinitionAttributeEntity.isRequired(),
+                        serviceDefinitionAttributeEntity.getDescription(),
+                        serviceDefinitionAttributeEntity.getAttributeOrder(),
+                        serviceDefinitionAttributeEntity.getDatatypeDescription());
+
+                Set<AttributeValueEntity> attributeValues = serviceDefinitionAttributeEntity.getAttributeValues();
+                if (attributeValues != null) {
+                    serviceDefinitionAttributeDTO.setValues(attributeValues.stream()
+                            .map(attributeValueEntity -> new AttributeValue(
+                                    attributeValueEntity.getId().toString(),
+                                    attributeValueEntity.getValueName()))
+                            .collect(Collectors.toList()));
+                }
+
+                return serviceDefinitionAttributeDTO;
+            }).collect(Collectors.toList()));
+        }
+
+        return serviceDefinitionDTO;
+    }
+
+    public ServiceDefinition updateServiceDefinitionAttribute(Long attributeId, ServiceDefinitionAttribute serviceDefinitionAttribute) {
+        Optional<ServiceDefinitionAttributeEntity> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeId);
+        if (serviceDefinitionAttributeEntityOptional.isEmpty()) {
+            LOG.error("Attribute not found.");
+            return null;
+        }
+        ServiceDefinitionAttributeEntity serviceDefinitionAttributeEntity = serviceDefinitionAttributeEntityOptional.get();
+
+        ServiceDefinitionAttributeEntity patch = patchServiceDefinitionAttribute(serviceDefinitionAttributeEntity, serviceDefinitionAttribute);
+
+        return convertToDTO(patch.getServiceDefinition());
+    }
+
+    @Transactional
+    public ServiceDefinitionAttributeEntity patchServiceDefinitionAttribute(ServiceDefinitionAttributeEntity serviceDefinitionAttribute, ServiceDefinitionAttribute serviceDefinitionAttributeDTO) {
+
+        if (serviceDefinitionAttributeDTO.getCode() != null) {
+            serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
+        }
+        if (serviceDefinitionAttributeDTO.isVariable() != null) {
+            serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
+        }
+        if (serviceDefinitionAttributeDTO.getDatatype() != null) {
+            serviceDefinitionAttribute.setRequired(serviceDefinitionAttributeDTO.isRequired());
+        }
+        if (serviceDefinitionAttributeDTO.getDatatype() != null) {
+            serviceDefinitionAttribute.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
+        }
+        if (serviceDefinitionAttributeDTO.getDescription() != null) {
+            serviceDefinitionAttribute.setDescription(serviceDefinitionAttributeDTO.getDescription());
+        }
+        if (serviceDefinitionAttributeDTO.getAttributeOrder() != null) {
+            serviceDefinitionAttribute.setAttributeOrder(serviceDefinitionAttributeDTO.getAttributeOrder());
+        }
+        if (serviceDefinitionAttributeDTO.getDatatypeDescription() != null) {
+            serviceDefinitionAttribute.setDatatypeDescription(serviceDefinitionAttributeDTO.getDatatypeDescription());
+        }
+
+        // add new values
+        if (serviceDefinitionAttributeDTO.getValues() != null) {
+            // drop all attribute values
+            attributeValueRepository.deleteAllByServiceDefinitionAttribute(serviceDefinitionAttribute);
+
+            serviceDefinitionAttributeDTO.getValues().forEach(attributeValue -> {
+                AttributeValueEntity savedValue = attributeValueRepository.save(new AttributeValueEntity(serviceDefinitionAttribute, attributeValue.getName()));
+                serviceDefinitionAttribute.addAttributeValue(savedValue);
+            });
+        }
+
+        return serviceDefinitionAttributeRepository.update(serviceDefinitionAttribute);
+    }
+
+    public void removeServiceDefinitionAttributeFromServiceDefinition(Long attributeId) {
+        Optional<ServiceDefinitionAttributeEntity> serviceDefinitionAttribute = serviceDefinitionAttributeRepository.findById(attributeId);
+        if (serviceDefinitionAttribute.isEmpty()) {
+            LOG.error("Attribute not found.");
+        }
+        ServiceDefinitionAttributeEntity serviceDefinitionAttributeEntity = serviceDefinitionAttribute.get();
+        serviceDefinitionAttributeRepository.delete(serviceDefinitionAttributeEntity);
+    }
+
+    @Transactional
+    public void addAttributeToServiceDefinition(ServiceDefinitionAttribute serviceDefinitionAttributeDTO, ServiceDefinitionEntity savedSD) {
+        ServiceDefinitionAttributeEntity serviceDefinitionAttributeEntity = new ServiceDefinitionAttributeEntity();
+        serviceDefinitionAttributeEntity.setServiceDefinition(savedSD);
+        serviceDefinitionAttributeEntity.setCode(serviceDefinitionAttributeDTO.getCode());
+        serviceDefinitionAttributeEntity.setVariable(serviceDefinitionAttributeDTO.isVariable());
+        serviceDefinitionAttributeEntity.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
+        serviceDefinitionAttributeEntity.setRequired(serviceDefinitionAttributeDTO.isRequired());
+        serviceDefinitionAttributeEntity.setDescription(serviceDefinitionAttributeDTO.getDescription());
+        serviceDefinitionAttributeEntity.setAttributeOrder(serviceDefinitionAttributeDTO.getAttributeOrder());
+        serviceDefinitionAttributeEntity.setDatatypeDescription(serviceDefinitionAttributeDTO.getDatatypeDescription());
+
+        ServiceDefinitionAttributeEntity savedSDA = serviceDefinitionAttributeRepository.save(serviceDefinitionAttributeEntity);
+
+        if (serviceDefinitionAttributeDTO.getValues() != null) {
+            serviceDefinitionAttributeDTO.getValues().forEach(attributeValue -> {
+                AttributeValueEntity savedValue = attributeValueRepository.save(new AttributeValueEntity(savedSDA, attributeValue.getName()));
+                savedSDA.addAttributeValue(savedValue);
+            });
+        }
+
+        serviceDefinitionAttributeRepository.update(savedSDA);
+
+        savedSD.addAttribute(savedSDA);
+        serviceDefinitionRepository.update(savedSD);
     }
 }

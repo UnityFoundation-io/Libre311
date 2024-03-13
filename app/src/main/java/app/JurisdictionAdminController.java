@@ -22,11 +22,11 @@ import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
+import app.model.service.servicedefinition.ServiceDefinition;
+import app.model.service.servicedefinition.ServiceDefinitionAttribute;
 import app.security.RequiresPermissions;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
-import io.micronaut.data.model.Page;
-import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.server.types.files.StreamedFile;
@@ -38,7 +38,6 @@ import jakarta.annotation.Nullable;
 import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static app.security.Permission.*;
@@ -72,6 +71,33 @@ public class JurisdictionAdminController {
     public ServiceDTO updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return serviceService.updateService(serviceId, requestDTO, jurisdiction_id);
+    }
+
+    @Post(uris = { "/services/{serviceId}/attributes{?jurisdiction_id}", "/services/{serviceId}/attributes.json{?jurisdiction_id}"})
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public ServiceDefinition addServiceDefinitionAttributeToServiceDefinition(Long serviceId,
+            @Valid @Body ServiceDefinitionAttribute requestDTO,
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceService.addServiceDefinitionAttributeToServiceDefinition(serviceId, requestDTO, jurisdiction_id);
+    }
+
+    @Patch(uris = { "/services/{serviceId}/attributes/{attributeId}{?jurisdiction_id}", "/services/{serviceId}/attributes/{attributeId}.json{?jurisdiction_id}"})
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public ServiceDefinition updateServiceDefinitionAttribute(Long serviceId, Long attributeId,
+            @Valid @Body ServiceDefinitionAttribute requestDTO,
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceService.updateServiceDefinitionAttribute(attributeId, requestDTO);
+    }
+
+    @Delete(uris = { "/services/{serviceId}/attributes/{attributeId}{?jurisdiction_id}", "/services/{serviceId}/attributes/{attributeId}.json{?jurisdiction_id}"})
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public HttpResponse<?> removeServiceDefinitionAttributeFromServiceDefinition(Long serviceId, Long attributeId,
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        serviceService.removeServiceDefinitionAttributeFromServiceDefinition(attributeId);
+        return HttpResponse.ok();
     }
 
     @Get(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })

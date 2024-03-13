@@ -21,14 +21,9 @@ import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.service.servicedefinition.AttributeDataType;
-import app.model.service.servicedefinition.AttributeValue;
-import app.model.service.servicedefinition.ServiceDefinition;
-import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.service.servicedefinition.*;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.convert.format.MapFormat;
@@ -53,12 +48,18 @@ public class Bootstrap {
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
     private final ServiceGroupRepository serviceGroupRepository;
+    private final ServiceDefinitionRepository serviceDefinitionRepository;
+    private final ServiceDefinitionAttributeRepository attributeRepository;
+    private final AttributeValueRepository attributeValueRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionRepository serviceDefinitionRepository, ServiceDefinitionAttributeRepository attributeRepository, AttributeValueRepository attributeValueRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.serviceGroupRepository = serviceGroupRepository;
+        this.serviceDefinitionRepository = serviceDefinitionRepository;
+        this.attributeRepository = attributeRepository;
+        this.attributeValueRepository = attributeValueRepository;
     }
 
     @EventListener
@@ -100,55 +101,50 @@ public class Bootstrap {
                     .findFirst();
             service.setServiceGroup(group.get());
 
-            if (svc.containsKey("serviceDefinition")) {
-                service.setMetadata(true);
+            Service savedService = serviceRepository.save(service);
 
+            if (svc.containsKey("serviceDefinition")) {
                 Map definitionMap = (Map) svc.get("serviceDefinition");
 
-                ServiceDefinition serviceDefinition = new ServiceDefinition();
-                serviceDefinition.setServiceCode((String) svc.get("serviceCode"));
+                ServiceDefinitionEntity serviceDefinition = new ServiceDefinitionEntity();
+                serviceDefinition.setService(savedService);
+
+                ServiceDefinitionEntity savedSD = serviceDefinitionRepository.save(serviceDefinition);
+                service.setServiceDefinition(savedSD);
+                serviceRepository.update(savedService);
 
                 List<Map<String, Object>> attributes = (List<Map<String, Object>>) definitionMap.get("attributes");
-                serviceDefinition.setAttributes(attributes.stream().map(stringObjectMap -> {
-                    AttributeDataType attributeDataType = AttributeDataType.valueOf(((String) stringObjectMap.get(
-                            "datatype")).toUpperCase());
+                attributes.forEach(stringObjectMap -> {
+                    AttributeDataType attributeDataType = AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase());
                     String attributeCode = (String) stringObjectMap.get("code");
 
-                    ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+                    ServiceDefinitionAttributeEntity serviceDefinitionAttribute = new ServiceDefinitionAttributeEntity();
+                    serviceDefinitionAttribute.setServiceDefinition(savedSD);
                     serviceDefinitionAttribute.setVariable((Boolean) stringObjectMap.get("variable"));
                     serviceDefinitionAttribute.setCode(attributeCode);
-                    serviceDefinitionAttribute.setDatatype(attributeDataType);
                     serviceDefinitionAttribute.setRequired((Boolean) stringObjectMap.get("required"));
                     serviceDefinitionAttribute.setDatatypeDescription((String) stringObjectMap.get("datatypeDescription"));
                     serviceDefinitionAttribute.setAttributeOrder((Integer) stringObjectMap.get("order"));
                     serviceDefinitionAttribute.setDescription((String) stringObjectMap.get("description"));
+                    serviceDefinitionAttribute.setDatatype(attributeDataType);
+
+                    ServiceDefinitionAttributeEntity savedSDA = attributeRepository.save(serviceDefinitionAttribute);
 
                     List<Map<String, String>> values = (List<Map<String, String>>) stringObjectMap.get("values");
                     if ((values == null || values.isEmpty()) && (attributeDataType.equals(AttributeDataType.MULTIVALUELIST) || attributeDataType.equals(AttributeDataType.SINGLEVALUELIST))) {
                         LOG.warn(String.format("Attribute with code %s does not contain values despite being a MULTIVALUELIST or SINGLEVALUELIST", attributeCode));
                     }
+
                     if (values != null) {
-                        List<AttributeValue> attributeValues =
-                                values.stream().map(stringStringMap -> new AttributeValue(stringStringMap.get("key"),
-                                        stringStringMap.get("name"))).collect(Collectors.toList());
-                        serviceDefinitionAttribute.setValues(attributeValues);
+                        values.forEach(stringStringMap -> attributeValueRepository.save(new AttributeValueEntity(savedSDA, stringStringMap.get("name"))));
                     }
-                    return serviceDefinitionAttribute;
-                }).collect(Collectors.toList()));
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                try {
-                    service.setServiceDefinitionJson(objectMapper.writeValueAsString(serviceDefinition));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
+                });
             }
-
-            Service savedService = serviceRepository.save(service);
 
             if (svc.containsKey("serviceRequests")) {
                 List<Map> serviceRequests = (List<Map>) svc.get("serviceRequests");
 
+                Service finalSavedService = savedService;
                 serviceRequests.forEach(svcReq -> {
                     ServiceRequest serviceRequest = new ServiceRequest();
                     serviceRequest.setDescription((String) svcReq.get("description"));
@@ -163,10 +159,10 @@ public class Bootstrap {
                     serviceRequest.setAddressId((String) svcReq.get("address_id"));
                     serviceRequest.setServiceNotice((String) svcReq.get("service_notice"));
                     serviceRequest.setStatusNotes((String) svcReq.get("status_notes"));
-                    serviceRequest.setService(savedService);
+                    serviceRequest.setService(finalSavedService);
                     serviceRequest.setJurisdiction(jurisdiction);
 
-                    savedService.addServiceRequest(serviceRequest);
+                    finalSavedService.addServiceRequest(serviceRequest);
                 });
             }
 

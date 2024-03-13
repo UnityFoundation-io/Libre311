@@ -16,6 +16,7 @@ package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.service.group.ServiceGroup;
+import app.model.service.servicedefinition.ServiceDefinitionEntity;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -38,16 +39,14 @@ public class Service {
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
 
-    @Column(columnDefinition = "TEXT")
-    private String serviceDefinitionJson;
+    @OneToOne
+    private ServiceDefinitionEntity serviceDefinition;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
-
-    private boolean metadata = false;
 
     @Enumerated(value = EnumType.STRING)
     private ServiceType type = ServiceType.REALTIME;
@@ -97,14 +96,6 @@ public class Service {
         this.description = description;
     }
 
-    public boolean isMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(boolean metadata) {
-        this.metadata = metadata;
-    }
-
     public ServiceType getType() {
         return type;
     }
@@ -113,12 +104,12 @@ public class Service {
         this.type = type;
     }
 
-    public String getServiceDefinitionJson() {
-        return serviceDefinitionJson;
+    public ServiceDefinitionEntity getServiceDefinition() {
+        return serviceDefinition;
     }
 
-    public void setServiceDefinitionJson(String serviceDefinitionJson) {
-        this.serviceDefinitionJson = serviceDefinitionJson;
+    public void setServiceDefinition(ServiceDefinitionEntity serviceDefinition) {
+        this.serviceDefinition = serviceDefinition;
     }
 
     public Long getId() {
