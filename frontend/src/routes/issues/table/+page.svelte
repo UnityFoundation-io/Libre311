@@ -14,23 +14,25 @@
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
-	<div class="m-3 flex items-center justify-between">
-		<div>
-			<p class="text-base">{messages['sidebar']['title']}</p>
-		</div>
+	<div class="sticky top-0 border-b-2 bg-white">
+		<div class="flex items-center justify-between">
+			<div>
+				<h3 class="ml-4 text-base">{messages['sidebar']['title']}</h3>
+			</div>
 
-		<div>
-			<Pagination
-				pagination={$serviceRequestsRes.value.metadata.pagination}
-				nextPage={linkResolver.nextIssuesPage(
-					$serviceRequestsRes.value.metadata.pagination,
-					$page.url
-				)}
-				prevPage={linkResolver.prevIssuesPage(
-					$serviceRequestsRes.value.metadata.pagination,
-					$page.url
-				)}
-			/>
+			<div>
+				<Pagination
+					pagination={$serviceRequestsRes.value.metadata.pagination}
+					nextPage={linkResolver.nextIssuesPage(
+						$serviceRequestsRes.value.metadata.pagination,
+						$page.url
+					)}
+					prevPage={linkResolver.prevIssuesPage(
+						$serviceRequestsRes.value.metadata.pagination,
+						$page.url
+					)}
+				/>
+			</div>
 		</div>
 	</div>
 
