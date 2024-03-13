@@ -176,6 +176,7 @@
 			},
 			$page.url
 		);
+		console.log(ctx.serviceRequestsResponse);
 	}
 
 	onMount(fetchServiceList);
@@ -260,7 +261,6 @@
 										name="select-1"
 										placeholder="Request Type"
 										multiple
-										on:change={() => {}}
 										options={selectOptions}
 									>
 										<Select.Label slot="label">Service</Select.Label>
@@ -383,6 +383,8 @@
 			</Card>
 		</div>
 	</SideBarMainContentLayout>
+{:else if $serviceRequestsRes.type === 'failure'}
+	{JSON.stringify($serviceRequestsRes, null, 2)}
 {/if}
 
 <style>
