@@ -20,10 +20,11 @@ import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
+import app.dto.servicedefinition.CreateServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.UpdateServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.dto.servicedefinition.ServiceDefinitionDTO;
-import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.security.RequiresPermissions;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
@@ -77,7 +78,7 @@ public class JurisdictionAdminController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId,
-                                                                                 @Valid @Body ServiceDefinitionAttributeDTO requestDTO,
+                                                                                 @Valid @Body CreateServiceDefinitionAttributeDTO requestDTO,
                                                                                  @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return serviceService.addServiceDefinitionAttributeToServiceDefinition(serviceId, requestDTO, jurisdiction_id);
     }
@@ -86,7 +87,7 @@ public class JurisdictionAdminController {
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long serviceId, Long attributeId,
-                                                                 @Valid @Body ServiceDefinitionAttributeDTO requestDTO,
+                                                                 @Valid @Body UpdateServiceDefinitionAttributeDTO requestDTO,
                                                                  @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return serviceService.updateServiceDefinitionAttribute(attributeId, requestDTO);
     }

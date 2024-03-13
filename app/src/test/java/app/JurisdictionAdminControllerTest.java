@@ -19,9 +19,7 @@ import app.dto.group.GroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
-import app.dto.servicedefinition.AttributeValueDTO;
-import app.dto.servicedefinition.ServiceDefinitionDTO;
-import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.*;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
@@ -316,8 +314,7 @@ public class JurisdictionAdminControllerTest {
         assertTrue(optional.isPresent());
         ServiceDTO serviceDTO = optional.get();
 
-        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", new ServiceDefinitionAttributeDTO(
-                null,
+        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", new CreateServiceDefinitionAttributeDTO(
                 "ISSUE_NEAR",
                 true,
                 AttributeDataType.STRING,
@@ -329,8 +326,7 @@ public class JurisdictionAdminControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
 
-        ServiceDefinitionAttributeDTO sdaIssueSelect = new ServiceDefinitionAttributeDTO(
-                null,
+        CreateServiceDefinitionAttributeDTO sdaIssueSelect = new CreateServiceDefinitionAttributeDTO(
                 "ISSUE_SELECT",
                 true,
                 AttributeDataType.MULTIVALUELIST,
@@ -401,7 +397,7 @@ public class JurisdictionAdminControllerTest {
         assertTrue(issueSelectOptional.isPresent());
         ServiceDefinitionAttributeDTO issueSelectAttribute = issueSelectOptional.get();
 
-        ServiceDefinitionAttributeDTO patchSDA = new ServiceDefinitionAttributeDTO();
+        UpdateServiceDefinitionAttributeDTO patchSDA = new UpdateServiceDefinitionAttributeDTO();
         patchSDA.setAttributeOrder(1);
         request = HttpRequest.PATCH("/jurisdiction-admin/services/"+serviceDTO.getId()+"/attributes/"+issueSelectAttribute.getId()+"?jurisdiction_id=fakecity.gov", patchSDA)
                 .header("Authorization", "Bearer token.text.here");
@@ -634,7 +630,7 @@ public class JurisdictionAdminControllerTest {
         return client.toBlocking().exchange(request, ServiceDTO.class);
     }
 
-    private HttpResponse<?> addServiceDefinitionAttribute(Long serviceId, String jurisdictionId, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+    private HttpResponse<?> addServiceDefinitionAttribute(Long serviceId, String jurisdictionId, CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
         HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services/"+serviceId+"/attributes?jurisdiction_id="+jurisdictionId, serviceDefinitionAttributeDTO)
                 .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, ServiceDefinitionDTO.class);

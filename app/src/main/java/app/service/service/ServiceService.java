@@ -19,9 +19,7 @@ import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
-import app.dto.servicedefinition.AttributeValueDTO;
-import app.dto.servicedefinition.ServiceDefinitionDTO;
-import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
@@ -211,7 +209,7 @@ public class ServiceService {
     }
 
     @Transactional
-    public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, String jurisdictionId) {
+    public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId, CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, String jurisdictionId) {
         Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
         if (serviceOptional.isEmpty()) {
             LOG.error("Service not found.");
@@ -268,7 +266,7 @@ public class ServiceService {
         return serviceDefinitionDTO;
     }
 
-    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long attributeId, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long attributeId, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
         Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeId);
         if (serviceDefinitionAttributeEntityOptional.isEmpty()) {
             LOG.error("Attribute not found.");
@@ -282,7 +280,7 @@ public class ServiceService {
     }
 
     @Transactional
-    public ServiceDefinitionAttribute patchServiceDefinitionAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+    public ServiceDefinitionAttribute patchServiceDefinitionAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
 
         if (serviceDefinitionAttributeDTO.getCode() != null) {
             serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
@@ -330,7 +328,7 @@ public class ServiceService {
     }
 
     @Transactional
-    public void addAttributeToServiceDefinition(ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, ServiceDefinition savedSD) {
+    public void addAttributeToServiceDefinition(CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, ServiceDefinition savedSD) {
         ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
         serviceDefinitionAttribute.setServiceDefinition(savedSD);
         serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());

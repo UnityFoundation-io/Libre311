@@ -15,6 +15,7 @@
 package app.model.servicedefinition;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "service_definition_attribute_values")
@@ -27,6 +28,7 @@ public class AttributeValue {
     @ManyToOne(optional = false)
     private ServiceDefinitionAttribute serviceDefinitionAttribute;
 
+    @NotBlank
     private String valueName;
 
     public AttributeValue() {

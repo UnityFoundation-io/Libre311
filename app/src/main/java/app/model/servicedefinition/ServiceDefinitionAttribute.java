@@ -19,6 +19,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,10 +35,12 @@ public class ServiceDefinitionAttribute {
     @ManyToOne(optional = false)
     private ServiceDefinition serviceDefinition;
 
+    @NotBlank
     private String code;
 
     private boolean variable;
 
+    @NotNull
     @Enumerated(value = EnumType.STRING)
     private AttributeDataType datatype;
 
