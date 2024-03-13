@@ -12,11 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.dto.servicedefinition;
 
-import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.repository.PageableRepository;
+import io.micronaut.core.annotation.Introspected;
 
-@Repository
-public interface ServiceDefinitionAttributeRepository extends PageableRepository<ServiceDefinitionAttributeEntity, Long> {
+@Introspected
+public class AttributeValueDTO {
+    private String key;
+    private String name;
+
+    public AttributeValueDTO() {
+    }
+
+    public AttributeValueDTO(String key, String name) {
+        this.key = key;
+        this.name = name;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

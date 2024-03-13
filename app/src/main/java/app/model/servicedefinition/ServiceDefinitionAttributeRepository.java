@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.model.servicedefinition;
 
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.PageableRepository;
 
 @Repository
-public interface AttributeValueRepository extends PageableRepository<AttributeValueEntity, Long> {
-    void deleteAllByServiceDefinitionAttribute(ServiceDefinitionAttributeEntity serviceDefinitionAttribute);
+public interface ServiceDefinitionAttributeRepository extends PageableRepository<ServiceDefinitionAttribute, Long> {
 }

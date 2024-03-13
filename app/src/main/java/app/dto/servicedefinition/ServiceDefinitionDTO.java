@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.dto.servicedefinition;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
@@ -24,7 +24,7 @@ import java.util.List;
 
 @Introspected
 @JacksonXmlRootElement(localName = "service_definitions")
-public class ServiceDefinition {
+public class ServiceDefinitionDTO {
 
     private Long id;
 
@@ -33,12 +33,12 @@ public class ServiceDefinition {
 
     @JacksonXmlElementWrapper(localName = "attributes")
     @JacksonXmlProperty(localName = "attribute")
-    private List<ServiceDefinitionAttribute> attributes;
+    private List<ServiceDefinitionAttributeDTO> attributes;
 
-    public ServiceDefinition() {
+    public ServiceDefinitionDTO() {
     }
 
-    public ServiceDefinition(Long id, String serviceCode) {
+    public ServiceDefinitionDTO(Long id, String serviceCode) {
         this.id = id;
         this.serviceCode = serviceCode;
     }
@@ -51,11 +51,11 @@ public class ServiceDefinition {
         this.id = id;
     }
 
-    public List<ServiceDefinitionAttribute> getAttributes() {
+    public List<ServiceDefinitionAttributeDTO> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<ServiceDefinitionAttribute> attributes) {
+    public void setAttributes(List<ServiceDefinitionAttributeDTO> attributes) {
         this.attributes = attributes;
     }
 

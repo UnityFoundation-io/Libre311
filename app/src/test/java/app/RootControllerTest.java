@@ -27,7 +27,7 @@ import app.model.jurisdiction.LatLong;
 import app.model.jurisdiction.RemoteHost;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
-import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
@@ -172,9 +172,9 @@ public class RootControllerTest {
 
         ServiceRequestDTO serviceRequestDTO = serviceRequestDTOS[0];
         assertFalse(serviceRequestDTO.getSelectedValues().isEmpty());
-        ServiceDefinitionAttribute serviceDefinitionAttribute = serviceRequestDTO.getSelectedValues().get(0);
-        assertNotNull(serviceDefinitionAttribute.getValues());
-        assertFalse(serviceDefinitionAttribute.getValues().isEmpty());
+        ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = serviceRequestDTO.getSelectedValues().get(0);
+        assertNotNull(serviceDefinitionAttributeDTO.getValues());
+        assertFalse(serviceDefinitionAttributeDTO.getValues().isEmpty());
     }
 
     @Test

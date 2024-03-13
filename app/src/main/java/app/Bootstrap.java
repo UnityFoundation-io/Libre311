@@ -16,12 +16,13 @@ package app;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
+import app.model.service.AttributeDataType;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.service.servicedefinition.*;
+import app.model.servicedefinition.*;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
 import io.micronaut.context.annotation.ConfigurationProperties;
@@ -106,10 +107,10 @@ public class Bootstrap {
             if (svc.containsKey("serviceDefinition")) {
                 Map definitionMap = (Map) svc.get("serviceDefinition");
 
-                ServiceDefinitionEntity serviceDefinition = new ServiceDefinitionEntity();
+                ServiceDefinition serviceDefinition = new ServiceDefinition();
                 serviceDefinition.setService(savedService);
 
-                ServiceDefinitionEntity savedSD = serviceDefinitionRepository.save(serviceDefinition);
+                ServiceDefinition savedSD = serviceDefinitionRepository.save(serviceDefinition);
                 service.setServiceDefinition(savedSD);
                 serviceRepository.update(savedService);
 
@@ -118,7 +119,7 @@ public class Bootstrap {
                     AttributeDataType attributeDataType = AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase());
                     String attributeCode = (String) stringObjectMap.get("code");
 
-                    ServiceDefinitionAttributeEntity serviceDefinitionAttribute = new ServiceDefinitionAttributeEntity();
+                    ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
                     serviceDefinitionAttribute.setServiceDefinition(savedSD);
                     serviceDefinitionAttribute.setVariable((Boolean) stringObjectMap.get("variable"));
                     serviceDefinitionAttribute.setCode(attributeCode);
@@ -128,7 +129,7 @@ public class Bootstrap {
                     serviceDefinitionAttribute.setDescription((String) stringObjectMap.get("description"));
                     serviceDefinitionAttribute.setDatatype(attributeDataType);
 
-                    ServiceDefinitionAttributeEntity savedSDA = attributeRepository.save(serviceDefinitionAttribute);
+                    ServiceDefinitionAttribute savedSDA = attributeRepository.save(serviceDefinitionAttribute);
 
                     List<Map<String, String>> values = (List<Map<String, String>>) stringObjectMap.get("values");
                     if ((values == null || values.isEmpty()) && (attributeDataType.equals(AttributeDataType.MULTIVALUELIST) || attributeDataType.equals(AttributeDataType.SINGLEVALUELIST))) {
@@ -136,7 +137,7 @@ public class Bootstrap {
                     }
 
                     if (values != null) {
-                        values.forEach(stringStringMap -> attributeValueRepository.save(new AttributeValueEntity(savedSDA, stringStringMap.get("name"))));
+                        values.forEach(stringStringMap -> attributeValueRepository.save(new AttributeValue(savedSDA, stringStringMap.get("name"))));
                     }
                 });
             }

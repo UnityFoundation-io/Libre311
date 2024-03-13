@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.dto.servicedefinition;
 
+import app.model.service.AttributeDataType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -22,7 +23,7 @@ import io.micronaut.core.annotation.Introspected;
 import java.util.List;
 
 @Introspected
-public class ServiceDefinitionAttribute {
+public class ServiceDefinitionAttributeDTO {
 
     private Long id;
 
@@ -40,12 +41,12 @@ public class ServiceDefinitionAttribute {
 
     @JacksonXmlElementWrapper(localName = "values")
     @JacksonXmlProperty(localName = "value")
-    private List<AttributeValue> values;
+    private List<AttributeValueDTO> values;
 
-    public ServiceDefinitionAttribute() {
+    public ServiceDefinitionAttributeDTO() {
     }
 
-    public ServiceDefinitionAttribute(Long id, String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
+    public ServiceDefinitionAttributeDTO(Long id, String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
         this.id = id;
         this.code = code;
         this.variable = variable;
@@ -112,11 +113,11 @@ public class ServiceDefinitionAttribute {
         this.description = description;
     }
 
-    public List<AttributeValue> getValues() {
+    public List<AttributeValueDTO> getValues() {
         return values;
     }
 
-    public void setValues(List<AttributeValue> values) {
+    public void setValues(List<AttributeValueDTO> values) {
         this.values = values;
     }
 

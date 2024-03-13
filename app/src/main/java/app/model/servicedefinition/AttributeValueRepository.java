@@ -12,16 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.model.servicedefinition;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.repository.PageableRepository;
 
-public enum AttributeDataType {
-    STRING, NUMBER, DATETIME, TEXT, SINGLEVALUELIST, MULTIVALUELIST;
-
-    @Override
-    @JsonValue
-    public String toString() {
-        return name().toLowerCase();
-    }
+@Repository
+public interface AttributeValueRepository extends PageableRepository<AttributeValue, Long> {
+    void deleteAllByServiceDefinitionAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute);
 }

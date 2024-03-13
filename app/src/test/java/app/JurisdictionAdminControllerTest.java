@@ -19,6 +19,9 @@ import app.dto.group.GroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
+import app.dto.servicedefinition.AttributeValueDTO;
+import app.dto.servicedefinition.ServiceDefinitionDTO;
+import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
@@ -27,12 +30,13 @@ import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdictionuser.JurisdictionUser;
 import app.model.jurisdictionuser.JurisdictionUserRepository;
+import app.model.service.AttributeDataType;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.service.servicedefinition.*;
+import app.model.servicedefinition.*;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.model.user.User;
@@ -144,12 +148,12 @@ public class JurisdictionAdminControllerTest {
             Service service = serviceRepository.save(sidewalkService);
 
             // service definition json
-            ServiceDefinitionEntity serviceDefinition = new ServiceDefinitionEntity();
+            ServiceDefinition serviceDefinition = new ServiceDefinition();
             serviceDefinition.setService(service);
 
-            ServiceDefinitionEntity savedSD = serviceDefinitionRepository.save(serviceDefinition);
+            ServiceDefinition savedSD = serviceDefinitionRepository.save(serviceDefinition);
 
-            ServiceDefinitionAttributeEntity serviceDefinitionAttribute = new ServiceDefinitionAttributeEntity();
+            ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
             serviceDefinitionAttribute.setServiceDefinition(savedSD);
             serviceDefinitionAttribute.setCode("SDWLK");
             serviceDefinitionAttribute.setVariable(true);
@@ -159,13 +163,13 @@ public class JurisdictionAdminControllerTest {
             serviceDefinitionAttribute.setAttributeOrder(1);
             serviceDefinitionAttribute.setDatatypeDescription("Please select one or more items.");
 
-            ServiceDefinitionAttributeEntity savedSDA = serviceDefinitionAttributeRepository.save(serviceDefinitionAttribute);
+            ServiceDefinitionAttribute savedSDA = serviceDefinitionAttributeRepository.save(serviceDefinitionAttribute);
 
-            attributeValueRepository.save(new AttributeValueEntity(savedSDA, "ADA Access"));
-            attributeValueRepository.save(new AttributeValueEntity(savedSDA, "Cracked"));
-            attributeValueRepository.save(new AttributeValueEntity(savedSDA, "Too narrow"));
-            attributeValueRepository.save(new AttributeValueEntity(savedSDA, "Heaved/Uneven Sidewalk"));
-            attributeValueRepository.save(new AttributeValueEntity(savedSDA, "Other"));
+            attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access"));
+            attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked"));
+            attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow"));
+            attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk"));
+            attributeValueRepository.save(new AttributeValue(savedSDA, "Other"));
         }
     }
 
@@ -312,7 +316,7 @@ public class JurisdictionAdminControllerTest {
         assertTrue(optional.isPresent());
         ServiceDTO serviceDTO = optional.get();
 
-        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", new ServiceDefinitionAttribute(
+        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", new ServiceDefinitionAttributeDTO(
                 null,
                 "ISSUE_NEAR",
                 true,
@@ -325,7 +329,7 @@ public class JurisdictionAdminControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
 
-        ServiceDefinitionAttribute sdaIssueSelect = new ServiceDefinitionAttribute(
+        ServiceDefinitionAttributeDTO sdaIssueSelect = new ServiceDefinitionAttributeDTO(
                 null,
                 "ISSUE_SELECT",
                 true,
@@ -336,19 +340,19 @@ public class JurisdictionAdminControllerTest {
                 "(Optional) If the issue is near anything, please describe here."
         );
         sdaIssueSelect.setValues(List.of(
-                new AttributeValue("UNSAFE", "Unsafe location"),
-                new AttributeValue("NO_SDLWLK", "No Sidewalk present"),
-                new AttributeValue("MISSING_SIGN", "Sign is missing")
+                new AttributeValueDTO("UNSAFE", "Unsafe location"),
+                new AttributeValueDTO("NO_SDLWLK", "No Sidewalk present"),
+                new AttributeValueDTO("MISSING_SIGN", "Sign is missing")
         ));
 
         response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", sdaIssueSelect);
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<ServiceDefinition> optionalServiceDefinition = response.getBody(ServiceDefinition.class);
+        Optional<ServiceDefinitionDTO> optionalServiceDefinition = response.getBody(ServiceDefinitionDTO.class);
         assertTrue(optionalServiceDefinition.isPresent());
-        ServiceDefinition savedServiceDefinition = optionalServiceDefinition.get();
-        assertNotNull(savedServiceDefinition.getAttributes());
-        assertFalse(savedServiceDefinition.getAttributes().isEmpty());
-        assertEquals(2, savedServiceDefinition.getAttributes().size());
+        ServiceDefinitionDTO savedServiceDefinitionDTO = optionalServiceDefinition.get();
+        assertNotNull(savedServiceDefinitionDTO.getAttributes());
+        assertFalse(savedServiceDefinitionDTO.getAttributes().isEmpty());
+        assertEquals(2, savedServiceDefinitionDTO.getAttributes().size());
 
         assertEquals(groupDTO.getId(), serviceDTO.getGroupId());
 
@@ -379,11 +383,11 @@ public class JurisdictionAdminControllerTest {
         assertEquals(secondGroupDTO.getId(), serviceDTO1.getGroupId());
 
         // Remove ISSUE_NEAR attribute
-        Optional<ServiceDefinitionAttribute> issueNearOptional = savedServiceDefinition.getAttributes().stream()
+        Optional<ServiceDefinitionAttributeDTO> issueNearOptional = savedServiceDefinitionDTO.getAttributes().stream()
                 .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals("ISSUE_NEAR"))
                 .findFirst();
         assertTrue(issueNearOptional.isPresent());
-        ServiceDefinitionAttribute issueNearAttribute = issueNearOptional.get();
+        ServiceDefinitionAttributeDTO issueNearAttribute = issueNearOptional.get();
 
         request = HttpRequest.DELETE("/jurisdiction-admin/services/"+serviceDTO.getId()+"/attributes/"+issueNearAttribute.getId()+"?jurisdiction_id=fakecity.gov")
                 .header("Authorization", "Bearer token.text.here");
@@ -391,24 +395,24 @@ public class JurisdictionAdminControllerTest {
         assertEquals(OK, response.getStatus());
 
         // Update ISSUE_SELECT attribute
-        Optional<ServiceDefinitionAttribute> issueSelectOptional = savedServiceDefinition.getAttributes().stream()
+        Optional<ServiceDefinitionAttributeDTO> issueSelectOptional = savedServiceDefinitionDTO.getAttributes().stream()
                 .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT"))
                 .findFirst();
         assertTrue(issueSelectOptional.isPresent());
-        ServiceDefinitionAttribute issueSelectAttribute = issueSelectOptional.get();
+        ServiceDefinitionAttributeDTO issueSelectAttribute = issueSelectOptional.get();
 
-        ServiceDefinitionAttribute patchSDA = new ServiceDefinitionAttribute();
+        ServiceDefinitionAttributeDTO patchSDA = new ServiceDefinitionAttributeDTO();
         patchSDA.setAttributeOrder(1);
         request = HttpRequest.PATCH("/jurisdiction-admin/services/"+serviceDTO.getId()+"/attributes/"+issueSelectAttribute.getId()+"?jurisdiction_id=fakecity.gov", patchSDA)
                 .header("Authorization", "Bearer token.text.here");
-        response = client.toBlocking().exchange(request, ServiceDefinition.class);
+        response = client.toBlocking().exchange(request, ServiceDefinitionDTO.class);
         assertEquals(OK, response.getStatus());
-        Optional<ServiceDefinition> optionalPatchServiceDefinition = response.getBody(ServiceDefinition.class);
+        Optional<ServiceDefinitionDTO> optionalPatchServiceDefinition = response.getBody(ServiceDefinitionDTO.class);
         assertTrue(optionalPatchServiceDefinition.isPresent());
-        ServiceDefinition patchedServiceDefinition = optionalPatchServiceDefinition.get();
-        assertNotNull(patchedServiceDefinition.getAttributes());
-        assertFalse(patchedServiceDefinition.getAttributes().isEmpty());
-        assertEquals(1, patchedServiceDefinition.getAttributes().size());
+        ServiceDefinitionDTO patchedServiceDefinitionDTO = optionalPatchServiceDefinition.get();
+        assertNotNull(patchedServiceDefinitionDTO.getAttributes());
+        assertFalse(patchedServiceDefinitionDTO.getAttributes().isEmpty());
+        assertEquals(1, patchedServiceDefinitionDTO.getAttributes().size());
 
         // get service definition
         response = client.toBlocking().exchange("/services/"+serviceDTO1.getServiceCode()+"?jurisdiction_id=fakecity.gov", String.class);
@@ -417,13 +421,13 @@ public class JurisdictionAdminControllerTest {
         assertTrue(serviceDefinitionOptional.isPresent());
         String serviceDefinitionResponse = serviceDefinitionOptional.get();
         assertTrue(StringUtils.hasText(serviceDefinitionResponse));
-        ServiceDefinition serviceDefinitionObject = (new ObjectMapper()).readValue(serviceDefinitionResponse, ServiceDefinition.class);
-        assertNotNull(serviceDefinitionObject.getServiceCode());
-        assertEquals("INNER_CITY_BUS_STOPS", serviceDefinitionObject.getServiceCode());
-        assertNotNull(serviceDefinitionObject.getAttributes());
-        assertFalse(serviceDefinitionObject.getAttributes().isEmpty());
-        assertEquals(1, serviceDefinitionObject.getAttributes().size());
-        assertTrue(serviceDefinitionObject.getAttributes().stream()
+        ServiceDefinitionDTO serviceDefinitionDTOObject = (new ObjectMapper()).readValue(serviceDefinitionResponse, ServiceDefinitionDTO.class);
+        assertNotNull(serviceDefinitionDTOObject.getServiceCode());
+        assertEquals("INNER_CITY_BUS_STOPS", serviceDefinitionDTOObject.getServiceCode());
+        assertNotNull(serviceDefinitionDTOObject.getAttributes());
+        assertFalse(serviceDefinitionDTOObject.getAttributes().isEmpty());
+        assertEquals(1, serviceDefinitionDTOObject.getAttributes().size());
+        assertTrue(serviceDefinitionDTOObject.getAttributes().stream()
                 .anyMatch(serviceDefinitionAttribute ->
                         serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT") &&
                                 serviceDefinitionAttribute.getValues() != null &&
@@ -630,10 +634,10 @@ public class JurisdictionAdminControllerTest {
         return client.toBlocking().exchange(request, ServiceDTO.class);
     }
 
-    private HttpResponse<?> addServiceDefinitionAttribute(Long serviceId, String jurisdictionId, ServiceDefinitionAttribute serviceDefinitionAttributeDTO) {
+    private HttpResponse<?> addServiceDefinitionAttribute(Long serviceId, String jurisdictionId, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
         HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services/"+serviceId+"/attributes?jurisdiction_id="+jurisdictionId, serviceDefinitionAttributeDTO)
                 .header("Authorization", "Bearer token.text.here");
-        return client.toBlocking().exchange(request, ServiceDefinition.class);
+        return client.toBlocking().exchange(request, ServiceDefinitionDTO.class);
     }
 
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes, String jurisdictionId) {

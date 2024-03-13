@@ -19,13 +19,16 @@ import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
+import app.dto.servicedefinition.AttributeValueDTO;
+import app.dto.servicedefinition.ServiceDefinitionDTO;
+import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.service.servicedefinition.*;
+import app.model.servicedefinition.*;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpStatus;
@@ -65,7 +68,7 @@ public class ServiceService {
         return servicePage.map(ServiceDTO::new);
     }
 
-    public ServiceDefinition getServiceDefinition(String serviceCode, String jurisdictionId) {
+    public ServiceDefinitionDTO getServiceDefinition(String serviceCode, String jurisdictionId) {
         Optional<Service> serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
 
         if (serviceOptional.isEmpty()) {
@@ -208,7 +211,7 @@ public class ServiceService {
     }
 
     @Transactional
-    public ServiceDefinition addServiceDefinitionAttributeToServiceDefinition(Long serviceId, ServiceDefinitionAttribute serviceDefinitionAttributeDTO, String jurisdictionId) {
+    public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, String jurisdictionId) {
         Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
         if (serviceOptional.isEmpty()) {
             LOG.error("Service not found.");
@@ -216,9 +219,9 @@ public class ServiceService {
         }
         Service service = serviceOptional.get();
 
-        ServiceDefinitionEntity serviceDefinition;
+        ServiceDefinition serviceDefinition;
         if (service.getServiceDefinition() == null) {
-            ServiceDefinitionEntity newServiceDefinition = new ServiceDefinitionEntity();
+            ServiceDefinition newServiceDefinition = new ServiceDefinition();
             newServiceDefinition.setService(service);
             serviceDefinition = serviceDefinitionRepository.save(newServiceDefinition);
 
@@ -234,12 +237,12 @@ public class ServiceService {
         return convertToDTO(serviceDefinition);
     }
 
-    private ServiceDefinition convertToDTO(ServiceDefinitionEntity serviceDefinition) {
-        ServiceDefinition serviceDefinitionDTO = new ServiceDefinition(serviceDefinition.getId(), serviceDefinition.getService().getServiceCode());
+    private ServiceDefinitionDTO convertToDTO(ServiceDefinition serviceDefinition) {
+        ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(serviceDefinition.getId(), serviceDefinition.getService().getServiceCode());
 
         if (serviceDefinition.getAttributes() != null) {
             serviceDefinitionDTO.setAttributes(serviceDefinition.getAttributes().stream().map(serviceDefinitionAttributeEntity -> {
-                ServiceDefinitionAttribute serviceDefinitionAttributeDTO = new ServiceDefinitionAttribute(
+                ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = new ServiceDefinitionAttributeDTO(
                         serviceDefinitionAttributeEntity.getId(),
                         serviceDefinitionAttributeEntity.getCode(),
                         serviceDefinitionAttributeEntity.isVariable(),
@@ -249,10 +252,10 @@ public class ServiceService {
                         serviceDefinitionAttributeEntity.getAttributeOrder(),
                         serviceDefinitionAttributeEntity.getDatatypeDescription());
 
-                Set<AttributeValueEntity> attributeValues = serviceDefinitionAttributeEntity.getAttributeValues();
+                Set<AttributeValue> attributeValues = serviceDefinitionAttributeEntity.getAttributeValues();
                 if (attributeValues != null) {
                     serviceDefinitionAttributeDTO.setValues(attributeValues.stream()
-                            .map(attributeValueEntity -> new AttributeValue(
+                            .map(attributeValueEntity -> new AttributeValueDTO(
                                     attributeValueEntity.getId().toString(),
                                     attributeValueEntity.getValueName()))
                             .collect(Collectors.toList()));
@@ -265,21 +268,21 @@ public class ServiceService {
         return serviceDefinitionDTO;
     }
 
-    public ServiceDefinition updateServiceDefinitionAttribute(Long attributeId, ServiceDefinitionAttribute serviceDefinitionAttribute) {
-        Optional<ServiceDefinitionAttributeEntity> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeId);
+    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long attributeId, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+        Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeId);
         if (serviceDefinitionAttributeEntityOptional.isEmpty()) {
             LOG.error("Attribute not found.");
             return null;
         }
-        ServiceDefinitionAttributeEntity serviceDefinitionAttributeEntity = serviceDefinitionAttributeEntityOptional.get();
+        ServiceDefinitionAttribute serviceDefinitionAttribute = serviceDefinitionAttributeEntityOptional.get();
 
-        ServiceDefinitionAttributeEntity patch = patchServiceDefinitionAttribute(serviceDefinitionAttributeEntity, serviceDefinitionAttribute);
+        ServiceDefinitionAttribute patch = patchServiceDefinitionAttribute(serviceDefinitionAttribute, serviceDefinitionAttributeDTO);
 
         return convertToDTO(patch.getServiceDefinition());
     }
 
     @Transactional
-    public ServiceDefinitionAttributeEntity patchServiceDefinitionAttribute(ServiceDefinitionAttributeEntity serviceDefinitionAttribute, ServiceDefinitionAttribute serviceDefinitionAttributeDTO) {
+    public ServiceDefinitionAttribute patchServiceDefinitionAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute, ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
 
         if (serviceDefinitionAttributeDTO.getCode() != null) {
             serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
@@ -308,8 +311,8 @@ public class ServiceService {
             // drop all attribute values
             attributeValueRepository.deleteAllByServiceDefinitionAttribute(serviceDefinitionAttribute);
 
-            serviceDefinitionAttributeDTO.getValues().forEach(attributeValue -> {
-                AttributeValueEntity savedValue = attributeValueRepository.save(new AttributeValueEntity(serviceDefinitionAttribute, attributeValue.getName()));
+            serviceDefinitionAttributeDTO.getValues().forEach(attributeValueDTO -> {
+                AttributeValue savedValue = attributeValueRepository.save(new AttributeValue(serviceDefinitionAttribute, attributeValueDTO.getName()));
                 serviceDefinitionAttribute.addAttributeValue(savedValue);
             });
         }
@@ -318,31 +321,31 @@ public class ServiceService {
     }
 
     public void removeServiceDefinitionAttributeFromServiceDefinition(Long attributeId) {
-        Optional<ServiceDefinitionAttributeEntity> serviceDefinitionAttribute = serviceDefinitionAttributeRepository.findById(attributeId);
+        Optional<ServiceDefinitionAttribute> serviceDefinitionAttribute = serviceDefinitionAttributeRepository.findById(attributeId);
         if (serviceDefinitionAttribute.isEmpty()) {
             LOG.error("Attribute not found.");
         }
-        ServiceDefinitionAttributeEntity serviceDefinitionAttributeEntity = serviceDefinitionAttribute.get();
+        ServiceDefinitionAttribute serviceDefinitionAttributeEntity = serviceDefinitionAttribute.get();
         serviceDefinitionAttributeRepository.delete(serviceDefinitionAttributeEntity);
     }
 
     @Transactional
-    public void addAttributeToServiceDefinition(ServiceDefinitionAttribute serviceDefinitionAttributeDTO, ServiceDefinitionEntity savedSD) {
-        ServiceDefinitionAttributeEntity serviceDefinitionAttributeEntity = new ServiceDefinitionAttributeEntity();
-        serviceDefinitionAttributeEntity.setServiceDefinition(savedSD);
-        serviceDefinitionAttributeEntity.setCode(serviceDefinitionAttributeDTO.getCode());
-        serviceDefinitionAttributeEntity.setVariable(serviceDefinitionAttributeDTO.isVariable());
-        serviceDefinitionAttributeEntity.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
-        serviceDefinitionAttributeEntity.setRequired(serviceDefinitionAttributeDTO.isRequired());
-        serviceDefinitionAttributeEntity.setDescription(serviceDefinitionAttributeDTO.getDescription());
-        serviceDefinitionAttributeEntity.setAttributeOrder(serviceDefinitionAttributeDTO.getAttributeOrder());
-        serviceDefinitionAttributeEntity.setDatatypeDescription(serviceDefinitionAttributeDTO.getDatatypeDescription());
+    public void addAttributeToServiceDefinition(ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, ServiceDefinition savedSD) {
+        ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+        serviceDefinitionAttribute.setServiceDefinition(savedSD);
+        serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
+        serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
+        serviceDefinitionAttribute.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
+        serviceDefinitionAttribute.setRequired(serviceDefinitionAttributeDTO.isRequired());
+        serviceDefinitionAttribute.setDescription(serviceDefinitionAttributeDTO.getDescription());
+        serviceDefinitionAttribute.setAttributeOrder(serviceDefinitionAttributeDTO.getAttributeOrder());
+        serviceDefinitionAttribute.setDatatypeDescription(serviceDefinitionAttributeDTO.getDatatypeDescription());
 
-        ServiceDefinitionAttributeEntity savedSDA = serviceDefinitionAttributeRepository.save(serviceDefinitionAttributeEntity);
+        ServiceDefinitionAttribute savedSDA = serviceDefinitionAttributeRepository.save(serviceDefinitionAttribute);
 
         if (serviceDefinitionAttributeDTO.getValues() != null) {
-            serviceDefinitionAttributeDTO.getValues().forEach(attributeValue -> {
-                AttributeValueEntity savedValue = attributeValueRepository.save(new AttributeValueEntity(savedSDA, attributeValue.getName()));
+            serviceDefinitionAttributeDTO.getValues().forEach(attributeValueDTO -> {
+                AttributeValue savedValue = attributeValueRepository.save(new AttributeValue(savedSDA, attributeValueDTO.getName()));
                 savedSDA.addAttributeValue(savedValue);
             });
         }

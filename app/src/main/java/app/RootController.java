@@ -19,7 +19,7 @@ import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
-import app.model.service.servicedefinition.ServiceDefinition;
+import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
@@ -136,8 +136,8 @@ public class RootController {
     @Get(uris = {"/services/{serviceCode}{?jurisdiction_id}", "/services/{serviceCode}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public ServiceDefinition getServiceDefinitionJson(String serviceCode,
-                                           @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+    public ServiceDefinitionDTO getServiceDefinitionJson(String serviceCode,
+                                                         @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
         return serviceService.getServiceDefinition(serviceCode, jurisdiction_id);
     }

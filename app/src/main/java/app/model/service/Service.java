@@ -16,7 +16,7 @@ package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.service.group.ServiceGroup;
-import app.model.service.servicedefinition.ServiceDefinitionEntity;
+import app.model.servicedefinition.ServiceDefinition;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -40,7 +40,7 @@ public class Service {
     private Jurisdiction jurisdiction;
 
     @OneToOne
-    private ServiceDefinitionEntity serviceDefinition;
+    private ServiceDefinition serviceDefinition;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
@@ -104,11 +104,11 @@ public class Service {
         this.type = type;
     }
 
-    public ServiceDefinitionEntity getServiceDefinition() {
+    public ServiceDefinition getServiceDefinition() {
         return serviceDefinition;
     }
 
-    public void setServiceDefinition(ServiceDefinitionEntity serviceDefinition) {
+    public void setServiceDefinition(ServiceDefinition serviceDefinition) {
         this.serviceDefinition = serviceDefinition;
     }
 

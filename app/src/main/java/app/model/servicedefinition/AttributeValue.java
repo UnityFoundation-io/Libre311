@@ -12,27 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.model.servicedefinition;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "service_definition_attribute_values")
-public class AttributeValueEntity {
+public class AttributeValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
-    private ServiceDefinitionAttributeEntity serviceDefinitionAttribute;
+    private ServiceDefinitionAttribute serviceDefinitionAttribute;
 
     private String valueName;
 
-    public AttributeValueEntity() {
+    public AttributeValue() {
     }
 
-    public AttributeValueEntity(ServiceDefinitionAttributeEntity serviceDefinitionAttribute, String valueName) {
+    public AttributeValue(ServiceDefinitionAttribute serviceDefinitionAttribute, String valueName) {
         this.serviceDefinitionAttribute = serviceDefinitionAttribute;
         this.valueName = valueName;
     }
@@ -45,11 +45,11 @@ public class AttributeValueEntity {
         this.id = id;
     }
 
-    public ServiceDefinitionAttributeEntity getServiceDefinitionAttribute() {
+    public ServiceDefinitionAttribute getServiceDefinitionAttribute() {
         return serviceDefinitionAttribute;
     }
 
-    public void setServiceDefinitionAttribute(ServiceDefinitionAttributeEntity serviceDefinitionAttribute) {
+    public void setServiceDefinitionAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute) {
         this.serviceDefinitionAttribute = serviceDefinitionAttribute;
     }
 

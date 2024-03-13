@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.model.servicedefinition;
 
 
 import app.model.service.Service;
@@ -25,7 +25,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "service_definitions")
-public class ServiceDefinitionEntity {
+public class ServiceDefinition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,10 +36,10 @@ public class ServiceDefinitionEntity {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "serviceDefinition")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ServiceDefinitionAttributeEntity> attributes;
+    private Set<ServiceDefinitionAttribute> attributes;
 
 
-    public ServiceDefinitionEntity() {
+    public ServiceDefinition() {
     }
 
     public void setId(Long id) {
@@ -58,18 +58,18 @@ public class ServiceDefinitionEntity {
         this.service = service;
     }
 
-    public void addAttribute(ServiceDefinitionAttributeEntity attribute) {
+    public void addAttribute(ServiceDefinitionAttribute attribute) {
         if (attributes == null) {
             attributes = new HashSet<>();
         }
         attributes.add(attribute);
     }
 
-    public Set<ServiceDefinitionAttributeEntity> getAttributes() {
+    public Set<ServiceDefinitionAttribute> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Set<ServiceDefinitionAttributeEntity> attributes) {
+    public void setAttributes(Set<ServiceDefinitionAttribute> attributes) {
         this.attributes = attributes;
     }
 }

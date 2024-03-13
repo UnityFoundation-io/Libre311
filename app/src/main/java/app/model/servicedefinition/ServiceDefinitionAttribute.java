@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.model.servicedefinition;
 
+import app.model.service.AttributeDataType;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -23,14 +24,14 @@ import java.util.Set;
 
 @Entity
 @Table(name = "service_definition_attributes")
-public class ServiceDefinitionAttributeEntity {
+public class ServiceDefinitionAttribute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
-    private ServiceDefinitionEntity serviceDefinition;
+    private ServiceDefinition serviceDefinition;
 
     private String code;
 
@@ -49,9 +50,9 @@ public class ServiceDefinitionAttributeEntity {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "serviceDefinitionAttribute")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<AttributeValueEntity> attributeValues;
+    private Set<AttributeValue> attributeValues;
 
-    public ServiceDefinitionAttributeEntity() {
+    public ServiceDefinitionAttribute() {
     }
 
     public Long getId() {
@@ -62,11 +63,11 @@ public class ServiceDefinitionAttributeEntity {
         this.id = id;
     }
 
-    public ServiceDefinitionEntity getServiceDefinition() {
+    public ServiceDefinition getServiceDefinition() {
         return serviceDefinition;
     }
 
-    public void setServiceDefinition(ServiceDefinitionEntity serviceDefinition) {
+    public void setServiceDefinition(ServiceDefinition serviceDefinition) {
         this.serviceDefinition = serviceDefinition;
     }
 
@@ -126,18 +127,18 @@ public class ServiceDefinitionAttributeEntity {
         this.datatypeDescription = datatypeDescription;
     }
 
-    public void addAttributeValue(AttributeValueEntity attributeValue) {
+    public void addAttributeValue(AttributeValue attributeValue) {
         if (attributeValues == null) {
             attributeValues = new HashSet<>();
         }
         attributeValues.add(attributeValue);
     }
 
-    public Set<AttributeValueEntity> getAttributeValues() {
+    public Set<AttributeValue> getAttributeValues() {
         return attributeValues;
     }
 
-    public void setAttributeValues(Set<AttributeValueEntity> attributeValues) {
+    public void setAttributeValues(Set<AttributeValue> attributeValues) {
         this.attributeValues = attributeValues;
     }
 }
