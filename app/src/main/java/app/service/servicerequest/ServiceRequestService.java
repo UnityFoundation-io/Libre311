@@ -17,6 +17,7 @@ package app.service.servicerequest;
 import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.download.DownloadServiceRequestDTO;
 import app.dto.servicerequest.*;
+import app.exception.Libre311BaseException;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.servicedefinition.AttributeDataType;
@@ -43,7 +44,10 @@ import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.MediaType;
 import io.micronaut.http.server.types.files.StreamedFile;
+import io.micronaut.http.server.types.files.SystemFile;
 import jakarta.inject.Singleton;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -81,6 +85,12 @@ public class ServiceRequestService {
         this.unityAuthService = unityAuthService;
     }
 
+    static class InvalidServiceRequestException extends Libre311BaseException {
+        public InvalidServiceRequestException(String message) {
+            super(message, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     private static ServiceRequestDTO convertToDTO(ServiceRequest serviceRequest) {
         ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
 
@@ -99,27 +109,22 @@ public class ServiceRequestService {
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
-        if (!reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse())) {
-            LOG.error("ReCaptcha verification failed.");
-            return null;
-        }
+        reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse());
 
         if (!validMediaUrl(serviceRequestDTO.getMediaUrl())) {
-            LOG.error("Media URL is invalid.");
-            return null;
+            throw new InvalidServiceRequestException("Media URL is invalid.");
         }
 
         Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCodeAndJurisdictionId(
                 serviceRequestDTO.getServiceCode(), jurisdictionId);
 
         if (serviceByServiceCodeOptional.isEmpty()) {
-            LOG.error("Corresponding service not found.");
-            return null; // todo return 'corresponding service not found
+            throw new InvalidServiceRequestException("Corresponding service is not found.");
         }
 
         if (!jurisdictionId.equals(serviceByServiceCodeOptional.get().getJurisdiction().getId())) {
-            LOG.error("Mismatch between jurisdiction_id provided and Service's associated jurisdiction.");
-            return null;
+            throw new InvalidServiceRequestException(
+                "Mismatch between jurisdiction_id provided and Service's associated jurisdiction.");
         }
 
         // validate if a location is provided
@@ -127,8 +132,7 @@ public class ServiceRequestService {
                 StringUtils.hasText(serviceRequestDTO.getLongitude());
 
         if (!latLongProvided) {
-            LOG.error("lat/long not provided.");
-            return null; // todo throw exception
+            throw new InvalidServiceRequestException("Lat/long are required.");
         }
 
         // validate if additional attributes are required

@@ -14,7 +14,9 @@
 
 package app.recaptcha;
 
+import app.exception.Libre311BaseException;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.http.HttpStatus;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -29,9 +31,17 @@ public class ReCaptchaService {
     @Property(name = "app.recaptcha.secret")
     protected String secret;
 
-    public Boolean verifyReCaptcha(String response) {
+    static class RecaptchaVerificationFailed extends Libre311BaseException {
+        public RecaptchaVerificationFailed() {
+            super("ReCaptcha verification failed.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public void verifyReCaptcha(String response) {
         Map map = client.verifyReCaptcha(this.secret, response);
         Boolean success = (Boolean) map.get("success");
-        return success;
+        if (!success){
+            throw new RecaptchaVerificationFailed();
+        }
     }
 }
