@@ -286,6 +286,15 @@ export const CreateGroupParamsSchema = z.object({ name: z.string() });
 
 export type CreateGroupParams = z.infer<typeof CreateGroupParamsSchema>;
 
+// ****************** Edit Group ****************** //
+
+export const EditGroupParamsSchema = z.object({
+	id: z.number(),
+	name: z.string()
+});
+
+export type EditGroupParams = z.infer<typeof EditGroupParamsSchema>;
+
 // ***************** Create Service *************** //
 
 // Create Service - Request Schema
@@ -403,6 +412,7 @@ export interface Libre311Service extends Open311Service {
 	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void;
 	getGroupList(): Promise<GetGroupListResponse>;
 	createGroup(params: CreateGroupParams): Promise<Group>;
+	editGroup(params: EditGroupParams): Promise<Group>;
 	downloadServiceRequests(params: URLSearchParams): Promise<Blob>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
 	editService(params: EditServiceParams): Promise<Service>;
@@ -430,6 +440,8 @@ const ROUTES = {
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
 	postGroup: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
+	patchGroup: (params: HasJurisdictionId & HasGroupId) =>
+		`/jurisdiction-admin/groups/${params.group_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getGroupList: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
 	postService: (params: HasJurisdictionId) =>
@@ -581,6 +593,23 @@ export class Libre311ServiceImpl implements Libre311Service {
 		);
 
 		return GetGroupListResponseSchema.parse(res.data);
+	}
+
+	async editGroup(params: EditGroupParams): Promise<Group> {
+		try {
+			const res = await this.axiosInstance.patch<unknown>(
+				ROUTES.patchGroup({
+					group_id: params.id,
+					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+				}),
+				params
+			);
+
+			return GroupSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
 	}
 
 	async createService(params: CreateServiceParams): Promise<CreateServiceResponse> {
