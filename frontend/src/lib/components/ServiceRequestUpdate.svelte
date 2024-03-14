@@ -362,7 +362,7 @@
 						{messages['updateServiceRequest']['button_cancel']}
 					</Button>
 
-					<Button type="primary" on:click={updateServiceRequest(serviceRequest)}>
+					<Button type="primary" on:click={() => updateServiceRequest(serviceRequest)}>
 						{messages['updateServiceRequest']['button_submit']}
 					</Button>
 				{/if}
