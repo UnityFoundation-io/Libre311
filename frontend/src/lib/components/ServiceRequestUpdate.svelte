@@ -16,8 +16,7 @@
 		optionalCoalesceNameValidator,
 		type FormInputValue,
 		emailValidator,
-		optionalCoalesceStringValidator,
-		optionalEmailValidator
+		optionalCoalesceStringValidator
 	} from '$lib/utils/validation';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 
