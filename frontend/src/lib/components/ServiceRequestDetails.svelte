@@ -1,9 +1,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Badge, Button, Card } from 'stwui';
-	import { Dropdown } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
-	import dropDownIcon from '$lib/assets/ellipsis-vertical.svg';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
@@ -11,16 +9,6 @@
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
-
-	let visible: boolean = false;
-
-	function closeDropdown() {
-		visible = false;
-	}
-
-	function toggleDropdown() {
-		visible = !visible;
-	}
 
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
@@ -70,10 +58,11 @@
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
-		<div class="mb-1">
-			<SelectedValues selectedValues={serviceRequest.selected_values} />
-		</div>
-
+				{#if serviceRequest.selected_values}
+					<div class="mb-1">
+						<SelectedValues selectedValues={serviceRequest.selected_values} />
+					</div>
+				{/if}
 				{#if serviceRequest.description}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['description']}</strong>

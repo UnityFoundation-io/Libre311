@@ -28,10 +28,14 @@
 	let agencyNameInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.agency_responsible
 	);
-	let agencyEmailInput: FormInputValue<string> = createInput(''); // TODO
+	let agencyEmailInput: FormInputValue<string> = createInput(serviceRequest.agency_email);
 
-	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(''); // TODO
-	let statusNotesInput: FormInputValue<string | undefined> = createInput(''); // TODO
+	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(
+		serviceRequest.service_notice
+	);
+	let statusNotesInput: FormInputValue<string | undefined> = createInput(
+		serviceRequest.status_notes
+	);
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -171,9 +175,11 @@
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
-				<div class="mb-1">
-					<SelectedValues selectedValues={serviceRequest.selected_values} />
-				</div>
+				{#if serviceRequest.selected_values}
+					<div class="mb-1">
+						<SelectedValues selectedValues={serviceRequest.selected_values} />
+					</div>
+				{/if}
 
 				{#if serviceRequest.description}
 					<div class="mb-1">
@@ -227,7 +233,9 @@
 				<div class="my-4">
 					<Select
 						name="select-priority"
-						placeholder={serviceRequest.priority ?? 'Low'}
+						placeholder={serviceRequest.priority
+							? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
+							: '--'}
 						options={priorityOptions}
 						on:change={updatePriority}
 					>

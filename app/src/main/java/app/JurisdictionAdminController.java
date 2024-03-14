@@ -142,6 +142,14 @@ public class JurisdictionAdminController {
         return serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id);
     }
 
+    @Delete(uris = { "/services/{serviceId}{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public HttpResponse deleteService(Long serviceId, @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        serviceService.deleteService(serviceId, jurisdiction_id);
+        return HttpResponse.ok();
+    }
+
     @Get(value = "/requests/download{?jurisdiction_id}")
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})

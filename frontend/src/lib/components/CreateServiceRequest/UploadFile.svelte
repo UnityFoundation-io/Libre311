@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Libre311ServiceImpl } from '$lib/services/Libre311/Libre311';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import Breakpoint from '../Breakpoint.svelte';
 	import messages from '$media/messages.json';
 	import { Button } from 'stwui';
@@ -12,6 +12,8 @@
 	import type { CreateServiceRequestUIParams } from './shared';
 
 	let input: HTMLInputElement;
+	let reuploadInput: HTMLInputElement;
+	let imageData: string | undefined;
 
 	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
 
@@ -27,6 +29,10 @@
 		if (input.files && input.files.length < 2) dispatchFile(input.files[0]);
 	}
 
+	async function reuploadImage() {
+		if (reuploadInput.files && reuploadInput.files.length < 2) dispatchFile(reuploadInput.files[0]);
+	}
+
 	function desktopDropFiles(dropFiles: DropResult) {
 		if (dropFiles.rejected[0]) {
 			console.log('Unsupported file type');
@@ -40,63 +46,136 @@
 	function dispatchFile(file: File) {
 		dispatch('stepChange', { file });
 	}
+
+	onMount(() => {
+		if (params.file) {
+			let reader = new FileReader();
+			reader.readAsDataURL(params.file);
+
+			reader.onloadend = function () {
+				const result: String = new String(reader.result);
+				imageData = result.toString();
+			};
+		}
+	});
 </script>
 
 <Breakpoint>
 	<div slot="is-desktop" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div class="mb-4">
-				<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
-					<FilePicker.Icon slot="icon" data={uploadIcon} />
-					<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
-					<FilePicker.Description slot="description">Drag & Drop your file</FilePicker.Description>
-				</FilePicker>
-			</div>
+			{#if imageData}
+				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+					<img class="w-full" src={imageData} alt="preview" />
+				</div>
 
-			<div class="grid grid-rows-2 gap-3">
-				<Button
-					type="primary"
-					on:click={() => {
-						dispatch('stepChange', { file: undefined });
-					}}
-				>
-					{messages['photo']['no_upload']}
-				</Button>
+				<div class="grid grid-rows-4 gap-2">
+					<input
+						type="file"
+						name="photo"
+						id="camera-roll-btn-desktop"
+						accept="image/*"
+						hidden
+						bind:this={input}
+						on:change={onChange}
+					/>
+					<label for="camera-roll-btn-desktop">{messages['photo']['change_image']}</label>
 
-				<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
-					{messages['photo']['back']}
-				</Button>
-			</div>
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
+					</Button>
+
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange', { file: undefined });
+						}}
+					>
+						{messages['photo']['no_upload']}
+					</Button>
+
+					<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
+						{messages['photo']['back']}
+					</Button>
+				</div>
+			{:else}
+				<div class="mb-4">
+					<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
+						<FilePicker.Icon slot="icon" data={uploadIcon} />
+						<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
+						<FilePicker.Description slot="description">Drag & Drop your file</FilePicker.Description
+						>
+					</FilePicker>
+				</div>
+
+				<div class="grid grid-rows-2 gap-2">
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange', { file: undefined });
+						}}
+					>
+						{messages['photo']['no_upload']}
+					</Button>
+
+					<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
+						{messages['photo']['back']}
+					</Button>
+				</div>
+			{/if}
 		</div>
 	</div>
 
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
 		<div class="flex-col">
-			<div class="grid grid-rows-4 gap-3">
-				<input
-					type="file"
-					id="actual-btn"
-					accept="image/*"
-					capture="environment"
-					hidden
-					bind:this={input}
-					on:change={onChange}
-				/>
-				<label for="actual-btn">{messages['photo']['take_photo']}</label>
+			{#if imageData}
+				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+					<img class="w-full" src={imageData} alt="preview" />
+				</div>
 
-				<input
-					type="file"
-					name="photo"
-					id="camera-roll-btn"
-					accept="image/*"
-					hidden
-					bind:this={input}
-					on:change={onChange}
-				/>
-				<label for="camera-roll-btn">{messages['photo']['camera_roll']}</label>
+				<div class="grid grid-rows-2 gap-2">
+					<input
+						type="file"
+						name="photo"
+						id="camera-roll-btn-reupload"
+						accept="image/*"
+						hidden
+						bind:this={reuploadInput}
+						on:change={reuploadImage}
+					/>
+					<label for="camera-roll-btn-reupload">{messages['photo']['change_image']}</label>
 
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
+					</Button>
+				</div>
+			{:else}
+				<div class="mb-2 grid">
+					<input
+						type="file"
+						name="photo"
+						id="camera-roll-btn"
+						accept="image/*"
+						hidden
+						bind:this={input}
+						on:change={onChange}
+					/>
+					<label for="camera-roll-btn">{messages['photo']['upload']}</label>
+				</div>
+			{/if}
+
+			<div class="grid grid-rows-2 gap-2">
 				<Button
-					type="link"
+					type="ghost"
 					on:click={() => {
 						dispatch('stepChange', { file: undefined });
 					}}

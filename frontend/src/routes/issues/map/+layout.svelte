@@ -53,7 +53,7 @@
 		if (matchesDesktopMedia()) {
 			goto(linkResolver.issueDetailsDesktop($page.url, serviceRequest.service_request_id));
 		} else {
-			// todo for mobile show preview of issue
+			alert('todo - mobile display');
 		}
 	}
 </script>

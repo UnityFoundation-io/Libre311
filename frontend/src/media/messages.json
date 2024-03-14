@@ -83,6 +83,8 @@
 		"camera_roll": "Camera Roll",
 		"take_photo": "Take Photo",
 		"no_upload": "Continue Without Photo",
+		"use_current_image": "Continue With Current Image",
+		"change_image": "Change Image",
 		"back": "Back",
 		"submit": "Submit"
 	}

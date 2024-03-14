@@ -19,6 +19,7 @@ import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
+import app.exception.Libre311BaseException;
 import app.dto.servicedefinition.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
@@ -60,6 +61,18 @@ public class ServiceService {
         this.attributeValueRepository = attributeValueRepository;
     }
 
+    static class ServiceNotFoundException extends Libre311BaseException {
+        public ServiceNotFoundException(String serviceCode, String jurisdictionId) {
+            super(String.format("No service found with serviceCode: %s for jurisdiction: %s",
+                serviceCode, jurisdictionId), HttpStatus.NOT_FOUND);
+        }
+
+        public ServiceNotFoundException(Long serviceId, String jurisdictionId) {
+            super(String.format("No service found with id: %s for jurisdiction: %s",
+                serviceId, jurisdictionId), HttpStatus.NOT_FOUND);
+        }
+    }
+
     public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
         Page<Service> servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
 
@@ -70,8 +83,7 @@ public class ServiceService {
         Optional<Service> serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
 
         if (serviceOptional.isEmpty()) {
-            LOG.error("Service not found.");
-            return null;
+            throw new ServiceNotFoundException(serviceCode, jurisdictionId);
         }
         Service service = serviceOptional.get();
         if (service.getServiceDefinition() == null) {
@@ -128,6 +140,12 @@ public class ServiceService {
         }
 
         return new ServiceDTO(serviceRepository.update(service));
+    }
+
+    public void deleteService(Long serviceId, String jurisdictionId) {
+        serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId)
+            .orElseThrow(() -> new ServiceNotFoundException(serviceId, jurisdictionId));
+        serviceRepository.deleteById(serviceId);
     }
 
     private boolean groupDoesNotExists(Long serviceDTO, Jurisdiction jurisdiction, Service service) {

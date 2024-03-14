@@ -71,7 +71,6 @@
 
 			<div class="my-2">
 				<Input
-					allowClear
 					type="text"
 					name="firstName"
 					placeholder={messages['contact']['name']['first_name']['placeholder']}
@@ -81,7 +80,6 @@
 					<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
 				</Input>
 				<Input
-					allowClear
 					type="text"
 					name="lastName"
 					placeholder={messages['contact']['name']['last_name']['placeholder']}
@@ -92,7 +90,6 @@
 
 			<div class="my-2">
 				<Input
-					allowClear
 					name="email"
 					type="email"
 					placeholder={messages['contact']['email']['placeholder']}
@@ -106,7 +103,6 @@
 
 			<div class="my-2">
 				<Input
-					allowClear
 					type="text"
 					name="phone"
 					placeholder={messages['contact']['phone']['placeholder']}

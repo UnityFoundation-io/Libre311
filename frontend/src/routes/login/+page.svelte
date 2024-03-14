@@ -5,6 +5,7 @@
 	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator } from '$lib/utils/validation';
 	import { useUnityAuthService } from '$lib/context/Libre311Context';
+	import { goto } from '$app/navigation';
 
 	const authService = useUnityAuthService();
 
@@ -26,7 +27,7 @@
 
 		if (emailInput.value && passwordInput.value) {
 			const res = await authService.login(emailInput.value, passwordInput.value);
-			alert(`LOGGED IN AS: ${res.username}`);
+			goto('/issues/table');
 		}
 	}
 </script>

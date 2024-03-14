@@ -24,7 +24,6 @@ public class MockReCaptchaService extends ReCaptchaService {
 
     public MockReCaptchaService() {}
 
-    public Boolean verifyReCaptcha(String response) {
-        return true;
+    public void verifyReCaptcha(String response) {
     }
 }
