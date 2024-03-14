@@ -1,34 +1,35 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
+	import { Badge, Button, Card, DatePicker, Input, Select, TextArea } from 'stwui';
+	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import clockIcon from '$lib/assets/Clock.svg';
-	import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
-	import Flag from '$lib/components/Svg/Flag.svelte';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import SelectedValues from './SelectedValues.svelte';
+	import Flag from './Svg/Flag.svelte';
+	import { wrenchScrewDriverIcon } from './Svg/outline/wrench-screwdriver';
+	import { mailIcon } from './Svg/outline/mailIcon';
+	import { calendarIcon } from './Svg/outline/calendarIcon';
 	import type { SelectOption } from 'stwui/types';
+	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 	import {
 		createInput,
 		optionalCoalesceNameValidator,
 		type FormInputValue,
 		emailValidator,
-		optionalCoalesceStringValidator
+		optionalCoalesceStringValidator,
+		optionalEmailValidator
 	} from '$lib/utils/validation';
-	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
-	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon.js';
-	import { wrenchScrewDriverIcon } from '$lib/components/Svg/outline/wrench-screwdriver';
-	import { DatePicker } from 'stwui';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
-	import SelectedValues from './SelectedValues.svelte';
 
-	const libre311 = useLibre311Service();
+	export let serviceRequest: ServiceRequest;
+	export let back: string;
 
-	export let serviceRequest: UpdateSensitiveServiceRequestRequest;
+	let isUpdateRquestButtonClicked: boolean = false;
 
 	let agencyNameInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.agency_responsible
 	);
-	let agencyEmailInput: FormInputValue<string> = createInput(serviceRequest.agency_email);
+	let agencyEmailInput: FormInputValue<string> = createInput(serviceRequest.agency_email ?? '');
 
 	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.service_notice
@@ -36,6 +37,8 @@
 	let statusNotesInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.status_notes
 	);
+
+	const libre311 = useLibre311Service();
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -68,7 +71,7 @@
 		}
 	];
 
-	function getStatus(serviceRequest: UpdateSensitiveServiceRequestRequest) {
+	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
 			case 'closed': {
 				return 'success';
@@ -102,7 +105,7 @@
 		}
 	}
 
-	async function updateServiceRequest() {
+	async function updateServiceRequest(serviceRequest: ServiceRequest) {
 		if (agencyNameInput.value !== null || agencyNameInput.value !== undefined) {
 			let agency: string = new String(agencyNameInput.value).toString();
 			if (agency) agencyNameInput = optionalCoalesceNameValidator(createInput(agency));
@@ -110,7 +113,6 @@
 		agencyEmailInput = emailValidator(agencyEmailInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
-
 		const resultSet = new Set([
 			agencyNameInput.type,
 			agencyEmailInput.type,
@@ -122,27 +124,29 @@
 			agencyNameInput.value = '';
 			return;
 		}
-
 		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 			...serviceRequest,
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,
-			expected_datetime: expected_datetime.toISOString(),
+			expected_datetime: expected_datetime?.toISOString(),
 			service_notice: serviceNoticeInput.value,
 			status_notes: statusNotesInput.value
 		};
-
 		const res = await libre311.updateServiceRequest(sensitiveServiceRequest);
+
+		isUpdateRquestButtonClicked = false;
+
+		// TODO: update the Service Request with the new information in the list of Service Requests
 	}
 
 	$: name = createName(serviceRequest);
-	$: expected_datetime = serviceRequest.expected_datetime
+	let expected_datetime = serviceRequest.expected_datetime
 		? new Date(Date.parse(serviceRequest.expected_datetime))
-		: new Date();
+		: null;
 </script>
 
 <div class="flex h-full">
-	<Card class="m-2">
+	<Card class="m-2 overflow-y-auto">
 		<div class="flex h-full w-full flex-col" slot="content">
 			<div class="m-2 flex-grow">
 				<div class="flow-root">
@@ -188,18 +192,7 @@
 					</div>
 				{/if}
 
-				<div class="mb-1 flex flex-col">
-					<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
-					<div class="flex items-center">
-						{#if serviceRequest.expected_datetime}
-							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
-						{:else}
-							<p class="text-sm">--</p>
-						{/if}
-						<img alt="clock" src={clockIcon} />
-					</div>
-				</div>
-
+				<!-- TODO: Gaurd this to only logged in users -->
 				{#if name}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
@@ -209,110 +202,170 @@
 					</div>
 				{/if}
 
-				<div class="my-4">
-					<hr />
-				</div>
+				{#if !isUpdateRquestButtonClicked}
+					<div class="mb-1 flex flex-col">
+						<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+						<div class="flex items-center">
+							{#if serviceRequest.expected_datetime}
+								<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
+							{:else}
+								<p class="text-sm">--</p>
+							{/if}
+							<img alt="clock" src={clockIcon} />
+						</div>
+					</div>
+				{:else}
+					<div class="mb-1">
+						<DatePicker name="datetime" bind:value={expected_datetime}>
+							<DatePicker.Label slot="label">
+								<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+							</DatePicker.Label>
+							<DatePicker.Leading slot="leading" data={calendarIcon} />
+						</DatePicker>
+					</div>
+				{/if}
 
-				<div class="my-4">
-					<Select
-						name="select-status"
-						placeholder={serviceRequest.status.charAt(0).toUpperCase() +
-							serviceRequest.status.slice(1)}
-						options={statusOptions}
-						on:change={updateStatus}
-					>
-						<Select.Label slot="label">{messages['serviceRequest']['status']}</Select.Label>
-						<Select.Options slot="options">
-							{#each statusOptions as option}
-								<Select.Options.Option {option} />
-							{/each}
-						</Select.Options>
-					</Select>
-				</div>
+				{#if isUpdateRquestButtonClicked}
+					<div class="mb-1">
+						<Select
+							name="select-status"
+							placeholder={serviceRequest.status.charAt(0).toUpperCase() +
+								serviceRequest.status.slice(1)}
+							options={statusOptions}
+							on:change={updateStatus}
+						>
+							<Select.Label slot="label">
+								<strong class="text-base">{messages['serviceRequest']['status']}</strong>
+							</Select.Label>
+							<Select.Options slot="options">
+								{#each statusOptions as option}
+									<Select.Options.Option {option} />
+								{/each}
+							</Select.Options>
+						</Select>
+					</div>
 
-				<div class="my-4">
-					<Select
-						name="select-priority"
-						placeholder={serviceRequest.priority
-							? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
-							: '--'}
-						options={priorityOptions}
-						on:change={updatePriority}
-					>
-						<Select.Label slot="label">{messages['serviceRequest']['priority']}</Select.Label>
-						<Select.Options slot="options">
-							{#each priorityOptions as option}
-								<Select.Options.Option {option} />
-							{/each}
-						</Select.Options>
-					</Select>
-				</div>
+					<div class="mb-1">
+						<Select
+							name="select-priority"
+							placeholder={serviceRequest.priority
+								? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
+								: '--'}
+							options={priorityOptions}
+							on:change={updatePriority}
+						>
+							<Select.Label slot="label">
+								<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
+							</Select.Label>
+							<Select.Options slot="options">
+								{#each priorityOptions as option}
+									<Select.Options.Option {option} />
+								{/each}
+							</Select.Options>
+						</Select>
+					</div>
+				{/if}
 
-				<div class="my-4">
-					<DatePicker name="datetime" allowClear bind:value={expected_datetime}>
-						<DatePicker.Label slot="label">
-							{messages['serviceRequest']['expected_datetime']}
-						</DatePicker.Label>
-						<DatePicker.Leading slot="leading" data={calendarIcon} />
-					</DatePicker>
-				</div>
+				{#if serviceRequest.agency_responsible && !isUpdateRquestButtonClicked}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
+						<p class="text-sm">{serviceRequest.agency_responsible ?? ''}</p>
+						<p class="text-sm">{serviceRequest.agency_email ?? ''}</p>
+					</div>
+				{:else if isUpdateRquestButtonClicked}
+					<div class="mb-1">
+						<Input
+							type="text"
+							name="firstName"
+							placeholder={messages['serviceRequest']['agency_name']}
+							error={agencyNameInput.error}
+							bind:value={agencyNameInput.value}
+						>
+							<Input.Label slot="label">
+								<strong class="text-base">
+									{messages['serviceRequest']['agency_contact']}
+								</strong>
+							</Input.Label>
+						</Input>
+						<Input
+							name="email"
+							type="email"
+							placeholder={messages['contact']['email']['placeholder']}
+							error={agencyEmailInput.error}
+							bind:value={agencyEmailInput.value}
+						>
+							<Input.Leading slot="leading" data={mailIcon} />
+						</Input>
+					</div>
+				{/if}
 
-				<div class="my-4">
-					<Input
-						allowClear
-						type="text"
-						name="firstName"
-						placeholder={messages['serviceRequest']['agency_name']}
-						error={agencyNameInput.error}
-						bind:value={agencyNameInput.value}
-					>
-						<Input.Label slot="label">{messages['serviceRequest']['agency_contact']}</Input.Label>
-					</Input>
-					<Input
-						allowClear
-						name="email"
-						type="email"
-						placeholder={messages['contact']['email']['placeholder']}
-						error={agencyEmailInput.error}
-						bind:value={agencyEmailInput.value}
-					>
-						<Input.Leading slot="leading" data={mailIcon} />
-					</Input>
-				</div>
+				{#if serviceRequest.service_notice && !isUpdateRquestButtonClicked}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+						<p class="text-sm">{serviceRequest.service_notice ?? ''}</p>
+					</div>
+				{:else if isUpdateRquestButtonClicked}
+					<div class="mb-1">
+						<Input
+							type="text"
+							name="firstName"
+							placeholder={messages['serviceRequest']['service_notice_placeholder']}
+							error={serviceNoticeInput.error}
+							bind:value={serviceNoticeInput.value}
+						>
+							<Input.Label slot="label">
+								<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+							</Input.Label>
+							<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
+						</Input>
+					</div>
+				{/if}
 
-				<div class="my-4">
-					<Input
-						allowClear
-						type="text"
-						name="firstName"
-						placeholder={messages['serviceRequest']['service_notice_placeholder']}
-						error={serviceNoticeInput.error}
-						bind:value={serviceNoticeInput.value}
-					>
-						<Input.Label slot="label">{messages['serviceRequest']['service_notice']}</Input.Label>
-						<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
-					</Input>
-				</div>
-
-				<div class="my-4 flex flex-col">
-					<p class="text-sm">{messages['serviceRequest']['status_notes']}</p>
-					<TextArea
-						bind:value={statusNotesInput.value}
-						name="comments"
-						placeholder="notes"
-						class="relative"
-					/>
-				</div>
+				{#if serviceRequest.status_notes && !isUpdateRquestButtonClicked}
+					<div class="mb-1">
+						<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
+						<p class="text-sm">{serviceRequest.status_notes ?? ''}</p>
+					</div>
+				{:else if isUpdateRquestButtonClicked}
+					<div class="mb-1 flex flex-col">
+						<strong class="text-base">{messages['serviceRequest']['status_notes']}</strong>
+						<TextArea
+							bind:value={statusNotesInput.value}
+							name="comments"
+							placeholder="notes"
+							class="relative"
+						/>
+					</div>
+				{/if}
 			</div>
 
-			<div class="m-2 flex items-center justify-between">
-				<Button href="/issues/table">
-					{messages['updateServiceRequest']['button_back']}
-				</Button>
+			<div class="mx-2 flex items-center justify-between pb-4 pt-4">
+				{#if !isUpdateRquestButtonClicked}
+					<Button href={back}>
+						{messages['updateServiceRequest']['button_back']}
+					</Button>
 
-				<Button type="primary" on:click={updateServiceRequest}>
-					{messages['updateServiceRequest']['button_submit']}
-				</Button>
+					<Button
+						type="primary"
+						on:click={() => {
+							isUpdateRquestButtonClicked = true;
+						}}
+					>
+						{messages['updateServiceRequest']['button_update']}
+					</Button>
+				{:else}
+					<Button
+						on:click={() => {
+							isUpdateRquestButtonClicked = false;
+						}}
+					>
+						{messages['updateServiceRequest']['button_cancel']}
+					</Button>
+
+					<Button type="primary" on:click={updateServiceRequest(serviceRequest)}>
+						{messages['updateServiceRequest']['button_submit']}
+					</Button>
+				{/if}
 			</div>
 		</div>
 	</Card>
