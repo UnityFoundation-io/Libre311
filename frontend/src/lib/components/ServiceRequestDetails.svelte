@@ -25,7 +25,7 @@
 </script>
 
 <div class="flex h-full">
-	<Card class="m-2">
+	<Card class="m-2 w-full">
 		<div class="flex h-full w-full flex-col" slot="content">
 			<div class="m-2 flex-grow">
 				<div class="flow-root">
