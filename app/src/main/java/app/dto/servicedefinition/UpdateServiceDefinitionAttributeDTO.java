@@ -33,7 +33,7 @@ public class UpdateServiceDefinitionAttributeDTO {
     private Boolean required;
     private String description;
 
-    @Min(1)
+    @Min(0)
     @JsonProperty("order")
     private Integer attributeOrder;
 
