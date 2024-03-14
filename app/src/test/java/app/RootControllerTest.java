@@ -317,13 +317,19 @@ public class RootControllerTest {
     public void canFilterServiceRequests() {
         setAuthHasPermissionSuccessResponse(true, List.of(Permission.LIBRE311_REQUEST_VIEW_TENANT));
 
-        Optional<Service> optionalService = serviceRepository.findByServiceCodeAndJurisdictionId("001", "city.gov");
+        Optional<Service> optionalSidewalkService = serviceRepository.findByServiceCodeAndJurisdictionId("001", "city.gov");
+        assertTrue(optionalSidewalkService.isPresent());
+        Service sidewalkService = optionalSidewalkService.get();
+
+        Optional<Service> optionalBikeLaneService = serviceRepository.findByServiceCodeAndJurisdictionId("003", "city.gov");
+        assertTrue(optionalBikeLaneService.isPresent());
+        Service bikeLaneService = optionalBikeLaneService.get();
 
         ServiceRequest closedHighPriority = new ServiceRequest();
         closedHighPriority.setStatus(ServiceRequestStatus.CLOSED);
         closedHighPriority.setPriority(ServiceRequestPriority.HIGH);
-        closedHighPriority.setService(optionalService.get());
-        closedHighPriority.setJurisdiction(optionalService.get().getJurisdiction());
+        closedHighPriority.setService(sidewalkService);
+        closedHighPriority.setJurisdiction(sidewalkService.getJurisdiction());
         closedHighPriority.setLatitude("12.34");
         closedHighPriority.setLongitude("56.78");
         ServiceRequest closedHighSR = serviceRequestRepository.save(closedHighPriority);
@@ -331,8 +337,8 @@ public class RootControllerTest {
         ServiceRequest openLowPriority = new ServiceRequest();
         openLowPriority.setStatus(ServiceRequestStatus.OPEN);
         openLowPriority.setPriority(ServiceRequestPriority.LOW);
-        openLowPriority.setService(optionalService.get());
-        openLowPriority.setJurisdiction(optionalService.get().getJurisdiction());
+        openLowPriority.setService(sidewalkService);
+        openLowPriority.setJurisdiction(sidewalkService.getJurisdiction());
         openLowPriority.setLatitude("12.34");
         openLowPriority.setLongitude("56.78");
         ServiceRequest openLowSR = serviceRequestRepository.save(openLowPriority);
@@ -340,11 +346,19 @@ public class RootControllerTest {
         ServiceRequest assignedMedium = new ServiceRequest();
         assignedMedium.setStatus(ServiceRequestStatus.ASSIGNED);
         assignedMedium.setPriority(ServiceRequestPriority.MEDIUM);
-        assignedMedium.setService(optionalService.get());
-        assignedMedium.setJurisdiction(optionalService.get().getJurisdiction());
+        assignedMedium.setService(sidewalkService);
+        assignedMedium.setJurisdiction(sidewalkService.getJurisdiction());
         assignedMedium.setLatitude("12.34");
         assignedMedium.setLongitude("56.78");
         serviceRequestRepository.save(assignedMedium);
+
+        ServiceRequest bikeLaneRequest = new ServiceRequest();
+        bikeLaneRequest.setStatus(ServiceRequestStatus.ASSIGNED);
+        bikeLaneRequest.setService(bikeLaneService);
+        bikeLaneRequest.setJurisdiction(bikeLaneService.getJurisdiction());
+        bikeLaneRequest.setLatitude("12.34");
+        bikeLaneRequest.setLongitude("56.78");
+        ServiceRequest bikeLaneSR = serviceRequestRepository.save(bikeLaneRequest);
 
         // filter high priority
         HttpRequest<?> req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&priority=high").bearerAuth( "eyekljdsl");
@@ -380,6 +394,18 @@ public class RootControllerTest {
                 sensitiveServiceRequestDTO.getId().equals(openLowSR.getId()) ||
                         sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
         assertEquals(2, body.get().size());
+
+        // filter service_code 003 and 001
+        req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&service_code=003&service_code=001").bearerAuth( "eyekljdsl");
+        response = client.toBlocking().exchange(req,
+                Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertEquals(HttpStatus.OK, response.status());
+        body = response.getBody(Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertTrue(body.isPresent());
+        assertFalse(body.get().isEmpty());
+        assertTrue(body.get().stream().anyMatch(sensitiveServiceRequestDTO ->
+                sensitiveServiceRequestDTO.getId().equals(bikeLaneSR.getId()) ||
+                        sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
     }
 
     @Test
