@@ -1,3 +1,6 @@
+ALTER TABLE services DROP COLUMN service_definition_json;
+ALTER TABLE services DROP COLUMN metadata;
+
 CREATE TABLE IF NOT EXISTS service_definitions (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     service_id BIGINT NOT NULL,
