@@ -19,6 +19,7 @@
 		optionalCoalesceStringValidator
 	} from '$lib/utils/validation';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { goto } from '$app/navigation';
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -136,6 +137,8 @@
 		isUpdateRquestButtonClicked = false;
 
 		// TODO: update the Service Request with the new information in the list of Service Requests
+		goto(`/issues/table`);
+		// goto(`/issues/table/${serviceRequest.service_request_id}`);
 	}
 
 	$: name = createName(serviceRequest);
