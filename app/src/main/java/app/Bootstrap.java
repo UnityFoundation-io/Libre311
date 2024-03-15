@@ -37,6 +37,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Requires(property = "app-data.bootstrap.data.enabled", value = StringUtils.TRUE)
@@ -49,16 +52,14 @@ public class Bootstrap {
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
     private final ServiceGroupRepository serviceGroupRepository;
-    private final ServiceDefinitionRepository serviceDefinitionRepository;
     private final ServiceDefinitionAttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionRepository serviceDefinitionRepository, ServiceDefinitionAttributeRepository attributeRepository, AttributeValueRepository attributeValueRepository) {
+    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionAttributeRepository attributeRepository, AttributeValueRepository attributeValueRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.serviceGroupRepository = serviceGroupRepository;
-        this.serviceDefinitionRepository = serviceDefinitionRepository;
         this.attributeRepository = attributeRepository;
         this.attributeValueRepository = attributeValueRepository;
     }
@@ -89,7 +90,7 @@ public class Bootstrap {
 
     private void processAndStoreServices(List<Map<String, ?>> services, Jurisdiction jurisdiction, List<ServiceGroup> serviceGroups) {
 
-        services.stream().forEach(svc -> {
+        services.forEach(svc -> {
             String serviceName = (String) svc.get("serviceName");
             Service service = new Service(serviceName);
             service.setServiceCode((String) svc.get("serviceCode"));
@@ -107,20 +108,13 @@ public class Bootstrap {
             if (svc.containsKey("serviceDefinition")) {
                 Map definitionMap = (Map) svc.get("serviceDefinition");
 
-                ServiceDefinition serviceDefinition = new ServiceDefinition();
-                serviceDefinition.setService(savedService);
-
-                ServiceDefinition savedSD = serviceDefinitionRepository.save(serviceDefinition);
-                service.setServiceDefinition(savedSD);
-                serviceRepository.update(savedService);
-
                 List<Map<String, Object>> attributes = (List<Map<String, Object>>) definitionMap.get("attributes");
-                attributes.forEach(stringObjectMap -> {
+                Set<ServiceDefinitionAttribute> savedAttributes = attributes.stream().map(stringObjectMap -> {
                     AttributeDataType attributeDataType = AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase());
                     String attributeCode = (String) stringObjectMap.get("code");
 
                     ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-                    serviceDefinitionAttribute.setServiceDefinition(savedSD);
+                    serviceDefinitionAttribute.setService(savedService);
                     serviceDefinitionAttribute.setVariable((Boolean) stringObjectMap.get("variable"));
                     serviceDefinitionAttribute.setCode(attributeCode);
                     serviceDefinitionAttribute.setRequired((Boolean) stringObjectMap.get("required"));
@@ -137,9 +131,20 @@ public class Bootstrap {
                     }
 
                     if (values != null) {
-                        values.forEach(stringStringMap -> attributeValueRepository.save(new AttributeValue(savedSDA, stringStringMap.get("name"))));
+                        ServiceDefinitionAttribute finalSavedSDA = savedSDA;
+                        Set<AttributeValue> attributeValues = values.stream()
+                                .map(stringStringMap -> attributeValueRepository.save(new AttributeValue(finalSavedSDA, stringStringMap.get("name"))))
+                                .collect(Collectors.toSet());
+
+                        savedSDA.setAttributeValues(attributeValues);
+                        savedSDA = attributeRepository.update(savedSDA);
                     }
-                });
+
+                    return savedSDA;
+                }).collect(Collectors.toSet());
+
+                service.setAttributes(savedAttributes);
+//                serviceRepository.update(savedService); // ??
             }
 
             if (svc.containsKey("serviceRequests")) {

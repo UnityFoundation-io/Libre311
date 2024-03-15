@@ -16,14 +16,16 @@ package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.service.group.ServiceGroup;
-import app.model.servicedefinition.ServiceDefinition;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "services")
@@ -38,9 +40,6 @@ public class Service {
     @ManyToOne
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
-
-    @OneToOne
-    private ServiceDefinition serviceDefinition;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
@@ -57,6 +56,10 @@ public class Service {
 
     @ManyToOne(optional = false)
     private ServiceGroup serviceGroup;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "service")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ServiceDefinitionAttribute> attributes;
 
     public Service(String serviceName) {
         this.serviceName = serviceName;
@@ -104,14 +107,6 @@ public class Service {
         this.type = type;
     }
 
-    public ServiceDefinition getServiceDefinition() {
-        return serviceDefinition;
-    }
-
-    public void setServiceDefinition(ServiceDefinition serviceDefinition) {
-        this.serviceDefinition = serviceDefinition;
-    }
-
     public Long getId() {
         return id;
     }
@@ -138,5 +133,20 @@ public class Service {
 
     public void setServiceGroup(ServiceGroup serviceGroup) {
         this.serviceGroup = serviceGroup;
+    }
+
+    public Set<ServiceDefinitionAttribute> getAttributes() {
+        return attributes;
+    }
+
+    public void addAttribute(ServiceDefinitionAttribute attribute) {
+        if (attributes == null) {
+            attributes = new HashSet<>();
+        }
+        attributes.add(attribute);
+    }
+
+    public void setAttributes(Set<ServiceDefinitionAttribute> attributes) {
+        this.attributes = attributes;
     }
 }

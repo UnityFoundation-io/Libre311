@@ -15,6 +15,7 @@
 package app.model.servicedefinition;
 
 import app.model.service.AttributeDataType;
+import app.model.service.Service;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -33,7 +34,7 @@ public class ServiceDefinitionAttribute {
     private Long id;
 
     @ManyToOne(optional = false)
-    private ServiceDefinition serviceDefinition;
+    private Service service;
 
     @NotBlank
     private String code;
@@ -67,12 +68,12 @@ public class ServiceDefinitionAttribute {
         this.id = id;
     }
 
-    public ServiceDefinition getServiceDefinition() {
-        return serviceDefinition;
+    public Service getService() {
+        return service;
     }
 
-    public void setServiceDefinition(ServiceDefinition serviceDefinition) {
-        this.serviceDefinition = serviceDefinition;
+    public void setService(Service service) {
+        this.service = service;
     }
 
     public String getCode() {

@@ -26,8 +26,6 @@ import java.util.List;
 @JacksonXmlRootElement(localName = "service_definitions")
 public class ServiceDefinitionDTO {
 
-    private Long id;
-
     @JsonProperty("service_code")
     private String serviceCode;
 
@@ -38,17 +36,8 @@ public class ServiceDefinitionDTO {
     public ServiceDefinitionDTO() {
     }
 
-    public ServiceDefinitionDTO(Long id, String serviceCode) {
-        this.id = id;
+    public ServiceDefinitionDTO(String serviceCode) {
         this.serviceCode = serviceCode;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public List<ServiceDefinitionAttributeDTO> getAttributes() {

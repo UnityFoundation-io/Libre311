@@ -50,7 +50,7 @@ public class ServiceDTO {
         this.serviceCode = service.getServiceCode();
         this.serviceName = service.getServiceName();
         this.description = service.getDescription();
-        this.metadata = service.getServiceDefinition() != null;
+        this.metadata = service.getAttributes() != null && !service.getAttributes().isEmpty();
         this.groupId = service.getServiceGroup().getId();
         this.type = service.getType();
         if (service.getJurisdiction() != null) {

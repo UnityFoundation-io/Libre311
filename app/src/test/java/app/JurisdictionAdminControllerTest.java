@@ -102,8 +102,6 @@ public class JurisdictionAdminControllerTest {
     @Inject
     ServiceGroupRepository serviceGroupRepository;
 
-    @Inject
-    ServiceDefinitionRepository serviceDefinitionRepository;
 
     @Inject
     ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository;
@@ -145,14 +143,8 @@ public class JurisdictionAdminControllerTest {
 
             Service service = serviceRepository.save(sidewalkService);
 
-            // service definition json
-            ServiceDefinition serviceDefinition = new ServiceDefinition();
-            serviceDefinition.setService(service);
-
-            ServiceDefinition savedSD = serviceDefinitionRepository.save(serviceDefinition);
-
             ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-            serviceDefinitionAttribute.setServiceDefinition(savedSD);
+            serviceDefinitionAttribute.setService(service);
             serviceDefinitionAttribute.setCode("SDWLK");
             serviceDefinitionAttribute.setVariable(true);
             serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);

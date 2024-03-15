@@ -25,7 +25,6 @@ import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.servicedefinition.AttributeValue;
 import app.model.servicedefinition.ServiceDefinitionAttribute;
-import app.model.servicedefinition.ServiceDefinition;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
@@ -47,9 +46,7 @@ import io.micronaut.data.model.Pageable;
 import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
-import io.micronaut.http.MediaType;
 import io.micronaut.http.server.types.files.StreamedFile;
-import io.micronaut.http.server.types.files.SystemFile;
 import jakarta.inject.Singleton;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -140,16 +137,16 @@ public class ServiceRequestService {
         // validate if additional attributes are required
         List<ServiceDefinitionAttributeDTO> requestAttributes = null;
         Service service = serviceByServiceCodeOptional.get();
-        if (service.getServiceDefinition() != null) {
+        if (service.getAttributes() != null) {
             // get service definition
-            ServiceDefinition serviceDefinition = service.getServiceDefinition();
+            Set<ServiceDefinitionAttribute> serviceDefinitionAttributes = service.getAttributes();
 
-            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinition);
+            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
             if (requestAttributes.isEmpty()) {
                 LOG.error("Submitted Service Request does not contain any attribute values.");
                 return null; // todo throw exception - must provide attributes
             }
-            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinition, requestAttributes)) {
+            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
                 LOG.error("Submitted Service Request does not contain required attribute values.");
                 return null; // todo throw exception (validation)
             }
@@ -173,9 +170,9 @@ public class ServiceRequestService {
         return mediaUrl.startsWith(storageUrlUtil.getBucketUrlString());
     }
 
-    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(ServiceDefinition serviceDefinition, List<ServiceDefinitionAttributeDTO> requestAttributes) {
+    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(Set<ServiceDefinitionAttribute> serviceDefinitionAttributes, List<ServiceDefinitionAttributeDTO> requestAttributes) {
         // collect all required attributes
-        List<String> requiredCodes = serviceDefinition.getAttributes().stream()
+        List<String> requiredCodes = serviceDefinitionAttributes.stream()
                 .filter(ServiceDefinitionAttribute::isRequired)
                 .map(ServiceDefinitionAttribute::getCode)
                 .collect(Collectors.toList());
@@ -188,7 +185,7 @@ public class ServiceRequestService {
         return requestCodes.containsAll(requiredCodes);
     }
 
-    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(HttpRequest<?> request, ServiceDefinition serviceDefinition) {
+    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(HttpRequest<?> request, Set<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
 
         Argument<Map<String, String>> type = Argument.mapOf(String.class, String.class);
         Optional<Map<String, String>> body = request.getBody(type);
@@ -200,8 +197,8 @@ public class ServiceRequestService {
                 if (k.startsWith("attribute[")) {
                     String attributeCode = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
 
-                    // search for attribute by code in serviceDefinition
-                    Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeOptional = serviceDefinition.getAttributes().stream()
+                    // search for attribute by code in serviceDefinitionAttributes
+                    Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeOptional = serviceDefinitionAttributes.stream()
                             .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals(attributeCode))
                             .findFirst();
 

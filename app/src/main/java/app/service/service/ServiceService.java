@@ -48,15 +48,13 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
     private final ServiceGroupRepository serviceGroupRepository;
-    private final ServiceDefinitionRepository serviceDefinitionRepository;
     private final ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository;
     private final AttributeValueRepository attributeValueRepository;
 
-    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionRepository serviceDefinitionRepository, ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository, AttributeValueRepository attributeValueRepository) {
+    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository, AttributeValueRepository attributeValueRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.serviceGroupRepository = serviceGroupRepository;
-        this.serviceDefinitionRepository = serviceDefinitionRepository;
         this.serviceDefinitionAttributeRepository = serviceDefinitionAttributeRepository;
         this.attributeValueRepository = attributeValueRepository;
     }
@@ -86,12 +84,8 @@ public class ServiceService {
             throw new ServiceNotFoundException(serviceCode, jurisdictionId);
         }
         Service service = serviceOptional.get();
-        if (service.getServiceDefinition() == null) {
-            LOG.error("Service Definition is null.");
-            return null;
-        }
 
-        return convertToDTO(service.getServiceDefinition());
+        return generateServiceDefinitionDTO(service);
     }
 
     public ServiceDTO createService(CreateServiceDTO serviceDTO, String jurisdictionId) {
@@ -235,29 +229,15 @@ public class ServiceService {
         }
         Service service = serviceOptional.get();
 
-        ServiceDefinition serviceDefinition;
-        if (service.getServiceDefinition() == null) {
-            ServiceDefinition newServiceDefinition = new ServiceDefinition();
-            newServiceDefinition.setService(service);
-            serviceDefinition = serviceDefinitionRepository.save(newServiceDefinition);
-
-            addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, serviceDefinition);
-        } else {
-            serviceDefinition = service.getServiceDefinition();
-            addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, serviceDefinition);
-        }
-
-        service.setServiceDefinition(serviceDefinition);
-        serviceRepository.update(service);
-
-        return convertToDTO(serviceDefinition);
+        return generateServiceDefinitionDTO(addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, service));
     }
 
-    private ServiceDefinitionDTO convertToDTO(ServiceDefinition serviceDefinition) {
-        ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(serviceDefinition.getId(), serviceDefinition.getService().getServiceCode());
+    private ServiceDefinitionDTO generateServiceDefinitionDTO(Service service) {
+        ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(service.getServiceCode());
 
-        if (serviceDefinition.getAttributes() != null) {
-            serviceDefinitionDTO.setAttributes(serviceDefinition.getAttributes().stream().map(serviceDefinitionAttributeEntity -> {
+        Set<ServiceDefinitionAttribute> serviceDefinitionAttributes = service.getAttributes();
+        if (serviceDefinitionAttributes != null) {
+            serviceDefinitionDTO.setAttributes(serviceDefinitionAttributes.stream().map(serviceDefinitionAttributeEntity -> {
                 ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = new ServiceDefinitionAttributeDTO(
                         serviceDefinitionAttributeEntity.getId(),
                         serviceDefinitionAttributeEntity.getCode(),
@@ -294,7 +274,7 @@ public class ServiceService {
 
         ServiceDefinitionAttribute patch = patchServiceDefinitionAttribute(serviceDefinitionAttribute, serviceDefinitionAttributeDTO);
 
-        return convertToDTO(patch.getServiceDefinition());
+        return generateServiceDefinitionDTO(patch.getService());
     }
 
     @Transactional
@@ -346,9 +326,9 @@ public class ServiceService {
     }
 
     @Transactional
-    public void addAttributeToServiceDefinition(CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, ServiceDefinition savedSD) {
+    public Service addAttributeToServiceDefinition(CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, Service service) {
         ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-        serviceDefinitionAttribute.setServiceDefinition(savedSD);
+        serviceDefinitionAttribute.setService(service);
         serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
         serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
         serviceDefinitionAttribute.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
@@ -368,7 +348,7 @@ public class ServiceService {
 
         serviceDefinitionAttributeRepository.update(savedSDA);
 
-        savedSD.addAttribute(savedSDA);
-        serviceDefinitionRepository.update(savedSD);
+        service.addAttribute(savedSDA);
+        return serviceRepository.update(service);
     }
 }
