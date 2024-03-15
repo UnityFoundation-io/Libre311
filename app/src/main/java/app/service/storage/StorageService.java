@@ -56,10 +56,7 @@ public class StorageService {
     }
 
     public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
-        if (photoUploadDTO.getgRecaptchaResponse() == null  || !reCaptchaService.verifyReCaptcha(photoUploadDTO.getgRecaptchaResponse())) {
-            LOG.error("ReCaptcha verification failed.");
-            return null;
-        }
+        reCaptchaService.verifyReCaptcha(photoUploadDTO.getgRecaptchaResponse());
 
         String base64Image = photoUploadDTO.getImage();
         String dataUri = base64Image.split(",")[0];

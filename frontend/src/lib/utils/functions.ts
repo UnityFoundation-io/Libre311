@@ -5,7 +5,7 @@ export function sleep(ms: number) {
 }
 
 export function matchesDesktopMedia() {
-	return window.matchMedia('(min-width: 64rem)').matches;
+	return window.matchMedia('(min-width: 769px)').matches;
 }
 
 type AnchorPosition = 'center' | 'bottom-center';
