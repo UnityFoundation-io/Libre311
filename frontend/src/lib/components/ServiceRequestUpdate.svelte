@@ -19,7 +19,7 @@
 		optionalCoalesceStringValidator
 	} from '$lib/utils/validation';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -137,7 +137,7 @@
 		isUpdateRquestButtonClicked = false;
 
 		// TODO: update the Service Request with the new information in the list of Service Requests
-		goto(`/issues/table`);
+		// goto(`/issues/table`);
 		// goto(`/issues/table/${serviceRequest.service_request_id}`);
 	}
 
@@ -145,6 +145,15 @@
 	let expected_datetime = serviceRequest.expected_datetime
 		? new Date(Date.parse(serviceRequest.expected_datetime))
 		: null;
+
+	$: if ($page.url.pathname) {
+		// console.log('page changed!');
+		// Refresh the user inputs with the values from the Service Request here
+		agencyNameInput.value = serviceRequest.agency_responsible;
+		agencyEmailInput.value = serviceRequest.agency_email;
+		serviceNoticeInput.value = serviceRequest.service_notice;
+		statusNotesInput.value = serviceRequest.status_notes;
+	}
 </script>
 
 <div class="flex h-full">
@@ -348,7 +357,6 @@
 					</Button>
 
 					<Button
-						type="primary"
 						on:click={() => {
 							isUpdateRquestButtonClicked = true;
 						}}
@@ -364,7 +372,12 @@
 						{messages['updateServiceRequest']['button_cancel']}
 					</Button>
 
-					<Button type="primary" on:click={() => updateServiceRequest(serviceRequest)}>
+					<Button
+						type="primary"
+						on:click={async () => {
+							await updateServiceRequest(serviceRequest);
+						}}
+					>
 						{messages['updateServiceRequest']['button_submit']}
 					</Button>
 				{/if}

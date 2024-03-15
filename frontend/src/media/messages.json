@@ -77,7 +77,7 @@
 	"updateServiceRequest": {
 		"button_back": "Close",
 		"button_cancel": "Cancel",
-		"button_update": "Update Request",
+		"button_update": "Update",
 		"button_submit": "Submit"
 	},
 	"photo": {
