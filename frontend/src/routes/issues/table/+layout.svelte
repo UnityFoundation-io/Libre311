@@ -108,53 +108,13 @@
 	}
 
 	async function handleDownloadCsv() {
-		const allServiceRequests = await libre311.getAllServiceRequests({});
+		const searchParams = new URLSearchParams($page.url.searchParams);
+		searchParams.delete('page_size');
+		searchParams.delete('page');
 
-		// Sanatize Requests
-		for (let request of allServiceRequests) {
-			request.address = request.address.replace(/,/g, '');
-		}
+		const serviceRequestsBlob = await libre311.downloadServiceRequests(searchParams);
 
-		const csvContent = convertToCSV(allServiceRequests);
-
-		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
-		saveAs(blob, 'service-requests.csv');
-	}
-
-	function convertToCSV(data: ServiceRequest[]) {
-		const delimiter = '\t';
-		const header = Object.keys(data[0]).join(delimiter);
-
-		// Iterate over each object in the data array
-		const rows = data
-			.map((obj) => {
-				// Map over each key in the header
-				return header
-					.split(delimiter)
-					.map((key) => {
-						// If the object has a value for the current key
-						if (
-							obj[key as keyof typeof obj] !== undefined &&
-							obj[key as keyof typeof obj] !== null
-						) {
-							// If the value is an object, stringify it as JSON
-							if (typeof obj[key as keyof typeof obj] === 'object') {
-								// Ugly looking JSON (service definition answers)
-								return JSON.stringify(obj[key as keyof typeof obj]);
-							} else {
-								// Otherwise, return the value as is
-								return obj[key as keyof typeof obj];
-							}
-						} else {
-							// If the value is undefined or null, return an empty string
-							return '';
-						}
-					})
-					.join(delimiter);
-			})
-			.join('\n');
-
-		return `${header}\n${rows}`;
+		saveAs(serviceRequestsBlob, 'service-requests.csv');
 	}
 
 	async function handleFunnelClick() {
@@ -275,14 +235,14 @@
 
 							<div class="m-1">
 								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
-									<DatePicker.Label slot="label">Start Date</DatePicker.Label>
+									<DatePicker.Label slot="label">Reported After</DatePicker.Label>
 									<DatePicker.Leading slot="leading" data={calendarIcon} />
 								</DatePicker>
 							</div>
 
 							<div class="m-1">
 								<DatePicker name="end-datetime" allowClear bind:value={endDate}>
-									<DatePicker.Label slot="label">End Date</DatePicker.Label>
+									<DatePicker.Label slot="label">Reported Before</DatePicker.Label>
 									<DatePicker.Leading slot="leading" data={calendarIcon} />
 								</DatePicker>
 							</div>
@@ -304,7 +264,7 @@
 								{#each $serviceRequestsRes.value.serviceRequests as item}
 									<Table.Body.Row
 										id={resolveStyleId(item, $selectedServiceRequestStore)}
-										on:click={selectRow(item.service_request_id)}
+										on:click={() => selectRow(item.service_request_id)}
 									>
 										<Table.Body.Row.Cell column={0}>
 											<div class="flex items-center justify-center">

@@ -40,11 +40,9 @@
 		...iconPositionOpts(128 / 169, 45, 'bottom-center')
 	});
 	const componentMap: Map<CreateServiceRequestSteps, ComponentType> = new Map();
-	componentMap.set(CreateServiceRequestSteps.LOCATION, SelectLocation);
 	componentMap.set(CreateServiceRequestSteps.PHOTO, UploadFile);
 	componentMap.set(CreateServiceRequestSteps.DETAILS, ServiceRequestDetailsForm);
 	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
-	componentMap.set(CreateServiceRequestSteps.REVIEW, ReviewServiceRequest);
 
 	function getStartingCenterPos(): PointTuple {
 		const center = L.latLngBounds(libre311.getJurisdictionConfig().bounds).getCenter();
@@ -65,12 +63,10 @@
 	async function confirmLocation() {
 		params.lat = String(centerPos[0]);
 		params.long = String(centerPos[1]);
-		if (!params.address_string) {
-			loadingLocation = true;
-			const res = await libre311.reverseGeocode(centerPos);
-			loadingLocation = false;
-			params.address_string = res.display_name;
-		}
+		loadingLocation = true;
+		const res = await libre311.reverseGeocode(centerPos);
+		loadingLocation = false;
+		params.address_string = res.display_name;
 		params = params;
 		goto(linkResolver.createIssuePageNext($page.url));
 	}
@@ -85,7 +81,12 @@
 		partial: Partial<CreateServiceRequestUIParams>
 	): partial is CreateServiceRequestUIParams {
 		if (partial?.address_string && partial?.attributeMap && partial?.service) return true;
-		throw new Error('Previous steps are missing data');
+		return false;
+	}
+
+	// Redirect user because they navigated to an invalid step
+	$: if (step == CreateServiceRequestSteps.REVIEW && !isCreateServiceRequestUIParams(params)) {
+		goto('/issue/create');
 	}
 </script>
 
