@@ -95,7 +95,7 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
         this.status = serviceRequest.getStatus();
-        this.serviceName = serviceRequest.getService().getServiceName();
+        this.serviceName = serviceRequest.getService().getServiceName(); //
         this.serviceCode = serviceRequest.getService().getServiceCode();
         this.description = serviceRequest.getDescription();
         this.agencyResponsible = serviceRequest.getAgencyResponsible();

@@ -135,25 +135,19 @@ public class ServiceRequestService {
         }
 
         // validate if additional attributes are required
-        List<ServiceDefinitionAttributeDTO> requestAttributes = null;
         Service service = serviceByServiceCodeOptional.get();
-        if (service.getAttributes() != null) {
+        ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
+        if (!service.getAttributes().isEmpty()) {
             // get service definition
             Set<ServiceDefinitionAttribute> serviceDefinitionAttributes = service.getAttributes();
 
-            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
-            if (requestAttributes.isEmpty()) {
-                LOG.error("Submitted Service Request does not contain any attribute values.");
-                return null; // todo throw exception - must provide attributes
-            }
+            List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
+
             if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
                 LOG.error("Submitted Service Request does not contain required attribute values.");
                 return null; // todo throw exception (validation)
             }
-        }
 
-        ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
-        if (requestAttributes != null) {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 serviceRequest.setAttributesJson(objectMapper.writeValueAsString(requestAttributes));
@@ -161,7 +155,7 @@ public class ServiceRequestService {
                 throw new RuntimeException(e);
             }
         }
-
+        
         return new PostResponseServiceRequestDTO(serviceRequestRepository.save(serviceRequest));
     }
 

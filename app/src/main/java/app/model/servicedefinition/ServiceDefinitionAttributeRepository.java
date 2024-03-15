@@ -14,9 +14,13 @@
 
 package app.model.servicedefinition;
 
+import app.model.service.Service;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.PageableRepository;
+import java.util.List;
 
 @Repository
 public interface ServiceDefinitionAttributeRepository extends PageableRepository<ServiceDefinitionAttribute, Long> {
+    boolean existsByServiceId(long serviceId);
+    List<ServiceDefinitionAttribute> findAllByServiceId(long serviceId);
 }

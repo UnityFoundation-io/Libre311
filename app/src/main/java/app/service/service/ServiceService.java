@@ -71,10 +71,11 @@ public class ServiceService {
         }
     }
 
+
     public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
         Page<Service> servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
 
-        return servicePage.map(ServiceDTO::new);
+        return servicePage.map(this::toServiceDTO);
     }
 
     public ServiceDefinitionDTO getServiceDefinition(String serviceCode, String jurisdictionId) {
@@ -103,7 +104,7 @@ public class ServiceService {
         service.setServiceName(serviceDTO.getServiceName());
         service.setDescription(serviceDTO.getDescription());
 
-        return new ServiceDTO(serviceRepository.save(service));
+        return toServiceDTO(serviceRepository.save(service));
     }
 
     public ServiceDTO updateService(Long serviceId, UpdateServiceDTO serviceDTO, String jurisdictionId) {
@@ -133,7 +134,7 @@ public class ServiceService {
             service.setServiceName(serviceDTO.getServiceName());
         }
 
-        return new ServiceDTO(serviceRepository.update(service));
+        return toServiceDTO(serviceRepository.update(service));
     }
 
     public void deleteService(Long serviceId, String jurisdictionId) {
@@ -235,7 +236,7 @@ public class ServiceService {
     private ServiceDefinitionDTO generateServiceDefinitionDTO(Service service) {
         ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(service.getServiceCode());
 
-        Set<ServiceDefinitionAttribute> serviceDefinitionAttributes = service.getAttributes();
+        List<ServiceDefinitionAttribute> serviceDefinitionAttributes = serviceDefinitionAttributeRepository.findAllByServiceId(service.getId());
         if (serviceDefinitionAttributes != null) {
             serviceDefinitionDTO.setAttributes(serviceDefinitionAttributes.stream().map(serviceDefinitionAttributeEntity -> {
                 ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = new ServiceDefinitionAttributeDTO(
@@ -350,5 +351,10 @@ public class ServiceService {
 
         service.addAttribute(savedSDA);
         return serviceRepository.update(service);
+    }
+
+
+    private ServiceDTO toServiceDTO(Service service){
+        return new ServiceDTO(service, serviceDefinitionAttributeRepository.existsByServiceId(service.getId()));
     }
 }
