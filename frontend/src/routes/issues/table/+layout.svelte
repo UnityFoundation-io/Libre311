@@ -136,7 +136,6 @@
 			},
 			$page.url
 		);
-		console.log(ctx.serviceRequestsResponse);
 	}
 
 	onMount(fetchServiceList);

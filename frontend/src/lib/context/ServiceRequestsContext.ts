@@ -98,12 +98,8 @@ export function createServiceRequestsContext(
 			selectedServiceRequest.set(undefined);
 			const updatedParams = toServiceRequestParams(page.url.searchParams);
 			const res = await libreService.getServiceRequests(updatedParams);
-			console.log(updatedParams);
 			serviceRequestsResponse.set(asAsyncSuccess(res));
-			console.log(res);
-			console.log('success');
 		} catch (error) {
-			console.log(error);
 			serviceRequestsResponse.set({
 				type: 'failure',
 				error
