@@ -5,7 +5,8 @@ import {
 	type ServiceRequest,
 	type ServiceRequestsResponse,
 	EMPTY_PAGINATION,
-	mapToServiceRequestsURLSearchParams
+	mapToServiceRequestsURLSearchParams,
+	isServiceRequestStatus
 } from '$lib/services/Libre311/Libre311';
 import {
 	asAsyncFailure,
@@ -38,13 +39,14 @@ function toServiceRequestParams(searchParams: URLSearchParams) {
 	if (searchParams.get('pageNumber')) params.pageNumber = Number(searchParams.get('pageNumber'));
 
 	if (searchParams.get('service_code'))
-		params.serviceCode = searchParams.get('service_code') ?? undefined;
+		params.serviceCode = searchParams.get('service_code')?.split(',');
 	if (searchParams.get('start_date'))
 		params.startDate = searchParams.get('start_date') ?? undefined;
 	if (searchParams.get('end_date')) params.endDate = searchParams.get('end_date') ?? undefined;
 	// todo validate format
 	if (searchParams.get('status'))
-		params.status = searchParams.get('status')?.split(',') ?? undefined;
+		params.status =
+			searchParams.get('status')?.split(',').filter(isServiceRequestStatus) ?? undefined;
 
 	return params;
 }

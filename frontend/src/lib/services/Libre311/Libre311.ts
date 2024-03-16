@@ -240,6 +240,9 @@ export const ServiceRequestStatusSchema = z.union([
 	ClosedServiceRequestStatusSchema
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusSchema>;
+export function isServiceRequestStatus(maybeStatus: unknown): maybeStatus is ServiceRequestStatus {
+	return maybeStatus == 'open' || maybeStatus == 'closed';
+}
 const urlSchema = z.string().url();
 
 // represents the users responses to the various service definition attributes
@@ -340,7 +343,7 @@ export type DeleteServiceParams = {
 export type GetServiceRequestsParams =
 	| ServiceRequestId[]
 	| {
-			serviceCode?: ServiceCode;
+			serviceCode?: ServiceCode[] | undefined;
 			startDate?: string;
 			endDate?: string;
 			status?: ServiceRequestStatus[];
@@ -511,7 +514,7 @@ export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsPa
 		queryParams.append('page_size', '10');
 		queryParams.append('page', `${params.pageNumber ?? 0}`);
 		params.status && queryParams.append('status', params.status?.join(','));
-		params.serviceCode && queryParams.append('service_code', params.serviceCode);
+		params.serviceCode && queryParams.append('service_code', params.serviceCode?.join(','));
 		params.startDate && queryParams.append('start_date', params.startDate);
 		params.endDate && queryParams.append('end_date', params.endDate);
 	}
@@ -702,6 +705,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
 		const queryParams = mapToServiceRequestsURLSearchParams(params);
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
+		console.log(queryParams.toString());
 
 		try {
 			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));
