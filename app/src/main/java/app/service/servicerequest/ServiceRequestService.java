@@ -25,6 +25,7 @@ import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.servicedefinition.AttributeValue;
 import app.model.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
@@ -70,15 +71,17 @@ public class ServiceRequestService {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceRequestService.class);
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRepository serviceRepository;
+    private final ServiceDefinitionAttributeRepository attributeRepository;
     private final ReCaptchaService reCaptchaService;
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
 
     public ServiceRequestService(ServiceRequestRepository serviceRequestRepository,
-            ServiceRepository serviceRepository, ReCaptchaService reCaptchaService,
-            StorageUrlUtil storageUrlUtil, UnityAuthService unityAuthService) {
+                                 ServiceRepository serviceRepository, ServiceDefinitionAttributeRepository attributeRepository,
+                                 ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil, UnityAuthService unityAuthService) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
+        this.attributeRepository = attributeRepository;
         this.reCaptchaService = reCaptchaService;
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
@@ -137,10 +140,8 @@ public class ServiceRequestService {
         // validate if additional attributes are required
         Service service = serviceByServiceCodeOptional.get();
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
-        if (!service.getAttributes().isEmpty()) {
-            // get service definition
-            Set<ServiceDefinitionAttribute> serviceDefinitionAttributes = service.getAttributes();
-
+        List<ServiceDefinitionAttribute> serviceDefinitionAttributes = attributeRepository.findAllByServiceId(service.getId());
+        if (!serviceDefinitionAttributes.isEmpty()) {
             List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
             if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
                 throw new InvalidServiceRequestException("Submitted Service Request does not contain required attribute values.");
@@ -162,7 +163,7 @@ public class ServiceRequestService {
         return mediaUrl.startsWith(storageUrlUtil.getBucketUrlString());
     }
 
-    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(Set<ServiceDefinitionAttribute> serviceDefinitionAttributes, List<ServiceDefinitionAttributeDTO> requestAttributes) {
+    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(List<ServiceDefinitionAttribute> serviceDefinitionAttributes, List<ServiceDefinitionAttributeDTO> requestAttributes) {
         // collect all required attributes
         List<String> requiredCodes = serviceDefinitionAttributes.stream()
                 .filter(ServiceDefinitionAttribute::isRequired)
@@ -177,7 +178,7 @@ public class ServiceRequestService {
         return requestCodes.containsAll(requiredCodes);
     }
 
-    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(HttpRequest<?> request, Set<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
+    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(HttpRequest<?> request, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
 
         Argument<Map<String, String>> type = Argument.mapOf(String.class, String.class);
         Optional<Map<String, String>> body = request.getBody(type);
