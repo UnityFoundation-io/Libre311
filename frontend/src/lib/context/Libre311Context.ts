@@ -17,6 +17,7 @@ import {
 	type RecaptchaServiceProps
 } from '$lib/services/RecaptchaService';
 import { writable, type Readable, type Writable } from 'svelte/store';
+import type { Libre311Alert } from './Libre311AlertStore';
 
 const libre311CtxKey = Symbol();
 
@@ -26,7 +27,8 @@ export type Libre311Context = {
 	unityAuthService: UnityAuthService;
 	mode: Mode;
 	user: Readable<UnityAuthLoginResponse | undefined>;
-};
+	alertError: (unknown: unknown) => void;
+} & Libre311Alert;
 
 export type Libre311ContextProviderProps = {
 	libreServiceProps: Omit<Libre311ServiceProps, 'recaptchaService'>;
@@ -35,7 +37,7 @@ export type Libre311ContextProviderProps = {
 	mode: Mode;
 };
 
-export function createLibre311Context(props: Libre311ContextProviderProps) {
+export function createLibre311Context(props: Libre311ContextProviderProps & Libre311Alert) {
 	const linkResolver = new LinkResolver();
 	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
 	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
@@ -47,12 +49,23 @@ export function createLibre311Context(props: Libre311ContextProviderProps) {
 	unityAuthService.subscribe('logout', () => libre311Service.setAuthInfo(undefined));
 	unityAuthService.subscribe('logout', () => user.set(undefined));
 
+	function alertError(unknown: unknown) {
+		// todo figure out if it is a server error or not
+		console.error(unknown);
+		props.alert({
+			type: 'error',
+			title: 'Something unexpected happened',
+			description: 'See console for more details'
+		});
+	}
+
 	const ctx: Libre311Context = {
-		mode: props.mode,
+		...props,
 		service: libre311Service,
 		linkResolver,
 		unityAuthService,
-		user
+		user,
+		alertError
 	};
 	setContext(libre311CtxKey, ctx);
 	return ctx;

@@ -1,8 +1,14 @@
 <script lang="ts">
+	import LibreAlert from '$lib/components/LibreAlert.svelte';
+	import { createAlertStore } from './Libre311AlertStore';
 	import { createLibre311Context, type Libre311ContextProviderProps } from './Libre311Context';
 	export let props: Libre311ContextProviderProps;
 
-	const libre311Context = createLibre311Context(props);
+	const alertStore = createAlertStore();
+	const currentAlert = alertStore.currentAlert;
+	const libre311Context = createLibre311Context({ ...props, ...alertStore });
+
+	// in:fly={{ x: -200, duration: 2000 }} out:fly={{ x: 200, duration: 2000 }}
 </script>
 
 <svelte:head>
@@ -13,3 +19,7 @@
 </svelte:head>
 
 <slot {libre311Context} />
+
+{#if $currentAlert}
+	<LibreAlert on:close={() => alertStore.close()} {...$currentAlert}></LibreAlert>
+{/if}
