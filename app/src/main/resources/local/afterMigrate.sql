@@ -31,9 +31,7 @@ VALUES (1, 'Infrastructure', 'stlma');
 INSERT IGNORE INTO services (id, service_code, jurisdiction_id, service_name, description, type, service_group_id)
 VALUES (1, '202', 'stlma', 'Bus Stop', 'For problems with bus stops', 'REALTIME', 1);
 
-INSERT IGNORE INTO service_definitions (id, service_id) VALUES (1, 1);
-
-INSERT IGNORE INTO service_definition_attributes (id, attribute_order, code, datatype, datatype_description, description, required, variable, service_definition_id)
+INSERT IGNORE INTO service_definition_attributes (id, attribute_order, code, datatype, datatype_description, description, required, variable, service_id)
 VALUES (1, 1, 'BUS_STOP', 'multivaluelist', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 1);
 
 INSERT IGNORE INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
@@ -48,10 +46,8 @@ VALUES (1, 'Unsafe location', 1),
 INSERT IGNORE INTO services (id, service_code, jurisdiction_id, service_name, description, type, service_group_id)
 VALUES (2, '204', 'stlma', 'Crosswalk', 'For issues with the crosswalks', 'REALTIME', 1);
 
-INSERT IGNORE INTO service_definitions (id, service_id) VALUES (2, 2);
-
-INSERT IGNORE INTO service_definition_attributes (id, attribute_order, code, datatype, datatype_description, description, required, variable, service_definition_id)
-VALUES (2, 1, 'CRSWLK', 'multivaluelist', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 1);
+INSERT IGNORE INTO service_definition_attributes (id, attribute_order, code, datatype, datatype_description, description, required, variable, service_id)
+VALUES (2, 1, 'CRSWLK', 'multivaluelist', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 2);
 
 INSERT IGNORE INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
 VALUES (6, 'ADA Access', 2),

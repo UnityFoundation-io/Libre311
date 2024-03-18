@@ -71,6 +71,13 @@ public class ServiceService {
         }
     }
 
+    static class ServiceDefinitionAttributeNotFoundException extends Libre311BaseException {
+        public ServiceDefinitionAttributeNotFoundException(Long attributeId) {
+            super(String.format("No service definition attribute found with id: %s",
+                    attributeId), HttpStatus.NOT_FOUND);
+        }
+    }
+
     public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
         Page<Service> servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
 
@@ -224,8 +231,7 @@ public class ServiceService {
     public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId, CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, String jurisdictionId) {
         Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
         if (serviceOptional.isEmpty()) {
-            LOG.error("Service not found.");
-            return null;
+            throw new ServiceNotFoundException(serviceId, jurisdictionId);
         }
         Service service = serviceOptional.get();
 
@@ -267,8 +273,7 @@ public class ServiceService {
     public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long attributeId, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
         Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeId);
         if (serviceDefinitionAttributeEntityOptional.isEmpty()) {
-            LOG.error("Attribute not found.");
-            return null;
+            throw new ServiceDefinitionAttributeNotFoundException(attributeId);
         }
         ServiceDefinitionAttribute serviceDefinitionAttribute = serviceDefinitionAttributeEntityOptional.get();
 
@@ -319,7 +324,7 @@ public class ServiceService {
     public void removeServiceDefinitionAttributeFromServiceDefinition(Long attributeId) {
         Optional<ServiceDefinitionAttribute> serviceDefinitionAttribute = serviceDefinitionAttributeRepository.findById(attributeId);
         if (serviceDefinitionAttribute.isEmpty()) {
-            LOG.error("Attribute not found.");
+            throw new ServiceDefinitionAttributeNotFoundException(attributeId);
         }
         ServiceDefinitionAttribute serviceDefinitionAttributeEntity = serviceDefinitionAttribute.get();
         serviceDefinitionAttributeRepository.delete(serviceDefinitionAttributeEntity);
