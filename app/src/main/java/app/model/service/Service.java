@@ -50,14 +50,14 @@ public class Service {
     @Enumerated(value = EnumType.STRING)
     private ServiceType type = ServiceType.REALTIME;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "service")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "service")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
 
     @ManyToOne(optional = false)
     private ServiceGroup serviceGroup;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "service")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "service")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ServiceDefinitionAttribute> attributes;
 
