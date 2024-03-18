@@ -109,7 +109,7 @@ public class Bootstrap {
                 Map definitionMap = (Map) svc.get("serviceDefinition");
 
                 List<Map<String, Object>> attributes = (List<Map<String, Object>>) definitionMap.get("attributes");
-                Set<ServiceDefinitionAttribute> savedAttributes = attributes.stream().map(stringObjectMap -> {
+                attributes.forEach(stringObjectMap -> {
                     AttributeDataType attributeDataType = AttributeDataType.valueOf(((String) stringObjectMap.get("datatype")).toUpperCase());
                     String attributeCode = (String) stringObjectMap.get("code");
 
@@ -131,48 +131,10 @@ public class Bootstrap {
                     }
 
                     if (values != null) {
-                        ServiceDefinitionAttribute finalSavedSDA = savedSDA;
-                        Set<AttributeValue> attributeValues = values.stream()
-                                .map(stringStringMap -> attributeValueRepository.save(new AttributeValue(finalSavedSDA, stringStringMap.get("name"))))
-                                .collect(Collectors.toSet());
-
-                        savedSDA.setAttributeValues(attributeValues);
-                        savedSDA = attributeRepository.update(savedSDA);
+                        values.forEach(stringStringMap -> attributeValueRepository.save(new AttributeValue(savedSDA, stringStringMap.get("name"))));
                     }
-
-                    return savedSDA;
-                }).collect(Collectors.toSet());
-
-                service.setAttributes(savedAttributes);
-//                serviceRepository.update(savedService); // ??
-            }
-
-            if (svc.containsKey("serviceRequests")) {
-                List<Map> serviceRequests = (List<Map>) svc.get("serviceRequests");
-
-                Service finalSavedService = savedService;
-                serviceRequests.forEach(svcReq -> {
-                    ServiceRequest serviceRequest = new ServiceRequest();
-                    serviceRequest.setDescription((String) svcReq.get("description"));
-                    serviceRequest.setAddressString((String) svcReq.get("address"));
-                    serviceRequest.setLatitude((String) svcReq.get("lat"));
-                    serviceRequest.setLongitude((String) svcReq.get("long"));
-                    serviceRequest.setStatus(ServiceRequestStatus.valueOf(((String) svcReq.get("status")).toUpperCase()));
-                    serviceRequest.setZipCode((String) svcReq.get("zipcode"));
-                    serviceRequest.setAgencyResponsible((String) svcReq.get("agency_responsible"));
-                    serviceRequest.setAgencyResponsible((String) svcReq.get("agency_responsible"));
-                    serviceRequest.setMediaUrl((String) svcReq.get("media_url"));
-                    serviceRequest.setAddressId((String) svcReq.get("address_id"));
-                    serviceRequest.setServiceNotice((String) svcReq.get("service_notice"));
-                    serviceRequest.setStatusNotes((String) svcReq.get("status_notes"));
-                    serviceRequest.setService(finalSavedService);
-                    serviceRequest.setJurisdiction(jurisdiction);
-
-                    finalSavedService.addServiceRequest(serviceRequest);
                 });
             }
-
-            serviceRepository.update(savedService);
         });
     }
 

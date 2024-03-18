@@ -208,7 +208,7 @@ public class RootControllerTest {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
             createServiceRequest("001", "12345 Fairway", Map.of(), "city.gov");
         });
-        assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
+        assertEquals(BAD_REQUEST, thrown.getStatus());
     }
 
     @Test

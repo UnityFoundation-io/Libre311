@@ -142,10 +142,8 @@ public class ServiceRequestService {
             Set<ServiceDefinitionAttribute> serviceDefinitionAttributes = service.getAttributes();
 
             List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
-
             if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
-                LOG.error("Submitted Service Request does not contain required attribute values.");
-                return null; // todo throw exception (validation)
+                throw new InvalidServiceRequestException("Submitted Service Request does not contain required attribute values.");
             }
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -155,7 +153,7 @@ public class ServiceRequestService {
                 throw new RuntimeException(e);
             }
         }
-        
+
         return new PostResponseServiceRequestDTO(serviceRequestRepository.save(serviceRequest));
     }
 
