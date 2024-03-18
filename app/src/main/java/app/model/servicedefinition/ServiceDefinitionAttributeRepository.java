@@ -12,36 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.model.servicedefinition;
 
-import io.micronaut.core.annotation.Introspected;
+import app.model.service.Service;
+import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.repository.PageableRepository;
+import java.util.List;
 
-@Introspected
-public class AttributeValue {
-    private String key;
-    private String name;
-
-    public AttributeValue() {
-    }
-
-    public AttributeValue(String key, String name) {
-        this.key = key;
-        this.name = name;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+@Repository
+public interface ServiceDefinitionAttributeRepository extends PageableRepository<ServiceDefinitionAttribute, Long> {
+    boolean existsByServiceId(long serviceId);
+    List<ServiceDefinitionAttribute> findAllByServiceId(long serviceId);
 }

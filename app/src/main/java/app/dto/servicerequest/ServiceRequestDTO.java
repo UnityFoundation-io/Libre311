@@ -14,7 +14,7 @@
 
 package app.dto.servicerequest;
 
-import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -87,7 +87,7 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     private String mediaUrl;
 
     @JsonProperty("selected_values")
-    private List<ServiceDefinitionAttribute> selectedValues;
+    private List<ServiceDefinitionAttributeDTO> selectedValues;
 
     public ServiceRequestDTO() {
     }
@@ -95,7 +95,7 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
         this.status = serviceRequest.getStatus();
-        this.serviceName = serviceRequest.getService().getServiceName();
+        this.serviceName = serviceRequest.getService().getServiceName(); //
         this.serviceCode = serviceRequest.getService().getServiceCode();
         this.description = serviceRequest.getDescription();
         this.agencyResponsible = serviceRequest.getAgencyResponsible();
@@ -266,11 +266,11 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         return m;
     }
 
-    public List<ServiceDefinitionAttribute> getSelectedValues() {
+    public List<ServiceDefinitionAttributeDTO> getSelectedValues() {
         return selectedValues;
     }
 
-    public void setSelectedValues(List<ServiceDefinitionAttribute> selectedValues) {
+    public void setSelectedValues(List<ServiceDefinitionAttributeDTO> selectedValues) {
         this.selectedValues = selectedValues;
     }
 }

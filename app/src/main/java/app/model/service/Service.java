@@ -16,13 +16,16 @@ package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.service.group.ServiceGroup;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "services")
@@ -38,26 +41,25 @@ public class Service {
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
 
-    @Column(columnDefinition = "TEXT")
-    private String serviceDefinitionJson;
-
     @Column(nullable = false, columnDefinition = "TEXT")
     private String serviceName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private boolean metadata = false;
-
     @Enumerated(value = EnumType.STRING)
     private ServiceType type = ServiceType.REALTIME;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "service")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "service")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
 
     @ManyToOne(optional = false)
     private ServiceGroup serviceGroup;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "service")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ServiceDefinitionAttribute> attributes;
 
     public Service(String serviceName) {
         this.serviceName = serviceName;
@@ -97,28 +99,12 @@ public class Service {
         this.description = description;
     }
 
-    public boolean isMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(boolean metadata) {
-        this.metadata = metadata;
-    }
-
     public ServiceType getType() {
         return type;
     }
 
     public void setType(ServiceType type) {
         this.type = type;
-    }
-
-    public String getServiceDefinitionJson() {
-        return serviceDefinitionJson;
-    }
-
-    public void setServiceDefinitionJson(String serviceDefinitionJson) {
-        this.serviceDefinitionJson = serviceDefinitionJson;
     }
 
     public Long getId() {
@@ -147,5 +133,20 @@ public class Service {
 
     public void setServiceGroup(ServiceGroup serviceGroup) {
         this.serviceGroup = serviceGroup;
+    }
+
+    public Set<ServiceDefinitionAttribute> getAttributes() {
+        return attributes;
+    }
+
+    public void addAttribute(ServiceDefinitionAttribute attribute) {
+        if (attributes == null) {
+            attributes = new HashSet<>();
+        }
+        attributes.add(attribute);
+    }
+
+    public void setAttributes(Set<ServiceDefinitionAttribute> attributes) {
+        this.attributes = attributes;
     }
 }

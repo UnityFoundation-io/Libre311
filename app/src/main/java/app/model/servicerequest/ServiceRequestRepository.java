@@ -25,6 +25,7 @@ import java.util.Optional;
 
 @Repository
 public interface ServiceRequestRepository extends PageableRepository<ServiceRequest, Long> {
+
     Optional<ServiceRequest> findByServiceServiceNameIlikeAndJurisdictionId(String serviceName, String jurisdictionId);
     Page<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Pageable pageable);
     Optional<ServiceRequest> findByIdAndJurisdictionId(Long serviceRequestId, String jurisdictionId);

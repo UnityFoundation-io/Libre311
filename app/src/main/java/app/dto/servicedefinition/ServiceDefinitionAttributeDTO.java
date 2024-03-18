@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.dto.servicedefinition;
 
+import app.model.service.AttributeDataType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -22,28 +23,31 @@ import io.micronaut.core.annotation.Introspected;
 import java.util.List;
 
 @Introspected
-public class ServiceDefinitionAttribute {
+public class ServiceDefinitionAttributeDTO {
+
+    private Long id;
 
     private String code;
-    private boolean variable;
+    private Boolean variable;
     private AttributeDataType datatype;
-    private boolean required;
+    private Boolean required;
     private String description;
 
     @JsonProperty("order")
-    private int attributeOrder;
+    private Integer attributeOrder;
 
     @JsonProperty("datatype_description")
     private String datatypeDescription;
 
     @JacksonXmlElementWrapper(localName = "values")
     @JacksonXmlProperty(localName = "value")
-    private List<AttributeValue> values;
+    private List<AttributeValueDTO> values;
 
-    public ServiceDefinitionAttribute() {
+    public ServiceDefinitionAttributeDTO() {
     }
 
-    public ServiceDefinitionAttribute(String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription, List<AttributeValue> values) {
+    public ServiceDefinitionAttributeDTO(Long id, String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
+        this.id = id;
         this.code = code;
         this.variable = variable;
         this.datatype = datatype;
@@ -51,14 +55,21 @@ public class ServiceDefinitionAttribute {
         this.description = description;
         this.attributeOrder = attributeOrder;
         this.datatypeDescription = datatypeDescription;
-        this.values = values;
     }
 
-    public boolean isVariable() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean isVariable() {
         return variable;
     }
 
-    public void setVariable(boolean variable) {
+    public void setVariable(Boolean variable) {
         this.variable = variable;
     }
 
@@ -70,11 +81,11 @@ public class ServiceDefinitionAttribute {
         this.datatype = datatype;
     }
 
-    public boolean isRequired() {
+    public Boolean isRequired() {
         return required;
     }
 
-    public void setRequired(boolean required) {
+    public void setRequired(Boolean required) {
         this.required = required;
     }
 
@@ -86,11 +97,11 @@ public class ServiceDefinitionAttribute {
         this.datatypeDescription = datatypeDescription;
     }
 
-    public int getAttributeOrder() {
+    public Integer getAttributeOrder() {
         return attributeOrder;
     }
 
-    public void setAttributeOrder(int attributeOrder) {
+    public void setAttributeOrder(Integer attributeOrder) {
         this.attributeOrder = attributeOrder;
     }
 
@@ -102,11 +113,11 @@ public class ServiceDefinitionAttribute {
         this.description = description;
     }
 
-    public List<AttributeValue> getValues() {
+    public List<AttributeValueDTO> getValues() {
         return values;
     }
 
-    public void setValues(List<AttributeValue> values) {
+    public void setValues(List<AttributeValueDTO> values) {
         this.values = values;
     }
 

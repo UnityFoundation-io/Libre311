@@ -45,12 +45,12 @@ public class ServiceDTO {
     public ServiceDTO() {
     }
 
-    public ServiceDTO(Service service) {
+    public ServiceDTO(Service service, boolean hasMetadata) {
         this.id = service.getId();
         this.serviceCode = service.getServiceCode();
         this.serviceName = service.getServiceName();
         this.description = service.getDescription();
-        this.metadata = service.isMetadata();
+        this.metadata = hasMetadata;
         this.groupId = service.getServiceGroup().getId();
         this.type = service.getType();
         if (service.getJurisdiction() != null) {
