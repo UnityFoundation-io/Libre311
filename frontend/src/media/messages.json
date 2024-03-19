@@ -37,9 +37,9 @@
 		"agency_contact": "Agency Contact:",
 		"agency_name": "agency name",
 		"expected_datetime": "Estimated Fix:",
-		"service_notice": "Service Notice:",
+		"service_notice": "Recommended Solution:",
 		"service_notice_placeholder": "proposed service",
-		"status_notes": "Status Notes:",
+		"status_notes": "Notes:",
 		"status": "Status:",
 		"priority": "Priority:"
 	},
@@ -76,7 +76,9 @@
 	},
 	"updateServiceRequest": {
 		"button_back": "Close",
-		"button_submit": "Update Request"
+		"button_cancel": "Cancel",
+		"button_update": "Update",
+		"button_submit": "Submit"
 	},
 	"photo": {
 		"upload": "Upload An Image",
