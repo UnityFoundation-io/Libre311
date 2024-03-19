@@ -184,15 +184,17 @@
 					/>
 				</div>
 			{:else}
-				<ServiceRequestButtonsContainer>
-					<Button slot="left" href={back}>
-						{messages['updateServiceRequest']['button_back']}
-					</Button>
+				<div class="mx-2">
+					<ServiceRequestButtonsContainer>
+						<Button slot="left" href={back}>
+							{messages['updateServiceRequest']['button_back']}
+						</Button>
 
-					<Button slot="right" on:click={() => handleUpdateButtonClick(serviceRequest)}>
-						{messages['updateServiceRequest']['button_update']}
-					</Button>
-				</ServiceRequestButtonsContainer>
+						<Button slot="right" on:click={() => handleUpdateButtonClick(serviceRequest)}>
+							{messages['updateServiceRequest']['button_update']}
+						</Button>
+					</ServiceRequestButtonsContainer>
+				</div>
 			{/if}
 		</div>
 	</Card>
