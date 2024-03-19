@@ -41,6 +41,9 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.annotation.Nullable;
 
 import jakarta.validation.Valid;
@@ -71,8 +74,8 @@ public class RootController {
     @Get(uris = {"/discovery", "/discovery.json"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public HttpResponse<DiscoveryDTO> discoveryJson() {
-        return HttpResponse.ok(discoveryEndpointService.getDiscoveryInfo());
+    public DiscoveryDTO discoveryJson() {
+        return discoveryEndpointService.getDiscoveryInfo();
     }
 
     @Get("/discovery.xml")
@@ -156,23 +159,29 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
-    public List<PostResponseServiceRequestDTO> createServiceRequestJson(HttpRequest<?> request,
-                                                                        @Valid @Body PostRequestServiceRequestDTO requestDTO,
+    @RequestBody(
+            description = "In addition to the body parameter specified, one can declare additional `attribute`s. See https://wiki.open311.org/GeoReport_v2/#required-arguments-2",
+            content = @Content(mediaType = "application/x-www-form-urlencoded", schema = @Schema(implementation = PostRequestServiceRequestDTO.class))
+    )
+    public List<PostResponseServiceRequestDTO> createServiceRequestJson(@Body Map requestMap,
                                                                         @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
-        return List.of(serviceRequestService.createServiceRequest(request, requestDTO, jurisdiction_id));
+        return List.of(serviceRequestService.createServiceRequest(requestMap, jurisdiction_id));
     }
 
     @Post("/requests.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @RequestBody(
+            description = "In addition to the body parameter specified, one can declare additional `attribute`s. See https://wiki.open311.org/GeoReport_v2/#required-arguments-2",
+            content = @Content(mediaType = "application/x-www-form-urlencoded", schema = @Schema(implementation = PostRequestServiceRequestDTO.class))
+    )
     @ExecuteOn(TaskExecutors.IO)
-    public String createServiceRequestXml(HttpRequest<?> request,
-                                          @Valid @Body PostRequestServiceRequestDTO requestDTO,
+    public String createServiceRequestXml(@Body Map requestMap,
                                           @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(request, requestDTO, jurisdiction_id)));
+        ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestService.createServiceRequest(requestMap, jurisdiction_id)));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
     }

@@ -40,12 +40,10 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.model.Sort;
-import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.annotation.Nullable;
@@ -110,15 +108,18 @@ public class ServiceRequestService {
         return serviceRequestDTO;
     }
 
-    public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
-        reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse());
+    public PostResponseServiceRequestDTO createServiceRequest(Map serviceRequestMap, String jurisdictionId) {
 
-        if (!validMediaUrl(serviceRequestDTO.getMediaUrl())) {
+        String gRecaptchaResponse = (String) serviceRequestMap.get("g_recaptcha_response");
+        reCaptchaService.verifyReCaptcha(gRecaptchaResponse);
+
+        String mediaUrl = (String) serviceRequestMap.get("media_url");
+        if (!validMediaUrl(mediaUrl)) {
             throw new InvalidServiceRequestException("Media URL is invalid.");
         }
 
-        Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCodeAndJurisdictionId(
-                serviceRequestDTO.getServiceCode(), jurisdictionId);
+        String serviceCode = (String) serviceRequestMap.get("service_code");
+        Optional<Service> serviceByServiceCodeOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
 
         if (serviceByServiceCodeOptional.isEmpty()) {
             throw new InvalidServiceRequestException("Corresponding service is not found.");
@@ -130,8 +131,10 @@ public class ServiceRequestService {
         }
 
         // validate if a location is provided
-        boolean latLongProvided = StringUtils.hasText(serviceRequestDTO.getLatitude()) &&
-                StringUtils.hasText(serviceRequestDTO.getLongitude());
+        String lat = (String) serviceRequestMap.get("lat");
+        String lng = (String) serviceRequestMap.get("long");
+        boolean latLongProvided = StringUtils.hasText(lat) &&
+                StringUtils.hasText(lng);
 
         if (!latLongProvided) {
             throw new InvalidServiceRequestException("Lat/long are required.");
@@ -139,10 +142,10 @@ public class ServiceRequestService {
 
         // validate if additional attributes are required
         Service service = serviceByServiceCodeOptional.get();
-        ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
+        ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestMap, service);
         List<ServiceDefinitionAttribute> serviceDefinitionAttributes = attributeRepository.findAllByServiceId(service.getId());
         if (!serviceDefinitionAttributes.isEmpty()) {
-            List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
+            List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(serviceRequestMap, serviceDefinitionAttributes);
             if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
                 throw new InvalidServiceRequestException("Submitted Service Request does not contain required attribute values.");
             }
@@ -178,15 +181,11 @@ public class ServiceRequestService {
         return requestCodes.containsAll(requiredCodes);
     }
 
-    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(HttpRequest<?> request, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
-
-        Argument<Map<String, String>> type = Argument.mapOf(String.class, String.class);
-        Optional<Map<String, String>> body = request.getBody(type);
+    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(Map<String, String> serviceRequestMap, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
 
         List<ServiceDefinitionAttributeDTO> attributes = new ArrayList<>();
-        if (body.isPresent()) {
-            Map<String, String> map = body.get();
-            map.forEach((k, v) -> {
+        if (!serviceRequestMap.isEmpty()) {
+            serviceRequestMap.forEach((k, v) -> {
                 if (k.startsWith("attribute[")) {
                     String attributeCode = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
 
@@ -285,22 +284,23 @@ public class ServiceRequestService {
         return valueName;
     }
 
-    private ServiceRequest transformDtoToServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Service service) {
+    private ServiceRequest transformDtoToServiceRequest(Map serviceRequestMap, Service service) {
+
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setService(service);
         serviceRequest.setJurisdiction(service.getJurisdiction());
-        serviceRequest.setLatitude(serviceRequestDTO.getLatitude());
-        serviceRequest.setLongitude(serviceRequestDTO.getLongitude());
-        serviceRequest.setAddressString(serviceRequestDTO.getAddressString());
-        serviceRequest.setAddressId(serviceRequestDTO.getAddressId());
-        serviceRequest.setEmail(serviceRequestDTO.getEmail());
-        serviceRequest.setDeviceId(serviceRequestDTO.getDeviceId());
-        serviceRequest.setAccountId(serviceRequestDTO.getAccountId());
-        serviceRequest.setFirstName(serviceRequestDTO.getFirstName());
-        serviceRequest.setLastName(serviceRequestDTO.getLastName());
-        serviceRequest.setPhone(serviceRequestDTO.getPhone());
-        serviceRequest.setDescription(serviceRequestDTO.getDescription());
-        serviceRequest.setMediaUrl(serviceRequestDTO.getMediaUrl());
+        serviceRequest.setLatitude((String) serviceRequestMap.get("lat"));
+        serviceRequest.setLongitude((String) serviceRequestMap.get("long"));
+        serviceRequest.setAddressString((String) serviceRequestMap.get("address_string"));
+        serviceRequest.setAddressId((String) serviceRequestMap.get("address_id"));
+        serviceRequest.setEmail((String) serviceRequestMap.get("email"));
+        serviceRequest.setDeviceId((String) serviceRequestMap.get("device_id"));
+        serviceRequest.setAccountId((String) serviceRequestMap.get("account_id"));
+        serviceRequest.setFirstName((String) serviceRequestMap.get("first_name"));
+        serviceRequest.setLastName((String) serviceRequestMap.get("last_name"));
+        serviceRequest.setPhone((String) serviceRequestMap.get("phone"));
+        serviceRequest.setDescription((String) serviceRequestMap.get("description"));
+        serviceRequest.setMediaUrl((String) serviceRequestMap.get("media_url"));
         return serviceRequest;
     }
 
