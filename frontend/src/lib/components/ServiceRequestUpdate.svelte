@@ -7,7 +7,7 @@
 	import type { SelectOption } from 'stwui/types';
 	import SelectedValues from './SelectedValues.svelte';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { wrenchScrewDriverIcon } from './Svg/outline/wrench-screwdriver';
 	import { mailIcon } from './Svg/outline/mailIcon';
 	import { calendarIcon } from './Svg/outline/calendarIcon';
@@ -16,6 +16,8 @@
 	import { page } from '$app/stores';
 
 	const libre311 = useLibre311Service();
+	const alertError = useLibre311Context().alertError;
+	const alert = useLibre311Context().alert;
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -97,20 +99,30 @@
 	}
 
 	async function updateServiceRequest(s: ServiceRequest) {
-		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
-			...s,
-			status: serviceRequest.status,
-			agency_responsible: serviceRequest.agency_responsible,
-			agency_email: serviceRequest.agency_email,
-			service_notice: serviceRequest.service_notice,
-			status_notes: serviceRequest.status_notes
-		};
+		try {
+			const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
+				...s,
+				status: serviceRequest.status,
+				agency_responsible: serviceRequest.agency_responsible,
+				agency_email: serviceRequest.agency_email,
+				service_notice: serviceRequest.service_notice,
+				status_notes: serviceRequest.status_notes
+			};
 
-		const res = await libre311.updateServiceRequest(sensitiveServiceRequest);
+			await libre311.updateServiceRequest(sensitiveServiceRequest);
 
-		isUpdateButtonClicked = false;
+			isUpdateButtonClicked = false;
 
-		goto(`/issues/table`);
+			alert({
+				type: 'success',
+				title: 'Success',
+				description: 'Your service request has been updated'
+			});
+
+			goto(`/issues/table`);
+		} catch (error) {
+			alertError(error);
+		}
 	}
 
 	$: if ($page.url) {
