@@ -6,7 +6,7 @@ export type AlertType = 'success' | 'error' | 'info' | 'warn';
 export type Alert = {
 	type: AlertType;
 	title: string;
-	description: string | undefined;
+	description?: string;
 };
 
 export type Libre311Alert = {

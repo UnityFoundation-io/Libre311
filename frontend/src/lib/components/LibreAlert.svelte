@@ -29,7 +29,10 @@
 	<Alert {type} on:fade>
 		<Alert.Leading slot="leading" data={typeIconMap[type]} />
 		<Alert.Title slot="title">{title}</Alert.Title>
-		<Alert.Description slot="description">{description}</Alert.Description>
+
+		<Alert.Description slot="description">
+			{@html description}
+		</Alert.Description>
 
 		<Button on:click={() => dispatch('close')} class="ml-3" slot="extra" type="ghost">Close</Button>
 	</Alert>

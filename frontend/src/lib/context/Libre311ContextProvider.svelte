@@ -7,8 +7,6 @@
 	const alertStore = createAlertStore();
 	const currentAlert = alertStore.currentAlert;
 	const libre311Context = createLibre311Context({ ...props, ...alertStore });
-
-	// in:fly={{ x: -200, duration: 2000 }} out:fly={{ x: 200, duration: 2000 }}
 </script>
 
 <svelte:head>
@@ -21,5 +19,10 @@
 <slot {libre311Context} />
 
 {#if $currentAlert}
-	<LibreAlert on:close={() => alertStore.close()} {...$currentAlert}></LibreAlert>
+	<LibreAlert
+		on:close={() => alertStore.close()}
+		type={$currentAlert.type}
+		title={$currentAlert.title}
+		description={$currentAlert.description}
+	></LibreAlert>
 {/if}

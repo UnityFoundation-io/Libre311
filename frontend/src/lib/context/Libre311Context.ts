@@ -18,6 +18,12 @@ import {
 } from '$lib/services/RecaptchaService';
 import { writable, type Readable, type Writable } from 'svelte/store';
 import type { Libre311Alert } from './Libre311AlertStore';
+import {
+	checkHasMessage,
+	extractFirstErrorMessage,
+	isLibre311ServerErrorResponse
+} from '$lib/services/Libre311/types/ServerErrors';
+import { isAxiosError } from 'axios';
 
 const libre311CtxKey = Symbol();
 
@@ -50,13 +56,29 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	unityAuthService.subscribe('logout', () => user.set(undefined));
 
 	function alertError(unknown: unknown) {
-		// todo figure out if it is a server error or not
 		console.error(unknown);
-		props.alert({
-			type: 'error',
-			title: 'Something unexpected happened',
-			description: 'See console for more details'
-		});
+		if (isAxiosError(unknown)) {
+			if (unknown.response?.data && isLibre311ServerErrorResponse(unknown.response.data)) {
+				const libre311ServerError = unknown.response.data;
+				props.alert({
+					type: 'error',
+					title: libre311ServerError.message,
+					description: `<div>${extractFirstErrorMessage(libre311ServerError)}</div> <small>logref: ${libre311ServerError.logref}</small>`
+				});
+			}
+		} else if (checkHasMessage(unknown)) {
+			props.alert({
+				type: 'error',
+				title: 'Error',
+				description: unknown.message
+			});
+		} else {
+			props.alert({
+				type: 'error',
+				title: 'Something unexpected happened',
+				description: 'The complete error has been logged in the console'
+			});
+		}
 	}
 
 	const ctx: Libre311Context = {
