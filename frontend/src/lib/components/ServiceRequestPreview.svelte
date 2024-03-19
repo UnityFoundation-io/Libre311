@@ -48,7 +48,7 @@
 				<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 			</a>
 			<div class="float-right">
-				<Flag />
+				<!-- <Flag /> -->
 			</div>
 		</div>
 
