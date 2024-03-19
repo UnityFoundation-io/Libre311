@@ -1,5 +1,6 @@
 import { z, ZodError } from 'zod';
 import libphonenumber from 'google-libphonenumber';
+import { ServiceRequestPrioritySchema } from '$lib/services/Libre311/Libre311';
 
 export type UnvalidatedInput<T> = {
 	type: 'unvalidated';
@@ -71,6 +72,10 @@ export const optionalCoalesceEmailValidator = inputValidatorFactory(
 // allow strings, empty strings and undefined
 export const optionalCoalesceStringValidator = inputValidatorFactory(
 	z.union([z.literal(''), z.string().optional()])
+);
+
+export const optionalPriorityValidator = inputValidatorFactory(
+	ServiceRequestPrioritySchema.optional()
 );
 
 // allow alphabetical characters including accents, empty strings and undefined
