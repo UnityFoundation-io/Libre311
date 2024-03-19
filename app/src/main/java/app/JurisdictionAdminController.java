@@ -36,7 +36,7 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;

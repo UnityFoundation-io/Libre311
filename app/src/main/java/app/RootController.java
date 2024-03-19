@@ -43,7 +43,7 @@ import io.micronaut.security.rules.SecurityRule;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.annotation.Nullable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;

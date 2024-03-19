@@ -13,9 +13,9 @@
 // limitations under the License.
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.7.10"
-    id("io.micronaut.test-resources") version "3.7.10"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.micronaut.application") version "4.3.4"
+    id("io.micronaut.test-resources") version "4.3.4"
 }
 
 version = "0.1"
@@ -32,10 +32,10 @@ dependencies {
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("jakarta.annotation:jakarta.annotation-api")
     runtimeOnly("ch.qos.logback:logback-classic")
-    implementation("io.micronaut:micronaut-validation")
     implementation("io.swagger.core.v3:swagger-annotations")
+
+    implementation "jakarta.persistence:jakarta.persistence-api:3.1.0"
 
     implementation("io.micronaut.xml:micronaut-jackson-xml")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
@@ -46,6 +46,7 @@ dependencies {
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
     runtimeOnly("org.flywaydb:flyway-mysql")
+    runtimeOnly "org.yaml:snakeyaml"
 
     String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
     if (databaseSelection != null) {
@@ -61,8 +62,8 @@ application {
     mainClass.set("app.Application")
 }
 java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
+    sourceCompatibility = JavaVersion.toVersion("17")
+    targetCompatibility = JavaVersion.toVersion("17")
 }
 
 graalvmNative.toolchainDetection = false

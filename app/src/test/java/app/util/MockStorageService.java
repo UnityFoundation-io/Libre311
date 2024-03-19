@@ -21,7 +21,7 @@ import io.micronaut.http.MediaType;
 import io.micronaut.objectstorage.request.UploadRequest;
 import jakarta.inject.Singleton;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Base64;
 import java.util.UUID;
 

@@ -26,7 +26,7 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;

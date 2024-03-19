@@ -25,7 +25,7 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @Controller("/api/image")
 @Secured(SecurityRule.IS_ANONYMOUS)
