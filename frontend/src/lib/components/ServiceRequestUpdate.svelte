@@ -126,6 +126,10 @@
 			return;
 		}
 
+		if (agencyNameInput.value !== undefined) {
+			agencyNameInput.value = '';
+		}
+
 		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 			...serviceRequest,
 			agency_responsible: agencyNameInput.value,
