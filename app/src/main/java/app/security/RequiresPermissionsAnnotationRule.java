@@ -19,21 +19,20 @@ import static app.security.SecurityRuleUtil.REJECTED;
 import static app.security.SecurityRuleUtil.UNKNOWN;
 
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.http.HttpAttributes;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.rules.SecurityRuleResult;
 import io.micronaut.web.router.MethodBasedRouteMatch;
-import io.micronaut.web.router.RouteMatch;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 
 @Singleton
-public class RequiresPermissionsAnnotationRule implements SecurityRule {
+public class RequiresPermissionsAnnotationRule implements SecurityRule<HttpRequest<?>> {
 
     private final UnityAuthService unityAuthService;
 
@@ -42,8 +41,8 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
     }
 
     @Override
-    public Publisher<SecurityRuleResult> check(HttpRequest<?> request,
-                                               @Nullable RouteMatch<?> routeMatch, @Nullable Authentication authentication) {
+    public Publisher<SecurityRuleResult> check(HttpRequest<?> request, @Nullable Authentication authentication) {
+        Object routeMatch = request.getAttribute(HttpAttributes.ROUTE_MATCH).orElse(null);
         if (!(routeMatch instanceof MethodBasedRouteMatch)) {
             return UNKNOWN;
         }
