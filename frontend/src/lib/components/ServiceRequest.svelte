@@ -21,6 +21,12 @@
 
 	let isUpdateButtonClicked: boolean = false;
 
+	$: if ($page.url) {
+		isUpdateButtonClicked = false;
+	}
+
+	$: name = createName(serviceRequest);
+
 	function getStatus(serviceRequest: ServiceRequest) {
 		switch (serviceRequest.status) {
 			case 'closed': {
@@ -60,12 +66,6 @@
 			alertError(error);
 		}
 	}
-
-	$: if ($page.url) {
-		isUpdateButtonClicked = false;
-	}
-
-	$: name = createName(serviceRequest);
 </script>
 
 <div class="flex h-full">
