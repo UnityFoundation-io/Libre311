@@ -19,13 +19,12 @@ import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
-import app.model.service.servicedefinition.ServiceDefinition;
+import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -137,8 +136,8 @@ public class RootController {
     @Get(uris = {"/services/{serviceCode}{?jurisdiction_id}", "/services/{serviceCode}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceDefinitionJson(String serviceCode,
-                                           @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+    public ServiceDefinitionDTO getServiceDefinitionJson(String serviceCode,
+                                                         @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
         return serviceService.getServiceDefinition(serviceCode, jurisdiction_id);
     }
@@ -150,11 +149,7 @@ public class RootController {
                                           @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String serviceDefinitionStr = serviceService.getServiceDefinition(serviceCode, jurisdiction_id);
-        ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionStr, ServiceDefinition.class);
-
-        return xmlMapper.writeValueAsString(serviceDefinition);
+        return xmlMapper.writeValueAsString(serviceService.getServiceDefinition(serviceCode, jurisdiction_id));
     }
 
     @Post(uris = {"/requests{?jurisdiction_id}", "/requests.json{?jurisdiction_id}"})

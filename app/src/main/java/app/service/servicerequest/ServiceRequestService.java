@@ -16,14 +16,16 @@ package app.service.servicerequest;
 
 import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.download.DownloadServiceRequestDTO;
+import app.dto.servicedefinition.AttributeValueDTO;
+import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.*;
+import app.model.service.AttributeDataType;
 import app.exception.Libre311BaseException;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
-import app.model.service.servicedefinition.AttributeDataType;
-import app.model.service.servicedefinition.AttributeValue;
-import app.model.service.servicedefinition.ServiceDefinition;
-import app.model.service.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicedefinition.AttributeValue;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
@@ -45,9 +47,7 @@ import io.micronaut.data.model.Pageable;
 import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
-import io.micronaut.http.MediaType;
 import io.micronaut.http.server.types.files.StreamedFile;
-import io.micronaut.http.server.types.files.SystemFile;
 import jakarta.inject.Singleton;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -71,15 +71,17 @@ public class ServiceRequestService {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceRequestService.class);
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRepository serviceRepository;
+    private final ServiceDefinitionAttributeRepository attributeRepository;
     private final ReCaptchaService reCaptchaService;
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
 
     public ServiceRequestService(ServiceRequestRepository serviceRequestRepository,
-            ServiceRepository serviceRepository, ReCaptchaService reCaptchaService,
-            StorageUrlUtil storageUrlUtil, UnityAuthService unityAuthService) {
+                                 ServiceRepository serviceRepository, ServiceDefinitionAttributeRepository attributeRepository,
+                                 ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil, UnityAuthService unityAuthService) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
+        this.attributeRepository = attributeRepository;
         this.reCaptchaService = reCaptchaService;
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
@@ -98,8 +100,8 @@ public class ServiceRequestService {
         String attributesJson = serviceRequest.getAttributesJson();
         if (attributesJson != null) {
             try {
-                ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
-                serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
+                ServiceDefinitionAttributeDTO[] serviceDefinitionAttributeDTOS = objectMapper.readValue(attributesJson, ServiceDefinitionAttributeDTO[].class);
+                serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributeDTOS));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -136,29 +138,15 @@ public class ServiceRequestService {
         }
 
         // validate if additional attributes are required
-        List<ServiceDefinitionAttribute> requestAttributes = null;
         Service service = serviceByServiceCodeOptional.get();
-        if (service.isMetadata()) {
-            // get service definition
-            String serviceDefinitionJson = service.getServiceDefinitionJson();
-            if (serviceDefinitionJson == null || serviceDefinitionJson.isBlank()) {
-                LOG.error("Service definition does not exists despite service requiring it.");
-                return null; // should not be in this state and admin needs to be aware.
-            }
-
-            requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionJson);
-            if (requestAttributes.isEmpty()) {
-                LOG.error("Submitted Service Request does not contain any attribute values.");
-                return null; // todo throw exception - must provide attributes
-            }
-            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionJson, requestAttributes)) {
-                LOG.error("Submitted Service Request does not contain required attribute values.");
-                return null; // todo throw exception (validation)
-            }
-        }
-
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
-        if (requestAttributes != null) {
+        List<ServiceDefinitionAttribute> serviceDefinitionAttributes = attributeRepository.findAllByServiceId(service.getId());
+        if (!serviceDefinitionAttributes.isEmpty()) {
+            List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
+            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
+                throw new InvalidServiceRequestException("Submitted Service Request does not contain required attribute values.");
+            }
+
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 serviceRequest.setAttributesJson(objectMapper.writeValueAsString(requestAttributes));
@@ -175,52 +163,35 @@ public class ServiceRequestService {
         return mediaUrl.startsWith(storageUrlUtil.getBucketUrlString());
     }
 
-    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(String serviceDefinitionJson, List<ServiceDefinitionAttribute> requestAttributes) {
-        // deserialize
-        ObjectMapper objectMapper = new ObjectMapper();
-        boolean containsAllRequiredAttrs = false;
-        try {
-            // collect all required attributes
-            ServiceDefinition serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
-            List<String> requiredCodes = serviceDefinition.getAttributes().stream()
-                    .filter(ServiceDefinitionAttribute::isRequired)
-                    .map(ServiceDefinitionAttribute::getCode)
-                    .collect(Collectors.toList());
+    private boolean requestAttributesHasAllRequiredServiceDefinitionAttributes(List<ServiceDefinitionAttribute> serviceDefinitionAttributes, List<ServiceDefinitionAttributeDTO> requestAttributes) {
+        // collect all required attributes
+        List<String> requiredCodes = serviceDefinitionAttributes.stream()
+                .filter(ServiceDefinitionAttribute::isRequired)
+                .map(ServiceDefinitionAttribute::getCode)
+                .collect(Collectors.toList());
 
-            // for each attr, check if it exists in requestAttributes
-            List<String> requestCodes = requestAttributes.stream()
-                    .map(ServiceDefinitionAttribute::getCode)
-                    .collect(Collectors.toList());
-            containsAllRequiredAttrs = requestCodes.containsAll(requiredCodes);
+        // for each attr, check if it exists in requestAttributes
+        List<String> requestCodes = requestAttributes.stream()
+                .map(ServiceDefinitionAttributeDTO::getCode)
+                .collect(Collectors.toList());
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        return containsAllRequiredAttrs;
+        return requestCodes.containsAll(requiredCodes);
     }
 
-    private List<ServiceDefinitionAttribute> buildUserResponseAttributesFromRequest(HttpRequest<?> request, String serviceDefinitionJson) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ServiceDefinition serviceDefinition;
-        try {
-            serviceDefinition = objectMapper.readValue(serviceDefinitionJson, ServiceDefinition.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(HttpRequest<?> request, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
 
         Argument<Map<String, String>> type = Argument.mapOf(String.class, String.class);
         Optional<Map<String, String>> body = request.getBody(type);
 
-        List<ServiceDefinitionAttribute> attributes = new ArrayList<>();
+        List<ServiceDefinitionAttributeDTO> attributes = new ArrayList<>();
         if (body.isPresent()) {
             Map<String, String> map = body.get();
             map.forEach((k, v) -> {
                 if (k.startsWith("attribute[")) {
                     String attributeCode = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
 
-                    // search for attribute by code in serviceDefinition
-                    Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeOptional = serviceDefinition.getAttributes().stream()
+                    // search for attribute by code in serviceDefinitionAttributes
+                    Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeOptional = serviceDefinitionAttributes.stream()
                             .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals(attributeCode))
                             .findFirst();
 
@@ -237,7 +208,7 @@ public class ServiceRequestService {
                         throw new RuntimeException(errorMsg);
                     }
 
-                    ServiceDefinitionAttribute sda = new ServiceDefinitionAttribute();
+                    ServiceDefinitionAttributeDTO sda = new ServiceDefinitionAttributeDTO();
                     sda.setCode(attributeCode);
                     sda.setAttributeOrder(serviceDefinitionAttribute.getAttributeOrder());
                     sda.setRequired(serviceDefinitionAttribute.isRequired());
@@ -245,27 +216,27 @@ public class ServiceRequestService {
                     sda.setDatatype(serviceDefinitionAttribute.getDatatype());
                     sda.setDescription(serviceDefinitionAttribute.getDescription());
 
-                    List<AttributeValue> values = new ArrayList<>();
+                    List<AttributeValueDTO> values = new ArrayList<>();
 
                     if (serviceDefinitionAttribute.getDatatype() == AttributeDataType.SINGLEVALUELIST ||
                             serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST) {
 
-                        List<AttributeValue> attributeValues = serviceDefinitionAttribute.getValues();
+                        Set<AttributeValue> attributeValues = serviceDefinitionAttribute.getAttributeValues();
                         if (attributeValues != null && v != null) {
                             if (v.contains(",") && serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST){
                                 String[] attrResKeys = v.split(",");
                                 for (String attrResKey : attrResKeys) {
-                                    values.add(new AttributeValue(attrResKey, getAttributeValueName(attrResKey, attributeValues)));
+                                    values.add(new AttributeValueDTO(attrResKey, getAttributeValueName(attrResKey, attributeValues)));
                                 }
                             }
                             else {
-                                values.add(new AttributeValue(v, getAttributeValueName( v, attributeValues)));
+                                values.add(new AttributeValueDTO(v, getAttributeValueName(v, attributeValues)));
                             }
                         }
                     } else {
                         // we need a way to capture the user's response. We will do so by adding an attribute value where
                         // the key is the code and the value is the user's response.
-                        values.add(new AttributeValue(attributeCode, v));
+                        values.add(new AttributeValueDTO(attributeCode, v));
                     }
 
                     sda.setValues(values);
@@ -302,13 +273,13 @@ public class ServiceRequestService {
         return true;
     }
 
-    private String getAttributeValueName(String valueKey, List<AttributeValue> attributeValues) {
+    private String getAttributeValueName(String valueKey, Set<AttributeValue> attributeValues) {
         String valueName = null;
         Optional<AttributeValue> attributeValueOptional = attributeValues.stream()
-                .filter(attributeValue -> attributeValue.getKey().equals(valueKey)).findFirst();
+                .filter(attributeValue -> attributeValue.getId().toString().equals(valueKey)).findFirst();
 
         if (attributeValueOptional.isPresent()) {
-            valueName = attributeValueOptional.get().getName();
+            valueName = attributeValueOptional.get().getValueName();
         }
 
         return valueName;
@@ -384,8 +355,8 @@ public class ServiceRequestService {
         String attributesJson = serviceRequest.getAttributesJson();
         if (attributesJson != null) {
             try {
-                ServiceDefinitionAttribute[] serviceDefinitionAttributes = objectMapper.readValue(attributesJson, ServiceDefinitionAttribute[].class);
-                serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributes));
+                ServiceDefinitionAttributeDTO[] serviceDefinitionAttributeDTOS = objectMapper.readValue(attributesJson, ServiceDefinitionAttributeDTO[].class);
+                serviceRequestDTO.setSelectedValues(List.of(serviceDefinitionAttributeDTOS));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -414,7 +385,7 @@ public class ServiceRequestService {
 
     private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
         String serviceRequestIds = requestDTO.getId();
-        String serviceCode = requestDTO.getServiceCode();
+        List<String> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
@@ -430,49 +401,48 @@ public class ServiceRequestService {
             return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, pageable);
         }
 
-        return getJurisdictionServiceRequests(jurisdictionId, pageable, serviceCode, statuses, priorities, startDate, endDate);
+        return getJurisdictionServiceRequests(jurisdictionId, pageable, serviceCodes, statuses, priorities, startDate, endDate);
     }
 
-    private Page<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, Pageable pageable, String serviceCode, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate) {
+    private Page<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, Pageable pageable, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate) {
 
-        if (StringUtils.hasText(serviceCode) && status != null && priority != null) {
+        if (serviceCodes != null && status != null && priority != null) {
 //            code-status-priority: 1-1-1
             if (startDate != null && endDate != null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCode, status, priority, startDate, endDate, pageable);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, priority, startDate, endDate, pageable);
             } else if (startDate != null && endDate == null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCode, status, priority, startDate, pageable);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, priority, startDate, pageable);
             } else if (startDate == null && endDate != null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCode, status, priority, endDate, pageable);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, priority, endDate, pageable);
             }
 
-            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityIn(jurisdictionId, serviceCode, status, priority, pageable);
+            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityIn(jurisdictionId, serviceCodes, status, priority, pageable);
         }
 
         if (priority == null) {
-            if (StringUtils.hasText(serviceCode) && status != null) {
+            if (serviceCodes != null && status != null) {
 //                code-status-priority: 1-1-0
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndDateCreatedBetween(jurisdictionId, serviceCode, status, startDate, endDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, startDate, endDate, pageable);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndDateCreatedAfter(jurisdictionId, serviceCode, status, startDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, startDate, pageable);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndDateCreatedBefore(jurisdictionId, serviceCode, status, endDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, endDate, pageable);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusIn(jurisdictionId,
-                        serviceCode, status, pageable);
-            } else if (StringUtils.hasText(serviceCode) && status == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusIn(jurisdictionId, serviceCodes, status, pageable);
+            } else if (serviceCodes != null && status == null) {
 //                code-status-priority: 1-0-0
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBetween(jurisdictionId, serviceCode, startDate, endDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBetween(jurisdictionId, serviceCodes, startDate, endDate, pageable);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedAfter(jurisdictionId, serviceCode, startDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedAfter(jurisdictionId, serviceCodes, startDate, pageable);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBefore(jurisdictionId, serviceCode, endDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBefore(jurisdictionId, serviceCodes, endDate, pageable);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCode(jurisdictionId, serviceCode, pageable);
-            } else if (StringUtils.isEmpty(serviceCode) && status != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeIn(jurisdictionId, serviceCodes, pageable);
+            } else if (serviceCodes == null && status != null) {
 //            code-status-priority: 0-1-0
                 if (startDate != null && endDate != null) {
                     return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedBetween(jurisdictionId, status, startDate, endDate, pageable);
@@ -485,18 +455,18 @@ public class ServiceRequestService {
                 return serviceRequestRepository.findByJurisdictionIdAndStatusIn(jurisdictionId, status, pageable);
             }
         } else {
-            if (StringUtils.hasText(serviceCode) && status == null) {
+            if (serviceCodes != null && status == null) {
 //                code-status-priority: 1-0-1
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCode, priority, startDate, endDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, priority, startDate, endDate, pageable);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCode, priority, startDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, priority, startDate, pageable);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCode, priority, endDate, pageable);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, priority, endDate, pageable);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityIn(jurisdictionId, serviceCode, priority, pageable);
-            } else if (StringUtils.isEmpty(serviceCode) && status != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityIn(jurisdictionId, serviceCodes, priority, pageable);
+            } else if (serviceCodes == null && status != null) {
 //            code-status-priority: 0-1-1
                 if (startDate != null && endDate != null) {
                     return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, status, priority, startDate, endDate, pageable);
@@ -507,7 +477,7 @@ public class ServiceRequestService {
                 }
 
                 return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityIn(jurisdictionId, status, priority, pageable);
-            } else if (StringUtils.isEmpty(serviceCode) && status == null) {
+            } else if (serviceCodes == null && status == null) {
 //            code-status-priority: 0-0-1
                 if (startDate != null && endDate != null) {
                     return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedBetween(jurisdictionId, priority, startDate, endDate, pageable);
@@ -562,16 +532,16 @@ public class ServiceRequestService {
                     if (serviceRequest.getAttributesJson() != null) {
                         ObjectMapper objectMapper = new ObjectMapper();
                         try {
-                            ServiceDefinitionAttribute[] serviceDefinitionAttributes =
-                                    objectMapper.readValue(serviceRequest.getAttributesJson(), ServiceDefinitionAttribute[].class);
-                            List<String> values = Arrays.stream(serviceDefinitionAttributes)
+                            ServiceDefinitionAttributeDTO[] serviceDefinitionAttributeDTOS =
+                                    objectMapper.readValue(serviceRequest.getAttributesJson(), ServiceDefinitionAttributeDTO[].class);
+                            List<String> values = Arrays.stream(serviceDefinitionAttributeDTOS)
                                     .flatMap(serviceDefinitionAttribute -> {
                                         if (serviceDefinitionAttribute.getValues() != null) {
                                             return serviceDefinitionAttribute.getValues().stream();
                                         }
                                         return Stream.of();
                                     })
-                                    .map(AttributeValue::getKey).collect(Collectors.toList());
+                                    .map(AttributeValueDTO::getKey).collect(Collectors.toList());
 
                             dto.setServiceSubtype(String.join(",", values));
                         } catch (JsonProcessingException e) {

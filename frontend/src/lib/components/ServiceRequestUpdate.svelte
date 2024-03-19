@@ -4,13 +4,12 @@
 	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
+	import type { SelectOption } from 'stwui/types';
 	import SelectedValues from './SelectedValues.svelte';
-	import Flag from './Svg/Flag.svelte';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import { wrenchScrewDriverIcon } from './Svg/outline/wrench-screwdriver';
 	import { mailIcon } from './Svg/outline/mailIcon';
-	import type { SelectOption } from 'stwui/types';
 	import { calendarIcon } from './Svg/outline/calendarIcon';
 	import { user } from './Svg/outline/user';
 	import { goto } from '$app/navigation';
@@ -154,7 +153,7 @@
 				<div class="mb-2 mt-2 flow-root">
 					<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 					<div class="float-right">
-						<Flag />
+						<!-- <Flag /> -->
 					</div>
 				</div>
 

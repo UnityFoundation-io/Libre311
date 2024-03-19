@@ -17,6 +17,14 @@ import {
 	type RecaptchaServiceProps
 } from '$lib/services/RecaptchaService';
 import { writable, type Readable, type Writable } from 'svelte/store';
+import type { Libre311Alert } from './Libre311AlertStore';
+import {
+	checkHasMessage,
+	extractFirstErrorMessage,
+	isHateoasErrorResponse,
+	isLibre311ServerErrorResponse
+} from '$lib/services/Libre311/types/ServerErrors';
+import { isAxiosError } from 'axios';
 
 const libre311CtxKey = Symbol();
 
@@ -26,7 +34,8 @@ export type Libre311Context = {
 	unityAuthService: UnityAuthService;
 	mode: Mode;
 	user: Readable<UnityAuthLoginResponse | undefined>;
-};
+	alertError: (unknown: unknown) => void;
+} & Libre311Alert;
 
 export type Libre311ContextProviderProps = {
 	libreServiceProps: Omit<Libre311ServiceProps, 'recaptchaService'>;
@@ -35,7 +44,7 @@ export type Libre311ContextProviderProps = {
 	mode: Mode;
 };
 
-export function createLibre311Context(props: Libre311ContextProviderProps) {
+export function createLibre311Context(props: Libre311ContextProviderProps & Libre311Alert) {
 	const linkResolver = new LinkResolver();
 	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
 	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
@@ -47,12 +56,50 @@ export function createLibre311Context(props: Libre311ContextProviderProps) {
 	unityAuthService.subscribe('logout', () => libre311Service.setAuthInfo(undefined));
 	unityAuthService.subscribe('logout', () => user.set(undefined));
 
+	function alertError(unknown: unknown) {
+		console.error(unknown);
+		if (isAxiosError(unknown)) {
+			if (isLibre311ServerErrorResponse(unknown.response?.data)) {
+				const libre311ServerError = unknown.response.data;
+				props.alert({
+					type: 'error',
+					title: libre311ServerError.message,
+					description: `<div>${extractFirstErrorMessage(libre311ServerError)}</div> <small>logref: ${libre311ServerError.logref}</small>`
+				});
+				return;
+			} else if (isHateoasErrorResponse(unknown.response?.data)) {
+				const hateoasErrorResponse = unknown.response.data;
+				props.alert({
+					type: 'error',
+					title: hateoasErrorResponse.message,
+					description: extractFirstErrorMessage(hateoasErrorResponse)
+				});
+				return;
+			}
+		}
+
+		if (checkHasMessage(unknown)) {
+			props.alert({
+				type: 'error',
+				title: 'Error',
+				description: unknown.message
+			});
+		} else {
+			props.alert({
+				type: 'error',
+				title: 'Something unexpected happened',
+				description: 'The complete error has been logged in the console'
+			});
+		}
+	}
+
 	const ctx: Libre311Context = {
-		mode: props.mode,
+		...props,
 		service: libre311Service,
 		linkResolver,
 		unityAuthService,
-		user
+		user,
+		alertError
 	};
 	setContext(libre311CtxKey, ctx);
 	return ctx;

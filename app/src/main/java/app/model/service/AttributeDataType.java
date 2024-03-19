@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.model.service.servicedefinition;
+package app.model.service;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

@@ -20,15 +20,14 @@ import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.exception.Libre311BaseException;
+import app.dto.servicedefinition.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.service.servicedefinition.ServiceDefinition;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import app.model.servicedefinition.*;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpStatus;
@@ -37,8 +36,10 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -47,11 +48,15 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final JurisdictionRepository jurisdictionRepository;
     private final ServiceGroupRepository serviceGroupRepository;
+    private final ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository;
+    private final AttributeValueRepository attributeValueRepository;
 
-    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository) {
+    public ServiceService(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository, AttributeValueRepository attributeValueRepository) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.serviceGroupRepository = serviceGroupRepository;
+        this.serviceDefinitionAttributeRepository = serviceDefinitionAttributeRepository;
+        this.attributeValueRepository = attributeValueRepository;
     }
 
     static class ServiceNotFoundException extends Libre311BaseException {
@@ -66,23 +71,28 @@ public class ServiceService {
         }
     }
 
+    static class ServiceDefinitionAttributeNotFoundException extends Libre311BaseException {
+        public ServiceDefinitionAttributeNotFoundException(Long attributeId) {
+            super(String.format("No service definition attribute found with id: %s",
+                    attributeId), HttpStatus.NOT_FOUND);
+        }
+    }
+
     public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
         Page<Service> servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
 
-        return servicePage.map(ServiceDTO::new);
+        return servicePage.map(this::toServiceDTO);
     }
 
-    public String getServiceDefinition(String serviceCode, String jurisdictionId) {
+    public ServiceDefinitionDTO getServiceDefinition(String serviceCode, String jurisdictionId) {
         Optional<Service> serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
 
         if (serviceOptional.isEmpty()) {
             throw new ServiceNotFoundException(serviceCode, jurisdictionId);
-        } else if (serviceOptional.get().getServiceDefinitionJson() == null) {
-            LOG.error("Service Definition is null.");
-            return null;
         }
+        Service service = serviceOptional.get();
 
-        return serviceOptional.get().getServiceDefinitionJson();
+        return generateServiceDefinitionDTO(service);
     }
 
     public ServiceDTO createService(CreateServiceDTO serviceDTO, String jurisdictionId) {
@@ -93,16 +103,6 @@ public class ServiceService {
 
         Service service = new Service();
 
-        if (serviceDTO.getServiceDefinitionJson() != null) {
-            if (serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson())) {
-                service.setMetadata(true);
-                service.setServiceDefinitionJson(serviceDTO.getServiceDefinitionJson());
-            } else {
-                LOG.error("Service Definition JSON format is invalid.");
-                return null;
-            }
-        }
-
         if (groupDoesNotExists(serviceDTO.getGroupId(), jurisdiction, service)) return null;
 
         service.setJurisdiction(jurisdiction);
@@ -110,7 +110,7 @@ public class ServiceService {
         service.setServiceName(serviceDTO.getServiceName());
         service.setDescription(serviceDTO.getDescription());
 
-        return new ServiceDTO(serviceRepository.save(service));
+        return toServiceDTO(serviceRepository.save(service));
     }
 
     public ServiceDTO updateService(Long serviceId, UpdateServiceDTO serviceDTO, String jurisdictionId) {
@@ -139,17 +139,8 @@ public class ServiceService {
         if (serviceDTO.getServiceName() != null) {
             service.setServiceName(serviceDTO.getServiceName());
         }
-        if (serviceDTO.getServiceDefinitionJson() != null) {
-            if (serviceDefinitionFormatIsValid(serviceDTO.getServiceDefinitionJson())) {
-                service.setMetadata(true);
-                service.setServiceDefinitionJson(serviceDTO.getServiceDefinitionJson());
-            } else {
-                LOG.error("Service Definition JSON format is invalid.");
-                return null;
-            }
-        }
 
-        return new ServiceDTO(serviceRepository.update(service));
+        return toServiceDTO(serviceRepository.update(service));
     }
 
     public void deleteService(Long serviceId, String jurisdictionId) {
@@ -176,15 +167,6 @@ public class ServiceService {
             return true;
         }
         return false;
-    }
-
-    private boolean serviceDefinitionFormatIsValid(String serviceDefinitionJson) {
-        try {
-            (new ObjectMapper()).readValue(serviceDefinitionJson, ServiceDefinition.class);
-        } catch (JsonProcessingException e) {
-            return false;
-        }
-        return true;
     }
 
     public List<GroupDTO> getListGroups(String jurisdictionId) {
@@ -243,5 +225,140 @@ public class ServiceService {
         } else {
             throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Cannot delete Group with existing Service associations.");
         }
+    }
+
+    @Transactional
+    public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId, CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, String jurisdictionId) {
+        Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
+        if (serviceOptional.isEmpty()) {
+            throw new ServiceNotFoundException(serviceId, jurisdictionId);
+        }
+        Service service = serviceOptional.get();
+
+        return generateServiceDefinitionDTO(addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, service));
+    }
+
+    private ServiceDefinitionDTO generateServiceDefinitionDTO(Service service) {
+        ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(service.getServiceCode());
+
+        List<ServiceDefinitionAttribute> serviceDefinitionAttributes = serviceDefinitionAttributeRepository.findAllByServiceId(service.getId());
+        if (serviceDefinitionAttributes != null) {
+            serviceDefinitionDTO.setAttributes(serviceDefinitionAttributes.stream().map(serviceDefinitionAttributeEntity -> {
+                ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = new ServiceDefinitionAttributeDTO(
+                        serviceDefinitionAttributeEntity.getId(),
+                        serviceDefinitionAttributeEntity.getCode(),
+                        serviceDefinitionAttributeEntity.isVariable(),
+                        serviceDefinitionAttributeEntity.getDatatype(),
+                        serviceDefinitionAttributeEntity.isRequired(),
+                        serviceDefinitionAttributeEntity.getDescription(),
+                        serviceDefinitionAttributeEntity.getAttributeOrder(),
+                        serviceDefinitionAttributeEntity.getDatatypeDescription());
+
+                Set<AttributeValue> attributeValues = serviceDefinitionAttributeEntity.getAttributeValues();
+                if (attributeValues != null) {
+                    serviceDefinitionAttributeDTO.setValues(attributeValues.stream()
+                            .map(attributeValueEntity -> new AttributeValueDTO(
+                                    attributeValueEntity.getId().toString(),
+                                    attributeValueEntity.getValueName()))
+                            .collect(Collectors.toList()));
+                }
+
+                return serviceDefinitionAttributeDTO;
+            }).collect(Collectors.toList()));
+        }
+
+        return serviceDefinitionDTO;
+    }
+
+    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long attributeId, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+        Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeId);
+        if (serviceDefinitionAttributeEntityOptional.isEmpty()) {
+            throw new ServiceDefinitionAttributeNotFoundException(attributeId);
+        }
+        ServiceDefinitionAttribute serviceDefinitionAttribute = serviceDefinitionAttributeEntityOptional.get();
+
+        ServiceDefinitionAttribute patch = patchServiceDefinitionAttribute(serviceDefinitionAttribute, serviceDefinitionAttributeDTO);
+
+        return generateServiceDefinitionDTO(patch.getService());
+    }
+
+    @Transactional
+    public ServiceDefinitionAttribute patchServiceDefinitionAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+
+        if (serviceDefinitionAttributeDTO.getCode() != null) {
+            serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
+        }
+        if (serviceDefinitionAttributeDTO.isVariable() != null) {
+            serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
+        }
+        if (serviceDefinitionAttributeDTO.getDatatype() != null) {
+            serviceDefinitionAttribute.setRequired(serviceDefinitionAttributeDTO.isRequired());
+        }
+        if (serviceDefinitionAttributeDTO.getDatatype() != null) {
+            serviceDefinitionAttribute.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
+        }
+        if (serviceDefinitionAttributeDTO.getDescription() != null) {
+            serviceDefinitionAttribute.setDescription(serviceDefinitionAttributeDTO.getDescription());
+        }
+        if (serviceDefinitionAttributeDTO.getAttributeOrder() != null) {
+            serviceDefinitionAttribute.setAttributeOrder(serviceDefinitionAttributeDTO.getAttributeOrder());
+        }
+        if (serviceDefinitionAttributeDTO.getDatatypeDescription() != null) {
+            serviceDefinitionAttribute.setDatatypeDescription(serviceDefinitionAttributeDTO.getDatatypeDescription());
+        }
+
+        // add new values
+        if (serviceDefinitionAttributeDTO.getValues() != null) {
+            // drop all attribute values
+            attributeValueRepository.deleteAllByServiceDefinitionAttribute(serviceDefinitionAttribute);
+
+            serviceDefinitionAttributeDTO.getValues().forEach(attributeValueDTO -> {
+                AttributeValue savedValue = attributeValueRepository.save(new AttributeValue(serviceDefinitionAttribute, attributeValueDTO.getName()));
+                serviceDefinitionAttribute.addAttributeValue(savedValue);
+            });
+        }
+
+        return serviceDefinitionAttributeRepository.update(serviceDefinitionAttribute);
+    }
+
+    public void removeServiceDefinitionAttributeFromServiceDefinition(Long attributeId) {
+        Optional<ServiceDefinitionAttribute> serviceDefinitionAttribute = serviceDefinitionAttributeRepository.findById(attributeId);
+        if (serviceDefinitionAttribute.isEmpty()) {
+            throw new ServiceDefinitionAttributeNotFoundException(attributeId);
+        }
+        ServiceDefinitionAttribute serviceDefinitionAttributeEntity = serviceDefinitionAttribute.get();
+        serviceDefinitionAttributeRepository.delete(serviceDefinitionAttributeEntity);
+    }
+
+    @Transactional
+    public Service addAttributeToServiceDefinition(CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, Service service) {
+        ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+        serviceDefinitionAttribute.setService(service);
+        serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
+        serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
+        serviceDefinitionAttribute.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
+        serviceDefinitionAttribute.setRequired(serviceDefinitionAttributeDTO.isRequired());
+        serviceDefinitionAttribute.setDescription(serviceDefinitionAttributeDTO.getDescription());
+        serviceDefinitionAttribute.setAttributeOrder(serviceDefinitionAttributeDTO.getAttributeOrder());
+        serviceDefinitionAttribute.setDatatypeDescription(serviceDefinitionAttributeDTO.getDatatypeDescription());
+
+        ServiceDefinitionAttribute savedSDA = serviceDefinitionAttributeRepository.save(serviceDefinitionAttribute);
+
+        if (serviceDefinitionAttributeDTO.getValues() != null) {
+            serviceDefinitionAttributeDTO.getValues().forEach(attributeValueDTO -> {
+                AttributeValue savedValue = attributeValueRepository.save(new AttributeValue(savedSDA, attributeValueDTO.getName()));
+                savedSDA.addAttributeValue(savedValue);
+            });
+        }
+
+        serviceDefinitionAttributeRepository.update(savedSDA);
+
+        service.addAttribute(savedSDA);
+        return serviceRepository.update(service);
+    }
+
+
+    private ServiceDTO toServiceDTO(Service service){
+        return new ServiceDTO(service, serviceDefinitionAttributeRepository.existsByServiceId(service.getId()));
     }
 }
