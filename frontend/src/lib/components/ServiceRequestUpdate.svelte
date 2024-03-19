@@ -13,6 +13,7 @@
 	import type { SelectOption } from 'stwui/types';
 	import { calendarIcon } from './Svg/outline/calendarIcon';
 	import { user } from './Svg/outline/user';
+	import { goto } from '$app/navigation';
 
 	const libre311 = useLibre311Service();
 
@@ -108,6 +109,8 @@
 		const res = await libre311.updateServiceRequest(sensitiveServiceRequest);
 
 		isUpdateButtonClicked = false;
+
+		goto(`/issues/table`);
 	}
 
 	$: name = createName(serviceRequest);
@@ -333,9 +336,9 @@
 						{messages['updateServiceRequest']['button_cancel']}
 					</Button>
 
-					<Button type="primary" on:click={() => updateServiceRequest(serviceRequest)}
-						>Submit</Button
-					>
+					<Button type="primary" on:click={() => updateServiceRequest(serviceRequest)}>
+						Submit
+					</Button>
 				{:else}
 					<Button href={back}>
 						{messages['updateServiceRequest']['button_back']}
