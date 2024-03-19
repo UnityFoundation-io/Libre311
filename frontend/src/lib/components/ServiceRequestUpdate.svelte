@@ -11,7 +11,9 @@
 		optionalCoalesceNameValidator,
 		type FormInputValue,
 		emailValidator,
-		optionalCoalesceStringValidator
+		optionalCoalesceStringValidator,
+		optionalEmailValidator,
+		optionalCoalesceEmailValidator
 	} from '$lib/utils/validation';
 	import { mailIcon } from '$lib/components/Svg/outline/mailIcon.js';
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon.js';
@@ -28,7 +30,9 @@
 	let agencyNameInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.agency_responsible
 	);
-	let agencyEmailInput: FormInputValue<string> = createInput(serviceRequest.agency_email);
+	let agencyEmailInput: FormInputValue<string | undefined> = createInput(
+		serviceRequest.agency_email
+	);
 
 	let serviceNoticeInput: FormInputValue<string | undefined> = createInput(
 		serviceRequest.service_notice
@@ -107,7 +111,7 @@
 			let agency: string = new String(agencyNameInput.value).toString();
 			if (agency) agencyNameInput = optionalCoalesceNameValidator(createInput(agency));
 		}
-		agencyEmailInput = emailValidator(agencyEmailInput);
+		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
 
