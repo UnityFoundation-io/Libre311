@@ -20,13 +20,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
+import io.micronaut.serde.annotation.Serdeable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-@Introspected
+@Serdeable
 public class PatchServiceRequestDTO {
 
     private ServiceRequestStatus status;
@@ -48,11 +49,9 @@ public class PatchServiceRequestDTO {
     private String agencyResponsible;
 
     @JsonProperty("expected_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant expectedDate;
 
     @JsonProperty("closed_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant closedDate;
 
 

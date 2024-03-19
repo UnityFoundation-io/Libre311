@@ -18,10 +18,11 @@ import app.model.servicerequest.ServiceRequest;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.serde.annotation.Serdeable;
 
 import java.time.Instant;
 
-@Introspected
+@Serdeable
 public class DownloadServiceRequestDTO {
 
     @CsvBindByName(column = "service_request_id")

@@ -19,11 +19,12 @@ import app.model.servicerequest.ServiceRequestStatus;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.annotation.QueryValue;
+import io.micronaut.serde.annotation.Serdeable;
 
 import java.time.Instant;
 import java.util.List;
 
-@Introspected
+@Serdeable
 public class DownloadRequestsArgumentsDTO {
 
     @Nullable

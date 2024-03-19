@@ -20,13 +20,14 @@ import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.serde.annotation.Serdeable;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Introspected
+@Serdeable
 public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     @JsonProperty("service_request_id")
@@ -52,19 +53,15 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     private String serviceNotice;
 
     @JsonProperty("requested_datetime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant dateCreated;
 
     @JsonProperty("updated_datetime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant dateUpdated;
 
     @JsonProperty("expected_datetime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant expectedDate;
 
     @JsonProperty("closed_datetime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant closedDate;
 
     @JsonProperty("address")

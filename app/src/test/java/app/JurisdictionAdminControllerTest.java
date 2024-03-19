@@ -20,10 +20,7 @@ import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicedefinition.*;
-import app.dto.servicerequest.PatchServiceRequestDTO;
-import app.dto.servicerequest.PostRequestServiceRequestDTO;
-import app.dto.servicerequest.PostResponseServiceRequestDTO;
-import app.dto.servicerequest.SensitiveServiceRequestDTO;
+import app.dto.servicerequest.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdictionuser.JurisdictionUser;
@@ -403,19 +400,17 @@ public class JurisdictionAdminControllerTest {
         assertEquals(1, patchedServiceDefinitionDTO.getAttributes().size());
 
         // get service definition
-        response = client.toBlocking().exchange("/services/"+serviceDTO1.getServiceCode()+"?jurisdiction_id=fakecity.gov", String.class);
+        response = client.toBlocking().exchange("/services/"+serviceDTO1.getServiceCode()+"?jurisdiction_id=fakecity.gov", ServiceDefinitionDTO.class);
         assertEquals(HttpStatus.OK, response.status());
-        Optional<String> serviceDefinitionOptional = response.getBody(String.class);
+        Optional<ServiceDefinitionDTO> serviceDefinitionOptional = response.getBody(ServiceDefinitionDTO.class);
         assertTrue(serviceDefinitionOptional.isPresent());
-        String serviceDefinitionResponse = serviceDefinitionOptional.get();
-        assertTrue(StringUtils.hasText(serviceDefinitionResponse));
-        ServiceDefinitionDTO serviceDefinitionDTOObject = (new ObjectMapper()).readValue(serviceDefinitionResponse, ServiceDefinitionDTO.class);
-        assertNotNull(serviceDefinitionDTOObject.getServiceCode());
-        assertEquals("INNER_CITY_BUS_STOPS", serviceDefinitionDTOObject.getServiceCode());
-        assertNotNull(serviceDefinitionDTOObject.getAttributes());
-        assertFalse(serviceDefinitionDTOObject.getAttributes().isEmpty());
-        assertEquals(1, serviceDefinitionDTOObject.getAttributes().size());
-        assertTrue(serviceDefinitionDTOObject.getAttributes().stream()
+        ServiceDefinitionDTO serviceDefinitionDTO = serviceDefinitionOptional.get();
+        assertNotNull(serviceDefinitionDTO.getServiceCode());
+        assertEquals("INNER_CITY_BUS_STOPS", serviceDefinitionDTO.getServiceCode());
+        assertNotNull(serviceDefinitionDTO.getAttributes());
+        assertFalse(serviceDefinitionDTO.getAttributes().isEmpty());
+        assertEquals(1, serviceDefinitionDTO.getAttributes().size());
+        assertTrue(serviceDefinitionDTO.getAttributes().stream()
                 .anyMatch(serviceDefinitionAttribute ->
                         serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT") &&
                                 serviceDefinitionAttribute.getValues() != null &&
@@ -609,7 +604,7 @@ public class JurisdictionAdminControllerTest {
         groupDTO.setName(name);
         HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/groups?jurisdiction_id="+jurisdictionId, groupDTO)
                 .header("Authorization", "Bearer token.text.here");
-        return client.toBlocking().exchange(request, GroupDTO[].class);
+        return client.toBlocking().exchange(request, GroupDTO.class);
     }
 
     private HttpResponse<?> createService(String code, String name, String jurisdictionId, Long groupId) {
@@ -642,6 +637,6 @@ public class JurisdictionAdminControllerTest {
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
-        return client.toBlocking().exchange(request, Map.class);
+        return client.toBlocking().exchange(request, PostResponseServiceRequestDTO[].class);
     }
 }

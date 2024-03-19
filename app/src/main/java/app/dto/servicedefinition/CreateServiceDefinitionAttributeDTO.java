@@ -17,10 +17,11 @@ package app.dto.servicedefinition;
 import app.model.service.AttributeDataType;
 import io.micronaut.core.annotation.Introspected;
 
+import io.micronaut.serde.annotation.Serdeable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-@Introspected
+@Serdeable
 public class CreateServiceDefinitionAttributeDTO extends UpdateServiceDefinitionAttributeDTO {
     public CreateServiceDefinitionAttributeDTO() {
     }
@@ -47,7 +48,7 @@ public class CreateServiceDefinitionAttributeDTO extends UpdateServiceDefinition
         return super.getDatatype();
     }
 
-    @NotBlank
+    @NotNull
     @Override
     public void setDatatype(AttributeDataType datatype) {
         super.setDatatype(datatype);

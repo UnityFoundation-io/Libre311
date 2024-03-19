@@ -17,8 +17,9 @@ package app.dto.jurisdiction;
 import app.model.jurisdiction.Jurisdiction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.serde.annotation.Serdeable;
 
-@Introspected
+@Serdeable
 public class JurisdictionDTO {
 
     private String name;

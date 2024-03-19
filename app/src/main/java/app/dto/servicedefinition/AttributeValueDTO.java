@@ -15,8 +15,9 @@
 package app.dto.servicedefinition;
 
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.serde.annotation.Serdeable;
 
-@Introspected
+@Serdeable
 public class AttributeValueDTO {
     private String key;
     private String name;

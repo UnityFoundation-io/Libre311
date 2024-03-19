@@ -18,11 +18,12 @@ import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Introspected
+@Serdeable
 public class SensitiveServiceRequestDTO extends ServiceRequestDTO {
 
     @JsonProperty("status_notes")

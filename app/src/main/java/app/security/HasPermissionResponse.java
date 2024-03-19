@@ -16,10 +16,11 @@ package app.security;
 
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.List;
 
-@Introspected
+@Serdeable
 public class HasPermissionResponse {
     private boolean hasPermission;
 
