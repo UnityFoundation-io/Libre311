@@ -1,13 +1,13 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
+	import { Badge, Button, Card, DatePicker, Input, Select, TextArea } from 'stwui';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import type {
-    ServiceRequest,
+		ServiceRequest,
 		ServiceRequestPriority,
 		ServiceRequestStatus
 	} from '$lib/services/Libre311/Libre311';
-  import { calendarIcon } from './Svg/outline/calendarIcon';
+	import { calendarIcon } from './Svg/outline/calendarIcon';
 	import Flag from '$lib/components/Svg/Flag.svelte';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import type { SelectOption } from 'stwui/types';
