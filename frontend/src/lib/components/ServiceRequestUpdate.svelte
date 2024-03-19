@@ -222,17 +222,8 @@
 					</div>
 				{/if}
 
-				<!-- EXPECTED TIMESTAMP -->
-				{#if isUpdateButtonClicked}
-					<DatePicker name="datetime" bind:value={expected_datetime}>
-						<DatePicker.Label slot="label">
-							<strong class="text-base">
-								{messages['serviceRequest']['expected_datetime']}
-							</strong>
-						</DatePicker.Label>
-						<DatePicker.Leading slot="leading" data={calendarIcon} />
-					</DatePicker>
-				{:else}
+				{#if !isUpdateButtonClicked}
+					<!-- EXPECTED TIMESTAMP -->
 					<div class="mb-1 flex flex-col">
 						<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
 						<div class="flex items-center">
@@ -244,10 +235,46 @@
 							<img alt="clock" src={clockIcon} />
 						</div>
 					</div>
+
+					<!-- AGENCY -->
+					{#if (agencyResponsible || agencyEmail) && !isUpdateButtonClicked}
+						<div class="mb-1">
+							<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
+							<p class="text-sm">{agencyResponsible}</p>
+							<p class="text-sm">{agencyEmail}</p>
+						</div>
+					{/if}
+
+					<!-- SERVICE NOTICE -->
+					{#if serviceNotice}
+						<div class="mb-1">
+							<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+							<p class="text-sm">{serviceNotice}</p>
+						</div>
+					{/if}
+
+					<!-- STATUS NOTES -->
+					{#if statusNotes}
+						<div class="mb-1">
+							<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
+							<p class="text-sm">{statusNotes}</p>
+						</div>
+					{/if}
 				{/if}
 
+				<!-- UPDATE -->
 				{#if isUpdateButtonClicked}
-					<!-- STATUS SELECT -->
+					<!-- UPDATE EXPECTED TIMESTAMP -->
+					<DatePicker name="datetime" bind:value={expected_datetime}>
+						<DatePicker.Label slot="label">
+							<strong class="text-base">
+								{messages['serviceRequest']['expected_datetime']}
+							</strong>
+						</DatePicker.Label>
+						<DatePicker.Leading slot="leading" data={calendarIcon} />
+					</DatePicker>
+
+					<!-- UPDATE STATUS -->
 					<div class="mb-1">
 						<Select
 							name="select-status"
@@ -267,7 +294,7 @@
 						</Select>
 					</div>
 
-					<!-- PRIORITY SELECT -->
+					<!-- UPDATE PRIORITY -->
 					<div class="mb-1">
 						<Select
 							name="select-priority"
@@ -289,16 +316,8 @@
 							</Select.Options>
 						</Select>
 					</div>
-				{/if}
 
-				<!-- AGENCY NAME & AGENCY EMAIL -->
-				{#if (agencyResponsible || agencyEmail) && !isUpdateButtonClicked}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
-						<p class="text-sm">{agencyResponsible}</p>
-						<p class="text-sm">{agencyEmail}</p>
-					</div>
-				{:else if isUpdateButtonClicked}
+					<!-- UPDATE AGENCY -->
 					<div class="mb-1">
 						<Input
 							type="text"
@@ -325,15 +344,8 @@
 							<Input.Leading slot="leading" data={mailIcon} />
 						</Input>
 					</div>
-				{/if}
 
-				<!-- SERVICE NOTICE -->
-				{#if serviceNotice && !isUpdateButtonClicked}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
-						<p class="text-sm">{serviceNotice}</p>
-					</div>
-				{:else if isUpdateButtonClicked}
+					<!-- UPDATE SERVICE NOTICE -->
 					<div class="mb-1">
 						<Input
 							type="text"
@@ -347,15 +359,8 @@
 							<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
 						</Input>
 					</div>
-				{/if}
 
-				<!-- STATUS NOTES -->
-				{#if statusNotes && !isUpdateButtonClicked}
-					<div class="mb-1">
-						<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
-						<p class="text-sm">{statusNotes}</p>
-					</div>
-				{:else if isUpdateButtonClicked}
+					<!-- UPDATE STATUS NOTES -->
 					<div class="mb-1 flex flex-col">
 						<strong class="text-base">{messages['serviceRequest']['status_notes']}</strong>
 						<TextArea
