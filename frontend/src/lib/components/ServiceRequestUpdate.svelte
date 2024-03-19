@@ -5,7 +5,8 @@
 		ServiceRequestPrioritySchema,
 		type ServiceRequest,
 		type ServiceRequestPriority,
-		type ServiceRequestStatus
+		type ServiceRequestStatus,
+		ServiceRequestStatusSchema
 	} from '$lib/services/Libre311/Libre311';
 	import { calendarIcon } from './Svg/outline/calendarIcon';
 	import type { SelectOption } from 'stwui/types';
@@ -13,7 +14,8 @@
 		createInput,
 		optionalCoalesceEmailValidator,
 		optionalCoalesceStringValidator,
-		optionalPriorityValidator
+		optionalPriorityValidator,
+		statusValidator
 	} from '$lib/utils/validation';
 	import { wrenchScrewDriverIcon } from './Svg/outline/wrench-screwdriver';
 	import { mailIcon } from './Svg/outline/mailIcon';
@@ -34,6 +36,7 @@
 		? new Date(Date.parse(serviceRequest.expected_datetime))
 		: null;
 
+	let statusInput = createInput<ServiceRequestStatus>(serviceRequest.status);
 	let priorityInput = createInput<ServiceRequestPriority | undefined>(serviceRequest.priority);
 	let agencyNameInput = createInput<string | undefined>(serviceRequest.agency_responsible);
 	let agencyEmailInput = createInput<string | undefined>(serviceRequest.agency_email);
@@ -41,6 +44,7 @@
 	let statusNotesInput = createInput<string | undefined>(serviceRequest.status_notes);
 
 	$: hasUserInput =
+		statusInput.value != serviceRequest.status ||
 		priorityInput.value != serviceRequest.priority ||
 		agencyNameInput.value != serviceRequest.agency_responsible ||
 		agencyEmailInput.value != serviceRequest.agency_email ||
@@ -80,40 +84,32 @@
 
 	function updateStatus(e: Event) {
 		const target = e.target as HTMLInputElement;
-		if (target.value) {
-			const status = target.value as ServiceRequestStatus;
-			serviceRequest.status = status;
-		}
+		statusInput.value = ServiceRequestStatusSchema.parse(target.value);
 	}
 
 	function updatePriority(e: Event) {
 		const target = e.target as HTMLInputElement;
-		if (target.value) {
-			const priority = ServiceRequestPrioritySchema.parse(target.value);
-			priorityInput.value = priority;
-		}
+		priorityInput.value = ServiceRequestPrioritySchema.parse(target.value);
 	}
 
 	async function updateServiceRequest(s: ServiceRequest) {
+		statusInput = statusValidator(statusInput);
 		priorityInput = optionalPriorityValidator(priorityInput);
 		agencyNameInput = optionalCoalesceStringValidator(agencyNameInput);
 		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
 
-		const resultSet = new Set([
-			priorityInput.type,
-			agencyNameInput.type,
-			agencyEmailInput.type,
-			serviceNoticeInput.type,
-			statusNotesInput.type
-		]);
-		if (resultSet.has('invalid')) {
-			return;
-		}
+		if (statusInput.type == 'invalid') return;
+		if (priorityInput.type == 'invalid') return;
+		if (agencyNameInput.type == 'invalid') return;
+		if (agencyEmailInput.type == 'invalid') return;
+		if (serviceNoticeInput.type == 'invalid') return;
+		if (statusNotesInput.type == 'invalid') return;
 
 		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 			...s,
+			status: statusInput.value,
 			priority: priorityInput.value,
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,

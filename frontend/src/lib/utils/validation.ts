@@ -1,6 +1,9 @@
 import { z, ZodError } from 'zod';
 import libphonenumber from 'google-libphonenumber';
-import { ServiceRequestPrioritySchema } from '$lib/services/Libre311/Libre311';
+import {
+	ServiceRequestPrioritySchema,
+	ServiceRequestStatusSchema
+} from '$lib/services/Libre311/Libre311';
 
 export type UnvalidatedInput<T> = {
 	type: 'unvalidated';
@@ -115,3 +118,5 @@ export const optionalCoalescePhoneNumberValidator = inputValidatorFactory(
 			.optional()
 	])
 );
+
+export const statusValidator = inputValidatorFactory(ServiceRequestStatusSchema);
