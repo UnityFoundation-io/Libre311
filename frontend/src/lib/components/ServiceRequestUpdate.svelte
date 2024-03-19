@@ -1,43 +1,42 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card, DatePicker, Input, Select, TextArea } from 'stwui';
 	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
-	import clockIcon from '$lib/assets/Clock.svg';
-	import { toTimeStamp } from '$lib/utils/functions';
-	import type { SelectOption } from 'stwui/types';
-	import SelectedValues from './SelectedValues.svelte';
-	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
-	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
-	import { wrenchScrewDriverIcon } from './Svg/outline/wrench-screwdriver';
-	import { mailIcon } from './Svg/outline/mailIcon';
+	import { Button, DatePicker, Input, Select, TextArea } from 'stwui';
 	import { calendarIcon } from './Svg/outline/calendarIcon';
-	import { user } from './Svg/outline/user';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import type { SelectOption } from 'stwui/types';
 	import {
 		createInput,
 		optionalCoalesceEmailValidator,
 		optionalCoalesceStringValidator
 	} from '$lib/utils/validation';
+	import { wrenchScrewDriverIcon } from './Svg/outline/wrench-screwdriver';
+	import { mailIcon } from './Svg/outline/mailIcon';
+	import { user } from './Svg/outline/user';
+	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
+	import { createEventDispatcher } from 'svelte';
+	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
 
-	const libre311 = useLibre311Service();
-	const alertError = useLibre311Context().alertError;
-	const alert = useLibre311Context().alert;
+	const dispatch = createEventDispatcher<{
+		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
+		cancel: void;
+	}>();
 
 	export let serviceRequest: ServiceRequest;
-	export let back: string;
 
-	let isUpdateButtonClicked: boolean = false;
+	let expectedDatetime = serviceRequest.expected_datetime
+		? new Date(Date.parse(serviceRequest.expected_datetime))
+		: null;
 
-	$: agencyResponsible = serviceRequest.agency_responsible;
-	$: agencyEmail = serviceRequest.agency_email;
-	$: serviceNotice = serviceRequest.service_notice;
-	$: statusNotes = serviceRequest.status_notes;
+	let agencyNameInput = createInput<string | undefined>(serviceRequest.agency_responsible);
+	let agencyEmailInput = createInput<string | undefined>(serviceRequest.agency_email);
+	let serviceNoticeInput = createInput<string | undefined>(serviceRequest.service_notice);
+	let statusNotesInput = createInput<string | undefined>(serviceRequest.status_notes);
 
-	$: agencyNameInput = createInput<string | undefined>(agencyResponsible);
-	$: agencyEmailInput = createInput<string | undefined>(agencyEmail);
-	$: serviceNoticeInput = createInput<string | undefined>(serviceNotice);
-	$: statusNotesInput = createInput<string | undefined>(statusNotes);
+	$: hasUserInput =
+		agencyNameInput.value != serviceRequest.agency_responsible ||
+		agencyEmailInput.value != serviceRequest.agency_email ||
+		serviceNoticeInput.value != serviceRequest.service_notice ||
+		statusNotesInput.value != serviceRequest.status_notes;
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -70,19 +69,6 @@
 		}
 	];
 
-	function getStatus(serviceRequest: ServiceRequest) {
-		switch (serviceRequest.status) {
-			case 'closed': {
-				return 'success';
-			}
-			case 'open': {
-				return 'warn';
-			}
-			default:
-				return 'error';
-		}
-	}
-
 	function updateStatus(e: Event) {
 		const target = e.target as HTMLInputElement;
 		if (target.value) {
@@ -97,15 +83,6 @@
 			const priority = target.value;
 			serviceRequest.priority = priority;
 		}
-	}
-
-	function createName(serviceRequest: UpdateSensitiveServiceRequestRequest) {
-		if (serviceRequest.first_name || serviceRequest.last_name)
-			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
-	}
-
-	function handleUpdateButtonClick(serviceRequest: ServiceRequest) {
-		isUpdateButtonClicked = true;
 	}
 
 	async function updateServiceRequest(s: ServiceRequest) {
@@ -124,293 +101,141 @@
 			return;
 		}
 
-		try {
-			const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
-				...s,
-				agency_responsible: agencyNameInput.value,
-				agency_email: agencyEmailInput.value,
-				service_notice: serviceNoticeInput.value,
-				status_notes: statusNotesInput.value
-			};
+		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
+			...s,
+			agency_responsible: agencyNameInput.value,
+			agency_email: agencyEmailInput.value,
+			service_notice: serviceNoticeInput.value,
+			status_notes: statusNotesInput.value
+		};
 
-			await libre311.updateServiceRequest(sensitiveServiceRequest);
-
-			isUpdateButtonClicked = false;
-
-			alert({
-				type: 'success',
-				title: 'Success',
-				description: 'Your service request has been updated'
-			});
-
-			goto(`/issues/table`);
-		} catch (error) {
-			alertError(error);
-		}
+		dispatch('updateServiceRequest', sensitiveServiceRequest);
 	}
-
-	$: if ($page.url) {
-		isUpdateButtonClicked = false;
-	}
-
-	$: name = createName(serviceRequest);
-	let expected_datetime = serviceRequest.expected_datetime
-		? new Date(Date.parse(serviceRequest.expected_datetime))
-		: null;
 </script>
 
-<div class="flex h-full">
-	<Card class="m-2 overflow-y-auto">
-		<div class="flex h-full w-full flex-col" slot="content">
-			<div class="m-2 flex-grow">
-				<!-- ID & STATUS -->
-				<div class="flow-root">
-					<h2 class="float-left text-base tracking-wide">
-						#{serviceRequest.service_request_id}
-					</h2>
+<form>
+	<!-- UPDATE EXPECTED TIMESTAMP -->
+	<DatePicker name="datetime" bind:value={expectedDatetime}>
+		<DatePicker.Label slot="label">
+			<strong class="text-base">
+				{messages['serviceRequest']['expected_datetime']}
+			</strong>
+		</DatePicker.Label>
+		<DatePicker.Leading slot="leading" data={calendarIcon} />
+	</DatePicker>
 
-					<Badge class="float-right text-sm" type={getStatus(serviceRequest)}
-						>{serviceRequest.status}
-					</Badge>
-				</div>
+	<!-- UPDATE STATUS -->
+	<div class="mb-1">
+		<Select
+			name="select-status"
+			placeholder={serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1)}
+			options={statusOptions}
+			on:change={updateStatus}
+		>
+			<Select.Label slot="label">
+				<strong class="text-base">{messages['serviceRequest']['status']}</strong>
+			</Select.Label>
+			<Select.Options slot="options">
+				{#each statusOptions as option}
+					<Select.Options.Option {option} />
+				{/each}
+			</Select.Options>
+		</Select>
+	</div>
 
-				<!-- REQUESTED TIMESTAMP -->
-				<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>
+	<!-- UPDATE PRIORITY -->
+	<div class="mb-1">
+		<Select
+			name="select-priority"
+			placeholder={serviceRequest.priority
+				? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
+				: '--'}
+			options={priorityOptions}
+			on:change={updatePriority}
+		>
+			<Select.Label slot="label">
+				<strong class="text-base">
+					{messages['serviceRequest']['priority']}
+				</strong>
+			</Select.Label>
+			<Select.Options slot="options">
+				{#each priorityOptions as option}
+					<Select.Options.Option {option} />
+				{/each}
+			</Select.Options>
+		</Select>
+	</div>
 
-				<!-- MEDIA -->
-				{#if serviceRequest.media_url}
-					<div
-						class="serviceImage"
-						style={`background-image: url('${serviceRequest.media_url}');`}
-					/>
-				{/if}
+	<!-- UPDATE AGENCY -->
+	<div class="mb-1">
+		<Input
+			type="text"
+			name="firstName"
+			placeholder={messages['serviceRequest']['agency_name']}
+			error={agencyNameInput.error}
+			bind:value={agencyNameInput.value}
+		>
+			<Input.Label slot="label">
+				<strong class="text-base">
+					{messages['serviceRequest']['agency_contact']}
+				</strong>
+			</Input.Label>
+			<Input.Leading slot="leading" data={user} />
+		</Input>
 
-				<!-- SERVICE NAME -->
-				<div class="mb-2 mt-2 flow-root">
-					<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
-					<div class="float-right">
-						<!-- <Flag /> -->
-					</div>
-				</div>
+		<Input
+			name="email"
+			type="email"
+			placeholder={messages['contact']['email']['placeholder']}
+			error={agencyEmailInput.error}
+			bind:value={agencyEmailInput.value}
+		>
+			<Input.Leading slot="leading" data={mailIcon} />
+		</Input>
+	</div>
 
-				<!-- ADDRESS -->
-				<div class="mb-2">
-					<p class="text-sm">{serviceRequest.address}</p>
-				</div>
+	<!-- UPDATE SERVICE NOTICE -->
+	<div class="mb-1">
+		<Input
+			type="text"
+			name="firstName"
+			placeholder={messages['serviceRequest']['service_notice_placeholder']}
+			bind:value={serviceNoticeInput.value}
+		>
+			<Input.Label slot="label">
+				<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+			</Input.Label>
+			<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
+		</Input>
+	</div>
 
-				{#if serviceRequest.selected_values}
-					<div class="mb-1">
-						<SelectedValues selectedValues={serviceRequest.selected_values} />
-					</div>
-				{/if}
+	<!-- UPDATE STATUS NOTES -->
+	<div class="mb-1 flex flex-col">
+		<strong class="text-base">{messages['serviceRequest']['status_notes']}</strong>
+		<TextArea
+			bind:value={statusNotesInput.value}
+			name="comments"
+			placeholder="notes"
+			class="relative"
+		/>
+	</div>
+</form>
 
-				<!-- DESCRIPTION -->
-				{#if serviceRequest.description}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['description']}</strong>
-						<p class="text-sm">{serviceRequest.description ?? ''}</p>
-					</div>
-				{/if}
-
-				<!-- NAME & EMAIL & PHONE (CITIZEN) -->
-				{#if name}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
-						<p class="text-sm">{name ?? ''}</p>
-						<p class="text-sm">{serviceRequest.email ?? ''}</p>
-						<p class="text-sm">{serviceRequest.phone ?? ''}</p>
-					</div>
-				{/if}
-
-				{#if !isUpdateButtonClicked}
-					<!-- EXPECTED TIMESTAMP -->
-					<div class="mb-1 flex flex-col">
-						<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
-						<div class="flex items-center">
-							{#if serviceRequest.expected_datetime}
-								<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
-							{:else}
-								<p class="text-sm">--</p>
-							{/if}
-							<img alt="clock" src={clockIcon} />
-						</div>
-					</div>
-
-					<!-- AGENCY -->
-					{#if (agencyResponsible || agencyEmail) && !isUpdateButtonClicked}
-						<div class="mb-1">
-							<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
-							<p class="text-sm">{agencyResponsible}</p>
-							<p class="text-sm">{agencyEmail}</p>
-						</div>
-					{/if}
-
-					<!-- SERVICE NOTICE -->
-					{#if serviceNotice}
-						<div class="mb-1">
-							<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
-							<p class="text-sm">{serviceNotice}</p>
-						</div>
-					{/if}
-
-					<!-- STATUS NOTES -->
-					{#if statusNotes}
-						<div class="mb-1">
-							<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
-							<p class="text-sm">{statusNotes}</p>
-						</div>
-					{/if}
-				{/if}
-
-				<!-- UPDATE -->
-				{#if isUpdateButtonClicked}
-					<!-- UPDATE EXPECTED TIMESTAMP -->
-					<DatePicker name="datetime" bind:value={expected_datetime}>
-						<DatePicker.Label slot="label">
-							<strong class="text-base">
-								{messages['serviceRequest']['expected_datetime']}
-							</strong>
-						</DatePicker.Label>
-						<DatePicker.Leading slot="leading" data={calendarIcon} />
-					</DatePicker>
-
-					<!-- UPDATE STATUS -->
-					<div class="mb-1">
-						<Select
-							name="select-status"
-							placeholder={serviceRequest.status.charAt(0).toUpperCase() +
-								serviceRequest.status.slice(1)}
-							options={statusOptions}
-							on:change={updateStatus}
-						>
-							<Select.Label slot="label">
-								<strong class="text-base">{messages['serviceRequest']['status']}</strong>
-							</Select.Label>
-							<Select.Options slot="options">
-								{#each statusOptions as option}
-									<Select.Options.Option {option} />
-								{/each}
-							</Select.Options>
-						</Select>
-					</div>
-
-					<!-- UPDATE PRIORITY -->
-					<div class="mb-1">
-						<Select
-							name="select-priority"
-							placeholder={serviceRequest.priority
-								? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
-								: '--'}
-							options={priorityOptions}
-							on:change={updatePriority}
-						>
-							<Select.Label slot="label">
-								<strong class="text-base">
-									{messages['serviceRequest']['priority']}
-								</strong>
-							</Select.Label>
-							<Select.Options slot="options">
-								{#each priorityOptions as option}
-									<Select.Options.Option {option} />
-								{/each}
-							</Select.Options>
-						</Select>
-					</div>
-
-					<!-- UPDATE AGENCY -->
-					<div class="mb-1">
-						<Input
-							type="text"
-							name="firstName"
-							placeholder={messages['serviceRequest']['agency_name']}
-							error={agencyNameInput.error}
-							bind:value={agencyNameInput.value}
-						>
-							<Input.Label slot="label">
-								<strong class="text-base">
-									{messages['serviceRequest']['agency_contact']}
-								</strong>
-							</Input.Label>
-							<Input.Leading slot="leading" data={user} />
-						</Input>
-
-						<Input
-							name="email"
-							type="email"
-							placeholder={messages['contact']['email']['placeholder']}
-							error={agencyEmailInput.error}
-							bind:value={agencyEmailInput.value}
-						>
-							<Input.Leading slot="leading" data={mailIcon} />
-						</Input>
-					</div>
-
-					<!-- UPDATE SERVICE NOTICE -->
-					<div class="mb-1">
-						<Input
-							type="text"
-							name="firstName"
-							placeholder={messages['serviceRequest']['service_notice_placeholder']}
-							bind:value={serviceNoticeInput.value}
-						>
-							<Input.Label slot="label">
-								<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
-							</Input.Label>
-							<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
-						</Input>
-					</div>
-
-					<!-- UPDATE STATUS NOTES -->
-					<div class="mb-1 flex flex-col">
-						<strong class="text-base">{messages['serviceRequest']['status_notes']}</strong>
-						<TextArea
-							bind:value={statusNotesInput.value}
-							name="comments"
-							placeholder="notes"
-							class="relative"
-						/>
-					</div>
-				{/if}
-			</div>
-
-			<div class="mx-2 flex items-center justify-between pb-4 pt-4">
-				{#if isUpdateButtonClicked}
-					<Button
-						on:click={() => {
-							isUpdateButtonClicked = false;
-						}}
-					>
-						{messages['updateServiceRequest']['button_cancel']}
-					</Button>
-
-					<Button type="primary" on:click={() => updateServiceRequest(serviceRequest)}>
-						Submit
-					</Button>
-				{:else}
-					<Button href={back}>
-						{messages['updateServiceRequest']['button_back']}
-					</Button>
-
-					<Button on:click={() => handleUpdateButtonClick(serviceRequest)}>
-						{messages['updateServiceRequest']['button_update']}
-					</Button>
-				{/if}
-			</div>
-		</div>
-	</Card>
-</div>
-
-<style>
-	h1 {
-		color: hsl(var(--primary));
-	}
-	.serviceImage {
-		height: 0;
-		padding-top: 56.25%;
-		overflow-x: hidden;
-		overflow-y: hidden;
-		background-position: center;
-		background-size: cover;
-		border-radius: 10px;
-	}
-</style>
+<ServiceRequestButtonsContainer>
+	<Button
+		slot="left"
+		on:click={() => {
+			dispatch('cancel');
+		}}
+	>
+		{messages['updateServiceRequest']['button_cancel']}
+	</Button>
+	<Button
+		disabled={!hasUserInput}
+		slot="right"
+		type="primary"
+		on:click={() => updateServiceRequest(serviceRequest)}
+	>
+		Submit
+	</Button>
+</ServiceRequestButtonsContainer>
