@@ -22,12 +22,12 @@ import io.micronaut.objectstorage.ObjectStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
-import java.util.Set;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.validation.Valid;
 import java.util.Base64;
+import java.util.Set;
 import java.util.UUID;
 
 @Singleton

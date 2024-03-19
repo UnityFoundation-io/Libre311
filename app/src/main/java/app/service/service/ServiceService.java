@@ -14,29 +14,32 @@
 
 package app.service.service;
 
-import app.dto.group.GroupDTO;
 import app.dto.group.CreateUpdateGroupDTO;
+import app.dto.group.GroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
-import app.exception.Libre311BaseException;
 import app.dto.servicedefinition.*;
+import app.exception.Libre311BaseException;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.servicedefinition.*;
+import app.model.servicedefinition.AttributeValue;
+import app.model.servicedefinition.AttributeValueRepository;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

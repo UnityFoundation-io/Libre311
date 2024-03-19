@@ -14,10 +14,6 @@
 
 package app.security;
 
-import static app.security.SecurityRuleUtil.ALLOWED;
-import static app.security.SecurityRuleUtil.REJECTED;
-import static app.security.SecurityRuleUtil.UNKNOWN;
-
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpAttributes;
 import io.micronaut.http.HttpRequest;
@@ -26,10 +22,13 @@ import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.rules.SecurityRuleResult;
 import io.micronaut.web.router.MethodBasedRouteMatch;
 import jakarta.inject.Singleton;
+import org.reactivestreams.Publisher;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
+
+import static app.security.SecurityRuleUtil.*;
 
 @Singleton
 public class RequiresPermissionsAnnotationRule implements SecurityRule<HttpRequest<?>> {

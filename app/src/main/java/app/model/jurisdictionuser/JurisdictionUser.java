@@ -17,7 +17,6 @@ package app.model.jurisdictionuser;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.user.User;
 import io.micronaut.core.annotation.NonNull;
-
 import jakarta.persistence.*;
 
 @Entity

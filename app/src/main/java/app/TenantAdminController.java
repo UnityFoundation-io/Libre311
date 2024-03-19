@@ -23,10 +23,10 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import jakarta.annotation.Nullable;
-
 import jakarta.validation.Valid;
 
-import static app.security.Permission.*;
+import static app.security.Permission.LIBRE311_ADMIN_EDIT_SYSTEM;
+import static app.security.Permission.LIBRE311_ADMIN_EDIT_TENANT;
 
 @Controller("/api/tenant-admin")
 public class TenantAdminController {

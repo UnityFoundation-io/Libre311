@@ -18,10 +18,10 @@ import app.model.jurisdiction.Jurisdiction;
 import app.model.service.group.ServiceGroup;
 import app.model.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
+import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

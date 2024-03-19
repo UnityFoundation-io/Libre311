@@ -14,7 +14,6 @@
 
 package app.util;
 
-import app.recaptcha.ReCaptchaService;
 import app.safesearch.GoogleImageSafeSearchService;
 import io.micronaut.context.annotation.Replaces;
 import jakarta.inject.Singleton;

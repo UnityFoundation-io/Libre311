@@ -15,7 +15,6 @@
 package app.model.user;
 
 import io.micronaut.core.annotation.NonNull;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 

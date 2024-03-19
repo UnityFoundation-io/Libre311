@@ -18,11 +18,9 @@ import app.model.service.AttributeDataType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import io.micronaut.core.annotation.Introspected;
-
 import io.micronaut.serde.annotation.Serdeable;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 
 @Serdeable

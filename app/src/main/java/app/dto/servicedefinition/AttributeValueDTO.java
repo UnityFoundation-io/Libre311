@@ -14,7 +14,6 @@
 
 package app.dto.servicedefinition;
 
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable

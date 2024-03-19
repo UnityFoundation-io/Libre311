@@ -19,8 +19,8 @@ import app.dto.download.DownloadServiceRequestDTO;
 import app.dto.servicedefinition.AttributeValueDTO;
 import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.*;
-import app.model.service.AttributeDataType;
 import app.exception.Libre311BaseException;
+import app.model.service.AttributeDataType;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.servicedefinition.AttributeValue;
@@ -48,7 +48,6 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Singleton;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +59,7 @@ import java.net.MalformedURLException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

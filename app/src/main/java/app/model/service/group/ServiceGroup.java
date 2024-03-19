@@ -15,7 +15,6 @@
 package app.model.service.group;
 
 import app.model.jurisdiction.Jurisdiction;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 

@@ -15,16 +15,16 @@
 package app;
 
 import app.dto.download.DownloadRequestsArgumentsDTO;
-import app.dto.group.GroupDTO;
 import app.dto.group.CreateUpdateGroupDTO;
+import app.dto.group.GroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicedefinition.CreateServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.dto.servicedefinition.UpdateServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
-import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.security.RequiresPermissions;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
@@ -35,8 +35,8 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
-
 import jakarta.validation.Valid;
+
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;

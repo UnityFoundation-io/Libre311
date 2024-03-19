@@ -22,9 +22,10 @@ import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.servicedefinition.*;
-import app.model.servicerequest.ServiceRequest;
-import app.model.servicerequest.ServiceRequestStatus;
+import app.model.servicedefinition.AttributeValue;
+import app.model.servicedefinition.AttributeValueRepository;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.convert.format.MapFormat;
@@ -37,9 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Requires(property = "app-data.bootstrap.data.enabled", value = StringUtils.TRUE)

@@ -18,8 +18,8 @@ import app.dto.discovery.DiscoveryDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
-import app.dto.servicerequest.*;
 import app.dto.servicedefinition.ServiceDefinitionDTO;
+import app.dto.servicerequest.*;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
@@ -45,8 +45,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.annotation.Nullable;
-
 import jakarta.validation.Valid;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;

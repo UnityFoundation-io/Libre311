@@ -16,11 +16,11 @@ package app.model.jurisdiction;
 
 import app.model.service.Service;
 import app.model.servicerequest.ServiceRequest;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

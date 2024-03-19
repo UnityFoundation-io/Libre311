@@ -15,7 +15,6 @@
 package app.dto.group;
 
 import app.model.service.group.ServiceGroup;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable

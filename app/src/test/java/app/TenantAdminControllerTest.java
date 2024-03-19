@@ -36,9 +36,7 @@ import java.util.Optional;
 
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.*;
-import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @MicronautTest
 public class TenantAdminControllerTest {
