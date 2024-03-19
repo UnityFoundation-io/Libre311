@@ -10,10 +10,12 @@
 	import { Badge } from 'stwui';
 	import StepControls from './StepControls.svelte';
 	import { toCreateServiceRequestParams, type CreateServiceRequestUIParams } from './shared';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
 
 	const libre311 = useLibre311Service();
+	const alertError = useLibre311Context().alertError;
+	const alert = useLibre311Context().alert;
 
 	export let params: CreateServiceRequestUIParams;
 
@@ -32,14 +34,22 @@
 	}
 
 	async function submitServiceReq() {
-		let mediaUrl: string | undefined = undefined;
-		if (params.file) {
-			mediaUrl = await libre311.uploadImage(params.file);
+		try {
+			let mediaUrl: string | undefined = undefined;
+			if (params.file) {
+				mediaUrl = await libre311.uploadImage(params.file);
+			}
+			params.media_url = mediaUrl;
+			await libre311.createServiceRequest(toCreateServiceRequestParams(params));
+			alert({
+				type: 'success',
+				title: 'Success',
+				description: 'Your service request has been created'
+			});
+			goto('/issues/map');
+		} catch (error) {
+			alertError(error);
 		}
-		params.media_url = mediaUrl;
-
-		const res = await libre311.createServiceRequest(toCreateServiceRequestParams(params));
-		goto('/issues/map');
 	}
 
 	onMount(() => {

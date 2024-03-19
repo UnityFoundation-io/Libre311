@@ -22,6 +22,10 @@ export const HateoasErrorResponseSchema = z
 
 export type HateoasErrorResponse = z.infer<typeof HateoasErrorResponseSchema>;
 
+export function isHateoasErrorResponse(unknown: unknown): unknown is HateoasErrorResponse {
+	return HateoasErrorResponseSchema.safeParse(unknown).success;
+}
+
 export const Libre311ServerErrorResponseSchema = z
 	.object({
 		logref: z.string()

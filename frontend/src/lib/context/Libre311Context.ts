@@ -21,6 +21,7 @@ import type { Libre311Alert } from './Libre311AlertStore';
 import {
 	checkHasMessage,
 	extractFirstErrorMessage,
+	isHateoasErrorResponse,
 	isLibre311ServerErrorResponse
 } from '$lib/services/Libre311/types/ServerErrors';
 import { isAxiosError } from 'axios';
@@ -58,15 +59,26 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	function alertError(unknown: unknown) {
 		console.error(unknown);
 		if (isAxiosError(unknown)) {
-			if (unknown.response?.data && isLibre311ServerErrorResponse(unknown.response.data)) {
+			if (isLibre311ServerErrorResponse(unknown.response?.data)) {
 				const libre311ServerError = unknown.response.data;
 				props.alert({
 					type: 'error',
 					title: libre311ServerError.message,
 					description: `<div>${extractFirstErrorMessage(libre311ServerError)}</div> <small>logref: ${libre311ServerError.logref}</small>`
 				});
+				return;
+			} else if (isHateoasErrorResponse(unknown.response?.data)) {
+				const hateoasErrorResponse = unknown.response.data;
+				props.alert({
+					type: 'error',
+					title: hateoasErrorResponse.message,
+					description: extractFirstErrorMessage(hateoasErrorResponse)
+				});
+				return;
 			}
-		} else if (checkHasMessage(unknown)) {
+		}
+
+		if (checkHasMessage(unknown)) {
 			props.alert({
 				type: 'error',
 				title: 'Error',
