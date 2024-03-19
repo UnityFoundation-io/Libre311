@@ -1,17 +1,19 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Button, DatePicker, Input, Select, TextArea } from 'stwui';
-	import type {
-		ServiceRequest,
-		ServiceRequestPriority,
-		ServiceRequestStatus
+	import {
+		ServiceRequestPrioritySchema,
+		type ServiceRequest,
+		type ServiceRequestPriority,
+		type ServiceRequestStatus
 	} from '$lib/services/Libre311/Libre311';
 	import { calendarIcon } from './Svg/outline/calendarIcon';
 	import type { SelectOption } from 'stwui/types';
 	import {
 		createInput,
 		optionalCoalesceEmailValidator,
-		optionalCoalesceStringValidator
+		optionalCoalesceStringValidator,
+		optionalPriorityValidator
 	} from '$lib/utils/validation';
 	import { wrenchScrewDriverIcon } from './Svg/outline/wrench-screwdriver';
 	import { mailIcon } from './Svg/outline/mailIcon';
@@ -19,6 +21,7 @@
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 	import { createEventDispatcher } from 'svelte';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
+	import { optional } from 'zod';
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
@@ -31,12 +34,14 @@
 		? new Date(Date.parse(serviceRequest.expected_datetime))
 		: null;
 
+	let priorityInput = createInput<ServiceRequestPriority | undefined>(serviceRequest.priority);
 	let agencyNameInput = createInput<string | undefined>(serviceRequest.agency_responsible);
 	let agencyEmailInput = createInput<string | undefined>(serviceRequest.agency_email);
 	let serviceNoticeInput = createInput<string | undefined>(serviceRequest.service_notice);
 	let statusNotesInput = createInput<string | undefined>(serviceRequest.status_notes);
 
 	$: hasUserInput =
+		priorityInput.value != serviceRequest.priority ||
 		agencyNameInput.value != serviceRequest.agency_responsible ||
 		agencyEmailInput.value != serviceRequest.agency_email ||
 		serviceNoticeInput.value != serviceRequest.service_notice ||
@@ -84,18 +89,20 @@
 	function updatePriority(e: Event) {
 		const target = e.target as HTMLInputElement;
 		if (target.value) {
-			const priority = target.value as ServiceRequestPriority;
-			serviceRequest.priority = priority;
+			const priority = ServiceRequestPrioritySchema.parse(target.value);
+			priorityInput.value = priority;
 		}
 	}
 
 	async function updateServiceRequest(s: ServiceRequest) {
+		priorityInput = optionalPriorityValidator(priorityInput);
 		agencyNameInput = optionalCoalesceStringValidator(agencyNameInput);
 		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
 
 		const resultSet = new Set([
+			priorityInput.type,
 			agencyNameInput.type,
 			agencyEmailInput.type,
 			serviceNoticeInput.type,
@@ -107,6 +114,7 @@
 
 		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 			...s,
+			priority: priorityInput.value,
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,
 			service_notice: serviceNoticeInput.value,
