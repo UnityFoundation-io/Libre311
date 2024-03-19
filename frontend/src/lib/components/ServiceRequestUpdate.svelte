@@ -14,6 +14,11 @@
 	import { user } from './Svg/outline/user';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import {
+		createInput,
+		optionalCoalesceEmailValidator,
+		optionalCoalesceStringValidator
+	} from '$lib/utils/validation';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -28,6 +33,11 @@
 	$: agencyEmail = serviceRequest.agency_email;
 	$: serviceNotice = serviceRequest.service_notice;
 	$: statusNotes = serviceRequest.status_notes;
+
+	$: agencyNameInput = createInput<string | undefined>(agencyResponsible);
+	$: agencyEmailInput = createInput<string | undefined>(agencyEmail);
+	$: serviceNoticeInput = createInput<string | undefined>(serviceNotice);
+	$: statusNotesInput = createInput<string | undefined>(statusNotes);
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -99,14 +109,28 @@
 	}
 
 	async function updateServiceRequest(s: ServiceRequest) {
+		agencyNameInput = optionalCoalesceStringValidator(agencyNameInput);
+		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
+		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
+		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
+
+		const resultSet = new Set([
+			agencyNameInput.type,
+			agencyEmailInput.type,
+			serviceNoticeInput.type,
+			statusNotesInput.type
+		]);
+		if (resultSet.has('invalid')) {
+			return;
+		}
+
 		try {
 			const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 				...s,
-				status: serviceRequest.status,
-				agency_responsible: serviceRequest.agency_responsible,
-				agency_email: serviceRequest.agency_email,
-				service_notice: serviceRequest.service_notice,
-				status_notes: serviceRequest.status_notes
+				agency_responsible: agencyNameInput.value,
+				agency_email: agencyEmailInput.value,
+				service_notice: serviceNoticeInput.value,
+				status_notes: statusNotesInput.value
 			};
 
 			await libre311.updateServiceRequest(sensitiveServiceRequest);
@@ -280,7 +304,8 @@
 							type="text"
 							name="firstName"
 							placeholder={messages['serviceRequest']['agency_name']}
-							bind:value={serviceRequest.agency_responsible}
+							error={agencyNameInput.error}
+							bind:value={agencyNameInput.value}
 						>
 							<Input.Label slot="label">
 								<strong class="text-base">
@@ -294,7 +319,8 @@
 							name="email"
 							type="email"
 							placeholder={messages['contact']['email']['placeholder']}
-							bind:value={serviceRequest.agency_email}
+							error={agencyEmailInput.error}
+							bind:value={agencyEmailInput.value}
 						>
 							<Input.Leading slot="leading" data={mailIcon} />
 						</Input>
@@ -313,7 +339,7 @@
 							type="text"
 							name="firstName"
 							placeholder={messages['serviceRequest']['service_notice_placeholder']}
-							bind:value={serviceRequest.service_notice}
+							bind:value={serviceNoticeInput.value}
 						>
 							<Input.Label slot="label">
 								<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
@@ -333,7 +359,7 @@
 					<div class="mb-1 flex flex-col">
 						<strong class="text-base">{messages['serviceRequest']['status_notes']}</strong>
 						<TextArea
-							bind:value={serviceRequest.status_notes}
+							bind:value={statusNotesInput.value}
 							name="comments"
 							placeholder="notes"
 							class="relative"
