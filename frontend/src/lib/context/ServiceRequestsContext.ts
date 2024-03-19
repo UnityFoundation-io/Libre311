@@ -6,7 +6,8 @@ import {
 	type ServiceRequestsResponse,
 	EMPTY_PAGINATION,
 	mapToServiceRequestsURLSearchParams,
-	isServiceRequestStatus
+	isServiceRequestStatus,
+	isServiceRequestPriority
 } from '$lib/services/Libre311/Libre311';
 import {
 	asAsyncFailure,
@@ -35,6 +36,10 @@ function toServiceRequestParams(searchParams: URLSearchParams) {
 		params = searchParams.get('service_request_id')?.split(',').map(Number) ?? [];
 		return params;
 	}
+
+	if (searchParams.get('priority'))
+		params.servicePriority =
+			searchParams.get('priority')?.split(',').filter(isServiceRequestPriority) ?? undefined;
 
 	if (searchParams.get('pageNumber')) params.pageNumber = Number(searchParams.get('pageNumber'));
 

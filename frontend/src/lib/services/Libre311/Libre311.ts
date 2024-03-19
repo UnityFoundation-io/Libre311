@@ -233,6 +233,22 @@ export type CreateServiceRequestParams = HasServiceCode &
 		media_url?: string;
 	};
 
+export const LowServiceRequestPrioritySchema = z.literal('low');
+export const MediumServiceRequestPrioritySchema = z.literal('medium');
+export const HighServiceRequestPrioritySchema = z.literal('high');
+export const ServiceRequestPrioritySchema = z.union([
+	LowServiceRequestPrioritySchema,
+	MediumServiceRequestPrioritySchema,
+	HighServiceRequestPrioritySchema
+]);
+export type ServiceRequestPriority = z.infer<typeof ServiceRequestPrioritySchema>;
+
+export function isServiceRequestPriority(
+	maybePriority: unknown
+): maybePriority is ServiceRequestPriority {
+	return maybePriority == 'low' || maybePriority == 'medium' || maybePriority == 'high';
+}
+
 export const OpenServiceRequestStatusSchema = z.literal('open');
 export const ClosedServiceRequestStatusSchema = z.literal('closed');
 export const ServiceRequestStatusSchema = z.union([
@@ -273,7 +289,7 @@ export const ServiceRequestSchema = z
 		long: z.string(),
 		media_url: urlSchema.optional(),
 		selected_values: z.array(SelectedValuesSchema).optional(),
-		priority: z.string().optional()
+		priority: ServiceRequestPrioritySchema.optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -343,6 +359,7 @@ export type DeleteServiceParams = {
 export type GetServiceRequestsParams =
 	| ServiceRequestId[]
 	| {
+			servicePriority?: ServiceRequestPriority[];
 			serviceCode?: ServiceCode[] | undefined;
 			startDate?: string;
 			endDate?: string;
@@ -513,6 +530,7 @@ export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsPa
 	} else {
 		queryParams.append('page_size', '10');
 		queryParams.append('page', `${params.pageNumber ?? 0}`);
+		params.servicePriority && queryParams.append('priority', params.servicePriority?.join(','));
 		params.status && queryParams.append('status', params.status?.join(','));
 		params.serviceCode && queryParams.append('service_code', params.serviceCode?.join(','));
 		params.startDate && queryParams.append('start_date', params.startDate);
