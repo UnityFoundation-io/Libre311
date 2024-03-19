@@ -14,6 +14,7 @@
 	import { calendarIcon } from './Svg/outline/calendarIcon';
 	import { user } from './Svg/outline/user';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	const libre311 = useLibre311Service();
 
@@ -111,6 +112,10 @@
 		isUpdateButtonClicked = false;
 
 		goto(`/issues/table`);
+	}
+
+	$: if ($page.url) {
+		isUpdateButtonClicked = false;
 	}
 
 	$: name = createName(serviceRequest);
