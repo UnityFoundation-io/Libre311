@@ -21,6 +21,7 @@
 		ServiceCode,
 		ServiceRequest,
 		ServiceRequestId,
+		ServiceRequestPriority,
 		ServiceRequestStatus
 	} from '$lib/services/Libre311/Libre311';
 	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
@@ -47,6 +48,7 @@
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
+	let selectedServicePriority: ServiceRequestPriority[];
 	let selectedServiceCode: ServiceCode[] | undefined;
 	let isSearchFiltersOpen: boolean = false;
 	let statusInput: ServiceRequestStatus[];
@@ -122,6 +124,7 @@
 	}
 
 	async function handleFilterInput(
+		selectedServicePriority: ServiceRequestPriority[],
 		selectedServiceCode: ServiceCode[] | undefined,
 		statusInput: ServiceRequestStatus[],
 		startDate: Date,
@@ -129,6 +132,7 @@
 	) {
 		ctx.applyServiceRequestParams(
 			{
+				servicePriority: selectedServicePriority,
 				serviceCode: selectedServiceCode,
 				status: statusInput,
 				startDate: startDate?.toISOString(),
@@ -140,7 +144,13 @@
 
 	onMount(fetchServiceList);
 
-	$: handleFilterInput(selectedServiceCode, statusInput, startDate, endDate);
+	$: handleFilterInput(
+		selectedServicePriority,
+		selectedServiceCode,
+		statusInput,
+		startDate,
+		endDate
+	);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -181,6 +191,7 @@
 						<div class="flex flex-wrap justify-end" transition:slide|local={{ duration: 500 }}>
 							<div class="m-1">
 								<Select
+									bind:value={selectedServicePriority}
 									name="select-priority"
 									placeholder="Priority:"
 									multiple

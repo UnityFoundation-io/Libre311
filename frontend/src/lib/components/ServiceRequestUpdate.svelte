@@ -1,8 +1,15 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import type { ServiceRequest, ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
-	import { Button, DatePicker, Input, Select, TextArea } from 'stwui';
-	import { calendarIcon } from './Svg/outline/calendarIcon';
+	import { Badge, Button, Card, Input, Select, TextArea } from 'stwui';
+	import clockIcon from '$lib/assets/Clock.svg';
+	import type {
+    ServiceRequest,
+		ServiceRequestPriority,
+		ServiceRequestStatus
+	} from '$lib/services/Libre311/Libre311';
+  import { calendarIcon } from './Svg/outline/calendarIcon';
+	import Flag from '$lib/components/Svg/Flag.svelte';
+	import { toTimeStamp } from '$lib/utils/functions';
 	import type { SelectOption } from 'stwui/types';
 	import {
 		createInput,
@@ -80,7 +87,7 @@
 	function updatePriority(e: Event) {
 		const target = e.target as HTMLInputElement;
 		if (target.value) {
-			const priority = target.value;
+			const priority = target.value as ServiceRequestPriority;
 			serviceRequest.priority = priority;
 		}
 	}
