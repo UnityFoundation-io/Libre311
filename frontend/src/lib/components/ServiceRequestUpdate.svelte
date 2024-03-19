@@ -106,10 +106,7 @@
 	}
 
 	async function updateServiceRequest() {
-		if (agencyNameInput.value !== null || agencyNameInput.value !== undefined) {
-			let agency: string = new String(agencyNameInput.value).toString();
-			if (agency) agencyNameInput = optionalCoalesceNameValidator(createInput(agency));
-		}
+		agencyNameInput = optionalCoalesceStringValidator(agencyNameInput);
 		agencyEmailInput = optionalCoalesceEmailValidator(agencyEmailInput);
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
@@ -124,10 +121,6 @@
 			// Refresh Inputs
 			agencyNameInput.value = '';
 			return;
-		}
-
-		if (agencyNameInput.value !== undefined) {
-			agencyNameInput.value = '';
 		}
 
 		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
