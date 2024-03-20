@@ -14,7 +14,6 @@
 
 package app.service.servicerequest;
 
-import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.download.DownloadServiceRequestDTO;
 import app.dto.servicedefinition.AttributeValueDTO;
 import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
@@ -523,9 +522,9 @@ public class ServiceRequestService {
         return serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
     }
 
-    public StreamedFile getAllServiceRequests(DownloadRequestsArgumentsDTO downloadRequestsArgumentsDTO, String jurisdictionId) throws MalformedURLException {
+    public StreamedFile getAllServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) throws MalformedURLException {
 
-        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(downloadRequestsArgumentsDTO, jurisdictionId).stream()
+        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(requestDTO, jurisdictionId).stream()
                 .map(serviceRequest -> {
                     DownloadServiceRequestDTO dto = new DownloadServiceRequestDTO(serviceRequest);
 
@@ -572,65 +571,60 @@ public class ServiceRequestService {
         return new StreamedFile(tmpFile.toURI().toURL()).attach(now + ".csv");
     }
 
-    private List<ServiceRequest> getServiceRequests(DownloadRequestsArgumentsDTO requestDTO, String jurisdictionId) {
-        String serviceName = requestDTO.getServiceName();
+    private List<ServiceRequest> getServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+        String serviceRequestIds = requestDTO.getId();
+        List<String> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
 
-        Optional<ServiceRequest> byServiceName;
-        if (serviceName == null) {
-            byServiceName = Optional.empty();
-        } else {
-            byServiceName = serviceRequestRepository.findByServiceServiceNameIlikeAndJurisdictionId(serviceName, jurisdictionId);
+        if (StringUtils.hasText(serviceRequestIds)) {
+            List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
+            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId);
         }
 
-        return getJurisdictionServiceRequests(jurisdictionId, byServiceName, statuses, priorities, startDate, endDate);
+        return getJurisdictionServiceRequests(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate);
     }
 
-    private List<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, Optional<ServiceRequest> byServiceName, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate) {
-        String serviceCode;
-        if (byServiceName.isPresent() && status != null && priority != null) {
+    private List<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate) {
+        if (serviceCodes != null && status != null && priority != null) {
 //            code-status-priority: 1-1-1
-            serviceCode = byServiceName.get().getService().getServiceCode();
             if (startDate != null && endDate != null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCode, status, priority, startDate, endDate);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, priority, startDate, endDate);
             } else if (startDate != null && endDate == null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCode, status, priority, startDate);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, priority, startDate);
             } else if (startDate == null && endDate != null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCode, status, priority, endDate);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, priority, endDate);
             }
 
-            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndPriorityIn(jurisdictionId, serviceCode, status, priority);
+            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityIn(jurisdictionId, serviceCodes, status, priority);
         }
 
         if (priority == null) {
-            if (byServiceName.isPresent() && status != null) {
+            if (serviceCodes != null && status != null) {
 //                code-status-priority: 1-1-0
-                serviceCode = byServiceName.get().getService().getServiceCode();
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndDateCreatedBetween(jurisdictionId, serviceCode, status, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, startDate, endDate);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndDateCreatedAfter(jurisdictionId, serviceCode, status, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, startDate);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusInAndDateCreatedBefore(jurisdictionId, serviceCode, status, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, endDate);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndStatusIn(jurisdictionId, serviceCode, status);
-            } else if (byServiceName.isPresent() && status == null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusIn(jurisdictionId, serviceCodes, status);
+            } else if (serviceCodes != null && status == null) {
 //                code-status-priority: 1-0-0
-                serviceCode = byServiceName.get().getService().getServiceCode();
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBetween(jurisdictionId, serviceCode, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBetween(jurisdictionId, serviceCodes, startDate, endDate);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedAfter(jurisdictionId, serviceCode, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedAfter(jurisdictionId, serviceCodes, startDate);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndDateCreatedBefore(jurisdictionId, serviceCode, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBefore(jurisdictionId, serviceCodes, endDate);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCode(jurisdictionId, serviceCode);
-            } else if (byServiceName.isEmpty() && status != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeIn(jurisdictionId, serviceCodes);
+            } else if (serviceCodes == null && status != null) {
 //                code-status-priority: 0-1-0
                 if (startDate != null && endDate != null) {
                     return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedBetween(jurisdictionId, status, startDate, endDate);
@@ -643,7 +637,7 @@ public class ServiceRequestService {
                 return serviceRequestRepository.findByJurisdictionIdAndStatusIn(jurisdictionId, status);
             }
         } else {
-            if (byServiceName.isPresent() && status != null) {
+            if (serviceCodes != null && status != null) {
 //                code-status-priority: 0-1-1
                 if (startDate != null && endDate != null) {
                     return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, status, priority, startDate, endDate);
@@ -654,19 +648,18 @@ public class ServiceRequestService {
                 }
 
                 return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityIn(jurisdictionId, status, priority);
-            } else if (byServiceName.isPresent() && status == null) {
+            } else if (serviceCodes != null && status == null) {
 //                code-status-priority: 1-0-1
-                serviceCode = byServiceName.get().getService().getServiceCode();
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCode, priority, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, priority, startDate, endDate);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCode, priority, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, priority, startDate);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCode, priority, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, priority, endDate);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeAndPriorityIn(jurisdictionId, serviceCode, priority);
-            } else if (byServiceName.isEmpty() && status != null) {
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityIn(jurisdictionId, serviceCodes, priority);
+            } else if (serviceCodes == null && status != null) {
 //                  code-status-priority: 0-0-1
                 if (startDate != null && endDate != null) {
                     return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedBetween(jurisdictionId, priority, startDate, endDate);

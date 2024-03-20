@@ -548,6 +548,13 @@ public class JurisdictionAdminControllerTest {
         InputStream inputStream = new ByteArrayInputStream(body.get());
         String text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         assertNotNull(text);
+        try (CSVReader reader = new CSVReader(new StringReader(text))) {
+            reader.skip(1); // skip header
+            String[] cells = reader.readNext();
+            assertTrue(cells.length > 1);
+        } catch (CsvValidationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
