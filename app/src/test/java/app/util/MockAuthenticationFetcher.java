@@ -20,13 +20,14 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.filters.AuthenticationFetcher;
 import jakarta.inject.Singleton;
-import java.util.Map;
 import org.reactivestreams.Publisher;
+
+import java.util.Map;
 
 
 @Replaces(AuthenticationFetcher.class)
 @Singleton
-public class MockAuthenticationFetcher implements AuthenticationFetcher {
+public class MockAuthenticationFetcher implements AuthenticationFetcher<HttpRequest<?>> {
 
     static class MockAuthentication implements Authentication {
 

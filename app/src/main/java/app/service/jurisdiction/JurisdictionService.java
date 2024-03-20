@@ -23,11 +23,14 @@ import app.model.jurisdiction.LatLong;
 import app.model.jurisdiction.LatLongRepository;
 import io.micronaut.context.annotation.Property;
 import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -75,12 +78,14 @@ public class JurisdictionService {
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
 
-        List<LatLong> bounds = saveNewBounds(requestDTO.getBounds(), savedJurisdiction);
         JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdictionRepository.update(savedJurisdiction));
-        jurisdictionDTO.setBounds(bounds.stream()
-                .sorted(Comparator.comparing(LatLong::getOrderPosition))
-                .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
-                .toArray(Double[][]::new));
+        if (requestDTO.getBounds() != null) {
+            List<LatLong> bounds = saveNewBounds(requestDTO.getBounds(), savedJurisdiction);
+            jurisdictionDTO.setBounds(bounds.stream()
+                    .sorted(Comparator.comparing(LatLong::getOrderPosition))
+                    .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
+                    .toArray(Double[][]::new));
+        }
 
         return jurisdictionDTO;
     }

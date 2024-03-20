@@ -34,7 +34,10 @@ import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.servicedefinition.*;
+import app.model.servicedefinition.AttributeValue;
+import app.model.servicedefinition.AttributeValueRepository;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.model.user.User;
@@ -71,7 +74,6 @@ import java.util.Optional;
 
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.*;
-import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest(transactional = false)

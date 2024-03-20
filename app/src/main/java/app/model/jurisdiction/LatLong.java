@@ -14,7 +14,7 @@
 
 package app.model.jurisdiction;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "boundary_coordinates")

@@ -17,7 +17,7 @@ package app.dto.storage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 @Introspected
 public class PhotoUploadDTO {

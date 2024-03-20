@@ -17,8 +17,7 @@ package app.util;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.servicerequest.ServiceRequestRepository;
 import jakarta.inject.Singleton;
-
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 @Singleton
 public class DbCleanup {

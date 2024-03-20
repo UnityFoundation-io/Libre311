@@ -7,6 +7,7 @@ import io.micronaut.http.server.exceptions.response.ErrorContext;
 import io.micronaut.http.server.exceptions.response.ErrorResponseProcessor;
 import io.micronaut.http.server.exceptions.response.HateoasErrorResponseProcessor;
 import jakarta.inject.Singleton;
+
 import java.util.Optional;
 
 
