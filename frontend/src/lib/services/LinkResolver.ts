@@ -45,6 +45,9 @@ export class LinkResolver {
 	issueDetailsMobile(url: URL, id: ServiceRequestId) {
 		return this.createIssueLink(`/issues/list/${id}`, url);
 	}
+	issueDetailsTable(url: URL, id: ServiceRequestId) {
+		return this.createIssueLink(`/issues/table/${id}`, url);
+	}
 
 	createIssuePageGetCurrentStep(url: URL): CreateServiceRequestSteps {
 		return Number(url.searchParams.get('step')) ?? 0;
