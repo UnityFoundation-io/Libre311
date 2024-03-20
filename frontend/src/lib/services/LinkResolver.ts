@@ -31,7 +31,7 @@ export class LinkResolver {
 		const searchParams = this.copySearchParams(url.searchParams);
 		if (pagination.totalPages === pagination.pageNumber + 1) return;
 		searchParams.set('pageNumber', (pagination.pageNumber + 1).toString());
-		return url.pathname.replace(/\/\d+/, '') + '?' + searchParams.toString();
+		return '/issues/table?' + searchParams.toString();
 	}
 
 	prevIssuesTablePage(pagination: Pagination, url: URL) {
@@ -40,7 +40,7 @@ export class LinkResolver {
 		}
 		const searchParams = this.copySearchParams(url.searchParams);
 		searchParams.set('pageNumber', (pagination.pageNumber - 1).toString());
-		return url.pathname.replace(/\/\d+/, '') + '?' + searchParams.toString();
+		return '/issues/table?' + searchParams.toString();
 	}
 
 	issuesMap(url: URL) {
