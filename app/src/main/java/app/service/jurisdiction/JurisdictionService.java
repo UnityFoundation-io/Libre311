@@ -78,12 +78,14 @@ public class JurisdictionService {
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
 
-        List<LatLong> bounds = saveNewBounds(requestDTO.getBounds(), savedJurisdiction);
         JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdictionRepository.update(savedJurisdiction));
-        jurisdictionDTO.setBounds(bounds.stream()
-                .sorted(Comparator.comparing(LatLong::getOrderPosition))
-                .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
-                .toArray(Double[][]::new));
+        if (requestDTO.getBounds() != null) {
+            List<LatLong> bounds = saveNewBounds(requestDTO.getBounds(), savedJurisdiction);
+            jurisdictionDTO.setBounds(bounds.stream()
+                    .sorted(Comparator.comparing(LatLong::getOrderPosition))
+                    .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
+                    .toArray(Double[][]::new));
+        }
 
         return jurisdictionDTO;
     }
