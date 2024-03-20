@@ -17,15 +17,16 @@ package app.dto.servicerequest;
 import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Serdeable
+@Introspected
 public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     @JsonProperty("service_request_id")
@@ -51,15 +52,19 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     private String serviceNotice;
 
     @JsonProperty("requested_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant dateCreated;
 
     @JsonProperty("updated_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant dateUpdated;
 
     @JsonProperty("expected_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant expectedDate;
 
     @JsonProperty("closed_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant closedDate;
 
     @JsonProperty("address")

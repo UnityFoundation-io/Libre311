@@ -19,13 +19,13 @@ import app.model.servicerequest.ServiceRequestStatus;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.annotation.QueryValue;
-import io.micronaut.serde.annotation.Serdeable;
+
 import jakarta.validation.Valid;
 
 import java.time.Instant;
 import java.util.List;
 
-@Serdeable
+@Introspected
 public class GetServiceRequestsDTO {
 
     @Nullable

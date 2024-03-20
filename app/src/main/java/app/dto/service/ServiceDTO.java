@@ -17,9 +17,9 @@ package app.dto.service;
 import app.model.service.Service;
 import app.model.service.ServiceType;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
 
-@Serdeable
+@Introspected
 public class ServiceDTO {
 
     private Long id;

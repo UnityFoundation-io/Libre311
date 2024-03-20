@@ -15,11 +15,12 @@
 package app.dto.servicedefinition;
 
 import app.model.service.AttributeDataType;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-@Serdeable
+@Introspected
 public class CreateServiceDefinitionAttributeDTO extends UpdateServiceDefinitionAttributeDTO {
     public CreateServiceDefinitionAttributeDTO() {
     }

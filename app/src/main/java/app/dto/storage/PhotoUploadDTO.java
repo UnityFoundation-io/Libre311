@@ -15,10 +15,11 @@
 package app.dto.storage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
+
 import jakarta.validation.constraints.NotBlank;
 
-@Serdeable
+@Introspected
 public class PhotoUploadDTO {
 
     @NotBlank

@@ -15,9 +15,9 @@
 package app.dto.group;
 
 import app.model.service.group.ServiceGroup;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
 
-@Serdeable
+@Introspected
 public class GroupDTO {
 
     private Long id;

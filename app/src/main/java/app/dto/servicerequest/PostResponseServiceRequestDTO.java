@@ -16,9 +16,7 @@ package app.dto.servicerequest;
 
 import app.model.servicerequest.ServiceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.serde.annotation.Serdeable;
 
-@Serdeable
 public class PostResponseServiceRequestDTO implements ServiceRequestResponseDTO {
 
     @JsonProperty("service_request_id")

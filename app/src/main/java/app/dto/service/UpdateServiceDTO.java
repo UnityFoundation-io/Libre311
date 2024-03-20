@@ -15,9 +15,9 @@
 package app.dto.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
 
-@Serdeable
+@Introspected
 public class UpdateServiceDTO {
 
     @JsonProperty("service_code")

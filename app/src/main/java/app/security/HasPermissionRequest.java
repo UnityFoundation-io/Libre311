@@ -14,13 +14,14 @@
 
 package app.security;
 
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
+
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Serdeable
+@Introspected
 public class HasPermissionRequest {
 
     @NotNull

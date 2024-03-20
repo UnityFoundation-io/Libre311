@@ -18,12 +18,13 @@ import app.model.service.AttributeDataType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
+
 import jakarta.validation.constraints.Min;
 
 import java.util.List;
 
-@Serdeable
+@Introspected
 public class UpdateServiceDefinitionAttributeDTO {
 
     private String code;

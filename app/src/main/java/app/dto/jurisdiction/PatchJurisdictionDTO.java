@@ -15,12 +15,13 @@
 package app.dto.jurisdiction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-@Serdeable
+@Introspected
 public class PatchJurisdictionDTO {
 
     @NotEmpty

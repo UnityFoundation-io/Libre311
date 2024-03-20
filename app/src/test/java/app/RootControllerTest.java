@@ -434,7 +434,7 @@ public class RootControllerTest {
     @Test
     public void canGetDiscoveryInfoJson() {
         HttpRequest<?> request = HttpRequest.GET("/discovery");
-        HttpResponse<?> response = client.toBlocking().exchange(request, DiscoveryDTO.class);
+        HttpResponse<?> response = client.toBlocking().exchange(request, Map.class);
         assertEquals(HttpStatus.OK, response.status());
 
         Optional<DiscoveryDTO> bodyOptional = response.getBody(DiscoveryDTO.class);
@@ -491,7 +491,7 @@ public class RootControllerTest {
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
-        return client.toBlocking().exchange(request, PostResponseServiceRequestDTO[].class);
+        return client.toBlocking().exchange(request, Map.class);
     }
 
     private HttpResponse<?> createServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Map attributes, String jurisdictionId) {
@@ -501,6 +501,6 @@ public class RootControllerTest {
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
                 .header("Authorization", "Bearer token.text.here")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
-        return client.toBlocking().exchange(request, PostResponseServiceRequestDTO[].class);
+        return client.toBlocking().exchange(request, Map.class);
     }
 }

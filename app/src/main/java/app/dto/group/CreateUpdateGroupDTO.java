@@ -14,10 +14,11 @@
 
 package app.dto.group;
 
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.core.annotation.Introspected;
+
 import jakarta.validation.constraints.NotBlank;
 
-@Serdeable
+@Introspected
 public class CreateUpdateGroupDTO {
 
     @NotBlank
