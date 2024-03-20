@@ -27,6 +27,22 @@ export class LinkResolver {
 		return url.pathname + '?' + searchParams.toString();
 	}
 
+	nextIssuesTablePage(pagination: Pagination, url: URL) {
+		const searchParams = this.copySearchParams(url.searchParams);
+		if (pagination.totalPages === pagination.pageNumber + 1) return;
+		searchParams.set('pageNumber', (pagination.pageNumber + 1).toString());
+		return '/issues/table?' + searchParams.toString();
+	}
+
+	prevIssuesTablePage(pagination: Pagination, url: URL) {
+		if (pagination.pageNumber === 0) {
+			return;
+		}
+		const searchParams = this.copySearchParams(url.searchParams);
+		searchParams.set('pageNumber', (pagination.pageNumber - 1).toString());
+		return '/issues/table?' + searchParams.toString();
+	}
+
 	issuesMap(url: URL) {
 		return this.createIssueLink('/issues/map', url);
 	}
@@ -44,6 +60,9 @@ export class LinkResolver {
 	}
 	issueDetailsMobile(url: URL, id: ServiceRequestId) {
 		return this.createIssueLink(`/issues/list/${id}`, url);
+	}
+	issueDetailsTable(url: URL, id: ServiceRequestId) {
+		return this.createIssueLink(`/issues/table/${id}`, url);
 	}
 
 	createIssuePageGetCurrentStep(url: URL): CreateServiceRequestSteps {
