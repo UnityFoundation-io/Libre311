@@ -16,6 +16,7 @@ package app.dto.servicerequest;
 
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
+import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.annotation.QueryValue;
