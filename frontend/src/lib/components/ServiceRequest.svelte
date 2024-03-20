@@ -69,7 +69,7 @@
 </script>
 
 <div class="flex h-full">
-	<Card class="m-2 overflow-y-auto">
+	<Card class="m-2 w-full overflow-y-auto">
 		<div class="flex h-full w-full flex-col" slot="content">
 			<div class="m-2 flex-grow">
 				<!-- ID & STATUS -->
