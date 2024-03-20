@@ -57,7 +57,7 @@
 	let endDate: Date;
 
 	function selectRow(service_request_id: ServiceRequestId) {
-		goto(`/issues/table/${service_request_id}`);
+		goto(linkResolver.issueDetailsTable($page.url, service_request_id));
 		return;
 	}
 
@@ -165,11 +165,11 @@
 				<div>
 					<Pagination
 						pagination={$serviceRequestsRes.value.metadata.pagination}
-						nextPage={linkResolver.nextIssuesPage(
+						nextPage={linkResolver.nextIssuesTablePage(
 							$serviceRequestsRes.value.metadata.pagination,
 							$page.url
 						)}
-						prevPage={linkResolver.prevIssuesPage(
+						prevPage={linkResolver.prevIssuesTablePage(
 							$serviceRequestsRes.value.metadata.pagination,
 							$page.url
 						)}
@@ -178,7 +178,7 @@
 			</div>
 
 			<div
-				class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
+				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
