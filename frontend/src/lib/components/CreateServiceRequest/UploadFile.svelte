@@ -132,15 +132,16 @@
 		</Button>
 	</div>
 
-	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
-		<div class="flex-col">
+	<div slot="is-mobile-or-tablet" class="flex h-full w-full flex-col">
+		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
 				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
 					<img class="w-full" src={imageData} alt="preview" />
 				</div>
 
-				<div class="grid grid-rows-2 gap-2">
+				<div class="grid grid-rows-3 gap-2">
 					<input
+						class="w-full"
 						type="file"
 						name="photo"
 						id="camera-roll-btn-reupload"
@@ -152,6 +153,7 @@
 					<label for="camera-roll-btn-reupload">{messages['photo']['change_image']}</label>
 
 					<Button
+						class="w-full"
 						type="ghost"
 						on:click={() => {
 							dispatch('stepChange');
@@ -159,9 +161,19 @@
 					>
 						{messages['photo']['use_current_image']}
 					</Button>
+
+					<Button
+						class="w-full"
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange', { file: undefined });
+						}}
+					>
+						{messages['photo']['no_upload']}
+					</Button>
 				</div>
 			{:else}
-				<div class="mb-2 grid">
+				<div class="grid grid-rows-2 gap-2">
 					<input
 						type="file"
 						name="photo"
@@ -171,25 +183,28 @@
 						bind:this={input}
 						on:change={onChange}
 					/>
-					<label for="camera-roll-btn">{messages['photo']['upload']}</label>
+					<label class="w-full" for="camera-roll-btn">{messages['photo']['upload']}</label>
+
+					<Button
+						class="w-full"
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange', { file: undefined });
+						}}
+					>
+						{messages['photo']['no_upload']}
+					</Button>
 				</div>
 			{/if}
-
-			<div class="grid grid-rows-2 gap-2">
-				<Button
-					type="ghost"
-					on:click={() => {
-						dispatch('stepChange', { file: undefined });
-					}}
-				>
-					{messages['photo']['no_upload']}
-				</Button>
-
-				<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
-					{messages['photo']['back']}
-				</Button>
-			</div>
 		</div>
+
+		<Button
+			class="mb-4 flex w-14 justify-start"
+			type="ghost"
+			href={linkResolver.createIssuePagePrevious($page.url)}
+		>
+			{messages['photo']['back']}
+		</Button>
 	</div>
 </Breakpoint>
 
