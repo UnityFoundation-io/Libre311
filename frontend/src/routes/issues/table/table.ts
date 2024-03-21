@@ -33,8 +33,8 @@ export const columns: TableColumn[] = [
 		class: 'hidden xl:table-cell w-[14%]'
 	},
 	{
-		column: 'created_at',
-		label: 'Created',
+		column: 'reported_at',
+		label: 'Reported',
 		placement: 'center',
 		class: 'hidden lg:table-cell w-[14%]'
 	},
