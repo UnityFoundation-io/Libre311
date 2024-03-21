@@ -23,7 +23,6 @@
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 	import { createEventDispatcher } from 'svelte';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
-	import { optional } from 'zod';
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
@@ -38,6 +37,9 @@
 
 	let statusInput = createInput<ServiceRequestStatus>(serviceRequest.status);
 	let priorityInput = createInput<ServiceRequestPriority | undefined>(serviceRequest.priority);
+	let expectedDateInput = createInput<Date | undefined>(
+		serviceRequest.expected_datetime ? new Date(serviceRequest.expected_datetime) : undefined
+	);
 	let agencyNameInput = createInput<string | undefined>(serviceRequest.agency_responsible);
 	let agencyEmailInput = createInput<string | undefined>(serviceRequest.agency_email);
 	let serviceNoticeInput = createInput<string | undefined>(serviceRequest.service_notice);
@@ -46,10 +48,17 @@
 	$: hasUserInput =
 		statusInput.value != serviceRequest.status ||
 		priorityInput.value != serviceRequest.priority ||
+		userChangedDate(expectedDateInput.value) ||
 		agencyNameInput.value != serviceRequest.agency_responsible ||
 		agencyEmailInput.value != serviceRequest.agency_email ||
 		serviceNoticeInput.value != serviceRequest.service_notice ||
 		statusNotesInput.value != serviceRequest.status_notes;
+
+	function userChangedDate(expectedDateInputValue: Date | undefined) {
+		const currentDate = serviceRequest.expected_datetime;
+		const expectedDate = expectedDateInputValue?.toISOString().replace(/\.\d+/g, '');
+		return currentDate != expectedDate;
+	}
 
 	const statusOptions: SelectOption[] = [
 		{
@@ -102,6 +111,7 @@
 
 		if (statusInput.type == 'invalid') return;
 		if (priorityInput.type == 'invalid') return;
+		if (expectedDateInput.type == 'invalid') return;
 		if (agencyNameInput.type == 'invalid') return;
 		if (agencyEmailInput.type == 'invalid') return;
 		if (serviceNoticeInput.type == 'invalid') return;
@@ -111,6 +121,7 @@
 			...s,
 			status: statusInput.value,
 			priority: priorityInput.value,
+			expected_datetime: expectedDateInput.value?.toISOString(),
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,
 			service_notice: serviceNoticeInput.value,
@@ -123,7 +134,7 @@
 
 <form>
 	<!-- UPDATE EXPECTED TIMESTAMP -->
-	<DatePicker name="datetime" bind:value={expectedDatetime}>
+	<DatePicker name="datetime" bind:value={expectedDateInput.value}>
 		<DatePicker.Label slot="label">
 			<strong class="text-base">
 				{messages['serviceRequest']['expected_datetime']}

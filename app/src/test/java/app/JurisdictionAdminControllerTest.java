@@ -504,8 +504,8 @@ public class JurisdictionAdminControllerTest {
                 .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=fakecity.gov",
                         Map.of(
                                 "jurisdiction_id", "fakecity.gov",
-                                "closed_date", "2023-01-25T13:15:30Z",
-                                "expected_date", "2023-01-15T13:15:30Z"
+                                "closed_datetime", "2023-01-25T13:15:30Z",
+                                "expected_datetime", "2023-01-15T13:15:30Z"
                         ))
                 .header("Authorization", "Bearer token.text.here");
 

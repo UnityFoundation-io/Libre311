@@ -47,11 +47,11 @@ public class PatchServiceRequestDTO {
     @JsonProperty("agency_responsible")
     private String agencyResponsible;
 
-    @JsonProperty("expected_date")
+    @JsonProperty("expected_datetime")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant expectedDate;
 
-    @JsonProperty("closed_date")
+    @JsonProperty("closed_datetime")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant closedDate;
 
