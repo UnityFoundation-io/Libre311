@@ -322,12 +322,6 @@
 
 										<Table.Body.Row.Cell column={6}>
 											<div class="flex items-center justify-center">
-												{toAbbreviatedTimeStamp(item.updated_datetime)}
-											</div>
-										</Table.Body.Row.Cell>
-
-										<Table.Body.Row.Cell column={7}>
-											<div class="flex items-center justify-center">
 												{#if item.expected_datetime}
 													{toAbbreviatedTimeStamp(item.expected_datetime)}
 												{:else}
