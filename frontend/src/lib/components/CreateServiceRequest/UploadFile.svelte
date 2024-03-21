@@ -68,7 +68,7 @@
 					<img class="w-full" src={imageData} alt="preview" />
 				</div>
 
-				<div class="grid grid-rows-3 gap-2">
+				<div class="grid w-full grid-rows-3 gap-2">
 					<input
 						type="file"
 						name="photo"
@@ -139,7 +139,7 @@
 					<img class="w-full" src={imageData} alt="preview" />
 				</div>
 
-				<div class="grid grid-rows-3 gap-2">
+				<div class="grid w-full grid-rows-3 gap-2">
 					<input
 						class="w-full"
 						type="file"
