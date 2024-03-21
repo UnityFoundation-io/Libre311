@@ -61,14 +61,14 @@
 </script>
 
 <Breakpoint>
-	<div slot="is-desktop" class="flex h-full w-full items-center justify-center">
-		<div class="flex-col">
+	<div slot="is-desktop" class="flex h-full w-full flex-col">
+		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
 				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
 					<img class="w-full" src={imageData} alt="preview" />
 				</div>
 
-				<div class="grid grid-rows-4 gap-2">
+				<div class="grid grid-rows-3 gap-2">
 					<input
 						type="file"
 						name="photo"
@@ -97,23 +97,21 @@
 					>
 						{messages['photo']['no_upload']}
 					</Button>
-
-					<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
-						{messages['photo']['back']}
-					</Button>
 				</div>
 			{:else}
-				<div class="mb-4">
-					<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
-						<FilePicker.Icon slot="icon" data={uploadIcon} />
-						<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
-						<FilePicker.Description slot="description">Drag & Drop your file</FilePicker.Description
-						>
-					</FilePicker>
-				</div>
+				<div class="items-center justify-center">
+					<div class="mb-4">
+						<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
+							<FilePicker.Icon slot="icon" data={uploadIcon} />
+							<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
+							<FilePicker.Description slot="description"
+								>Drag & Drop your file</FilePicker.Description
+							>
+						</FilePicker>
+					</div>
 
-				<div class="grid grid-rows-2 gap-2">
 					<Button
+						class="w-full"
 						type="ghost"
 						on:click={() => {
 							dispatch('stepChange', { file: undefined });
@@ -121,13 +119,17 @@
 					>
 						{messages['photo']['no_upload']}
 					</Button>
-
-					<Button type="link" href={linkResolver.createIssuePagePrevious($page.url)}>
-						{messages['photo']['back']}
-					</Button>
 				</div>
 			{/if}
 		</div>
+
+		<Button
+			class="mb-4 flex w-14 justify-start"
+			type="ghost"
+			href={linkResolver.createIssuePagePrevious($page.url)}
+		>
+			{messages['photo']['back']}
+		</Button>
 	</div>
 
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full items-center justify-center">
