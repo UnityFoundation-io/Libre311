@@ -14,7 +14,6 @@
 
 package app;
 
-import app.dto.download.DownloadRequestsArgumentsDTO;
 import app.dto.group.GroupDTO;
 import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
@@ -22,6 +21,7 @@ import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicedefinition.CreateServiceDefinitionAttributeDTO;
 import app.dto.servicedefinition.UpdateServiceDefinitionAttributeDTO;
+import app.dto.servicerequest.GetServiceRequestsDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.dto.servicedefinition.ServiceDefinitionDTO;
@@ -153,7 +153,7 @@ public class JurisdictionAdminController {
     @Get(value = "/requests/download{?jurisdiction_id}")
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
-    public StreamedFile downloadServiceRequests(@Valid @RequestBean DownloadRequestsArgumentsDTO requestDTO,
+    public StreamedFile downloadServiceRequests(@Valid @RequestBean GetServiceRequestsDTO requestDTO,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws MalformedURLException {
         return serviceRequestService.getAllServiceRequests(requestDTO, jurisdiction_id);
     }

@@ -41,7 +41,7 @@
 			<li class="m-3">
 				<ServiceRequestPreview
 					{serviceRequest}
-					detailsLink={`/issues/table/${serviceRequest.service_request_id}`}
+					detailsLink={linkResolver.issueDetailsTable($page.url, serviceRequest.service_request_id)}
 				/>
 			</li>
 		{/each}
