@@ -14,72 +14,83 @@
 
 package app.service.storage;
 
-import app.dto.storage.PhotoUploadDTO;
+
+import app.exception.Libre311BaseException;
 import app.recaptcha.ReCaptchaService;
 import app.safesearch.GoogleImageSafeSearchService;
+import com.google.cloud.storage.Blob;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
-import io.micronaut.objectstorage.ObjectStorageOperations;
+import io.micronaut.http.multipart.CompletedFileUpload;
+import io.micronaut.http.uri.UriBuilder;
+import io.micronaut.objectstorage.googlecloud.GoogleCloudStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
+import java.io.IOException;
 import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.Valid;
-import java.util.Base64;
-import java.util.UUID;
-
 @Singleton
 public class StorageService {
+
+    static class UnsupportedMediaTypeException extends Libre311BaseException {
+
+        public UnsupportedMediaTypeException(MediaType mediaType) {
+            super(String.format("The MediaType: %s is not supported.", mediaType),
+                HttpStatus.BAD_REQUEST);
+        }
+
+        public UnsupportedMediaTypeException() {
+            super("MediaType missing from file upload but is required.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(StorageService.class);
-    private final ObjectStorageOperations<?, ?, ?> objectStorage;
+    private final GoogleCloudStorageOperations objectStorage;
     private final ReCaptchaService reCaptchaService;
     private final GoogleImageSafeSearchService googleImageClassificationService;
-    private final StorageUrlUtil storageUrlUtil;
 
     private final Set<MediaType> supportedMediaTypes = Set.of(MediaType.IMAGE_PNG_TYPE,
         MediaType.IMAGE_JPEG_TYPE, MediaType.IMAGE_WEBP_TYPE);
 
-    public StorageService(ObjectStorageOperations<?, ?, ?> objectStorage, ReCaptchaService reCaptchaService, GoogleImageSafeSearchService googleImageClassificationService, StorageUrlUtil storageUrlUtil) {
+    public StorageService(GoogleCloudStorageOperations objectStorage,
+        ReCaptchaService reCaptchaService,
+        GoogleImageSafeSearchService googleImageClassificationService) {
         this.objectStorage = objectStorage;
         this.reCaptchaService = reCaptchaService;
         this.googleImageClassificationService = googleImageClassificationService;
-        this.storageUrlUtil = storageUrlUtil;
     }
 
-    public StorageService() {
-        this.storageUrlUtil = null;
-        this.objectStorage = null;
-        this.reCaptchaService = null;
-        this.googleImageClassificationService = null;
-    }
 
-    public String upload(@Valid PhotoUploadDTO photoUploadDTO) {
-        reCaptchaService.verifyReCaptcha(photoUploadDTO.getgRecaptchaResponse());
-
-        String base64Image = photoUploadDTO.getImage();
-        String dataUri = base64Image.split(",")[0];
-        MediaType mediaType = MediaType.of(dataUri.substring(dataUri.indexOf(":")+1, dataUri.indexOf(";")));
-
+    public String upload(CompletedFileUpload file, String gRecaptchaResponse) {
+        reCaptchaService.verifyReCaptcha(gRecaptchaResponse);
+        MediaType mediaType = file.getContentType().orElseThrow(UnsupportedMediaTypeException::new);
         if (!supportedMediaTypes.contains(mediaType)) {
-            LOG.error(String.format("File media type must be one of the following: %s",
-                supportedMediaTypes));
-            return null;
-        }
-        String extension = mediaType.getExtension();
-
-        String image = base64Image.split(",")[1];
-
-        if (googleImageClassificationService.imageIsExplicit(image)) {
-            LOG.error("Image does not meet SafeSearch criteria.");
-            return null;
+            throw new UnsupportedMediaTypeException(mediaType);
         }
 
-        byte[] bytes = Base64.getDecoder().decode(image);
-        UploadRequest request = UploadRequest.fromBytes(bytes, UUID.randomUUID()+"."+extension);
-        UploadResponse<?> response = objectStorage.upload(request);
+        byte[] fileBytes;
+        try {
+            fileBytes = file.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        return storageUrlUtil.getObjectUrlString(response.getKey());
+        googleImageClassificationService.preventExplicitImage(fileBytes);
+        UploadResponse<Blob> response = objectStorage.upload(
+            UploadRequest.fromBytes(fileBytes, createName(mediaType)));
+        return getPublicURL(response.getNativeResponse());
+    }
+
+    private static String createName(MediaType mediaType) {
+        return UUID.randomUUID() + "." + mediaType.getExtension();
+    }
+
+    private static String getPublicURL(Blob res) {
+        return UriBuilder.of("https://storage.googleapis.com").path(res.getBucket())
+            .path(res.getName()).build().toString();
     }
 }
