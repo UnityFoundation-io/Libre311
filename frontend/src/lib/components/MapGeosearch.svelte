@@ -35,8 +35,7 @@
 	const control = GeoSearchControl({
 		provider,
 		style: 'bar',
-		showMarker: false,
-		retainZoomLevel: true
+		showMarker: false
 	});
 
 	const dispatch = createEventDispatcher<{
