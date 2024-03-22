@@ -5,7 +5,7 @@ micronaut:
   server:
     multipart:
       enabled: true
-      max-file-size: 5_000_000 # 5mb
+      max-file-size: 8_000_000 # 8mb
   application:
     name: Libre311
   object-storage:
