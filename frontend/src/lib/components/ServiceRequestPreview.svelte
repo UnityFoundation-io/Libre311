@@ -1,23 +1,13 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Card } from 'stwui';
+	import { Card } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import Flag from './Svg/Flag.svelte';
+	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let detailsLink: string;
-
-	function getStatus(serviceRequest: ServiceRequest) {
-		switch (serviceRequest.status) {
-			case 'closed': {
-				return 'success';
-			}
-			case 'open': {
-				return 'warn';
-			}
-		}
-	}
 </script>
 
 <Card>
@@ -26,9 +16,7 @@
 			<h2 class="float-left text-base tracking-wide">
 				#{serviceRequest.service_request_id}
 			</h2>
-			<Badge class="float-right text-sm" type={getStatus(serviceRequest)}
-				>{serviceRequest.status}</Badge
-			>
+			<ServiceRequestStatusBadge class="float-right text-sm" status={serviceRequest.status} />
 		</div>
 
 		<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>

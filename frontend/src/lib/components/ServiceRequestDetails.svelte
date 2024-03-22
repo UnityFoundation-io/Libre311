@@ -1,27 +1,15 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card } from 'stwui';
+	import { Button, Card } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
 	import Flag from './Svg/Flag.svelte';
+	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
-
-	function getStatus(serviceRequest: ServiceRequest) {
-		switch (serviceRequest.status) {
-			case 'closed': {
-				return 'success';
-			}
-			case 'open': {
-				return 'warn';
-			}
-			default:
-				return 'error';
-		}
-	}
 </script>
 
 <div class="flex h-full">
@@ -33,9 +21,7 @@
 						#{serviceRequest.service_request_id}
 					</h2>
 
-					<Badge class="float-right text-sm" type={getStatus(serviceRequest)}
-						>{serviceRequest.status}
-					</Badge>
+					<ServiceRequestStatusBadge class="float-right text-sm" status={serviceRequest.status} />
 				</div>
 
 				<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>
