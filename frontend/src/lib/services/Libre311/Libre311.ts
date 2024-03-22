@@ -352,8 +352,6 @@ export type GetServiceRequestsParams =
 
 const latLngTupleSchema = z.tuple([z.number(), z.number()]);
 
-type LatLngTuple = z.infer<typeof latLngTupleSchema>;
-
 const JurisdictionConfigSchema = z
 	.object({
 		name: z.string(),
@@ -545,9 +543,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
 		console.log({ props });
 		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
-		// todo remove once backend returns bounds info
-		const jurisdictionBounds: LatLngTuple[] = [[41.31742721517005, -72.93918211751856]];
-		jurisdictionConfig.bounds = jurisdictionBounds;
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
 	}
 
@@ -749,13 +744,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 				`Supported image types are ${Libre311ServiceImpl.supportedImageTypes.join(', ')}`
 			);
 		}
+		const formData = new FormData();
+		formData.append('file', file);
 		const token = await this.recaptchaService.execute('upload_image');
-		const asDataUrl = await this.convertToDataURL(file);
-		const res = await this.axiosInstance.post<unknown>('/image', {
-			image: asDataUrl,
-			g_recaptcha_response: token
-		});
+		formData.append('g_recaptcha_response', token);
 
+		const res = await this.axiosInstance.post<unknown>('/image', formData);
 		return urlSchema.parse(res.data);
 	}
 
@@ -768,24 +762,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 		} else {
 			this.axiosInstance.interceptors.request.eject(this.authTokenInterceptorId);
 		}
-	}
-
-	private async convertToDataURL(file: File): Promise<string> {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.addEventListener(
-				'load',
-				() => {
-					if (typeof reader.result === 'string') {
-						resolve(reader.result);
-					} else {
-						reject('Unsupported Operation');
-					}
-				},
-				false
-			);
-			reader.readAsDataURL(file);
-		});
 	}
 }
 
