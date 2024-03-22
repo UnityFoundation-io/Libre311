@@ -2,6 +2,8 @@
 	import L from 'leaflet';
 	import Closed from '$lib/assets/closed.png';
 	import Open from '$lib/assets/open.png';
+	import InProgress from '$lib/assets/in_progress.png';
+	import Assigned from '$lib/assets/assigned.png';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import { iconPositionOpts } from '$lib/utils/functions';
 	import MapMarker from './MapMarker.svelte';
@@ -10,7 +12,9 @@
 
 	const circleLookupMap = {
 		closed: Closed,
-		open: Open
+		open: Open,
+		in_progress: InProgress,
+		assigned: Assigned
 	};
 
 	const icon = L.icon({
