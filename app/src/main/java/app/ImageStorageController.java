@@ -14,18 +14,18 @@
 
 package app;
 
-import app.dto.storage.PhotoUploadDTO;
 import app.service.storage.StorageService;
-import io.micronaut.http.annotation.Body;
+import io.micronaut.http.MediaType;
+import io.micronaut.http.annotation.Consumes;
 import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Part;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.http.multipart.CompletedFileUpload;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import javax.validation.Valid;
 
 @Controller("/api/image")
 @Secured(SecurityRule.IS_ANONYMOUS)
@@ -39,8 +39,10 @@ public class ImageStorageController {
     }
 
     @Post
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ExecuteOn(TaskExecutors.IO)
-    public String upload(@Valid @Body PhotoUploadDTO photoUploadDTO) {
-        return storageService.upload(photoUploadDTO);
+    public String upload(@Part("file") CompletedFileUpload file,
+        @Part("g_recaptcha_response") String gRecaptchaResponse) {
+        return storageService.upload(file, gRecaptchaResponse);
     }
 }
