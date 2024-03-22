@@ -1,6 +1,6 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Badge, Button, Card } from 'stwui';
+	import { Button, Card } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
@@ -11,6 +11,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
+	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -26,19 +27,6 @@
 	}
 
 	$: name = createName(serviceRequest);
-
-	function getStatus(serviceRequest: ServiceRequest) {
-		switch (serviceRequest.status) {
-			case 'closed': {
-				return 'success';
-			}
-			case 'open': {
-				return 'warn';
-			}
-			default:
-				return 'error';
-		}
-	}
 
 	function createName(serviceRequest: UpdateSensitiveServiceRequestRequest) {
 		if (serviceRequest.first_name || serviceRequest.last_name)
@@ -78,9 +66,7 @@
 						#{serviceRequest.service_request_id}
 					</h2>
 
-					<Badge class="float-right text-sm" type={getStatus(serviceRequest)}
-						>{serviceRequest.status}
-					</Badge>
+					<ServiceRequestStatusBadge class="float-right text-sm" status={serviceRequest.status} />
 				</div>
 
 				<!-- REQUESTED TIMESTAMP -->

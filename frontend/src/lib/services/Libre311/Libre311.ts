@@ -251,9 +251,13 @@ export function isServiceRequestPriority(
 
 export const OpenServiceRequestStatusSchema = z.literal('open');
 export const ClosedServiceRequestStatusSchema = z.literal('closed');
+export const AssignedServiceRequestStatusSchema = z.literal('assigned');
+export const InProgressServiceRequestStatusSchema = z.literal('in_progress');
 export const ServiceRequestStatusSchema = z.union([
 	OpenServiceRequestStatusSchema,
-	ClosedServiceRequestStatusSchema
+	ClosedServiceRequestStatusSchema,
+	AssignedServiceRequestStatusSchema,
+	InProgressServiceRequestStatusSchema
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusSchema>;
 export function isServiceRequestStatus(maybeStatus: unknown): maybeStatus is ServiceRequestStatus {

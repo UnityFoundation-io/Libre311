@@ -53,3 +53,17 @@ export function toTimeStamp(timeStamp: Date | string | null | undefined) {
 export function toAbbreviatedTimeStamp(timeStamp: Date | string | null | undefined) {
 	return timeStamp ? `${new Date(timeStamp).toLocaleDateString()}` : '';
 }
+
+export const statusToColorMap = {
+	closed: '#37D39A',
+	open: '#FABE23',
+	in_progress: '#38BDF9',
+	assigned: '#67E8F9'
+};
+
+export const statusToTextMap = {
+	closed: 'Closed',
+	open: 'Open',
+	in_progress: 'In Progress',
+	assigned: 'Assigned'
+};

@@ -65,11 +65,15 @@
 			value: 'open',
 			label: 'Open'
 		},
-		// TODO
-		// {
-		// 	value: 'assigned',
-		// 	label: 'Assigned'
-		// },
+
+		{
+			value: 'assigned',
+			label: 'Assigned'
+		},
+		{
+			value: 'in_progress',
+			label: 'In Progress'
+		},
 		{
 			value: 'closed',
 			label: 'Closed'

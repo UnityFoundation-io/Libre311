@@ -1,8 +1,10 @@
 <script lang="ts">
 	import L from 'leaflet';
 
-	import WaypointClosed from '$lib/assets/waypoint-closed.png';
-	import WaypointOpen from '$lib/assets/waypoint-open.png';
+	import WaypointClosed from '$lib/assets/waypoint/closed.png';
+	import WaypointOpen from '$lib/assets/waypoint/open.png';
+	import WaypointInProgress from '$lib/assets/waypoint/in_progress.png';
+	import WayPointAssigned from '$lib/assets/waypoint/assigned.png';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 
 	import { iconPositionOpts } from '$lib/utils/functions';
@@ -12,7 +14,9 @@
 
 	const waypointLookupMap = {
 		closed: WaypointClosed,
-		open: WaypointOpen
+		open: WaypointOpen,
+		in_progress: WaypointInProgress,
+		assigned: WayPointAssigned
 	};
 
 	const icon = L.icon({

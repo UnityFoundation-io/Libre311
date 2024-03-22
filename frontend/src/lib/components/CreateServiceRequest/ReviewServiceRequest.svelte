@@ -12,6 +12,7 @@
 	import { toCreateServiceRequestParams, type CreateServiceRequestUIParams } from './shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
+	import ServiceRequestStatusBadge from '../ServiceRequestStatusBadge.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -74,7 +75,7 @@
 
 			<div class="my-2">
 				<div class="flow-root">
-					<Badge class="float-right text-sm" type="warn">Open</Badge>
+					<ServiceRequestStatusBadge class="float-right text-sm" status="open" />
 				</div>
 
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>

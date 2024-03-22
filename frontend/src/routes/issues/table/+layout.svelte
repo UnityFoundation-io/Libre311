@@ -5,7 +5,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import { Badge, Button, Card, DatePicker, Input, Table } from 'stwui';
+	import { Button, Card, DatePicker, Input, Table } from 'stwui';
 	import { page } from '$app/stores';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import {
@@ -40,6 +40,7 @@
 		asAsyncFailure
 	} from '$lib/services/http';
 	import type { SelectOption } from 'stwui/types';
+	import ServiceRequestStatusBadge from '$lib/components/ServiceRequestStatusBadge.svelte';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
@@ -59,11 +60,6 @@
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(linkResolver.issueDetailsTable($page.url, service_request_id));
 		return;
-	}
-
-	function issueStatus(item: ServiceRequest): 'warn' | 'success' {
-		if (item.status === 'open') return 'warn';
-		else return 'success';
 	}
 
 	function resolveStyleId(
@@ -298,9 +294,7 @@
 
 										<Table.Body.Row.Cell column={3}>
 											<div class="flex items-center justify-center">
-												<Badge type={issueStatus(item)}>
-													{item.status}
-												</Badge>
+												<ServiceRequestStatusBadge status={item.status} />
 											</div>
 										</Table.Body.Row.Cell>
 
