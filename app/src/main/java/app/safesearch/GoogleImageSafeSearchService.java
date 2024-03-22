@@ -14,50 +14,77 @@
 
 package app.safesearch;
 
-import io.micronaut.context.annotation.Property;
-import jakarta.inject.Inject;
+import app.exception.Libre311BaseException;
+import com.google.cloud.vision.v1.AnnotateImageRequest;
+import com.google.cloud.vision.v1.AnnotateImageResponse;
+import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
+import com.google.cloud.vision.v1.Feature;
+import com.google.cloud.vision.v1.Image;
+import com.google.cloud.vision.v1.ImageAnnotatorClient;
+import com.google.cloud.vision.v1.Likelihood;
+import com.google.cloud.vision.v1.SafeSearchAnnotation;
+import com.google.protobuf.ByteString;
+import io.micronaut.http.HttpStatus;
 import jakarta.inject.Singleton;
-
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
 
 @Singleton
 public class GoogleImageSafeSearchService {
 
-    @Inject
-    SafeSearchClient client;
+    public static class ExplicitImageDetected extends Libre311BaseException {
 
-    @Property(name = "app.safesearch.key")
-    protected String key;
-
-    public boolean imageIsExplicit(String image) {
-        boolean isImageExplicit = true;
-
-        try {
-            Map payload = Map.of(
-                    "requests", List.of(
-                            Map.of(
-                                    "image", Map.of("content", image),
-                                    "features", List.of(Map.of("type", "SAFE_SEARCH_DETECTION"))
-                            )
-                    )
-            );
-            Map map = client.classifyImage(payload, key);
-            Map safeSearchAnnotationsMap = (Map) ((Map) ((List) map.get("responses")).get(0)).get("safeSearchAnnotation");
-            isImageExplicit = safeSearchAnnotationsMap.entrySet().stream()
-                    .filter((Predicate<Map.Entry<String, String>>) filterEntry -> {
-                        String k = filterEntry.getKey();
-                        return k.equals("adult") || k.equals("violence") || k.equals("racy");
-                    })
-                    .anyMatch((Predicate<Map.Entry<String, String>>) matchEntry -> {
-                        String v = matchEntry.getValue();
-                        return v.equals("LIKELY") || v.equals("VERY_LIKELY");
-                    });
-        } catch (Exception e) {
-            e.printStackTrace();
+        public ExplicitImageDetected() {
+            super("The uploaded image has a high likelihood of being explicit and was rejected.",
+                HttpStatus.BAD_REQUEST);
         }
+    }
 
-        return isImageExplicit;
+    static class FailedToAnnotateImage extends Libre311BaseException {
+
+        public FailedToAnnotateImage(String message) {
+            super(message, HttpStatus.BAD_GATEWAY);
+        }
+    }
+
+    /**
+     * @param bytes the image data in bytes
+     * @throws ExplicitImageDetected if image is suspected of being explicit
+     */
+    public void preventExplicitImage(byte[] bytes) {
+        List<AnnotateImageRequest> requests = new ArrayList<>();
+
+        ByteString imgBytes = ByteString.copyFrom(bytes);
+        Image img = Image.newBuilder().setContent(imgBytes).build();
+        Feature feat = Feature.newBuilder().setType(Feature.Type.SAFE_SEARCH_DETECTION).build();
+        AnnotateImageRequest request =
+            AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+        requests.add(request);
+
+        try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+            BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+            List<AnnotateImageResponse> responses = response.getResponsesList();
+
+            for (AnnotateImageResponse res : responses) {
+                if (res.hasError()) {
+                    throw new FailedToAnnotateImage(res.getError().getMessage());
+                }
+
+                SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
+                if (likelyExplicit(annotation)) {
+                    throw new ExplicitImageDetected();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static boolean likelyExplicit(SafeSearchAnnotation annotation) {
+        int maxLikelihoodNum = Likelihood.POSSIBLE.getNumber();
+        return annotation.getAdult().getNumber() > maxLikelihoodNum
+            || annotation.getViolence().getNumber() > maxLikelihoodNum
+            || annotation.getRacy().getNumber() > maxLikelihoodNum;
     }
 }

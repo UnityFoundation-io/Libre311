@@ -2,6 +2,10 @@ gcp:
   project-id: ${GCP_PROJECT_ID}
 
 micronaut:
+  server:
+    multipart:
+      enabled: true
+      max-file-size: 5_000_000 # 5mb
   application:
     name: Libre311
   object-storage:
@@ -88,7 +92,6 @@ app:
   image-storage:
     bucket-url-format: "https://storage.googleapis.com/%s/"
     bucket:  ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
-    append-object-url-format: "%s"
   recaptcha:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
   safesearch:
