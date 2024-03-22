@@ -8,4 +8,19 @@
 	export let status: ServiceRequestStatus;
 </script>
 
-<Badge class={`${clazz} bg-[${statusToColorMap[status]}]`}>{statusToTextMap[status]}</Badge>
+<div
+	class="service-request-status-badge-wrapper"
+	style="--status-background-color: {statusToColorMap[status]}"
+>
+	<Badge class={clazz}>{statusToTextMap[status]}</Badge>
+</div>
+
+<style>
+	.service-request-status-badge-wrapper {
+		display: contents;
+	}
+
+	.service-request-status-badge-wrapper :global(.stwui-badge) {
+		background-color: var(--status-background-color);
+	}
+</style>

@@ -11,10 +11,7 @@
 {#if $selectedServiceRequest}
 	<div class="flex h-full w-full items-center justify-center">
 		<div class="h-full w-full md:w-3/4 lg:w-1/2">
-			<ServiceRequestDetails
-				serviceRequest={$selectedServiceRequest}
-				back={linkResolver.issuesList($page.url)}
-			/>
+			<ServiceRequestDetails serviceRequest={$selectedServiceRequest} />
 		</div>
 	</div>
 {/if}

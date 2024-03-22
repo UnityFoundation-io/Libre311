@@ -9,7 +9,7 @@
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 
 	export let serviceRequest: ServiceRequest;
-	export let back: string;
+	export let back: string | undefined = undefined;
 </script>
 
 <div class="flex h-full">
@@ -92,9 +92,15 @@
 			</div>
 
 			<div class="m-2">
-				<Button href={back}>
-					{messages['updateServiceRequest']['button_back']}
-				</Button>
+				{#if back}
+					<Button href={back}>
+						{messages['updateServiceRequest']['button_back']}
+					</Button>
+				{:else}
+					<Button on:click={() => window.history.back()}>
+						{messages['updateServiceRequest']['button_back']}
+					</Button>
+				{/if}
 			</div>
 		</div>
 	</Card>
