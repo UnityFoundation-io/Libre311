@@ -172,15 +172,11 @@
 									newServiceName.value = undefined;
 								}}
 							>
-								<div slot="icon">
-									<XMark />
-								</div>
+								<XMark slot="icon" />
 							</Button>
 
 							<Button aria-label="Submit" type="ghost" on:click={handleAddNewService}>
-								<div slot="icon">
-									<CheckMark />
-								</div>
+								<CheckMark slot="icon" />
 							</Button>
 						</div>
 					</div>
@@ -193,9 +189,7 @@
 								<ToggleState startingValue={false} let:show let:toggle>
 									<Dropdown visible={show}>
 										<Button type="ghost" slot="trigger" on:click={toggle}>
-											<div slot="icon">
-												<EllipsisVertical />
-											</div>
+											<EllipsisVertical slot="icon" />
 										</Button>
 
 										<Dropdown.Items slot="items" class="w-[100px]">
@@ -242,9 +236,7 @@
 													isEditServiceInputVisible = false;
 												}}
 											>
-												<div slot="icon">
-													<XMark />
-												</div>
+												<XMark slot="icon" />
 											</Button>
 
 											<Button
@@ -252,15 +244,11 @@
 												type="ghost"
 												on:click={() => handleEditServiceButton(service)}
 											>
-												<div slot="icon">
-													<CheckMark />
-												</div>
+												<CheckMark slot="icon" />
 											</Button>
 										{:else}
 											<Button type="ghost" href={`/groups/1/services/${service.service_code}`}>
-												<div slot="icon">
-													<ChevronRight />
-												</div>
+												<ChevronRight slot="icon" />
 											</Button>
 										{/if}
 									</div>
