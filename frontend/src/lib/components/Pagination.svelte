@@ -18,10 +18,10 @@
 	{lowerBound} - {upperBound} of {pagination?.totalSize}
 	<span class="ml-1">
 		<Button href={prevPage} type={prevPage ? 'text' : 'ghost'} disabled={!prevPage} shape="circle">
-				<ChevronLeft slot="icon"/>
+				<ChevronLeft slot="icon" />
 		</Button>
 		<Button href={nextPage} type={nextPage ? 'text' : 'ghost'} disabled={!nextPage} shape="circle">
-				<ChevronRight slot="icon"/>
+				<ChevronRight slot="icon" />
 		</Button>
 	</span>
 </div>
