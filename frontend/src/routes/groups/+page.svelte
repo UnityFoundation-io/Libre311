@@ -4,10 +4,10 @@
 
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { checkMark } from '$lib/components/Svg/outline/CheckMark.svelte';
-	import { chevronRightSvg } from '$lib/components/Svg/outline/ChevronRight.svelte';
-	import { ellipsisSVG } from '$lib/components/Svg/outline/EllipsisVertical.svelte';
-	import { xMark } from '$lib/components/Svg/outline/XMark';
+	import CheckMark from '$lib/components/Svg/outline/CheckMark.svelte';
+	import ChevronRight from '$lib/components/Svg/outline/ChevronRight.svelte';
+	import EllipsisVertical from '$lib/components/Svg/outline/EllipsisVertical.svelte';
+	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import ToggleState from '$lib/components/ToggleState.svelte';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { GetGroupListResponse, Group } from '$lib/services/Libre311/Libre311';
@@ -146,7 +146,9 @@
 							<ToggleState startingValue={false} let:show let:toggle>
 								<Dropdown visible={show}>
 									<Button type="ghost" slot="trigger" on:click={toggle}>
-										<Button.Icon slot="icon" type="ghost" data={ellipsisSVG} />
+										<div slot="icon">
+											<EllipsisVertical />
+										</div>
 									</Button>
 
 									<Dropdown.Items slot="items" class="w-[100px]">
@@ -181,7 +183,9 @@
 											isEditGroupInputVisible = false;
 										}}
 									>
-										<Button.Icon slot="icon" type="ghost" data={xMark} fill="red" stroke="red" />
+										<div slot="icon">
+											<XMark />
+										</div>
 									</Button>
 
 									<Button
@@ -189,17 +193,15 @@
 										type="ghost"
 										on:click={() => handleEditGroupButton(group)}
 									>
-										<Button.Icon
-											slot="icon"
-											type="ghost"
-											data={checkMark}
-											fill="none"
-											stroke="green"
-										/>
+										<div slot="icon">
+											<CheckMark />
+										</div>
 									</Button>
 								{:else}
 									<Button type="ghost" href={`/groups/${group.id}`}>
-										<Button.Icon data={chevronRightSvg} slot="icon" type="ghost"></Button.Icon>
+										<div slot="icon">
+											<ChevronRight />
+										</div>
 									</Button>
 								{/if}
 							</div>
