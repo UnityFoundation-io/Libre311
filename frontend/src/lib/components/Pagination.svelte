@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Button } from 'stwui';
 
-	import { chevronRightSvg } from './Svg/outline/ChevronRight.svelte';
-	import { chevronLeftSvg } from './Svg/outline/ChevronLeft.svelte';
+	import ChevronRight from './Svg/outline/ChevronRight.svelte';
+	import ChevronLeft from './Svg/outline/ChevronLeft.svelte';
 	import type { Pagination } from '$lib/services/Libre311/Libre311';
 
 	export let pagination: Pagination;
@@ -18,10 +18,10 @@
 	{lowerBound} - {upperBound} of {pagination?.totalSize}
 	<span class="ml-1">
 		<Button href={prevPage} type={prevPage ? 'text' : 'ghost'} disabled={!prevPage} shape="circle">
-			<Button.Icon data={chevronLeftSvg} slot="icon" />
+				<ChevronLeft slot="icon" />
 		</Button>
 		<Button href={nextPage} type={nextPage ? 'text' : 'ghost'} disabled={!nextPage} shape="circle">
-			<Button.Icon data={chevronRightSvg} slot="icon" />
+				<ChevronRight slot="icon" />
 		</Button>
 	</span>
 </div>
