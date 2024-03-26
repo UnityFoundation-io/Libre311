@@ -30,13 +30,7 @@
 		if (emailInput.value && passwordInput.value) {
 			try {
 
-				const res = await authService.login(emailInput.value, passwordInput.value);
-
-				alert({
-					type: 'success',
-					title: 'Success',
-					description: 'You are logged in'
-				});
+				await authService.login(emailInput.value, passwordInput.value);
 
 				goto('/issues/table');
 			} catch (error) {
