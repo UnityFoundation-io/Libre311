@@ -25,7 +25,7 @@
 <div class="flex h-full w-full items-center justify-center">
 	<div class="w-full flex-col">
 		{#if errorMessage}
-			<div class="bg-red-500 text-white rounded-md p-2 flex justify-center">
+			<div class="bg-red-500 text-white p-2 flex justify-center">
 				<span>{errorMessage}</span>
 			</div>
 		{/if}
