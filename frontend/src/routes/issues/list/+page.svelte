@@ -11,6 +11,8 @@
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
 	const linkResolver = useLibre311Context().linkResolver;
+
+	let listElement: HTMLElement;
 </script>
 
 <div class="flex items-center justify-center">
@@ -20,39 +22,42 @@
 		</div>
 
 		{#if $serviceRequestsRes.type === 'success'}
-			<div class="m-3 flex items-center justify-between">
-				<div>
-					<p class="text-base">{messages['sidebar']['title']}</p>
-				</div>
+			<div bind:this={listElement}>
+				<div class="m-3 flex items-center justify-between">
+					<div>
+						<p class="text-base">{messages['sidebar']['title']}</p>
+					</div>
 
-				<div>
-					<Pagination
-						pagination={$serviceRequestsRes.value.metadata.pagination}
-						nextPage={linkResolver.nextIssuesPage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-						prevPage={linkResolver.prevIssuesPage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-					/>
-				</div>
-			</div>
-
-			<ul>
-				{#each $serviceRequestsRes.value.serviceRequests as serviceRequest}
-					<li class="m-3">
-						<ServiceRequestPreview
-							{serviceRequest}
-							detailsLink={linkResolver.issueDetailsMobile(
-								$page.url,
-								serviceRequest.service_request_id
+					<div>
+						<Pagination
+							pagination={$serviceRequestsRes.value.metadata.pagination}
+							nextPage={linkResolver.nextIssuesPage(
+								$serviceRequestsRes.value.metadata.pagination,
+								$page.url
 							)}
+							prevPage={linkResolver.prevIssuesPage(
+								$serviceRequestsRes.value.metadata.pagination,
+								$page.url
+							)}
+							element={listElement}
 						/>
-					</li>
-				{/each}
-			</ul>
+					</div>
+				</div>
+
+				<ul>
+					{#each $serviceRequestsRes.value.serviceRequests as serviceRequest}
+						<li class="m-3">
+							<ServiceRequestPreview
+								{serviceRequest}
+								detailsLink={linkResolver.issueDetailsMobile(
+									$page.url,
+									serviceRequest.service_request_id
+								)}
+							/>
+						</li>
+					{/each}
+				</ul>
+			</div>
 		{/if}
 	</div>
 </div>

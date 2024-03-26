@@ -8,6 +8,11 @@
 	export let pagination: Pagination;
 	export let prevPage: string | undefined = undefined;
 	export let nextPage: string | undefined = undefined;
+	export let element: HTMLElement;
+
+	function scrollToTop() {
+		element.scrollIntoView();
+	}
 
 	$: maxUpperBound = (pagination.pageNumber + 1) * pagination.size;
 	$: upperBound = Math.min(maxUpperBound, pagination.totalSize);
@@ -17,10 +22,22 @@
 <div class="text-base font-semibold text-slate-600">
 	{lowerBound} - {upperBound} of {pagination?.totalSize}
 	<span class="ml-1">
-		<Button href={prevPage} type={prevPage ? 'text' : 'ghost'} disabled={!prevPage} shape="circle">
+		<Button
+			href={prevPage}
+			type={prevPage ? 'text' : 'ghost'}
+			disabled={!prevPage}
+			shape="circle"
+			on:click={scrollToTop}
+		>
 			<Button.Icon data={chevronLeftSvg} slot="icon" />
 		</Button>
-		<Button href={nextPage} type={nextPage ? 'text' : 'ghost'} disabled={!nextPage} shape="circle">
+		<Button
+			href={nextPage}
+			type={nextPage ? 'text' : 'ghost'}
+			disabled={!nextPage}
+			shape="circle"
+			on:click={scrollToTop}
+		>
 			<Button.Icon data={chevronRightSvg} slot="icon" />
 		</Button>
 	</span>
