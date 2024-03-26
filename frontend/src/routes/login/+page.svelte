@@ -6,6 +6,8 @@
 	import { createInput, emailValidator } from '$lib/utils/validation';
 	import { useLibre311Context, useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
+	import { isHateoasErrorResponse } from '$lib/services/Libre311/types/ServerErrors';
+	import { isAxiosError } from 'axios';
 
 	const authService = useUnityAuthService();
 
@@ -33,7 +35,10 @@
 
 				goto('/issues/table');
 			} catch (error: unknown) {
-				errorMessage = error.response.data.message.toString();
+				if (isAxiosError(error) && isHateoasErrorResponse(error.response?.data)) {
+					const hateoasError = error.response.data;
+					errorMessage = hateoasError.message;
+				}
 			}
 		}
 	}
