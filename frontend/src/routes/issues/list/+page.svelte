@@ -23,24 +23,26 @@
 
 		{#if $serviceRequestsRes.type === 'success'}
 			<div bind:this={listElement}>
-				<div class="m-3 flex items-center justify-between">
-					<div>
-						<p class="text-base">{messages['sidebar']['title']}</p>
-					</div>
+				<div class="sticky top-0 border-b-2 bg-white">
+					<div class="m-3 flex items-center justify-between">
+						<div>
+							<p class="text-base">{messages['sidebar']['title']}</p>
+						</div>
 
-					<div>
-						<Pagination
-							pagination={$serviceRequestsRes.value.metadata.pagination}
-							nextPage={linkResolver.nextIssuesPage(
-								$serviceRequestsRes.value.metadata.pagination,
-								$page.url
-							)}
-							prevPage={linkResolver.prevIssuesPage(
-								$serviceRequestsRes.value.metadata.pagination,
-								$page.url
-							)}
-							element={listElement}
-						/>
+						<div>
+							<Pagination
+								pagination={$serviceRequestsRes.value.metadata.pagination}
+								nextPage={linkResolver.nextIssuesPage(
+									$serviceRequestsRes.value.metadata.pagination,
+									$page.url
+								)}
+								prevPage={linkResolver.prevIssuesPage(
+									$serviceRequestsRes.value.metadata.pagination,
+									$page.url
+								)}
+								element={listElement}
+							/>
+						</div>
 					</div>
 				</div>
 
