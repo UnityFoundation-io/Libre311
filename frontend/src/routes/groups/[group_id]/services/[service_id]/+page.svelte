@@ -61,7 +61,7 @@
 					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
 
 						<div class="mx-4 w-full">
-							{input.attribute.code}
+							{input.attribute.description}
 						</div>
 
 					</List.Item>
