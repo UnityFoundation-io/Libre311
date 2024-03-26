@@ -11,6 +11,7 @@
 
 	export let emailInput: FormInputValue<string | undefined>;
 	export let passwordInput: FormInputValue<string | undefined>;
+	export let errorMessage: string | undefined;
 
 	let visible = false;
 
@@ -23,6 +24,12 @@
 
 <div class="flex h-full w-full items-center justify-center">
 	<div class="w-full flex-col">
+		{#if errorMessage}
+			<div class="bg-red-500 text-white rounded-t-md p-2 flex justify-center">
+				<span>{errorMessage}</span>
+			</div>
+		{/if}
+
 		<div class="m-4 flex flex-col items-center justify-center">
 			{#if visible}
 				<div class="size-28">

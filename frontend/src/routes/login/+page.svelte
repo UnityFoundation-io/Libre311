@@ -8,11 +8,10 @@
 	import { goto } from '$app/navigation';
 
 	const authService = useUnityAuthService();
-	const alertError = useLibre311Context().alertError;
-	const alert = useLibre311Context().alert;
 
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
+	let errorMessage: string | undefined;
 
 	function handleChange(e: CustomEvent<EventDispatchTypeMap['inputChange']>) {
 		if (e.detail.type == 'email') {
@@ -33,8 +32,8 @@
 				await authService.login(emailInput.value, passwordInput.value);
 
 				goto('/issues/table');
-			} catch (error) {
-				alertError(error);
+			} catch (error: unknown) {
+				errorMessage = error.response.data.message.toString();
 			}
 		}
 	}
@@ -45,6 +44,7 @@
 		slot="is-desktop"
 		{emailInput}
 		{passwordInput}
+		{errorMessage}
 		on:inputChange={handleChange}
 		on:login={login}
 	/>
@@ -52,6 +52,7 @@
 		slot="is-mobile-or-tablet"
 		{emailInput}
 		{passwordInput}
+		{errorMessage}
 		on:inputChange={handleChange}
 		on:login={login}
 	/>
