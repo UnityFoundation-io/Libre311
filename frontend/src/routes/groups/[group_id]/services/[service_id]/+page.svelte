@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { Breadcrumbs, Button, Card, Dropdown, List } from 'stwui';
-	import { asAsyncSuccess, type AsyncResult } from '$lib/services/http';
+	import { Breadcrumbs, Card, List, Progress } from 'stwui';
+	import { asAsyncFailure, asAsyncSuccess, ASYNC_IN_PROGRESS, type AsyncResult } from '$lib/services/http';
 	import { createAttributeInputMap, type AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
 
 	const libre311 = useLibre311Service();
+	const alertError = useLibre311Context().alertError;
 
-	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> | undefined;
-	let selectedServiceCode: string = $page.url.pathname.replace(/\/groups\/(\d+)\/services\//, '');
+	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
+	let selectedServiceCode: string = $page.params.service_id;
 
 	interface Crumb {
 		label: string;
@@ -25,18 +26,20 @@
 
 	function updateAttributeMap(service: string) {
 		if (!service) {
-			asyncAttributeInputMap = undefined;
 			return;
 		}
 		getServiceDefinition(service);
 	}
 
 	async function getServiceDefinition(selectedServiceCode: string) {
-		asyncAttributeInputMap = undefined;
-
-		const payload = { service_code: selectedServiceCode };
-		const res = await libre311.getServiceDefinition(payload);
-		asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(res, {}));
+		try {
+			const payload = { service_code: selectedServiceCode };
+			const res = await libre311.getServiceDefinition(payload);
+			asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(res, {}));
+		} catch (error) {
+			asyncAttributeInputMap = asAsyncFailure(error);
+			alertError(error);
+		}
 	}
 </script>
 
@@ -51,8 +54,8 @@
 		</Breadcrumbs>
 	</Card.Header>
 
-	{#if asyncAttributeInputMap?.type == 'success'}
-		<Card.Content slot="content" class="p-0 sm:p-0">
+	<Card.Content slot="content" class="p-0 sm:p-0">
+		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
 				{#each asyncAttributeInputMap.value.values() as input}
 					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
@@ -64,6 +67,10 @@
 					</List.Item>
 				{/each}
 			</List>
-		</Card.Content>
-	{/if}
+		{:else if asyncAttributeInputMap?.type === 'inProgress'}
+			<div class="mx-8 my-4">
+				<Progress value={0} indeterminate />
+			</div>
+		{/if}
+	</Card.Content>
 </Card>
