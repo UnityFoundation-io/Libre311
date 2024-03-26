@@ -21,6 +21,7 @@
 	export let params: CreateServiceRequestUIParams;
 
 	let imageData: string | undefined;
+	let submittingServiceRequest: boolean = false;
 
 	function createName(params: CreateServiceRequestUIParams) {
 		if (params.first_name || params.last_name)
@@ -37,11 +38,18 @@
 	async function submitServiceReq() {
 		try {
 			let mediaUrl: string | undefined = undefined;
+
+			submittingServiceRequest = true
+
 			if (params.file) {
 				mediaUrl = await libre311.uploadImage(params.file);
 			}
 			params.media_url = mediaUrl;
+
 			await libre311.createServiceRequest(toCreateServiceRequestParams(params));
+
+			submittingServiceRequest = false
+
 			alert({
 				type: 'success',
 				title: 'Success',
@@ -130,7 +138,7 @@
 			</div>
 		</div>
 
-		<StepControls on:click={submitServiceReq}>
+		<StepControls on:click={submitServiceReq} loading={submittingServiceRequest}>
 			<svelte:fragment slot="submit-text"
 				>{messages['reviewServiceRequest']['button_submit']}</svelte:fragment
 			>
