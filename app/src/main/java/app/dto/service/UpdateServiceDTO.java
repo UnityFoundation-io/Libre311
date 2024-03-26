@@ -17,6 +17,8 @@ package app.dto.service;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
+import javax.validation.constraints.Min;
+
 @Introspected
 public class UpdateServiceDTO {
 
@@ -30,6 +32,10 @@ public class UpdateServiceDTO {
 
     @JsonProperty("group_id")
     private Long groupId;
+
+    @Min(0)
+    @JsonProperty("order_position")
+    private Integer orderPosition;
 
     public UpdateServiceDTO() {
     }
@@ -64,5 +70,13 @@ public class UpdateServiceDTO {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public Integer getOrderPosition() {
+        return orderPosition;
+    }
+
+    public void setOrderPosition(Integer orderPosition) {
+        this.orderPosition = orderPosition;
     }
 }

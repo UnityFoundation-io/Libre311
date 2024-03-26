@@ -102,7 +102,6 @@ public class JurisdictionAdminControllerTest {
     @Inject
     ServiceGroupRepository serviceGroupRepository;
 
-
     @Inject
     ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository;
 
@@ -257,15 +256,17 @@ public class JurisdictionAdminControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
+        assertEquals(-1, optional.get().getOrderPosition());
 
         // success, all provided
-        response = createService("BUS_STOP", "Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId());
+        response = createService("BUS_STOP", "Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId(), 2);
         assertEquals(HttpStatus.OK, response.getStatus());
         optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
         ServiceDTO serviceDTO = optional.get();
         assertNotNull(serviceDTO.getJurisdictionId());
         assertEquals("fakecity.gov", serviceDTO.getJurisdictionId());
+        assertEquals(2, optional.get().getOrderPosition());
 
         // fail, jurisdiction not provided
         exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
@@ -349,6 +350,7 @@ public class JurisdictionAdminControllerTest {
         updateServiceDTO.setServiceCode("INNER_CITY_BUS_STOPS");
         updateServiceDTO.setServiceName("Inner City Bust Stops");
         updateServiceDTO.setDescription("Issues pertaining to inner city bus stops.");
+        updateServiceDTO.setOrderPosition(3);
 
         response = createGroup("Group - Bus Stop 2","fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
@@ -369,6 +371,7 @@ public class JurisdictionAdminControllerTest {
         assertEquals("Inner City Bust Stops", serviceDTO1.getServiceName());
         assertEquals("Issues pertaining to inner city bus stops.", serviceDTO1.getDescription());
         assertEquals(secondGroupDTO.getId(), serviceDTO1.getGroupId());
+        assertEquals(3, serviceDTO1.getOrderPosition());
 
         // Remove ISSUE_NEAR attribute
         Optional<ServiceDefinitionAttributeDTO> issueNearOptional = savedServiceDefinitionDTO.getAttributes().stream()
@@ -620,10 +623,15 @@ public class JurisdictionAdminControllerTest {
     }
 
     private HttpResponse<?> createService(String code, String name, String jurisdictionId, Long groupId) {
+        return createService(code,name, jurisdictionId, groupId, null);
+    }
+
+    private HttpResponse<?> createService(String code, String name, String jurisdictionId, Long groupId, Integer orderPosition) {
         CreateServiceDTO serviceDTO = new CreateServiceDTO();
         serviceDTO.setServiceCode(code);
         serviceDTO.setServiceName(name);
         serviceDTO.setGroupId(groupId);
+        serviceDTO.setOrderPosition(orderPosition);
         HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, serviceDTO)
                 .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, ServiceDTO.class);
