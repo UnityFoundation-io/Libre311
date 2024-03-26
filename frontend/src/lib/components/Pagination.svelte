@@ -8,7 +8,7 @@
 	export let pagination: Pagination;
 	export let prevPage: string | undefined = undefined;
 	export let nextPage: string | undefined = undefined;
-	export let element: HTMLElement | undefined = undefined;
+	export let element: HTMLElement;
 
 	function scrollToTop() {
 		element.scrollIntoView();
