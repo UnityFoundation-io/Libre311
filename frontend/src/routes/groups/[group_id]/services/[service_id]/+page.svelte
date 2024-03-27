@@ -1,6 +1,15 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { Breadcrumbs, Card, List } from 'stwui';
+	import { Breadcrumbs, Card, List, Progress } from 'stwui';
+	import { asAsyncFailure, asAsyncSuccess, ASYNC_IN_PROGRESS, type AsyncResult } from '$lib/services/http';
+	import { createAttributeInputMap, type AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { page } from '$app/stores';
+
+	const libre311 = useLibre311Service();
+	const alertError = useLibre311Context().alertError;
+
+	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
+	let selectedServiceCode: string = $page.params.service_id;
 
 	interface Crumb {
 		label: string;
@@ -13,24 +22,25 @@
 		{ label: 'Attributes', href: '/groups/1/services/1' }
 	];
 
-	const attributes = [
-		{
-			id: 1,
-			title: 'Something Old'
-		},
-		{
-			id: 2,
-			title: 'Something New'
-		},
-		{
-			id: 3,
-			title: 'Something Borrowed'
-		},
-		{
-			id: 4,
-			title: 'Something Blue'
+	$: updateAttributeMap(selectedServiceCode);
+
+	function updateAttributeMap(service: string) {
+		if (!service) {
+			return;
 		}
-	];
+		getServiceDefinition(service);
+	}
+
+	async function getServiceDefinition(selectedServiceCode: string) {
+		try {
+			const payload = { service_code: selectedServiceCode };
+			const res = await libre311.getServiceDefinition(payload);
+			asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(res, {}));
+		} catch (error) {
+			asyncAttributeInputMap = asAsyncFailure(error);
+			alertError(error);
+		}
+	}
 </script>
 
 <Card bordered={true} class="m-4">
@@ -43,16 +53,24 @@
 			{/each}
 		</Breadcrumbs>
 	</Card.Header>
+
 	<Card.Content slot="content" class="p-0 sm:p-0">
-		<List>
-			{#each attributes as attribute}
-				<List.Item
-					on:click={() => goto(`/groups/1/services/${attribute.id}`)}
-					class="cursor-pointer hover:bg-slate-100"
-				>
-					<div class="mx-4">{attribute.title}</div></List.Item
-				>
-			{/each}
-		</List>
+		{#if asyncAttributeInputMap?.type === 'success'}
+			<List>
+				{#each asyncAttributeInputMap.value.values() as input}
+					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
+
+						<div class="mx-4 w-full">
+							{input.attribute.description}
+						</div>
+
+					</List.Item>
+				{/each}
+			</List>
+		{:else if asyncAttributeInputMap?.type === 'inProgress'}
+			<div class="mx-8 my-4">
+				<Progress value={0} indeterminate />
+			</div>
+		{/if}
 	</Card.Content>
 </Card>
