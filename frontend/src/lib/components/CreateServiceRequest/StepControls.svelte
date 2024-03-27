@@ -4,6 +4,8 @@
 	import messages from '$media/messages.json';
 	import { page } from '$app/stores';
 
+	export let loading: boolean | undefined = undefined;
+
 	const linkResolver = useLibre311Context().linkResolver;
 </script>
 
@@ -12,7 +14,7 @@
 		{messages['contact']['button']['back']}
 	</Button>
 
-	<Button type="primary" on:click>
+	<Button {loading} type="primary" on:click>
 		<slot name="submit-text" />
 	</Button>
 </div>

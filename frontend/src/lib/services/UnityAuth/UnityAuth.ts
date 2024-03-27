@@ -58,7 +58,7 @@ export class UnityAuthServiceImpl
 			this.publish('login', loginRes);
 			return loginRes;
 		} catch (e) {
-			throw new Error(e?.toString());
+			throw new Error('Login Failed!<br/>' + e?.toString());
 		}
 	}
 

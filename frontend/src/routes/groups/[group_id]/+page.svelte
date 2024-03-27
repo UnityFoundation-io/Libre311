@@ -5,8 +5,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 
-	import { ellipsisSVG } from '$lib/components/Svg/outline/EllipsisVertical.svelte';
-	import { chevronRightSvg } from '$lib/components/Svg/outline/ChevronRight.svelte';
+	import EllipsisVertical from '$lib/components/Svg/outline/EllipsisVertical.svelte';
+	import ChevronRight from '$lib/components/Svg/outline/ChevronRight.svelte';
 
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { GetServiceListResponse, Service } from '$lib/services/Libre311/Libre311';
@@ -23,8 +23,8 @@
 	import { page } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import ToggleState from '$lib/components/ToggleState.svelte';
-	import { xMark } from '$lib/components/Svg/outline/XMark';
-	import { checkMark } from '$lib/components/Svg/outline/CheckMark.svelte';
+	import XMark from '$lib/components/Svg/outline/XMark.svelte';
+	import CheckMark from '$lib/components/Svg/outline/CheckMark.svelte';
 
 	interface Crumb {
 		label: string;
@@ -172,12 +172,11 @@
 									newServiceName.value = undefined;
 								}}
 							>
-								<Button.Icon slot="icon" type="ghost" data={xMark} fill="red" stroke="red" />
+								<XMark slot="icon" />
 							</Button>
 
 							<Button aria-label="Submit" type="ghost" on:click={handleAddNewService}>
-								<Button.Icon slot="icon" type="ghost" data={checkMark} fill="none" stroke="green"
-								></Button.Icon>
+								<CheckMark slot="icon" />
 							</Button>
 						</div>
 					</div>
@@ -190,7 +189,7 @@
 								<ToggleState startingValue={false} let:show let:toggle>
 									<Dropdown visible={show}>
 										<Button type="ghost" slot="trigger" on:click={toggle}>
-											<Button.Icon slot="icon" type="ghost" data={ellipsisSVG} />
+											<EllipsisVertical slot="icon" />
 										</Button>
 
 										<Dropdown.Items slot="items" class="w-[100px]">
@@ -237,13 +236,7 @@
 													isEditServiceInputVisible = false;
 												}}
 											>
-												<Button.Icon
-													slot="icon"
-													type="ghost"
-													data={xMark}
-													fill="red"
-													stroke="red"
-												/>
+												<XMark slot="icon" />
 											</Button>
 
 											<Button
@@ -251,17 +244,11 @@
 												type="ghost"
 												on:click={() => handleEditServiceButton(service)}
 											>
-												<Button.Icon
-													slot="icon"
-													type="ghost"
-													data={checkMark}
-													fill="none"
-													stroke="green"
-												/>
+												<CheckMark slot="icon" />
 											</Button>
 										{:else}
 											<Button type="ghost" href={`/groups/1/services/${service.service_code}`}>
-												<Button.Icon data={chevronRightSvg} slot="icon" type="ghost"></Button.Icon>
+												<ChevronRight slot="icon" />
 											</Button>
 										{/if}
 									</div>
