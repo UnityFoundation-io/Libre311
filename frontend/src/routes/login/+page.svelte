@@ -6,13 +6,14 @@
 	import { createInput, emailValidator } from '$lib/utils/validation';
 	import { useLibre311Context, useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
+	import { checkHasMessage, isHateoasErrorResponse } from '$lib/services/Libre311/types/ServerErrors';
+	import { isAxiosError } from 'axios';
 
 	const authService = useUnityAuthService();
-	const alertError = useLibre311Context().alertError;
-	const alert = useLibre311Context().alert;
 
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
+	let errorMessage: string | undefined;
 
 	function handleChange(e: CustomEvent<EventDispatchTypeMap['inputChange']>) {
 		if (e.detail.type == 'email') {
@@ -29,18 +30,18 @@
 
 		if (emailInput.value && passwordInput.value) {
 			try {
-
-				const res = await authService.login(emailInput.value, passwordInput.value);
-
-				alert({
-					type: 'success',
-					title: 'Success',
-					description: 'You are logged in'
-				});
+				await authService.login(emailInput.value, passwordInput.value);
 
 				goto('/issues/table');
-			} catch (error) {
-				alertError(error);
+			} catch (error: unknown) {
+				if (isAxiosError(error) && isHateoasErrorResponse(error.response?.data)) {
+					const hateoasError = error.response.data;
+					errorMessage = hateoasError.message;
+				} else if (checkHasMessage(error)) {
+					errorMessage = error.message;
+				} else {
+					errorMessage = new String(error).toString();
+				}
 			}
 		}
 	}
@@ -51,6 +52,7 @@
 		slot="is-desktop"
 		{emailInput}
 		{passwordInput}
+		{errorMessage}
 		on:inputChange={handleChange}
 		on:login={login}
 	/>
@@ -58,6 +60,7 @@
 		slot="is-mobile-or-tablet"
 		{emailInput}
 		{passwordInput}
+		{errorMessage}
 		on:inputChange={handleChange}
 		on:login={login}
 	/>
