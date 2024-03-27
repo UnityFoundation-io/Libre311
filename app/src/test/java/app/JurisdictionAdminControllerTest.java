@@ -17,6 +17,7 @@ package app;
 import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.group.GroupDTO;
 import app.dto.service.CreateServiceDTO;
+import app.dto.service.PatchServiceOrderPositionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicedefinition.*;
@@ -65,9 +66,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.*;
@@ -425,6 +424,54 @@ public class JurisdictionAdminControllerTest {
                                 !serviceDefinitionAttribute.getValues().isEmpty() &&
                                 serviceDefinitionAttribute.getAttributeOrder() == 1)
         );
+    }
+
+    @Test
+    void canUpdateServicesOrder() {
+        HttpResponse<?> response;
+
+        Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById("fakecity.gov");
+        ServiceGroup myInfraGroup = serviceGroupRepository.save(new ServiceGroup("MyInfraGroup", optionalJurisdiction.get()));
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            createService("InfraBIKELN007", "Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId());
+        });
+        assertEquals(UNAUTHORIZED, exception.getStatus());
+
+        authLogin();
+
+        response = createService("InfraBIKELN007", "Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
+        assertTrue(optional.isPresent());
+        ServiceDTO bikeLaneService = optional.get();
+        assertEquals(-1, bikeLaneService.getOrderPosition());
+
+        response = createService("InfraBUS_STOP", "Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId(), 2);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        optional = response.getBody(ServiceDTO.class);
+        assertTrue(optional.isPresent());
+        ServiceDTO busStopService = optional.get();
+        assertEquals(2, busStopService.getOrderPosition());
+
+        // update order
+        List<PatchServiceOrderPositionDTO> payload = List.of(
+                new PatchServiceOrderPositionDTO(bikeLaneService.getId(), 0),
+                new PatchServiceOrderPositionDTO(busStopService.getId(), 1)
+        );
+
+        HttpRequest<?> request = HttpRequest.PATCH(
+                "/jurisdiction-admin/groups/"+myInfraGroup.getId()+"/services-order?jurisdiction_id=fakecity.gov",
+                        payload).header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, ServiceDTO[].class);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<ServiceDTO[]> serviceDTOSOptional = response.getBody(ServiceDTO[].class);
+        assertTrue(serviceDTOSOptional.isPresent());
+        ServiceDTO[] serviceDTOS = serviceDTOSOptional.get();
+        assertEquals(2, serviceDTOS.length);
+        assertTrue(Arrays.stream(serviceDTOS)
+                .allMatch(serviceDTO -> (Objects.equals(serviceDTO.getId(), bikeLaneService.getId()) && serviceDTO.getOrderPosition() == 0) ||
+                        (Objects.equals(serviceDTO.getId(), busStopService.getId()) && serviceDTO.getOrderPosition() == 1)));
     }
 
     @Test

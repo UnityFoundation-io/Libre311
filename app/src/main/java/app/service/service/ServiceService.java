@@ -17,6 +17,7 @@ package app.service.service;
 import app.dto.group.GroupDTO;
 import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
+import app.dto.service.PatchServiceOrderPositionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.exception.Libre311BaseException;
@@ -113,12 +114,11 @@ public class ServiceService {
         Jurisdiction jurisdiction = jurisdictionRepository.findById(jurisdictionId).get();
         validateServiceCodeExistence(serviceDTO.getServiceCode(), jurisdiction);
 
+        ServiceGroup group = validateGroupExistenceAndReturn(serviceDTO.getGroupId(), jurisdictionId);
+
         Service service = new Service();
-
-        if (groupDoesNotExists(serviceDTO.getGroupId(), jurisdiction, service))
-            throw new GroupNotFoundException(serviceDTO.getGroupId());
-
         service.setJurisdiction(jurisdiction);
+        service.setServiceGroup(group);
         service.setServiceCode(serviceDTO.getServiceCode());
         service.setServiceName(serviceDTO.getServiceName());
         service.setDescription(serviceDTO.getDescription());
@@ -143,7 +143,8 @@ public class ServiceService {
         }
 
         if (serviceDTO.getGroupId() != null) {
-            if (groupDoesNotExists(serviceDTO.getGroupId(), service.getJurisdiction(), service)) return null;
+            ServiceGroup group = validateGroupExistenceAndReturn(serviceDTO.getGroupId(), jurisdictionId);
+            service.setServiceGroup(group);
         }
         if (serviceDTO.getDescription() != null) {
             service.setDescription(serviceDTO.getDescription());
@@ -158,21 +159,32 @@ public class ServiceService {
         return toServiceDTO(serviceRepository.update(service));
     }
 
+    public List<ServiceDTO> updateServiceOrderPositions(Long groupId, List<PatchServiceOrderPositionDTO> requestDTO) {
+
+        updateServicesOrderPosition(groupId, requestDTO);
+
+        // get refreshed list of services
+        List<Service> services = serviceRepository.findAllByServiceGroupId(groupId);
+        return services.stream().map(this::toServiceDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateServicesOrderPosition(Long groupId, List<PatchServiceOrderPositionDTO> requestDTO) {
+        requestDTO.forEach(patchServiceOrderPositionDTO -> serviceRepository.updateOrderPositionByIdAndServiceGroupId(
+                patchServiceOrderPositionDTO.getServiceId(), groupId,
+                patchServiceOrderPositionDTO.getOrderPosition()
+        ));
+    }
+
     public void deleteService(Long serviceId, String jurisdictionId) {
         serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId)
             .orElseThrow(() -> new ServiceNotFoundException(serviceId, jurisdictionId));
         serviceRepository.deleteById(serviceId);
     }
 
-    private boolean groupDoesNotExists(Long serviceDTO, Jurisdiction jurisdiction, Service service) {
-        Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO, jurisdiction);
-        if (serviceGroupOptional.isPresent()) {
-            service.setServiceGroup(serviceGroupOptional.get());
-        } else {
-            LOG.error("Group not found.");
-            return true;
-        }
-        return false;
+    private ServiceGroup validateGroupExistenceAndReturn(Long groupId, String jurisdictionId) {
+        Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdictionId(groupId, jurisdictionId);
+        return serviceGroupOptional.orElseThrow(() -> new GroupNotFoundException(groupId));
     }
 
     private void validateServiceCodeExistence(String serviceCode, Jurisdiction jurisdiction) {
