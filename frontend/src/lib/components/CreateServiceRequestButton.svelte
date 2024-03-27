@@ -9,6 +9,6 @@
 		<div slot="leading">
 			<PlusCircleIcon />
 		</div>
-		Create Service Request
+		New Request
 	</Button>
 </div>
