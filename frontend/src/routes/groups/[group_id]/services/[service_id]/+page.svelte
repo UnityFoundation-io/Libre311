@@ -1,15 +1,21 @@
 <script lang="ts">
-	import { Breadcrumbs, Card, List, Progress } from 'stwui';
+	import { Breadcrumbs, Button, Card, Input, List, Progress } from 'stwui';
 	import { asAsyncFailure, asAsyncSuccess, ASYNC_IN_PROGRESS, type AsyncResult } from '$lib/services/http';
 	import { createAttributeInputMap, type AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
+	import XMark from '$lib/components/Svg/outline/XMark.svelte';
+	import CheckMark from '$lib/components/Svg/outline/CheckMark.svelte';
+	import { slide } from 'svelte/transition';
+	import { createInput, type FormInputValue } from '$lib/utils/validation';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
 	let selectedServiceCode: string = $page.params.service_id;
+	let isDropDownVisable: boolean = false;
+	let newServiceName: FormInputValue<string> = createInput();
 
 	interface Crumb {
 		label: string;
@@ -41,6 +47,10 @@
 			alertError(error);
 		}
 	}
+
+	async function handleAddNewAttribute() {
+		// TODO: add new service
+	}
 </script>
 
 <Card bordered={true} class="m-4">
@@ -52,11 +62,50 @@
 				</Breadcrumbs.Crumb>
 			{/each}
 		</Breadcrumbs>
+		<div class="flex justify-end">
+			<Button
+				type="ghost"
+				on:click={() => {
+					isDropDownVisable = true;
+				}}
+				>{'+ Add Attribute'}
+			</Button>
+		</div>
 	</Card.Header>
 
 	<Card.Content slot="content" class="p-0 sm:p-0">
+
 		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
+				{#if isDropDownVisable}
+					<List.Item>
+						<div class="m-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
+							<Input
+								class="w-[80%]"
+								name="new-service-name"
+								error={newServiceName.error}
+								bind:value={newServiceName.value}
+							></Input>
+
+							<div class="flex">
+								<Button
+									aria-label="Close"
+									type="ghost"
+									on:click={() => {
+										isDropDownVisable = false;
+										newServiceName.value = undefined;
+									}}
+								>
+									<XMark slot="icon" />
+								</Button>
+								<Button aria-label="Submit" type="ghost" on:click={handleAddNewAttribute}>
+									<CheckMark slot="icon" />
+								</Button>
+							</div>
+						</div>
+					</List.Item>
+				{/if}
+
 				{#each asyncAttributeInputMap.value.values() as input}
 					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
 
