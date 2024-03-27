@@ -9,16 +9,11 @@
 	export let pagination: Pagination;
 	export let prevPage: string | undefined = undefined;
 	export let nextPage: string | undefined = undefined;
-	// export let element: HTMLElement;
 
 	const dispatch = createEventDispatcher<{ pageChange: void }>();
 	function scrollDispatch() {
 		dispatch('pageChange');
 	}
-
-	// function scrollToTop() {
-	// 	element.scrollIntoView();
-	// }
 
 	$: maxUpperBound = (pagination.pageNumber + 1) * pagination.size;
 	$: upperBound = Math.min(maxUpperBound, pagination.totalSize);

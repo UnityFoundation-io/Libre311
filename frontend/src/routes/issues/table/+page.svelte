@@ -5,18 +5,20 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
-	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
+	import {
+		useServiceRequestsContext,
+		useServiceRequestsResponseStore
+	} from '$lib/context/ServiceRequestsContext';
 
 	const ctx = useServiceRequestsContext();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
 	const linkResolver = useLibre311Context().linkResolver;
 
-	let listElement: HTMLElement;
+	const serviceRequestResStore = useServiceRequestsResponseStore();
+	let listElement: HTMLElement | undefined;
 
-	function scrollToTop() {
-		listElement.scrollIntoView();
-	}
+	$: if ($serviceRequestResStore.type === 'success') listElement?.scrollIntoView();
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -38,7 +40,6 @@
 							$serviceRequestsRes.value.metadata.pagination,
 							$page.url
 						)}
-						on:pageChange={scrollToTop}
 					/>
 				</div>
 			</div>
