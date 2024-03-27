@@ -78,32 +78,30 @@
 		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
 				{#if isDropDownVisable}
-					<List.Item>
-						<div class="m-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
-							<Input
-								class="w-[80%]"
-								name="new-service-name"
-								error={newServiceName.error}
-								bind:value={newServiceName.value}
-							></Input>
+					<div class="m-2 w-full flex justify-between" transition:slide|local={{ duration: 500 }}>
+						<Input
+							class="w-[80%]"
+							name="new-service-name"
+							error={newServiceName.error}
+							bind:value={newServiceName.value}
+						></Input>
 
-							<div class="flex">
-								<Button
-									aria-label="Close"
-									type="ghost"
-									on:click={() => {
-										isDropDownVisable = false;
-										newServiceName.value = undefined;
-									}}
-								>
-									<XMark slot="icon" />
-								</Button>
-								<Button aria-label="Submit" type="ghost" on:click={handleAddNewAttribute}>
-									<CheckMark slot="icon" />
-								</Button>
-							</div>
+						<div class="flex">
+							<Button
+								aria-label="Close"
+								type="ghost"
+								on:click={() => {
+									isDropDownVisable = false;
+									newServiceName.value = undefined;
+								}}
+							>
+								<XMark slot="icon" />
+							</Button>
+							<Button aria-label="Submit" type="ghost" on:click={handleAddNewAttribute}>
+								<CheckMark slot="icon" />
+							</Button>
 						</div>
-					</List.Item>
+					</div>
 				{/if}
 
 				{#each asyncAttributeInputMap.value.values() as input}
