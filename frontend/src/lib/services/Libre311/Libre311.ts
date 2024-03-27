@@ -358,6 +358,17 @@ export type DeleteServiceParams = {
 	serviceId: number;
 };
 
+// ***************** Attributes *************** //
+
+export const CreateServiceDefinitionAttributesSchema = z.object({
+	serviceId: z.number(),
+	description: z.string()
+});
+
+export type CreateServiceDefinitionAttributesParams = z.infer<
+	typeof CreateServiceDefinitionAttributesSchema
+>;
+
 // ************************************************ //
 
 export type GetServiceRequestsParams =
@@ -437,6 +448,9 @@ export interface Libre311Service extends Open311Service {
 	editGroup(params: EditGroupParams): Promise<Group>;
 	downloadServiceRequests(params: URLSearchParams): Promise<Blob>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
+	createAttribute(
+		params: CreateServiceDefinitionAttributesParams
+	): Promise<ServiceDefinitionAttribute>;
 	editService(params: EditServiceParams): Promise<Service>;
 	deleteService(params: DeleteServiceParams): Promise<void>;
 	updateServiceRequest(
@@ -471,6 +485,8 @@ const ROUTES = {
 	patchService: (params: HasJurisdictionId & HasId<number>) =>
 		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteService: (params: DeleteServiceParams & HasJurisdictionId) =>
+		`/jurisdiction-admin/services/${params.serviceId}?jurisdiction_id=${params.jurisdiction_id}`,
+	postAttribute: (params: CreateServiceDefinitionAttributesParams & HasJurisdictionId) =>
 		`/jurisdiction-admin/services/${params.serviceId}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
@@ -566,6 +582,21 @@ export class Libre311ServiceImpl implements Libre311Service {
 		console.log({ props });
 		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
+	}
+
+	async createAttribute(
+		params: CreateServiceDefinitionAttributesParams
+	): Promise<ServiceDefinitionAttribute> {
+		const res = await this.axiosInstance.post<unknown>(
+			ROUTES.postAttribute({
+				serviceId: params.serviceId,
+				description: params.description,
+				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+			}),
+			params
+		);
+
+		return ServiceDefinitionAttributeSchema.parse(res);
 	}
 
 	getJurisdictionConfig(): JurisdictionConfig {

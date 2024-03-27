@@ -7,7 +7,7 @@
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import CheckMark from '$lib/components/Svg/outline/CheckMark.svelte';
 	import { slide } from 'svelte/transition';
-	import { createInput, type FormInputValue } from '$lib/utils/validation';
+	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -15,7 +15,7 @@
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
 	let selectedServiceCode: string = $page.params.service_id;
 	let isDropDownVisable: boolean = false;
-	let newServiceName: FormInputValue<string> = createInput();
+	let newAttributeName: FormInputValue<string> = createInput();
 
 	interface Crumb {
 		label: string;
@@ -49,7 +49,27 @@
 	}
 
 	async function handleAddNewAttribute() {
-		// TODO: add new service
+		console.log("HANDLE NEW ATTRIBUTE");
+		console.log(newAttributeName);
+
+		newAttributeName = stringValidator(newAttributeName);
+
+		if (newAttributeName.type != 'valid') {
+			return;
+		}
+
+		try {
+			const res = await libre311.createAttribute({
+				serviceId: 1,
+				description: 'I am an attribute'
+			});
+			console.log('RES')
+			console.log(res);
+		} catch (error) {
+			alertError(error);
+		}
+
+		isDropDownVisable = false;
 	}
 </script>
 
@@ -82,8 +102,8 @@
 						<Input
 							class="w-[80%]"
 							name="new-service-name"
-							error={newServiceName.error}
-							bind:value={newServiceName.value}
+							error={newAttributeName.error}
+							bind:value={newAttributeName.value}
 						></Input>
 
 						<div class="flex">
@@ -92,7 +112,7 @@
 								type="ghost"
 								on:click={() => {
 									isDropDownVisable = false;
-									newServiceName.value = undefined;
+									newAttributeName.value = undefined;
 								}}
 							>
 								<XMark slot="icon" />
