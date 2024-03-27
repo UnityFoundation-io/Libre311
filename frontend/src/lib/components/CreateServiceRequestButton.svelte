@@ -6,9 +6,9 @@
 
 <div class="absolute bottom-5 left-1/2 z-[1] -translate-x-1/2">
 	<Button type="primary" href={'/issue/create'}>
-		<Button.Leading slot="leading">
-			<PlusCircleIcon slot="icon" />
-		</Button.Leading>
+		<div slot="leading">
+			<PlusCircleIcon />
+		</div>
 		Create Service Request
 	</Button>
 </div>
