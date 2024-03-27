@@ -57,6 +57,12 @@
 	let startDate: Date;
 	let endDate: Date;
 
+	let listElement: HTMLElement;
+
+	function scrollToTop() {
+		listElement.scrollIntoView();
+	}
+
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(linkResolver.issueDetailsTable($page.url, service_request_id));
 		return;
@@ -153,192 +159,195 @@
 	<SideBarMainContentLayout>
 		<slot slot="side-bar" />
 		<div slot="main-content" class="relative flex h-full flex-col">
-			<div class="m-3 flex items-center justify-between">
-				<div>
-					<p class="text-base">{messages['sidebar']['title']}</p>
+			<div bind:this={listElement}>
+				<div class="m-3 flex items-center justify-between">
+					<div>
+						<p class="text-base">{messages['sidebar']['title']}</p>
+					</div>
+
+					<div>
+						<Pagination
+							pagination={$serviceRequestsRes.value.metadata.pagination}
+							nextPage={linkResolver.nextIssuesTablePage(
+								$serviceRequestsRes.value.metadata.pagination,
+								$page.url
+							)}
+							prevPage={linkResolver.prevIssuesTablePage(
+								$serviceRequestsRes.value.metadata.pagination,
+								$page.url
+							)}
+							on:pageChange={scrollToTop}
+						/>
+					</div>
 				</div>
 
-				<div>
-					<Pagination
-						pagination={$serviceRequestsRes.value.metadata.pagination}
-						nextPage={linkResolver.nextIssuesTablePage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-						prevPage={linkResolver.prevIssuesTablePage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-					/>
-				</div>
-			</div>
-
-			<div
-				class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
-			>
-				<div class="m-3 flex items-center">
-					{#if !isSearchFiltersOpen}
-						<div transition:slide|local={{ duration: 500 }}>
-							<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
-								<Input.Leading slot="trailing" data={magnifingGlassIcon} />
-							</Input>
-						</div>
-					{:else}
-						<div class="flex flex-wrap justify-end" transition:slide|local={{ duration: 500 }}>
-							<div class="m-1">
-								<Select
-									bind:value={selectedServicePriority}
-									name="select-priority"
-									placeholder="Priority:"
-									multiple
-									options={priorityOptions}
-								>
-									<Select.Label slot="label">Priority</Select.Label>
-									<Select.Options slot="options">
-										{#each priorityOptions as option}
-											<Select.Options.Option {option} />
-										{/each}
-									</Select.Options>
-								</Select>
+				<div
+					class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
+				>
+					<div class="m-3 flex items-center">
+						{#if !isSearchFiltersOpen}
+							<div transition:slide|local={{ duration: 500 }}>
+								<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
+									<Input.Leading slot="trailing" data={magnifingGlassIcon} />
+								</Input>
 							</div>
-
-							<div class="m-1">
-								<Select
-									name="select-status"
-									placeholder="Status:"
-									multiple
-									options={statusOptions}
-									bind:value={statusInput}
-								>
-									<Select.Label slot="label">Status</Select.Label>
-									<Select.Options slot="options">
-										{#each statusOptions as option}
-											<Select.Options.Option {option} />
-										{/each}
-									</Select.Options>
-								</Select>
-							</div>
-
-							{#if serviceList.type === 'success'}
-								{@const selectOptions = createSelectOptions(serviceList.value)}
-								<div class="m-1 min-w-52">
+						{:else}
+							<div class="flex flex-wrap justify-end" transition:slide|local={{ duration: 500 }}>
+								<div class="m-1">
 									<Select
-										bind:value={selectedServiceCode}
-										name="select-1"
-										placeholder="Request Type"
+										bind:value={selectedServicePriority}
+										name="select-priority"
+										placeholder="Priority:"
 										multiple
-										options={selectOptions}
+										options={priorityOptions}
 									>
-										<Select.Label slot="label">Service</Select.Label>
+										<Select.Label slot="label">Priority</Select.Label>
 										<Select.Options slot="options">
-											{#each selectOptions as option}
+											{#each priorityOptions as option}
 												<Select.Options.Option {option} />
 											{/each}
 										</Select.Options>
 									</Select>
 								</div>
-							{/if}
 
-							<div class="m-1">
-								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
-									<DatePicker.Label slot="label">Reported From</DatePicker.Label>
-									<DatePicker.Leading slot="leading" data={calendarIcon} />
-								</DatePicker>
-							</div>
+								<div class="m-1">
+									<Select
+										name="select-status"
+										placeholder="Status:"
+										multiple
+										options={statusOptions}
+										bind:value={statusInput}
+									>
+										<Select.Label slot="label">Status</Select.Label>
+										<Select.Options slot="options">
+											{#each statusOptions as option}
+												<Select.Options.Option {option} />
+											{/each}
+										</Select.Options>
+									</Select>
+								</div>
 
-							<div class="m-1">
-								<DatePicker name="end-datetime" allowClear bind:value={endDate}>
-									<DatePicker.Label slot="label">Reported To</DatePicker.Label>
-									<DatePicker.Leading slot="leading" data={calendarIcon} />
-								</DatePicker>
+								{#if serviceList.type === 'success'}
+									{@const selectOptions = createSelectOptions(serviceList.value)}
+									<div class="m-1 min-w-52">
+										<Select
+											bind:value={selectedServiceCode}
+											name="select-1"
+											placeholder="Request Type"
+											multiple
+											options={selectOptions}
+										>
+											<Select.Label slot="label">Service</Select.Label>
+											<Select.Options slot="options">
+												{#each selectOptions as option}
+													<Select.Options.Option {option} />
+												{/each}
+											</Select.Options>
+										</Select>
+									</div>
+								{/if}
+
+								<div class="m-1">
+									<DatePicker name="start-datetime" allowClear bind:value={startDate}>
+										<DatePicker.Label slot="label">Reported From</DatePicker.Label>
+										<DatePicker.Leading slot="leading" data={calendarIcon} />
+									</DatePicker>
+								</div>
+
+								<div class="m-1">
+									<DatePicker name="end-datetime" allowClear bind:value={endDate}>
+										<DatePicker.Label slot="label">Reported To</DatePicker.Label>
+										<DatePicker.Leading slot="leading" data={calendarIcon} />
+									</DatePicker>
+								</div>
 							</div>
-						</div>
-					{/if}
+						{/if}
+					</div>
+
+					<button class="mr-3" on:click={handleFunnelClick}>
+						<Funnel />
+					</button>
 				</div>
 
-				<button class="mr-3" on:click={handleFunnelClick}>
-					<Funnel />
-				</button>
+				<Card bordered={true} class="m-2">
+					<Card.Content slot="content" class="p-0 sm:p-0">
+						<div class="issues-table-override">
+							<Table class="h-full overflow-hidden rounded-md" {columns}>
+								<Table.Header slot="header" {orderBy} />
+								<Table.Body slot="body">
+									{#each $serviceRequestsRes.value.serviceRequests as item}
+										<Table.Body.Row
+											id={resolveStyleId(item, $selectedServiceRequestStore)}
+											on:click={() => selectRow(item.service_request_id)}
+										>
+											<Table.Body.Row.Cell column={0}>
+												<div class="flex items-center justify-center">
+													{item.service_request_id}
+												</div>
+											</Table.Body.Row.Cell>
+
+											<Table.Body.Row.Cell column={1}>
+												<div class="flex items-center justify-center">
+													{item.priority
+														? `${item.priority.charAt(0).toUpperCase()}${item.priority.slice(1)}`
+														: '--'}
+												</div>
+											</Table.Body.Row.Cell>
+
+											<Table.Body.Row.Cell column={2}>
+												<div class="flex items-center justify-center">
+													{item.service_name}
+												</div>
+											</Table.Body.Row.Cell>
+
+											<Table.Body.Row.Cell column={3}>
+												<div class="flex items-center justify-center">
+													<ServiceRequestStatusBadge status={item.status} />
+												</div>
+											</Table.Body.Row.Cell>
+
+											<Table.Body.Row.Cell column={4}>
+												<div class="flex items-center justify-center">
+													<p
+														class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm 2xl:w-32"
+													>
+														{item.address}
+													</p>
+												</div>
+											</Table.Body.Row.Cell>
+
+											<Table.Body.Row.Cell column={5}>
+												<div class="flex items-center justify-center">
+													{toAbbreviatedTimeStamp(item.requested_datetime)}
+												</div>
+											</Table.Body.Row.Cell>
+
+											<Table.Body.Row.Cell column={6}>
+												<div class="flex items-center justify-center">
+													{#if item.expected_datetime}
+														{toAbbreviatedTimeStamp(item.expected_datetime)}
+													{:else}
+														--
+													{/if}
+												</div>
+											</Table.Body.Row.Cell>
+										</Table.Body.Row>
+									{/each}
+								</Table.Body>
+
+								<Table.Footer slot="footer">
+									<div class="m-2 flex justify-end">
+										<Button on:click={handleDownloadCsv}>
+											Download CSV
+											<Button.Trailing data={arrowDownTray} slot="trailing" />
+										</Button>
+									</div>
+								</Table.Footer>
+							</Table>
+						</div>
+					</Card.Content>
+				</Card>
 			</div>
-
-			<Card bordered={true} class="m-2">
-				<Card.Content slot="content" class="p-0 sm:p-0">
-					<div class="issues-table-override">
-						<Table class="h-full overflow-hidden rounded-md" {columns}>
-							<Table.Header slot="header" {orderBy} />
-							<Table.Body slot="body">
-								{#each $serviceRequestsRes.value.serviceRequests as item}
-									<Table.Body.Row
-										id={resolveStyleId(item, $selectedServiceRequestStore)}
-										on:click={() => selectRow(item.service_request_id)}
-									>
-										<Table.Body.Row.Cell column={0}>
-											<div class="flex items-center justify-center">
-												{item.service_request_id}
-											</div>
-										</Table.Body.Row.Cell>
-
-										<Table.Body.Row.Cell column={1}>
-											<div class="flex items-center justify-center">
-												{item.priority
-													? `${item.priority.charAt(0).toUpperCase()}${item.priority.slice(1)}`
-													: '--'}
-											</div>
-										</Table.Body.Row.Cell>
-
-										<Table.Body.Row.Cell column={2}>
-											<div class="flex items-center justify-center">
-												{item.service_name}
-											</div>
-										</Table.Body.Row.Cell>
-
-										<Table.Body.Row.Cell column={3}>
-											<div class="flex items-center justify-center">
-												<ServiceRequestStatusBadge status={item.status} />
-											</div>
-										</Table.Body.Row.Cell>
-
-										<Table.Body.Row.Cell column={4}>
-											<div class="flex items-center justify-center">
-												<p
-													class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm 2xl:w-32"
-												>
-													{item.address}
-												</p>
-											</div>
-										</Table.Body.Row.Cell>
-
-										<Table.Body.Row.Cell column={5}>
-											<div class="flex items-center justify-center">
-												{toAbbreviatedTimeStamp(item.requested_datetime)}
-											</div>
-										</Table.Body.Row.Cell>
-
-										<Table.Body.Row.Cell column={6}>
-											<div class="flex items-center justify-center">
-												{#if item.expected_datetime}
-													{toAbbreviatedTimeStamp(item.expected_datetime)}
-												{:else}
-													--
-												{/if}
-											</div>
-										</Table.Body.Row.Cell>
-									</Table.Body.Row>
-								{/each}
-							</Table.Body>
-
-							<Table.Footer slot="footer">
-								<div class="m-2 flex justify-end">
-									<Button on:click={handleDownloadCsv}>
-										Download CSV
-										<Button.Trailing data={arrowDownTray} slot="trailing" />
-									</Button>
-								</div>
-							</Table.Footer>
-						</Table>
-					</div>
-				</Card.Content>
-			</Card>
 		</div>
 	</SideBarMainContentLayout>
 {:else if $serviceRequestsRes.type === 'failure'}

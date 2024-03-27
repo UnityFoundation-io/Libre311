@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import { Button } from 'stwui';
 
 	import { chevronRightSvg } from './Svg/outline/ChevronRight.svelte';
@@ -8,11 +9,16 @@
 	export let pagination: Pagination;
 	export let prevPage: string | undefined = undefined;
 	export let nextPage: string | undefined = undefined;
-	export let element: HTMLElement;
+	// export let element: HTMLElement;
 
-	function scrollToTop() {
-		element.scrollIntoView();
+	const dispatch = createEventDispatcher<{ pageChange: void }>();
+	function scrollDispatch() {
+		dispatch('pageChange');
 	}
+
+	// function scrollToTop() {
+	// 	element.scrollIntoView();
+	// }
 
 	$: maxUpperBound = (pagination.pageNumber + 1) * pagination.size;
 	$: upperBound = Math.min(maxUpperBound, pagination.totalSize);
@@ -27,7 +33,7 @@
 			type={prevPage ? 'text' : 'ghost'}
 			disabled={!prevPage}
 			shape="circle"
-			on:click={scrollToTop}
+			on:click={scrollDispatch}
 		>
 			<Button.Icon data={chevronLeftSvg} slot="icon" />
 		</Button>
@@ -36,7 +42,7 @@
 			type={nextPage ? 'text' : 'ghost'}
 			disabled={!nextPage}
 			shape="circle"
-			on:click={scrollToTop}
+			on:click={scrollDispatch}
 		>
 			<Button.Icon data={chevronRightSvg} slot="icon" />
 		</Button>

@@ -13,6 +13,10 @@
 	const linkResolver = useLibre311Context().linkResolver;
 
 	let listElement: HTMLElement;
+
+	function scrollToTop() {
+		listElement.scrollIntoView();
+	}
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
@@ -34,7 +38,7 @@
 							$serviceRequestsRes.value.metadata.pagination,
 							$page.url
 						)}
-						element={listElement}
+						on:pageChange={scrollToTop}
 					/>
 				</div>
 			</div>
