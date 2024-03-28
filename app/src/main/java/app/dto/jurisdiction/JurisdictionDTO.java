@@ -15,8 +15,12 @@
 package app.dto.jurisdiction;
 
 import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.JurisdictionBoundary;
+import app.service.geometry.LibreGeometryFactory;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import io.micronaut.core.annotation.Introspected;
+import org.locationtech.jts.geom.Polygon;
 
 @Introspected
 public class JurisdictionDTO {
@@ -59,6 +63,16 @@ public class JurisdictionDTO {
         this.primaryColor = jurisdiction.getPrimaryColor();
         this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
+    }
+
+    public JurisdictionDTO(Jurisdiction jurisdiction, JurisdictionBoundary boundary) {
+        this.jurisdictionId = jurisdiction.getId();
+        this.name = jurisdiction.getName();
+        this.tenantId = jurisdiction.getTenantId();
+        this.primaryColor = jurisdiction.getPrimaryColor();
+        this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
+        this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
+        setBounds(boundary.getBoundary());
     }
 
     public String getJurisdictionId() {
@@ -121,6 +135,11 @@ public class JurisdictionDTO {
         return bounds;
     }
 
+    public void setBounds(Polygon polygon) {
+        this.bounds = LibreGeometryFactory.getCoordinatesFrom(polygon);
+    }
+
+    @JsonSetter
     public void setBounds(Double[][] bounds) {
         this.bounds = bounds;
     }
