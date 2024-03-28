@@ -6,14 +6,16 @@ VALUES (1, 'stl_subtenant_admin@example.com');
 INSERT IGNORE INTO jurisdictions (id, name, tenant_id)
 VALUES ('stlma', 'St. Louis Metro Area', 1);
 
--- Add jurisdiction boundary
-INSERT IGNORE INTO boundary_coordinates (id, latitude, longitude, order_position, jurisdiction_id)
-VALUES (1, 38.82703279269242, -90.49033044152023, 0, 'stlma'),
-       (2, 38.597392575835784, -90.56676157292115, 1, 'stlma'),
-       (3, 38.38544522916203,  -90.37277483714392, 2, 'stlma'),
-       (4, 38.62881664652022, -90.16644447677419, 3, 'stlma'),
-       (5, 38.840026683304046, -90.24154815404624, 4, 'stlma'),
-       (6, 38.82703279269242, -90.49033044152023, 5, 'stlma');
+-- Add jurisdiction boundary (POLYGON fn
+INSERT INTO jurisdiction_boundary (boundary, jurisdiction_id)
+VALUES (ST_GeomFromText('POLYGON((
+        38.88908245157475, -90.82207996696539,
+        38.28511105115126, -90.32668241294714,
+        38.73098601356233, -89.86006757704696,
+        39.04413540068816, -90.36058752072049,
+        38.88908245157475, -90.82207996696539))', 4326),
+        'stlma');
+
 
 -- map the host to the jurisdiction
 INSERT IGNORE INTO remote_hosts (id, name, jurisdiction_id)
