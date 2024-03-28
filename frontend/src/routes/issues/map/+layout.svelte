@@ -23,6 +23,7 @@
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
 	import { matchesDesktopMedia } from '$lib/utils/functions';
+	import CreateServiceRequestButton from '$lib/components/CreateServiceRequestButton.svelte';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const libre311 = useLibre311Context().service;
@@ -77,5 +78,6 @@
 				{/each}
 			{/if}
 		</MapComponent>
+		<CreateServiceRequestButton />
 	</div>
 </SideBarMainContentLayout>

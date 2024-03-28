@@ -11,6 +11,12 @@
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
 	const linkResolver = useLibre311Context().linkResolver;
+
+	let listElement: HTMLElement;
+
+	function scrollToTop() {
+		listElement.scrollIntoView();
+	}
 </script>
 
 <div class="flex items-center justify-center">
@@ -20,39 +26,44 @@
 		</div>
 
 		{#if $serviceRequestsRes.type === 'success'}
-			<div class="m-3 flex items-center justify-between">
-				<div>
-					<p class="text-base">{messages['sidebar']['title']}</p>
+			<div bind:this={listElement}>
+				<div class="sticky top-0 border-b-2 bg-white">
+					<div class="m-3 flex items-center justify-between">
+						<div>
+							<p class="text-base">{messages['sidebar']['title']}</p>
+						</div>
+
+						<div>
+							<Pagination
+								pagination={$serviceRequestsRes.value.metadata.pagination}
+								nextPage={linkResolver.nextIssuesPage(
+									$serviceRequestsRes.value.metadata.pagination,
+									$page.url
+								)}
+								prevPage={linkResolver.prevIssuesPage(
+									$serviceRequestsRes.value.metadata.pagination,
+									$page.url
+								)}
+								on:pageChange={scrollToTop}
+							/>
+						</div>
+					</div>
 				</div>
 
-				<div>
-					<Pagination
-						pagination={$serviceRequestsRes.value.metadata.pagination}
-						nextPage={linkResolver.nextIssuesPage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-						prevPage={linkResolver.prevIssuesPage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-					/>
-				</div>
+				<ul>
+					{#each $serviceRequestsRes.value.serviceRequests as serviceRequest}
+						<li class="m-3">
+							<ServiceRequestPreview
+								{serviceRequest}
+								detailsLink={linkResolver.issueDetailsMobile(
+									$page.url,
+									serviceRequest.service_request_id
+								)}
+							/>
+						</li>
+					{/each}
+				</ul>
 			</div>
-
-			<ul>
-				{#each $serviceRequestsRes.value.serviceRequests as serviceRequest}
-					<li class="m-3">
-						<ServiceRequestPreview
-							{serviceRequest}
-							detailsLink={linkResolver.issueDetailsMobile(
-								$page.url,
-								serviceRequest.service_request_id
-							)}
-						/>
-					</li>
-				{/each}
-			</ul>
 		{/if}
 	</div>
 </div>
