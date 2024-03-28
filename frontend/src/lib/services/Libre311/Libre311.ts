@@ -598,20 +598,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
 	}
 
-	async createAttribute(
-		params: CreateServiceDefinitionAttributesParams
-	): Promise<CreateServiceDefinitionAttributeResponse> {
-		const res = await this.axiosInstance.post<unknown>(
-			ROUTES.postAttribute({
-				id: params.serviceId,
-				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
-			}),
-			params
-		);
-
-		return CreateServiceDefinitionAttributeResponseSchema.parse(res.data);
-	}
-
 	getJurisdictionConfig(): JurisdictionConfig {
 		return this.jurisdictionConfig;
 	}
@@ -719,6 +705,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 			console.log(error);
 			throw error;
 		}
+	}
+
+	async createAttribute(
+		params: CreateServiceDefinitionAttributesParams
+	): Promise<CreateServiceDefinitionAttributeResponse> {
+		const res = await this.axiosInstance.post<unknown>(
+			ROUTES.postAttribute({
+				id: params.serviceId,
+				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+			}),
+			params
+		);
+
+		return CreateServiceDefinitionAttributeResponseSchema.parse(res.data);
 	}
 
 	async createServiceRequest(
