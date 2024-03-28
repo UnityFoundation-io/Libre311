@@ -147,8 +147,8 @@
 			<List>
 				{#if isDropDownVisable}
 					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
-						<div class="m-2">
-							<div class="my-4 flex justify-between">
+						<div class="my-2 mx-4">
+							<div class="my-4 flex justify-between items-center">
 								<div class="items-center">
 									<label for="is-attribute-required">
 										<strong class="text-base">{'Required:'}</strong>
