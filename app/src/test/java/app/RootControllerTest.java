@@ -51,6 +51,7 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -58,14 +59,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.TestInstance;
 
-import static app.fixture.JurisdictionBoundaryRepositoryFixture.DEFAULT_BOUNDS;
-import static app.fixture.JurisdictionBoundaryRepositoryFixture.IN_BOUNDS_COORDINATE;
+import static app.util.JurisdictionBoundaryUtil.DEFAULT_BOUNDS;
+import static app.util.JurisdictionBoundaryUtil.IN_BOUNDS_COORDINATE;
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @MicronautTest(environments={"app-api-test-data"}, transactional = false)
 public class RootControllerTest {
 
@@ -98,6 +101,12 @@ public class RootControllerTest {
     void setup() {
         dbCleanup.cleanupServiceRequests();
     }
+
+    @AfterAll
+    void cleanupAll(){
+        dbCleanup.cleanupAll();
+    }
+
 
     private void setAuthHasPermissionSuccessResponse(boolean success, List<Permission> permissions) {
         var permissionsAsString = permissions.stream()
