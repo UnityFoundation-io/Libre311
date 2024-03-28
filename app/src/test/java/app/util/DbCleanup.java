@@ -14,7 +14,6 @@
 
 package app.util;
 
-import app.model.jurisdiction.JurisdictionBoundary;
 import app.model.jurisdiction.JurisdictionBoundaryRepository;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdictionuser.JurisdictionUserRepository;
@@ -59,7 +58,7 @@ public class DbCleanup {
     public JurisdictionUserRepository jurisdictionUserRepository;
 
     @Transactional
-    public void cleanup(){
+    public void cleanupAll(){
         userRepository.deleteAll();
         jurisdictionUserRepository.deleteAll();
         attributeValueRepository.deleteAll();
@@ -69,4 +68,10 @@ public class DbCleanup {
         jurisdictionRepository.deleteAll();
         serviceRequestRepository.deleteAll();
     }
+
+    @Transactional
+    public void cleanupServiceRequests() {
+        serviceRequestRepository.deleteAll();
+    }
+
 }

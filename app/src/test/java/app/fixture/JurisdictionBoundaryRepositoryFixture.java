@@ -23,7 +23,7 @@ public class JurisdictionBoundaryRepositoryFixture extends JurisdictionRepositor
     }
 
     // a large boundary roughly covering St. Louis metro area (format [lat, lng])
-    public final Double[][] DEFAULT_BOUNDS = new Double[][]{
+    public static final Double[][] DEFAULT_BOUNDS = new Double[][]{
         new Double[]{38.88908245157475, -90.82207996696539},
         new Double[]{38.28511105115126, -90.32668241294714},
         new Double[]{38.73098601356233, -89.86006757704696},
@@ -31,7 +31,7 @@ public class JurisdictionBoundaryRepositoryFixture extends JurisdictionRepositor
         new Double[]{38.88908245157475, -90.82207996696539},
     };
 
-    public final Coordinate IN_BOUNDS_COORDINATE = new Coordinate(-90.29517238194957,
+    public static final Coordinate IN_BOUNDS_COORDINATE = new Coordinate(-90.29517238194957,
         38.689033913397765);
 
     public JurisdictionBoundaryEntity saveJurisdictionBoundary(Jurisdiction jurisdiction,

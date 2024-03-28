@@ -138,7 +138,7 @@ public class JurisdictionAdminControllerTest extends JurisdictionBoundaryReposit
 
     @AfterEach
     void teardown(){
-        dbCleanup.cleanup();
+        dbCleanup.cleanupAll();
     }
 
     public void setupMockData() {
