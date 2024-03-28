@@ -24,8 +24,9 @@
 	const alertError = useLibre311Context().alertError;
 
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
-	let selectedServiceCode: string = $page.params.service_id;
-	let serviceId: number = 1;	// TODO
+	let groupId = $page.params.group_id;
+	let serviceCode = $page.params.service_id;
+	let serviceId: number;
 	let isDropDownVisable: boolean = false;
 	let newAttribute: AttributeInput = {
 		description: createInput<string>(''),
@@ -36,8 +37,8 @@
 
 	const crumbs: Crumb[] = [
 		{ label: 'Groups', href: '/groups' },
-		{ label: 'Services', href: '/groups/1/' },
-		{ label: 'Attributes', href: '/groups/1/services/1' }
+		{ label: 'Services', href: `/groups/${groupId}` },
+		{ label: 'Attributes', href: `/groups/${groupId}/services/${serviceCode}` }
 	];
 
 	const dataTypeOptions: SelectOption[] = [
@@ -47,7 +48,7 @@
 		}
 	];
 
-	$: updateAttributeMap(selectedServiceCode);
+	$: updateAttributeMap(serviceCode);
 
 	function updateAttributeMap(service: string) {
 		if (!service) {
@@ -56,10 +57,19 @@
 		getServiceDefinition(service);
 	}
 
-	async function getServiceDefinition(selectedServiceCode: string) {
+	async function getServiceDefinition(serviceCode: string) {
 		try {
-			const payload = { service_code: selectedServiceCode };
+			const payload = { service_code: serviceCode };
 			const res = await libre311.getServiceDefinition(payload);
+
+			// Get Service ID
+			const serviceList = await libre311.getServiceList();
+			for (let service of serviceList) {
+				if (service.service_code == serviceCode) {
+					serviceId = service.id;
+				}
+			}
+
 			asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(res, {}));
 		} catch (error) {
 			asyncAttributeInputMap = asAsyncFailure(error);
@@ -68,11 +78,12 @@
 	}
 
 	async function handleAddNewAttribute() {
-		console.log('Datatype:', newAttribute.dataType);
-
 		newAttribute.description = stringValidator(newAttribute.description);
 		newAttribute.code = stringValidator(newAttribute.code);
 
+		if (serviceId == null) {
+			return;
+		}
 		if (newAttribute.description.type != 'valid') {
 			return;
 		}
@@ -96,7 +107,7 @@
 			newAttribute.code.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
-			updateAttributeMap(selectedServiceCode);
+			updateAttributeMap(serviceCode);
 		} catch (error) {
 			alertError(error);
 		}
