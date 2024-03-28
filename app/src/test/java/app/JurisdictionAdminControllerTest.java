@@ -60,10 +60,7 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -552,6 +549,69 @@ public class JurisdictionAdminControllerTest {
             reader.skip(1); // skip header
             String[] cells = reader.readNext();
             assertTrue(cells.length > 1);
+        } catch (CsvValidationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void downloadCSVRequestsFileCanBeSorted() throws IOException {
+        HttpResponse<?> response;
+
+        // create service requests
+        response = createServiceRequest("001", "a st.",
+                Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        response = createServiceRequest("001", "x st.",
+                Map.of("attribute[SDWLK]", "NARROW"), "fakecity.gov");
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov&sort=addressString,asc")
+                .header("Authorization", "Bearer token.text.here");
+
+        authLogin();
+
+        response = client.toBlocking().exchange(request, byte[].class);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<byte[]> body = response.getBody(byte[].class);
+        assertTrue(body.isPresent());
+        InputStream inputStream = new ByteArrayInputStream(body.get());
+        String text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        assertNotNull(text);
+
+        int addressIndex = 0;
+        try (CSVReader reader = new CSVReader(new StringReader(text))) {
+
+            // get address index
+            String[] header = reader.readNext();
+            for (int i = 0; i < header.length - 1; i++) {
+                if (header[i].equalsIgnoreCase("address")) {
+                    addressIndex = i;
+                }
+            }
+
+            String[] firstRow = reader.readNext();
+            assertEquals("a st.", firstRow[addressIndex]);
+        } catch (CsvValidationException e) {
+            throw new RuntimeException(e);
+        }
+
+        // address descending
+        request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov&sort=addressString,desc")
+                .header("Authorization", "Bearer token.text.here");
+
+        response = client.toBlocking().exchange(request, byte[].class);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        body = response.getBody(byte[].class);
+        assertTrue(body.isPresent());
+        inputStream = new ByteArrayInputStream(body.get());
+        text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        assertNotNull(text);
+        try (CSVReader reader = new CSVReader(new StringReader(text))) {
+            reader.skip(1);
+            String[] firstRow = reader.readNext();
+            assertEquals("x st.", firstRow[addressIndex]);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
         }

@@ -578,114 +578,122 @@ public class ServiceRequestService {
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
+        Pageable pageable = requestDTO.getPageable();
+
+        Sort sort;
+        if(pageable != null && pageable.isSorted()) {
+            sort = pageable.getSort();
+        } else {
+            sort = Sort.of(new Sort.Order("dateCreated", Sort.Order.Direction.DESC, false));
+        }
 
         if (StringUtils.hasText(serviceRequestIds)) {
             List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
-            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId);
+            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, sort);
         }
 
-        return getJurisdictionServiceRequests(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate);
+        return getJurisdictionServiceRequests(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
     }
 
-    private List<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate) {
+    private List<ServiceRequest> getJurisdictionServiceRequests(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate, Sort sort) {
         if (serviceCodes != null && status != null && priority != null) {
 //            code-status-priority: 1-1-1
             if (startDate != null && endDate != null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, priority, startDate, endDate);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, priority, startDate, endDate, sort);
             } else if (startDate != null && endDate == null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, priority, startDate);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, priority, startDate, sort);
             } else if (startDate == null && endDate != null) {
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, priority, endDate);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, priority, endDate, sort);
             }
 
-            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityIn(jurisdictionId, serviceCodes, status, priority);
+            return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityIn(jurisdictionId, serviceCodes, status, priority, sort);
         }
 
         if (priority == null) {
             if (serviceCodes != null && status != null) {
 //                code-status-priority: 1-1-0
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBetween(jurisdictionId, serviceCodes, status, startDate, endDate, sort);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedAfter(jurisdictionId, serviceCodes, status, startDate, sort);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBefore(jurisdictionId, serviceCodes, status, endDate, sort);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusIn(jurisdictionId, serviceCodes, status);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndStatusIn(jurisdictionId, serviceCodes, status, sort);
             } else if (serviceCodes != null && status == null) {
 //                code-status-priority: 1-0-0
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBetween(jurisdictionId, serviceCodes, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBetween(jurisdictionId, serviceCodes, startDate, endDate, sort);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedAfter(jurisdictionId, serviceCodes, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedAfter(jurisdictionId, serviceCodes, startDate, sort);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBefore(jurisdictionId, serviceCodes, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBefore(jurisdictionId, serviceCodes, endDate, sort);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeIn(jurisdictionId, serviceCodes);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeIn(jurisdictionId, serviceCodes, sort);
             } else if (serviceCodes == null && status != null) {
 //                code-status-priority: 0-1-0
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedBetween(jurisdictionId, status, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedBetween(jurisdictionId, status, startDate, endDate, sort);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedAfter(jurisdictionId, status, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedAfter(jurisdictionId, status, startDate, sort);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedBefore(jurisdictionId, status, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndDateCreatedBefore(jurisdictionId, status, endDate, sort);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndStatusIn(jurisdictionId, status);
+                return serviceRequestRepository.findByJurisdictionIdAndStatusIn(jurisdictionId, status, sort);
             }
         } else {
             if (serviceCodes != null && status != null) {
 //                code-status-priority: 0-1-1
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, status, priority, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBetween(jurisdictionId, status, priority, startDate, endDate, sort);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, status, priority, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedAfter(jurisdictionId, status, priority, startDate, sort);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, status, priority, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBefore(jurisdictionId, status, priority, endDate, sort);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityIn(jurisdictionId, status, priority);
+                return serviceRequestRepository.findByJurisdictionIdAndStatusInAndPriorityIn(jurisdictionId, status, priority, sort);
             } else if (serviceCodes != null && status == null) {
 //                code-status-priority: 1-0-1
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, priority, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBetween(jurisdictionId, serviceCodes, priority, startDate, endDate, sort);
                 } else if (startDate != null && endDate == null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, priority, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedAfter(jurisdictionId, serviceCodes, priority, startDate, sort);
                 } else if (startDate == null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, priority, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBefore(jurisdictionId, serviceCodes, priority, endDate, sort);
                 }
 
-                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityIn(jurisdictionId, serviceCodes, priority);
+                return serviceRequestRepository.findByJurisdictionIdAndServiceServiceCodeInAndPriorityIn(jurisdictionId, serviceCodes, priority, sort);
             } else if (serviceCodes == null && status != null) {
 //                  code-status-priority: 0-0-1
                 if (startDate != null && endDate != null) {
-                    return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedBetween(jurisdictionId, priority, startDate, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedBetween(jurisdictionId, priority, startDate, endDate, sort);
                 } else if (startDate != null && endDate == null) {
                     // just start
-                    return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedAfter(jurisdictionId, priority, startDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedAfter(jurisdictionId, priority, startDate, sort);
                 } else if (startDate == null && endDate != null) {
                     // just end
-                    return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedBefore(jurisdictionId, priority, endDate);
+                    return serviceRequestRepository.findByJurisdictionIdAndPriorityInAndDateCreatedBefore(jurisdictionId, priority, endDate, sort);
                 }
 
-                return serviceRequestRepository.findAllByJurisdictionIdAndPriorityIn(jurisdictionId, priority);
+                return serviceRequestRepository.findAllByJurisdictionIdAndPriorityIn(jurisdictionId, priority, sort);
             }
         }
 
 //        code-status-priority: 0-0-0
         if (startDate != null && endDate != null) {
-            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBetween(jurisdictionId, startDate, endDate);
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBetween(jurisdictionId, startDate, endDate, sort);
         } else if (startDate != null && endDate == null) {
             // just start
-            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedAfter(jurisdictionId, startDate);
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedAfter(jurisdictionId, startDate, sort);
         } else if (startDate == null && endDate != null) {
             // just end
-            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBefore(jurisdictionId, endDate);
+            return serviceRequestRepository.findByJurisdictionIdAndDateCreatedBefore(jurisdictionId, endDate, sort);
         }
 
-        return serviceRequestRepository.findAllByJurisdictionId(jurisdictionId);
+        return serviceRequestRepository.findAllByJurisdictionId(jurisdictionId, sort);
     }
 }
