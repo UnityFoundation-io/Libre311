@@ -24,10 +24,13 @@
 	const alertError = useLibre311Context().alertError;
 
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
+
 	let groupId = $page.params.group_id;
 	let serviceCode = $page.params.service_id;
 	let serviceId: number;
+
 	let isDropDownVisable: boolean = false;
+
 	let newAttribute: AttributeInput = {
 		description: createInput<string>(''),
 		code: createInput<string>(''),
