@@ -15,7 +15,7 @@
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
 	let selectedServiceCode: string = $page.params.service_id;
 	let isDropDownVisable: boolean = false;
-	let newAttributeName: FormInputValue<string> = createInput();
+	let newAttributeDescription: FormInputValue<string> = createInput();
 
 	interface Crumb {
 		label: string;
@@ -49,27 +49,28 @@
 	}
 
 	async function handleAddNewAttribute() {
-		console.log("HANDLE NEW ATTRIBUTE");
-		console.log(newAttributeName);
+		newAttributeDescription = stringValidator(newAttributeDescription);
 
-		newAttributeName = stringValidator(newAttributeName);
-
-		if (newAttributeName.type != 'valid') {
+		if (newAttributeDescription.type != 'valid') {
 			return;
 		}
 
 		try {
 			const res = await libre311.createAttribute({
 				serviceId: 1,
-				description: 'I am an attribute'
+				description: newAttributeDescription.value,
+				code: 203,
+				datatype: "string",
+				variable: true,
+				required: true,
+				order: 3
 			});
-			console.log('RES')
-			console.log(res);
+
+			isDropDownVisable = false;
+			updateAttributeMap(selectedServiceCode)
 		} catch (error) {
 			alertError(error);
 		}
-
-		isDropDownVisable = false;
 	}
 </script>
 
@@ -102,8 +103,8 @@
 						<Input
 							class="w-[80%]"
 							name="new-service-name"
-							error={newAttributeName.error}
-							bind:value={newAttributeName.value}
+							error={newAttributeDescription.error}
+							bind:value={newAttributeDescription.value}
 						></Input>
 
 						<div class="flex">
@@ -112,7 +113,7 @@
 								type="ghost"
 								on:click={() => {
 									isDropDownVisable = false;
-									newAttributeName.value = undefined;
+									newAttributeDescription.value = undefined;
 								}}
 							>
 								<XMark slot="icon" />
