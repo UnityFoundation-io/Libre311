@@ -372,7 +372,7 @@ export type CreateServiceDefinitionAttributeResponse = z.infer<
 export const CreateServiceDefinitionAttributesSchema = z.object({
 	serviceId: z.number(),
 	description: z.string(),
-	code: z.number(),
+	code: z.string(),
 	datatype: z.string(),
 	variable: z.boolean(),
 	required: z.boolean(),

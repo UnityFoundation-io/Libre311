@@ -4,23 +4,32 @@
 	import { createAttributeInputMap, type AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
-	import XMark from '$lib/components/Svg/outline/XMark.svelte';
-	import CheckMark from '$lib/components/Svg/outline/CheckMark.svelte';
 	import { slide } from 'svelte/transition';
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
+
+	type AttributeInput = {
+		description: FormInputValue<string>,
+		code: FormInputValue<string>,
+		required: boolean
+	}
+
+	interface Crumb {
+		label: string;
+		href: string;
+	}
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
 	let selectedServiceCode: string = $page.params.service_id;
+	let serviceId: number = 1;	// TODO
 	let isDropDownVisable: boolean = false;
-	let newAttributeDescription: FormInputValue<string> = createInput();
-
-	interface Crumb {
-		label: string;
-		href: string;
-	}
+	let newAttribute: AttributeInput = {
+		description: createInput<string>(''),
+		code: createInput<string>(''),
+		required: false
+	};
 
 	const crumbs: Crumb[] = [
 		{ label: 'Groups', href: '/groups' },
@@ -49,25 +58,32 @@
 	}
 
 	async function handleAddNewAttribute() {
-		newAttributeDescription = stringValidator(newAttributeDescription);
+		newAttribute.description = stringValidator(newAttribute.description);
+		newAttribute.code = stringValidator(newAttribute.code);
 
-		if (newAttributeDescription.type != 'valid') {
+		if (newAttribute.description.type != 'valid') {
+			return;
+		}
+		if (newAttribute.code.type != 'valid') {
 			return;
 		}
 
 		try {
 			const res = await libre311.createAttribute({
-				serviceId: 1,
-				description: newAttributeDescription.value,
-				code: 203,
+				serviceId: serviceId,
+				description: newAttribute.description.value,
+				code: newAttribute.code.value,
 				datatype: "string",
 				variable: true,
-				required: true,
+				required: newAttribute.required,
 				order: 3
 			});
 
 			isDropDownVisable = false;
-			updateAttributeMap(selectedServiceCode)
+			newAttribute.description.value = '';
+			newAttribute.code.value = '';
+			newAttribute.required = false;
+			updateAttributeMap(selectedServiceCode);
 		} catch (error) {
 			alertError(error);
 		}
@@ -99,28 +115,63 @@
 		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
 				{#if isDropDownVisable}
-					<div class="m-2 w-full flex justify-between" transition:slide|local={{ duration: 500 }}>
-						<Input
-							class="w-[80%]"
-							name="new-service-name"
-							error={newAttributeDescription.error}
-							bind:value={newAttributeDescription.value}
-						></Input>
+					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
+						<div class="m-2">
+							<div class="my-4 items-center">
+								<label for="is-attribute-required">
+									<strong class="text-base">{'Required:'}</strong>
+								</label>
+								<input class="rounded-sm mx-2" id="is-attribute-required" type="checkbox" bind:checked={newAttribute.required}/>
+							</div>
 
-						<div class="flex">
-							<Button
-								aria-label="Close"
-								type="ghost"
-								on:click={() => {
-									isDropDownVisable = false;
-									newAttributeDescription.value = undefined;
-								}}
-							>
-								<XMark slot="icon" />
-							</Button>
-							<Button aria-label="Submit" type="ghost" on:click={handleAddNewAttribute}>
-								<CheckMark slot="icon" />
-							</Button>
+							<div class="my-4">
+								<Input
+									name="new-attribute-description"
+									error={newAttribute.description.error}
+									bind:value={newAttribute.description.value}
+								>
+									<Input.Label slot="label">
+										<strong class="text-base">{'Question:'}</strong>
+									</Input.Label>
+								</Input>
+							</div>
+
+							<div class="flex items-end my-4">
+								<div class="w-2/4">
+									<Input
+										name="new-service-name"
+										error={newAttribute.code.error}
+										bind:value={newAttribute.code.value}
+									>
+										<Input.Label slot="label">
+											<strong class="text-base">
+												{'Code:'}
+											</strong>
+										</Input.Label>
+									</Input>
+								</div>
+
+									<Button
+										class="mx-2 w-1/4"
+										aria-label="Close"
+										type="ghost"
+										on:click={() => {
+											isDropDownVisable = false;
+										}}
+									>
+										{'Cancel'}
+									</Button>
+
+									<Button
+										class="mx-2 w-1/4"
+										aria-label="Submit"
+										type="primary"
+										on:click={handleAddNewAttribute}
+									>
+										{'Submit'}
+									</Button>
+							</div>
+
 						</div>
 					</div>
 				{/if}
