@@ -48,6 +48,10 @@
 		{
 			value: 'string',
 			label: 'String'
+		},
+		{
+			value: 'multivaluelist',
+			label: 'Multi-Value'
 		}
 	];
 
@@ -102,7 +106,7 @@
 				datatype: String(newAttribute?.dataType).toString(),
 				variable: true,
 				required: newAttribute.required,
-				order: 3
+				order: 4	// TODO
 			});
 
 			isDropDownVisable = false;

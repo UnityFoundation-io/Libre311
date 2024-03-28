@@ -122,11 +122,11 @@ const AttributeValueSchema = z.object({
 	/**
 	 * The unique identifier associated with an option for singlevaluelist or multivaluelist. This is analogous to the value attribute in an html option tag.
 	 */
-	key: z.string(),
+	key: z.string().optional(),
 	/**
 	 * The human readable title of an option for singlevaluelist or multivaluelist. This is analogous to the innerhtml text node of an html option tag.
 	 */
-	name: z.string()
+	name: z.string().optional()
 });
 
 export type AttributeValue = z.infer<typeof AttributeValueSchema>;
@@ -134,7 +134,7 @@ export type AttributeValue = z.infer<typeof AttributeValueSchema>;
 export const ListBasedServiceDefinitionAttributeSchema =
 	BaseServiceDefinitionAttributeSchema.extend({
 		datatype: z.union([SingleValueListType, MultiValueListType]),
-		values: z.array(AttributeValueSchema)
+		values: z.array(AttributeValueSchema).optional()
 	});
 
 export const MultiSelectServiceDefinitionAttributeSchema =
@@ -270,7 +270,7 @@ const SelectedValuesSchema = z.object({
 	code: z.string(),
 	datatype: DatatypeUnionSchema,
 	description: z.string(),
-	values: z.array(AttributeValueSchema) // key is the SelectOption value and name is the human readable option.  For displaying the value to users, show the name.
+	values: z.array(AttributeValueSchema).optional() // key is the SelectOption value and name is the human readable option.  For displaying the value to users, show the name.
 });
 export type SelectedValue = z.infer<typeof SelectedValuesSchema>;
 
@@ -376,7 +376,8 @@ export const CreateServiceDefinitionAttributesSchema = z.object({
 	datatype: z.string(),
 	variable: z.boolean(),
 	required: z.boolean(),
-	order: z.number()
+	order: z.number(),
+	values: z.array(ServiceDefinitionAttributeSchema).optional()
 });
 
 export type CreateServiceDefinitionAttributesParams = z.infer<
@@ -620,6 +621,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
+
 		return ServiceDefinitionSchema.parse(res.data);
 	}
 
