@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { Breadcrumbs, Button, Card, Input, List, Progress } from 'stwui';
+	import { Breadcrumbs, Button, Card, Input, List, Progress, Select } from 'stwui';
 	import { asAsyncFailure, asAsyncSuccess, ASYNC_IN_PROGRESS, type AsyncResult } from '$lib/services/http';
 	import { createAttributeInputMap, type AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
+	import type { SelectOption } from 'stwui/types';
 
 	type AttributeInput = {
 		description: FormInputValue<string>,
 		code: FormInputValue<string>,
+		dataType: string | undefined,
 		required: boolean
 	}
 
@@ -28,6 +30,7 @@
 	let newAttribute: AttributeInput = {
 		description: createInput<string>(''),
 		code: createInput<string>(''),
+		dataType: undefined,
 		required: false
 	};
 
@@ -35,6 +38,13 @@
 		{ label: 'Groups', href: '/groups' },
 		{ label: 'Services', href: '/groups/1/' },
 		{ label: 'Attributes', href: '/groups/1/services/1' }
+	];
+
+	const dataTypeOptions: SelectOption[] = [
+		{
+			value: 'string',
+			label: 'String'
+		}
 	];
 
 	$: updateAttributeMap(selectedServiceCode);
@@ -58,6 +68,8 @@
 	}
 
 	async function handleAddNewAttribute() {
+		console.log('Datatype:', newAttribute.dataType);
+
 		newAttribute.description = stringValidator(newAttribute.description);
 		newAttribute.code = stringValidator(newAttribute.code);
 
@@ -73,7 +85,7 @@
 				serviceId: serviceId,
 				description: newAttribute.description.value,
 				code: newAttribute.code.value,
-				datatype: "string",
+				datatype: String(newAttribute?.dataType).toString(),
 				variable: true,
 				required: newAttribute.required,
 				order: 3
@@ -83,6 +95,7 @@
 			newAttribute.description.value = '';
 			newAttribute.code.value = '';
 			newAttribute.required = false;
+			newAttribute.dataType = undefined;
 			updateAttributeMap(selectedServiceCode);
 		} catch (error) {
 			alertError(error);
@@ -117,11 +130,26 @@
 				{#if isDropDownVisable}
 					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
 						<div class="m-2">
-							<div class="my-4 items-center">
-								<label for="is-attribute-required">
-									<strong class="text-base">{'Required:'}</strong>
-								</label>
-								<input class="rounded-sm mx-2" id="is-attribute-required" type="checkbox" bind:checked={newAttribute.required}/>
+							<div class="my-4 flex justify-between">
+								<div class="items-center">
+									<label for="is-attribute-required">
+										<strong class="text-base">{'Required:'}</strong>
+									</label>
+									<input class="rounded-sm mx-2" id="is-attribute-required" type="checkbox" bind:checked={newAttribute.required}/>
+								</div>
+
+								<Select
+									name="select-datatype"
+									placeholder="Data Type"
+									options={dataTypeOptions}
+									bind:value={newAttribute.dataType}
+								>
+									<Select.Options slot="options">
+										{#each dataTypeOptions as option}
+											<Select.Options.Option {option}/>
+										{/each}
+									</Select.Options>
+								</Select>
 							</div>
 
 							<div class="my-4">
