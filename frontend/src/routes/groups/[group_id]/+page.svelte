@@ -184,7 +184,7 @@
 
 				{#each serviceList.value as service}
 					{#if service !== undefined}
-						<List.Item class="flex items-center">
+						<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
 							<div class="">
 								<ToggleState startingValue={false} let:show let:toggle>
 									<Dropdown visible={show}>
@@ -212,7 +212,7 @@
 								</ToggleState>
 							</div>
 
-							<div class="mx-4 w-full cursor-pointer hover:bg-slate-100">
+							<div class="mx-4 w-full">
 								{#if isEditServiceInputVisible && editServiceCode == service.service_code}
 									<Input
 										class="w-full"
