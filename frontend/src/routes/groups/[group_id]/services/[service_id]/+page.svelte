@@ -175,6 +175,7 @@
 									name="new-attribute-description"
 									error={newAttribute.description.error}
 									bind:value={newAttribute.description.value}
+									placeholder="Tell us what is wrong with ...?"
 								>
 									<Input.Label slot="label">
 										<strong class="text-base">{'Question:'}</strong>
@@ -188,6 +189,7 @@
 										name="new-service-name"
 										error={newAttribute.code.error}
 										bind:value={newAttribute.code.value}
+										placeholder="EXTERNAL_TRACKING_CODE"
 									>
 										<Input.Label slot="label">
 											<strong class="text-base">
