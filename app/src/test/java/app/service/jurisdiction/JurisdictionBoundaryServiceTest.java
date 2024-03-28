@@ -1,14 +1,16 @@
 package app.service.jurisdiction;
 
 
+import static app.util.JurisdictionBoundaryUtil.DEFAULT_BOUNDS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import app.fixture.JurisdictionBoundaryRepositoryFixture;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionBoundary;
+import app.model.jurisdiction.JurisdictionBoundaryRepository;
+import app.model.jurisdiction.JurisdictionRepository;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
@@ -16,21 +18,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @MicronautTest
-class JurisdictionBoundaryServiceTest extends JurisdictionBoundaryRepositoryFixture {
+class JurisdictionBoundaryServiceTest  {
+
 
     @Inject
+    JurisdictionRepository jurisdictionRepository;
+    @Inject
     JurisdictionBoundaryService jurisdictionBoundaryService;
+    @Inject
+    JurisdictionBoundaryRepository jurisdictionBoundaryRepository;
 
     Jurisdiction savedJurisdiction;
 
     @BeforeEach
     void setup() {
-        savedJurisdiction = saveJurisdiction(DEFAULT_JURISDICTION);
+        savedJurisdiction = jurisdictionRepository.save(new Jurisdiction("stlma", 1L));
     }
 
     @AfterEach
     void teardown() {
-        cleanup();
+        jurisdictionRepository.deleteAll();
     }
 
     @Test

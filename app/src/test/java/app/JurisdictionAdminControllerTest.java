@@ -14,6 +14,8 @@
 
 package app;
 
+import static app.util.JurisdictionBoundaryUtil.DEFAULT_BOUNDS;
+import static app.util.JurisdictionBoundaryUtil.IN_BOUNDS_COORDINATE;
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static io.micronaut.http.HttpStatus.NOT_FOUND;
@@ -40,7 +42,6 @@ import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
-import app.fixture.JurisdictionBoundaryRepositoryFixture;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdictionuser.JurisdictionUser;
@@ -60,6 +61,7 @@ import app.model.servicerequest.ServiceRequestStatus;
 import app.model.user.User;
 import app.model.user.UserRepository;
 import app.security.HasPermissionResponse;
+import app.service.jurisdiction.JurisdictionBoundaryService;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockUnityAuthClient;
@@ -90,7 +92,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @MicronautTest(transactional = false)
-public class JurisdictionAdminControllerTest extends JurisdictionBoundaryRepositoryFixture {
+public class JurisdictionAdminControllerTest  {
 
     @Inject
     @Client("/api")
@@ -127,6 +129,9 @@ public class JurisdictionAdminControllerTest extends JurisdictionBoundaryReposit
     @Inject
     ServiceRepository serviceRepository;
 
+    @Inject
+    JurisdictionBoundaryService jurisdictionBoundaryService;
+
     @BeforeEach
     void setup() {
 
@@ -146,7 +151,7 @@ public class JurisdictionAdminControllerTest extends JurisdictionBoundaryReposit
         User user = userRepository.save(new User("user@fakecity.gov"));
         Jurisdiction jurisdiction = jurisdictionRepository.save(
             new Jurisdiction("fakecity.gov", 1L));
-        saveJurisdictionBoundary(jurisdiction, DEFAULT_BOUNDS);
+        jurisdictionBoundaryService.saveBoundary(jurisdiction, DEFAULT_BOUNDS);
         jurisdictionRepository.save(new Jurisdiction("faketown.gov", 1L));
 
         jurisdictionUserRepository.save(new JurisdictionUser(admin, jurisdiction, true));
