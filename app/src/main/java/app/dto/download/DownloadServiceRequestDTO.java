@@ -15,6 +15,8 @@
 package app.dto.download;
 
 import app.model.servicerequest.ServiceRequest;
+import app.model.servicerequest.ServiceRequestPriority;
+import app.model.servicerequest.ServiceRequestStatus;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 import io.micronaut.core.annotation.Introspected;
@@ -24,11 +26,53 @@ import java.time.Instant;
 @Introspected
 public class DownloadServiceRequestDTO {
 
+    @CsvBindByName(column = "jurisdiction_id")
+    private String jurisdictionId;
+
+    @CsvBindByName(column = "service_name")
+    private String serviceName;
+
+    @CsvBindByName
+    private String group;
+
+    @CsvBindByName(column = "service_code")
+    private String serviceCode;
+
     @CsvBindByName(column = "service_request_id")
     private Long id;
 
-    @CsvBindByName(column = "jurisdiction_id")
-    private String jurisdictionId;
+    @CsvBindByName(column = "service_subtype")
+    private String serviceSubtype;
+
+    @CsvBindByName
+    private String description;
+
+    @CsvBindByName(column = "media_url")
+    private String mediaUrl;
+
+    @CsvBindByName
+    private String address;
+
+    @CsvBindByName
+    private String zipcode;
+
+    @CsvBindByName(column = "lat")
+    private String latitude;
+
+    @CsvBindByName(column = "long")
+    private String longitude;
+
+    @CsvBindByName(column = "first_name")
+    private String firstName;
+
+    @CsvBindByName(column = "last_name")
+    private String lastName;
+
+    @CsvBindByName
+    private String email;
+
+    @CsvBindByName
+    private String phone;
 
     @CsvDate(value = "yyyy-MM-dd'T'HH:mm'Z'")
     @CsvBindByName(column = "requested_datetime")
@@ -42,54 +86,30 @@ public class DownloadServiceRequestDTO {
     @CsvBindByName(column = "closed_datetime")
     private Instant closedDate;
 
-    @CsvBindByName(column = "status_description")
-    private String statusDescription;
+    @CsvBindByName(column = "agency_responsible")
+    private String agencyResponsible;
+
+    @CsvBindByName(column = "agency_email")
+    private String agencyEmail;
+
+    @CsvBindByName
+    private ServiceRequestPriority priority;
+
+    @CsvBindByName
+    private ServiceRequestStatus status;
 
     @CsvBindByName(column = "status_notes")
     private String statusNotes;
 
-    @CsvBindByName(column = "service_name")
-    private String serviceName;
-
-    @CsvBindByName
-    private String description;
-
-    @CsvBindByName(column = "agency_responsible")
-    private String agencyResponsible;
-
-    @CsvBindByName
-    private String address;
-
-    @CsvBindByName(column = "lat")
-    private String latitude;
-
-    @CsvBindByName(column = "long")
-    private String longitude;
-
-    @CsvBindByName(column = "service_subtype")
-    private String serviceSubtype;
-
-    @CsvBindByName
-    private String email;
-
-    @CsvBindByName(column = "first_name")
-    private String firstName;
-
-    @CsvBindByName(column = "last_name")
-    private String lastName;
-
-    @CsvBindByName
-    private String phone;
-
-    @CsvBindByName(column = "media_url")
-    private String mediaUrl;
+    @CsvBindByName(column = "service_notice")
+    private String serviceNotice;
 
     public DownloadServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
         this.dateCreated = serviceRequest.getDateCreated();
         this.dateUpdated = serviceRequest.getDateUpdated();
         this.closedDate = serviceRequest.getClosedDate();
-        this.statusDescription = sanitize(serviceRequest.getStatus().toString());
+        this.status = serviceRequest.getStatus();
         this.statusNotes = sanitize(serviceRequest.getStatusNotes());
         this.serviceName = sanitize(serviceRequest.getService().getServiceName());
         this.description = sanitize(serviceRequest.getDescription());
@@ -102,6 +122,14 @@ public class DownloadServiceRequestDTO {
         this.lastName = sanitize(serviceRequest.getLastName());
         this.phone = sanitize(serviceRequest.getPhone());
         this.mediaUrl = sanitize(serviceRequest.getMediaUrl());
+        this.serviceNotice = sanitize(serviceRequest.getServiceNotice());
+        this.serviceCode = sanitize(serviceRequest.getService().getServiceCode());
+        this.zipcode = sanitize(serviceRequest.getZipCode());
+        this.agencyEmail = sanitize(serviceRequest.getAgencyEmail());
+        this.priority = serviceRequest.getPriority();
+        if (serviceRequest.getService().getServiceGroup() != null) {
+            this.group = sanitize(serviceRequest.getService().getServiceGroup().getName());
+        }
         if (serviceRequest.getJurisdiction() != null) {
             this.jurisdictionId = serviceRequest.getJurisdiction().getId();
         }
@@ -195,12 +223,12 @@ public class DownloadServiceRequestDTO {
         this.longitude = longitude;
     }
 
-    public String getStatusDescription() {
-        return statusDescription;
+    public ServiceRequestStatus getStatus() {
+        return status;
     }
 
-    public void setStatusDescription(String statusDescription) {
-        this.statusDescription = statusDescription;
+    public void setStatus(ServiceRequestStatus status) {
+        this.status = status;
     }
 
     public Instant getClosedDate() {
@@ -255,6 +283,46 @@ public class DownloadServiceRequestDTO {
         return serviceSubtype;
     }
 
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
+
+    public String getAgencyEmail() {
+        return agencyEmail;
+    }
+
+    public void setAgencyEmail(String agencyEmail) {
+        this.agencyEmail = agencyEmail;
+    }
+
+    public ServiceRequestPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(ServiceRequestPriority priority) {
+        this.priority = priority;
+    }
+
     public void setServiceSubtype(String serviceSubtype) {
         this.serviceSubtype = serviceSubtype;
     }
@@ -266,5 +334,13 @@ public class DownloadServiceRequestDTO {
             return value;
 
         return "'" + value;
+    }
+
+    public String getServiceNotice() {
+        return serviceNotice;
+    }
+
+    public void setServiceNotice(String serviceNotice) {
+        this.serviceNotice = serviceNotice;
     }
 }
