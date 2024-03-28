@@ -21,9 +21,8 @@ import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.dto.servicerequest.ServiceRequestDTO;
+import app.fixture.JurisdictionBoundaryRepositoryFixture;
 import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.JurisdictionRepository;
-import app.model.jurisdiction.LatLong;
 import app.model.jurisdiction.RemoteHost;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
@@ -64,7 +63,7 @@ import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest(environments={"app-api-test-data"}, transactional = false)
-public class RootControllerTest {
+public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
 
     @Inject
     @Client("/api")
@@ -72,9 +71,6 @@ public class RootControllerTest {
 
     @Inject
     MockAuthenticationFetcher mockAuthenticationFetcher;
-
-    @Inject
-    JurisdictionRepository jurisdictionRepository;
 
     @Inject
     ServiceRepository serviceRepository;
@@ -456,12 +452,12 @@ public class RootControllerTest {
     @Test
     public void getJurisdictionTest() {
         Jurisdiction j = new Jurisdiction("1", 1L, "jurisdiction1", null);
-        LatLong coordinatePair = new LatLong(41.31742721517005, -72.93918211751856, j, 0);
+
         RemoteHost h = new RemoteHost("host1");
         h.setJurisdiction(j);
-        j.getBounds().add(coordinatePair);
         j.getRemoteHosts().add(h);
         jurisdictionRepository.save(j);
+        saveJurisdictionBoundary(j, DEFAULT_BOUNDS);
         authLogin();
 
         HttpRequest<?> request = HttpRequest.GET("/config")
@@ -503,4 +499,5 @@ public class RootControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
     }
+
 }
