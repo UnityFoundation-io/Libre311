@@ -24,13 +24,20 @@ import app.dto.servicerequest.ServiceRequestDTO;
 import app.fixture.JurisdictionBoundaryRepositoryFixture;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.RemoteHost;
+import app.model.jurisdictionuser.JurisdictionUser;
+import app.model.service.AttributeDataType;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
+import app.model.service.ServiceType;
+import app.model.service.group.ServiceGroup;
+import app.model.servicedefinition.AttributeValue;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
+import app.model.user.User;
 import app.security.HasPermissionResponse;
 import app.security.Permission;
 import app.util.DbCleanup;
@@ -49,6 +56,7 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -62,7 +70,7 @@ import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
-@MicronautTest(environments={"app-api-test-data"}, transactional = false)
+@MicronautTest(transactional = false)
 public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
 
     @Inject
@@ -86,8 +94,126 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
 
     @BeforeEach
     void setup() {
-        dbCleanup.cleanupServiceRequests();
+        setupMockData();
     }
+
+    @AfterEach
+    void teardown(){
+        dbCleanup.cleanup();
+    }
+
+    void setupTownJurisdiction(){
+        Jurisdiction jurisdiction = jurisdictionRepository.save(
+            new Jurisdiction("town.gov", 2L));
+        saveJurisdictionBoundary(jurisdiction, DEFAULT_BOUNDS);
+        ServiceGroup infrastructureGroup = dbCleanup.serviceGroupRepository.save(new ServiceGroup("Infrastructure", jurisdiction));
+        ServiceGroup unknownGroup = dbCleanup.serviceGroupRepository.save(new ServiceGroup("Unknown", jurisdiction));
+
+        // save bus stop service and its attributes
+        Service busStopService = dbCleanup.serviceRepository.save(new Service("Bus stop"));
+        busStopService.setServiceCode("BUS_STOP");
+        busStopService.setType(ServiceType.REALTIME);
+        busStopService.setJurisdiction(jurisdiction);
+        busStopService.setServiceGroup(infrastructureGroup);
+        ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+        serviceDefinitionAttribute.setService(busStopService);
+        serviceDefinitionAttribute.setCode("BUS_STOP");
+        serviceDefinitionAttribute.setVariable(true);
+        serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
+        serviceDefinitionAttribute.setRequired(false);
+        serviceDefinitionAttribute.setDescription(
+            "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.");
+        serviceDefinitionAttribute.setAttributeOrder(1);
+        serviceDefinitionAttribute.setDatatypeDescription("Please select one or more items.");
+        ServiceDefinitionAttribute savedSDA = dbCleanup.serviceDefinitionAttributeRepository.save(
+            serviceDefinitionAttribute);
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Other"));
+
+
+        // save crosswalk service and its attributes
+        Service crosswalkService = new Service("crosswalk service");
+        crosswalkService.setServiceCode("CRSWLK");
+        crosswalkService.setType(ServiceType.REALTIME);
+        crosswalkService.setJurisdiction(jurisdiction);
+        crosswalkService.setServiceGroup(infrastructureGroup);
+        crosswalkService = dbCleanup.serviceRepository.save(crosswalkService);
+
+        ServiceDefinitionAttribute crosswalkSDA = new ServiceDefinitionAttribute();
+        crosswalkSDA.setService(crosswalkService);
+        crosswalkSDA.setCode("BUS_STOP");
+        crosswalkSDA.setVariable(true);
+        crosswalkSDA.setDatatype(AttributeDataType.MULTIVALUELIST);
+        crosswalkSDA.setRequired(false);
+        crosswalkSDA.setDescription(
+            "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.");
+        crosswalkSDA.setAttributeOrder(1);
+        crosswalkSDA.setDatatypeDescription("Please select one or more items.");
+        crosswalkSDA = dbCleanup.serviceDefinitionAttributeRepository.save(serviceDefinitionAttribute);
+        dbCleanup.attributeValueRepository.save(new AttributeValue(crosswalkSDA, "ADA Access"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(crosswalkSDA, "Cracked"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(crosswalkSDA, "Too narrow"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(crosswalkSDA, "Heaved/Uneven Sidewalk"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(crosswalkSDA, "Other"));
+
+    }
+
+
+
+    public void setupMockData() {
+        setupTownJurisdiction();
+        User admin = dbCleanup.userRepository.save(new User("admin@fakecity.gov"));
+        User user = dbCleanup.userRepository.save(new User("user@fakecity.gov"));
+        Jurisdiction jurisdiction = jurisdictionRepository.save(
+            new Jurisdiction("city.gov", 1L));
+        saveJurisdictionBoundary(jurisdiction, DEFAULT_BOUNDS);
+        dbCleanup.jurisdictionUserRepository.save(new JurisdictionUser(admin, jurisdiction, true));
+        dbCleanup.jurisdictionUserRepository.save(new JurisdictionUser(user, jurisdiction, false));
+
+        // service
+        ServiceGroup infrastructureGroup = dbCleanup.serviceGroupRepository.save(
+            new ServiceGroup("Infrastructure", jurisdiction));
+        Service sidewalkService = new Service("Sidewalk");
+        sidewalkService.setServiceCode("001");
+        sidewalkService.setType(ServiceType.REALTIME);
+        sidewalkService.setJurisdiction(jurisdiction);
+        sidewalkService.setServiceGroup(infrastructureGroup);
+        Service service = serviceRepository.save(sidewalkService);
+
+        ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+        serviceDefinitionAttribute.setService(service);
+        serviceDefinitionAttribute.setCode("SDWLK");
+        serviceDefinitionAttribute.setVariable(true);
+        serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
+        serviceDefinitionAttribute.setRequired(false);
+        serviceDefinitionAttribute.setDescription(
+            "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.");
+        serviceDefinitionAttribute.setAttributeOrder(1);
+        serviceDefinitionAttribute.setDatatypeDescription("Please select one or more items.");
+
+        ServiceDefinitionAttribute savedSDA = dbCleanup.serviceDefinitionAttributeRepository.save(
+            serviceDefinitionAttribute);
+
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk"));
+        dbCleanup.attributeValueRepository.save(new AttributeValue(savedSDA, "Other"));
+
+
+        Service bikeLaneService = new Service("Bike lane service");
+        bikeLaneService.setServiceCode("003");
+        bikeLaneService.setType(ServiceType.REALTIME);
+        bikeLaneService.setJurisdiction(jurisdiction);
+        bikeLaneService.setServiceGroup(infrastructureGroup);
+        serviceRepository.save(bikeLaneService);
+
+    }
+
+
 
     private void setAuthHasPermissionSuccessResponse(boolean success, List<Permission> permissions) {
         var permissionsAsString = permissions.stream()
@@ -228,7 +354,7 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
     public void cannotCreateServiceRequestIfLatLngNotProvided() {
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO("006");
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
-            createServiceRequest(serviceRequestDTO, Map.of(), "town.gov");
+            createServiceRequest(serviceRequestDTO, Map.of(), "city.gov");
         });
         assertEquals(BAD_REQUEST, thrown.getStatus());
     }
@@ -270,7 +396,7 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest("006", "12345 Fairway", Map.of(), "town.gov");
+        response = createServiceRequest("006", "12345 Fairway", Map.of(), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "12345 Fairway",
@@ -295,8 +421,8 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
 
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO("001");
         serviceRequestDTO.setgRecaptchaResponse("abc");
-        serviceRequestDTO.setLongitude("43.3434");
-        serviceRequestDTO.setLatitude("48.98");
+        serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
+        serviceRequestDTO.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         serviceRequestDTO.setEmail("private@test.com");
 
         createServiceRequest(serviceRequestDTO, Map.of("attribute[SDWLK]", "NARROW"),
@@ -326,8 +452,8 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
         closedHighPriority.setPriority(ServiceRequestPriority.HIGH);
         closedHighPriority.setService(sidewalkService);
         closedHighPriority.setJurisdiction(sidewalkService.getJurisdiction());
-        closedHighPriority.setLatitude("12.34");
-        closedHighPriority.setLongitude("56.78");
+        closedHighPriority.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        closedHighPriority.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         ServiceRequest closedHighSR = serviceRequestRepository.save(closedHighPriority);
 
         ServiceRequest openLowPriority = new ServiceRequest();
@@ -335,8 +461,8 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
         openLowPriority.setPriority(ServiceRequestPriority.LOW);
         openLowPriority.setService(sidewalkService);
         openLowPriority.setJurisdiction(sidewalkService.getJurisdiction());
-        openLowPriority.setLatitude("12.34");
-        openLowPriority.setLongitude("56.78");
+        openLowPriority.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        openLowPriority.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         ServiceRequest openLowSR = serviceRequestRepository.save(openLowPriority);
 
         ServiceRequest assignedMedium = new ServiceRequest();
@@ -344,16 +470,16 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
         assignedMedium.setPriority(ServiceRequestPriority.MEDIUM);
         assignedMedium.setService(sidewalkService);
         assignedMedium.setJurisdiction(sidewalkService.getJurisdiction());
-        assignedMedium.setLatitude("12.34");
-        assignedMedium.setLongitude("56.78");
+        assignedMedium.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        assignedMedium.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         serviceRequestRepository.save(assignedMedium);
 
         ServiceRequest bikeLaneRequest = new ServiceRequest();
         bikeLaneRequest.setStatus(ServiceRequestStatus.ASSIGNED);
         bikeLaneRequest.setService(bikeLaneService);
         bikeLaneRequest.setJurisdiction(bikeLaneService.getJurisdiction());
-        bikeLaneRequest.setLatitude("12.34");
-        bikeLaneRequest.setLongitude("56.78");
+        bikeLaneRequest.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        bikeLaneRequest.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         ServiceRequest bikeLaneSR = serviceRequestRepository.save(bikeLaneRequest);
 
         // filter high priority
@@ -476,8 +602,8 @@ public class RootControllerTest extends JurisdictionBoundaryRepositoryFixture {
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes, String jurisdictionId) {
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(serviceCode);
         serviceRequestDTO.setgRecaptchaResponse("abc");
-        serviceRequestDTO.setLongitude("43.3434");
-        serviceRequestDTO.setLatitude("48.98");
+        serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
+        serviceRequestDTO.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         if (address != null) {
             serviceRequestDTO.setAddressString(address);
         }

@@ -9,8 +9,15 @@ public class JurisdictionRepositoryFixture {
     public static Jurisdiction DEFAULT_JURISDICTION = new Jurisdiction("stlma", 1L);
 
 
+
     @Inject
     public JurisdictionRepository jurisdictionRepository;
+
+
+    public void cleanup(){
+        jurisdictionRepository.deleteAll();
+    }
+
 
     public Jurisdiction saveJurisdiction(Jurisdiction jurisdiction){
         return jurisdictionRepository.save(jurisdiction);

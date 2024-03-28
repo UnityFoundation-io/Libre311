@@ -30,8 +30,7 @@ class JurisdictionBoundaryServiceTest extends JurisdictionBoundaryRepositoryFixt
 
     @AfterEach
     void teardown() {
-        jurisdictionBoundaryRepository.deleteAll();
-        jurisdictionRepository.deleteAll();
+        cleanup();
     }
 
     @Test

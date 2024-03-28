@@ -14,16 +14,33 @@
 
 package app;
 
+import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
+import static io.micronaut.http.HttpStatus.BAD_REQUEST;
+import static io.micronaut.http.HttpStatus.NOT_FOUND;
+import static io.micronaut.http.HttpStatus.OK;
+import static io.micronaut.http.HttpStatus.UNAUTHORIZED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.group.GroupDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
-import app.dto.servicedefinition.*;
+import app.dto.servicedefinition.AttributeValueDTO;
+import app.dto.servicedefinition.CreateServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.ServiceDefinitionDTO;
+import app.dto.servicedefinition.UpdateServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
+import app.fixture.JurisdictionBoundaryRepositoryFixture;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdictionuser.JurisdictionUser;
@@ -34,7 +51,10 @@ import app.model.service.ServiceRepository;
 import app.model.service.ServiceType;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.servicedefinition.*;
+import app.model.servicedefinition.AttributeValue;
+import app.model.servicedefinition.AttributeValueRepository;
+import app.model.servicedefinition.ServiceDefinitionAttribute;
+import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.model.user.User;
@@ -57,9 +77,6 @@ import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,14 +85,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
-import static io.micronaut.http.HttpStatus.*;
-import static io.micronaut.http.HttpStatus.BAD_REQUEST;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @MicronautTest(transactional = false)
-public class JurisdictionAdminControllerTest {
+public class JurisdictionAdminControllerTest extends JurisdictionBoundaryRepositoryFixture {
 
     @Inject
     @Client("/api")
@@ -114,60 +129,70 @@ public class JurisdictionAdminControllerTest {
 
     @BeforeEach
     void setup() {
-        dbCleanup.cleanupServiceRequests();
+
         mockAuthenticationFetcher.setAuthentication(null);
         setAuthHasPermissionSuccessResponse(false, null);
 
         setupMockData();
     }
 
+    @AfterEach
+    void teardown(){
+        dbCleanup.cleanup();
+    }
+
     public void setupMockData() {
-        if (userRepository.findByEmail("admin@fakecity.gov").isEmpty() &&
-                userRepository.findByEmail("user@fakecity.gov").isEmpty() &&
-                jurisdictionRepository.findById("fakecity.gov").isEmpty()) {
-            User admin = userRepository.save(new User("admin@fakecity.gov"));
-            User user = userRepository.save(new User("user@fakecity.gov"));
-            Jurisdiction jurisdiction = jurisdictionRepository.save(new Jurisdiction("fakecity.gov", 1L));
-            jurisdictionRepository.save(new Jurisdiction("faketown.gov", 1L));
+        User admin = userRepository.save(new User("admin@fakecity.gov"));
+        User user = userRepository.save(new User("user@fakecity.gov"));
+        Jurisdiction jurisdiction = jurisdictionRepository.save(
+            new Jurisdiction("fakecity.gov", 1L));
+        saveJurisdictionBoundary(jurisdiction, DEFAULT_BOUNDS);
+        jurisdictionRepository.save(new Jurisdiction("faketown.gov", 1L));
 
-            jurisdictionUserRepository.save(new JurisdictionUser(admin, jurisdiction, true));
-            jurisdictionUserRepository.save(new JurisdictionUser(user, jurisdiction, false));
+        jurisdictionUserRepository.save(new JurisdictionUser(admin, jurisdiction, true));
+        jurisdictionUserRepository.save(new JurisdictionUser(user, jurisdiction, false));
 
-            // service
-            ServiceGroup infrastructureGroup = serviceGroupRepository.save(new ServiceGroup("Infrastructure", jurisdiction));
-            Service sidewalkService = new Service("Sidewalk");
-            sidewalkService.setServiceCode("001");
-            sidewalkService.setType(ServiceType.REALTIME);
-            sidewalkService.setJurisdiction(jurisdiction);
-            sidewalkService.setServiceGroup(infrastructureGroup);
+        // service
+        ServiceGroup infrastructureGroup = serviceGroupRepository.save(
+            new ServiceGroup("Infrastructure", jurisdiction));
+        Service sidewalkService = new Service("Sidewalk");
+        sidewalkService.setServiceCode("001");
+        sidewalkService.setType(ServiceType.REALTIME);
+        sidewalkService.setJurisdiction(jurisdiction);
+        sidewalkService.setServiceGroup(infrastructureGroup);
 
-            Service service = serviceRepository.save(sidewalkService);
+        Service service = serviceRepository.save(sidewalkService);
 
-            ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-            serviceDefinitionAttribute.setService(service);
-            serviceDefinitionAttribute.setCode("SDWLK");
-            serviceDefinitionAttribute.setVariable(true);
-            serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
-            serviceDefinitionAttribute.setRequired(false);
-            serviceDefinitionAttribute.setDescription("Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.");
-            serviceDefinitionAttribute.setAttributeOrder(1);
-            serviceDefinitionAttribute.setDatatypeDescription("Please select one or more items.");
+        ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+        serviceDefinitionAttribute.setService(service);
+        serviceDefinitionAttribute.setCode("SDWLK");
+        serviceDefinitionAttribute.setVariable(true);
+        serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
+        serviceDefinitionAttribute.setRequired(false);
+        serviceDefinitionAttribute.setDescription(
+            "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.");
+        serviceDefinitionAttribute.setAttributeOrder(1);
+        serviceDefinitionAttribute.setDatatypeDescription("Please select one or more items.");
 
-            ServiceDefinitionAttribute savedSDA = serviceDefinitionAttributeRepository.save(serviceDefinitionAttribute);
+        ServiceDefinitionAttribute savedSDA = serviceDefinitionAttributeRepository.save(
+            serviceDefinitionAttribute);
 
-            attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access"));
-            attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked"));
-            attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow"));
-            attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk"));
-            attributeValueRepository.save(new AttributeValue(savedSDA, "Other"));
-        }
+        attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Other"));
+
     }
 
     private void setAuthHasPermissionSuccessResponse(boolean success, List<String> permissions) {
         if (success) {
-            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "admin@fakecity.gov", null, permissions)));
+            mockUnityAuthClient.setResponse(HttpResponse.ok(
+                new HasPermissionResponse(true, "admin@fakecity.gov", null, permissions)));
         } else {
-            mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(false, "user@fakecity.gov", "Unauthorized", permissions)));
+            mockUnityAuthClient.setResponse(HttpResponse.ok(
+                new HasPermissionResponse(false, "user@fakecity.gov", "Unauthorized",
+                    permissions)));
         }
     }
 
@@ -192,7 +217,7 @@ public class JurisdictionAdminControllerTest {
 
         // list
         request = HttpRequest.GET("/jurisdiction-admin/groups?jurisdiction_id=fakecity.gov")
-                .header("Authorization", "Bearer token.text.here");
+            .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, GroupDTO[].class);
         assertEquals(OK, response.getStatus());
         Optional<GroupDTO[]> listBody = response.getBody(GroupDTO[].class);
@@ -203,8 +228,10 @@ public class JurisdictionAdminControllerTest {
         CreateUpdateGroupDTO updateGroupDTO = new CreateUpdateGroupDTO();
         updateGroupDTO.setName("Solid Waste Management");
 
-        request = HttpRequest.PATCH("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=fakecity.gov", updateGroupDTO)
-                .header("Authorization", "Bearer token.text.here");
+        request = HttpRequest.PATCH(
+                "/jurisdiction-admin/groups/" + groupDTO.getId() + "?jurisdiction_id=fakecity.gov",
+                updateGroupDTO)
+            .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, GroupDTO.class);
         assertEquals(OK, response.getStatus());
 
@@ -215,8 +242,9 @@ public class JurisdictionAdminControllerTest {
         assertEquals("Solid Waste Management", groupDTO1.getName());
 
         // delete
-        request = HttpRequest.DELETE("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=fakecity.gov")
-                .header("Authorization", "Bearer token.text.here");
+        request = HttpRequest.DELETE(
+                "/jurisdiction-admin/groups/" + groupDTO.getId() + "?jurisdiction_id=fakecity.gov")
+            .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, GroupDTO.class);
         assertEquals(OK, response.getStatus());
     }
@@ -226,14 +254,20 @@ public class JurisdictionAdminControllerTest {
 
         // Checks whether the user has the permission to create a service in their own jurisdiction, but does
         // not have a user-jurisdiction record locally.
-        mockUnityAuthClient.setResponse(HttpResponse.ok(new HasPermissionResponse(true, "person2@test.com", null, List.of("LIBRE311_ADMIN_VIEW_SUBTENANT"))));
+        mockUnityAuthClient.setResponse(HttpResponse.ok(
+            new HasPermissionResponse(true, "person2@test.com", null,
+                List.of("LIBRE311_ADMIN_VIEW_SUBTENANT"))));
 
-        Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById("fakecity.gov");
-        ServiceGroup bikeln010Group = serviceGroupRepository.save(new ServiceGroup("BIKELN010 Group", optionalJurisdiction.get()));
+        Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById(
+            "fakecity.gov");
+        ServiceGroup bikeln010Group = serviceGroupRepository.save(
+            new ServiceGroup("BIKELN010 Group", optionalJurisdiction.get()));
 
-        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            createService("BIKELN010", "Bike Lane Obstruction", "faketown.gov", bikeln010Group.getId());
-        });
+        HttpClientResponseException exception = assertThrowsExactly(
+            HttpClientResponseException.class, () -> {
+                createService("BIKELN010", "Bike Lane Obstruction", "faketown.gov",
+                    bikeln010Group.getId());
+            });
         assertEquals(UNAUTHORIZED, exception.getStatus());
     }
 
@@ -242,24 +276,30 @@ public class JurisdictionAdminControllerTest {
     public void canCreateServiceIfAuthenticated() throws JsonProcessingException {
         HttpResponse<?> response;
 
-        Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById("fakecity.gov");
-        ServiceGroup bikeln007Group = serviceGroupRepository.save(new ServiceGroup("BIKELN007 Group", optionalJurisdiction.get()));
+        Optional<Jurisdiction> optionalJurisdiction = jurisdictionRepository.findById(
+            "fakecity.gov");
+        ServiceGroup bikeln007Group = serviceGroupRepository.save(
+            new ServiceGroup("BIKELN007 Group", optionalJurisdiction.get()));
 
-        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            createService("BIKELN007", "Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId());
-        });
+        HttpClientResponseException exception = assertThrowsExactly(
+            HttpClientResponseException.class, () -> {
+                createService("BIKELN007", "Bike Lane Obstruction", "fakecity.gov",
+                    bikeln007Group.getId());
+            });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
         authLogin();
 
         // success, bare minimum
-        response = createService("BIKELN007", "Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId());
+        response = createService("BIKELN007", "Bike Lane Obstruction", "fakecity.gov",
+            bikeln007Group.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
 
         // success, all provided
-        response = createService("BUS_STOP", "Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId());
+        response = createService("BUS_STOP", "Bike Lane Obstruction", "fakecity.gov",
+            bikeln007Group.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
@@ -294,19 +334,21 @@ public class JurisdictionAdminControllerTest {
 
         authLogin();
 
-        response = createGroup("Group - Bus Stop 1","fakecity.gov");
+        response = createGroup("Group - Bus Stop 1", "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<GroupDTO> groupOptional = response.getBody(GroupDTO.class);
         assertTrue(groupOptional.isPresent());
         GroupDTO groupDTO = groupOptional.get();
 
-        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues","fakecity.gov", groupDTO.getId());
+        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "fakecity.gov",
+            groupDTO.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
         ServiceDTO serviceDTO = optional.get();
 
-        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", new CreateServiceDefinitionAttributeDTO(
+        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov",
+            new CreateServiceDefinitionAttributeDTO(
                 "ISSUE_NEAR",
                 true,
                 AttributeDataType.STRING,
@@ -314,28 +356,29 @@ public class JurisdictionAdminControllerTest {
                 "Bus Stop Near",
                 1,
                 "(Optional) If the issue is near anything, please describe here."
-        ));
+            ));
         assertEquals(HttpStatus.OK, response.getStatus());
-
 
         CreateServiceDefinitionAttributeDTO sdaIssueSelect = new CreateServiceDefinitionAttributeDTO(
-                "ISSUE_SELECT",
-                true,
-                AttributeDataType.MULTIVALUELIST,
-                true,
-                "Bus Stop Issues",
-                2,
-                "(Optional) If the issue is near anything, please describe here."
+            "ISSUE_SELECT",
+            true,
+            AttributeDataType.MULTIVALUELIST,
+            true,
+            "Bus Stop Issues",
+            2,
+            "(Optional) If the issue is near anything, please describe here."
         );
         sdaIssueSelect.setValues(List.of(
-                new AttributeValueDTO("UNSAFE", "Unsafe location"),
-                new AttributeValueDTO("NO_SDLWLK", "No Sidewalk present"),
-                new AttributeValueDTO("MISSING_SIGN", "Sign is missing")
+            new AttributeValueDTO("UNSAFE", "Unsafe location"),
+            new AttributeValueDTO("NO_SDLWLK", "No Sidewalk present"),
+            new AttributeValueDTO("MISSING_SIGN", "Sign is missing")
         ));
 
-        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", sdaIssueSelect);
+        response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov",
+            sdaIssueSelect);
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<ServiceDefinitionDTO> optionalServiceDefinition = response.getBody(ServiceDefinitionDTO.class);
+        Optional<ServiceDefinitionDTO> optionalServiceDefinition = response.getBody(
+            ServiceDefinitionDTO.class);
         assertTrue(optionalServiceDefinition.isPresent());
         ServiceDefinitionDTO savedServiceDefinitionDTO = optionalServiceDefinition.get();
         assertNotNull(savedServiceDefinitionDTO.getAttributes());
@@ -350,15 +393,17 @@ public class JurisdictionAdminControllerTest {
         updateServiceDTO.setServiceName("Inner City Bust Stops");
         updateServiceDTO.setDescription("Issues pertaining to inner city bus stops.");
 
-        response = createGroup("Group - Bus Stop 2","fakecity.gov");
+        response = createGroup("Group - Bus Stop 2", "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<GroupDTO> secondGroupOptional = response.getBody(GroupDTO.class);
         assertTrue(secondGroupOptional.isPresent());
         GroupDTO secondGroupDTO = secondGroupOptional.get();
         updateServiceDTO.setGroupId(secondGroupDTO.getId());
 
-        request = HttpRequest.PATCH("/jurisdiction-admin/services/"+serviceDTO.getId()+"?jurisdiction_id=fakecity.gov", updateServiceDTO)
-                .header("Authorization", "Bearer token.text.here");
+        request = HttpRequest.PATCH(
+                "/jurisdiction-admin/services/" + serviceDTO.getId() + "?jurisdiction_id=fakecity.gov",
+                updateServiceDTO)
+            .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, ServiceDTO.class);
         assertEquals(OK, response.getStatus());
 
@@ -371,31 +416,40 @@ public class JurisdictionAdminControllerTest {
         assertEquals(secondGroupDTO.getId(), serviceDTO1.getGroupId());
 
         // Remove ISSUE_NEAR attribute
-        Optional<ServiceDefinitionAttributeDTO> issueNearOptional = savedServiceDefinitionDTO.getAttributes().stream()
-                .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals("ISSUE_NEAR"))
-                .findFirst();
+        Optional<ServiceDefinitionAttributeDTO> issueNearOptional = savedServiceDefinitionDTO.getAttributes()
+            .stream()
+            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode()
+                .equals("ISSUE_NEAR"))
+            .findFirst();
         assertTrue(issueNearOptional.isPresent());
         ServiceDefinitionAttributeDTO issueNearAttribute = issueNearOptional.get();
 
-        request = HttpRequest.DELETE("/jurisdiction-admin/services/"+serviceDTO.getId()+"/attributes/"+issueNearAttribute.getId()+"?jurisdiction_id=fakecity.gov")
-                .header("Authorization", "Bearer token.text.here");
+        request = HttpRequest.DELETE(
+                "/jurisdiction-admin/services/" + serviceDTO.getId() + "/attributes/"
+                    + issueNearAttribute.getId() + "?jurisdiction_id=fakecity.gov")
+            .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, ServiceDTO.class);
         assertEquals(OK, response.getStatus());
 
         // Update ISSUE_SELECT attribute
-        Optional<ServiceDefinitionAttributeDTO> issueSelectOptional = savedServiceDefinitionDTO.getAttributes().stream()
-                .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT"))
-                .findFirst();
+        Optional<ServiceDefinitionAttributeDTO> issueSelectOptional = savedServiceDefinitionDTO.getAttributes()
+            .stream()
+            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode()
+                .equals("ISSUE_SELECT"))
+            .findFirst();
         assertTrue(issueSelectOptional.isPresent());
         ServiceDefinitionAttributeDTO issueSelectAttribute = issueSelectOptional.get();
 
         UpdateServiceDefinitionAttributeDTO patchSDA = new UpdateServiceDefinitionAttributeDTO();
         patchSDA.setAttributeOrder(1);
-        request = HttpRequest.PATCH("/jurisdiction-admin/services/"+serviceDTO.getId()+"/attributes/"+issueSelectAttribute.getId()+"?jurisdiction_id=fakecity.gov", patchSDA)
-                .header("Authorization", "Bearer token.text.here");
+        request = HttpRequest.PATCH(
+                "/jurisdiction-admin/services/" + serviceDTO.getId() + "/attributes/"
+                    + issueSelectAttribute.getId() + "?jurisdiction_id=fakecity.gov", patchSDA)
+            .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, ServiceDefinitionDTO.class);
         assertEquals(OK, response.getStatus());
-        Optional<ServiceDefinitionDTO> optionalPatchServiceDefinition = response.getBody(ServiceDefinitionDTO.class);
+        Optional<ServiceDefinitionDTO> optionalPatchServiceDefinition = response.getBody(
+            ServiceDefinitionDTO.class);
         assertTrue(optionalPatchServiceDefinition.isPresent());
         ServiceDefinitionDTO patchedServiceDefinitionDTO = optionalPatchServiceDefinition.get();
         assertNotNull(patchedServiceDefinitionDTO.getAttributes());
@@ -403,24 +457,27 @@ public class JurisdictionAdminControllerTest {
         assertEquals(1, patchedServiceDefinitionDTO.getAttributes().size());
 
         // get service definition
-        response = client.toBlocking().exchange("/services/"+serviceDTO1.getServiceCode()+"?jurisdiction_id=fakecity.gov", String.class);
+        response = client.toBlocking()
+            .exchange("/services/" + serviceDTO1.getServiceCode() + "?jurisdiction_id=fakecity.gov",
+                String.class);
         assertEquals(HttpStatus.OK, response.status());
         Optional<String> serviceDefinitionOptional = response.getBody(String.class);
         assertTrue(serviceDefinitionOptional.isPresent());
         String serviceDefinitionResponse = serviceDefinitionOptional.get();
         assertTrue(StringUtils.hasText(serviceDefinitionResponse));
-        ServiceDefinitionDTO serviceDefinitionDTOObject = (new ObjectMapper()).readValue(serviceDefinitionResponse, ServiceDefinitionDTO.class);
+        ServiceDefinitionDTO serviceDefinitionDTOObject = (new ObjectMapper()).readValue(
+            serviceDefinitionResponse, ServiceDefinitionDTO.class);
         assertNotNull(serviceDefinitionDTOObject.getServiceCode());
         assertEquals("INNER_CITY_BUS_STOPS", serviceDefinitionDTOObject.getServiceCode());
         assertNotNull(serviceDefinitionDTOObject.getAttributes());
         assertFalse(serviceDefinitionDTOObject.getAttributes().isEmpty());
         assertEquals(1, serviceDefinitionDTOObject.getAttributes().size());
         assertTrue(serviceDefinitionDTOObject.getAttributes().stream()
-                .anyMatch(serviceDefinitionAttribute ->
-                        serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT") &&
-                                serviceDefinitionAttribute.getValues() != null &&
-                                !serviceDefinitionAttribute.getValues().isEmpty() &&
-                                serviceDefinitionAttribute.getAttributeOrder() == 1)
+            .anyMatch(serviceDefinitionAttribute ->
+                serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT") &&
+                    serviceDefinitionAttribute.getValues() != null &&
+                    !serviceDefinitionAttribute.getValues().isEmpty() &&
+                    serviceDefinitionAttribute.getAttributeOrder() == 1)
         );
     }
 
@@ -432,20 +489,22 @@ public class JurisdictionAdminControllerTest {
         authLogin();
 
         // create
-        response = createGroup("Animal Control","fakecity.gov");
+        response = createGroup("Animal Control", "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<GroupDTO> groupOptional = response.getBody(GroupDTO.class);
         assertTrue(groupOptional.isPresent());
         GroupDTO groupDTO = groupOptional.get();
 
-        response = createService("DISTRESSED_ANIMAL", "Animal in Distress", "fakecity.gov", groupDTO.getId());
+        response = createService("DISTRESSED_ANIMAL", "Animal in Distress", "fakecity.gov",
+            groupDTO.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> serviceOptional = response.getBody(ServiceDTO.class);
         assertTrue(serviceOptional.isPresent());
 
         // delete
-        request = HttpRequest.DELETE("/jurisdiction-admin/groups/"+groupDTO.getId()+"?jurisdiction_id=fakecity.gov")
-                .header("Authorization", "Bearer token.text.here");
+        request = HttpRequest.DELETE(
+                "/jurisdiction-admin/groups/" + groupDTO.getId() + "?jurisdiction_id=fakecity.gov")
+            .header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, GroupDTO[].class);
         assertEquals(OK, response.getStatus());
     }
@@ -456,9 +515,10 @@ public class JurisdictionAdminControllerTest {
         HttpResponse<?> response;
 
         response = createServiceRequest("001", "12345 Fairway",
-                Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(
+            PostResponseServiceRequestDTO[].class);
         assertTrue(optional.isPresent());
         PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
         PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
@@ -474,13 +534,15 @@ public class JurisdictionAdminControllerTest {
 
         Map payload = (new ObjectMapper()).convertValue(patchServiceRequestDTO, Map.class);
         HttpRequest<?> request = HttpRequest
-                .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=fakecity.gov", payload)
-                .header("Authorization", "Bearer token.text.here");
+            .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()
+                + "?jurisdiction_id=fakecity.gov", payload)
+            .header("Authorization", "Bearer token.text.here");
 
         HttpRequest<?> finalRequest = request;
-        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            client.toBlocking().exchange(finalRequest, SensitiveServiceRequestDTO.class);
-        });
+        HttpClientResponseException exception = assertThrowsExactly(
+            HttpClientResponseException.class, () -> {
+                client.toBlocking().exchange(finalRequest, SensitiveServiceRequestDTO.class);
+            });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
         authLogin();
@@ -489,25 +551,29 @@ public class JurisdictionAdminControllerTest {
         response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO.class);
         assertEquals(HttpStatus.OK, response.status());
 
-        Optional<SensitiveServiceRequestDTO> bodyOptional = response.getBody(SensitiveServiceRequestDTO.class);
+        Optional<SensitiveServiceRequestDTO> bodyOptional = response.getBody(
+            SensitiveServiceRequestDTO.class);
         assertTrue(bodyOptional.isPresent());
-        SensitiveServiceRequestDTO updatedServiceRequestDTO =bodyOptional.get();
+        SensitiveServiceRequestDTO updatedServiceRequestDTO = bodyOptional.get();
         assertEquals("acme@example.com", updatedServiceRequestDTO.getAgencyEmail());
-        assertEquals("To be fulfilled by Acme Concrete Co.", updatedServiceRequestDTO.getServiceNotice());
+        assertEquals("To be fulfilled by Acme Concrete Co.",
+            updatedServiceRequestDTO.getServiceNotice());
         assertEquals("Acme Concrete", updatedServiceRequestDTO.getAgencyResponsible());
-        assertEquals("Will investigate and remediate within 2 weeks", updatedServiceRequestDTO.getStatusNotes());
+        assertEquals("Will investigate and remediate within 2 weeks",
+            updatedServiceRequestDTO.getStatusNotes());
         assertEquals(ServiceRequestPriority.HIGH, updatedServiceRequestDTO.getPriority());
         assertEquals(ServiceRequestStatus.IN_PROGRESS, updatedServiceRequestDTO.getStatus());
 
         // update dates
         request = HttpRequest
-                .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=fakecity.gov",
-                        Map.of(
-                                "jurisdiction_id", "fakecity.gov",
-                                "closed_datetime", "2023-01-25T13:15:30Z",
-                                "expected_datetime", "2023-01-15T13:15:30Z"
-                        ))
-                .header("Authorization", "Bearer token.text.here");
+            .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()
+                    + "?jurisdiction_id=fakecity.gov",
+                Map.of(
+                    "jurisdiction_id", "fakecity.gov",
+                    "closed_datetime", "2023-01-25T13:15:30Z",
+                    "expected_datetime", "2023-01-15T13:15:30Z"
+                ))
+            .header("Authorization", "Bearer token.text.here");
 
         response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO.class);
         assertEquals(HttpStatus.OK, response.status());
@@ -524,19 +590,21 @@ public class JurisdictionAdminControllerTest {
 
         // create service requests
         response = createServiceRequest("001", "12345 Nearway",
-                Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "6789 Faraway",
-                Map.of("attribute[SDWLK]", "NARROW"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "NARROW"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov")
-                .header("Authorization", "Bearer token.text.here");
+        HttpRequest<?> request = HttpRequest.GET(
+                "/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov")
+            .header("Authorization", "Bearer token.text.here");
 
-        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            client.toBlocking().exchange(request, byte[].class);
-        });
+        HttpClientResponseException exception = assertThrowsExactly(
+            HttpClientResponseException.class, () -> {
+                client.toBlocking().exchange(request, byte[].class);
+            });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
         authLogin();
@@ -563,31 +631,32 @@ public class JurisdictionAdminControllerTest {
 
         // create service requests
         response = createServiceRequest("001", "=1+3",
-                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "@1+3",
-                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "+1+3",
-                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "-1+3",
-                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "\t1+3",
-                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "\r1+3",
-                Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov")
-                .header("Authorization", "Bearer token.text.here");
+        HttpRequest<?> request = HttpRequest.GET(
+                "/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov")
+            .header("Authorization", "Bearer token.text.here");
 
         authLogin();
 
@@ -614,41 +683,51 @@ public class JurisdictionAdminControllerTest {
     private HttpResponse<?> createGroup(String name, String jurisdictionId) {
         CreateUpdateGroupDTO groupDTO = new CreateUpdateGroupDTO();
         groupDTO.setName(name);
-        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/groups?jurisdiction_id="+jurisdictionId, groupDTO)
-                .header("Authorization", "Bearer token.text.here");
+        HttpRequest<?> request = HttpRequest.POST(
+                "/jurisdiction-admin/groups?jurisdiction_id=" + jurisdictionId, groupDTO)
+            .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, GroupDTO[].class);
     }
 
-    private HttpResponse<?> createService(String code, String name, String jurisdictionId, Long groupId) {
+    private HttpResponse<?> createService(String code, String name, String jurisdictionId,
+        Long groupId) {
         CreateServiceDTO serviceDTO = new CreateServiceDTO();
         serviceDTO.setServiceCode(code);
         serviceDTO.setServiceName(name);
         serviceDTO.setGroupId(groupId);
-        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services?jurisdiction_id="+jurisdictionId, serviceDTO)
-                .header("Authorization", "Bearer token.text.here");
+        HttpRequest<?> request = HttpRequest.POST(
+                "/jurisdiction-admin/services?jurisdiction_id=" + jurisdictionId, serviceDTO)
+            .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, ServiceDTO.class);
     }
 
-    private HttpResponse<?> addServiceDefinitionAttribute(Long serviceId, String jurisdictionId, CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
-        HttpRequest<?> request = HttpRequest.POST("/jurisdiction-admin/services/"+serviceId+"/attributes?jurisdiction_id="+jurisdictionId, serviceDefinitionAttributeDTO)
-                .header("Authorization", "Bearer token.text.here");
+    private HttpResponse<?> addServiceDefinitionAttribute(Long serviceId, String jurisdictionId,
+        CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+        HttpRequest<?> request = HttpRequest.POST(
+                "/jurisdiction-admin/services/" + serviceId + "/attributes?jurisdiction_id="
+                    + jurisdictionId, serviceDefinitionAttributeDTO)
+            .header("Authorization", "Bearer token.text.here");
         return client.toBlocking().exchange(request, ServiceDefinitionDTO.class);
     }
 
-    private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes, String jurisdictionId) {
-        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(serviceCode);
+    private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes,
+        String jurisdictionId) {
+        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(
+            serviceCode);
         serviceRequestDTO.setgRecaptchaResponse("abc");
-        serviceRequestDTO.setLongitude("43.3434");
-        serviceRequestDTO.setLatitude("48.98");
+
+        serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
+        serviceRequestDTO.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         if (address != null) {
             serviceRequestDTO.setAddressString(address);
         }
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);
-        HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id=" + jurisdictionId,
+                payload)
+            .header("Authorization", "Bearer token.text.here")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
     }
 }

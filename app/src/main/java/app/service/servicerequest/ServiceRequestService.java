@@ -148,14 +148,6 @@ public class ServiceRequestService {
                 "Mismatch between jurisdiction_id provided and Service's associated jurisdiction.");
         }
 
-        // validate if a location is provided
-        boolean latLongProvided = StringUtils.hasText(serviceRequestDTO.getLatitude()) &&
-                StringUtils.hasText(serviceRequestDTO.getLongitude());
-
-        if (!latLongProvided) {
-            throw new InvalidServiceRequestException("Lat/long are required.");
-        }
-
         // validate if additional attributes are required
         Service service = serviceByServiceCodeOptional.get();
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);

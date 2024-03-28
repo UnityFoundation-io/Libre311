@@ -14,8 +14,17 @@
 
 package app.util;
 
+import app.model.jurisdiction.JurisdictionBoundary;
+import app.model.jurisdiction.JurisdictionBoundaryRepository;
 import app.model.jurisdiction.JurisdictionRepository;
+import app.model.jurisdictionuser.JurisdictionUserRepository;
+import app.model.service.ServiceRepository;
+import app.model.service.group.ServiceGroupRepository;
+import app.model.servicedefinition.AttributeValueRepository;
+import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import app.model.servicerequest.ServiceRequestRepository;
+import app.model.user.UserRepository;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import javax.transaction.Transactional;
@@ -23,21 +32,41 @@ import javax.transaction.Transactional;
 @Singleton
 public class DbCleanup {
 
-    private final ServiceRequestRepository serviceRequestRepository;
-    private final JurisdictionRepository jurisdictionRepository;
+    @Inject
+    public JurisdictionRepository jurisdictionRepository;
 
-    public DbCleanup(ServiceRequestRepository serviceRequestRepository, JurisdictionRepository jurisdictionRepository) {
-        this.serviceRequestRepository = serviceRequestRepository;
-        this.jurisdictionRepository = jurisdictionRepository;
-    }
+    @Inject
+    public ServiceGroupRepository serviceGroupRepository;
+
+    @Inject
+    public ServiceRepository serviceRepository;
+
+    @Inject
+    public ServiceRequestRepository serviceRequestRepository;
+    @Inject
+    public ServiceDefinitionAttributeRepository serviceDefinitionAttributeRepository;
+
+    @Inject
+    public AttributeValueRepository attributeValueRepository;
+
+    @Inject
+    public JurisdictionBoundaryRepository jurisdictionBoundaryRepository;
+
+    @Inject
+    public UserRepository userRepository;
+
+    @Inject
+    public JurisdictionUserRepository jurisdictionUserRepository;
 
     @Transactional
-    public void cleanupServiceRequests() {
-        serviceRequestRepository.deleteAll();
-    }
-
-    @Transactional
-    public void cleanupJurisdictions() {
+    public void cleanup(){
+        userRepository.deleteAll();
+        jurisdictionUserRepository.deleteAll();
+        attributeValueRepository.deleteAll();
+        serviceDefinitionAttributeRepository.deleteAll();
+        serviceRepository.deleteAll();
+        serviceGroupRepository.deleteAll();
         jurisdictionRepository.deleteAll();
+        serviceRequestRepository.deleteAll();
     }
 }
