@@ -140,7 +140,7 @@
 
 								<Select
 									name="select-datatype"
-									placeholder="Data Type"
+									placeholder="Select Data Type"
 									options={dataTypeOptions}
 									bind:value={newAttribute.dataType}
 								>
