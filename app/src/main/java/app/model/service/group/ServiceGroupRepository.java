@@ -25,5 +25,5 @@ import java.util.Optional;
 public interface ServiceGroupRepository extends PageableRepository<ServiceGroup, Long> {
     List<ServiceGroup> findAllByJurisdictionId(String jurisdictionId);
     boolean existsByNameAndJurisdiction(String name, Jurisdiction jurisdiction);
-    Optional<ServiceGroup> findByIdAndJurisdiction(Long id, Jurisdiction jurisdiction);
+    Optional<ServiceGroup> findByIdAndJurisdictionId(Long id, String jurisdictionId);
 }

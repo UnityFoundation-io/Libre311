@@ -50,6 +50,8 @@ public class Service {
     @Enumerated(value = EnumType.STRING)
     private ServiceType type = ServiceType.REALTIME;
 
+    private int orderPosition = -1;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "service")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
@@ -148,5 +150,13 @@ public class Service {
 
     public void setAttributes(Set<ServiceDefinitionAttribute> attributes) {
         this.attributes = attributes;
+    }
+
+    public int getOrderPosition() {
+        return orderPosition;
+    }
+
+    public void setOrderPosition(int orderPosition) {
+        this.orderPosition = orderPosition;
     }
 }
