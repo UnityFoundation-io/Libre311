@@ -29,13 +29,11 @@ public class CreateServiceDefinitionAttributeDTO extends UpdateServiceDefinition
         super(code, variable, datatype, required, description, attributeOrder, datatypeDescription);
     }
 
-    @NotBlank
     @Override
     public String getCode() {
         return super.getCode();
     }
 
-    @NotBlank
     @Override
     public void setCode(String code) {
         super.setCode(code);

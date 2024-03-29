@@ -10,7 +10,6 @@
 
 	type AttributeInput = {
 		description: FormInputValue<string>,
-		code: FormInputValue<string>,
 		dataType: string | undefined,
 		required: boolean,
 		order: number
@@ -92,7 +91,6 @@
 
 	async function handleAddNewAttribute() {
 		newAttribute.description = stringValidator(newAttribute.description);
-		newAttribute.code = stringValidator(newAttribute.code);
 
 		if (serviceId == null) {
 			return;
@@ -100,15 +98,11 @@
 		if (newAttribute.description.type != 'valid') {
 			return;
 		}
-		if (newAttribute.code.type != 'valid') {
-			return;
-		}
 
 		try {
 			await libre311.createAttribute({
 				serviceId: serviceId,
 				description: newAttribute.description.value,
-				code: newAttribute.code.value,
 				datatype: String(newAttribute?.dataType).toString(),
 				variable: true,
 				required: newAttribute.required,
@@ -117,7 +111,6 @@
 
 			isDropDownVisable = false;
 			newAttribute.description.value = '';
-			newAttribute.code.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
 			updateAttributeMap(serviceCode);
@@ -190,40 +183,25 @@
 							</div>
 
 							<div class="flex items-end my-4">
-								<div class="w-2/4">
-									<Input
-										name="new-service-name"
-										error={newAttribute.code.error}
-										bind:value={newAttribute.code.value}
-										placeholder="EXTERNAL_TRACKING_CODE"
-									>
-										<Input.Label slot="label">
-											<strong class="text-base">
-												{'Code:'}
-											</strong>
-										</Input.Label>
-									</Input>
-								</div>
+								<Button
+									class="mx-2 w-1/2"
+									aria-label="Close"
+									type="ghost"
+									on:click={() => {
+										isDropDownVisable = false;
+									}}
+								>
+									{'Cancel'}
+								</Button>
 
-									<Button
-										class="mx-2 w-1/4"
-										aria-label="Close"
-										type="ghost"
-										on:click={() => {
-											isDropDownVisable = false;
-										}}
-									>
-										{'Cancel'}
-									</Button>
-
-									<Button
-										class="mx-2 w-1/4"
-										aria-label="Submit"
-										type="primary"
-										on:click={handleAddNewAttribute}
-									>
-										{'Submit'}
-									</Button>
+								<Button
+									class="mx-2 w-1/2"
+									aria-label="Submit"
+									type="primary"
+									on:click={handleAddNewAttribute}
+								>
+									{'Submit'}
+								</Button>
 							</div>
 
 						</div>
