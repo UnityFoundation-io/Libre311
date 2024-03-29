@@ -164,7 +164,7 @@ public class ServiceService {
         updateServicesOrderPosition(groupId, requestDTO);
 
         // get refreshed list of services
-        List<Service> services = serviceRepository.findAllByServiceGroupId(groupId);
+        List<Service> services = serviceRepository.findAllByServiceGroupIdOrderByOrderPositionAsc(groupId);
         return services.stream().map(this::toServiceDTO).collect(Collectors.toList());
     }
 

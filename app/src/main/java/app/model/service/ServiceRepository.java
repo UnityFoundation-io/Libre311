@@ -30,7 +30,7 @@ public interface ServiceRepository extends PageableRepository<Service, Long> {
     Page<Service> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
     Optional<Service> findByServiceCodeAndJurisdictionId(String serviceCode, String jurisdictionId);
     Optional<Service> findByIdAndJurisdictionId(Long id, String jurisdictionId);
-    List<Service> findAllByServiceGroupId(Long groupId);
+    List<Service> findAllByServiceGroupIdOrderByOrderPositionAsc(Long groupId);
     void updateOrderPositionByIdAndServiceGroupId(@Id Long id, @Id Long groupId, Integer orderPosition);
     boolean existsByServiceCodeAndJurisdiction(String serviceCode, Jurisdiction jurisdiction);
     Long countByServiceGroup(ServiceGroup serviceGroup);
