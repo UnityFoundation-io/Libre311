@@ -39,6 +39,9 @@ public class ServiceDTO {
 
     private ServiceType type;
 
+    @JsonProperty("order_position")
+    private Integer orderPosition;
+
     @JsonProperty("group_id")
     private Long groupId;
 
@@ -53,6 +56,7 @@ public class ServiceDTO {
         this.metadata = hasMetadata;
         this.groupId = service.getServiceGroup().getId();
         this.type = service.getType();
+        this.orderPosition = service.getOrderPosition();
         if (service.getJurisdiction() != null) {
             this.jurisdictionId = service.getJurisdiction().getId();
         }
@@ -120,5 +124,13 @@ public class ServiceDTO {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public Integer getOrderPosition() {
+        return orderPosition;
+    }
+
+    public void setOrderPosition(Integer orderPosition) {
+        this.orderPosition = orderPosition;
     }
 }

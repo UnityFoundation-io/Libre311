@@ -104,4 +104,7 @@
 	main {
 		height: calc(100dvh - var(--header-height));
 	}
+	h1 {
+		font-size: clamp(1.5rem, -0.875rem + 8.333333vw, 2.5rem);
+	}
 </style>

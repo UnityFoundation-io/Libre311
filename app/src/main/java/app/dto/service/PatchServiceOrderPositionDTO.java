@@ -20,56 +20,29 @@ import io.micronaut.core.annotation.Introspected;
 import javax.validation.constraints.Min;
 
 @Introspected
-public class UpdateServiceDTO {
+public class PatchServiceOrderPositionDTO {
 
-    @JsonProperty("service_code")
-    private String serviceCode;
-
-    @JsonProperty("service_name")
-    private String serviceName;
-
-    private String description;
-
-    @JsonProperty("group_id")
-    private Long groupId;
+    @JsonProperty("service_id")
+    private Long serviceId;
 
     @Min(0)
     @JsonProperty("order_position")
     private Integer orderPosition;
 
-    public UpdateServiceDTO() {
+    public PatchServiceOrderPositionDTO() {
     }
 
-    public String getServiceCode() {
-        return serviceCode;
+    public PatchServiceOrderPositionDTO(Long serviceId, Integer orderPosition) {
+        this.serviceId = serviceId;
+        this.orderPosition = orderPosition;
     }
 
-    public void setServiceCode(String serviceCode) {
-        this.serviceCode = serviceCode;
+    public Long getServiceId() {
+        return serviceId;
     }
 
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
     }
 
     public Integer getOrderPosition() {
