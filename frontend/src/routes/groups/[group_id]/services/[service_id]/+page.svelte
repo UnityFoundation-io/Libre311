@@ -33,7 +33,6 @@
 
 	let newAttribute: AttributeInput = {
 		description: createInput<string>(''),
-		code: createInput<string>(''),
 		dataType: undefined,
 		required: false,
 		order: 0
@@ -129,15 +128,6 @@
 				</Breadcrumbs.Crumb>
 			{/each}
 		</Breadcrumbs>
-		<div class="flex justify-end">
-			<Button
-				type="ghost"
-				on:click={() => {
-					isDropDownVisable = true;
-				}}
-				>{'+ Add Attribute'}
-			</Button>
-		</div>
 	</Card.Header>
 
 	<Card.Content slot="content" class="p-0 sm:p-0">
@@ -147,7 +137,7 @@
 				{#if isDropDownVisable}
 					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
 						<div class="my-2 mx-4">
-							<div class="my-4 flex justify-between items-center">
+							<div class="my-2 flex justify-between items-center">
 								<div class="items-center">
 									<label for="is-attribute-required">
 										<strong class="text-base">{'Required:'}</strong>
@@ -217,6 +207,17 @@
 
 					</List.Item>
 				{/each}
+
+				<List.Item class="flex justify-end items-center h-[3.5rem]">
+					<Button
+						class="mr-2"
+						type="ghost"
+						on:click={() => {
+							isDropDownVisable = true;
+						}}
+						>{'+ Add Attribute'}
+					</Button>
+				</List.Item>
 			</List>
 		{:else if asyncAttributeInputMap?.type === 'inProgress'}
 			<div class="mx-8 my-4">
