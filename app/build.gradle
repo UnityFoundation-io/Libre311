@@ -36,17 +36,17 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
     implementation("io.swagger.core.v3:swagger-annotations")
-
     implementation("io.micronaut.xml:micronaut-jackson-xml")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut.sql:micronaut-jdbc-tomcat")
     implementation("io.micronaut.objectstorage:micronaut-object-storage-gcp")
     implementation("io.micronaut.security:micronaut-security-jwt")
-    implementation('com.opencsv:opencsv:5.7.1')
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
     runtimeOnly("org.flywaydb:flyway-mysql")
+
     implementation('com.google.cloud:google-cloud-vision:3.35.0')
+    implementation("org.apache.commons:commons-csv:1.10.0")
 
     String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
     if (databaseSelection != null) {

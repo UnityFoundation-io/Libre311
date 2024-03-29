@@ -14,6 +14,7 @@
 
 package app.service.servicerequest;
 
+import app.dto.download.CsvHeaders;
 import app.dto.download.DownloadServiceRequestDTO;
 import app.dto.servicedefinition.AttributeValueDTO;
 import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
@@ -35,10 +36,6 @@ import app.security.UnityAuthService;
 import app.service.storage.StorageUrlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.data.model.Page;
@@ -48,8 +45,12 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.inject.Singleton;
+
 import java.util.function.Function;
 import javax.annotation.Nullable;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -559,12 +560,46 @@ public class ServiceRequestService {
             tmpFile = File.createTempFile(now.toString(), ".csv");
             try (Writer writer  = new FileWriter(tmpFile)) {
 
-                StatefulBeanToCsv<DownloadServiceRequestDTO> sbc = new StatefulBeanToCsvBuilder<DownloadServiceRequestDTO>(writer)
-                        .build();
+                CSVFormat.Builder builder = CSVFormat.Builder.create(CSVFormat.DEFAULT);
+                builder.setHeader(CsvHeaders.class);
 
-                sbc.write(downloadServiceRequestDTOS);
+                try (CSVPrinter csvPrinter = new CSVPrinter(writer, builder.build())) {
+                    downloadServiceRequestDTOS.forEach(downloadServiceRequestDTO -> {
+                        try {
+                            csvPrinter.printRecord(
+                                    downloadServiceRequestDTO.getJurisdictionId(),
+                                    downloadServiceRequestDTO.getServiceName(),
+                                    downloadServiceRequestDTO.getGroup(),
+                                    downloadServiceRequestDTO.getServiceCode(),
+                                    downloadServiceRequestDTO.getId(),
+                                    downloadServiceRequestDTO.getServiceSubtype(),
+                                    downloadServiceRequestDTO.getDescription(),
+                                    downloadServiceRequestDTO.getMediaUrl(),
+                                    downloadServiceRequestDTO.getAddress(),
+                                    downloadServiceRequestDTO.getZipcode(),
+                                    downloadServiceRequestDTO.getLatitude(),
+                                    downloadServiceRequestDTO.getLongitude(),
+                                    downloadServiceRequestDTO.getFirstName(),
+                                    downloadServiceRequestDTO.getLastName(),
+                                    downloadServiceRequestDTO.getEmail(),
+                                    downloadServiceRequestDTO.getPhone(),
+                                    downloadServiceRequestDTO.getDateCreated(),
+                                    downloadServiceRequestDTO.getDateUpdated(),
+                                    downloadServiceRequestDTO.getClosedDate(),
+                                    downloadServiceRequestDTO.getAgencyResponsible(),
+                                    downloadServiceRequestDTO.getAgencyEmail(),
+                                    downloadServiceRequestDTO.getPriority(),
+                                    downloadServiceRequestDTO.getStatus(),
+                                    downloadServiceRequestDTO.getStatusNotes(),
+                                    downloadServiceRequestDTO.getServiceNotice()
+                            );
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
             }
-        } catch (CsvRequiredFieldEmptyException | CsvDataTypeMismatchException | IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

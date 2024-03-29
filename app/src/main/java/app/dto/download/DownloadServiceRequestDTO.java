@@ -17,8 +17,6 @@ package app.dto.download;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvDate;
 import io.micronaut.core.annotation.Introspected;
 
 import java.time.Instant;
@@ -26,82 +24,30 @@ import java.time.Instant;
 @Introspected
 public class DownloadServiceRequestDTO {
 
-    @CsvBindByName(column = "jurisdiction_id")
     private String jurisdictionId;
-
-    @CsvBindByName(column = "service_name")
     private String serviceName;
-
-    @CsvBindByName
     private String group;
-
-    @CsvBindByName(column = "service_code")
     private String serviceCode;
-
-    @CsvBindByName(column = "service_request_id")
     private Long id;
-
-    @CsvBindByName(column = "service_subtype")
     private String serviceSubtype;
-
-    @CsvBindByName
     private String description;
-
-    @CsvBindByName(column = "media_url")
     private String mediaUrl;
-
-    @CsvBindByName
     private String address;
-
-    @CsvBindByName
     private String zipcode;
-
-    @CsvBindByName(column = "lat")
     private String latitude;
-
-    @CsvBindByName(column = "long")
     private String longitude;
-
-    @CsvBindByName(column = "first_name")
     private String firstName;
-
-    @CsvBindByName(column = "last_name")
     private String lastName;
-
-    @CsvBindByName
     private String email;
-
-    @CsvBindByName
     private String phone;
-
-    @CsvDate(value = "yyyy-MM-dd'T'HH:mm'Z'")
-    @CsvBindByName(column = "requested_datetime")
     private Instant dateCreated;
-
-    @CsvDate(value = "yyyy-MM-dd'T'HH:mm'Z'")
-    @CsvBindByName(column = "updated_datetime")
     private Instant dateUpdated;
-
-    @CsvDate(value = "yyyy-MM-dd'T'HH:mm'Z'")
-    @CsvBindByName(column = "closed_datetime")
     private Instant closedDate;
-
-    @CsvBindByName(column = "agency_responsible")
     private String agencyResponsible;
-
-    @CsvBindByName(column = "agency_email")
     private String agencyEmail;
-
-    @CsvBindByName
     private ServiceRequestPriority priority;
-
-    @CsvBindByName
     private ServiceRequestStatus status;
-
-    @CsvBindByName(column = "status_notes")
     private String statusNotes;
-
-    @CsvBindByName(column = "service_notice")
     private String serviceNotice;
 
     public DownloadServiceRequestDTO(ServiceRequest serviceRequest) {
