@@ -6,6 +6,7 @@ import jakarta.inject.Singleton;
 import java.util.Arrays;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
 
@@ -34,6 +35,10 @@ public class LibreGeometryFactory extends GeometryFactory {
             .toArray(Coordinate[]::new);
 
         return this.createPolygon(this.createLinearRing(exteriorCoords), null);
+    }
+
+    public Point createPoint(String lat, String lng){
+        return this.createPoint(new Coordinate(Double.parseDouble(lng), Double.parseDouble(lat)));
     }
 
     /**
