@@ -22,9 +22,11 @@ import io.micronaut.data.annotation.DateUpdated;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.Instant;
+import org.locationtech.jts.geom.Point;
 
 @Entity
 @Table(name = "service_requests")
@@ -46,11 +48,8 @@ public class ServiceRequest {
     @Column(columnDefinition = "TEXT")
     private String attributesJson;
 
-    // optional
-
-    private String latitude;
-
-    private String longitude;
+    @NotNull
+    private Point location;
 
     @Nullable
     private String addressString;
@@ -144,24 +143,6 @@ public class ServiceRequest {
 
     public void setJurisdiction(Jurisdiction jurisdiction) {
         this.jurisdiction = jurisdiction;
-    }
-
-    @Nullable
-    public String getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(@Nullable String latitude) {
-        this.latitude = latitude;
-    }
-
-    @Nullable
-    public String getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(@Nullable String longitude) {
-        this.longitude = longitude;
     }
 
     @Nullable
@@ -365,4 +346,24 @@ public class ServiceRequest {
     public void setPriority(ServiceRequestPriority priority) {
         this.priority = priority;
     }
+
+    public Point getLocation() {
+        return location;
+    }
+
+
+    public void setLocation(Point location) {
+        this.location = location;
+    }
+
+    @Transient
+    public String getLatitude(){
+        return String.valueOf(this.location.getY());
+    }
+
+    @Transient
+    public String getLongitude(){
+        return String.valueOf(this.location.getX());
+    }
+
 }
