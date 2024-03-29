@@ -34,6 +34,7 @@ import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.security.HasPermissionResponse;
 import app.security.Permission;
+import app.service.geometry.LibreGeometryFactory;
 import app.service.jurisdiction.JurisdictionBoundaryService;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
@@ -60,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.TestInstance;
+import org.locationtech.jts.geom.Coordinate;
 
 import static app.util.JurisdictionBoundaryUtil.DEFAULT_BOUNDS;
 import static app.util.JurisdictionBoundaryUtil.IN_BOUNDS_COORDINATE;
@@ -96,6 +98,9 @@ public class RootControllerTest {
 
     @Inject
     DbCleanup dbCleanup;
+
+    @Inject
+    LibreGeometryFactory libreGeometryFactory;
 
     @BeforeEach
     void setup() {
@@ -345,8 +350,7 @@ public class RootControllerTest {
         closedHighPriority.setPriority(ServiceRequestPriority.HIGH);
         closedHighPriority.setService(sidewalkService);
         closedHighPriority.setJurisdiction(sidewalkService.getJurisdiction());
-        closedHighPriority.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
-        closedHighPriority.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        setLocation(closedHighPriority, IN_BOUNDS_COORDINATE);
         ServiceRequest closedHighSR = serviceRequestRepository.save(closedHighPriority);
 
         ServiceRequest openLowPriority = new ServiceRequest();
@@ -354,8 +358,7 @@ public class RootControllerTest {
         openLowPriority.setPriority(ServiceRequestPriority.LOW);
         openLowPriority.setService(sidewalkService);
         openLowPriority.setJurisdiction(sidewalkService.getJurisdiction());
-        openLowPriority.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
-        openLowPriority.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        setLocation(openLowPriority, IN_BOUNDS_COORDINATE);
         ServiceRequest openLowSR = serviceRequestRepository.save(openLowPriority);
 
         ServiceRequest assignedMedium = new ServiceRequest();
@@ -363,16 +366,14 @@ public class RootControllerTest {
         assignedMedium.setPriority(ServiceRequestPriority.MEDIUM);
         assignedMedium.setService(sidewalkService);
         assignedMedium.setJurisdiction(sidewalkService.getJurisdiction());
-        assignedMedium.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
-        assignedMedium.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        setLocation(assignedMedium, IN_BOUNDS_COORDINATE);
         serviceRequestRepository.save(assignedMedium);
 
         ServiceRequest bikeLaneRequest = new ServiceRequest();
         bikeLaneRequest.setStatus(ServiceRequestStatus.ASSIGNED);
         bikeLaneRequest.setService(bikeLaneService);
         bikeLaneRequest.setJurisdiction(bikeLaneService.getJurisdiction());
-        bikeLaneRequest.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
-        bikeLaneRequest.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
+        setLocation(bikeLaneRequest, IN_BOUNDS_COORDINATE);
         ServiceRequest bikeLaneSR = serviceRequestRepository.save(bikeLaneRequest);
 
         // filter high priority
@@ -518,5 +519,9 @@ public class RootControllerTest {
             .header("Authorization", "Bearer token.text.here")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
+    }
+
+    void setLocation(ServiceRequest sr, Coordinate coordinate){
+        sr.setLocation(libreGeometryFactory.createPoint(coordinate));
     }
 }
