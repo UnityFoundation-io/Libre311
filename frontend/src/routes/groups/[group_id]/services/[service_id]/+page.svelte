@@ -12,7 +12,8 @@
 		description: FormInputValue<string>,
 		code: FormInputValue<string>,
 		dataType: string | undefined,
-		required: boolean
+		required: boolean,
+		order: number
 	}
 
 	interface Crumb {
@@ -35,7 +36,8 @@
 		description: createInput<string>(''),
 		code: createInput<string>(''),
 		dataType: undefined,
-		required: false
+		required: false,
+		order: 0
 	};
 
 	const crumbs: Crumb[] = [
@@ -68,6 +70,10 @@
 		try {
 			const payload = { service_code: serviceCode };
 			const res = await libre311.getServiceDefinition(payload);
+			const attributes = res.attributes;
+
+			// Get order
+			newAttribute.order = attributes[attributes.length - 1].order + 1;
 
 			// Get Service ID
 			const serviceList = await libre311.getServiceList();
@@ -99,14 +105,14 @@
 		}
 
 		try {
-			const res = await libre311.createAttribute({
+			await libre311.createAttribute({
 				serviceId: serviceId,
 				description: newAttribute.description.value,
 				code: newAttribute.code.value,
 				datatype: String(newAttribute?.dataType).toString(),
 				variable: true,
 				required: newAttribute.required,
-				order: 4	// TODO
+				order: newAttribute.order
 			});
 
 			isDropDownVisable = false;
