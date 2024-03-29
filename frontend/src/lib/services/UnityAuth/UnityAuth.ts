@@ -48,18 +48,14 @@ export class UnityAuthServiceImpl
 	}
 
 	async login(email: string, password: string): Promise<UnityAuthLoginResponse> {
-		try {
-			const res = await this.axiosInstance.post('/api/login', {
-				username: email,
-				password: password
-			});
+		const res = await this.axiosInstance.post('/api/login', {
+			username: email,
+			password: password
+		});
 
-			const loginRes = UnityAuthLoginResponseSchema.parse(res.data);
-			this.publish('login', loginRes);
-			return loginRes;
-		} catch (e) {
-			throw new Error('Login Failed!<br/>' + e?.toString());
-		}
+		const loginRes = UnityAuthLoginResponseSchema.parse(res.data);
+		this.publish('login', loginRes);
+		return loginRes;
 	}
 
 	logout() {

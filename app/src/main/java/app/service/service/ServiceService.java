@@ -17,6 +17,7 @@ package app.service.service;
 import app.dto.group.GroupDTO;
 import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
+import app.dto.service.PatchServiceOrderPositionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.exception.Libre311BaseException;
@@ -71,10 +72,24 @@ public class ServiceService {
         }
     }
 
+    static class ServiceCodeAlreadyExistsException extends Libre311BaseException {
+        public ServiceCodeAlreadyExistsException(String serviceCode, String jurisdictionId) {
+            super(String.format("Service with serviceCode: %s for jurisdiction: %s already exists",
+                    serviceCode, jurisdictionId), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     static class ServiceDefinitionAttributeNotFoundException extends Libre311BaseException {
         public ServiceDefinitionAttributeNotFoundException(Long attributeId) {
             super(String.format("No service definition attribute found with id: %s",
                     attributeId), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    static class GroupNotFoundException extends Libre311BaseException {
+        public GroupNotFoundException(Long groupId) {
+            super(String.format("No Group found with id: %s",
+                    groupId), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -97,18 +112,19 @@ public class ServiceService {
 
     public ServiceDTO createService(CreateServiceDTO serviceDTO, String jurisdictionId) {
         Jurisdiction jurisdiction = jurisdictionRepository.findById(jurisdictionId).get();
-        if (serviceCodeAlreadyExists(serviceDTO.getServiceCode(), jurisdiction)) {
-            return null;
-        }
+        validateServiceCodeExistence(serviceDTO.getServiceCode(), jurisdiction);
+
+        ServiceGroup group = validateGroupExistenceAndReturn(serviceDTO.getGroupId(), jurisdictionId);
 
         Service service = new Service();
-
-        if (groupDoesNotExists(serviceDTO.getGroupId(), jurisdiction, service)) return null;
-
         service.setJurisdiction(jurisdiction);
+        service.setServiceGroup(group);
         service.setServiceCode(serviceDTO.getServiceCode());
         service.setServiceName(serviceDTO.getServiceName());
         service.setDescription(serviceDTO.getDescription());
+        if (serviceDTO.getOrderPosition() != null) {
+            service.setOrderPosition(serviceDTO.getOrderPosition());
+        }
 
         return toServiceDTO(serviceRepository.save(service));
     }
@@ -117,30 +133,47 @@ public class ServiceService {
 
         Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
         if (serviceOptional.isEmpty()) {
-            LOG.error("Service not found.");
-            return null;
+           throw new ServiceNotFoundException(serviceId, jurisdictionId);
         }
 
         Service service = serviceOptional.get();
         if (serviceDTO.getServiceCode() != null) {
-            if (serviceCodeAlreadyExists(serviceDTO.getServiceCode(), service.getJurisdiction())) {
-                return null;
-            }
+            validateServiceCodeExistence(serviceDTO.getServiceCode(), service.getJurisdiction());
             service.setServiceCode(serviceDTO.getServiceCode());
         }
 
         if (serviceDTO.getGroupId() != null) {
-            if (groupDoesNotExists(serviceDTO.getGroupId(), service.getJurisdiction(), service)) return null;
+            ServiceGroup group = validateGroupExistenceAndReturn(serviceDTO.getGroupId(), jurisdictionId);
+            service.setServiceGroup(group);
         }
-
         if (serviceDTO.getDescription() != null) {
             service.setDescription(serviceDTO.getDescription());
         }
         if (serviceDTO.getServiceName() != null) {
             service.setServiceName(serviceDTO.getServiceName());
         }
+        if (serviceDTO.getOrderPosition() != null) {
+            service.setOrderPosition(serviceDTO.getOrderPosition());
+        }
 
         return toServiceDTO(serviceRepository.update(service));
+    }
+
+    public List<ServiceDTO> updateServiceOrderPositions(Long groupId, List<PatchServiceOrderPositionDTO> requestDTO) {
+
+        updateServicesOrderPosition(groupId, requestDTO);
+
+        // get refreshed list of services
+        List<Service> services = serviceRepository.findAllByServiceGroupIdOrderByOrderPositionAsc(groupId);
+        return services.stream().map(this::toServiceDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateServicesOrderPosition(Long groupId, List<PatchServiceOrderPositionDTO> requestDTO) {
+        requestDTO.forEach(patchServiceOrderPositionDTO -> serviceRepository.updateOrderPositionByIdAndServiceGroupId(
+                patchServiceOrderPositionDTO.getServiceId(), groupId,
+                patchServiceOrderPositionDTO.getOrderPosition()
+        ));
     }
 
     public void deleteService(Long serviceId, String jurisdictionId) {
@@ -149,24 +182,16 @@ public class ServiceService {
         serviceRepository.deleteById(serviceId);
     }
 
-    private boolean groupDoesNotExists(Long serviceDTO, Jurisdiction jurisdiction, Service service) {
-        Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdiction(serviceDTO, jurisdiction);
-        if (serviceGroupOptional.isPresent()) {
-            service.setServiceGroup(serviceGroupOptional.get());
-        } else {
-            LOG.error("Group not found.");
-            return true;
-        }
-        return false;
+    private ServiceGroup validateGroupExistenceAndReturn(Long groupId, String jurisdictionId) {
+        Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdictionId(groupId, jurisdictionId);
+        return serviceGroupOptional.orElseThrow(() -> new GroupNotFoundException(groupId));
     }
 
-    private boolean serviceCodeAlreadyExists(String serviceCode, Jurisdiction jurisdiction) {
+    private void validateServiceCodeExistence(String serviceCode, Jurisdiction jurisdiction) {
         boolean serviceCodeAlreadyExists = serviceRepository.existsByServiceCodeAndJurisdiction(serviceCode, jurisdiction);
         if (serviceCodeAlreadyExists) {
-            LOG.error("Service with code {} already exists.", serviceCode);
-            return true;
+            throw new ServiceCodeAlreadyExistsException(serviceCode, jurisdiction.getId());
         }
-        return false;
     }
 
     public List<GroupDTO> getListGroups(String jurisdictionId) {
