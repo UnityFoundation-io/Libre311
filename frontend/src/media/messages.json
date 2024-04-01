@@ -81,7 +81,7 @@
 		"button_submit": "Submit"
 	},
 	"photo": {
-		"upload": "Upload An Image",
+		"upload": "Add An Image",
 		"camera_roll": "Camera Roll",
 		"take_photo": "Take Photo",
 		"no_upload": "Continue Without Image",
