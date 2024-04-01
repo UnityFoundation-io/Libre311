@@ -7,6 +7,7 @@
 	import { slide } from 'svelte/transition';
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
 	import type { SelectOption } from 'stwui/types';
+	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 
 	type AttributeInput = {
 		description: FormInputValue<string>,
@@ -39,6 +40,8 @@
 		required: false,
 		order: 0
 	};
+
+	let values: { id: number, value: string }[] = [];
 
 	const crumbs: Crumb[] = [
 		{ label: 'Groups', href: '/groups' },
@@ -105,7 +108,7 @@
 		}
 
 		try {
-			await libre311.createAttribute({
+			const body = {
 				serviceId: serviceId,
 				description: newAttribute.description.value,
 				datatype_description: newAttribute.dataTypeDescription.value,
@@ -113,7 +116,13 @@
 				variable: true,
 				required: newAttribute.required,
 				order: newAttribute.order
-			});
+			}
+
+			if (values.length > 0) {
+				console.log(values);
+			}
+
+			await libre311.createAttribute(body);
 
 			isDropDownVisable = false;
 			newAttribute.description.value = '';
@@ -123,6 +132,15 @@
 		} catch (error) {
 			alertError(error);
 		}
+	}
+
+	function addValue() {
+		const newId = values.length ? values[values.length - 1].id + 1 : 1;
+		values = [...values, { id: newId, value: '' }];
+	}
+
+	function removeValue(index: number) {
+		values = values.filter((_, i) => i !== index);
 	}
 </script>
 
@@ -191,6 +209,28 @@
 									</Input.Label>
 								</Input>
 							</div>
+
+							{#if newAttribute.dataType == 'multivaluelist'}
+								<div class="flex flex-col" transition:slide|local={{ duration: 500 }}>
+
+									<strong class="text-base">{'Values:'}</strong>
+
+									<ul>
+										{#each values as _, index}
+											<li class="flex my-2 justify-between" transition:slide|local={{ duration: 500 }}>
+												<Input class="rounded-md w-11/12" type="text" placeholder="option" bind:value={values[index].value}/>
+												<Button on:click={() => removeValue(index)}>
+													<XMark />
+												</Button>
+											</li>
+										{/each}
+									</ul>
+
+									<Button class="mt-1" type='ghost' on:click={addValue}>
+										{'+ Add'}
+									</Button>
+								</div>
+							{/if}
 
 							<div class="flex items-end my-4">
 								<Button
