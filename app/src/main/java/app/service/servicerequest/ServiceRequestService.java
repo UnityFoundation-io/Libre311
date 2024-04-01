@@ -32,6 +32,7 @@ import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
 import app.security.Permission;
 import app.security.UnityAuthService;
+import app.service.geometry.LibreGeometryFactory;
 import app.service.jurisdiction.JurisdictionBoundaryService;
 import app.service.storage.StorageUrlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -89,13 +90,15 @@ public class ServiceRequestService {
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
     JurisdictionBoundaryService jurisdictionBoundaryService;
+    LibreGeometryFactory libreGeometryFactory;
 
     public ServiceRequestService(ServiceRequestRepository serviceRequestRepository,
         ServiceRepository serviceRepository,
         ServiceDefinitionAttributeRepository attributeRepository,
         ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
         UnityAuthService unityAuthService,
-        JurisdictionBoundaryService jurisdictionBoundaryService) {
+        JurisdictionBoundaryService jurisdictionBoundaryService,
+        LibreGeometryFactory libreGeometryFactory) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRepository = serviceRepository;
         this.attributeRepository = attributeRepository;
@@ -103,6 +106,7 @@ public class ServiceRequestService {
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
         this.jurisdictionBoundaryService = jurisdictionBoundaryService;
+        this.libreGeometryFactory = libreGeometryFactory;
     }
 
 
@@ -300,8 +304,8 @@ public class ServiceRequestService {
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setService(service);
         serviceRequest.setJurisdiction(service.getJurisdiction());
-        serviceRequest.setLatitude(serviceRequestDTO.getLatitude());
-        serviceRequest.setLongitude(serviceRequestDTO.getLongitude());
+        serviceRequest.setLocation(libreGeometryFactory.createPoint(serviceRequestDTO.getLatitude(),
+            serviceRequestDTO.getLongitude()));
         serviceRequest.setAddressString(serviceRequestDTO.getAddressString());
         serviceRequest.setAddressId(serviceRequestDTO.getAddressId());
         serviceRequest.setEmail(serviceRequestDTO.getEmail());
