@@ -199,6 +199,7 @@
 									type="ghost"
 									on:click={() => {
 										isDropDownVisable = false;
+										newAttribute.dataType = undefined;
 									}}
 								>
 									{'Cancel'}
