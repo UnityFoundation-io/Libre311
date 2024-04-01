@@ -32,6 +32,7 @@ import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
 import app.security.Permission;
 import app.security.UnityAuthService;
+import app.service.jurisdiction.JurisdictionBoundaryService;
 import app.service.storage.StorageUrlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,23 +68,11 @@ import java.util.stream.Stream;
 
 @Singleton
 public class ServiceRequestService {
-    private static final Logger LOG = LoggerFactory.getLogger(ServiceRequestService.class);
-    private final ServiceRequestRepository serviceRequestRepository;
-    private final ServiceRepository serviceRepository;
-    private final ServiceDefinitionAttributeRepository attributeRepository;
-    private final ReCaptchaService reCaptchaService;
-    private final StorageUrlUtil storageUrlUtil;
-    private final UnityAuthService unityAuthService;
 
-    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository,
-                                 ServiceRepository serviceRepository, ServiceDefinitionAttributeRepository attributeRepository,
-                                 ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil, UnityAuthService unityAuthService) {
-        this.serviceRequestRepository = serviceRequestRepository;
-        this.serviceRepository = serviceRepository;
-        this.attributeRepository = attributeRepository;
-        this.reCaptchaService = reCaptchaService;
-        this.storageUrlUtil = storageUrlUtil;
-        this.unityAuthService = unityAuthService;
+    static class ServiceRequestOutOfBoundsException extends Libre311BaseException {
+        public ServiceRequestOutOfBoundsException() {
+            super("The service request is out of bounds", HttpStatus.BAD_REQUEST);
+        }
     }
 
     static class InvalidServiceRequestException extends Libre311BaseException {
@@ -91,6 +80,31 @@ public class ServiceRequestService {
             super(message, HttpStatus.BAD_REQUEST);
         }
     }
+
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceRequestService.class);
+    private final ServiceRequestRepository serviceRequestRepository;
+    private final ServiceRepository serviceRepository;
+    private final ServiceDefinitionAttributeRepository attributeRepository;
+    private final ReCaptchaService reCaptchaService;
+    private final StorageUrlUtil storageUrlUtil;
+    private final UnityAuthService unityAuthService;
+    JurisdictionBoundaryService jurisdictionBoundaryService;
+
+    public ServiceRequestService(ServiceRequestRepository serviceRequestRepository,
+        ServiceRepository serviceRepository,
+        ServiceDefinitionAttributeRepository attributeRepository,
+        ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
+        UnityAuthService unityAuthService,
+        JurisdictionBoundaryService jurisdictionBoundaryService) {
+        this.serviceRequestRepository = serviceRequestRepository;
+        this.serviceRepository = serviceRepository;
+        this.attributeRepository = attributeRepository;
+        this.reCaptchaService = reCaptchaService;
+        this.storageUrlUtil = storageUrlUtil;
+        this.unityAuthService = unityAuthService;
+        this.jurisdictionBoundaryService = jurisdictionBoundaryService;
+    }
+
 
     private static ServiceRequestDTO convertToDTO(ServiceRequest serviceRequest) {
         ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO(serviceRequest);
@@ -112,6 +126,12 @@ public class ServiceRequestService {
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
         reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse());
 
+        double lat = Double.parseDouble(serviceRequestDTO.getLatitude());
+        double lng = Double.parseDouble(serviceRequestDTO.getLongitude());
+        if (!jurisdictionBoundaryService.existsInJurisdiction(jurisdictionId, lat, lng)){
+            throw new ServiceRequestOutOfBoundsException();
+        }
+
         if (!validMediaUrl(serviceRequestDTO.getMediaUrl())) {
             throw new InvalidServiceRequestException("Media URL is invalid.");
         }
@@ -126,14 +146,6 @@ public class ServiceRequestService {
         if (!jurisdictionId.equals(serviceByServiceCodeOptional.get().getJurisdiction().getId())) {
             throw new InvalidServiceRequestException(
                 "Mismatch between jurisdiction_id provided and Service's associated jurisdiction.");
-        }
-
-        // validate if a location is provided
-        boolean latLongProvided = StringUtils.hasText(serviceRequestDTO.getLatitude()) &&
-                StringUtils.hasText(serviceRequestDTO.getLongitude());
-
-        if (!latLongProvided) {
-            throw new InvalidServiceRequestException("Lat/long are required.");
         }
 
         // validate if additional attributes are required

@@ -17,22 +17,48 @@ package app.service.jurisdiction;
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
+import app.exception.Libre311BaseException;
 import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.JurisdictionBoundary;
+import app.model.jurisdiction.JurisdictionBoundaryEntity;
+import app.model.jurisdiction.JurisdictionBoundaryRepository;
 import app.model.jurisdiction.JurisdictionRepository;
-import app.model.jurisdiction.LatLong;
-import app.model.jurisdiction.LatLongRepository;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.http.HttpStatus;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.transaction.Transactional;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Singleton
 public class JurisdictionService {
+
+    static class JurisdictionNotFoundException extends Libre311BaseException {
+        public JurisdictionNotFoundException(String message) {
+            super(message, HttpStatus.NOT_FOUND);
+        }
+
+        static JurisdictionNotFoundException noJurisdictionForHostname(String hostname){
+            return new JurisdictionNotFoundException(
+                String.format("No Jurisdiction found with hostname %s", hostname));
+        }
+
+        static JurisdictionNotFoundException noJurisdictionForId(String id){
+            return new JurisdictionNotFoundException(
+                String.format("No Jurisdiction found with id: %s", id));
+        }
+
+    }
+
+    static class JurisdictionAlreadyExists extends Libre311BaseException {
+
+        public JurisdictionAlreadyExists(String id) {
+            super(String.format(
+                    "Cannot create jurisdiction. A jurisdiction with id: %s already exists", id),
+                HttpStatus.BAD_REQUEST);
+        }
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(JurisdictionService.class);
 
@@ -40,11 +66,15 @@ public class JurisdictionService {
     protected String authUrl;
 
     private final JurisdictionRepository jurisdictionRepository;
-    private final LatLongRepository latLongRepository;
+    JurisdictionBoundaryRepository jurisdictionBoundaryRepository;
+    JurisdictionBoundaryService jurisdictionBoundaryService;
 
-    public JurisdictionService(JurisdictionRepository jurisdictionRepository, LatLongRepository latLongRepository) {
+    public JurisdictionService(JurisdictionRepository jurisdictionRepository,
+        JurisdictionBoundaryRepository jurisdictionBoundaryRepository,
+        JurisdictionBoundaryService jurisdictionBoundaryService) {
         this.jurisdictionRepository = jurisdictionRepository;
-        this.latLongRepository = latLongRepository;
+        this.jurisdictionBoundaryRepository = jurisdictionBoundaryRepository;
+        this.jurisdictionBoundaryService = jurisdictionBoundaryService;
     }
 
     public JurisdictionDTO findJurisdictionByHostName(String hostName) {
@@ -52,19 +82,17 @@ public class JurisdictionService {
             .map(jurisdiction -> {
                 JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdiction, authUrl);
 
-                List<LatLong> bounds = latLongRepository.findAllByJurisdiction(jurisdiction);
-                jurisdictionDTO.setBounds(bounds.stream()
-                        .sorted(Comparator.comparing(LatLong::getOrderPosition))
-                        .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
-                        .toArray(Double[][]::new));
+                JurisdictionBoundaryEntity jurisdictionBoundary = jurisdictionBoundaryRepository.findByJurisdictionId(
+                    jurisdiction.getId());
+                jurisdictionDTO.setBounds(jurisdictionBoundary.getBoundary());
 
                 return jurisdictionDTO;
-            }).orElse(null);
+            }).orElseThrow(() -> JurisdictionNotFoundException.noJurisdictionForHostname(hostName));
     }
 
     public JurisdictionDTO createJurisdiction(CreateJurisdictionDTO requestDTO, Long tenantId) {
         if (jurisdictionRepository.existsById(requestDTO.getJurisdictionId())) {
-            return null;
+            throw new JurisdictionAlreadyExists(requestDTO.getJurisdictionId());
         }
 
         Jurisdiction jurisdiction = new Jurisdiction(requestDTO.getJurisdictionId(), tenantId);
@@ -74,23 +102,17 @@ public class JurisdictionService {
         jurisdiction.setLogoMediaUrl(requestDTO.getLogoMediaUrl());
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
+        JurisdictionBoundary savedBoundary = jurisdictionBoundaryService.saveBoundary(
+            savedJurisdiction, requestDTO.getBounds());
 
-        List<LatLong> bounds = saveNewBounds(requestDTO.getBounds(), savedJurisdiction);
-        JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdictionRepository.update(savedJurisdiction));
-        jurisdictionDTO.setBounds(bounds.stream()
-                .sorted(Comparator.comparing(LatLong::getOrderPosition))
-                .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
-                .toArray(Double[][]::new));
-
-        return jurisdictionDTO;
+        return new JurisdictionDTO(savedJurisdiction, savedBoundary);
     }
 
     public JurisdictionDTO updateJurisdiction(String jurisdictionId, PatchJurisdictionDTO requestDTO) {
         Optional<Jurisdiction> jurisdictionOptional = jurisdictionRepository.findById(jurisdictionId);
 
-        if (jurisdictionOptional.isEmpty()) {
-            LOG.error("Could not find Jurisdiction with id {}.", jurisdictionId);
-            return null;
+        if (jurisdictionOptional.isEmpty()){
+            throw JurisdictionNotFoundException.noJurisdictionForId(jurisdictionId);
         }
 
         Jurisdiction jurisdiction = jurisdictionOptional.get();
@@ -99,50 +121,14 @@ public class JurisdictionService {
 
         Double[][] dtoBounds = requestDTO.getBounds();
         if (dtoBounds != null) {
-            List<LatLong> savedBounds = updateBounds(jurisdiction, dtoBounds);
-            jurisdictionDTO.setBounds(savedBounds.stream()
-                    .sorted(Comparator.comparing(LatLong::getOrderPosition))
-                    .map(latLong -> new Double[]{latLong.getLatitude(), latLong.getLongitude()})
-                    .toArray(Double[][]::new));
+            JurisdictionBoundary savedBoundary = jurisdictionBoundaryService.updateBoundary(
+                jurisdiction, dtoBounds);
+            jurisdictionDTO.setBounds(savedBoundary.getBoundary());
         }
-
         return jurisdictionDTO;
     }
 
-    @Transactional
-    public List<LatLong> updateBounds(Jurisdiction jurisdiction, Double[][] dtoBounds) {
-        latLongRepository.deleteAll(latLongRepository.findAllByJurisdiction(jurisdiction));
-        return saveNewBounds(dtoBounds, jurisdiction);
-    }
 
-    private List<LatLong> saveNewBounds(Double[][] dtoBounds, Jurisdiction jurisdiction) {
-        List<LatLong> polygonalBound = checkValidPolygonBound(dtoBounds, jurisdiction);
-        List<LatLong> savedPolygonalBound = (List<LatLong>) latLongRepository.saveAll(polygonalBound);
-        jurisdiction.setBounds(savedPolygonalBound);
-
-        return savedPolygonalBound;
-    }
-
-    private List<LatLong> checkValidPolygonBound(Double[][] dtoBounds, Jurisdiction jurisdiction) {
-
-        if (Arrays.stream(dtoBounds).anyMatch(doubles -> doubles.length != 2)) {
-            throw new IllegalArgumentException("Invalid polygonal bound - should consist of tuple decimals values only.");
-        }
-
-        Double[] firstTuple = dtoBounds[0];
-        Double[] lastTuple = dtoBounds[dtoBounds.length - 1];
-        if (!(firstTuple[0].equals(lastTuple[0]) && firstTuple[1].equals(lastTuple[1]))) {
-            throw new IllegalArgumentException("Invalid polygonal bound - first element does not equal last.");
-        }
-
-        AtomicInteger pos = new AtomicInteger(-1);
-        return Arrays.stream(dtoBounds)
-                .map(latLongTuple -> {
-                    pos.addAndGet(1);
-                    return new LatLong(latLongTuple[0], latLongTuple[1], jurisdiction, pos.get());
-                })
-                .collect(Collectors.toList());
-    }
 
     private void applyPatch(PatchJurisdictionDTO jurisdictionDTO, Jurisdiction jurisdiction) {
         if (jurisdictionDTO.getName() != null) {
