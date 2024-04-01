@@ -194,7 +194,7 @@
 
 							<div class="flex items-end my-4">
 								<Button
-									class="mx-2 w-1/2"
+									class="mr-2 w-1/2"
 									aria-label="Close"
 									type="ghost"
 									on:click={() => {
@@ -205,7 +205,7 @@
 								</Button>
 
 								<Button
-									class="mx-2 w-1/2"
+									class="ml-2 w-1/2"
 									aria-label="Submit"
 									type="primary"
 									on:click={handleAddNewAttribute}
