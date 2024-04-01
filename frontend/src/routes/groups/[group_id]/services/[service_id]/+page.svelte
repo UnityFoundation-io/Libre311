@@ -47,11 +47,11 @@
 	const dataTypeOptions: SelectOption[] = [
 		{
 			value: 'string',
-			label: 'String'
+			label: 'Single Answer'
 		},
 		{
 			value: 'multivaluelist',
-			label: 'Multi-Value'
+			label: 'Multi-Answer'
 		}
 	];
 
@@ -147,7 +147,7 @@
 
 								<Select
 									name="select-datatype"
-									placeholder="Select Data Type"
+									placeholder="Answer Type"
 									options={dataTypeOptions}
 									bind:value={newAttribute.dataType}
 								>
