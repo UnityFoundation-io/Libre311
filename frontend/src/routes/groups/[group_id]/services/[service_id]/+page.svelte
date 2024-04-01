@@ -10,6 +10,7 @@
 
 	type AttributeInput = {
 		description: FormInputValue<string>,
+		dataTypeDescription: FormInputValue<string>,
 		dataType: string | undefined,
 		required: boolean,
 		order: number
@@ -33,6 +34,7 @@
 
 	let newAttribute: AttributeInput = {
 		description: createInput<string>(''),
+		dataTypeDescription: createInput<string>(''),
 		dataType: undefined,
 		required: false,
 		order: 0
@@ -90,6 +92,7 @@
 
 	async function handleAddNewAttribute() {
 		newAttribute.description = stringValidator(newAttribute.description);
+		newAttribute.dataTypeDescription = stringValidator(newAttribute.dataTypeDescription);
 
 		if (serviceId == null) {
 			return;
@@ -97,11 +100,15 @@
 		if (newAttribute.description.type != 'valid') {
 			return;
 		}
+		if (newAttribute.dataTypeDescription.type != 'valid') {
+			return;
+		}
 
 		try {
 			await libre311.createAttribute({
 				serviceId: serviceId,
 				description: newAttribute.description.value,
+				datatype_description: newAttribute.dataTypeDescription.value,
 				datatype: String(newAttribute?.dataType).toString(),
 				variable: true,
 				required: newAttribute.required,
@@ -140,7 +147,7 @@
 							<div class="my-2 flex justify-between items-center">
 								<div class="items-center">
 									<label for="is-attribute-required">
-										<strong class="text-base">{'Required:'}</strong>
+										<strong class="text-base">{'Required Answer:'}</strong>
 									</label>
 									<input class="rounded-sm mx-2" id="is-attribute-required" type="checkbox" bind:checked={newAttribute.required}/>
 								</div>
@@ -168,6 +175,19 @@
 								>
 									<Input.Label slot="label">
 										<strong class="text-base">{'Question:'}</strong>
+									</Input.Label>
+								</Input>
+							</div>
+
+							<div class="my-4">
+								<Input
+									name="new-attribute-datatype-description"
+									error={newAttribute.dataTypeDescription.error}
+									bind:value={newAttribute.dataTypeDescription.value}
+									placeholder="What type of issue?"
+								>
+									<Input.Label slot="label">
+										<strong class="text-base">{'Helper Text:'}</strong>
 									</Input.Label>
 								</Input>
 							</div>
