@@ -17,6 +17,7 @@ package app;
 import app.dto.group.GroupDTO;
 import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.service.CreateServiceDTO;
+import app.dto.service.PatchServiceOrderPositionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicedefinition.CreateServiceDefinitionAttributeDTO;
@@ -125,6 +126,14 @@ public class JurisdictionAdminController {
     public GroupDTO updateGroup(Long groupId, @Valid @Body CreateUpdateGroupDTO requestDTO,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return serviceService.updateGroup(groupId, requestDTO);
+    }
+
+    @Patch(uris = { "/groups/{groupId}/services-order{?jurisdiction_id}", "/groups/{groupId}/services-order.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public List<ServiceDTO> updateServicesOrder(Long groupId, @Valid @Body List<PatchServiceOrderPositionDTO> requestDTO,
+                                              @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceService.updateServiceOrderPositions(groupId, requestDTO);
     }
 
     @Delete(uris = { "/groups/{groupId}{?jurisdiction_id}", "/groups/{groupId}.json{?jurisdiction_id}" })

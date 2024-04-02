@@ -1,0 +1,29 @@
+package app.dto.download;
+
+public enum CsvHeaders {
+    JURISDICTION_ID,
+    SERVICE_NAME,
+    GROUP,
+    SERVICE_CODE,
+    SERVICE_REQUEST_ID,
+    SERVICE_SUBTYPE,
+    DESCRIPTION,
+    MEDIA_URL,
+    ADDRESS,
+    ZIPCODE,
+    LAT,
+    LONG,
+    FIRST_NAME,
+    LAST_NAME,
+    EMAIL,
+    PHONE,
+    REQUESTED_DATETIME,
+    UPDATED_DATETIME,
+    CLOSED_DATETIME,
+    AGENCY_RESPONSIBLE,
+    AGENCY_EMAIL,
+    PRIORITY,
+    STATUS,
+    STATUS_NOTES,
+    SERVICE_NOTICE
+}

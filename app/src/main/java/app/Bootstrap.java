@@ -25,6 +25,7 @@ import app.model.service.group.ServiceGroupRepository;
 import app.model.servicedefinition.*;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
+import app.service.jurisdiction.JurisdictionBoundaryService;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.convert.format.MapFormat;
@@ -54,15 +55,23 @@ public class Bootstrap {
     private final ServiceGroupRepository serviceGroupRepository;
     private final ServiceDefinitionAttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
+    private final JurisdictionBoundaryService jurisdictionBoundaryService;
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrap.class);
 
-    public Bootstrap(ServiceRepository serviceRepository, JurisdictionRepository jurisdictionRepository, ServiceGroupRepository serviceGroupRepository, ServiceDefinitionAttributeRepository attributeRepository, AttributeValueRepository attributeValueRepository) {
+    public Bootstrap(ServiceRepository serviceRepository,
+        JurisdictionRepository jurisdictionRepository,
+        ServiceGroupRepository serviceGroupRepository,
+        ServiceDefinitionAttributeRepository attributeRepository,
+        AttributeValueRepository attributeValueRepository,
+        JurisdictionBoundaryService jurisdictionBoundaryService) {
         this.serviceRepository = serviceRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.serviceGroupRepository = serviceGroupRepository;
         this.attributeRepository = attributeRepository;
         this.attributeValueRepository = attributeValueRepository;
+        this.jurisdictionBoundaryService = jurisdictionBoundaryService;
     }
+
 
     @EventListener
     public void devData(ServerStartupEvent event) {
@@ -73,6 +82,14 @@ public class Bootstrap {
                 jurisdictions.forEach(juridictionsMap -> {
                     Jurisdiction jurisdiction = jurisdictionRepository.save(
                             new Jurisdiction((String) juridictionsMap.get("id"), ((Integer) juridictionsMap.get("tenant")).longValue()));
+
+                    jurisdictionBoundaryService.saveBoundary(jurisdiction,  new Double[][]{
+                        new Double[]{38.88908245157475, -90.82207996696539},
+                        new Double[]{38.28511105115126, -90.32668241294714},
+                        new Double[]{38.73098601356233, -89.86006757704696},
+                        new Double[]{39.04413540068816, -90.36058752072049},
+                        new Double[]{38.88908245157475, -90.82207996696539},
+                    });
 
                     List<String> groups = (List<String>) juridictionsMap.get("groups");
                     List<ServiceGroup> serviceGroups = processAndStoreGroups(groups, jurisdiction);

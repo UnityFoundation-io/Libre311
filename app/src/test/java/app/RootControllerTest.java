@@ -23,7 +23,7 @@ import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.dto.servicerequest.ServiceRequestDTO;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
-import app.model.jurisdiction.LatLong;
+
 import app.model.jurisdiction.RemoteHost;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
@@ -34,6 +34,8 @@ import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.security.HasPermissionResponse;
 import app.security.Permission;
+import app.service.geometry.LibreGeometryFactory;
+import app.service.jurisdiction.JurisdictionBoundaryService;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockUnityAuthClient;
@@ -50,6 +52,7 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,12 +60,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.TestInstance;
+import org.locationtech.jts.geom.Coordinate;
 
+import static app.util.JurisdictionBoundaryUtil.DEFAULT_BOUNDS;
+import static app.util.JurisdictionBoundaryUtil.IN_BOUNDS_COORDINATE;
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @MicronautTest(environments={"app-api-test-data"}, transactional = false)
 public class RootControllerTest {
 
@@ -86,12 +94,24 @@ public class RootControllerTest {
     MockUnityAuthClient mockUnityAuthClient;
 
     @Inject
+    JurisdictionBoundaryService jurisdictionBoundaryService;
+
+    @Inject
     DbCleanup dbCleanup;
+
+    @Inject
+    LibreGeometryFactory libreGeometryFactory;
 
     @BeforeEach
     void setup() {
         dbCleanup.cleanupServiceRequests();
     }
+
+    @AfterAll
+    void cleanupAll(){
+        dbCleanup.cleanupAll();
+    }
+
 
     private void setAuthHasPermissionSuccessResponse(boolean success, List<Permission> permissions) {
         var permissionsAsString = permissions.stream()
@@ -119,7 +139,7 @@ public class RootControllerTest {
         assertTrue(optional.isPresent());
         PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
         assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
-                .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
     }
 
     @Test
@@ -127,13 +147,13 @@ public class RootControllerTest {
         HttpResponse<?> response;
 
         response = createServiceRequest("001", "12345 Fairway",
-                Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
+            Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
         assertTrue(optional.isPresent());
         PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
         assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
-                .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
     }
 
     @Test
@@ -141,21 +161,21 @@ public class RootControllerTest {
         HttpResponse<?> response;
 
         response = createServiceRequest("001", "12345 Fairway",
-                Map.of(
-                        "attribute[SDWLK]", "NARROW",
-                        "attribute[SDWLK_NEAR]", "A string description",
-                        "attribute[SDWLK_WIDTH]", "5",
-                        "attribute[SDWLK_DATETIME]", "2015-04-14T11:07:36.639Z",
-                        "attribute[SDWLK_CMNTS]", "This is a comment field that can introduce multiline characters",
-                        "attribute[SDWLK_SNGLIST]", "NARROW"
-                ),
-                "city.gov");
+            Map.of(
+                "attribute[SDWLK]", "NARROW",
+                "attribute[SDWLK_NEAR]", "A string description",
+                "attribute[SDWLK_WIDTH]", "5",
+                "attribute[SDWLK_DATETIME]", "2015-04-14T11:07:36.639Z",
+                "attribute[SDWLK_CMNTS]", "This is a comment field that can introduce multiline characters",
+                "attribute[SDWLK_SNGLIST]", "NARROW"
+            ),
+            "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
         assertTrue(optional.isPresent());
         PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
         assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
-                .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
 
         PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
 
@@ -181,11 +201,11 @@ public class RootControllerTest {
     public void cannotCreateServiceRequestWithInvalidFormattedDateField() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
             createServiceRequest("001", "12345 Fairway",
-                    Map.of(
-                            "attribute[SDWLK]", "NARROW",
-                            "attribute[SDWLK_DATETIME]", "0015/04/14Z"
-                    ),
-                    "city.gov");
+                Map.of(
+                    "attribute[SDWLK]", "NARROW",
+                    "attribute[SDWLK_DATETIME]", "0015/04/14Z"
+                ),
+                "city.gov");
         });
         assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
     }
@@ -194,11 +214,11 @@ public class RootControllerTest {
     public void cannotCreateServiceRequestWithInvalidFormattedNumberField() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
             createServiceRequest("001", "12345 Fairway",
-                    Map.of(
-                            "attribute[SDWLK]", "NARROW",
-                            "attribute[SDWLK_WIDTH]", "NotANumber"
-                    ),
-                    "city.gov");
+                Map.of(
+                    "attribute[SDWLK]", "NARROW",
+                    "attribute[SDWLK_WIDTH]", "NotANumber"
+                ),
+                "city.gov");
         });
         assertEquals(INTERNAL_SERVER_ERROR, thrown.getStatus());
     }
@@ -220,7 +240,7 @@ public class RootControllerTest {
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
 
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id=", payload)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, Map.class);
@@ -278,7 +298,7 @@ public class RootControllerTest {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = createServiceRequest("001", "12345 Fairway",
-                Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
+            Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         response = client.toBlocking().exchange("/requests?jurisdiction_id=city.gov", ServiceRequestDTO[].class);
@@ -290,7 +310,7 @@ public class RootControllerTest {
         assertTrue(Arrays.stream(serviceRequestDTOS).findAny().isPresent());
         assertEquals(1, serviceRequestDTOS.length);
         assertTrue(Arrays.stream(serviceRequestDTOS).allMatch(
-                serviceRequestDTO -> "city.gov".equals(serviceRequestDTO.getJurisdictionId())));
+            serviceRequestDTO -> "city.gov".equals(serviceRequestDTO.getJurisdictionId())));
     }
 
     @Test
@@ -299,8 +319,8 @@ public class RootControllerTest {
 
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO("001");
         serviceRequestDTO.setgRecaptchaResponse("abc");
-        serviceRequestDTO.setLongitude("43.3434");
-        serviceRequestDTO.setLatitude("48.98");
+        serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
+        serviceRequestDTO.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         serviceRequestDTO.setEmail("private@test.com");
 
         createServiceRequest(serviceRequestDTO, Map.of("attribute[SDWLK]", "NARROW"),
@@ -330,8 +350,7 @@ public class RootControllerTest {
         closedHighPriority.setPriority(ServiceRequestPriority.HIGH);
         closedHighPriority.setService(sidewalkService);
         closedHighPriority.setJurisdiction(sidewalkService.getJurisdiction());
-        closedHighPriority.setLatitude("12.34");
-        closedHighPriority.setLongitude("56.78");
+        setLocation(closedHighPriority, IN_BOUNDS_COORDINATE);
         ServiceRequest closedHighSR = serviceRequestRepository.save(closedHighPriority);
 
         ServiceRequest openLowPriority = new ServiceRequest();
@@ -339,8 +358,7 @@ public class RootControllerTest {
         openLowPriority.setPriority(ServiceRequestPriority.LOW);
         openLowPriority.setService(sidewalkService);
         openLowPriority.setJurisdiction(sidewalkService.getJurisdiction());
-        openLowPriority.setLatitude("12.34");
-        openLowPriority.setLongitude("56.78");
+        setLocation(openLowPriority, IN_BOUNDS_COORDINATE);
         ServiceRequest openLowSR = serviceRequestRepository.save(openLowPriority);
 
         ServiceRequest assignedMedium = new ServiceRequest();
@@ -348,16 +366,14 @@ public class RootControllerTest {
         assignedMedium.setPriority(ServiceRequestPriority.MEDIUM);
         assignedMedium.setService(sidewalkService);
         assignedMedium.setJurisdiction(sidewalkService.getJurisdiction());
-        assignedMedium.setLatitude("12.34");
-        assignedMedium.setLongitude("56.78");
+        setLocation(assignedMedium, IN_BOUNDS_COORDINATE);
         serviceRequestRepository.save(assignedMedium);
 
         ServiceRequest bikeLaneRequest = new ServiceRequest();
         bikeLaneRequest.setStatus(ServiceRequestStatus.ASSIGNED);
         bikeLaneRequest.setService(bikeLaneService);
         bikeLaneRequest.setJurisdiction(bikeLaneService.getJurisdiction());
-        bikeLaneRequest.setLatitude("12.34");
-        bikeLaneRequest.setLongitude("56.78");
+        setLocation(bikeLaneRequest, IN_BOUNDS_COORDINATE);
         ServiceRequest bikeLaneSR = serviceRequestRepository.save(bikeLaneRequest);
 
         // filter high priority
@@ -374,7 +390,7 @@ public class RootControllerTest {
         // filter open status
         req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&status=open").bearerAuth( "eyekljdsl");
         response = client.toBlocking().exchange(req,
-                Argument.listOf(SensitiveServiceRequestDTO.class));
+            Argument.listOf(SensitiveServiceRequestDTO.class));
         assertEquals(HttpStatus.OK, response.status());
         body = response.getBody(Argument.listOf(SensitiveServiceRequestDTO.class));
         assertTrue(body.isPresent());
@@ -385,27 +401,27 @@ public class RootControllerTest {
         // filter high and low priority
         req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&priority=low&priority=high").bearerAuth( "eyekljdsl");
         response = client.toBlocking().exchange(req,
-                Argument.listOf(SensitiveServiceRequestDTO.class));
+            Argument.listOf(SensitiveServiceRequestDTO.class));
         assertEquals(HttpStatus.OK, response.status());
         body = response.getBody(Argument.listOf(SensitiveServiceRequestDTO.class));
         assertTrue(body.isPresent());
         assertFalse(body.get().isEmpty());
         assertTrue(body.get().stream().anyMatch(sensitiveServiceRequestDTO ->
-                sensitiveServiceRequestDTO.getId().equals(openLowSR.getId()) ||
-                        sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
+            sensitiveServiceRequestDTO.getId().equals(openLowSR.getId()) ||
+                sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
         assertEquals(2, body.get().size());
 
         // filter service_code 003 and 001
         req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&service_code=003&service_code=001").bearerAuth( "eyekljdsl");
         response = client.toBlocking().exchange(req,
-                Argument.listOf(SensitiveServiceRequestDTO.class));
+            Argument.listOf(SensitiveServiceRequestDTO.class));
         assertEquals(HttpStatus.OK, response.status());
         body = response.getBody(Argument.listOf(SensitiveServiceRequestDTO.class));
         assertTrue(body.isPresent());
         assertFalse(body.get().isEmpty());
         assertTrue(body.get().stream().anyMatch(sensitiveServiceRequestDTO ->
-                sensitiveServiceRequestDTO.getId().equals(bikeLaneSR.getId()) ||
-                        sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
+            sensitiveServiceRequestDTO.getId().equals(bikeLaneSR.getId()) ||
+                sensitiveServiceRequestDTO.getId().equals(closedHighSR.getId())));
     }
 
     @Test
@@ -414,7 +430,7 @@ public class RootControllerTest {
 
         // create service requests
         response = createServiceRequest("001", "12345 Fairway",
-                Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
+            Map.of("attribute[SDWLK]", "NARROW"), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
         assertTrue(optional.isPresent());
@@ -456,18 +472,19 @@ public class RootControllerTest {
     @Test
     public void getJurisdictionTest() {
         Jurisdiction j = new Jurisdiction("1", 1L, "jurisdiction1", null);
-        LatLong coordinatePair = new LatLong(41.31742721517005, -72.93918211751856, j, 0);
+//        LatLong coordinatePair = new LatLong(41.31742721517005, -72.93918211751856, j, 0);
         RemoteHost h = new RemoteHost("host1");
         h.setJurisdiction(j);
-        j.getBounds().add(coordinatePair);
+
         j.getRemoteHosts().add(h);
-        jurisdictionRepository.save(j);
+        j = jurisdictionRepository.save(j);
+        jurisdictionBoundaryService.saveBoundary(j, DEFAULT_BOUNDS);
         authLogin();
 
         HttpRequest<?> request = HttpRequest.GET("/config")
-                .header("referer", "http://host1");
+            .header("referer", "http://host1");
         HttpResponse<JurisdictionDTO> response = client.toBlocking()
-                .exchange(request, JurisdictionDTO.class);
+            .exchange(request, JurisdictionDTO.class);
         JurisdictionDTO infoResponse = response.getBody().get();
         assertEquals(infoResponse.getJurisdictionId(), "1");
         assertEquals(infoResponse.getName(), "jurisdiction1");
@@ -480,8 +497,8 @@ public class RootControllerTest {
     private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes, String jurisdictionId) {
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(serviceCode);
         serviceRequestDTO.setgRecaptchaResponse("abc");
-        serviceRequestDTO.setLongitude("43.3434");
-        serviceRequestDTO.setLatitude("48.98");
+        serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
+        serviceRequestDTO.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
         if (address != null) {
             serviceRequestDTO.setAddressString(address);
         }
@@ -489,8 +506,8 @@ public class RootControllerTest {
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+            .header("Authorization", "Bearer token.text.here")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
     }
 
@@ -499,8 +516,12 @@ public class RootControllerTest {
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);
         HttpRequest<?> request = HttpRequest.POST("/requests?jurisdiction_id="+jurisdictionId, payload)
-                .header("Authorization", "Bearer token.text.here")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+            .header("Authorization", "Bearer token.text.here")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED);
         return client.toBlocking().exchange(request, Map.class);
+    }
+
+    void setLocation(ServiceRequest sr, Coordinate coordinate){
+        sr.setLocation(libreGeometryFactory.createPoint(coordinate));
     }
 }

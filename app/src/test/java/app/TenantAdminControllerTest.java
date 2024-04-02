@@ -264,6 +264,6 @@ public class TenantAdminControllerTest {
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, JurisdictionDTO.class);
         });
-        assertEquals(INTERNAL_SERVER_ERROR, exception.getStatus());
+        assertEquals(BAD_REQUEST, exception.getStatus());
     }
 }
