@@ -12,6 +12,7 @@
 				values.push(attribute.name);
 			}
 		}
+
 		return values;
 	}
 
