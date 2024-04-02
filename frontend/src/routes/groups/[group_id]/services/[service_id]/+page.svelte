@@ -62,8 +62,8 @@
 
 	$: crumbs = [
 		{ label: 'Groups', href: '/groups' },
-		{ label: 'Services', href: `/groups/${groupId}` },
-		{ label: `${serviceName}`, href: `/groups/${groupId}/services/${serviceCode}` }
+		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
+		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
 	];
 
 	const dataTypeOptions: SelectOption[] = [
@@ -193,8 +193,6 @@
 
 		{#if asyncAttributeInputMap?.type === 'success'}
 		<List>
-				<h1 class="text-lg mx-4">{'Attributes:'}</h1>
-
 				{#each asyncAttributeInputMap.value.values() as input}
 					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
 
