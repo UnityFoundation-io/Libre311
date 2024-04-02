@@ -119,4 +119,7 @@
 		background-size: cover;
 		border-radius: 10px;
 	}
+	.mb-1 p{
+		text-indent: .5rem;
+	}
 </style>
