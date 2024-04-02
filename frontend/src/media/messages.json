@@ -89,5 +89,17 @@
 		"change_image": "Change Image",
 		"back": "Back",
 		"submit": "Submit"
+	},
+	"serviceDefinitionEditor": {
+		"attributes": {
+			"add_attribute": "+ Add Attribute",
+			"required": "Required Answer",
+			"description": "Question",
+			"description_placeholder": "Tell us what is wrong with ...?",
+			"data_type_description": "Helper Text",
+			"data_type_description_placeholder": "What type of issue?",
+			"select_data_type_placeholder": "Answer Type",
+			"value_placeholder": "option"
+		}
 	}
 }

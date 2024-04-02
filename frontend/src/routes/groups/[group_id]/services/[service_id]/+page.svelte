@@ -1,4 +1,5 @@
 <script lang="ts">
+	import messages from '$media/messages.json';
 	import { Breadcrumbs, Button, Card, Input, List, Progress, Select } from 'stwui';
 	import { asAsyncFailure, asAsyncSuccess, ASYNC_IN_PROGRESS, type AsyncResult } from '$lib/services/http';
 	import { createAttributeInputMap, type AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
@@ -219,14 +220,14 @@
 							<div class="my-2 flex justify-between items-center">
 								<div class="items-center">
 									<label for="is-attribute-required">
-										<strong class="text-base">{'Required Answer:'}</strong>
+										<strong class="text-base">{messages['serviceDefinitionEditor']['attributes']['required']}</strong>
 									</label>
 									<input class="rounded-sm mx-2" id="is-attribute-required" type="checkbox" bind:checked={newAttribute.required}/>
 								</div>
 
 								<Select
 									name="select-datatype"
-									placeholder="Answer Type"
+									placeholder={messages['serviceDefinitionEditor']['attributes']['select_data_type_placeholder']}
 									options={dataTypeOptions}
 									bind:value={newAttribute.dataType}
 								>
@@ -243,10 +244,10 @@
 									name="new-attribute-description"
 									error={newAttribute.description.error}
 									bind:value={newAttribute.description.value}
-									placeholder="Tell us what is wrong with ...?"
+									placeholder={messages['serviceDefinitionEditor']['attributes']['description_placeholder']}
 								>
 									<Input.Label slot="label">
-										<strong class="text-base">{'Question:'}</strong>
+										<strong class="text-base">{messages['serviceDefinitionEditor']['attributes']['description']}</strong>
 									</Input.Label>
 								</Input>
 							</div>
@@ -256,10 +257,10 @@
 									name="new-attribute-datatype-description"
 									error={newAttribute.dataTypeDescription.error}
 									bind:value={newAttribute.dataTypeDescription.value}
-									placeholder="What type of issue?"
+									placeholder={messages['serviceDefinitionEditor']['attributes']['data_type_description_placeholder']}
 								>
 									<Input.Label slot="label">
-										<strong class="text-base">{'Helper Text:'}</strong>
+										<strong class="text-base">{messages['serviceDefinitionEditor']['attributes']['data_type_description']}</strong>
 									</Input.Label>
 								</Input>
 							</div>
@@ -272,7 +273,7 @@
 									<ul>
 										{#each values as _, index}
 											<li class="flex my-2 justify-between" transition:slide|local={{ duration: 500 }}>
-												<Input class="rounded-md w-11/12" type="text" placeholder="option" error={multivalueErrorMessage} bind:value={values[index].name}/>
+												<Input class="rounded-md w-11/12" type="text" placeholder={messages['serviceDefinitionEditor']['attributes']['value_placeholder']} error={multivalueErrorMessage} bind:value={values[index].name}/>
 
 												{#if index != 0}
 													<Button on:click={() => removeValue(index)}>
@@ -331,7 +332,7 @@
 								isNewAttributeDropDownVisable = true;
 							}}
 						>
-							{'+ Add Attribute'}
+							{messages['serviceDefinitionEditor']['attributes']['add_attribute']}
 						</Button>
 					</List.Item>
 				{/if}
