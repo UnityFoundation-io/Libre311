@@ -1,8 +1,16 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Breadcrumbs, Button, Card, Input, List, Progress, Select } from 'stwui';
-	import { asAsyncFailure, asAsyncSuccess, ASYNC_IN_PROGRESS, type AsyncResult } from '$lib/services/http';
-	import { createAttributeInputMap, type AttributeInputMap } from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import {
+		asAsyncFailure,
+		asAsyncSuccess,
+		ASYNC_IN_PROGRESS,
+		type AsyncResult
+	} from '$lib/services/http';
+	import {
+		createAttributeInputMap,
+		type AttributeInputMap
+	} from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
 	import { slide } from 'svelte/transition';
@@ -12,18 +20,18 @@
 	import type { CreateServiceDefinitionAttributesParams } from '$lib/services/Libre311/Libre311';
 
 	type AttributeValue = {
-		id: number,
-		name: string
-	}
+		id: number;
+		name: string;
+	};
 
 	type AttributeInput = {
-		description: FormInputValue<string>,
-		dataTypeDescription: FormInputValue<string>,
-		dataType: string | undefined,
-		required: boolean,
-		order: number,
-		values: AttributeValue[] | undefined
-	}
+		description: FormInputValue<string>;
+		dataTypeDescription: FormInputValue<string>;
+		dataType: string | undefined;
+		required: boolean;
+		order: number;
+		values: AttributeValue[] | undefined;
+	};
 
 	interface Crumb {
 		label: string;
@@ -70,8 +78,8 @@
 
 	let multivalueErrorMessage: string | undefined;
 
-	$: groupName = ''
-	$: serviceName = '';
+	let groupName = '';
+	let serviceName = '';
 
 	$: crumbs = [
 		{ label: `Group: ${groupName}`, href: '/groups' },
@@ -93,7 +101,7 @@
 			// Get Group
 			const groups = await libre311.getGroupList();
 
-			const group = groups.find(group => group.id === Number(groupId));
+			const group = groups.find((group) => group.id === Number(groupId));
 			if (group) {
 				groupName = group.name;
 			}
@@ -104,7 +112,7 @@
 			const attributes = res.attributes;
 
 			// Get order
-			newAttribute.order = attributes[attributes.length - 1].order + 1;
+			newAttribute.order = attributes.length;
 
 			// Get Service ID
 			const serviceList = await libre311.getServiceList();
@@ -145,19 +153,17 @@
 				variable: true,
 				required: newAttribute.required,
 				order: newAttribute.order
-			}
+			};
 
 			if (values && values.length > 0) {
-				const valueArray = values.map(
-					v => {
-						return {
-							key: v.id.toString(),
-							name: v.name
-						}
-					}
-				);
-				if(valueArray[0].name == '') {
-					multivalueErrorMessage = "You might want to add a value!";
+				const valueArray = values.map((v) => {
+					return {
+						key: v.id.toString(),
+						name: v.name
+					};
+				});
+				if (valueArray[0].name == '') {
+					multivalueErrorMessage = 'You might want to add a value!';
 					return;
 				} else {
 					multivalueErrorMessage = undefined;
@@ -171,7 +177,7 @@
 			newAttribute.description.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
-			values = [{id: 0, name: ''}];
+			values = [{ id: 0, name: '' }];
 			updateAttributeMap(serviceCode);
 		} catch (error) {
 			alertError(error);
@@ -204,35 +210,45 @@
 		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
 				{#each asyncAttributeInputMap.value.values() as input}
-					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
-
+					<List.Item class="flex cursor-pointer items-center hover:bg-slate-100">
 						<div class="mx-4 w-full">
 							{input.attribute.description}
 						</div>
-
 					</List.Item>
 				{/each}
 
 				{#if isNewAttributeDropDownVisable}
-					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
-						<div class="my-2 mx-4">
-							<div class="my-2 flex justify-between items-center">
+					<div
+						class="flex w-full flex-col justify-between"
+						transition:slide|local={{ duration: 500 }}
+					>
+						<div class="mx-4 my-2">
+							<div class="my-2 flex items-center justify-between">
 								<div class="items-center">
 									<label for="is-attribute-required">
-										<strong class="text-base">{messages['serviceDefinitionEditor']['attributes']['required']}</strong>
+										<strong class="text-base"
+											>{messages['serviceDefinitionEditor']['attributes']['required']}</strong
+										>
 									</label>
-									<input class="rounded-sm mx-2" id="is-attribute-required" type="checkbox" bind:checked={newAttribute.required}/>
+									<input
+										class="mx-2 rounded-sm"
+										id="is-attribute-required"
+										type="checkbox"
+										bind:checked={newAttribute.required}
+									/>
 								</div>
 
 								<Select
 									name="select-datatype"
-									placeholder={messages['serviceDefinitionEditor']['attributes']['select_data_type_placeholder']}
+									placeholder={messages['serviceDefinitionEditor']['attributes'][
+										'select_data_type_placeholder'
+									]}
 									options={dataTypeOptions}
 									bind:value={newAttribute.dataType}
 								>
 									<Select.Options slot="options">
 										{#each dataTypeOptions as option}
-											<Select.Options.Option {option}/>
+											<Select.Options.Option {option} />
 										{/each}
 									</Select.Options>
 								</Select>
@@ -243,10 +259,14 @@
 									name="new-attribute-description"
 									error={newAttribute.description.error}
 									bind:value={newAttribute.description.value}
-									placeholder={messages['serviceDefinitionEditor']['attributes']['description_placeholder']}
+									placeholder={messages['serviceDefinitionEditor']['attributes'][
+										'description_placeholder'
+									]}
 								>
 									<Input.Label slot="label">
-										<strong class="text-base">{messages['serviceDefinitionEditor']['attributes']['description']}</strong>
+										<strong class="text-base"
+											>{messages['serviceDefinitionEditor']['attributes']['description']}</strong
+										>
 									</Input.Label>
 								</Input>
 							</div>
@@ -256,23 +276,39 @@
 									name="new-attribute-datatype-description"
 									error={newAttribute.dataTypeDescription.error}
 									bind:value={newAttribute.dataTypeDescription.value}
-									placeholder={messages['serviceDefinitionEditor']['attributes']['data_type_description_placeholder']}
+									placeholder={messages['serviceDefinitionEditor']['attributes'][
+										'data_type_description_placeholder'
+									]}
 								>
 									<Input.Label slot="label">
-										<strong class="text-base">{messages['serviceDefinitionEditor']['attributes']['data_type_description']}</strong>
+										<strong class="text-base"
+											>{messages['serviceDefinitionEditor']['attributes'][
+												'data_type_description'
+											]}</strong
+										>
 									</Input.Label>
 								</Input>
 							</div>
 
 							{#if newAttribute.dataType == 'multivaluelist'}
 								<div class="flex flex-col" transition:slide|local={{ duration: 500 }}>
-
 									<strong class="text-base">{'Values:'}</strong>
 
 									<ul>
 										{#each values as _, index}
-											<li class="flex my-2 justify-between" transition:slide|local={{ duration: 500 }}>
-												<Input class="rounded-md w-11/12" type="text" placeholder={messages['serviceDefinitionEditor']['attributes']['value_placeholder']} error={multivalueErrorMessage} bind:value={values[index].name}/>
+											<li
+												class="my-2 flex justify-between"
+												transition:slide|local={{ duration: 500 }}
+											>
+												<Input
+													class="w-11/12 rounded-md"
+													type="text"
+													placeholder={messages['serviceDefinitionEditor']['attributes'][
+														'value_placeholder'
+													]}
+													error={multivalueErrorMessage}
+													bind:value={values[index].name}
+												/>
 
 												{#if index != 0}
 													<Button on:click={() => removeValue(index)}>
@@ -283,7 +319,7 @@
 										{/each}
 									</ul>
 
-									<Button class="mt-1" type='ghost' on:click={addValue}>
+									<Button class="mt-1" type="ghost" on:click={addValue}>
 										{'+ Add'}
 									</Button>
 								</div>
@@ -292,9 +328,8 @@
 					</div>
 				{/if}
 
-				
 				{#if isNewAttributeDropDownVisable}
-					<List.Item class="h-[3.5rem] flex items-center justify-between">
+					<List.Item class="flex h-[3.5rem] items-center justify-between">
 						<Button
 							class="mx-2 w-1/2"
 							aria-label="Close"
@@ -305,7 +340,7 @@
 								newAttribute.dataTypeDescription.value = undefined;
 								newAttribute.dataType = undefined;
 								newAttribute.required = false;
-								values = [{id: 0, name: ''}];
+								values = [{ id: 0, name: '' }];
 								multivalueErrorMessage = undefined;
 							}}
 						>
@@ -322,7 +357,7 @@
 						</Button>
 					</List.Item>
 				{:else}
-					<List.Item class="h-[3.5rem] flex justify-end items-center">
+					<List.Item class="flex h-[3.5rem] items-center justify-end">
 						<Button
 							class="mr-2"
 							aria-label="Add"
