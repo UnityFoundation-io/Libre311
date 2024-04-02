@@ -14,6 +14,7 @@
 
 package app;
 
+import app.dto.download.CsvHeaders;
 import static app.util.JurisdictionBoundaryUtil.DEFAULT_BOUNDS;
 import static app.util.JurisdictionBoundaryUtil.IN_BOUNDS_COORDINATE;
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
@@ -68,8 +69,6 @@ import app.util.MockAuthenticationFetcher;
 import app.util.MockUnityAuthClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvValidationException;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -82,21 +81,18 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import java.util.*;
-
-import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
-import static io.micronaut.http.HttpStatus.*;
-import static io.micronaut.http.HttpStatus.BAD_REQUEST;
-import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest(transactional = false)
 public class JurisdictionAdminControllerTest  {
@@ -675,16 +671,65 @@ public class JurisdictionAdminControllerTest  {
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<byte[]> body = response.getBody(byte[].class);
         assertTrue(body.isPresent());
-        InputStream inputStream = new ByteArrayInputStream(body.get());
-        String text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        assertNotNull(text);
-        try (CSVReader reader = new CSVReader(new StringReader(text))) {
-            reader.skip(1); // skip header
-            String[] cells = reader.readNext();
-            assertTrue(cells.length > 1);
-        } catch (CsvValidationException e) {
-            throw new RuntimeException(e);
-        }
+
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.get());
+        InputStreamReader inputStreamReader = new InputStreamReader(byteArrayInputStream);
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setSkipHeaderRecord(true).setHeader(CsvHeaders.class).build();
+        CSVParser parser = new CSVParser(inputStreamReader, csvFormat);
+        List<CSVRecord> records = parser.getRecords();
+        assertTrue(records.size() > 1);
+    }
+
+    @Test
+    public void downloadCSVRequestsFileCanBeSorted() throws IOException {
+        HttpResponse<?> response;
+
+        // create service requests
+        response = createServiceRequest("001", "a st.",
+                Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        response = createServiceRequest("001", "x st.",
+                Map.of("attribute[SDWLK]", "NARROW"), "fakecity.gov");
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+        HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov&sort=addressString,asc")
+                .header("Authorization", "Bearer token.text.here");
+
+        authLogin();
+
+        response = client.toBlocking().exchange(request, byte[].class);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<byte[]> body = response.getBody(byte[].class);
+        assertTrue(body.isPresent());
+
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.get());
+        InputStreamReader inputStreamReader = new InputStreamReader(byteArrayInputStream);
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setSkipHeaderRecord(true).setHeader(CsvHeaders.class).build();
+        CSVParser parser = new CSVParser(inputStreamReader, csvFormat);
+        List<CSVRecord> records = parser.getRecords();
+        assertTrue(records.size() > 1);
+
+        CSVRecord firstRecord = records.get(0);
+        assertEquals("a st.",  firstRecord.get("ADDRESS"));
+
+        // address descending
+        request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov&sort=addressString,desc")
+                .header("Authorization", "Bearer token.text.here");
+
+        response = client.toBlocking().exchange(request, byte[].class);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        body = response.getBody(byte[].class);
+        assertTrue(body.isPresent());
+
+        byteArrayInputStream = new ByteArrayInputStream(body.get());
+        inputStreamReader = new InputStreamReader(byteArrayInputStream);
+        parser = new CSVParser(inputStreamReader, csvFormat);
+        records = parser.getRecords();
+        assertTrue(records.size() > 1);
+
+        firstRecord = records.get(0);
+        assertEquals("x st.",  firstRecord.get("ADDRESS"));
     }
 
     @Test
@@ -726,20 +771,17 @@ public class JurisdictionAdminControllerTest  {
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<byte[]> body = response.getBody(byte[].class);
         assertTrue(body.isPresent());
-        InputStream inputStream = new ByteArrayInputStream(body.get());
-        String text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        assertNotNull(text);
-        try (CSVReader reader = new CSVReader(new StringReader(text))) {
-            reader.skip(1); // skip header
-            String[] cells = reader.readNext();
-            while (cells != null) {
-                String addressCell = cells[0];
-                assertTrue(addressCell.startsWith("'"));
-                cells = reader.readNext();
-            }
-        } catch (CsvValidationException e) {
-            throw new RuntimeException(e);
-        }
+
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.get());
+        InputStreamReader inputStreamReader = new InputStreamReader(byteArrayInputStream);
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setSkipHeaderRecord(true).setHeader(CsvHeaders.class).build();
+        CSVParser parser = new CSVParser(inputStreamReader, csvFormat);
+        List<CSVRecord> records = parser.getRecords();
+        assertTrue(records.size() > 1);
+
+        CSVRecord firstRecord = records.get(0);
+        String address = firstRecord.get("ADDRESS");
+        assertTrue(address.startsWith("'"));
     }
 
     private HttpResponse<?> createGroup(String name, String jurisdictionId) {
