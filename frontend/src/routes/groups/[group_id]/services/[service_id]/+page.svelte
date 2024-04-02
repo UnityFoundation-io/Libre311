@@ -38,7 +38,7 @@
 	let serviceCode = $page.params.service_id;
 	let serviceId: number;
 
-	let isDropDownVisable: boolean = false;
+	let isNewAttributeDropDownVisable: boolean = false;
 
 	let newAttribute: AttributeInput = {
 		description: createInput<string>(''),
@@ -145,7 +145,7 @@
 
 			await libre311.createAttribute(body);
 
-			isDropDownVisable = false;
+			isNewAttributeDropDownVisable = false;
 			newAttribute.description.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
@@ -181,7 +181,7 @@
 
 		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
-				{#if isDropDownVisable}
+				{#if isNewAttributeDropDownVisable}
 					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
 						<div class="my-2 mx-4">
 							<div class="my-2 flex justify-between items-center">
@@ -263,7 +263,7 @@
 									aria-label="Close"
 									type="ghost"
 									on:click={() => {
-										isDropDownVisable = false;
+										isNewAttributeDropDownVisable = false;
 										newAttribute.dataType = undefined;
 										values = [{id: 0, name: ''}];
 									}}
@@ -300,7 +300,7 @@
 						class="mr-2"
 						type="ghost"
 						on:click={() => {
-							isDropDownVisable = true;
+							isNewAttributeDropDownVisable = true;
 						}}
 						>{'+ Add Attribute'}
 					</Button>
