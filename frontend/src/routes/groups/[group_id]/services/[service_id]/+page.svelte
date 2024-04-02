@@ -181,6 +181,7 @@
 	function addValue() {
 		const newId = values.length ? values[values.length - 1].id + 1 : 1;
 		values = [...values, { id: newId, name: '' }];
+		multivalueErrorMessage = undefined;
 	}
 
 	function removeValue(index: number) {
