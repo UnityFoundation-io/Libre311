@@ -58,10 +58,12 @@
 
 	let multivalueErrorMessage: string | undefined;
 
-	const crumbs: Crumb[] = [
+	$: serviceName = '';
+
+	$: crumbs = [
 		{ label: 'Groups', href: '/groups' },
 		{ label: 'Services', href: `/groups/${groupId}` },
-		{ label: 'Attributes', href: `/groups/${groupId}/services/${serviceCode}` }
+		{ label: `${serviceName}`, href: `/groups/${groupId}/services/${serviceCode}` }
 	];
 
 	const dataTypeOptions: SelectOption[] = [
@@ -98,6 +100,8 @@
 			for (let service of serviceList) {
 				if (service.service_code == serviceCode) {
 					serviceId = service.id;
+					serviceName = service.service_name;
+					console.log(serviceName);
 				}
 			}
 
@@ -175,7 +179,7 @@
 </script>
 
 <Card bordered={true} class="m-4">
-	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
+	<Card.Header slot="header" class="flexitems-center justify-between py-3 text-lg font-bold">
 		<Breadcrumbs>
 			{#each crumbs as crumb}
 				<Breadcrumbs.Crumb href={crumb.href}>
@@ -183,12 +187,15 @@
 				</Breadcrumbs.Crumb>
 			{/each}
 		</Breadcrumbs>
+
 	</Card.Header>
 
 	<Card.Content slot="content" class="p-0 sm:p-0">
 
 		{#if asyncAttributeInputMap?.type === 'success'}
-			<List>
+		<List>
+				<h1 class="text-lg mx-4">{'Attributes:'}</h1>
+
 				{#if isNewAttributeDropDownVisable}
 					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
 						<div class="my-2 mx-4">
