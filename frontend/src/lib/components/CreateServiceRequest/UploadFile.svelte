@@ -64,7 +64,7 @@
 	<div slot="is-desktop" class="flex h-full w-full flex-col">
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
-				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
+				<div class="relative mx-auto my-4 overflow-hidden">
 					<img class="w-full" src={imageData} alt="preview" />
 				</div>
 
@@ -136,7 +136,7 @@
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
 				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-					<img class="w-full" src={imageData} alt="preview" />
+					<img class="w-full" src={imageData} alt="preview"/>
 				</div>
 
 				<div class="grid w-full grid-rows-3 gap-2">
@@ -217,5 +217,9 @@
 		text-align: center;
 		border-radius: 0.3rem;
 		cursor: pointer;
+	}
+	img {
+		object-fit: contain;
+		max-height: 15rem;
 	}
 </style>
