@@ -65,7 +65,7 @@
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
 				<div class="relative mx-auto my-4 overflow-hidden">
-					<img class="w-full" src={imageData} alt="preview" />
+					<img class="w-full" src={imageData} alt="preview"/>
 				</div>
 
 				<div class="grid w-full grid-rows-3 gap-2">
