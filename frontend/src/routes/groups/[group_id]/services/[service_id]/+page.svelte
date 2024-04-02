@@ -196,6 +196,16 @@
 		<List>
 				<h1 class="text-lg mx-4">{'Attributes:'}</h1>
 
+				{#each asyncAttributeInputMap.value.values() as input}
+					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
+
+						<div class="mx-4 w-full">
+							{input.attribute.description}
+						</div>
+
+					</List.Item>
+				{/each}
+
 				{#if isNewAttributeDropDownVisable}
 					<div class="w-full flex flex-col justify-between" transition:slide|local={{ duration: 500 }}>
 						<div class="my-2 mx-4">
@@ -302,16 +312,6 @@
 						</div>
 					</div>
 				{/if}
-
-				{#each asyncAttributeInputMap.value.values() as input}
-					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
-
-						<div class="mx-4 w-full">
-							{input.attribute.description}
-						</div>
-
-					</List.Item>
-				{/each}
 
 				<List.Item class="flex justify-end items-center h-[3.5rem]">
 					<Button
