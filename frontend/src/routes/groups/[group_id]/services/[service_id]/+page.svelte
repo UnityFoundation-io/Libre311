@@ -198,13 +198,11 @@
 				</Breadcrumbs.Crumb>
 			{/each}
 		</Breadcrumbs>
-
 	</Card.Header>
 
 	<Card.Content slot="content" class="p-0 sm:p-0">
-
 		{#if asyncAttributeInputMap?.type === 'success'}
-		<List>
+			<List>
 				{#each asyncAttributeInputMap.value.values() as input}
 					<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
 
