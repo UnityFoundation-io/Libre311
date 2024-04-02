@@ -14,10 +14,7 @@
 	$: selectOptions = createSelectOptions(input.attribute);
 
 	function createSelectOptions(res: MultiSelectServiceDefinitionAttribute): SelectOption[] {
-		if (res.values)
-			return res.values.map((s) => ({ value: s.key, label: s.name }));
-		else
-			return [];
+		return res.values.map((s) => ({ value: s.key, label: s.name }));
 	}
 </script>
 

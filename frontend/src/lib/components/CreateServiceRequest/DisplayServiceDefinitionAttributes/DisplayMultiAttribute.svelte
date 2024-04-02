@@ -7,19 +7,12 @@
 		let values: string[] = [];
 
 		const keys = attributes.value;
-		if (attributes.attribute.values) {
-			for (let attribute of attributes.attribute.values) {
-				if (!attribute.key || !attribute.name)
-					return [];
-				if (keys && keys.includes(attribute.key)) {
-					values.push(attribute.name);
-				}
+		for (let attribute of attributes.attribute.values) {
+			if (keys && keys.includes(attribute.key)) {
+				values.push(attribute.name);
 			}
-
-			return values;
-		} else {
-			return [];
 		}
+		return values;
 	}
 
 	$: values = extractAttributeValueNames(attributes);
