@@ -25,6 +25,7 @@
 	import { page } from '$app/stores';
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
+	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
 
 	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
@@ -91,7 +92,7 @@
 </script>
 
 <svelte:head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 </svelte:head>
 
 <CreateServiceRequestLayout {step}>
@@ -106,11 +107,12 @@
 	</div>
 	<div slot="main-content" class="relative h-full">
 		<MapComponent
+			controlFactories={[mapCenterControlFactory]}
 			disabled={step != 0}
-			locateOpts={{ setView: true, maxZoom: 16, enableHighAccuracy: true }}
+			locateOpts={{ setView: true, enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
 		>
-			<MapMarker on:click latLng={centerPos} options={{ icon }} />
+			<MapMarker latLng={centerPos} options={{ icon }} />
 			{#if step == CreateServiceRequestSteps.LOCATION}
 				<MapGeosearch on:geosearch={handleGeosearch} />
 			{/if}
