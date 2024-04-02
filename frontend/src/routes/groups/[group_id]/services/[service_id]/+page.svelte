@@ -30,6 +30,17 @@
 		href: string;
 	}
 
+	const dataTypeOptions: SelectOption[] = [
+		{
+			value: 'string',
+			label: 'Single Answer'
+		},
+		{
+			value: 'multivaluelist',
+			label: 'Multi-Answer'
+		}
+	];
+
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 
@@ -66,17 +77,6 @@
 		{ label: `Group: ${groupName}`, href: '/groups' },
 		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
 		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
-	];
-
-	const dataTypeOptions: SelectOption[] = [
-		{
-			value: 'string',
-			label: 'Single Answer'
-		},
-		{
-			value: 'multivaluelist',
-			label: 'Multi-Answer'
-		}
 	];
 
 	$: updateAttributeMap(serviceCode);
