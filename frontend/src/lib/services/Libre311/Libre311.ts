@@ -622,7 +622,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
-
 		return ServiceDefinitionSchema.parse(res.data);
 	}
 
