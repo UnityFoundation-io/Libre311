@@ -288,48 +288,52 @@
 									</Button>
 								</div>
 							{/if}
-
-							<div class="flex items-end my-4">
-								<Button
-									class="mr-1 w-1/2"
-									aria-label="Close"
-									type="ghost"
-									on:click={() => {
-										isNewAttributeDropDownVisable = false;
-										newAttribute.description.value = undefined;
-										newAttribute.dataTypeDescription.value = undefined;
-										newAttribute.dataType = undefined;
-										values = [{id: 0, name: ''}];
-										multivalueErrorMessage = undefined;
-									}}
-								>
-									{'Cancel'}
-								</Button>
-
-								<Button
-									class="ml-1 w-1/2"
-									aria-label="Submit"
-									type="primary"
-									on:click={handleAddNewAttribute}
-								>
-									{'Submit'}
-								</Button>
-							</div>
-
 						</div>
 					</div>
 				{/if}
 
-				<List.Item class="flex justify-end items-center h-[3.5rem]">
-					<Button
-						class="mr-2"
-						type="ghost"
-						on:click={() => {
-							isNewAttributeDropDownVisable = true;
-						}}
-						>{'+ Add Attribute'}
-					</Button>
-				</List.Item>
+				
+				{#if isNewAttributeDropDownVisable}
+					<List.Item class="h-[3.5rem] flex items-center justify-between">
+						<Button
+							class="mx-2 w-1/2"
+							aria-label="Close"
+							type="ghost"
+							on:click={() => {
+								isNewAttributeDropDownVisable = false;
+								newAttribute.description.value = undefined;
+								newAttribute.dataTypeDescription.value = undefined;
+								newAttribute.dataType = undefined;
+								values = [{id: 0, name: ''}];
+								multivalueErrorMessage = undefined;
+							}}
+						>
+							{'Cancel'}
+						</Button>
+
+						<Button
+							class="mx-2 w-1/2"
+							aria-label="Submit"
+							type="primary"
+							on:click={handleAddNewAttribute}
+						>
+							{'Save Attribute'}
+						</Button>
+					</List.Item>
+				{:else}
+					<List.Item class="h-[3.5rem] flex justify-end items-center">
+						<Button
+							class="mr-2"
+							aria-label="Add"
+							type="ghost"
+							on:click={() => {
+								isNewAttributeDropDownVisable = true;
+							}}
+						>
+							{'+ Add Attribute'}
+						</Button>
+					</List.Item>
+				{/if}
 			</List>
 		{:else if asyncAttributeInputMap?.type === 'inProgress'}
 			<div class="mx-8 my-4">
