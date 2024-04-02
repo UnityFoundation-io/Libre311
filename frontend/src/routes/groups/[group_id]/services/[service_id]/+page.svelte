@@ -304,6 +304,7 @@
 								newAttribute.description.value = undefined;
 								newAttribute.dataTypeDescription.value = undefined;
 								newAttribute.dataType = undefined;
+								newAttribute.required = false;
 								values = [{id: 0, name: ''}];
 								multivalueErrorMessage = undefined;
 							}}
