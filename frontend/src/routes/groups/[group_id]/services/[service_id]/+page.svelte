@@ -41,7 +41,12 @@
 		order: 0
 	};
 
-	let values: { id: number, value: string }[] = [];
+	let values: { id: number, value: string }[] = [
+		{
+			id: 0,
+			value: ''
+		}
+	];
 
 	const crumbs: Crumb[] = [
 		{ label: 'Groups', href: '/groups' },
@@ -128,6 +133,7 @@
 			newAttribute.description.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
+			values = [{id: 0, value: ''}];
 			updateAttributeMap(serviceCode);
 		} catch (error) {
 			alertError(error);
@@ -219,9 +225,12 @@
 										{#each values as _, index}
 											<li class="flex my-2 justify-between" transition:slide|local={{ duration: 500 }}>
 												<Input class="rounded-md w-11/12" type="text" placeholder="option" bind:value={values[index].value}/>
-												<Button on:click={() => removeValue(index)}>
-													<XMark />
-												</Button>
+
+												{#if index != 0}
+													<Button on:click={() => removeValue(index)}>
+														<XMark />
+													</Button>
+												{/if}
 											</li>
 										{/each}
 									</ul>
@@ -240,6 +249,7 @@
 									on:click={() => {
 										isDropDownVisable = false;
 										newAttribute.dataType = undefined;
+										values = [{id: 0, value: ''}];
 									}}
 								>
 									{'Cancel'}
