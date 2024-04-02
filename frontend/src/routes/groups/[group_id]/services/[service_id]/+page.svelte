@@ -56,6 +56,8 @@
 		}
 	];
 
+	let multivalueErrorMessage: string | undefined;
+
 	const crumbs: Crumb[] = [
 		{ label: 'Groups', href: '/groups' },
 		{ label: 'Services', href: `/groups/${groupId}` },
@@ -140,7 +142,13 @@
 						}
 					}
 				);
-				body.values = valueArray;
+				if(valueArray[0].name == '') {
+					multivalueErrorMessage = "You might want to add a value!";
+					return;
+				} else {
+					multivalueErrorMessage = undefined;
+					body.values = valueArray;
+				}
 			}
 
 			await libre311.createAttribute(body);
@@ -240,7 +248,7 @@
 									<ul>
 										{#each values as _, index}
 											<li class="flex my-2 justify-between" transition:slide|local={{ duration: 500 }}>
-												<Input class="rounded-md w-11/12" type="text" placeholder="option" bind:value={values[index].name}/>
+												<Input class="rounded-md w-11/12" type="text" placeholder="option" error={multivalueErrorMessage} bind:value={values[index].name}/>
 
 												{#if index != 0}
 													<Button on:click={() => removeValue(index)}>
@@ -264,8 +272,11 @@
 									type="ghost"
 									on:click={() => {
 										isNewAttributeDropDownVisable = false;
+										newAttribute.description.value = undefined;
+										newAttribute.dataTypeDescription.value = undefined;
 										newAttribute.dataType = undefined;
 										values = [{id: 0, name: ''}];
+										multivalueErrorMessage = undefined;
 									}}
 								>
 									{'Cancel'}
