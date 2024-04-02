@@ -101,7 +101,6 @@
 				if (service.service_code == serviceCode) {
 					serviceId = service.id;
 					serviceName = service.service_name;
-					console.log(serviceName);
 				}
 			}
 
