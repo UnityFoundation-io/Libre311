@@ -58,10 +58,11 @@
 
 	let multivalueErrorMessage: string | undefined;
 
+	$: groupName = ''
 	$: serviceName = '';
 
 	$: crumbs = [
-		{ label: 'Groups', href: '/groups' },
+		{ label: `Group: ${groupName}`, href: '/groups' },
 		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
 		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
 	];
@@ -88,6 +89,15 @@
 
 	async function getServiceDefinition(serviceCode: string) {
 		try {
+			// Get Group
+			const groups = await libre311.getGroupList();
+
+			const group = groups.find(group => group.id === Number(groupId));
+			if (group) {
+				groupName = group.name;
+			}
+
+			// Get Service Definition
 			const payload = { service_code: serviceCode };
 			const res = await libre311.getServiceDefinition(payload);
 			const attributes = res.attributes;
