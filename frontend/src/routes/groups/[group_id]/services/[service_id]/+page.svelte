@@ -8,13 +8,20 @@
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
 	import type { SelectOption } from 'stwui/types';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
+	import type { CreateServiceDefinitionAttributesParams } from '$lib/services/Libre311/Libre311';
+
+	type AttributeValue = {
+		id: number,
+		name: string
+	}
 
 	type AttributeInput = {
 		description: FormInputValue<string>,
 		dataTypeDescription: FormInputValue<string>,
 		dataType: string | undefined,
 		required: boolean,
-		order: number
+		order: number,
+		values: AttributeValue[] | undefined
 	}
 
 	interface Crumb {
@@ -38,13 +45,14 @@
 		dataTypeDescription: createInput<string>(''),
 		dataType: undefined,
 		required: false,
-		order: 0
+		order: 0,
+		values: undefined
 	};
 
-	let values: { id: number, value: string }[] = [
+	let values: AttributeValue[] = [
 		{
 			id: 0,
-			value: ''
+			name: ''
 		}
 	];
 
@@ -113,7 +121,7 @@
 		}
 
 		try {
-			const body = {
+			const body: CreateServiceDefinitionAttributesParams = {
 				serviceId: serviceId,
 				description: newAttribute.description.value,
 				datatype_description: newAttribute.dataTypeDescription.value,
@@ -123,8 +131,16 @@
 				order: newAttribute.order
 			}
 
-			if (values.length > 0) {
-				console.log(values);
+			if (values && values.length > 0) {
+				const valueArray = values.map(
+					v => {
+						return {
+							key: v.id.toString(),
+							name: v.name
+						}
+					}
+				);
+				body.values = valueArray;
 			}
 
 			await libre311.createAttribute(body);
@@ -133,7 +149,7 @@
 			newAttribute.description.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
-			values = [{id: 0, value: ''}];
+			values = [{id: 0, name: ''}];
 			updateAttributeMap(serviceCode);
 		} catch (error) {
 			alertError(error);
@@ -142,7 +158,7 @@
 
 	function addValue() {
 		const newId = values.length ? values[values.length - 1].id + 1 : 1;
-		values = [...values, { id: newId, value: '' }];
+		values = [...values, { id: newId, name: '' }];
 	}
 
 	function removeValue(index: number) {
@@ -224,7 +240,7 @@
 									<ul>
 										{#each values as _, index}
 											<li class="flex my-2 justify-between" transition:slide|local={{ duration: 500 }}>
-												<Input class="rounded-md w-11/12" type="text" placeholder="option" bind:value={values[index].value}/>
+												<Input class="rounded-md w-11/12" type="text" placeholder="option" bind:value={values[index].name}/>
 
 												{#if index != 0}
 													<Button on:click={() => removeValue(index)}>
@@ -249,7 +265,7 @@
 									on:click={() => {
 										isDropDownVisable = false;
 										newAttribute.dataType = undefined;
-										values = [{id: 0, value: ''}];
+										values = [{id: 0, name: ''}];
 									}}
 								>
 									{'Cancel'}

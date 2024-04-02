@@ -378,7 +378,7 @@ export const CreateServiceDefinitionAttributesSchema = z.object({
 	variable: z.boolean(),
 	required: z.boolean(),
 	order: z.number(),
-	values: z.array(ServiceDefinitionAttributeSchema).optional()
+	values: z.array(AttributeValueSchema).optional()
 });
 
 export type CreateServiceDefinitionAttributesParams = z.infer<
