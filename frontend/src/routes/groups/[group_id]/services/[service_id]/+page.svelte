@@ -190,7 +190,7 @@
 </script>
 
 <Card bordered={true} class="m-4">
-	<Card.Header slot="header" class="flexitems-center justify-between py-3 text-lg font-bold">
+	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
 		<Breadcrumbs>
 			{#each crumbs as crumb}
 				<Breadcrumbs.Crumb href={crumb.href}>
