@@ -175,6 +175,7 @@
 
 			isNewAttributeDropDownVisable = false;
 			newAttribute.description.value = '';
+			newAttribute.dataTypeDescription.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
 			values = [{ id: 0, name: '' }];
