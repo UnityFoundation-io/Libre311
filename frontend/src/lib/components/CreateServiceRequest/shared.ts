@@ -40,9 +40,7 @@ export function toCreateServiceRequestParams(
 		...uiParams,
 		service_code: uiParams.service.service_code,
 		attributes: Array.from(uiParams.attributeMap.values())
-			.filter((attr) => {
-				isEmptyArrayOrUndefined(attr.value);
-			})
+			.filter((attr) => !isEmptyArrayOrUndefined(attr.value))
 			.map((attrInpt) => {
 				return {
 					code: attrInpt.attribute.code,
