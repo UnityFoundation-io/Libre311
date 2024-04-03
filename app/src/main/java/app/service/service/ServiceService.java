@@ -24,6 +24,7 @@ import app.exception.Libre311BaseException;
 import app.dto.servicedefinition.*;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
+import app.model.service.AttributeDataType;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.service.group.ServiceGroup;
@@ -76,6 +77,12 @@ public class ServiceService {
         public ServiceDefinitionAttributeNotFoundException(Long attributeId) {
             super(String.format("No service definition attribute found with id: %s",
                     attributeId), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    static class MultiValueListServiceDefinitionNeedsValues extends Libre311BaseException {
+        public MultiValueListServiceDefinitionNeedsValues() {
+            super("Multi-value service definition attribute requires at least one value", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -347,6 +354,9 @@ public class ServiceService {
                 AttributeValue savedValue = attributeValueRepository.save(new AttributeValue(savedSDA, attributeValueDTO.getName()));
                 savedSDA.addAttributeValue(savedValue);
             });
+        } else if (serviceDefinitionAttributeDTO.getDatatype().equals(AttributeDataType.MULTIVALUELIST) ||
+                serviceDefinitionAttributeDTO.getDatatype().equals(AttributeDataType.SINGLEVALUELIST)) {
+            throw new MultiValueListServiceDefinitionNeedsValues();
         }
 
         serviceDefinitionAttributeRepository.update(savedSDA);

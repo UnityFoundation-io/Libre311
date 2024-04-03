@@ -6,4 +6,4 @@
 
 <strong>{attributes.attribute.description}</strong>
 
-<div>{attributes.value}</div>
+<div>{attributes.value ?? ''}</div>

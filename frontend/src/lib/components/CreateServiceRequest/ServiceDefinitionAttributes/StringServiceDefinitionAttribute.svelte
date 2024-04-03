@@ -13,5 +13,10 @@
 	placeholder={input.attribute.datatype_description ?? undefined}
 	class="relative my-4"
 >
-	<Input.Label slot="label">{input.attribute.description}</Input.Label>
+	<Input.Label slot="label">
+		{input.attribute.description}
+		{#if input.attribute.required}
+			<span class="text-red-600">*</span>
+		{/if}
+	</Input.Label>
 </Input>
