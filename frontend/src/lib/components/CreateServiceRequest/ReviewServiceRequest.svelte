@@ -89,8 +89,8 @@
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>
 
 				{#if imageData}
-					<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-						<img class="w-full" src={imageData} alt="preview" />
+					<div class="image-container relative mx-auto my-4">
+						<img class="rounded-lg" src={imageData} alt="preview" />
 					</div>
 				{/if}
 
@@ -149,5 +149,14 @@
 <style>
 	.serviceTitle {
 		color: hsl(var(--primary));
+	}
+	img {
+		max-height: 15rem;
+	}
+	/* Desktop */
+	@media only screen and (min-width: 769px) {
+		img {
+			max-height: 20rem;
+		}
 	}
 </style>
