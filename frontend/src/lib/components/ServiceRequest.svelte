@@ -2,7 +2,6 @@
 	import messages from '$media/messages.json';
 	import { Button, Card } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
-	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
 	import ServiceRequestUpdate from './ServiceRequestUpdate.svelte';
@@ -119,17 +118,14 @@
 
 				{#if !isUpdateButtonClicked}
 					<!-- EXPECTED TIMESTAMP -->
-					<div class="mb-1 flex flex-col">
-						<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
-						<div class="flex items-center">
-							{#if serviceRequest.expected_datetime}
+					{#if serviceRequest.expected_datetime}
+						<div class="mb-1 flex flex-col">
+							<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+							<div class="flex items-center">
 								<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
-							{:else}
-								<p class="text-sm">--</p>
-							{/if}
-							<img alt="clock" src={clockIcon} />
+							</div>
 						</div>
-					</div>
+					{/if}
 
 					<!-- AGENCY -->
 					{#if serviceRequest.agency_responsible || serviceRequest.agency_email}
