@@ -64,7 +64,7 @@
 	<div slot="is-desktop" class="flex h-full w-full flex-col">
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
-				<div class="relative mx-auto my-4">
+				<div class="image-container relative mx-auto my-4">
 					<img class="rounded-lg" src={imageData} alt="preview"/>
 				</div>
 
@@ -135,7 +135,7 @@
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full flex-col">
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
-				<div class="relative mx-auto my-4">
+				<div class="image-container relative mx-auto my-4">
 					<img class="rounded-lg" src={imageData} alt="preview"/>
 				</div>
 
