@@ -16,6 +16,7 @@ package app.model.service;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.service.group.ServiceGroup;
+import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
@@ -29,6 +30,8 @@ public interface ServiceRepository extends PageableRepository<Service, Long> {
     Page<Service> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
     Optional<Service> findByServiceCodeAndJurisdictionId(String serviceCode, String jurisdictionId);
     Optional<Service> findByIdAndJurisdictionId(Long id, String jurisdictionId);
+    List<Service> findAllByServiceGroupIdOrderByOrderPositionAsc(Long groupId);
+    void updateOrderPositionByIdAndServiceGroupId(@Id Long id, @Id Long groupId, Integer orderPosition);
     boolean existsByServiceCodeAndJurisdiction(String serviceCode, Jurisdiction jurisdiction);
     Long countByServiceGroup(ServiceGroup serviceGroup);
 }
