@@ -33,11 +33,6 @@
 		values: AttributeValue[] | undefined;
 	};
 
-	interface Crumb {
-		label: string;
-		href: string;
-	}
-
 	const dataTypeOptions: SelectOption[] = [
 		{
 			value: 'string',
