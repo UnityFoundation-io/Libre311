@@ -256,7 +256,7 @@
 	<Button
 		disabled={!hasUserInput}
 		slot="right"
-		type="primary"
+		type={!hasUserInput ? undefined : 'primary'}
 		on:click={() => updateServiceRequest(serviceRequest)}
 	>
 		Submit
