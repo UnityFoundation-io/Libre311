@@ -36,9 +36,6 @@ public class ServiceDefinitionAttribute {
     @ManyToOne(optional = false)
     private Service service;
 
-    @NotBlank
-    private String code;
-
     private boolean variable;
 
     @NotNull
@@ -74,14 +71,6 @@ public class ServiceDefinitionAttribute {
 
     public void setService(Service service) {
         this.service = service;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 
     public boolean isVariable() {

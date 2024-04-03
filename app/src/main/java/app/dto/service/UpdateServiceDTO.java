@@ -22,9 +22,6 @@ import javax.validation.constraints.Min;
 @Introspected
 public class UpdateServiceDTO {
 
-    @JsonProperty("service_code")
-    private String serviceCode;
-
     @JsonProperty("service_name")
     private String serviceName;
 
@@ -38,14 +35,6 @@ public class UpdateServiceDTO {
     private Integer orderPosition;
 
     public UpdateServiceDTO() {
-    }
-
-    public String getServiceCode() {
-        return serviceCode;
-    }
-
-    public void setServiceCode(String serviceCode) {
-        this.serviceCode = serviceCode;
     }
 
     public String getServiceName() {
