@@ -184,7 +184,7 @@
 
 				{#each serviceList.value as service}
 					{#if service !== undefined}
-						<List.Item class="flex items-center cursor-pointer hover:bg-slate-100">
+						<List.Item class="flex cursor-pointer items-center hover:bg-slate-100">
 							<div class="">
 								<ToggleState startingValue={false} let:show let:toggle>
 									<Dropdown visible={show}>
