@@ -2,7 +2,6 @@
 	import messages from '$media/messages.json';
 	import { Button, Card } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
-	import clockIcon from '$lib/assets/Clock.svg';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
 	import Flag from './Svg/Flag.svelte';
