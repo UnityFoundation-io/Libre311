@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 
-const loginToken = writable<string>('');
+const loginToken = writable<string>(undefined);
 
 loginToken.subscribe((value) => {
 	if (browser) window.localStorage.setItem('loginToken', value);

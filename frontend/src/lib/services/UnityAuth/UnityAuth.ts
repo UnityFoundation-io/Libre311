@@ -2,6 +2,7 @@ import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
 import { BaseObservable } from '../EventBus/EventBus';
+import loginToken from '../../../stores/loginTokenStore';
 
 // Auth props schema
 const UnityAuthServicePropsSchema = z.object({
@@ -55,6 +56,7 @@ export class UnityAuthServiceImpl
 
 		const loginRes = UnityAuthLoginResponseSchema.parse(res.data);
 		this.publish('login', loginRes);
+		loginToken.set(loginRes.access_token);
 		return loginRes;
 	}
 
