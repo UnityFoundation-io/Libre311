@@ -2,7 +2,7 @@ import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
 import { BaseObservable } from '../EventBus/EventBus';
-import loginToken from '../../../stores/loginTokenStore';
+import Cookies from 'js-cookie';
 
 // Auth props schema
 const UnityAuthServicePropsSchema = z.object({
@@ -42,6 +42,7 @@ export class UnityAuthServiceImpl
 		super();
 		UnityAuthServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
+		// call retrieveLoginDataFromCookie
 	}
 
 	public static create(props: UnityAuthServiceProps) {
@@ -56,13 +57,18 @@ export class UnityAuthServiceImpl
 
 		const loginRes = UnityAuthLoginResponseSchema.parse(res.data);
 		this.publish('login', loginRes);
-		loginToken.set(loginRes.access_token);
+		// Set loginRes to cookie
 		return loginRes;
 	}
 
 	logout() {
 		this.publish('logout', void 0);
 	}
+
+	// private void retrieveLoginDataFromCookie() {
+	//   // Check for login info from Cookie
+	//   // If it exists, publish login event with Login info (this.publish('login', loginRes);)
+	// }
 }
 
 // Auth Factory
