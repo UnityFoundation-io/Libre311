@@ -127,6 +127,17 @@
 						</div>
 					{/if}
 
+					<!-- PRIORITY -->
+					{#if serviceRequest.priority}
+						<div class="mb-1">
+							<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
+							<p class="text-sm">
+								{serviceRequest.priority.charAt(0).toUpperCase() +
+									serviceRequest.priority.slice(1) ?? ''}
+							</p>
+						</div>
+					{/if}
+
 					<!-- AGENCY -->
 					{#if serviceRequest.agency_responsible || serviceRequest.agency_email}
 						<div class="mb-1">
@@ -196,6 +207,6 @@
 		border-radius: 10px;
 	}
 	.mb-1 p {
-		text-indent: .5rem;
+		text-indent: 0.5rem;
 	}
 </style>
