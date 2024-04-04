@@ -376,6 +376,13 @@ public class JurisdictionAdminControllerTest  {
             2,
             "(Optional) If the issue is near anything, please describe here."
         );
+
+        // Cannot create MULTIVALUELIST attribute with empty values
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov", sdaIssueSelect);
+        });
+        assertEquals(BAD_REQUEST, exception.getStatus());
+
         sdaIssueSelect.setValues(List.of(
             new AttributeValueDTO("UNSAFE", "Unsafe location"),
             new AttributeValueDTO("NO_SDLWLK", "No Sidewalk present"),
