@@ -4,14 +4,7 @@
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
-	import Flag from './Svg/Flag.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
-	import { useLibre311Context } from '$lib/context/Libre311Context';
-
-	const libre311Context = useLibre311Context();
-	const user = libre311Context.user;
-
-	$: console.log($user);
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string | undefined = undefined;
@@ -70,16 +63,14 @@
 					</div>
 				{/if}
 
-				{#if $user}
-					{#if serviceRequest.priority}
-						<div class="mb-1">
-							<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
-							<p class="text-sm">
-								{serviceRequest.priority.charAt(0).toUpperCase() +
-									serviceRequest.priority.slice(1) ?? ''}
-							</p>
-						</div>
-					{/if}
+				{#if serviceRequest.priority}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
+						<p class="text-sm">
+							{serviceRequest.priority.charAt(0).toUpperCase() + serviceRequest.priority.slice(1) ??
+								''}
+						</p>
+					</div>
 				{/if}
 
 				{#if serviceRequest.agency_responsible}
