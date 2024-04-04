@@ -20,7 +20,7 @@ const RealtimeServiceTypeSchema = z.literal('realtime');
 const OtherServiceTypeSchema = z.literal('other'); // todo remove once second type is found
 const ServiceTypeSchema = z.union([RealtimeServiceTypeSchema, OtherServiceTypeSchema]); // todo what are the other types besides realtime?
 
-const ServiceCodeSchema = z.string();
+const ServiceCodeSchema = z.number();
 const HasServiceCodeSchema = z.object({
 	service_code: ServiceCodeSchema
 });
@@ -33,7 +33,6 @@ export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
 export const ServiceSchema = z
 	.object({
-		id: z.number(),
 		service_name: z.string(),
 		description: z.string().optional(),
 		metadata: z.boolean(),
@@ -70,7 +69,7 @@ export const BaseServiceDefinitionAttributeSchema = z.object({
 	 * false: means the attribute is only used to present information to the user within the description field
 	 */
 	variable: z.boolean(),
-	code: z.string(),
+	code: z.number(), // the id of the attribute in the db
 	datatype: DatatypeUnionSchema,
 	required: z.boolean(),
 	/**
@@ -550,7 +549,7 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 				urlSearchParams.append(`attribute[${code}]`, value.join(','));
 			});
 		} else {
-			urlSearchParams.set(k, v);
+			urlSearchParams.set(k, v.toString());
 		}
 	}
 	return urlSearchParams;
