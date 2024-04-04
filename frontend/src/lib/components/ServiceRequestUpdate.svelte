@@ -54,10 +54,16 @@
 		serviceNoticeInput.value != serviceRequest.service_notice ||
 		statusNotesInput.value != serviceRequest.status_notes;
 
+	$: console.log(userChangedText(statusNotesInput.value, serviceRequest.status_notes));
+
 	function userChangedDate(expectedDateInputValue: Date | undefined) {
 		const currentDate = serviceRequest.expected_datetime;
 		const expectedDate = expectedDateInputValue?.toISOString().replace(/\.\d+/g, '');
 		return currentDate != expectedDate;
+	}
+
+	function userChangedText(expectedText: string | undefined, currentText: string | undefined) {
+		return (expectedText == '' || expectedText == undefined) && currentText == undefined;
 	}
 
 	const statusOptions: SelectOption[] = [
