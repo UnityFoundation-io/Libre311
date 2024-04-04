@@ -30,11 +30,11 @@ INSERT IGNORE INTO service_groups (id, name, jurisdiction_id)
 VALUES (1, 'Infrastructure', 'stlma');
 
 -- Bus Stop Service
-INSERT IGNORE INTO services (id, service_code, jurisdiction_id, service_name, description, type, service_group_id)
-VALUES (1, '202', 'stlma', 'Bus Stop', 'For problems with bus stops', 'REALTIME', 1);
+INSERT IGNORE INTO services (id, jurisdiction_id, service_name, description, type, service_group_id)
+VALUES (1, 'stlma', 'Bus Stop', 'For problems with bus stops', 'REALTIME', 1);
 
-INSERT IGNORE INTO service_definition_attributes (id, attribute_order, code, datatype, datatype_description, description, required, variable, service_id)
-VALUES (1, 1, 'BUS_STOP', 'MULTIVALUELIST', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 1);
+INSERT IGNORE INTO service_definition_attributes (id, attribute_order, datatype, datatype_description, description, required, variable, service_id)
+VALUES (1, 1, 'MULTIVALUELIST', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 1);
 
 INSERT IGNORE INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
 VALUES (1, 'Unsafe location', 1),
@@ -45,11 +45,11 @@ VALUES (1, 'Unsafe location', 1),
 
 
 -- Crosswalk Service
-INSERT IGNORE INTO services (id, service_code, jurisdiction_id, service_name, description, type, service_group_id)
-VALUES (2, '204', 'stlma', 'Crosswalk', 'For issues with the crosswalks', 'REALTIME', 1);
+INSERT IGNORE INTO services (id, jurisdiction_id, service_name, description, type, service_group_id)
+VALUES (2, 'stlma', 'Crosswalk', 'For issues with the crosswalks', 'REALTIME', 1);
 
-INSERT IGNORE INTO service_definition_attributes (id, attribute_order, code, datatype, datatype_description, description, required, variable, service_id)
-VALUES (2, 1, 'CRSWLK', 'MULTIVALUELIST', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 2);
+INSERT IGNORE INTO service_definition_attributes (id, attribute_order, datatype, datatype_description, description, required, variable, service_id)
+VALUES (2, 1, 'MULTIVALUELIST', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 2);
 
 INSERT IGNORE INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
 VALUES (6, 'ADA Access', 2),
@@ -60,5 +60,5 @@ VALUES (6, 'ADA Access', 2),
 
 
 -- Other Service
-INSERT IGNORE INTO services (id, service_code, jurisdiction_id, service_name, description, type, service_group_id)
-VALUES (3, '206', 'stlma', 'Other', 'Other', 'REALTIME', 1);
+INSERT IGNORE INTO services (id, jurisdiction_id, service_name, description, type, service_group_id)
+VALUES (3, 'stlma', 'Other', 'Other', 'REALTIME', 1);
