@@ -81,6 +81,9 @@ public class JurisdictionAdminController {
     public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId,
                                                                                  @Valid @Body CreateServiceDefinitionAttributeDTO requestDTO,
                                                                                  @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        if (requestDTO.getCode() == null) {
+            requestDTO.setCode(UUID.randomUUID().toString());
+        }
         return serviceService.addServiceDefinitionAttributeToServiceDefinition(serviceId, requestDTO, jurisdiction_id);
     }
 

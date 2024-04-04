@@ -29,13 +29,11 @@ public class CreateServiceDefinitionAttributeDTO extends UpdateServiceDefinition
         super(code, variable, datatype, required, description, attributeOrder, datatypeDescription);
     }
 
-    @NotBlank
     @Override
     public String getCode() {
         return super.getCode();
     }
 
-    @NotBlank
     @Override
     public void setCode(String code) {
         super.setCode(code);
@@ -47,9 +45,46 @@ public class CreateServiceDefinitionAttributeDTO extends UpdateServiceDefinition
         return super.getDatatype();
     }
 
-    @NotBlank
+    @NotNull
     @Override
     public void setDatatype(AttributeDataType datatype) {
         super.setDatatype(datatype);
+    }
+
+
+    @NotNull
+    @Override
+    public Boolean isVariable() {
+        return super.isVariable();
+    }
+
+    @NotNull
+    @Override
+    public void setVariable(Boolean variable) {
+        super.setVariable(variable);
+    }
+
+    @NotNull
+    @Override
+    public Boolean isRequired() {
+        return super.isRequired();
+    }
+
+    @NotNull
+    @Override
+    public void setRequired(Boolean required) {
+        super.setRequired(required);
+    }
+
+    @NotNull
+    @Override
+    public Integer getAttributeOrder() {
+        return super.getAttributeOrder();
+    }
+
+    @NotNull
+    @Override
+    public void setAttributeOrder(Integer attributeOrder) {
+        super.setAttributeOrder(attributeOrder);
     }
 }
