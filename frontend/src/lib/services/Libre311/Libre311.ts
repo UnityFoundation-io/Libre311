@@ -360,7 +360,7 @@ export type DeleteServiceParams = {
 // ***************** Attributes *************** //
 
 export const CreateServiceDefinitionAttributeResponseSchema = z.object({
-	service_code: z.string(),
+	service_code: z.number(),
 	attributes: z.array(ServiceDefinitionAttributeSchema)
 });
 
@@ -372,7 +372,6 @@ export const CreateServiceDefinitionAttributesSchema = z.object({
 	serviceId: z.number(),
 	description: z.string(),
 	datatype_description: z.string(),
-	code: z.string().optional(),
 	datatype: z.string(),
 	variable: z.boolean(),
 	required: z.boolean(),
