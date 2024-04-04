@@ -358,6 +358,33 @@ export type DeleteServiceParams = {
 	serviceId: number;
 };
 
+// ***************** Attributes *************** //
+
+export const CreateServiceDefinitionAttributeResponseSchema = z.object({
+	service_code: z.string(),
+	attributes: z.array(ServiceDefinitionAttributeSchema)
+});
+
+export type CreateServiceDefinitionAttributeResponse = z.infer<
+	typeof CreateServiceDefinitionAttributeResponseSchema
+>;
+
+export const CreateServiceDefinitionAttributesSchema = z.object({
+	serviceId: z.number(),
+	description: z.string(),
+	datatype_description: z.string(),
+	code: z.string().optional(),
+	datatype: z.string(),
+	variable: z.boolean(),
+	required: z.boolean(),
+	order: z.number(),
+	values: z.array(AttributeValueSchema).optional()
+});
+
+export type CreateServiceDefinitionAttributesParams = z.infer<
+	typeof CreateServiceDefinitionAttributesSchema
+>;
+
 // ************************************************ //
 
 export type GetServiceRequestsParams =
@@ -437,6 +464,9 @@ export interface Libre311Service extends Open311Service {
 	editGroup(params: EditGroupParams): Promise<Group>;
 	downloadServiceRequests(params: URLSearchParams): Promise<Blob>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
+	createAttribute(
+		params: CreateServiceDefinitionAttributesParams
+	): Promise<CreateServiceDefinitionAttributeResponse>;
 	editService(params: EditServiceParams): Promise<Service>;
 	deleteService(params: DeleteServiceParams): Promise<void>;
 	updateServiceRequest(
@@ -472,6 +502,8 @@ const ROUTES = {
 		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteService: (params: DeleteServiceParams & HasJurisdictionId) =>
 		`/jurisdiction-admin/services/${params.serviceId}?jurisdiction_id=${params.jurisdiction_id}`,
+	postAttribute: (params: HasId<number> & HasJurisdictionId) =>
+		`/jurisdiction-admin/services/${params.id}/attributes?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -675,6 +707,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 			console.log(error);
 			throw error;
 		}
+	}
+
+	async createAttribute(
+		params: CreateServiceDefinitionAttributesParams
+	): Promise<CreateServiceDefinitionAttributeResponse> {
+		const res = await this.axiosInstance.post<unknown>(
+			ROUTES.postAttribute({
+				id: params.serviceId,
+				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+			}),
+			params
+		);
+
+		return CreateServiceDefinitionAttributeResponseSchema.parse(res.data);
 	}
 
 	async createServiceRequest(
