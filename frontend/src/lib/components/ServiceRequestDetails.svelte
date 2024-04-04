@@ -64,16 +64,6 @@
 					</div>
 				{/if}
 
-				{#if serviceRequest.priority}
-					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
-						<p class="text-sm">
-							{serviceRequest.priority.charAt(0).toUpperCase() + serviceRequest.priority.slice(1) ??
-								''}
-						</p>
-					</div>
-				{/if}
-
 				{#if serviceRequest.agency_responsible}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
