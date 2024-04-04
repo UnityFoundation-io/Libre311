@@ -6,6 +6,12 @@
 	import SelectedValues from './SelectedValues.svelte';
 	import Flag from './Svg/Flag.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
+
+	const libre311Context = useLibre311Context();
+	const user = libre311Context.user;
+
+	$: console.log($user);
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string | undefined = undefined;
@@ -62,6 +68,18 @@
 							<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
 						</div>
 					</div>
+				{/if}
+
+				{#if $user}
+					{#if serviceRequest.priority}
+						<div class="mb-1">
+							<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
+							<p class="text-sm">
+								{serviceRequest.priority.charAt(0).toUpperCase() +
+									serviceRequest.priority.slice(1) ?? ''}
+							</p>
+						</div>
+					{/if}
 				{/if}
 
 				{#if serviceRequest.agency_responsible}
