@@ -89,7 +89,7 @@ public class ServiceService {
 
     static class MultiValueListServiceDefinitionNeedsValues extends Libre311BaseException {
         public MultiValueListServiceDefinitionNeedsValues() {
-            super("Multi-value service definition attribute requires at least one value", HttpStatus.NOT_FOUND);
+            super("Multi-value service definition attribute requires at least one value", HttpStatus.BAD_REQUEST);
         }
     }
 
