@@ -4,7 +4,6 @@
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
-	import Flag from './Svg/Flag.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 
 	export let serviceRequest: ServiceRequest;
@@ -64,6 +63,16 @@
 					</div>
 				{/if}
 
+				{#if serviceRequest.priority}
+					<div class="mb-1">
+						<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
+						<p class="text-sm">
+							{serviceRequest.priority.charAt(0).toUpperCase() + serviceRequest.priority.slice(1) ??
+								''}
+						</p>
+					</div>
+				{/if}
+
 				{#if serviceRequest.agency_responsible}
 					<div class="mb-1">
 						<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
@@ -116,6 +125,6 @@
 		border-radius: 10px;
 	}
 	.mb-1 p {
-		text-indent: .5rem;
+		text-indent: 0.5rem;
 	}
 </style>
