@@ -266,7 +266,7 @@ const urlSchema = z.string().url();
 
 // represents the users responses to the various service definition attributes
 const SelectedValuesSchema = z.object({
-	code: z.string(),
+	code: z.number(),
 	datatype: DatatypeUnionSchema,
 	description: z.string(),
 	values: z.array(AttributeValueSchema) // key is the SelectOption value and name is the human readable option.  For displaying the value to users, show the name.
