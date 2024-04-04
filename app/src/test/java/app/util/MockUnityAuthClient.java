@@ -17,6 +17,8 @@ package app.util;
 import app.security.HasPermissionRequest;
 import app.security.HasPermissionResponse;
 import app.security.UnityAuthClient;
+import app.security.UnityAuthUserPermissionsRequest;
+import app.security.UserPermissionsResponse;
 import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
 
@@ -25,9 +27,17 @@ public class MockUnityAuthClient implements UnityAuthClient {
 
     private HttpResponse<HasPermissionResponse> response;
 
+    public HttpResponse<UserPermissionsResponse> userPermissionsResponse;
+
     @Override
     public HttpResponse<HasPermissionResponse> hasPermission(HasPermissionRequest requestDTO, String authorizationHeader) {
         return response;
+    }
+
+    @Override
+    public HttpResponse<UserPermissionsResponse> getUserPermissions(
+        UnityAuthUserPermissionsRequest requestDTO, String authorizationHeader) {
+        return userPermissionsResponse;
     }
 
     public HttpResponse<HasPermissionResponse> getResponse() {

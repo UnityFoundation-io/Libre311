@@ -29,4 +29,9 @@ public interface UnityAuthClient {
     @Post( "/hasPermission")
     HttpResponse<HasPermissionResponse> hasPermission(@Body HasPermissionRequest requestDTO,
                                                       @Header("Authorization") String authorizationHeader);
+
+    @Post("/principal/permissions")
+    HttpResponse<UserPermissionsResponse> getUserPermissions(
+        @Body UnityAuthUserPermissionsRequest requestDTO,
+        @Header("Authorization") String authorizationHeader);
 }
