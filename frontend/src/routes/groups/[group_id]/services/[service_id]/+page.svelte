@@ -33,11 +33,6 @@
 		values: AttributeValue[] | undefined;
 	};
 
-	interface Crumb {
-		label: string;
-		href: string;
-	}
-
 	const dataTypeOptions: SelectOption[] = [
 		{
 			value: 'string',
@@ -61,8 +56,8 @@
 	let isNewAttributeDropDownVisable: boolean = false;
 
 	let newAttribute: AttributeInput = {
-		description: createInput<string>(''),
-		dataTypeDescription: createInput<string>(''),
+		description: createInput<string>(),
+		dataTypeDescription: createInput<string>(),
 		dataType: undefined,
 		required: false,
 		order: 0,
@@ -77,6 +72,7 @@
 	];
 
 	let multivalueErrorMessage: string | undefined;
+	let dataTypeSelectError: string | undefined;
 
 	let groupName = '';
 	let serviceName = '';
@@ -134,6 +130,14 @@
 		newAttribute.description = stringValidator(newAttribute.description);
 		newAttribute.dataTypeDescription = stringValidator(newAttribute.dataTypeDescription);
 
+		// Data Type validation
+		if (newAttribute.dataType == undefined) {
+			dataTypeSelectError = 'Answer Type Required';
+		} else {
+			dataTypeSelectError = undefined;
+		}
+
+		// Return if any input errors
 		if (serviceId == null) {
 			return;
 		}
@@ -141,6 +145,9 @@
 			return;
 		}
 		if (newAttribute.dataTypeDescription.type != 'valid') {
+			return;
+		}
+		if (dataTypeSelectError) {
 			return;
 		}
 
@@ -155,13 +162,14 @@
 				order: newAttribute.order
 			};
 
-			if (values && values.length > 0) {
+			if (newAttribute.dataType == 'multivaluelist') {
 				const valueArray = values.map((v) => {
 					return {
 						key: v.id.toString(),
 						name: v.name
 					};
 				});
+
 				if (valueArray[0].name == '') {
 					multivalueErrorMessage = 'You might want to add a value!';
 					return;
@@ -173,8 +181,10 @@
 
 			await libre311.createAttribute(body);
 
+			// Reset inputs
 			isNewAttributeDropDownVisable = false;
 			newAttribute.description.value = '';
+			newAttribute.dataTypeDescription.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
 			values = [{ id: 0, name: '' }];
@@ -244,6 +254,7 @@
 										'select_data_type_placeholder'
 									]}
 									options={dataTypeOptions}
+									error={dataTypeSelectError}
 									bind:value={newAttribute.dataType}
 								>
 									<Select.Options slot="options">
