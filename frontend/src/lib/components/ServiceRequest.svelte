@@ -11,6 +11,7 @@
 	import { page } from '$app/stores';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
+	import AuthGuard from './AuthGuard.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -30,10 +31,6 @@
 	function createName(serviceRequest: UpdateSensitiveServiceRequestRequest) {
 		if (serviceRequest.first_name || serviceRequest.last_name)
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
-	}
-
-	function handleUpdateButtonClick(serviceRequest: ServiceRequest) {
-		isUpdateButtonClicked = true;
 	}
 
 	async function updateServiceRequest(e: CustomEvent<UpdateSensitiveServiceRequestRequest>) {
@@ -172,9 +169,18 @@
 							{messages['updateServiceRequest']['button_back']}
 						</Button>
 
-						<Button slot="right" on:click={() => handleUpdateButtonClick(serviceRequest)}>
-							{messages['updateServiceRequest']['button_update']}
-						</Button>
+						<AuthGuard
+							slot="right"
+							requires={[
+								'LIBRE311_REQUEST_EDIT-TENANT',
+								'LIBRE311_REQUEST_EDIT-SYSTEM',
+								'LIBRE311_REQUEST_EDIT-SUBTENANT'
+							]}
+						>
+							<Button on:click={() => (isUpdateButtonClicked = true)}>
+								{messages['updateServiceRequest']['button_update']}
+							</Button>
+						</AuthGuard>
 					</ServiceRequestButtonsContainer>
 				</div>
 			{/if}
@@ -196,6 +202,6 @@
 		border-radius: 10px;
 	}
 	.mb-1 p {
-		text-indent: .5rem;
+		text-indent: 0.5rem;
 	}
 </style>
