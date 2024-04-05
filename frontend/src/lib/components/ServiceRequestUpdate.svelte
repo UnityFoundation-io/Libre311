@@ -49,12 +49,10 @@
 		statusInput.value != serviceRequest.status ||
 		priorityInput.value != serviceRequest.priority ||
 		userChangedDate(expectedDateInput.value) ||
-		agencyNameInput.value != serviceRequest.agency_responsible ||
-		agencyEmailInput.value != serviceRequest.agency_email ||
-		serviceNoticeInput.value != serviceRequest.service_notice ||
-		statusNotesInput.value != serviceRequest.status_notes;
-
-	$: console.log(userChangedText(statusNotesInput.value, serviceRequest.status_notes));
+		userChangedText(agencyNameInput.value, serviceRequest.agency_responsible) ||
+		userChangedText(agencyEmailInput.value, serviceRequest.agency_email) ||
+		userChangedText(serviceNoticeInput.value, serviceRequest.service_notice) ||
+		userChangedText(statusNotesInput.value, serviceRequest.status_notes);
 
 	function userChangedDate(expectedDateInputValue: Date | undefined) {
 		const currentDate = serviceRequest.expected_datetime;
@@ -63,7 +61,11 @@
 	}
 
 	function userChangedText(expectedText: string | undefined, currentText: string | undefined) {
-		return (expectedText == '' || expectedText == undefined) && currentText == undefined;
+		if (currentText == undefined) {
+			return !((expectedText == '' || expectedText == undefined) && currentText == undefined);
+		} else {
+			return expectedText != currentText;
+		}
 	}
 
 	const statusOptions: SelectOption[] = [
