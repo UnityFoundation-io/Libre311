@@ -6,7 +6,7 @@ import {
 	isUserPermissionsSuccessResponse,
 	type UserPermissionsResolver,
 	type UserPermissionsSuccessResponse
-} from '../Libre311/UserPermissionsResolver';
+} from '../UserPermissionsResolver';
 
 // Auth props schema
 const UnityAuthServicePropsSchema = z.object({
