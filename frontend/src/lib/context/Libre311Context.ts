@@ -7,7 +7,7 @@ import {
 	unityAuthServiceFactory,
 	type UnityAuthService,
 	type UnityAuthServiceProps,
-	type UnityAuthLoginResponse
+	type CompleteLoginResponse
 } from '$lib/services/UnityAuth/UnityAuth';
 import { LinkResolver } from '$lib/services/LinkResolver';
 import type { Mode } from '$lib/services/mode';
@@ -25,34 +25,43 @@ import {
 	isLibre311ServerErrorResponse
 } from '$lib/services/Libre311/types/ServerErrors';
 import { isAxiosError } from 'axios';
+import { UserPermissionsResolverImpl } from '$lib/services/UserPermissionsResolver';
 
 const libre311CtxKey = Symbol();
+
+export type UserInfo = CompleteLoginResponse | undefined;
 
 export type Libre311Context = {
 	service: Libre311Service;
 	linkResolver: LinkResolver;
 	unityAuthService: UnityAuthService;
 	mode: Mode;
-	user: Readable<UnityAuthLoginResponse | undefined>;
+	user: Readable<UserInfo>;
 	alertError: (unknown: unknown) => void;
 } & Libre311Alert;
 
 export type Libre311ContextProviderProps = {
 	libreServiceProps: Omit<Libre311ServiceProps, 'recaptchaService'>;
-	unityAuthServiceProps: UnityAuthServiceProps;
+	unityAuthServiceProps: Omit<UnityAuthServiceProps, 'userPermissionsResolver'>;
 	recaptchaServiceProps: RecaptchaServiceProps;
 	mode: Mode;
 };
 
 export function createLibre311Context(props: Libre311ContextProviderProps & Libre311Alert) {
 	const linkResolver = new LinkResolver();
-	const unityAuthService = unityAuthServiceFactory(props.unityAuthServiceProps);
+	const userPermissionsResolver = new UserPermissionsResolverImpl({
+		libreBaseUrl: props.libreServiceProps.baseURL,
+		jurisdictionId: props.libreServiceProps.jurisdictionConfig.jurisdiction_id
+	});
+	const unityAuthService = unityAuthServiceFactory({
+		userPermissionsResolver,
+		...props.unityAuthServiceProps
+	});
 	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
 	const libre311Service = libre311Factory({ ...props.libreServiceProps, recaptchaService });
-	const user: Writable<UnityAuthLoginResponse | undefined> = writable(undefined);
-
-	unityAuthService.subscribe('login', (args) => libre311Service.setAuthInfo(args));
+	const user: Writable<UserInfo> = writable(undefined);
 	unityAuthService.subscribe('login', (args) => user.set(args));
+	unityAuthService.subscribe('login', (args) => libre311Service.setAuthInfo(args));
 	unityAuthService.subscribe('logout', () => libre311Service.setAuthInfo(undefined));
 	unityAuthService.subscribe('logout', () => user.set(undefined));
 

@@ -4,65 +4,17 @@
 	import { Drawer, Menu, Portal } from 'stwui';
 
 	import { mapIcon } from './Svg/outline/mapIcon';
-	import { paintBrushIcon } from './Svg/outline/paintBrushIcon';
 	import { pencilIcon } from './Svg/outline/pencilIcon';
 	import { tableIcon } from './Svg/outline/tableIcon';
 	import { plusCircleIcon } from './Svg/outline/plusCircleIcon';
 	import { user } from './Svg/outline/user';
+	import AuthGuard from './AuthGuard.svelte';
 
 	export let open: boolean;
 
 	export let handleClose: () => void;
 
 	const linkResolver = useLibre311Context().linkResolver;
-
-	// Menu
-	interface MenuItem {
-		key: string;
-		label: string;
-		data: string;
-		href: string;
-	}
-
-	const items: MenuItem[] = [
-		{
-			key: 'create',
-			label: 'Create Service Request',
-			data: plusCircleIcon,
-			href: '/issue/create'
-		},
-		{
-			key: 'table',
-			label: 'Service Request Table',
-			data: tableIcon,
-			href: linkResolver.issuesTable($page.url)
-		},
-		{
-			key: 'map',
-			label: 'Request Map',
-			data: mapIcon,
-			href: linkResolver.issuesMap($page.url)
-		},
-		{
-			key: 'manager',
-			label: 'Service Definition Manager',
-			data: pencilIcon,
-			href: '/groups'
-		},
-		// TODO: Add appropriate URLs
-		// {
-		// 	key: 'editor',
-		// 	label: 'Theme Editor',
-		// 	data: paintBrushIcon,
-		// 	href: '#editor'
-		// }
-		{
-			key: 'login',
-			label: 'Login',
-			data: user,
-			href: '/login'
-		}
-	];
 </script>
 
 <Portal>
@@ -70,11 +22,59 @@
 		<Drawer {handleClose} placement="left">
 			<Drawer.Content slot="content">
 				<Menu>
-					{#each items as item}
-						<Menu.Item key={item.key} label={item.label} href={item.href} on:click={handleClose}>
-							<Menu.Item.Icon slot="icon" data={item.data} fill="none" />
+					<Menu.Item
+						key="create"
+						label="Create Service Request"
+						href="/issue/create"
+						on:click={handleClose}
+					>
+						<Menu.Item.Icon slot="icon" data={plusCircleIcon} fill="none" />
+					</Menu.Item>
+					<AuthGuard
+						requires={[
+							'LIBRE311_REQUEST_VIEW-TENANT',
+							'LIBRE311_REQUEST_VIEW-SUBTENANT',
+							'LIBRE311_REQUEST_VIEW-SYSTEM'
+						]}
+					>
+						<Menu.Item
+							key="table"
+							label="Service Request Table"
+							href={linkResolver.issuesTable($page.url)}
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={tableIcon} fill="none" />
 						</Menu.Item>
-					{/each}
+					</AuthGuard>
+					<Menu.Item
+						key="map"
+						label="Request Map"
+						href={linkResolver.issuesMap($page.url)}
+						on:click={handleClose}
+					>
+						<Menu.Item.Icon slot="icon" data={mapIcon} fill="none" />
+					</Menu.Item>
+					<AuthGuard
+						requires={[
+							'LIBRE311_ADMIN_EDIT-SYSTEM',
+							'LIBRE311_ADMIN_EDIT-TENANT',
+							'LIBRE311_ADMIN_EDIT-SUBTENANT'
+						]}
+					>
+						<Menu.Item
+							key="manager"
+							label="Service Definition Configuration"
+							href="/groups"
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
+						</Menu.Item>
+					</AuthGuard>
+					<AuthGuard requires="is-anonymous">
+						<Menu.Item key="login" label="Login" href="/login" on:click={handleClose}>
+							<Menu.Item.Icon slot="icon" data={user} fill="none" />
+						</Menu.Item>
+					</AuthGuard>
 				</Menu>
 			</Drawer.Content>
 		</Drawer>
