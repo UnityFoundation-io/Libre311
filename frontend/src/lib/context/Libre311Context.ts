@@ -25,7 +25,7 @@ import {
 	isLibre311ServerErrorResponse
 } from '$lib/services/Libre311/types/ServerErrors';
 import { isAxiosError } from 'axios';
-import { UserPermissionsResolverImpl } from '$lib/services/Libre311/UserPermissionsResolver';
+import { UserPermissionsResolverImpl } from '$lib/services/UserPermissionsResolver';
 
 const libre311CtxKey = Symbol();
 
