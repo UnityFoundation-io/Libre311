@@ -21,8 +21,12 @@ import app.model.jurisdictionuser.JurisdictionUserRepository;
 import app.model.user.User;
 import app.model.user.UserRepository;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +54,15 @@ public class UnityAuthService {
         this.userRepository = userRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.jurisdictionUserRepository = jurisdictionUserRepository;
+    }
+
+    public HttpResponse<UserPermissionsResponse> getUserPermissions(
+        @PathVariable String jurisdictionId, String authorization) {
+        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+        // later on we will augment the permissions returned by unityAuthClient with any Libre defined permissions.  Currently, there are none so we simply proxy the call to unity auth service.
+        return this.client.getUserPermissions(
+            new UnityAuthUserPermissionsRequest(jurisdiction.getTenantId(), serviceId),
+            authorization);
     }
 
     public boolean isUserPermittedForTenantAction(String token, Long tenantId, List<Permission> permissions) {
