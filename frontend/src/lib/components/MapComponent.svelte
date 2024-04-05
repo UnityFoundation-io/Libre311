@@ -29,6 +29,7 @@
 		map.addEventListener('moveend', (e) => {
 			dispatch('boundsChanged', map.getBounds());
 		});
+		map.addEventListener('drag', () => dispatch('boundsChanged', map.getBounds()));
 		map.on('locationfound', function (e) {
 			map.setView(e.latlng, 16);
 		});
