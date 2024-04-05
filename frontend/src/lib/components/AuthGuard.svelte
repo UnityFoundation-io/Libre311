@@ -19,7 +19,7 @@
 		}
 		if (!user) return false;
 
-		return user.permissions.some((p) => user.permissions.includes(p));
+		return user.permissions.some((p) => requires.includes(p));
 	}
 </script>
 
