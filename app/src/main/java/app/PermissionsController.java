@@ -3,6 +3,7 @@ package app;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.security.UnityAuthClient;
+import app.security.UnityAuthService;
 import app.security.UnityAuthUserPermissionsRequest;
 import app.security.UserPermissionsResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,41 +25,17 @@ import io.micronaut.security.rules.SecurityRule;
 @Secured(SecurityRule.IS_AUTHENTICATED)
 public class PermissionsController {
 
+    UnityAuthService unityAuthService;
 
-    @Property(name = "app.service-id")
-    protected Long serviceId;
-
-    UnityAuthClient unityAuthClient;
-    JurisdictionRepository jurisdictionRepository;
-
-    public PermissionsController(UnityAuthClient unityAuthClient,
-        JurisdictionRepository jurisdictionRepository) {
-        this.unityAuthClient = unityAuthClient;
-        this.jurisdictionRepository = jurisdictionRepository;
-    }
-
-    @Introspected
-    public static class LibreUserPermissionsRequest {
-
-        @JsonProperty("jurisdiction_id")
-        String jurisdictionId;
-
-        public String getJurisdictionId() {
-            return jurisdictionId;
-        }
-
-        public void setJurisdictionId(String jurisdictionId) {
-            this.jurisdictionId = jurisdictionId;
-        }
+    public PermissionsController(UnityAuthService unityAuthService) {
+        this.unityAuthService = unityAuthService;
     }
 
     @Get("/{jurisdictionId}/principal/permissions")
     public HttpResponse<UserPermissionsResponse> getUserPermissions(
         @PathVariable String jurisdictionId, HttpRequest<?> request) {
-        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
-        // later on we will augment the permissions returned by unityAuthClient with any Libre defined permissions.  Currently, there are none so we simply proxy the call to unity auth service.
-        return this.unityAuthClient.getUserPermissions(
-            new UnityAuthUserPermissionsRequest(jurisdiction.getTenantId(), serviceId),
+
+        return this.unityAuthService.getUserPermissions(jurisdictionId,
             request.getHeaders().getAuthorization().orElseThrow(
                 () -> new HttpStatusException(HttpStatus.FORBIDDEN, "User must be authenticated")));
     }
