@@ -13,8 +13,9 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
-import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.exceptions.HttpStatusException;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
@@ -35,9 +36,25 @@ public class PermissionsController {
         this.unityAuthClient = unityAuthClient;
         this.jurisdictionRepository = jurisdictionRepository;
     }
-    @Post("/principal/permissions{?jurisdiction_id}")
+
+    @Introspected
+    public static class LibreUserPermissionsRequest {
+
+        @JsonProperty("jurisdiction_id")
+        String jurisdictionId;
+
+        public String getJurisdictionId() {
+            return jurisdictionId;
+        }
+
+        public void setJurisdictionId(String jurisdictionId) {
+            this.jurisdictionId = jurisdictionId;
+        }
+    }
+
+    @Get("/{jurisdictionId}/principal/permissions")
     public HttpResponse<UserPermissionsResponse> getUserPermissions(
-        @QueryValue("jurisdiction_id") String jurisdictionId, HttpRequest<?> request) {
+        @PathVariable String jurisdictionId, HttpRequest<?> request) {
         Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
         // later on we will augment the permissions returned by unityAuthClient with any Libre defined permissions.  Currently, there are none so we simply proxy the call to unity auth service.
         return this.unityAuthClient.getUserPermissions(
