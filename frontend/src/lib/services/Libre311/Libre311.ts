@@ -454,6 +454,23 @@ export const ReverseGeocodeResponseSchema = z.object({
 });
 export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema>;
 
+export const LibrePermissionsSchema = z.union([
+	z.literal('LIBRE311_ADMIN_EDIT_SYSTEM'),
+	z.literal('LIBRE311_ADMIN_VIEW_SYSTEM'),
+	z.literal('LIBRE311_ADMIN_EDIT_TENANT'),
+	z.literal('LIBRE311_ADMIN_VIEW_TENANT'),
+	z.literal('LIBRE311_ADMIN_EDIT_SUBTENANT'),
+	z.literal('LIBRE311_ADMIN_VIEW_SUBTENANT'),
+	z.literal('LIBRE311_REQUEST_EDIT_SYSTEM'),
+	z.literal('LIBRE311_REQUEST_VIEW_SYSTEM'),
+	z.literal('LIBRE311_REQUEST_EDIT_TENANT'),
+	z.literal('LIBRE311_REQUEST_VIEW_TENANT'),
+	z.literal('LIBRE311_REQUEST_EDIT_SUBTENANT'),
+	z.literal('LIBRE311_REQUEST_VIEW_SUBTENANT')
+]);
+
+export type LibrePermissions = z.infer<typeof LibrePermissionsSchema>;
+
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
