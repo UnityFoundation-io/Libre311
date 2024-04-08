@@ -362,7 +362,7 @@ export type CreateServiceDefinitionAttributeResponse = z.infer<
 >;
 
 export const CreateServiceDefinitionAttributesSchema = z.object({
-	serviceCode: z.number(),
+	service_code: z.number(),
 	description: z.string(),
 	datatype_description: z.string(),
 	datatype: z.string(),
@@ -705,7 +705,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	): Promise<CreateServiceDefinitionAttributeResponse> {
 		const res = await this.axiosInstance.post<unknown>(
 			ROUTES.postAttribute({
-				service_code: params.serviceCode,
+				service_code: params.service_code,
 				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
 			}),
 			params

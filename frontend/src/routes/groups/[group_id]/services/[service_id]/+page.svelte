@@ -146,7 +146,7 @@
 
 		try {
 			const body: CreateServiceDefinitionAttributesParams = {
-				serviceCode: serviceId,
+				service_code: serviceId,
 				description: newAttribute.description.value,
 				datatype_description: newAttribute.dataTypeDescription.value,
 				datatype: String(newAttribute?.dataType).toString(),
