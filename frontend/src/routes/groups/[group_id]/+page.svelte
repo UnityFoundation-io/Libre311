@@ -98,7 +98,7 @@
 		if (serviceList.type !== 'success') return;
 
 		const res = await libre311.editService({
-			id: service.service_code,
+			service_code: service.service_code,
 			service_name: editServiceName
 		});
 
@@ -114,7 +114,7 @@
 		isDeleteModalOpen = false;
 
 		await libre311.deleteService({
-			serviceId: serviceToDelete.service_code
+			service_code: serviceToDelete.service_code
 		});
 
 		let foundIndex = serviceList.value.findIndex((x) => x.service_code == serviceToDelete.service_code);
