@@ -27,7 +27,6 @@ import java.util.List;
 @Introspected
 public class UpdateServiceDefinitionAttributeDTO {
 
-    private String code;
     private AttributeDataType datatype;
     private Boolean variable;
     private Boolean required;
@@ -47,8 +46,7 @@ public class UpdateServiceDefinitionAttributeDTO {
     public UpdateServiceDefinitionAttributeDTO() {
     }
 
-    public UpdateServiceDefinitionAttributeDTO(String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
-        this.code = code;
+    public UpdateServiceDefinitionAttributeDTO(boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
         this.variable = variable;
         this.datatype = datatype;
         this.required = required;
@@ -111,13 +109,5 @@ public class UpdateServiceDefinitionAttributeDTO {
 
     public void setValues(List<AttributeValueDTO> values) {
         this.values = values;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 }

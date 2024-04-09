@@ -34,7 +34,7 @@ public class GetServiceRequestsDTO {
 
     @Nullable
     @QueryValue(value = "service_code")
-    private List<String> serviceCodes;
+    private List<Long> serviceCodes;
 
     @Nullable
     @QueryValue(value = "start_date")
@@ -68,11 +68,11 @@ public class GetServiceRequestsDTO {
     }
 
     @Nullable
-    public List<String> getServiceCodes() {
+    public List<Long> getServiceCodes() {
         return serviceCodes;
     }
 
-    public void setServiceCodes(@Nullable List<String> serviceCodes) {
+    public void setServiceCodes(@Nullable List<Long> serviceCodes) {
         this.serviceCodes = serviceCodes;
     }
 

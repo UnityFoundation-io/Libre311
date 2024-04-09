@@ -134,9 +134,12 @@ public class JurisdictionAdminControllerTest  {
     @Inject
     JurisdictionBoundaryService jurisdictionBoundaryService;
 
+    private Service sidewalkService;
+    private ServiceDefinitionAttribute savedSDA;
+    private HashMap<String, Long> sidewalkAttrIdMap = new HashMap<>();
+
     @BeforeEach
     void setup() {
-
         mockAuthenticationFetcher.setAuthentication(null);
         setAuthHasPermissionSuccessResponse(false, null);
 
@@ -163,16 +166,14 @@ public class JurisdictionAdminControllerTest  {
         ServiceGroup infrastructureGroup = serviceGroupRepository.save(
             new ServiceGroup("Infrastructure", jurisdiction));
         Service sidewalkService = new Service("Sidewalk");
-        sidewalkService.setServiceCode("001");
         sidewalkService.setType(ServiceType.REALTIME);
         sidewalkService.setJurisdiction(jurisdiction);
         sidewalkService.setServiceGroup(infrastructureGroup);
 
-        Service service = serviceRepository.save(sidewalkService);
+        this.sidewalkService = serviceRepository.save(sidewalkService);
 
         ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-        serviceDefinitionAttribute.setService(service);
-        serviceDefinitionAttribute.setCode("SDWLK");
+        serviceDefinitionAttribute.setService(sidewalkService);
         serviceDefinitionAttribute.setVariable(true);
         serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
         serviceDefinitionAttribute.setRequired(false);
@@ -181,15 +182,19 @@ public class JurisdictionAdminControllerTest  {
         serviceDefinitionAttribute.setAttributeOrder(1);
         serviceDefinitionAttribute.setDatatypeDescription("Please select one or more items.");
 
-        ServiceDefinitionAttribute savedSDA = serviceDefinitionAttributeRepository.save(
+        savedSDA = serviceDefinitionAttributeRepository.save(
             serviceDefinitionAttribute);
 
-        attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access"));
-        attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked"));
-        attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow"));
-        attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk"));
-        attributeValueRepository.save(new AttributeValue(savedSDA, "Other"));
-
+        sidewalkAttrIdMap.put("ADA Access",
+                attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access")).getId());
+        sidewalkAttrIdMap.put("Cracked",
+                attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked")).getId());
+        sidewalkAttrIdMap.put("Too narrow",
+                attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow")).getId());
+        sidewalkAttrIdMap.put("Heaved/Uneven Sidewalk",
+                attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk")).getId());
+        sidewalkAttrIdMap.put("Other",
+                attributeValueRepository.save(new AttributeValue(savedSDA, "Other")).getId());
     }
 
     private void setAuthHasPermissionSuccessResponse(boolean success, List<String> permissions) {
@@ -272,7 +277,7 @@ public class JurisdictionAdminControllerTest  {
 
         HttpClientResponseException exception = assertThrowsExactly(
             HttpClientResponseException.class, () -> {
-                createService("BIKELN010", "Bike Lane Obstruction", "faketown.gov",
+                createService("Bike Lane Obstruction", "faketown.gov",
                     bikeln010Group.getId());
             });
         assertEquals(UNAUTHORIZED, exception.getStatus());
@@ -290,7 +295,7 @@ public class JurisdictionAdminControllerTest  {
 
         HttpClientResponseException exception = assertThrowsExactly(
             HttpClientResponseException.class, () -> {
-                createService("BIKELN007", "Bike Lane Obstruction", "fakecity.gov",
+                createService("Bike Lane Obstruction", "fakecity.gov",
                     bikeln007Group.getId());
             });
         assertEquals(UNAUTHORIZED, exception.getStatus());
@@ -298,7 +303,7 @@ public class JurisdictionAdminControllerTest  {
         authLogin();
 
         // success, bare minimum
-        response = createService("BIKELN007", "Bike Lane Obstruction", "fakecity.gov",
+        response = createService("Bike Lane Obstruction", "fakecity.gov",
             bikeln007Group.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
@@ -306,7 +311,7 @@ public class JurisdictionAdminControllerTest  {
         assertEquals(-1, optional.get().getOrderPosition());
 
         // success, all provided
-        response = createService("BUS_STOP", "Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId(), 2);
+        response = createService("Bike Lane Obstruction", "fakecity.gov", bikeln007Group.getId(), 2);
         assertEquals(HttpStatus.OK, response.getStatus());
         optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
@@ -317,19 +322,19 @@ public class JurisdictionAdminControllerTest  {
 
         // fail, jurisdiction not provided
         exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            createService("ROAD", "Road Issues", null, 1L);
+            createService("Road Issues", null, 1L);
         });
         assertEquals(NOT_FOUND, exception.getStatus());
 
         // fail, name not provided
         exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            createService("ROAD", null, "fakecity.gov", 1L);
+            createService(null, "fakecity.gov", 1L);
         });
         assertEquals(BAD_REQUEST, exception.getStatus());
 
         // fail, group not provided
         exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            createService("ROAD", "Road Issues", "fakecity.gov", null);
+            createService("Road Issues", "fakecity.gov", null);
         });
         assertEquals(BAD_REQUEST, exception.getStatus());
     }
@@ -348,7 +353,7 @@ public class JurisdictionAdminControllerTest  {
         assertTrue(groupOptional.isPresent());
         GroupDTO groupDTO = groupOptional.get();
 
-        response = createService("BUS_STOP_UPDATE", "Bus Stop Issues", "fakecity.gov",
+        response = createService("Bus Stop Issues", "fakecity.gov",
             groupDTO.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
@@ -357,7 +362,6 @@ public class JurisdictionAdminControllerTest  {
 
         response = addServiceDefinitionAttribute(serviceDTO.getId(), "fakecity.gov",
             new CreateServiceDefinitionAttributeDTO(
-                "ISSUE_NEAR",
                 true,
                 AttributeDataType.STRING,
                 false,
@@ -368,7 +372,6 @@ public class JurisdictionAdminControllerTest  {
         assertEquals(HttpStatus.OK, response.getStatus());
 
         CreateServiceDefinitionAttributeDTO sdaIssueSelect = new CreateServiceDefinitionAttributeDTO(
-            "ISSUE_SELECT",
             true,
             AttributeDataType.MULTIVALUELIST,
             true,
@@ -404,7 +407,6 @@ public class JurisdictionAdminControllerTest  {
 
         // update Service
         UpdateServiceDTO updateServiceDTO = new UpdateServiceDTO();
-        updateServiceDTO.setServiceCode("INNER_CITY_BUS_STOPS");
         updateServiceDTO.setServiceName("Inner City Bust Stops");
         updateServiceDTO.setDescription("Issues pertaining to inner city bus stops.");
         updateServiceDTO.setOrderPosition(3);
@@ -426,7 +428,6 @@ public class JurisdictionAdminControllerTest  {
         Optional<ServiceDTO> body = response.getBody(ServiceDTO.class);
         assertTrue(body.isPresent());
         ServiceDTO serviceDTO1 = body.get();
-        assertEquals("INNER_CITY_BUS_STOPS", serviceDTO1.getServiceCode());
         assertEquals("Inner City Bust Stops", serviceDTO1.getServiceName());
         assertEquals("Issues pertaining to inner city bus stops.", serviceDTO1.getDescription());
         assertEquals(secondGroupDTO.getId(), serviceDTO1.getGroupId());
@@ -435,8 +436,8 @@ public class JurisdictionAdminControllerTest  {
         // Remove ISSUE_NEAR attribute
         Optional<ServiceDefinitionAttributeDTO> issueNearOptional = savedServiceDefinitionDTO.getAttributes()
             .stream()
-            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode()
-                .equals("ISSUE_NEAR"))
+            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getDescription()
+                .equals("Bus Stop Near"))
             .findFirst();
         assertTrue(issueNearOptional.isPresent());
         ServiceDefinitionAttributeDTO issueNearAttribute = issueNearOptional.get();
@@ -451,8 +452,8 @@ public class JurisdictionAdminControllerTest  {
         // Update ISSUE_SELECT attribute
         Optional<ServiceDefinitionAttributeDTO> issueSelectOptional = savedServiceDefinitionDTO.getAttributes()
             .stream()
-            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getCode()
-                .equals("ISSUE_SELECT"))
+            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getDescription()
+                .equals("Bus Stop Issues"))
             .findFirst();
         assertTrue(issueSelectOptional.isPresent());
         ServiceDefinitionAttributeDTO issueSelectAttribute = issueSelectOptional.get();
@@ -475,7 +476,7 @@ public class JurisdictionAdminControllerTest  {
 
         // get service definition
         response = client.toBlocking()
-            .exchange("/services/" + serviceDTO1.getServiceCode() + "?jurisdiction_id=fakecity.gov",
+            .exchange("/services/" + serviceDTO1.getId() + "?jurisdiction_id=fakecity.gov",
                 String.class);
         assertEquals(HttpStatus.OK, response.status());
         Optional<String> serviceDefinitionOptional = response.getBody(String.class);
@@ -485,13 +486,13 @@ public class JurisdictionAdminControllerTest  {
         ServiceDefinitionDTO serviceDefinitionDTOObject = (new ObjectMapper()).readValue(
             serviceDefinitionResponse, ServiceDefinitionDTO.class);
         assertNotNull(serviceDefinitionDTOObject.getServiceCode());
-        assertEquals("INNER_CITY_BUS_STOPS", serviceDefinitionDTOObject.getServiceCode());
+        assertEquals(serviceDTO1.getId(), serviceDefinitionDTOObject.getServiceCode());
         assertNotNull(serviceDefinitionDTOObject.getAttributes());
         assertFalse(serviceDefinitionDTOObject.getAttributes().isEmpty());
         assertEquals(1, serviceDefinitionDTOObject.getAttributes().size());
         assertTrue(serviceDefinitionDTOObject.getAttributes().stream()
             .anyMatch(serviceDefinitionAttribute ->
-                serviceDefinitionAttribute.getCode().equals("ISSUE_SELECT") &&
+                serviceDefinitionAttribute.getDescription().equals("Bus Stop Issues") &&
                     serviceDefinitionAttribute.getValues() != null &&
                     !serviceDefinitionAttribute.getValues().isEmpty() &&
                     serviceDefinitionAttribute.getAttributeOrder() == 1)
@@ -506,20 +507,20 @@ public class JurisdictionAdminControllerTest  {
         ServiceGroup myInfraGroup = serviceGroupRepository.save(new ServiceGroup("MyInfraGroup", optionalJurisdiction.get()));
 
         HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
-            createService("InfraBIKELN007", "Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId());
+            createService("Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId());
         });
         assertEquals(UNAUTHORIZED, exception.getStatus());
 
         authLogin();
 
-        response = createService("InfraBIKELN007", "Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId());
+        response = createService("Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
         ServiceDTO bikeLaneService = optional.get();
         assertEquals(-1, bikeLaneService.getOrderPosition());
 
-        response = createService("InfraBUS_STOP", "Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId(), 2);
+        response = createService("Bike Lane Obstruction", "fakecity.gov", myInfraGroup.getId(), 2);
         assertEquals(HttpStatus.OK, response.getStatus());
         optional = response.getBody(ServiceDTO.class);
         assertTrue(optional.isPresent());
@@ -560,7 +561,7 @@ public class JurisdictionAdminControllerTest  {
         assertTrue(groupOptional.isPresent());
         GroupDTO groupDTO = groupOptional.get();
 
-        response = createService("DISTRESSED_ANIMAL", "Animal in Distress", "fakecity.gov",
+        response = createService("Animal in Distress", "fakecity.gov",
             groupDTO.getId());
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<ServiceDTO> serviceOptional = response.getBody(ServiceDTO.class);
@@ -579,8 +580,8 @@ public class JurisdictionAdminControllerTest  {
     public void canUpdateServiceRequestIfAuthenticated() {
         HttpResponse<?> response;
 
-        response = createServiceRequest("001", "12345 Fairway",
-            Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
+        response = createSidewalkServiceRequest("12345 Fairway",
+            Map.of("attribute["+savedSDA.getId()+"]", sidewalkAttrIdMap.get("Cracked")), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(
             PostResponseServiceRequestDTO[].class);
@@ -654,12 +655,12 @@ public class JurisdictionAdminControllerTest  {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest("001", "12345 Nearway",
-            Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
+        response = createSidewalkServiceRequest("12345 Nearway",
+            Map.of("attribute["+savedSDA.getId()+"]", sidewalkAttrIdMap.get("Cracked")), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "6789 Faraway",
-            Map.of("attribute[SDWLK]", "NARROW"), "fakecity.gov");
+        response = createSidewalkServiceRequest("6789 Faraway",
+            Map.of("attribute["+savedSDA.getId()+"]", sidewalkAttrIdMap.get("Too narrow")), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         HttpRequest<?> request = HttpRequest.GET(
@@ -692,12 +693,12 @@ public class JurisdictionAdminControllerTest  {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest("001", "a st.",
-                Map.of("attribute[SDWLK]", "CRACKED"), "fakecity.gov");
+        response = createSidewalkServiceRequest("a st.",
+                Map.of("attribute["+savedSDA.getId()+"]", sidewalkAttrIdMap.get("Cracked")), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "x st.",
-                Map.of("attribute[SDWLK]", "NARROW"), "fakecity.gov");
+        response = createSidewalkServiceRequest("x st.",
+                Map.of("attribute["+savedSDA.getId()+"]", sidewalkAttrIdMap.get("Too narrow")), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         HttpRequest<?> request = HttpRequest.GET("/jurisdiction-admin/requests/download?jurisdiction_id=fakecity.gov&sort=addressString,asc")
@@ -743,29 +744,32 @@ public class JurisdictionAdminControllerTest  {
     public void theCSVFileShouldNotContainCellsBeginningWithUnsafeCharacters() throws IOException {
         HttpResponse<?> response;
 
+        Long sidewalkId = savedSDA.getId();
+        Long heavedUnevenId = sidewalkAttrIdMap.get("Heaved/Uneven Sidewalk");
+
         // create service requests
-        response = createServiceRequest("001", "=1+3",
-            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+        response = createSidewalkServiceRequest("=1+3",
+            Map.of("attribute["+sidewalkId+"]", heavedUnevenId), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "@1+3",
-            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+        response = createSidewalkServiceRequest("@1+3",
+            Map.of("attribute["+sidewalkId+"]", heavedUnevenId), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "+1+3",
-            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+        response = createSidewalkServiceRequest("+1+3",
+            Map.of("attribute["+sidewalkId+"]", heavedUnevenId), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "-1+3",
-            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+        response = createSidewalkServiceRequest("-1+3",
+            Map.of("attribute["+sidewalkId+"]", heavedUnevenId), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "\t1+3",
-            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+        response = createSidewalkServiceRequest("\t1+3",
+            Map.of("attribute["+sidewalkId+"]", heavedUnevenId), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest("001", "\r1+3",
-            Map.of("attribute[SDWLK]", "HEAVED_UNEVEN"), "fakecity.gov");
+        response = createSidewalkServiceRequest("\r1+3",
+            Map.of("attribute["+sidewalkId+"]", heavedUnevenId), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
         HttpRequest<?> request = HttpRequest.GET(
@@ -800,13 +804,12 @@ public class JurisdictionAdminControllerTest  {
         return client.toBlocking().exchange(request, GroupDTO[].class);
     }
 
-    private HttpResponse<?> createService(String code, String name, String jurisdictionId, Long groupId) {
-        return createService(code,name, jurisdictionId, groupId, null);
+    private HttpResponse<?> createService(String name, String jurisdictionId, Long groupId) {
+        return createService(name, jurisdictionId, groupId, null);
     }
 
-    private HttpResponse<?> createService(String code, String name, String jurisdictionId, Long groupId, Integer orderPosition) {
+    private HttpResponse<?> createService(String name, String jurisdictionId, Long groupId, Integer orderPosition) {
         CreateServiceDTO serviceDTO = new CreateServiceDTO();
-        serviceDTO.setServiceCode(code);
         serviceDTO.setServiceName(name);
         serviceDTO.setGroupId(groupId);
         serviceDTO.setOrderPosition(orderPosition);
@@ -825,10 +828,10 @@ public class JurisdictionAdminControllerTest  {
         return client.toBlocking().exchange(request, ServiceDefinitionDTO.class);
     }
 
-    private HttpResponse<?> createServiceRequest(String serviceCode, String address, Map attributes,
-        String jurisdictionId) {
-        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(
-            serviceCode);
+    private HttpResponse<?> createSidewalkServiceRequest(String address, Map attributes,
+                                                         String jurisdictionId) {
+
+        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(sidewalkService.getId());
         serviceRequestDTO.setgRecaptchaResponse("abc");
 
         serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
