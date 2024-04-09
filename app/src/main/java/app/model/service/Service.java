@@ -35,8 +35,6 @@ public class Service {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String serviceCode;
-
     @ManyToOne
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
@@ -68,14 +66,6 @@ public class Service {
     }
 
     public Service() {}
-
-    public String getServiceCode() {
-        return serviceCode;
-    }
-
-    public void setServiceCode(String serviceCode) {
-        this.serviceCode = serviceCode;
-    }
 
     public Jurisdiction getJurisdiction() {
         return jurisdiction;

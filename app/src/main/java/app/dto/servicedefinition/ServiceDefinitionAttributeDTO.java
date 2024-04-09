@@ -25,9 +25,8 @@ import java.util.List;
 @Introspected
 public class ServiceDefinitionAttributeDTO {
 
+    @JsonProperty("code")
     private Long id;
-
-    private String code;
     private Boolean variable;
     private AttributeDataType datatype;
     private Boolean required;
@@ -46,9 +45,8 @@ public class ServiceDefinitionAttributeDTO {
     public ServiceDefinitionAttributeDTO() {
     }
 
-    public ServiceDefinitionAttributeDTO(Long id, String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
+    public ServiceDefinitionAttributeDTO(Long id, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
         this.id = id;
-        this.code = code;
         this.variable = variable;
         this.datatype = datatype;
         this.required = required;
@@ -119,13 +117,5 @@ public class ServiceDefinitionAttributeDTO {
 
     public void setValues(List<AttributeValueDTO> values) {
         this.values = values;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 }

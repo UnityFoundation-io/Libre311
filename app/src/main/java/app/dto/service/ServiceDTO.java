@@ -22,10 +22,8 @@ import io.micronaut.core.annotation.Introspected;
 @Introspected
 public class ServiceDTO {
 
-    private Long id;
-
     @JsonProperty("service_code")
-    private String serviceCode;
+    private Long id;
 
     @JsonProperty("jurisdiction_id")
     private String jurisdictionId;
@@ -50,7 +48,6 @@ public class ServiceDTO {
 
     public ServiceDTO(Service service, boolean hasMetadata) {
         this.id = service.getId();
-        this.serviceCode = service.getServiceCode();
         this.serviceName = service.getServiceName();
         this.description = service.getDescription();
         this.metadata = hasMetadata;
@@ -68,14 +65,6 @@ public class ServiceDTO {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getServiceCode() {
-        return serviceCode;
-    }
-
-    public void setServiceCode(String serviceCode) {
-        this.serviceCode = serviceCode;
     }
 
     public String getJurisdictionId() {

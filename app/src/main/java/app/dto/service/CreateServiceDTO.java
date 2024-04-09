@@ -37,16 +37,6 @@ public class CreateServiceDTO extends UpdateServiceDTO {
         super.setServiceName(serviceName);
     }
 
-    @Override
-    public String getServiceCode() {
-        return super.getServiceCode();
-    }
-
-    @Override
-    public void setServiceCode(String serviceCode) {
-        super.setServiceCode(serviceCode);
-    }
-
     @NotNull
     @Override
     public Long getGroupId() {

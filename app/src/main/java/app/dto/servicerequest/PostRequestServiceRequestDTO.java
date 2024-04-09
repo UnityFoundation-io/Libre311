@@ -30,7 +30,7 @@ public class PostRequestServiceRequestDTO {
 
     @NotBlank
     @JsonProperty("service_code")
-    private String serviceCode;
+    private Long serviceCode;
 
     @JsonProperty("lat")
     @NotNull
@@ -80,15 +80,15 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("g_recaptcha_response")
     private String gRecaptchaResponse;
 
-    public PostRequestServiceRequestDTO(String serviceCode) {
+    public PostRequestServiceRequestDTO(Long serviceCode) {
         this.serviceCode = serviceCode;
     }
 
-    public String getServiceCode() {
+    public Long getServiceCode() {
         return serviceCode;
     }
 
-    public void setServiceCode(String serviceCode) {
+    public void setServiceCode(Long serviceCode) {
         this.serviceCode = serviceCode;
     }
 

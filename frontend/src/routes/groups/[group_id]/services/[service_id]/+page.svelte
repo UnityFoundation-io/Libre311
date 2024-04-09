@@ -50,7 +50,7 @@
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
 
 	let groupId = $page.params.group_id;
-	let serviceCode = $page.params.service_id;
+	let serviceCode = Number($page.params.service_id);
 	let serviceId: number;
 
 	let isNewAttributeDropDownVisable: boolean = false;
@@ -85,14 +85,14 @@
 
 	$: updateAttributeMap(serviceCode);
 
-	function updateAttributeMap(service: string) {
+	function updateAttributeMap(service: number) {
 		if (!service) {
 			return;
 		}
 		getServiceDefinition(service);
 	}
 
-	async function getServiceDefinition(serviceCode: string) {
+	async function getServiceDefinition(serviceCode: number) {
 		try {
 			// Get Group
 			const groups = await libre311.getGroupList();
@@ -114,7 +114,7 @@
 			const serviceList = await libre311.getServiceList();
 			for (let service of serviceList) {
 				if (service.service_code == serviceCode) {
-					serviceId = service.id;
+					serviceId = service.service_code;
 					serviceName = service.service_name;
 				}
 			}
@@ -153,7 +153,7 @@
 
 		try {
 			const body: CreateServiceDefinitionAttributesParams = {
-				serviceId: serviceId,
+				service_code: serviceId,
 				description: newAttribute.description.value,
 				datatype_description: newAttribute.dataTypeDescription.value,
 				datatype: String(newAttribute?.dataType).toString(),
