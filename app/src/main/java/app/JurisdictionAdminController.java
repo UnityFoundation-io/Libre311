@@ -61,47 +61,41 @@ public class JurisdictionAdminController {
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public ServiceDTO createServiceJson(@Valid @Body CreateServiceDTO requestDTO,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        if (requestDTO.getServiceCode() == null) {
-            requestDTO.setServiceCode(UUID.randomUUID().toString());
-        }
         return serviceService.createService(requestDTO, jurisdiction_id);
     }
 
-    @Patch(uris = { "/services/{serviceId}{?jurisdiction_id}", "/requests/{serviceId}.json{?jurisdiction_id}" })
+    @Patch(uris = { "/services/{serviceCode}{?jurisdiction_id}", "/requests/{serviceCode}.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public ServiceDTO updateServiceJson(Long serviceId, @Valid @Body UpdateServiceDTO requestDTO,
+    public ServiceDTO updateServiceJson(Long serviceCode, @Valid @Body UpdateServiceDTO requestDTO,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return serviceService.updateService(serviceId, requestDTO, jurisdiction_id);
+        return serviceService.updateService(serviceCode, requestDTO, jurisdiction_id);
     }
 
-    @Post(uris = { "/services/{serviceId}/attributes{?jurisdiction_id}", "/services/{serviceId}/attributes.json{?jurisdiction_id}"})
+    @Post(uris = { "/services/{serviceCode}/attributes{?jurisdiction_id}", "/services/{serviceCode}/attributes.json{?jurisdiction_id}"})
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId,
+    public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceCode,
                                                                                  @Valid @Body CreateServiceDefinitionAttributeDTO requestDTO,
                                                                                  @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        if (requestDTO.getCode() == null) {
-            requestDTO.setCode(UUID.randomUUID().toString());
-        }
-        return serviceService.addServiceDefinitionAttributeToServiceDefinition(serviceId, requestDTO, jurisdiction_id);
+        return serviceService.addServiceDefinitionAttributeToServiceDefinition(serviceCode, requestDTO, jurisdiction_id);
     }
 
-    @Patch(uris = { "/services/{serviceId}/attributes/{attributeId}{?jurisdiction_id}", "/services/{serviceId}/attributes/{attributeId}.json{?jurisdiction_id}"})
+    @Patch(uris = { "/services/{serviceCode}/attributes/{attributeCode}{?jurisdiction_id}", "/services/{serviceCode}/attributes/{attributeCode}.json{?jurisdiction_id}"})
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long serviceId, Long attributeId,
+    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long serviceCode, Long attributeCode,
                                                                  @Valid @Body UpdateServiceDefinitionAttributeDTO requestDTO,
                                                                  @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return serviceService.updateServiceDefinitionAttribute(attributeId, requestDTO);
+        return serviceService.updateServiceDefinitionAttribute(attributeCode, requestDTO);
     }
 
-    @Delete(uris = { "/services/{serviceId}/attributes/{attributeId}{?jurisdiction_id}", "/services/{serviceId}/attributes/{attributeId}.json{?jurisdiction_id}"})
+    @Delete(uris = { "/services/{serviceCode}/attributes/{attributeCode}{?jurisdiction_id}", "/services/{serviceCode}/attributes/{attributeCode}.json{?jurisdiction_id}"})
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public HttpResponse<?> removeServiceDefinitionAttributeFromServiceDefinition(Long serviceId, Long attributeId,
+    public HttpResponse<?> removeServiceDefinitionAttributeFromServiceDefinition(Long serviceCode, Long attributeCode,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        serviceService.removeServiceDefinitionAttributeFromServiceDefinition(attributeId);
+        serviceService.removeServiceDefinitionAttributeFromServiceDefinition(attributeCode);
         return HttpResponse.ok();
     }
 
@@ -154,11 +148,11 @@ public class JurisdictionAdminController {
         return serviceRequestService.updateServiceRequest(serviceRequestId, requestDTO, jurisdiction_id);
     }
 
-    @Delete(uris = { "/services/{serviceId}{?jurisdiction_id}" })
+    @Delete(uris = { "/services/{serviceCode}{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public HttpResponse deleteService(Long serviceId, @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        serviceService.deleteService(serviceId, jurisdiction_id);
+    public HttpResponse deleteService(Long serviceCode, @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        serviceService.deleteService(serviceCode, jurisdiction_id);
         return HttpResponse.ok();
     }
 

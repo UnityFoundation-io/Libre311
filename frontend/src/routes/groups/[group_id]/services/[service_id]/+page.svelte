@@ -33,11 +33,6 @@
 		values: AttributeValue[] | undefined;
 	};
 
-	interface Crumb {
-		label: string;
-		href: string;
-	}
-
 	const dataTypeOptions: SelectOption[] = [
 		{
 			value: 'string',
@@ -55,14 +50,14 @@
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
 
 	let groupId = $page.params.group_id;
-	let serviceCode = $page.params.service_id;
+	let serviceCode = Number($page.params.service_id);
 	let serviceId: number;
 
 	let isNewAttributeDropDownVisable: boolean = false;
 
 	let newAttribute: AttributeInput = {
-		description: createInput<string>(''),
-		dataTypeDescription: createInput<string>(''),
+		description: createInput<string>(),
+		dataTypeDescription: createInput<string>(),
 		dataType: undefined,
 		required: false,
 		order: 0,
@@ -77,6 +72,7 @@
 	];
 
 	let multivalueErrorMessage: string | undefined;
+	let dataTypeSelectError: string | undefined;
 
 	let groupName = '';
 	let serviceName = '';
@@ -89,14 +85,14 @@
 
 	$: updateAttributeMap(serviceCode);
 
-	function updateAttributeMap(service: string) {
+	function updateAttributeMap(service: number) {
 		if (!service) {
 			return;
 		}
 		getServiceDefinition(service);
 	}
 
-	async function getServiceDefinition(serviceCode: string) {
+	async function getServiceDefinition(serviceCode: number) {
 		try {
 			// Get Group
 			const groups = await libre311.getGroupList();
@@ -118,7 +114,7 @@
 			const serviceList = await libre311.getServiceList();
 			for (let service of serviceList) {
 				if (service.service_code == serviceCode) {
-					serviceId = service.id;
+					serviceId = service.service_code;
 					serviceName = service.service_name;
 				}
 			}
@@ -134,6 +130,14 @@
 		newAttribute.description = stringValidator(newAttribute.description);
 		newAttribute.dataTypeDescription = stringValidator(newAttribute.dataTypeDescription);
 
+		// Data Type validation
+		if (newAttribute.dataType == undefined) {
+			dataTypeSelectError = 'Answer Type Required';
+		} else {
+			dataTypeSelectError = undefined;
+		}
+
+		// Return if any input errors
 		if (serviceId == null) {
 			return;
 		}
@@ -143,10 +147,13 @@
 		if (newAttribute.dataTypeDescription.type != 'valid') {
 			return;
 		}
+		if (dataTypeSelectError) {
+			return;
+		}
 
 		try {
 			const body: CreateServiceDefinitionAttributesParams = {
-				serviceId: serviceId,
+				service_code: serviceId,
 				description: newAttribute.description.value,
 				datatype_description: newAttribute.dataTypeDescription.value,
 				datatype: String(newAttribute?.dataType).toString(),
@@ -155,13 +162,14 @@
 				order: newAttribute.order
 			};
 
-			if (values && values.length > 0) {
+			if (newAttribute.dataType == 'multivaluelist') {
 				const valueArray = values.map((v) => {
 					return {
 						key: v.id.toString(),
 						name: v.name
 					};
 				});
+
 				if (valueArray[0].name == '') {
 					multivalueErrorMessage = 'You might want to add a value!';
 					return;
@@ -173,8 +181,10 @@
 
 			await libre311.createAttribute(body);
 
+			// Reset inputs
 			isNewAttributeDropDownVisable = false;
 			newAttribute.description.value = '';
+			newAttribute.dataTypeDescription.value = '';
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
 			values = [{ id: 0, name: '' }];
@@ -244,6 +254,7 @@
 										'select_data_type_placeholder'
 									]}
 									options={dataTypeOptions}
+									error={dataTypeSelectError}
 									bind:value={newAttribute.dataType}
 								>
 									<Select.Options slot="options">

@@ -22,7 +22,7 @@ import javax.validation.constraints.Min;
 @Introspected
 public class PatchServiceOrderPositionDTO {
 
-    @JsonProperty("service_id")
+    @JsonProperty("service_code")
     private Long serviceId;
 
     @Min(0)

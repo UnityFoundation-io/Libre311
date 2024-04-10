@@ -73,13 +73,6 @@ public class ServiceService {
         }
     }
 
-    static class ServiceCodeAlreadyExistsException extends Libre311BaseException {
-        public ServiceCodeAlreadyExistsException(String serviceCode, String jurisdictionId) {
-            super(String.format("Service with serviceCode: %s for jurisdiction: %s already exists",
-                    serviceCode, jurisdictionId), HttpStatus.BAD_REQUEST);
-        }
-    }
-
     static class ServiceDefinitionAttributeNotFoundException extends Libre311BaseException {
         public ServiceDefinitionAttributeNotFoundException(Long attributeId) {
             super(String.format("No service definition attribute found with id: %s",
@@ -89,7 +82,7 @@ public class ServiceService {
 
     static class MultiValueListServiceDefinitionNeedsValues extends Libre311BaseException {
         public MultiValueListServiceDefinitionNeedsValues() {
-            super("Multi-value service definition attribute requires at least one value", HttpStatus.NOT_FOUND);
+            super("Multi-value service definition attribute requires at least one value", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -106,27 +99,24 @@ public class ServiceService {
         return servicePage.map(this::toServiceDTO);
     }
 
-    public ServiceDefinitionDTO getServiceDefinition(String serviceCode, String jurisdictionId) {
-        Optional<Service> serviceOptional = serviceRepository.findByServiceCodeAndJurisdictionId(serviceCode, jurisdictionId);
+    public ServiceDefinitionDTO getServiceDefinition(Long serviceCode, String jurisdictionId) {
+        Optional<Service> serviceOptional = serviceRepository.findById(serviceCode);
 
         if (serviceOptional.isEmpty()) {
             throw new ServiceNotFoundException(serviceCode, jurisdictionId);
         }
         Service service = serviceOptional.get();
 
-        return generateServiceDefinitionDTO(service);
+        return convertToServiceDefinitionDTO(service);
     }
 
     public ServiceDTO createService(CreateServiceDTO serviceDTO, String jurisdictionId) {
         Jurisdiction jurisdiction = jurisdictionRepository.findById(jurisdictionId).get();
-        validateServiceCodeExistence(serviceDTO.getServiceCode(), jurisdiction);
-
         ServiceGroup group = validateGroupExistenceAndReturn(serviceDTO.getGroupId(), jurisdictionId);
 
         Service service = new Service();
         service.setJurisdiction(jurisdiction);
         service.setServiceGroup(group);
-        service.setServiceCode(serviceDTO.getServiceCode());
         service.setServiceName(serviceDTO.getServiceName());
         service.setDescription(serviceDTO.getDescription());
         if (serviceDTO.getOrderPosition() != null) {
@@ -136,19 +126,14 @@ public class ServiceService {
         return toServiceDTO(serviceRepository.save(service));
     }
 
-    public ServiceDTO updateService(Long serviceId, UpdateServiceDTO serviceDTO, String jurisdictionId) {
+    public ServiceDTO updateService(Long serviceCode, UpdateServiceDTO serviceDTO, String jurisdictionId) {
 
-        Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
+        Optional<Service> serviceOptional = serviceRepository.findById(serviceCode);
         if (serviceOptional.isEmpty()) {
-           throw new ServiceNotFoundException(serviceId, jurisdictionId);
+           throw new ServiceNotFoundException(serviceCode, jurisdictionId);
         }
 
         Service service = serviceOptional.get();
-        if (serviceDTO.getServiceCode() != null) {
-            validateServiceCodeExistence(serviceDTO.getServiceCode(), service.getJurisdiction());
-            service.setServiceCode(serviceDTO.getServiceCode());
-        }
-
         if (serviceDTO.getGroupId() != null) {
             ServiceGroup group = validateGroupExistenceAndReturn(serviceDTO.getGroupId(), jurisdictionId);
             service.setServiceGroup(group);
@@ -183,22 +168,15 @@ public class ServiceService {
         ));
     }
 
-    public void deleteService(Long serviceId, String jurisdictionId) {
-        serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId)
-            .orElseThrow(() -> new ServiceNotFoundException(serviceId, jurisdictionId));
-        serviceRepository.deleteById(serviceId);
+    public void deleteService(Long serviceCode, String jurisdictionId) {
+        serviceRepository.findById(serviceCode)
+            .orElseThrow(() -> new ServiceNotFoundException(serviceCode, jurisdictionId));
+        serviceRepository.deleteById(serviceCode);
     }
 
     private ServiceGroup validateGroupExistenceAndReturn(Long groupId, String jurisdictionId) {
         Optional<ServiceGroup> serviceGroupOptional = serviceGroupRepository.findByIdAndJurisdictionId(groupId, jurisdictionId);
         return serviceGroupOptional.orElseThrow(() -> new GroupNotFoundException(groupId));
-    }
-
-    private void validateServiceCodeExistence(String serviceCode, Jurisdiction jurisdiction) {
-        boolean serviceCodeAlreadyExists = serviceRepository.existsByServiceCodeAndJurisdiction(serviceCode, jurisdiction);
-        if (serviceCodeAlreadyExists) {
-            throw new ServiceCodeAlreadyExistsException(serviceCode, jurisdiction.getId());
-        }
     }
 
     public List<GroupDTO> getListGroups(String jurisdictionId) {
@@ -261,24 +239,23 @@ public class ServiceService {
 
     @Transactional
     public ServiceDefinitionDTO addServiceDefinitionAttributeToServiceDefinition(Long serviceId, CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, String jurisdictionId) {
-        Optional<Service> serviceOptional = serviceRepository.findByIdAndJurisdictionId(serviceId, jurisdictionId);
+        Optional<Service> serviceOptional = serviceRepository.findById(serviceId);
         if (serviceOptional.isEmpty()) {
             throw new ServiceNotFoundException(serviceId, jurisdictionId);
         }
         Service service = serviceOptional.get();
 
-        return generateServiceDefinitionDTO(addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, service));
+        return convertToServiceDefinitionDTO(addAttributeToServiceDefinition(serviceDefinitionAttributeDTO, service));
     }
 
-    private ServiceDefinitionDTO generateServiceDefinitionDTO(Service service) {
-        ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(service.getServiceCode());
+    private ServiceDefinitionDTO convertToServiceDefinitionDTO(Service service) {
+        ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(service.getId());
 
         List<ServiceDefinitionAttribute> serviceDefinitionAttributes = serviceDefinitionAttributeRepository.findAllByServiceId(service.getId());
         if (serviceDefinitionAttributes != null) {
             serviceDefinitionDTO.setAttributes(serviceDefinitionAttributes.stream().map(serviceDefinitionAttributeEntity -> {
                 ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = new ServiceDefinitionAttributeDTO(
                         serviceDefinitionAttributeEntity.getId(),
-                        serviceDefinitionAttributeEntity.getCode(),
                         serviceDefinitionAttributeEntity.isVariable(),
                         serviceDefinitionAttributeEntity.getDatatype(),
                         serviceDefinitionAttributeEntity.isRequired(),
@@ -302,24 +279,21 @@ public class ServiceService {
         return serviceDefinitionDTO;
     }
 
-    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long attributeId, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
-        Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeId);
+    public ServiceDefinitionDTO updateServiceDefinitionAttribute(Long attributeCode, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
+        Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeEntityOptional = serviceDefinitionAttributeRepository.findById(attributeCode);
         if (serviceDefinitionAttributeEntityOptional.isEmpty()) {
-            throw new ServiceDefinitionAttributeNotFoundException(attributeId);
+            throw new ServiceDefinitionAttributeNotFoundException(attributeCode);
         }
         ServiceDefinitionAttribute serviceDefinitionAttribute = serviceDefinitionAttributeEntityOptional.get();
 
         ServiceDefinitionAttribute patch = patchServiceDefinitionAttribute(serviceDefinitionAttribute, serviceDefinitionAttributeDTO);
 
-        return generateServiceDefinitionDTO(patch.getService());
+        return convertToServiceDefinitionDTO(patch.getService());
     }
 
     @Transactional
     public ServiceDefinitionAttribute patchServiceDefinitionAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute, UpdateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO) {
 
-        if (serviceDefinitionAttributeDTO.getCode() != null) {
-            serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
-        }
         if (serviceDefinitionAttributeDTO.isVariable() != null) {
             serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
         }
@@ -366,7 +340,6 @@ public class ServiceService {
     public Service addAttributeToServiceDefinition(CreateServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO, Service service) {
         ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
         serviceDefinitionAttribute.setService(service);
-        serviceDefinitionAttribute.setCode(serviceDefinitionAttributeDTO.getCode());
         serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
         serviceDefinitionAttribute.setDatatype(serviceDefinitionAttributeDTO.getDatatype());
         serviceDefinitionAttribute.setRequired(serviceDefinitionAttributeDTO.isRequired());

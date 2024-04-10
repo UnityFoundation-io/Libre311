@@ -49,15 +49,23 @@
 		statusInput.value != serviceRequest.status ||
 		priorityInput.value != serviceRequest.priority ||
 		userChangedDate(expectedDateInput.value) ||
-		agencyNameInput.value != serviceRequest.agency_responsible ||
-		agencyEmailInput.value != serviceRequest.agency_email ||
-		serviceNoticeInput.value != serviceRequest.service_notice ||
-		statusNotesInput.value != serviceRequest.status_notes;
+		userChangedText(agencyNameInput.value, serviceRequest.agency_responsible) ||
+		userChangedText(agencyEmailInput.value, serviceRequest.agency_email) ||
+		userChangedText(serviceNoticeInput.value, serviceRequest.service_notice) ||
+		userChangedText(statusNotesInput.value, serviceRequest.status_notes);
 
 	function userChangedDate(expectedDateInputValue: Date | undefined) {
 		const currentDate = serviceRequest.expected_datetime;
 		const expectedDate = expectedDateInputValue?.toISOString().replace(/\.\d+/g, '');
 		return currentDate != expectedDate;
+	}
+
+	function userChangedText(expectedText: string | undefined, currentText: string | undefined) {
+		if (currentText == undefined) {
+			return !((expectedText == '' || expectedText == undefined) && currentText == undefined);
+		} else {
+			return expectedText != currentText;
+		}
 	}
 
 	const statusOptions: SelectOption[] = [
@@ -256,7 +264,7 @@
 	<Button
 		disabled={!hasUserInput}
 		slot="right"
-		type="primary"
+		type={!hasUserInput ? undefined : 'primary'}
 		on:click={() => updateServiceRequest(serviceRequest)}
 	>
 		Submit

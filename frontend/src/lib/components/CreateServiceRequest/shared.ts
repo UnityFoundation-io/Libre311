@@ -29,6 +29,10 @@ export type CreateServiceRequestUIParams = ContactInformation & {
 	file?: File;
 };
 
+function isEmptyArrayOrUndefined(thing: string | number | Date | string[] | undefined) {
+	return (Array.isArray(thing) && thing.length == 0) || thing == undefined;
+}
+
 export function toCreateServiceRequestParams(
 	uiParams: CreateServiceRequestUIParams
 ): CreateServiceRequestParams {
@@ -36,7 +40,7 @@ export function toCreateServiceRequestParams(
 		...uiParams,
 		service_code: uiParams.service.service_code,
 		attributes: Array.from(uiParams.attributeMap.values())
-			.filter((attr) => Boolean(attr.value))
+			.filter((attr) => !isEmptyArrayOrUndefined(attr.value))
 			.map((attrInpt) => {
 				return {
 					code: attrInpt.attribute.code,

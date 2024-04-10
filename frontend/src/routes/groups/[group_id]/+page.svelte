@@ -3,8 +3,6 @@
 </script>
 
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
 	import EllipsisVertical from '$lib/components/Svg/outline/EllipsisVertical.svelte';
 	import ChevronRight from '$lib/components/Svg/outline/ChevronRight.svelte';
 
@@ -100,13 +98,13 @@
 		if (serviceList.type !== 'success') return;
 
 		const res = await libre311.editService({
-			id: service.id,
+			service_code: service.service_code,
 			service_name: editServiceName
 		});
 
 		isEditServiceInputVisible = false;
 
-		let foundIndex = serviceList.value.findIndex((x) => x.id == res.id);
+		let foundIndex = serviceList.value.findIndex((x) => x.service_code == res.service_code);
 		serviceList.value[foundIndex] = res;
 	}
 
@@ -116,10 +114,10 @@
 		isDeleteModalOpen = false;
 
 		await libre311.deleteService({
-			serviceId: serviceToDelete.id
+			service_code: serviceToDelete.service_code
 		});
 
-		let foundIndex = serviceList.value.findIndex((x) => x.id == serviceToDelete.id);
+		let foundIndex = serviceList.value.findIndex((x) => x.service_code == serviceToDelete.service_code);
 		delete serviceList.value[foundIndex];
 		serviceList = serviceList;
 	}
@@ -127,7 +125,7 @@
 	onMount(fetchServiceList);
 
 	let isEditServiceInputVisible = false;
-	let editServiceCode: string;
+	let editServiceCode: number;
 	let editServiceName: string;
 </script>
 

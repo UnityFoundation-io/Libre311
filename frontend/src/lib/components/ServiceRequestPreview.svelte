@@ -59,4 +59,7 @@
 	h1 {
 		color: hsl(var(--primary));
 	}
+	img {
+		object-fit: cover;
+	}
 </style>

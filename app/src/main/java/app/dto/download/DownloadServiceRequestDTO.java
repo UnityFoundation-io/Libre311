@@ -27,7 +27,7 @@ public class DownloadServiceRequestDTO {
     private String jurisdictionId;
     private String serviceName;
     private String group;
-    private String serviceCode;
+    private Long serviceCode;
     private Long id;
     private String serviceSubtype;
     private String description;
@@ -69,7 +69,7 @@ public class DownloadServiceRequestDTO {
         this.phone = sanitize(serviceRequest.getPhone());
         this.mediaUrl = sanitize(serviceRequest.getMediaUrl());
         this.serviceNotice = sanitize(serviceRequest.getServiceNotice());
-        this.serviceCode = sanitize(serviceRequest.getService().getServiceCode());
+        this.serviceCode = serviceRequest.getService().getId();
         this.zipcode = sanitize(serviceRequest.getZipCode());
         this.agencyEmail = sanitize(serviceRequest.getAgencyEmail());
         this.priority = serviceRequest.getPriority();
@@ -237,11 +237,11 @@ public class DownloadServiceRequestDTO {
         this.group = group;
     }
 
-    public String getServiceCode() {
+    public Long getServiceCode() {
         return serviceCode;
     }
 
-    public void setServiceCode(String serviceCode) {
+    public void setServiceCode(Long serviceCode) {
         this.serviceCode = serviceCode;
     }
 

@@ -25,18 +25,8 @@ public class CreateServiceDefinitionAttributeDTO extends UpdateServiceDefinition
     public CreateServiceDefinitionAttributeDTO() {
     }
 
-    public CreateServiceDefinitionAttributeDTO(String code, boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
-        super(code, variable, datatype, required, description, attributeOrder, datatypeDescription);
-    }
-
-    @Override
-    public String getCode() {
-        return super.getCode();
-    }
-
-    @Override
-    public void setCode(String code) {
-        super.setCode(code);
+    public CreateServiceDefinitionAttributeDTO(boolean variable, AttributeDataType datatype, boolean required, String description, int attributeOrder, String datatypeDescription) {
+        super(variable, datatype, required, description, attributeOrder, datatypeDescription);
     }
 
     @NotNull

@@ -41,7 +41,7 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     private String serviceName;
 
     @JsonProperty("service_code")
-    private String serviceCode;
+    private Long serviceCode;
 
     private String description;
 
@@ -95,8 +95,8 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     public ServiceRequestDTO(ServiceRequest serviceRequest) {
         this.id = serviceRequest.getId();
         this.status = serviceRequest.getStatus();
-        this.serviceName = serviceRequest.getService().getServiceName(); //
-        this.serviceCode = serviceRequest.getService().getServiceCode();
+        this.serviceName = serviceRequest.getService().getServiceName();
+        this.serviceCode = serviceRequest.getService().getId();
         this.description = serviceRequest.getDescription();
         this.agencyResponsible = serviceRequest.getAgencyResponsible();
         this.serviceNotice = serviceRequest.getServiceNotice();
@@ -147,11 +147,11 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         this.description = description;
     }
 
-    public String getServiceCode() {
+    public Long getServiceCode() {
         return serviceCode;
     }
 
-    public void setServiceCode(String serviceCode) {
+    public void setServiceCode(Long serviceCode) {
         this.serviceCode = serviceCode;
     }
 

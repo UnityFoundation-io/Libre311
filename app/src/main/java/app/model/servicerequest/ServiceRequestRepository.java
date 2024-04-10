@@ -33,14 +33,14 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     Page<ServiceRequest> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
     List<ServiceRequest> findAllByJurisdictionId(String jurisdictionId, Sort sort);
 
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeIn(String jurisdictionId, List<String> serviceCodes, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeIn(String jurisdictionId, List<String> serviceCodes, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, Instant start, Instant end, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, Instant start, Instant end, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, Instant start, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, Instant start, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, Instant end, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, Instant end, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdIn(String jurisdictionId, List<Long> serviceIds, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdIn(String jurisdictionId, List<Long> serviceIds, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, Instant start, Instant end, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, Instant start, Instant end, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, Instant start, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, Instant start, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, Instant end, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, Instant end, Sort sort);
 
     Page<ServiceRequest> findByJurisdictionIdAndStatusIn(String jurisdictionId, List<ServiceRequestStatus> status, Pageable pageable);
     List<ServiceRequest> findByJurisdictionIdAndStatusIn(String jurisdictionId, List<ServiceRequestStatus> status, Sort sort);
@@ -51,14 +51,14 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     Page<ServiceRequest> findByJurisdictionIdAndStatusInAndDateCreatedBefore(String jurisdictionId, List<ServiceRequestStatus> status, Instant end, Pageable pageable);
     List<ServiceRequest> findByJurisdictionIdAndStatusInAndDateCreatedBefore(String jurisdictionId, List<ServiceRequestStatus> status, Instant end, Sort sort);
 
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusIn(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusIn(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, Instant start, Instant end, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, Instant start, Instant end, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status,  Instant start, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, Instant start, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, Instant end, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, Instant end, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, Instant start, Instant end, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, Instant start, Instant end, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status,  Instant start, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, Instant start, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, Instant end, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, Instant end, Sort sort);
 
     Page<ServiceRequest> findByJurisdictionIdAndDateCreatedBetween(String jurisdictionId, Instant start, Instant end, Pageable pageable);
     List<ServiceRequest> findByJurisdictionIdAndDateCreatedBetween(String jurisdictionId, Instant startDate, Instant endDate, Sort sort);
@@ -67,22 +67,22 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     Page<ServiceRequest> findByJurisdictionIdAndDateCreatedBefore(String jurisdictionId, Instant end, Pageable pageable);
     List<ServiceRequest> findByJurisdictionIdAndDateCreatedBefore(String jurisdictionId, Instant end, Sort sort);
 
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityIn(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityIn(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant start, Instant end, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant start, Instant end, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,  Instant start, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant start, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant end, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndStatusInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant end, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Instant startDate, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Instant startDate, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Instant endDate, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Instant endDate, Sort sort);
-    Page<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityIn(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Pageable pageable);
-    List<ServiceRequest> findByJurisdictionIdAndServiceServiceCodeInAndPriorityIn(String jurisdictionId, List<String> serviceCodes, List<ServiceRequestPriority> priority, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant start, Instant end, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant start, Instant end, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,  Instant start, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant start, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant end, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant end, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Instant startDate, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Instant startDate, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Instant endDate, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityInAndDateCreatedBefore(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Instant endDate, Sort sort);
+    Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Pageable pageable);
+    List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndPriorityIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestPriority> priority, Sort sort);
     Page<ServiceRequest> findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate, Pageable pageable);
     List<ServiceRequest> findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedBetween(String jurisdictionId, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Instant endDate, Sort sort);
     Page<ServiceRequest> findByJurisdictionIdAndStatusInAndPriorityInAndDateCreatedAfter(String jurisdictionId, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Instant startDate, Pageable pageable);

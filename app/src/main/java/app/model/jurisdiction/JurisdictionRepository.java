@@ -14,13 +14,26 @@
 
 package app.model.jurisdiction;
 
-import io.micronaut.data.annotation.Join;
+import app.exception.Libre311BaseException;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.PageableRepository;
+import io.micronaut.http.HttpStatus;
 import java.util.Optional;
 
 @Repository
 public interface JurisdictionRepository extends PageableRepository<Jurisdiction, String> {
+
+  class JurisdictionNotFoundException extends Libre311BaseException {
+
+    public JurisdictionNotFoundException(String message) {
+      super(message, HttpStatus.NOT_FOUND);
+    }
+  }
+
+  default Jurisdiction findByJurisdictionId(String id){
+    return this.findById(id).orElseThrow(() -> new JurisdictionNotFoundException(
+        String.format("No Jurisdiction found with id: %s", id)));
+  }
 
   Optional<Jurisdiction> findByRemoteHostsNameEquals(String hosts);
 }

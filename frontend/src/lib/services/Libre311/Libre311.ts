@@ -20,7 +20,7 @@ const RealtimeServiceTypeSchema = z.literal('realtime');
 const OtherServiceTypeSchema = z.literal('other'); // todo remove once second type is found
 const ServiceTypeSchema = z.union([RealtimeServiceTypeSchema, OtherServiceTypeSchema]); // todo what are the other types besides realtime?
 
-const ServiceCodeSchema = z.string();
+const ServiceCodeSchema = z.number();
 const HasServiceCodeSchema = z.object({
 	service_code: ServiceCodeSchema
 });
@@ -33,7 +33,6 @@ export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
 export const ServiceSchema = z
 	.object({
-		id: z.number(),
 		service_name: z.string(),
 		description: z.string().optional(),
 		metadata: z.boolean(),
@@ -70,7 +69,7 @@ export const BaseServiceDefinitionAttributeSchema = z.object({
 	 * false: means the attribute is only used to present information to the user within the description field
 	 */
 	variable: z.boolean(),
-	code: z.string(),
+	code: z.number(), // the id of the attribute in the db
 	datatype: DatatypeUnionSchema,
 	required: z.boolean(),
 	/**
@@ -267,7 +266,7 @@ const urlSchema = z.string().url();
 
 // represents the users responses to the various service definition attributes
 const SelectedValuesSchema = z.object({
-	code: z.string(),
+	code: z.number(),
 	datatype: DatatypeUnionSchema,
 	description: z.string(),
 	values: z.array(AttributeValueSchema) // key is the SelectOption value and name is the human readable option.  For displaying the value to users, show the name.
@@ -329,7 +328,6 @@ export const CreateServiceParamsSchema = z.object({
 //  Create Service - Response Schema
 export const CreateServiceResponseSchema = z
 	.object({
-		id: z.number(),
 		jurisdiction_id: z.string(),
 		group_id: z.number()
 	})
@@ -345,23 +343,17 @@ export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
 
 // Edit Service - Request Schema
 export const EditServiceParamsSchema = z.object({
-	id: z.number(),
+	service_code: z.number(),
 	service_name: z.string()
 });
 
 // Edit Service - Request Type
 export type EditServiceParams = z.infer<typeof EditServiceParamsSchema>;
 
-// ***************** Delete Service *************** //
-
-export type DeleteServiceParams = {
-	serviceId: number;
-};
-
 // ***************** Attributes *************** //
 
 export const CreateServiceDefinitionAttributeResponseSchema = z.object({
-	service_code: z.string(),
+	service_code: z.number(),
 	attributes: z.array(ServiceDefinitionAttributeSchema)
 });
 
@@ -370,10 +362,9 @@ export type CreateServiceDefinitionAttributeResponse = z.infer<
 >;
 
 export const CreateServiceDefinitionAttributesSchema = z.object({
-	serviceId: z.number(),
+	service_code: z.number(),
 	description: z.string(),
 	datatype_description: z.string(),
-	code: z.string().optional(),
 	datatype: z.string(),
 	variable: z.boolean(),
 	required: z.boolean(),
@@ -454,6 +445,27 @@ export const ReverseGeocodeResponseSchema = z.object({
 });
 export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema>;
 
+export const LibrePermissionsSchema = z.union([
+	z.literal('AUTH_SERVICE_EDIT-SYSTEM'),
+	z.literal('AUTH_SERVICE_VIEW-SYSTEM'),
+	z.literal('AUTH_SERVICE_EDIT-TENANT'),
+	z.literal('AUTH_SERVICE_VIEW-TENANT'),
+	z.literal('LIBRE311_ADMIN_EDIT-SYSTEM'),
+	z.literal('LIBRE311_ADMIN_VIEW-SYSTEM'),
+	z.literal('LIBRE311_ADMIN_EDIT-TENANT'),
+	z.literal('LIBRE311_ADMIN_VIEW-TENANT'),
+	z.literal('LIBRE311_ADMIN_EDIT-SUBTENANT'),
+	z.literal('LIBRE311_ADMIN_VIEW-SUBTENANT'),
+	z.literal('LIBRE311_REQUEST_EDIT-SYSTEM'),
+	z.literal('LIBRE311_REQUEST_VIEW-SYSTEM'),
+	z.literal('LIBRE311_REQUEST_EDIT-TENANT'),
+	z.literal('LIBRE311_REQUEST_VIEW-TENANT'),
+	z.literal('LIBRE311_REQUEST_EDIT-SUBTENANT'),
+	z.literal('LIBRE311_REQUEST_VIEW-SUBTENANT')
+]);
+
+export type LibrePermissions = z.infer<typeof LibrePermissionsSchema>;
+
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
@@ -468,7 +480,7 @@ export interface Libre311Service extends Open311Service {
 		params: CreateServiceDefinitionAttributesParams
 	): Promise<CreateServiceDefinitionAttributeResponse>;
 	editService(params: EditServiceParams): Promise<Service>;
-	deleteService(params: DeleteServiceParams): Promise<void>;
+	deleteService(params: HasServiceCode): Promise<void>;
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse>;
@@ -498,12 +510,12 @@ const ROUTES = {
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
 	postService: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
-	patchService: (params: HasJurisdictionId & HasId<number>) =>
-		`/jurisdiction-admin/services/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
-	deleteService: (params: DeleteServiceParams & HasJurisdictionId) =>
-		`/jurisdiction-admin/services/${params.serviceId}?jurisdiction_id=${params.jurisdiction_id}`,
-	postAttribute: (params: HasId<number> & HasJurisdictionId) =>
-		`/jurisdiction-admin/services/${params.id}/attributes?jurisdiction_id=${params.jurisdiction_id}`,
+	patchService: (params: HasJurisdictionId & HasServiceCode) =>
+		`/jurisdiction-admin/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteService: (params:  HasJurisdictionId & HasServiceCode) =>
+		`/jurisdiction-admin/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
+	postAttribute: (params: HasJurisdictionId & HasServiceCode) =>
+		`/jurisdiction-admin/services/${params.service_code}/attributes?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -550,7 +562,7 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 				urlSearchParams.append(`attribute[${code}]`, value.join(','));
 			});
 		} else {
-			urlSearchParams.set(k, v);
+			urlSearchParams.set(k, v.toString());
 		}
 	}
 	return urlSearchParams;
@@ -682,7 +694,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		try {
 			const res = await this.axiosInstance.patch<unknown>(
 				ROUTES.patchService({
-					id: params.id,
+					service_code: params.service_code,
 					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
 				}),
 				params
@@ -695,7 +707,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		}
 	}
 
-	async deleteService(params: DeleteServiceParams): Promise<void> {
+	async deleteService(params: HasServiceCode): Promise<void> {
 		try {
 			await this.axiosInstance.delete<unknown>(
 				ROUTES.deleteService({
@@ -714,7 +726,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	): Promise<CreateServiceDefinitionAttributeResponse> {
 		const res = await this.axiosInstance.post<unknown>(
 			ROUTES.postAttribute({
-				id: params.serviceId,
+				service_code: params.service_code,
 				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
 			}),
 			params

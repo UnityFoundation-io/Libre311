@@ -136,7 +136,7 @@ public class RootController {
     @Get(uris = {"/services/{serviceCode}{?jurisdiction_id}", "/services/{serviceCode}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
-    public ServiceDefinitionDTO getServiceDefinitionJson(String serviceCode,
+    public ServiceDefinitionDTO getServiceDefinitionJson(Long serviceCode,
                                                          @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
         return serviceService.getServiceDefinition(serviceCode, jurisdiction_id);
@@ -145,7 +145,7 @@ public class RootController {
     @Get("/services/{serviceCode}.xml{?jurisdiction_id}")
     @Produces(MediaType.TEXT_XML)
     @ExecuteOn(TaskExecutors.IO)
-    public String getServiceDefinitionXml(String serviceCode,
+    public String getServiceDefinitionXml(Long serviceCode,
                                           @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().build();
