@@ -65,7 +65,7 @@
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
 				<div class="image-container relative mx-auto my-4">
-					<img class="rounded-lg" src={imageData} alt="preview"/>
+					<img class="rounded-lg" src={imageData} alt="preview" />
 				</div>
 
 				<div class="grid w-full grid-rows-3 gap-2">
@@ -136,7 +136,7 @@
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
 				<div class="image-container relative mx-auto my-4">
-					<img class="rounded-lg" src={imageData} alt="preview"/>
+					<img class="rounded-lg" src={imageData} alt="preview" />
 				</div>
 
 				<div class="grid w-full grid-rows-3 gap-2">

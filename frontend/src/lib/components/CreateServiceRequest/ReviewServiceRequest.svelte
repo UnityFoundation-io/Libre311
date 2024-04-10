@@ -39,7 +39,7 @@
 		try {
 			let mediaUrl: string | undefined = undefined;
 
-			submittingServiceRequest = true
+			submittingServiceRequest = true;
 
 			if (params.file) {
 				mediaUrl = await libre311.uploadImage(params.file);
@@ -48,7 +48,7 @@
 
 			await libre311.createServiceRequest(toCreateServiceRequestParams(params));
 
-			submittingServiceRequest = false
+			submittingServiceRequest = false;
 
 			alert({
 				type: 'success',
