@@ -150,6 +150,10 @@
 	.serviceTitle {
 		color: hsl(var(--primary));
 	}
+	.image-container {
+		display: flex;
+		justify-content: center;
+	}
 	img {
 		max-height: 15rem;
 	}
