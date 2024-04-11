@@ -42,7 +42,7 @@ jobs:
          working-directory: ./frontend
       # run svelte check
       - name: Run Svelte Check
-        run: npm run svelte-check
+        run: npm run check
         working-directory: ./frontend
       # run unit tests
       - name: Run unit tests
