@@ -241,7 +241,11 @@ export const ServiceRequestPrioritySchema = z.union([
 ]);
 export type ServiceRequestPriority = z.infer<typeof ServiceRequestPrioritySchema>;
 
-export const serviceRequestPriorityArray: Readonly<Array<ServiceRequestPriority>> = ["low", "medium", "high"];
+export const serviceRequestPriorityArray: Readonly<Array<ServiceRequestPriority>> = [
+	'low',
+	'medium',
+	'high'
+];
 
 export function isServiceRequestPriority(
 	maybePriority: unknown
