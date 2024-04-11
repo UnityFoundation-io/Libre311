@@ -1,4 +1,9 @@
+import {
+	serviceRequestPriorityArray,
+	serviceRequestStatusArray
+} from '$lib/services/Libre311/Libre311';
 import L, { type PointTuple } from 'leaflet';
+import type { SelectOption } from 'stwui/types';
 
 export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -67,3 +72,19 @@ export const statusToTextMap = {
 	in_progress: 'In Progress',
 	assigned: 'Assigned'
 };
+
+export const serviceRequestStatusSelectOptions: SelectOption[] = serviceRequestStatusArray.map(
+	(s) => {
+		return {
+			value: s,
+			label: statusToTextMap[s]
+		};
+	}
+);
+
+export const serviceRequestPrioritySelectOptions = serviceRequestPriorityArray.map((s) => {
+	return {
+		value: s,
+		label: s.toLocaleUpperCase()
+	}
+})

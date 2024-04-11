@@ -24,14 +24,18 @@
 		ServiceRequestPriority,
 		ServiceRequestStatus
 	} from '$lib/services/Libre311/Libre311';
-	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
+	import {
+		serviceRequestPrioritySelectOptions,
+		serviceRequestStatusSelectOptions,
+		toAbbreviatedTimeStamp
+	} from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
 	import { onMount, type ComponentEvents } from 'svelte';
 	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
 	import { slide } from 'svelte/transition';
 	import { Select } from 'stwui';
-	import { columns, priorityOptions, statusOptions } from './table';
+	import { columns } from './table';
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon';
 	import {
 		ASYNC_IN_PROGRESS,
@@ -191,11 +195,11 @@
 									name="select-priority"
 									placeholder="Priority:"
 									multiple
-									options={priorityOptions}
+									options={serviceRequestPrioritySelectOptions}
 								>
 									<Select.Label slot="label">Priority</Select.Label>
 									<Select.Options slot="options">
-										{#each priorityOptions as option}
+										{#each serviceRequestPrioritySelectOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
 									</Select.Options>
@@ -207,12 +211,12 @@
 									name="select-status"
 									placeholder="Status:"
 									multiple
-									options={statusOptions}
+									options={serviceRequestStatusSelectOptions}
 									bind:value={statusInput}
 								>
 									<Select.Label slot="label">Status</Select.Label>
 									<Select.Options slot="options">
-										{#each statusOptions as option}
+										{#each serviceRequestStatusSelectOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
 									</Select.Options>

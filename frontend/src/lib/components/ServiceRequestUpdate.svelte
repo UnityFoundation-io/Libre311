@@ -23,6 +23,10 @@
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 	import { createEventDispatcher } from 'svelte';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
+	import {
+		serviceRequestPrioritySelectOptions,
+		serviceRequestStatusSelectOptions
+	} from "$lib/utils/functions";
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
@@ -30,10 +34,6 @@
 	}>();
 
 	export let serviceRequest: ServiceRequest;
-
-	let expectedDatetime = serviceRequest.expected_datetime
-		? new Date(Date.parse(serviceRequest.expected_datetime))
-		: null;
 
 	let statusInput = createInput<ServiceRequestStatus>(serviceRequest.status);
 	let priorityInput = createInput<ServiceRequestPriority | undefined>(serviceRequest.priority);
@@ -67,41 +67,6 @@
 			return expectedText != currentText;
 		}
 	}
-
-	const statusOptions: SelectOption[] = [
-		{
-			value: 'open',
-			label: 'Open'
-		},
-
-		{
-			value: 'assigned',
-			label: 'Assigned'
-		},
-		{
-			value: 'in_progress',
-			label: 'In Progress'
-		},
-		{
-			value: 'closed',
-			label: 'Closed'
-		}
-	];
-
-	const priorityOptions: SelectOption[] = [
-		{
-			value: 'low',
-			label: 'Low'
-		},
-		{
-			value: 'medium',
-			label: 'Medium'
-		},
-		{
-			value: 'high',
-			label: 'High'
-		}
-	];
 
 	function updateStatus(e: Event) {
 		const target = e.target as HTMLInputElement;
@@ -160,14 +125,14 @@
 		<Select
 			name="select-status"
 			placeholder={serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1)}
-			options={statusOptions}
+			options={serviceRequestStatusSelectOptions}
 			on:change={updateStatus}
 		>
 			<Select.Label slot="label">
 				<strong class="text-base">{messages['serviceRequest']['status']}</strong>
 			</Select.Label>
 			<Select.Options slot="options">
-				{#each statusOptions as option}
+				{#each serviceRequestStatusSelectOptions as option}
 					<Select.Options.Option {option} />
 				{/each}
 			</Select.Options>
@@ -181,7 +146,7 @@
 			placeholder={serviceRequest.priority
 				? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
 				: '--'}
-			options={priorityOptions}
+			options={serviceRequestPrioritySelectOptions}
 			on:change={updatePriority}
 		>
 			<Select.Label slot="label">
@@ -190,7 +155,7 @@
 				</strong>
 			</Select.Label>
 			<Select.Options slot="options">
-				{#each priorityOptions as option}
+				{#each serviceRequestPrioritySelectOptions as option}
 					<Select.Options.Option {option} />
 				{/each}
 			</Select.Options>

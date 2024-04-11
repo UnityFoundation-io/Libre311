@@ -45,29 +45,3 @@ export const columns: TableColumn[] = [
 		class: 'hidden xl:table-cell w-[14%]'
 	}
 ];
-
-export const priorityOptions: SelectOption[] = [
-	{
-		value: 'low',
-		label: 'Low'
-	},
-	{
-		value: 'medium',
-		label: 'Medium'
-	},
-	{
-		value: 'high',
-		label: 'High'
-	}
-];
-
-export const statusOptions: SelectOption[] = [
-	{
-		value: 'open',
-		label: 'Open'
-	},
-	{
-		value: 'closed',
-		label: 'Closed'
-	}
-];
