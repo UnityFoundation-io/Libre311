@@ -59,7 +59,8 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	});
 	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
 	const libre311Service = libre311Factory({ ...props.libreServiceProps, recaptchaService });
-	const user: Writable<UserInfo> = writable(undefined);
+	libre311Service.setAuthInfo(unityAuthService.getLoginData());
+	const user: Writable<UserInfo> = writable(unityAuthService.getLoginData());
 	unityAuthService.subscribe('login', (args) => user.set(args));
 	unityAuthService.subscribe('login', (args) => libre311Service.setAuthInfo(args));
 	unityAuthService.subscribe('logout', () => libre311Service.setAuthInfo(undefined));

@@ -2,10 +2,11 @@ import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
 import { BaseObservable } from '../EventBus/EventBus';
+
 import {
 	isUserPermissionsSuccessResponse,
-	type UserPermissionsResolver,
-	type UserPermissionsSuccessResponse
+	UserPermissionsSuccessResponseSchema,
+	type UserPermissionsResolver
 } from '../UserPermissionsResolver';
 
 // Auth props schema
@@ -31,12 +32,15 @@ export type UnityAuthEventMap = {
 	login: CompleteLoginResponse;
 	logout: void;
 };
+const CompleteLoginResponseSchema = UnityAuthLoginResponseSchema.merge(
+	UserPermissionsSuccessResponseSchema
+);
 
-export type CompleteLoginResponse = UnityAuthLoginResponse & UserPermissionsSuccessResponse;
-
+export type CompleteLoginResponse = z.infer<typeof CompleteLoginResponseSchema>;
 // Auth Interface
 export type UnityAuthService = BaseObservable<UnityAuthEventMap> & {
 	login(email: string, password: string): Promise<CompleteLoginResponse>;
+	getLoginData(): CompleteLoginResponse | undefined;
 	logout(): void;
 };
 
@@ -45,17 +49,27 @@ export class UnityAuthServiceImpl
 	extends BaseObservable<UnityAuthEventMap>
 	implements UnityAuthService
 {
+	private loginDataKey: string = 'loginData';
 	private axiosInstance: AxiosInstance;
 	private userPermissionsResolver: UserPermissionsResolver;
+	private loginData: CompleteLoginResponse | undefined;
 	private constructor(props: UnityAuthServiceProps) {
 		super();
 		UnityAuthServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
+
+		this.loginData = this.retrieveLoginData();
+		this.publish('logout', undefined);
+
 		this.userPermissionsResolver = props.userPermissionsResolver;
 	}
 
 	public static create(props: UnityAuthServiceProps) {
 		return new UnityAuthServiceImpl({ ...props });
+	}
+
+	getLoginData(): CompleteLoginResponse | undefined {
+		return this.loginData;
 	}
 
 	async login(email: string, password: string): Promise<CompleteLoginResponse> {
@@ -73,11 +87,23 @@ export class UnityAuthServiceImpl
 		const completeLoginRes: CompleteLoginResponse = { ...loginRes, ...permissionsRes };
 
 		this.publish('login', completeLoginRes);
+		sessionStorage.setItem(this.loginDataKey, JSON.stringify(completeLoginRes));
 		return completeLoginRes;
 	}
 
 	logout() {
+		sessionStorage.removeItem(this.loginDataKey);
 		this.publish('logout', undefined);
+	}
+
+	private retrieveLoginData(): CompleteLoginResponse | undefined {
+		const loginInfo = sessionStorage.getItem(this.loginDataKey);
+
+		if (!loginInfo) {
+			return;
+		}
+
+		return CompleteLoginResponseSchema.parse(JSON.parse(loginInfo));
 	}
 }
 
