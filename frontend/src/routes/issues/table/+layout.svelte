@@ -54,7 +54,7 @@
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let selectedServicePriority: ServiceRequestPriority[];
-	let selectedServiceCode: ServiceCode[] | undefined;
+	let selectedServiceCodes: string[] | undefined;
 	let isSearchFiltersOpen: boolean = false;
 	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
@@ -125,7 +125,7 @@
 
 	async function handleFilterInput(
 		selectedServicePriority: ServiceRequestPriority[],
-		selectedServiceCode: ServiceCode[] | undefined,
+		selectedServiceCodes: string[] | undefined,
 		statusInput: ServiceRequestStatus[],
 		startDate: Date,
 		endDate: Date
@@ -133,7 +133,7 @@
 		ctx.applyServiceRequestParams(
 			{
 				servicePriority: selectedServicePriority,
-				serviceCode: selectedServiceCode,
+				serviceCode: selectedServiceCodes?.map((s) => Number(s)),
 				status: statusInput,
 				startDate: startDate?.toISOString(),
 				endDate: endDate?.toISOString()
@@ -146,7 +146,7 @@
 
 	$: handleFilterInput(
 		selectedServicePriority,
-		selectedServiceCode,
+		selectedServiceCodes,
 		statusInput,
 		startDate,
 		endDate
@@ -178,7 +178,7 @@
 			</div>
 
 			<div
-				class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
+				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
@@ -227,7 +227,7 @@
 								{@const selectOptions = createSelectOptions(serviceList.value)}
 								<div class="m-1 min-w-52">
 									<Select
-										bind:value={selectedServiceCode}
+										bind:value={selectedServiceCodes}
 										name="select-1"
 										placeholder="Request Type"
 										multiple

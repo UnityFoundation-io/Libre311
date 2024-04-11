@@ -44,7 +44,10 @@ function toServiceRequestParams(searchParams: URLSearchParams) {
 	if (searchParams.get('pageNumber')) params.pageNumber = Number(searchParams.get('pageNumber'));
 
 	if (searchParams.get('service_code'))
-		params.serviceCode = searchParams.get('service_code')?.split(',');
+		params.serviceCode = searchParams
+			.get('service_code')
+			?.split(',')
+			.map((code) => Number(code));
 	if (searchParams.get('start_date'))
 		params.startDate = searchParams.get('start_date') ?? undefined;
 	if (searchParams.get('end_date')) params.endDate = searchParams.get('end_date') ?? undefined;
