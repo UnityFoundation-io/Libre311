@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import CheckMark from '$lib/components/Svg/outline/CheckMark.svelte';
 	import ChevronRight from '$lib/components/Svg/outline/ChevronRight.svelte';
 	import EllipsisVertical from '$lib/components/Svg/outline/EllipsisVertical.svelte';

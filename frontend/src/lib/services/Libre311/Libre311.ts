@@ -7,7 +7,6 @@ import type {
 	UpdateSensitiveServiceRequestResponse
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
-import type { HasId } from '$lib/utils/types';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -242,10 +241,16 @@ export const ServiceRequestPrioritySchema = z.union([
 ]);
 export type ServiceRequestPriority = z.infer<typeof ServiceRequestPrioritySchema>;
 
+export const serviceRequestPriorityArray: Readonly<Array<ServiceRequestPriority>> = [
+	'low',
+	'medium',
+	'high'
+];
+
 export function isServiceRequestPriority(
 	maybePriority: unknown
 ): maybePriority is ServiceRequestPriority {
-	return maybePriority == 'low' || maybePriority == 'medium' || maybePriority == 'high';
+	return ServiceRequestPrioritySchema.safeParse(maybePriority).success;
 }
 
 export const OpenServiceRequestStatusSchema = z.literal('open');
@@ -259,8 +264,14 @@ export const ServiceRequestStatusSchema = z.union([
 	InProgressServiceRequestStatusSchema
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusSchema>;
+export const serviceRequestStatusArray: Readonly<Array<ServiceRequestStatus>> = [
+	'assigned',
+	'closed',
+	'open',
+	'in_progress'
+];
 export function isServiceRequestStatus(maybeStatus: unknown): maybeStatus is ServiceRequestStatus {
-	return maybeStatus == 'open' || maybeStatus == 'closed';
+	return ServiceRequestStatusSchema.safeParse(maybeStatus).success;
 }
 const urlSchema = z.string().url();
 
@@ -512,7 +523,7 @@ const ROUTES = {
 		`/jurisdiction-admin/services?jurisdiction_id=${params.jurisdiction_id}`,
 	patchService: (params: HasJurisdictionId & HasServiceCode) =>
 		`/jurisdiction-admin/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
-	deleteService: (params:  HasJurisdictionId & HasServiceCode) =>
+	deleteService: (params: HasJurisdictionId & HasServiceCode) =>
 		`/jurisdiction-admin/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	postAttribute: (params: HasJurisdictionId & HasServiceCode) =>
 		`/jurisdiction-admin/services/${params.service_code}/attributes?jurisdiction_id=${params.jurisdiction_id}`,

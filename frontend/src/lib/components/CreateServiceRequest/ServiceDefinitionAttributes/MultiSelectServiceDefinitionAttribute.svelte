@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { Select } from 'stwui';
 	import type { SelectOption } from 'stwui/types';
-	import type {
-		AttributeResponse,
-		BaseServiceDefinitionAttribute,
-		MultiSelectServiceDefinitionAttribute
-	} from '$lib/services/Libre311/Libre311';
+	import type { MultiSelectServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
 
 	import type { MultiSelectServiceDefinitionAttributeInput } from './shared';
 
