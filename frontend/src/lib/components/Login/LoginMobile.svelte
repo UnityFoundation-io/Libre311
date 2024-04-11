@@ -25,7 +25,7 @@
 <div class="flex h-full w-full items-center justify-center">
 	<div class="w-full flex-col">
 		{#if errorMessage}
-			<div class="bg-red-500 text-white p-2 flex justify-center">
+			<div class="flex justify-center bg-red-500 p-2 text-white">
 				<span>{errorMessage}</span>
 			</div>
 		{/if}
@@ -96,10 +96,14 @@
 		</div>
 
 		<div class="m-4">
+			<!-- disbling the warning until we have valid link for this -->
+			<!-- eslint-disable-next-line svelte/valid-compile -->
 			<a class="text-sm" href="javascript:void(0);">{messages['login']['forgot_password']}</a>
 		</div>
 
 		<div class="m-4">
+			<!-- disbling the warning until we have valid link for this -->
+			<!-- eslint-disable-next-line svelte/valid-compile -->
 			<a class="text-sm" href="javascript:void(0);">{messages['login']['create_account']}</a>
 		</div>
 	</div>

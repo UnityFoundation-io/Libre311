@@ -1,4 +1,4 @@
-import type { SelectOption, TableColumn } from 'stwui/types';
+import type { TableColumn } from 'stwui/types';
 
 // 14% * 7 = 98%
 export const columns: TableColumn[] = [

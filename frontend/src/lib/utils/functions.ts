@@ -86,5 +86,5 @@ export const serviceRequestPrioritySelectOptions = serviceRequestPriorityArray.m
 	return {
 		value: s,
 		label: s.toLocaleUpperCase()
-	}
-})
+	};
+});

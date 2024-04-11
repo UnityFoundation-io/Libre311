@@ -73,7 +73,7 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 				props.alert({
 					type: 'error',
 					title: libre311ServerError.message,
-					description: `<div>${extractFirstErrorMessage(libre311ServerError)}</div> <small>logref: ${libre311ServerError.logref}</small>`
+					description: `${extractFirstErrorMessage(libre311ServerError)} \n logref: ${libre311ServerError.logref}`
 				});
 				return;
 			} else if (isHateoasErrorResponse(unknown.response?.data)) {

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { InputNumber } from 'stwui';
-	import type { NumberServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
 	import type { NumberServiceDefinitionInput } from './shared';
 
 	export let input: NumberServiceDefinitionInput;

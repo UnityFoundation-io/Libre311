@@ -306,7 +306,7 @@
 									<strong class="text-base">{'Values:'}</strong>
 
 									<ul>
-										{#each values as _, index}
+										{#each values as value, index}
 											<li
 												class="my-2 flex justify-between"
 												transition:slide|local={{ duration: 500 }}
@@ -318,7 +318,7 @@
 														'value_placeholder'
 													]}
 													error={multivalueErrorMessage}
-													bind:value={values[index].name}
+													bind:value={value.name}
 												/>
 
 												{#if index != 0}

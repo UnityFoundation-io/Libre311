@@ -8,7 +8,6 @@
 
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { GetServiceListResponse, Service } from '$lib/services/Libre311/Libre311';
-	import type { SelectOption } from 'stwui/types';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
 	import { Breadcrumbs, Button, Card, Dropdown, Input, List, Modal, Portal } from 'stwui';
 	import { onMount } from 'svelte';
@@ -117,7 +116,9 @@
 			service_code: serviceToDelete.service_code
 		});
 
-		let foundIndex = serviceList.value.findIndex((x) => x.service_code == serviceToDelete.service_code);
+		let foundIndex = serviceList.value.findIndex(
+			(x) => x.service_code == serviceToDelete.service_code
+		);
 		delete serviceList.value[foundIndex];
 		serviceList = serviceList;
 	}

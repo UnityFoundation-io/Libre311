@@ -9,7 +9,7 @@
 		ServiceRequestStatusSchema
 	} from '$lib/services/Libre311/Libre311';
 	import { calendarIcon } from './Svg/outline/calendarIcon';
-	import type { SelectOption } from 'stwui/types';
+
 	import {
 		createInput,
 		optionalCoalesceEmailValidator,
@@ -26,7 +26,7 @@
 	import {
 		serviceRequestPrioritySelectOptions,
 		serviceRequestStatusSelectOptions
-	} from "$lib/utils/functions";
+	} from '$lib/utils/functions';
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;

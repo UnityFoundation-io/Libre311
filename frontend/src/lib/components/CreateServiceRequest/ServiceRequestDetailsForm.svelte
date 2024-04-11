@@ -110,7 +110,7 @@
 			reader.readAsDataURL(params.file);
 
 			reader.onloadend = function () {
-				const result: String = new String(reader.result);
+				const result: string = String(reader.result);
 				imageData = result.toString();
 			};
 		}
