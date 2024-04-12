@@ -21,6 +21,7 @@ import app.dto.service.PatchServiceOrderPositionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
 import app.dto.servicedefinition.CreateServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.PatchAttributeOrderDTO;
 import app.dto.servicedefinition.UpdateServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.GetServiceRequestsDTO;
 import app.dto.servicerequest.PatchServiceRequestDTO;
@@ -40,7 +41,6 @@ import jakarta.annotation.Nullable;
 import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.UUID;
 
 import static app.security.Permission.*;
 
@@ -72,6 +72,14 @@ public class JurisdictionAdminController {
         return serviceService.updateService(serviceCode, requestDTO, jurisdiction_id);
     }
 
+    @Patch(uris = { "/groups/{groupId}/services-order{?jurisdiction_id}", "/groups/{groupId}/services-order.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public List<ServiceDTO> updateServicesOrder(Long groupId, @Valid @Body List<PatchServiceOrderPositionDTO> requestDTO,
+                                                @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceService.updateServiceOrderPositions(groupId, requestDTO);
+    }
+
     @Post(uris = { "/services/{serviceCode}/attributes{?jurisdiction_id}", "/services/{serviceCode}/attributes.json{?jurisdiction_id}"})
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
@@ -99,6 +107,14 @@ public class JurisdictionAdminController {
         return HttpResponse.ok();
     }
 
+    @Patch(uris = { "/services/{serviceCode}/attributes-order{?jurisdiction_id}", "/services/{serviceCode}/attributes-order.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public ServiceDefinitionDTO updateAttributesOrder(Long serviceCode, @Valid @Body List<PatchAttributeOrderDTO> requestDTO,
+                                                @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceService.updateAttributesOrder(serviceCode, requestDTO);
+    }
+
     @Get(uris = { "/groups{?jurisdiction_id}", "/groups.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_VIEW_SYSTEM, LIBRE311_ADMIN_VIEW_TENANT, LIBRE311_ADMIN_VIEW_SUBTENANT})
@@ -120,14 +136,6 @@ public class JurisdictionAdminController {
     public GroupDTO updateGroup(Long groupId, @Valid @Body CreateUpdateGroupDTO requestDTO,
                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return serviceService.updateGroup(groupId, requestDTO);
-    }
-
-    @Patch(uris = { "/groups/{groupId}/services-order{?jurisdiction_id}", "/groups/{groupId}/services-order.json{?jurisdiction_id}" })
-    @ExecuteOn(TaskExecutors.IO)
-    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public List<ServiceDTO> updateServicesOrder(Long groupId, @Valid @Body List<PatchServiceOrderPositionDTO> requestDTO,
-                                              @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return serviceService.updateServiceOrderPositions(groupId, requestDTO);
     }
 
     @Delete(uris = { "/groups/{groupId}{?jurisdiction_id}", "/groups/{groupId}.json{?jurisdiction_id}" })

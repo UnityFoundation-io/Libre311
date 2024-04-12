@@ -35,11 +35,7 @@ import app.dto.service.CreateServiceDTO;
 import app.dto.service.PatchServiceOrderPositionDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.UpdateServiceDTO;
-import app.dto.servicedefinition.AttributeValueDTO;
-import app.dto.servicedefinition.CreateServiceDefinitionAttributeDTO;
-import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
-import app.dto.servicedefinition.ServiceDefinitionDTO;
-import app.dto.servicedefinition.UpdateServiceDefinitionAttributeDTO;
+import app.dto.servicedefinition.*;
 import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.PostRequestServiceRequestDTO;
 import app.dto.servicerequest.PostResponseServiceRequestDTO;
@@ -545,6 +541,41 @@ public class JurisdictionAdminControllerTest  {
         assertTrue(Arrays.stream(serviceDTOS)
                 .allMatch(serviceDTO -> (Objects.equals(serviceDTO.getId(), bikeLaneService.getId()) && serviceDTO.getOrderPosition() == 0) ||
                         (Objects.equals(serviceDTO.getId(), busStopService.getId()) && serviceDTO.getOrderPosition() == 1)));
+    }
+
+    @Test
+    void canUpdateAttributesOrder() {
+        HttpResponse<?> response;
+
+        ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+        serviceDefinitionAttribute.setService(sidewalkService);
+        serviceDefinitionAttribute.setVariable(true);
+        serviceDefinitionAttribute.setDatatype(AttributeDataType.STRING);
+        serviceDefinitionAttribute.setRequired(true);
+        serviceDefinitionAttribute.setDescription("Sidewalk Service");
+        serviceDefinitionAttribute.setAttributeOrder(3);
+        serviceDefinitionAttribute.setDatatypeDescription("Sidewalk Service");
+        ServiceDefinitionAttribute stringAttribute = serviceDefinitionAttributeRepository.save(serviceDefinitionAttribute);
+
+        authLogin();
+
+        // reverse the order
+        List<PatchAttributeOrderDTO> payload = List.of(
+                new PatchAttributeOrderDTO(stringAttribute.getId(), 0),
+                new PatchAttributeOrderDTO(savedSDA.getId(), 1)
+        );
+
+        HttpRequest<?> request = HttpRequest.PATCH(
+                "/jurisdiction-admin/services/"+sidewalkService.getId()+"/attributes-order?jurisdiction_id=fakecity.gov",
+                payload).header("Authorization", "Bearer token.text.here");
+        response = client.toBlocking().exchange(request, ServiceDefinitionDTO.class);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        Optional<ServiceDefinitionDTO> serviceDefinitionDTOOptional = response.getBody(ServiceDefinitionDTO.class);
+        assertTrue(serviceDefinitionDTOOptional.isPresent());
+        ServiceDefinitionDTO serviceDefinitionDTO = serviceDefinitionDTOOptional.get();
+        assertTrue(serviceDefinitionDTO.getAttributes().stream().allMatch(
+                attributeDTO -> (Objects.equals(attributeDTO.getId(), savedSDA.getId()) && attributeDTO.getAttributeOrder() == 1) ||
+                        (Objects.equals(attributeDTO.getId(), stringAttribute.getId()) && attributeDTO.getAttributeOrder() == 0)));
     }
 
     @Test
