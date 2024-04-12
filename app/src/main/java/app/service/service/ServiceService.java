@@ -251,7 +251,7 @@ public class ServiceService {
     private ServiceDefinitionDTO convertToServiceDefinitionDTO(Service service) {
         ServiceDefinitionDTO serviceDefinitionDTO = new ServiceDefinitionDTO(service.getId());
 
-        List<ServiceDefinitionAttribute> serviceDefinitionAttributes = serviceDefinitionAttributeRepository.findAllByServiceId(service.getId());
+        List<ServiceDefinitionAttribute> serviceDefinitionAttributes = serviceDefinitionAttributeRepository.findAllByServiceIdOrderByAttributeOrderAsc(service.getId());
         if (serviceDefinitionAttributes != null) {
             serviceDefinitionDTO.setAttributes(serviceDefinitionAttributes.stream().map(serviceDefinitionAttributeEntity -> {
                 ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = new ServiceDefinitionAttributeDTO(
@@ -365,6 +365,22 @@ public class ServiceService {
         return serviceRepository.update(service);
     }
 
+    public ServiceDefinitionDTO updateAttributesOrder(Long serviceCode, List<PatchAttributeOrderDTO> requestDTO) {
+
+        updateAttributeOrderPositions(serviceCode, requestDTO);
+
+        // get refreshed list of attributes
+        Optional<Service> serviceOptional = serviceRepository.findById(serviceCode);
+        return convertToServiceDefinitionDTO(serviceOptional.get());
+    }
+
+    @Transactional
+    public void updateAttributeOrderPositions(Long serviceId, List<PatchAttributeOrderDTO> requestDTO) {
+        requestDTO.forEach(patchAttributeOrderDTO -> serviceDefinitionAttributeRepository.updateAttributeOrderByIdAndServiceId(
+                patchAttributeOrderDTO.getCode(), serviceId,
+                patchAttributeOrderDTO.getOrder()
+        ));
+    }
 
     private ServiceDTO toServiceDTO(Service service){
         return new ServiceDTO(service, serviceDefinitionAttributeRepository.existsByServiceId(service.getId()));
