@@ -16,12 +16,12 @@
 	import { goto } from '$app/navigation';
 	import { saveAs } from 'file-saver';
 	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
-	import type {
-		GetServiceListResponse,
-		ServiceRequest,
-		ServiceRequestId,
-		ServiceRequestPriority,
-		ServiceRequestStatus
+	import {
+		type GetServiceListResponse,
+		type ServiceRequest,
+		type ServiceRequestId,
+		type ServiceRequestPriority,
+		type ServiceRequestStatus
 	} from '$lib/services/Libre311/Libre311';
 	import {
 		serviceRequestPrioritySelectOptions,
@@ -44,6 +44,7 @@
 	} from '$lib/services/http';
 	import type { SelectOption } from 'stwui/types';
 	import ServiceRequestStatusBadge from '$lib/components/ServiceRequestStatusBadge.svelte';
+	import { FilteredServiceRequestsParamsMapper } from '$lib/services/Libre311/FilteredServiceRequestsParamsMapper';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
@@ -107,11 +108,9 @@
 	}
 
 	async function handleDownloadCsv() {
-		const searchParams = new URLSearchParams($page.url.searchParams);
-		searchParams.delete('page_size');
-		searchParams.delete('page');
-
-		const serviceRequestsBlob = await libre311.downloadServiceRequests(searchParams);
+		const serviceRequestsBlob = await libre311.downloadServiceRequests(
+			FilteredServiceRequestsParamsMapper.toRequestParams($page.url.searchParams)
+		);
 
 		saveAs(serviceRequestsBlob, 'service-requests.csv');
 	}

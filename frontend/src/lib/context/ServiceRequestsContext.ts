@@ -1,13 +1,11 @@
 import { goto } from '$app/navigation';
+import { FilteredServiceRequestsParamsMapper } from '$lib/services/Libre311/FilteredServiceRequestsParamsMapper';
 import {
-	type GetServiceRequestsParams,
 	type Libre311Service,
 	type ServiceRequest,
 	type ServiceRequestsResponse,
 	EMPTY_PAGINATION,
-	mapToServiceRequestsURLSearchParams,
-	isServiceRequestStatus,
-	isServiceRequestPriority
+	type FilteredServiceRequestsParams
 } from '$lib/services/Libre311/Libre311';
 import {
 	asAsyncFailure,
@@ -26,38 +24,8 @@ const key = Symbol();
 export type ServiceRequestsContext = {
 	selectedServiceRequest: Readable<Maybe<ServiceRequest>>;
 	serviceRequestsResponse: Readable<AsyncResult<ServiceRequestsResponse>>;
-	applyServiceRequestParams(params: GetServiceRequestsParams, url: URL): void;
+	applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL): void;
 };
-
-function toServiceRequestParams(searchParams: URLSearchParams) {
-	let params: GetServiceRequestsParams = {};
-
-	if (searchParams.get('service_request_id')) {
-		params = searchParams.get('service_request_id')?.split(',').map(Number) ?? [];
-		return params;
-	}
-
-	if (searchParams.get('priority'))
-		params.servicePriority =
-			searchParams.get('priority')?.split(',').filter(isServiceRequestPriority) ?? undefined;
-
-	if (searchParams.get('pageNumber')) params.pageNumber = Number(searchParams.get('pageNumber'));
-
-	if (searchParams.get('service_code'))
-		params.serviceCode = searchParams
-			.get('service_code')
-			?.split(',')
-			.map((code) => Number(code));
-	if (searchParams.get('start_date'))
-		params.startDate = searchParams.get('start_date') ?? undefined;
-	if (searchParams.get('end_date')) params.endDate = searchParams.get('end_date') ?? undefined;
-	// todo validate format
-	if (searchParams.get('status'))
-		params.status =
-			searchParams.get('status')?.split(',').filter(isServiceRequestStatus) ?? undefined;
-
-	return params;
-}
 
 export function createServiceRequestsContext(
 	libreService: Libre311Service,
@@ -104,7 +72,9 @@ export function createServiceRequestsContext(
 	async function handleMapPageNav(page: Page<Record<string, string>, string | null>) {
 		try {
 			selectedServiceRequest.set(undefined);
-			const updatedParams = toServiceRequestParams(page.url.searchParams);
+			const updatedParams = FilteredServiceRequestsParamsMapper.toRequestParams(
+				page.url.searchParams
+			);
 			const res = await libreService.getServiceRequests(updatedParams);
 			serviceRequestsResponse.set(asAsyncSuccess(res));
 		} catch (error) {
@@ -123,8 +93,8 @@ export function createServiceRequestsContext(
 		}
 	});
 
-	function applyServiceRequestParams(params: GetServiceRequestsParams, url: URL) {
-		const queryParams = mapToServiceRequestsURLSearchParams(params);
+	function applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL) {
+		const queryParams = FilteredServiceRequestsParamsMapper.toURLSearchParams(params);
 		goto(`${url.pathname}?${queryParams.toString()}`);
 	}
 
