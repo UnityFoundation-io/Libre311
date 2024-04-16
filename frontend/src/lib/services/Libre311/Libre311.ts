@@ -7,6 +7,7 @@ import type {
 	UpdateSensitiveServiceRequestResponse
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
+import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -387,9 +388,10 @@ export type CreateServiceDefinitionAttributesParams = z.infer<
 	typeof CreateServiceDefinitionAttributesSchema
 >;
 
-// ************************************************ //
-
-export type GetServiceRequestsParams =
+/**
+ * Filter Params for retrieving a subset service requests
+ */
+export type FilteredServiceRequestsParams =
 	| ServiceRequestId[]
 	| {
 			servicePriority?: ServiceRequestPriority[];
@@ -447,7 +449,7 @@ export interface Open311Service {
 	getServiceList(): Promise<GetServiceListResponse>;
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition>;
 	createServiceRequest(params: CreateServiceRequestParams): Promise<CreateServiceRequestResponse>;
-	getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse>;
+	getServiceRequests(params: FilteredServiceRequestsParams): Promise<ServiceRequestsResponse>;
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
@@ -485,7 +487,7 @@ export interface Libre311Service extends Open311Service {
 	getGroupList(): Promise<GetGroupListResponse>;
 	createGroup(params: CreateGroupParams): Promise<Group>;
 	editGroup(params: EditGroupParams): Promise<Group>;
-	downloadServiceRequests(params: URLSearchParams): Promise<Blob>;
+	downloadServiceRequests(params: FilteredServiceRequestsParams): Promise<Blob>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
 	createAttribute(
 		params: CreateServiceDefinitionAttributesParams
@@ -577,23 +579,6 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 		}
 	}
 	return urlSearchParams;
-}
-
-export function mapToServiceRequestsURLSearchParams(params: GetServiceRequestsParams) {
-	const queryParams = new URLSearchParams();
-
-	if (Array.isArray(params)) {
-		queryParams.append('service_request_id', params.join(','));
-	} else {
-		queryParams.append('page_size', '10');
-		queryParams.append('page', `${params.pageNumber ?? 0}`);
-		params.servicePriority && queryParams.append('priority', params.servicePriority?.join(','));
-		params.status && queryParams.append('status', params.status?.join(','));
-		params.serviceCode && queryParams.append('service_code', params.serviceCode?.join(','));
-		params.startDate && queryParams.append('start_date', params.startDate);
-		params.endDate && queryParams.append('end_date', params.endDate);
-	}
-	return queryParams;
 }
 
 export class Libre311ServiceImpl implements Libre311Service {
@@ -774,24 +759,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 		return CreateServiceRequestResponseSchema.parse(res.data);
 	}
 
-	async downloadServiceRequests(params: URLSearchParams): Promise<Blob> {
-		params.append('jurisdiction_id', this.jurisdictionId);
-
-		try {
-			const res = await this.axiosInstance.get<Blob>(ROUTES.getServiceRequestsDownload(params), {
-				responseType: 'blob'
-			});
-			return res.data;
-		} catch (error) {
-			console.log(error);
-			throw error;
-		}
+	async downloadServiceRequests(params: FilteredServiceRequestsParams): Promise<Blob> {
+		const queryParams = FilteredServiceRequestsParamsMapper.toURLSearchParams(params);
+		queryParams.append('jurisdiction_id', this.jurisdictionId);
+		const res = await this.axiosInstance.get<Blob>(ROUTES.getServiceRequestsDownload(queryParams), {
+			responseType: 'blob'
+		});
+		return res.data;
 	}
 
-	async getServiceRequests(params: GetServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		const queryParams = mapToServiceRequestsURLSearchParams(params);
+	async getServiceRequests(
+		params: FilteredServiceRequestsParams
+	): Promise<ServiceRequestsResponse> {
+		const queryParams = FilteredServiceRequestsParamsMapper.toURLSearchParams(params);
 		queryParams.append('jurisdiction_id', this.jurisdictionId);
-		console.log(queryParams.toString());
 
 		try {
 			const res = await this.axiosInstance.get<unknown>(ROUTES.getServiceRequests(queryParams));
