@@ -7,7 +7,6 @@
 	import DisplayNumberAttribute from './DisplayServiceDefinitionAttributes/DisplayNumberAttribute.svelte';
 	import DisplayDateTimeAttribute from './DisplayServiceDefinitionAttributes/DisplayDateTimeAttribute.svelte';
 	import DisplayTextAttribute from './DisplayServiceDefinitionAttributes/DisplayTextAttribute.svelte';
-	import { Badge } from 'stwui';
 	import StepControls from './StepControls.svelte';
 	import { toCreateServiceRequestParams, type CreateServiceRequestUIParams } from './shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
@@ -39,7 +38,7 @@
 		try {
 			let mediaUrl: string | undefined = undefined;
 
-			submittingServiceRequest = true
+			submittingServiceRequest = true;
 
 			if (params.file) {
 				mediaUrl = await libre311.uploadImage(params.file);
@@ -48,7 +47,7 @@
 
 			await libre311.createServiceRequest(toCreateServiceRequestParams(params));
 
-			submittingServiceRequest = false
+			submittingServiceRequest = false;
 
 			alert({
 				type: 'success',
@@ -67,7 +66,7 @@
 			reader.readAsDataURL(params.file);
 
 			reader.onloadend = function () {
-				const result: String = new String(reader.result);
+				const result: string = String(reader.result);
 				imageData = result.toString();
 			};
 		}
@@ -89,8 +88,8 @@
 				<p class="my-1 text-sm font-extralight">{getTimeStamp()}</p>
 
 				{#if imageData}
-					<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-						<img class="w-full" src={imageData} alt="preview" />
+					<div class="image-container relative mx-auto my-4">
+						<img class="rounded-lg" src={imageData} alt="preview" />
 					</div>
 				{/if}
 
@@ -149,5 +148,18 @@
 <style>
 	.serviceTitle {
 		color: hsl(var(--primary));
+	}
+	.image-container {
+		display: flex;
+		justify-content: center;
+	}
+	img {
+		max-height: 15rem;
+	}
+	/* Desktop */
+	@media only screen and (min-width: 769px) {
+		img {
+			max-height: 20rem;
+		}
 	}
 </style>

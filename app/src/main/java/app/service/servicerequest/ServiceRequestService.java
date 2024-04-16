@@ -200,8 +200,10 @@ public class ServiceRequestService {
 
         List<ServiceDefinitionAttributeDTO> attributes = new ArrayList<>();
         if (body.isPresent()) {
-            Map<String, String> map = body.get();
-            map.forEach((k, v) -> {
+            body.get().forEach((k, v) -> {
+                if (v != null && v.trim().isEmpty()) {
+                    return;
+                }
                 if (k.startsWith("attribute[")) {
                     String attributeCodeStr = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
                     Long attributeCode;
@@ -243,7 +245,7 @@ public class ServiceRequestService {
                             serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST) {
 
                         Set<AttributeValue> attributeValues = serviceDefinitionAttribute.getAttributeValues();
-                        if (attributeValues != null && v != null) {
+                        if (attributeValues != null) {
                             if (v.contains(",") && serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST){
                                 String[] attrResKeys = v.split(",");
                                 for (String attrResKey : attrResKeys) {

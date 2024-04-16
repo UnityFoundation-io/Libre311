@@ -4,9 +4,12 @@
 	import type { EventDispatchTypeMap } from '$lib/components/Login/shared';
 	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator } from '$lib/utils/validation';
-	import { useLibre311Context, useUnityAuthService } from '$lib/context/Libre311Context';
+	import { useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
-	import { checkHasMessage, isHateoasErrorResponse } from '$lib/services/Libre311/types/ServerErrors';
+	import {
+		checkHasMessage,
+		isHateoasErrorResponse
+	} from '$lib/services/Libre311/types/ServerErrors';
 	import { isAxiosError } from 'axios';
 
 	const authService = useUnityAuthService();

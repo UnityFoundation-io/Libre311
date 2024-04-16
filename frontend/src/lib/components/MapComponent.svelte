@@ -7,7 +7,7 @@
 </script>
 
 <script lang="ts">
-	import { onMount, onDestroy, setContext, createEventDispatcher, tick } from 'svelte';
+	import { onMount, onDestroy, setContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
 
@@ -26,7 +26,7 @@
 
 	onMount(() => {
 		map = L.map(mapElement);
-		map.addEventListener('moveend', (e) => {
+		map.addEventListener('moveend', () => {
 			dispatch('boundsChanged', map.getBounds());
 		});
 		map.addEventListener('drag', () => dispatch('boundsChanged', map.getBounds()));

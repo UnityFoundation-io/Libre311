@@ -3,7 +3,6 @@
 	import { Card } from 'stwui';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
-	import Flag from './Svg/Flag.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 
 	export let serviceRequest: ServiceRequest;

@@ -14,7 +14,7 @@
 
 package app.model.servicedefinition;
 
-import app.model.service.Service;
+import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.PageableRepository;
 import java.util.List;
@@ -23,4 +23,6 @@ import java.util.List;
 public interface ServiceDefinitionAttributeRepository extends PageableRepository<ServiceDefinitionAttribute, Long> {
     boolean existsByServiceId(long serviceId);
     List<ServiceDefinitionAttribute> findAllByServiceId(long serviceId);
+    List<ServiceDefinitionAttribute> findAllByServiceIdOrderByAttributeOrderAsc(long serviceId);
+    void updateAttributeOrderByIdAndServiceId(@Id Long id, @Id Long serviceId, Integer attributeOrder);
 }

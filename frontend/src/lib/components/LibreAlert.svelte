@@ -31,7 +31,9 @@
 		<Alert.Title slot="title">{title}</Alert.Title>
 
 		<Alert.Description slot="description">
-			{@html description}
+			<!-- todo change back to @html once csp policy is corrected -> https://kit.svelte.dev/docs/configuration#csp -->
+			<!-- {@html description} -->
+			{description}
 		</Alert.Description>
 
 		<Button on:click={() => dispatch('close')} class="ml-3" slot="extra" type="ghost">Close</Button>

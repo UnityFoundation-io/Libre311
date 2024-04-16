@@ -16,7 +16,7 @@
 	viewBox="0 0 24 24"
 	stroke-width="1.5"
 	stroke="currentColor"
-	class="h-6 w-6"
+	class="h-{size} w-{size}"
 >
 	<path
 		stroke-linecap="round"

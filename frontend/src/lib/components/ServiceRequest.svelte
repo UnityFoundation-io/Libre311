@@ -45,7 +45,7 @@
 				description: 'Your service request has been updated'
 			});
 
-			goto(`/issues/table`);
+			goto(back);
 		} catch (error) {
 			alertError(error);
 		}

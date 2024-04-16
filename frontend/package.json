@@ -12,7 +12,7 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:integration": "NODE_ENV=test playwright test",
-		"test:unit": "NODE_ENV=test vitest"
+		"test:unit": "NODE_ENV=test vitest --run"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",

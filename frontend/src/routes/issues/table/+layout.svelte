@@ -18,20 +18,23 @@
 	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
 	import type {
 		GetServiceListResponse,
-		ServiceCode,
 		ServiceRequest,
 		ServiceRequestId,
 		ServiceRequestPriority,
 		ServiceRequestStatus
 	} from '$lib/services/Libre311/Libre311';
-	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
+	import {
+		serviceRequestPrioritySelectOptions,
+		serviceRequestStatusSelectOptions,
+		toAbbreviatedTimeStamp
+	} from '$lib/utils/functions';
 	import type { Maybe } from '$lib/utils/types';
 	import { magnifingGlassIcon } from '$lib/components/Svg/outline/magnifyingGlassIcon';
-	import { onMount, type ComponentEvents } from 'svelte';
+	import { onMount } from 'svelte';
 	import Funnel from '$lib/components/Svg/outline/Funnel.svelte';
 	import { slide } from 'svelte/transition';
 	import { Select } from 'stwui';
-	import { columns, priorityOptions, statusOptions } from './table';
+	import { columns } from './table';
 	import { calendarIcon } from '$lib/components/Svg/outline/calendarIcon';
 	import {
 		ASYNC_IN_PROGRESS,
@@ -50,7 +53,7 @@
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let selectedServicePriority: ServiceRequestPriority[];
-	let selectedServiceCode: ServiceCode[] | undefined;
+	let selectedServiceCodes: string[] | undefined;
 	let isSearchFiltersOpen: boolean = false;
 	let statusInput: ServiceRequestStatus[];
 	let orderBy: string;
@@ -89,16 +92,14 @@
 		return res.map((s) => ({ value: s.service_code, label: s.service_name }));
 	}
 
-	async function handleSearchInput(e: ComponentEvents<any>['input']) {
+	async function handleSearchInput(e: Event) {
 		const target = e.target as HTMLInputElement;
 
 		// Remove non-numeric characters from the input value
 		let sanitizedValue = target.value.replace(/\D/g, '');
 
-		if (e.target != null && e.target.value) {
-			e.target.value = sanitizedValue;
-			const serviceRequestId = Number(e.target.value);
-
+		if (sanitizedValue) {
+			const serviceRequestId = Number(sanitizedValue);
 			ctx.applyServiceRequestParams([serviceRequestId], $page.url);
 		} else {
 			ctx.applyServiceRequestParams({}, $page.url);
@@ -121,7 +122,7 @@
 
 	async function handleFilterInput(
 		selectedServicePriority: ServiceRequestPriority[],
-		selectedServiceCode: ServiceCode[] | undefined,
+		selectedServiceCodes: string[] | undefined,
 		statusInput: ServiceRequestStatus[],
 		startDate: Date,
 		endDate: Date
@@ -129,7 +130,7 @@
 		ctx.applyServiceRequestParams(
 			{
 				servicePriority: selectedServicePriority,
-				serviceCode: selectedServiceCode,
+				serviceCode: selectedServiceCodes?.map((s) => Number(s)),
 				status: statusInput,
 				startDate: startDate?.toISOString(),
 				endDate: endDate?.toISOString()
@@ -142,7 +143,7 @@
 
 	$: handleFilterInput(
 		selectedServicePriority,
-		selectedServiceCode,
+		selectedServiceCodes,
 		statusInput,
 		startDate,
 		endDate
@@ -174,7 +175,7 @@
 			</div>
 
 			<div
-				class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
+				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
@@ -191,11 +192,11 @@
 									name="select-priority"
 									placeholder="Priority:"
 									multiple
-									options={priorityOptions}
+									options={serviceRequestPrioritySelectOptions}
 								>
 									<Select.Label slot="label">Priority</Select.Label>
 									<Select.Options slot="options">
-										{#each priorityOptions as option}
+										{#each serviceRequestPrioritySelectOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
 									</Select.Options>
@@ -207,12 +208,12 @@
 									name="select-status"
 									placeholder="Status:"
 									multiple
-									options={statusOptions}
+									options={serviceRequestStatusSelectOptions}
 									bind:value={statusInput}
 								>
 									<Select.Label slot="label">Status</Select.Label>
 									<Select.Options slot="options">
-										{#each statusOptions as option}
+										{#each serviceRequestStatusSelectOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
 									</Select.Options>
@@ -223,7 +224,7 @@
 								{@const selectOptions = createSelectOptions(serviceList.value)}
 								<div class="m-1 min-w-52">
 									<Select
-										bind:value={selectedServiceCode}
+										bind:value={selectedServiceCodes}
 										name="select-1"
 										placeholder="Request Type"
 										multiple

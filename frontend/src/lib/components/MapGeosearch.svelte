@@ -8,7 +8,7 @@
 			[number, number], // south, west - lat, lon
 			[number, number] // north, east - lat, lon
 		];
-		raw: any; // raw provider result
+		raw: unknown; // raw provider result
 	};
 
 	export type GeosearchShowLocationEvent = {
@@ -23,8 +23,9 @@
 </script>
 
 <script lang="ts">
-	import { GeoSearchControl, OpenStreetMapProvider, SearchControl } from 'leaflet-geosearch';
+	import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
+	import L from 'leaflet';
 
 	const map = getContext<{ getMap: () => L.Map }>('map').getMap();
 	const provider = new OpenStreetMapProvider({

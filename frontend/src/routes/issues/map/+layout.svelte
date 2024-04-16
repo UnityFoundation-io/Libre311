@@ -14,7 +14,7 @@
 	import MapListToggle from '$lib/components/MapListToggle.svelte';
 
 	// Type imports
-	import type { LatLngExpression, LatLngTuple } from 'leaflet';
+	import type { LatLngTuple } from 'leaflet';
 	import type { Maybe } from '$lib/utils/types';
 	import type { ServiceRequest, ServiceRequestsResponse } from '$lib/services/Libre311/Libre311';
 	import type { AsyncResult } from '$lib/services/http';

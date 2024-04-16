@@ -110,7 +110,7 @@
 			reader.readAsDataURL(params.file);
 
 			reader.onloadend = function () {
-				const result: String = new String(reader.result);
+				const result: string = String(reader.result);
 				imageData = result.toString();
 			};
 		}
@@ -120,8 +120,8 @@
 <form class="flex-container">
 	<div>
 		{#if imageData}
-			<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-				<img class="w-full" src={imageData} alt="preview" />
+			<div class="image-container relative mx-auto my-4">
+				<img class="rounded-lg" src={imageData} alt="preview" />
 			</div>
 		{/if}
 		<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
@@ -163,5 +163,18 @@
 		flex-direction: column;
 		justify-content: space-between;
 		height: 100%;
+	}
+	.image-container {
+		display: flex;
+		justify-content: center;
+	}
+	img {
+		max-height: 15rem;
+	}
+	/* Desktop */
+	@media only screen and (min-width: 769px) {
+		img {
+			max-height: 20rem;
+		}
 	}
 </style>

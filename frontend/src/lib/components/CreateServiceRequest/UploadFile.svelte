@@ -53,7 +53,7 @@
 			reader.readAsDataURL(params.file);
 
 			reader.onloadend = function () {
-				const result: String = new String(reader.result);
+				const result: string = String(reader.result);
 				imageData = result.toString();
 			};
 		}
@@ -64,8 +64,8 @@
 	<div slot="is-desktop" class="flex h-full w-full flex-col">
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
-				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-					<img class="w-full" src={imageData} alt="preview" />
+				<div class="image-container relative mx-auto my-4">
+					<img class="rounded-lg" src={imageData} alt="preview" />
 				</div>
 
 				<div class="grid w-full grid-rows-3 gap-2">
@@ -135,8 +135,8 @@
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full flex-col">
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
-				<div class="relative mx-auto my-4 overflow-hidden rounded-lg">
-					<img class="w-full" src={imageData} alt="preview" />
+				<div class="image-container relative mx-auto my-4">
+					<img class="rounded-lg" src={imageData} alt="preview" />
 				</div>
 
 				<div class="grid w-full grid-rows-3 gap-2">
@@ -217,5 +217,12 @@
 		text-align: center;
 		border-radius: 0.3rem;
 		cursor: pointer;
+	}
+	.image-container {
+		display: flex;
+		justify-content: center;
+	}
+	img {
+		max-height: 20rem;
 	}
 </style>
