@@ -50,7 +50,7 @@ public class ServiceDefinitionAttribute {
 
     private String datatypeDescription;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "serviceDefinitionAttribute")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "serviceDefinitionAttribute")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<AttributeValue> attributeValues;
 
