@@ -18,6 +18,8 @@
 	import type { SelectOption } from 'stwui/types';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import type { CreateServiceDefinitionAttributesParams } from '$lib/services/Libre311/Libre311';
+	import SdaListItem from '$lib/components/ServiceDefinitionEditor/SdaListItem.svelte';
+	import type { ComponentEvents } from 'svelte';
 
 	type AttributeValue = {
 		id: number;
@@ -203,6 +205,12 @@
 	function removeValue(index: number) {
 		values = values.filter((_, i) => i !== index);
 	}
+
+	function removeFromAttributeMap(e: ComponentEvents<SdaListItem>['attributeDeleted']) {
+		if (asyncAttributeInputMap.type != 'success') return;
+		asyncAttributeInputMap.value.delete(e.detail.code);
+		asyncAttributeInputMap = asyncAttributeInputMap;
+	}
 </script>
 
 <Card bordered={true} class="m-4">
@@ -220,11 +228,12 @@
 		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
 				{#each asyncAttributeInputMap.value.values() as input}
-					<List.Item class="flex cursor-pointer items-center hover:bg-slate-100">
-						<div class="mx-4 w-full">
-							{input.attribute.description}
-						</div>
-					</List.Item>
+					<SdaListItem
+						on:attributeDeleted={removeFromAttributeMap}
+						groupId={Number($page.params.group_id)}
+						serviceCode={Number($page.params.service_id)}
+						sda={input.attribute}
+					/>
 				{/each}
 
 				{#if isNewAttributeDropDownVisable}

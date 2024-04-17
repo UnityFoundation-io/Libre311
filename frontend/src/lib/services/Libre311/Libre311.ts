@@ -31,6 +31,12 @@ export type Group = z.infer<typeof GroupSchema>;
 export type HasServiceCode = z.infer<typeof HasServiceCodeSchema>;
 export type ServiceCode = z.infer<typeof ServiceCodeSchema>;
 
+const HasGroupIdSchema = z.object({
+	group_id: z.number()
+});
+
+export type HasGroupId = z.infer<typeof HasGroupIdSchema>;
+
 export const ServiceSchema = z
 	.object({
 		service_name: z.string(),
@@ -40,7 +46,8 @@ export const ServiceSchema = z
 		// keywords: z.array(z.string()),
 		// group: z.string()
 	})
-	.merge(HasServiceCodeSchema);
+	.merge(HasServiceCodeSchema)
+	.merge(HasGroupIdSchema);
 
 export type Service = z.infer<typeof ServiceSchema>;
 
@@ -170,12 +177,6 @@ const ServiceDefinitionSchema = HasServiceCodeSchema.extend({
 });
 
 export type ServiceDefinition = z.infer<typeof ServiceDefinitionSchema>;
-
-const HasGroupIdSchema = z.object({
-	group_id: z.number()
-});
-
-export type HasGroupId = z.infer<typeof HasGroupIdSchema>;
 
 const HasServiceRequestIdSchema = z.object({
 	service_request_id: z.number()
@@ -479,6 +480,11 @@ export const LibrePermissionsSchema = z.union([
 
 export type LibrePermissions = z.infer<typeof LibrePermissionsSchema>;
 
+type DeleteAttributeParams = {
+	serviceCode: number;
+	attributeCode: number;
+};
+
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
@@ -492,6 +498,7 @@ export interface Libre311Service extends Open311Service {
 	createAttribute(
 		params: CreateServiceDefinitionAttributesParams
 	): Promise<CreateServiceDefinitionAttributeResponse>;
+	deleteAttribute(params: DeleteAttributeParams): Promise<void>;
 	editService(params: EditServiceParams): Promise<Service>;
 	deleteService(params: HasServiceCode): Promise<void>;
 	updateServiceRequest(
@@ -529,6 +536,8 @@ const ROUTES = {
 		`/jurisdiction-admin/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	postAttribute: (params: HasJurisdictionId & HasServiceCode) =>
 		`/jurisdiction-admin/services/${params.service_code}/attributes?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteAttribute: (params: DeleteAttributeParams & HasJurisdictionId) =>
+		`/jurisdiction-admin/services/${params.serviceCode}/attributes/${params.attributeCode}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
 		`/requests?jurisdiction_id=${params.jurisdiction_id}`,
 	patchServiceRequest: (service_request_id: number, params: HasJurisdictionId) =>
@@ -729,6 +738,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 		);
 
 		return CreateServiceDefinitionAttributeResponseSchema.parse(res.data);
+	}
+
+	async deleteAttribute(params: DeleteAttributeParams): Promise<void> {
+		await this.axiosInstance.delete<void>(
+			ROUTES.deleteAttribute({ ...params, jurisdiction_id: this.jurisdictionId })
+		);
 	}
 
 	async createServiceRequest(
