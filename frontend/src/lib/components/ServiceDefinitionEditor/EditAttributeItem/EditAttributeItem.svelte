@@ -17,8 +17,8 @@
 	import { fade } from 'svelte/transition';
 	import type { EditServiceDefinitionAttributeParams } from '$lib/services/Libre311/Libre311';
 	import { goto } from '$app/navigation';
-	import type { AttributeInput } from './types';
-	import MultiValueList from './AttributeValue/MultiValueList.svelte';
+	import type { AttributeInput } from '../types';
+	import MultiValueList from './MultiValueList.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
