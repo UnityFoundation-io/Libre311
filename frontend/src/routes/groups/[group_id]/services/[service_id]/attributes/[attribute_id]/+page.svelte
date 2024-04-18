@@ -247,7 +247,7 @@
 						<strong class="text-base">{'Values'}</strong>
 
 						<ul>
-							{#each editAttributeInput.values as { }, index}
+							{#each editAttributeInput.values as value, index}
 								<li class="my-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
 									{#if index == multivalueErrorIndex}
 										<Input
@@ -257,7 +257,7 @@
 												'value_placeholder'
 											]}
 											error={multivalueErrorMessage}
-											bind:value={editAttributeInput.values[index].name}
+											bind:value={value.name}
 										/>
 									{:else}
 										<Input
@@ -266,7 +266,7 @@
 											placeholder={messages['serviceDefinitionEditor']['attributes'][
 												'value_placeholder'
 											]}
-											bind:value={editAttributeInput.values[index].name}
+											bind:value={value.name}
 										/>
 									{/if}
 
