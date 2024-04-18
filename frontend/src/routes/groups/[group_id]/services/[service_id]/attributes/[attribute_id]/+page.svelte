@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AttributeListItem from '$lib/components/ServiceDefinitionEditor/AttributeListItem.svelte';
+	import EditAttributeItem from '$lib/components/ServiceDefinitionEditor/EditAttributeItem.svelte';
 </script>
 
-<AttributeListItem />
+<EditAttributeItem />
