@@ -247,7 +247,7 @@
 						<strong class="text-base">{'Values'}</strong>
 
 						<ul>
-							{#each editAttributeInput.values as _, index}
+							{#each editAttributeInput.values as { }, index}
 								<li class="my-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
 									{#if index == multivalueErrorIndex}
 										<Input
