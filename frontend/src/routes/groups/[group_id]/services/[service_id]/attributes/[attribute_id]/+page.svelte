@@ -95,6 +95,7 @@
 			alertError(error);
 		}
 	}
+
 	async function handleEditAttribute() {
 		editAttribute.description = stringValidator(editAttribute.description);
 		editAttribute.dataTypeDescription = stringValidator(editAttribute.dataTypeDescription);
