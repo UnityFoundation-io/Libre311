@@ -7,7 +7,7 @@
 	import { createInput, stringValidator, type FormInputValue } from "$lib/utils/validation";
 	import { Breadcrumbs, Button, Card, Input, Progress } from "stwui";
 	import { fade, slide } from "svelte/transition";
-	import type { EditServiceDefinitionAttributeParams, ServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
+	import type { EditServiceDefinitionAttributeParams } from '$lib/services/Libre311/Libre311';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 
 	type AttributeEditValue = { key: string, name: string };
@@ -120,11 +120,10 @@
 				body.values = editValues;
 			}
 
-			console.log(body);
-
 			await libre311.editAttribute(body);
 
 			updateAttributeMap(serviceCode);
+			window.history.back();
 		} catch (error) {
 			alertError(error);
 		}
