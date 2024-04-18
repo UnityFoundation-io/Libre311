@@ -27,6 +27,7 @@
 	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
 	let groupId = $page.params.group_id;
 	let serviceCode = Number($page.params.service_id);
+	let attributeCode = Number($page.params.attribute_id);
 	let groupName = '';
 	let serviceName = '';
 	let editAttribute: AttributeEditInput = {
@@ -68,7 +69,7 @@
 			const serviceDefinition = await libre311.getServiceDefinition(payload);
 
 			for (let attribute of serviceDefinition.attributes) {
-				if (attribute.code == serviceCode) {
+				if (attribute.code == attributeCode) {
 					editAttribute.code = attribute.code;
 					editAttribute.required = attribute.required;
 					editAttribute.description.value = attribute.description;
