@@ -7,7 +7,7 @@ module.exports = {
 		'plugin:svelte/recommended',
 		'prettier'
 	],
-	root: {
+	rules: {
 		'no-unused-vars': 'off',
 		'@typescript-eslint/no-unused-vars': ['error']
 	},
