@@ -1,11 +1,11 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { slide } from 'svelte/transition';
-	import type { AttributeEditValue } from '../types';
+	import type { AttributeValue } from '../types';
 	import { Button, Input } from 'stwui';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 
-	export let values: AttributeEditValue[];
+	export let values: AttributeValue[];
 	export let multivalueErrorIndex: number;
 	export let multivalueErrorMessage: string | undefined;
 

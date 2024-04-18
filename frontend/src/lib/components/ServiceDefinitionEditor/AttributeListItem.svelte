@@ -17,7 +17,7 @@
 	import { fade } from 'svelte/transition';
 	import type { EditServiceDefinitionAttributeParams } from '$lib/services/Libre311/Libre311';
 	import { goto } from '$app/navigation';
-	import type { AttributeEditInput } from './types';
+	import type { AttributeInput } from './types';
 	import MultiValueList from './AttributeValue/MultiValueList.svelte';
 
 	const libre311 = useLibre311Service();
@@ -29,7 +29,7 @@
 	let attributeCode = Number($page.params.attribute_id);
 	let groupName = '';
 	let serviceName = '';
-	let editAttributeInput: AttributeEditInput = {
+	let editAttributeInput: AttributeInput = {
 		code: 0,
 		required: false,
 		description: createInput<string>(),

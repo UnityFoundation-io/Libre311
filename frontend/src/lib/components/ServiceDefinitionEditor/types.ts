@@ -1,11 +1,11 @@
 import type { FormInputValue } from '$lib/utils/validation';
 
-export type AttributeEditValue = { key: string; name: string };
+export type AttributeValue = { key: string; name: string };
 
-export type AttributeEditInput = {
+export type AttributeInput = {
 	code: number;
 	required: boolean;
 	description: FormInputValue<string>;
 	dataTypeDescription: FormInputValue<string>;
-	values: AttributeEditValue[] | undefined;
+	values: AttributeValue[] | undefined;
 };
