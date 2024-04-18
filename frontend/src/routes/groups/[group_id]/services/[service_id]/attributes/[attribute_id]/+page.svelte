@@ -122,6 +122,8 @@
 					if (value.name == '') {
 						multivalueErrorMessage = 'You might want to add a value!';
 						return;
+					} else {
+						multivalueErrorMessage = undefined;
 					}
 				}
 				body.values = editAttribute.values;
