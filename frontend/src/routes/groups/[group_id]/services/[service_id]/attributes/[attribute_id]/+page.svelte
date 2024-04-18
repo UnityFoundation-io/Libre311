@@ -39,6 +39,8 @@
 	};
 	let multivalueErrorMessage: string | undefined;
 
+	$: multivalueErrorIndex = -1;
+
 	$: crumbs = [
 		{ label: `Group: ${groupName}`, href: '/groups' },
 		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
@@ -118,9 +120,10 @@
 			};
 
 			if (editAttributeInput.values) {
-				for (let value of editAttributeInput.values) {
-					if (value.name == '') {
-						multivalueErrorMessage = 'You might want to add a value!';
+				for (let i = 0; i < editAttributeInput.values.length; i++) {
+					if (editAttributeInput.values[i].name == '') {
+						multivalueErrorMessage = `You might want to add a value!`;
+						multivalueErrorIndex = i;
 						return;
 					} else {
 						multivalueErrorMessage = undefined;
@@ -144,6 +147,7 @@
 		}
 		const newId = editAttributeInput.values?.length ? Number(editAttributeInput.values[editAttributeInput.values.length - 1].key) + 1 : 1;
 		editAttributeInput.values = [...editAttributeInput.values, { key: newId.toString(), name: '' }];
+		multivalueErrorMessage = undefined;
 	}
 
 	function removeEditValue(index: number) {
@@ -236,14 +240,26 @@
 									class="my-2 flex justify-between"
 									transition:slide|local={{ duration: 500 }}
 								>
-									<Input
-										class="w-11/12 rounded-md"
-										type="text"
-										placeholder={messages['serviceDefinitionEditor']['attributes'][
-											'value_placeholder'
-										]}
-										bind:value={editAttributeInput.values[index].name}
-									/>
+									{#if index == multivalueErrorIndex}
+										<Input
+											class="w-11/12 rounded-md"
+											type="text"
+											placeholder={messages['serviceDefinitionEditor']['attributes'][
+												'value_placeholder'
+											]}
+											error={multivalueErrorMessage}
+											bind:value={editAttributeInput.values[index].name}
+										/>
+									{:else}
+										<Input
+											class="w-11/12 rounded-md"
+											type="text"
+											placeholder={messages['serviceDefinitionEditor']['attributes'][
+												'value_placeholder'
+											]}
+											bind:value={editAttributeInput.values[index].name}
+										/>
+									{/if}
 
 									{#if index != 0}
 										<Button on:click={() => removeEditValue(index)}>
