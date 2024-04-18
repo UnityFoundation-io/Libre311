@@ -9,6 +9,7 @@
 	import { fade, slide } from "svelte/transition";
 	import type { EditServiceDefinitionAttributeParams } from '$lib/services/Libre311/Libre311';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
+	import { goto } from '$app/navigation';
 
 	type AttributeEditValue = { key: string, name: string };
 
@@ -127,7 +128,7 @@
 			await libre311.editAttribute(body);
 
 			updateAttributeMap(serviceCode);
-			window.history.back();
+			goto(`/groups/${groupId}/services/${serviceCode}`);
 		} catch (error) {
 			alertError(error);
 		}
