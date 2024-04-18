@@ -12,11 +12,12 @@
 
 	type AttributeEditValue = { key: string, name: string };
 
-	type AttributeEdit = {
+	type AttributeEditInput = {
 		code: number;
 		required: boolean;
 		description: FormInputValue<string>;
 		dataTypeDescription: FormInputValue<string>;
+		values: AttributeEditValue[] | undefined;
 	};
 
 	const libre311 = useLibre311Service();
@@ -27,13 +28,13 @@
 	let serviceCode = Number($page.params.service_id);
 	let groupName = '';
 	let serviceName = '';
-	let editAttribute: AttributeEdit = {
+	let editAttribute: AttributeEditInput = {
 		code: 0,
 		required: false,
 		description: createInput<string>(),
-		dataTypeDescription: createInput<string>()
+		dataTypeDescription: createInput<string>(),
+		values: undefined
 	};
-	let editValues: AttributeEditValue[] = [];
 	let multivalueErrorMessage: string | undefined;
 
 	$: crumbs = [
@@ -71,7 +72,10 @@
 					editAttribute.required = attribute.required;
 					editAttribute.description.value = attribute.description;
 					editAttribute.dataTypeDescription.value = attribute.datatype_description?.toString();
-					if (attribute.values) editValues = attribute.values;
+					if (attribute.values) editAttribute.values = attribute.values;
+					if (editAttribute.values) {
+						editAttribute.values.sort((a, b) => Number(a.key) - Number(b.key));
+					}
 				}
 			}
 
@@ -110,14 +114,14 @@
 				required: editAttribute.required
 			};
 
-			if (editValues) {
-				for (let value of editValues) {
+			if (editAttribute.values) {
+				for (let value of editAttribute.values) {
 					if (value.name == '') {
 						multivalueErrorMessage = 'You might want to add a value!';
 						return;
 					}
 				}
-				body.values = editValues;
+				body.values = editAttribute.values;
 			}
 
 			await libre311.editAttribute(body);
@@ -130,16 +134,18 @@
 	}
 
 	function addEditValue() {
-		const newId = editValues?.length ? Number(editValues[editValues.length - 1].key) + 1 : 1;
-		console.log(newId);
-		editValues = [...editValues, { key: newId.toString(), name: '' }];
+		if (editAttribute.values == undefined) {
+			return;
+		}
+		const newId = editAttribute.values?.length ? Number(editAttribute.values[editAttribute.values.length - 1].key) + 1 : 1;
+		editAttribute.values = [...editAttribute.values, { key: newId.toString(), name: '' }];
 	}
 
 	function removeEditValue(index: number) {
-		if (editValues) {
-			for (let i = 0; i < editValues.length; i++) {
+		if (editAttribute.values) {
+			for (let i = 0; i < editAttribute.values.length; i++) {
 				if (i == index) {
-					editValues = editValues.filter((_, i) => i !== index);
+					editAttribute.values = editAttribute.values.filter((_, i) => i !== index);
 				}
 			}
 		}
@@ -215,12 +221,12 @@
 					</Input>
 				</div>
 
-				{#if editValues}
+				{#if editAttribute.values}
 					<div class="flex flex-col" transition:slide|local={{ duration: 500 }}>
 						<strong class="text-base">{'Values'}</strong>
 
 						<ul>
-							{#each editValues as _, index}
+							{#each editAttribute.values as _, index}
 								<li
 									class="my-2 flex justify-between"
 									transition:slide|local={{ duration: 500 }}
@@ -231,7 +237,7 @@
 										placeholder={messages['serviceDefinitionEditor']['attributes'][
 											'value_placeholder'
 										]}
-										bind:value={editValues[index].name}
+										bind:value={editAttribute.values[index].name}
 									/>
 
 									{#if index != 0}
