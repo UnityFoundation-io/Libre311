@@ -12,22 +12,13 @@
 		type AsyncResult,
 		asAsyncSuccess
 	} from '$lib/services/http';
-	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
+	import { createInput, stringValidator } from '$lib/utils/validation';
 	import { Breadcrumbs, Button, Card, Input, Progress } from 'stwui';
-	import { fade, slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import type { EditServiceDefinitionAttributeParams } from '$lib/services/Libre311/Libre311';
-	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import { goto } from '$app/navigation';
-
-	type AttributeEditValue = { key: string; name: string };
-
-	type AttributeEditInput = {
-		code: number;
-		required: boolean;
-		description: FormInputValue<string>;
-		dataTypeDescription: FormInputValue<string>;
-		values: AttributeEditValue[] | undefined;
-	};
+	import type { AttributeEditInput } from './types';
+	import MultiValueList from './AttributeValue/MultiValueList.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -155,27 +146,6 @@
 			alertError(error);
 		}
 	}
-
-	function addEditValue() {
-		if (editAttributeInput.values == undefined) {
-			return;
-		}
-		const newId = editAttributeInput.values?.length
-			? Number(editAttributeInput.values[editAttributeInput.values.length - 1].key) + 1
-			: 1;
-		editAttributeInput.values = [...editAttributeInput.values, { key: newId.toString(), name: '' }];
-		multivalueErrorMessage = undefined;
-	}
-
-	function removeEditValue(index: number) {
-		if (editAttributeInput.values) {
-			for (let i = 0; i < editAttributeInput.values.length; i++) {
-				if (i == index) {
-					editAttributeInput.values = editAttributeInput.values.filter((_, i) => i !== index);
-				}
-			}
-		}
-	}
 </script>
 
 <Card bordered={true} class="m-4">
@@ -243,46 +213,11 @@
 				</div>
 
 				{#if editAttributeInput.values}
-					<div class="flex flex-col" transition:slide|local={{ duration: 500 }}>
-						<strong class="text-base">{'Values'}</strong>
-
-						<ul>
-							{#each editAttributeInput.values as value, index}
-								<li class="my-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
-									{#if index == multivalueErrorIndex}
-										<Input
-											class="w-11/12 rounded-md"
-											type="text"
-											placeholder={messages['serviceDefinitionEditor']['attributes'][
-												'value_placeholder'
-											]}
-											error={multivalueErrorMessage}
-											bind:value={value.name}
-										/>
-									{:else}
-										<Input
-											class="w-11/12 rounded-md"
-											type="text"
-											placeholder={messages['serviceDefinitionEditor']['attributes'][
-												'value_placeholder'
-											]}
-											bind:value={value.name}
-										/>
-									{/if}
-
-									{#if index != 0}
-										<Button on:click={() => removeEditValue(index)}>
-											<XMark />
-										</Button>
-									{/if}
-								</li>
-							{/each}
-						</ul>
-
-						<Button class="mt-1" type="ghost" on:click={addEditValue}>
-							{'+ Add'}
-						</Button>
-					</div>
+					<MultiValueList
+						bind:values={editAttributeInput.values}
+						{multivalueErrorMessage}
+						{multivalueErrorIndex}
+					/>
 				{/if}
 
 				<div class="my-2 flex items-center justify-between">
