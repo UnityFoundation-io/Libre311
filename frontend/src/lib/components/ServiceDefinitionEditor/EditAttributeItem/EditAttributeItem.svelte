@@ -74,8 +74,7 @@
 					editAttributeInput.code = attribute.code;
 					editAttributeInput.required = attribute.required;
 					editAttributeInput.description.value = attribute.description;
-					editAttributeInput.dataTypeDescription.value = attribute.datatype_description?.toString();
-					console.log(typeof attribute);
+					editAttributeInput.dataTypeDescription.value = attribute.datatype_description?.toString()
 
 					if (
 						attribute.datatype == 'multivaluelist' ||
