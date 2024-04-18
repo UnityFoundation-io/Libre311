@@ -25,6 +25,11 @@ const HasServiceCodeSchema = z.object({
 	service_code: ServiceCodeSchema
 });
 
+export const AttributeCodeSchma = z.object({
+	attribute_code: z.number()
+});
+export type HasAttributeCode = z.infer<typeof AttributeCodeSchma>;
+
 export const GroupSchema = z.object({ id: z.number(), name: z.string() });
 export type Group = z.infer<typeof GroupSchema>;
 
@@ -389,6 +394,40 @@ export type CreateServiceDefinitionAttributesParams = z.infer<
 	typeof CreateServiceDefinitionAttributesSchema
 >;
 
+export const EditServiceDefinitionAttributesSchema = z.object({
+	code: z.number(),
+	description: z.string(),
+	datatype_description: z.string(),
+	datatype: z.string(),
+	variable: z.boolean(),
+	required: z.boolean(),
+	order: z.number(),
+	values: z.array(AttributeValueSchema).optional()
+});
+
+export const EditServiceDefinitionAttributeParamsSchema = z.object({
+	attribute_code: z.number(),
+	service_code: z.number(),
+	description: z.string(),
+	datatype_description: z.string(),
+	required: z.boolean(),
+	// order: z.number(),
+	values: z.array(AttributeValueSchema).optional()
+});
+
+export type EditServiceDefinitionAttributeParams = z.infer<
+	typeof EditServiceDefinitionAttributeParamsSchema
+>;
+
+export const EditServiceDefinitionAttributeResponseSchema = z.object({
+	service_code: z.number(),
+	attributes: z.array(EditServiceDefinitionAttributesSchema)
+});
+
+export type EditServiceDefinitionAttributeResponse = z.infer<
+	typeof EditServiceDefinitionAttributeResponseSchema
+>;
+
 /**
  * Filter Params for retrieving a subset service requests
  */
@@ -498,6 +537,9 @@ export interface Libre311Service extends Open311Service {
 	createAttribute(
 		params: CreateServiceDefinitionAttributesParams
 	): Promise<CreateServiceDefinitionAttributeResponse>;
+	editAttribute(
+		params: EditServiceDefinitionAttributeParams
+	): Promise<EditServiceDefinitionAttributeResponse>;
 	deleteAttribute(params: DeleteAttributeParams): Promise<void>;
 	editService(params: EditServiceParams): Promise<Service>;
 	deleteService(params: HasServiceCode): Promise<void>;
@@ -536,6 +578,8 @@ const ROUTES = {
 		`/jurisdiction-admin/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	postAttribute: (params: HasJurisdictionId & HasServiceCode) =>
 		`/jurisdiction-admin/services/${params.service_code}/attributes?jurisdiction_id=${params.jurisdiction_id}`,
+	patchAttribute: (params: HasJurisdictionId & HasServiceCode & HasAttributeCode) =>
+		`/jurisdiction-admin/services/${params.service_code}/attributes/${params.attribute_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteAttribute: (params: DeleteAttributeParams & HasJurisdictionId) =>
 		`/jurisdiction-admin/services/${params.serviceCode}/attributes/${params.attributeCode}?jurisdiction_id=${params.jurisdiction_id}`,
 	postServiceRequest: (params: HasJurisdictionId) =>
@@ -738,6 +782,21 @@ export class Libre311ServiceImpl implements Libre311Service {
 		);
 
 		return CreateServiceDefinitionAttributeResponseSchema.parse(res.data);
+	}
+
+	async editAttribute(
+		params: EditServiceDefinitionAttributeParams
+	): Promise<EditServiceDefinitionAttributeResponse> {
+		const res = await this.axiosInstance.patch<unknown>(
+			ROUTES.patchAttribute({
+				service_code: params.service_code,
+				attribute_code: params.attribute_code,
+				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+			}),
+			params
+		);
+
+		return EditServiceDefinitionAttributeResponseSchema.parse(res.data);
 	}
 
 	async deleteAttribute(params: DeleteAttributeParams): Promise<void> {
