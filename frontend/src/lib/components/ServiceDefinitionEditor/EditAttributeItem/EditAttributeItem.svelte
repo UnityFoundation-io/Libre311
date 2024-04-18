@@ -74,7 +74,7 @@
 					editAttributeInput.code = attribute.code;
 					editAttributeInput.required = attribute.required;
 					editAttributeInput.description.value = attribute.description;
-					editAttributeInput.dataTypeDescription.value = attribute.datatype_description?.toString()
+					editAttributeInput.dataTypeDescription.value = attribute.datatype_description?.toString();
 
 					if (
 						attribute.datatype == 'multivaluelist' ||
