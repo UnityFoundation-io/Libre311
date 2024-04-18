@@ -313,6 +313,8 @@ public class ServiceService {
             serviceDefinitionAttribute.setDatatypeDescription(serviceDefinitionAttributeDTO.getDatatypeDescription());
         }
 
+        var saved = serviceDefinitionAttributeRepository.update(serviceDefinitionAttribute);
+
         // add new values
         if (serviceDefinitionAttributeDTO.getValues() != null) {
             // drop all attribute values
@@ -320,11 +322,11 @@ public class ServiceService {
 
             serviceDefinitionAttributeDTO.getValues().forEach(attributeValueDTO -> {
                 AttributeValue savedValue = attributeValueRepository.save(new AttributeValue(serviceDefinitionAttribute, attributeValueDTO.getName()));
-                serviceDefinitionAttribute.addAttributeValue(savedValue);
+                saved.addAttributeValue(savedValue);
             });
         }
 
-        return serviceDefinitionAttributeRepository.update(serviceDefinitionAttribute);
+        return saved;
     }
 
     public void removeServiceDefinitionAttributeFromServiceDefinition(Long attributeId) {
