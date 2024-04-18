@@ -394,17 +394,6 @@ export type CreateServiceDefinitionAttributesParams = z.infer<
 	typeof CreateServiceDefinitionAttributesSchema
 >;
 
-export const EditServiceDefinitionAttributesSchema = z.object({
-	code: z.number(),
-	description: z.string(),
-	datatype_description: z.string(),
-	datatype: z.string(),
-	variable: z.boolean(),
-	required: z.boolean(),
-	order: z.number(),
-	values: z.array(AttributeValueSchema).optional()
-});
-
 export const EditServiceDefinitionAttributeParamsSchema = z.object({
 	attribute_code: z.number(),
 	service_code: z.number(),
@@ -421,7 +410,7 @@ export type EditServiceDefinitionAttributeParams = z.infer<
 
 export const EditServiceDefinitionAttributeResponseSchema = z.object({
 	service_code: z.number(),
-	attributes: z.array(EditServiceDefinitionAttributesSchema)
+	attributes: z.array(ServiceDefinitionAttributeSchema)
 });
 
 export type EditServiceDefinitionAttributeResponse = z.infer<
