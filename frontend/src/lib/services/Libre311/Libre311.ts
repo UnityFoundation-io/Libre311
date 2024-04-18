@@ -537,6 +537,9 @@ export interface Libre311Service extends Open311Service {
 	createAttribute(
 		params: CreateServiceDefinitionAttributesParams
 	): Promise<CreateServiceDefinitionAttributeResponse>;
+	editAttribute(
+		params: EditServiceDefinitionAttributeParams
+	): Promise<EditServiceDefinitionAttributeResponse>;
 	deleteAttribute(params: DeleteAttributeParams): Promise<void>;
 	editService(params: EditServiceParams): Promise<Service>;
 	deleteService(params: HasServiceCode): Promise<void>;
