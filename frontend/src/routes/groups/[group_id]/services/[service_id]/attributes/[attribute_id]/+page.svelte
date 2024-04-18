@@ -30,7 +30,7 @@
 	let attributeCode = Number($page.params.attribute_id);
 	let groupName = '';
 	let serviceName = '';
-	let editAttribute: AttributeEditInput = {
+	let editAttributeInput: AttributeEditInput = {
 		code: 0,
 		required: false,
 		description: createInput<string>(),
@@ -70,13 +70,13 @@
 
 			for (let attribute of serviceDefinition.attributes) {
 				if (attribute.code == attributeCode) {
-					editAttribute.code = attribute.code;
-					editAttribute.required = attribute.required;
-					editAttribute.description.value = attribute.description;
-					editAttribute.dataTypeDescription.value = attribute.datatype_description?.toString();
-					if (attribute.values) editAttribute.values = attribute.values;
-					if (editAttribute.values) {
-						editAttribute.values.sort((a, b) => Number(a.key) - Number(b.key));
+					editAttributeInput.code = attribute.code;
+					editAttributeInput.required = attribute.required;
+					editAttributeInput.description.value = attribute.description;
+					editAttributeInput.dataTypeDescription.value = attribute.datatype_description?.toString();
+					if (attribute.values) editAttributeInput.values = attribute.values;
+					if (editAttributeInput.values) {
+						editAttributeInput.values.sort((a, b) => Number(a.key) - Number(b.key));
 					}
 				}
 			}
@@ -97,28 +97,28 @@
 	}
 
 	async function handleEditAttribute() {
-		editAttribute.description = stringValidator(editAttribute.description);
-		editAttribute.dataTypeDescription = stringValidator(editAttribute.dataTypeDescription);
+		editAttributeInput.description = stringValidator(editAttributeInput.description);
+		editAttributeInput.dataTypeDescription = stringValidator(editAttributeInput.dataTypeDescription);
 
 		// Return if any input errors
-		if (editAttribute.description.type != 'valid') {
+		if (editAttributeInput.description.type != 'valid') {
 			return;
 		}
-		if (editAttribute.dataTypeDescription.type != 'valid') {
+		if (editAttributeInput.dataTypeDescription.type != 'valid') {
 			return;
 		}
 
 		try {
 			const body: EditServiceDefinitionAttributeParams = {
-				attribute_code: editAttribute.code,
+				attribute_code: editAttributeInput.code,
 				service_code: serviceCode,
-				description: editAttribute.description.value,
-				datatype_description: editAttribute.dataTypeDescription.value,
-				required: editAttribute.required
+				description: editAttributeInput.description.value,
+				datatype_description: editAttributeInput.dataTypeDescription.value,
+				required: editAttributeInput.required
 			};
 
-			if (editAttribute.values) {
-				for (let value of editAttribute.values) {
+			if (editAttributeInput.values) {
+				for (let value of editAttributeInput.values) {
 					if (value.name == '') {
 						multivalueErrorMessage = 'You might want to add a value!';
 						return;
@@ -126,7 +126,7 @@
 						multivalueErrorMessage = undefined;
 					}
 				}
-				body.values = editAttribute.values;
+				body.values = editAttributeInput.values;
 			}
 
 			await libre311.editAttribute(body);
@@ -139,18 +139,18 @@
 	}
 
 	function addEditValue() {
-		if (editAttribute.values == undefined) {
+		if (editAttributeInput.values == undefined) {
 			return;
 		}
-		const newId = editAttribute.values?.length ? Number(editAttribute.values[editAttribute.values.length - 1].key) + 1 : 1;
-		editAttribute.values = [...editAttribute.values, { key: newId.toString(), name: '' }];
+		const newId = editAttributeInput.values?.length ? Number(editAttributeInput.values[editAttributeInput.values.length - 1].key) + 1 : 1;
+		editAttributeInput.values = [...editAttributeInput.values, { key: newId.toString(), name: '' }];
 	}
 
 	function removeEditValue(index: number) {
-		if (editAttribute.values) {
-			for (let i = 0; i < editAttribute.values.length; i++) {
+		if (editAttributeInput.values) {
+			for (let i = 0; i < editAttributeInput.values.length; i++) {
 				if (i == index) {
-					editAttribute.values = editAttribute.values.filter((_, i) => i !== index);
+					editAttributeInput.values = editAttributeInput.values.filter((_, i) => i !== index);
 				}
 			}
 		}
@@ -185,7 +185,7 @@
 							class="mx-2 rounded-sm"
 							id="is-edit-attribute-required"
 							type="checkbox"
-							bind:checked={editAttribute.required}
+							bind:checked={editAttributeInput.required}
 						/>
 					</div>
 				</div>
@@ -193,8 +193,8 @@
 				<div class="my-2">
 					<Input
 						name="edit-attribute-description"
-						error={editAttribute.description.error}
-						bind:value={editAttribute.description.value}
+						error={editAttributeInput.description.error}
+						bind:value={editAttributeInput.description.value}
 						placeholder={messages['serviceDefinitionEditor']['attributes'][
 							'description_placeholder'
 						]}
@@ -210,8 +210,8 @@
 				<div class="my-2">
 					<Input
 						name="edit-attribute-datatype-description"
-						error={editAttribute.dataTypeDescription.error}
-						bind:value={editAttribute.dataTypeDescription.value}
+						error={editAttributeInput.dataTypeDescription.error}
+						bind:value={editAttributeInput.dataTypeDescription.value}
 						placeholder={messages['serviceDefinitionEditor']['attributes'][
 							'data_type_description_placeholder'
 						]}
@@ -226,12 +226,12 @@
 					</Input>
 				</div>
 
-				{#if editAttribute.values}
+				{#if editAttributeInput.values}
 					<div class="flex flex-col" transition:slide|local={{ duration: 500 }}>
 						<strong class="text-base">{'Values'}</strong>
 
 						<ul>
-							{#each editAttribute.values as _, index}
+							{#each editAttributeInput.values as _, index}
 								<li
 									class="my-2 flex justify-between"
 									transition:slide|local={{ duration: 500 }}
@@ -242,7 +242,7 @@
 										placeholder={messages['serviceDefinitionEditor']['attributes'][
 											'value_placeholder'
 										]}
-										bind:value={editAttribute.values[index].name}
+										bind:value={editAttributeInput.values[index].name}
 									/>
 
 									{#if index != 0}
