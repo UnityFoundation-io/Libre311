@@ -1,17 +1,25 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { page } from "$app/stores";
-	import { createAttributeInputMap, type AttributeInputMap } from "$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared";
-	import { useLibre311Context, useLibre311Service } from "$lib/context/Libre311Context";
-	import { ASYNC_IN_PROGRESS, asAsyncFailure, type AsyncResult, asAsyncSuccess } from "$lib/services/http";
-	import { createInput, stringValidator, type FormInputValue } from "$lib/utils/validation";
-	import { Breadcrumbs, Button, Card, Input, Progress } from "stwui";
-	import { fade, slide } from "svelte/transition";
+	import { page } from '$app/stores';
+	import {
+		createAttributeInputMap,
+		type AttributeInputMap
+	} from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import {
+		ASYNC_IN_PROGRESS,
+		asAsyncFailure,
+		type AsyncResult,
+		asAsyncSuccess
+	} from '$lib/services/http';
+	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
+	import { Breadcrumbs, Button, Card, Input, Progress } from 'stwui';
+	import { fade, slide } from 'svelte/transition';
 	import type { EditServiceDefinitionAttributeParams } from '$lib/services/Libre311/Libre311';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import { goto } from '$app/navigation';
 
-	type AttributeEditValue = { key: string, name: string };
+	type AttributeEditValue = { key: string; name: string };
 
 	type AttributeEditInput = {
 		code: number;
@@ -76,10 +84,15 @@
 					editAttributeInput.required = attribute.required;
 					editAttributeInput.description.value = attribute.description;
 					editAttributeInput.dataTypeDescription.value = attribute.datatype_description?.toString();
-					if (attribute.values) editAttributeInput.values = attribute.values;
-					if (editAttributeInput.values) {
-						editAttributeInput.values.sort((a, b) => Number(a.key) - Number(b.key));
-					}
+					console.log(typeof attribute);
+
+					if (
+						attribute.datatype == 'multivaluelist' ||
+						(attribute.datatype == 'singlevaluelist' && attribute.values)
+					)
+						editAttributeInput.values = attribute.values.sort(
+							(a, b) => Number(a.key) - Number(b.key)
+						);
 				}
 			}
 
@@ -100,7 +113,9 @@
 
 	async function handleEditAttribute() {
 		editAttributeInput.description = stringValidator(editAttributeInput.description);
-		editAttributeInput.dataTypeDescription = stringValidator(editAttributeInput.dataTypeDescription);
+		editAttributeInput.dataTypeDescription = stringValidator(
+			editAttributeInput.dataTypeDescription
+		);
 
 		// Return if any input errors
 		if (editAttributeInput.description.type != 'valid') {
@@ -145,7 +160,9 @@
 		if (editAttributeInput.values == undefined) {
 			return;
 		}
-		const newId = editAttributeInput.values?.length ? Number(editAttributeInput.values[editAttributeInput.values.length - 1].key) + 1 : 1;
+		const newId = editAttributeInput.values?.length
+			? Number(editAttributeInput.values[editAttributeInput.values.length - 1].key) + 1
+			: 1;
 		editAttributeInput.values = [...editAttributeInput.values, { key: newId.toString(), name: '' }];
 		multivalueErrorMessage = undefined;
 	}
@@ -174,10 +191,7 @@
 
 	<Card.Content slot="content" class="p-0 sm:p-0">
 		{#if asyncAttributeInputMap?.type === 'success'}
-			<div
-				class="mx-4"
-				transition:fade={{ delay: 0, duration: 150 }}
-			>
+			<div class="mx-4" transition:fade={{ delay: 0, duration: 150 }}>
 				<div class="my-2 flex items-center justify-between">
 					<div class="my-2 items-center">
 						<label for="is-edit-attribute-required">
@@ -222,9 +236,7 @@
 					>
 						<Input.Label slot="label">
 							<strong class="text-base">
-								{messages['serviceDefinitionEditor']['attributes'][
-									'data_type_description'
-								]}
+								{messages['serviceDefinitionEditor']['attributes']['data_type_description']}
 							</strong>
 						</Input.Label>
 					</Input>
@@ -236,10 +248,7 @@
 
 						<ul>
 							{#each editAttributeInput.values as _, index}
-								<li
-									class="my-2 flex justify-between"
-									transition:slide|local={{ duration: 500 }}
-								>
+								<li class="my-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
 									{#if index == multivalueErrorIndex}
 										<Input
 											class="w-11/12 rounded-md"
@@ -296,7 +305,6 @@
 					</Button>
 				</div>
 			</div>
-
 		{:else if asyncAttributeInputMap?.type === 'inProgress'}
 			<div class="mx-8 my-4">
 				<Progress value={0} indeterminate />
