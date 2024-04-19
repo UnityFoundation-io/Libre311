@@ -14,6 +14,8 @@
 
 package app.dto.servicedefinition;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -29,6 +31,7 @@ public class ServiceDefinitionDTO {
     @JsonProperty("service_code")
     private Long serviceCode;
 
+    @JsonInclude(Include.ALWAYS) // my IDE marks this as the default but without including it null values are not deserialized as empty arrays
     @JacksonXmlElementWrapper(localName = "attributes")
     @JacksonXmlProperty(localName = "attribute")
     private List<ServiceDefinitionAttributeDTO> attributes;
