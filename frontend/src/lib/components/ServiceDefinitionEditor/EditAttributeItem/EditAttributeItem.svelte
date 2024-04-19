@@ -15,10 +15,7 @@
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
 	import { Breadcrumbs, Button, Card, Input, Progress } from 'stwui';
 	import { fade } from 'svelte/transition';
-	import type {
-		AttributeValue,
-		EditServiceDefinitionAttributeParams
-	} from '$lib/services/Libre311/Libre311';
+	import { type AttributeValue } from '$lib/services/Libre311/Libre311';
 	import { goto } from '$app/navigation';
 	import EditMultiValueList from './EditMultiValueList.svelte';
 
@@ -108,7 +105,7 @@
 		}
 	}
 
-	async function handleEditAttribute() {
+	async function handleEditStringAttribute() {
 		editAttributeInput.description = stringValidator(editAttributeInput.description);
 		editAttributeInput.dataTypeDescription = stringValidator(
 			editAttributeInput.dataTypeDescription
@@ -122,25 +119,50 @@
 			return;
 		}
 
+		const body = {
+			attribute_code: editAttributeInput.attribute_code,
+			service_code: serviceCode,
+			description: editAttributeInput.description.value?.toString(),
+			datatype_description: editAttributeInput.dataTypeDescription.value?.toString(),
+			required: editAttributeInput.required
+		};
+
 		try {
-			const body: EditServiceDefinitionAttributeParams = {
-				attribute_code: editAttributeInput.attribute_code,
-				service_code: serviceCode,
-				description: editAttributeInput.description.value,
-				datatype_description: editAttributeInput.dataTypeDescription.value,
-				required: editAttributeInput.required
-			};
+			await libre311.editAttribute(body);
 
-			if (editAttributeInput.values) {
-				for (let i = 0; i < editAttributeInput.values.length; i++) {
-					if (editAttributeInput.values[i].name == '') {
-						return;
-					} else {
-					}
-				}
-				body.values = editAttributeInput.values;
-			}
+			updateAttributeMap(serviceCode);
+			goto(`/groups/${groupId}/services/${serviceCode}`);
+		} catch (error) {
+			alertError(error);
+		}
+	}
 
+	async function handleEditMultivaluelistAttribute(e: CustomEvent) {
+		const values = e.detail.values;
+
+		editAttributeInput.description = stringValidator(editAttributeInput.description);
+		editAttributeInput.dataTypeDescription = stringValidator(
+			editAttributeInput.dataTypeDescription
+		);
+
+		// Return if any input errors
+		if (editAttributeInput.description.type != 'valid') {
+			return;
+		}
+		if (editAttributeInput.dataTypeDescription.type != 'valid') {
+			return;
+		}
+
+		const body = {
+			attribute_code: editAttributeInput.attribute_code,
+			service_code: serviceCode,
+			description: editAttributeInput.description.value?.toString(),
+			datatype_description: editAttributeInput.dataTypeDescription.value?.toString(),
+			required: editAttributeInput.required,
+			values: values
+		};
+
+		try {
 			await libre311.editAttribute(body);
 
 			updateAttributeMap(serviceCode);
@@ -216,7 +238,10 @@
 				</div>
 
 				{#if editAttributeInput.values}
-					<EditMultiValueList bind:attribute={editAttributeInput} on:submit={handleEditAttribute} />
+					<EditMultiValueList
+						bind:attribute={editAttributeInput}
+						on:submit={handleEditMultivaluelistAttribute}
+					/>
 				{:else}
 					<div class="my-2 flex items-center justify-between">
 						<Button
@@ -232,7 +257,7 @@
 							class="ml-1 w-1/2"
 							aria-label="Submit"
 							type="primary"
-							on:click={handleEditAttribute}
+							on:click={handleEditStringAttribute}
 						>
 							{'Save Changes'}
 						</Button>

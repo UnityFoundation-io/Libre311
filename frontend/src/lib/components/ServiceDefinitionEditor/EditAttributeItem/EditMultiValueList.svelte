@@ -4,10 +4,7 @@
 	import { Button, Input } from 'stwui';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type {
-		AttributeValue,
-		MultiSelectServiceDefinitionAttribute
-	} from '$lib/services/Libre311/Libre311';
+	import type { AttributeValue } from '$lib/services/Libre311/Libre311';
 	import type { FormInputValue } from '$lib/utils/validation';
 
 	interface EditAttributeInput {
@@ -44,6 +41,21 @@
 					attribute.values = attribute.values.filter((_, i) => i !== index);
 				}
 			}
+		}
+	}
+
+	function handleSubmit() {
+		if (attribute.values) {
+			for (let i = 0; i < attribute.values.length; i++) {
+				if (attribute.values[i].name == '') {
+					multivalueErrorMessage = 'You might want to add a value!';
+					multivalueErrorIndex = i;
+					return;
+				} else {
+					multivalueErrorMessage = undefined;
+				}
+			}
+			dispatch('submit', attribute);
 		}
 	}
 </script>
@@ -95,12 +107,7 @@
 				{'Cancel'}
 			</Button>
 
-			<Button
-				class="ml-1 w-1/2"
-				aria-label="Submit"
-				type="primary"
-				on:click={() => dispatch('submit', attribute)}
-			>
+			<Button class="ml-1 w-1/2" aria-label="Submit" type="primary" on:click={handleSubmit}>
 				{'Submit'}
 			</Button>
 		</div>
