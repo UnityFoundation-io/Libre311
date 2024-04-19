@@ -16,7 +16,7 @@
 	}
 
 	const dispatch = createEventDispatcher<{ submit: EditAttributeInput }>();
-	
+
 	export let attribute: EditAttributeInput;
 
 	let multivalueErrorMessage: string | undefined;
