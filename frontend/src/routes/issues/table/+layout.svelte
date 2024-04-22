@@ -174,7 +174,7 @@
 			</div>
 
 			<div
-				class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
+				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
