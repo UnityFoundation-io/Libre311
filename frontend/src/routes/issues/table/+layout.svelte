@@ -185,7 +185,7 @@
 						</div>
 					{:else}
 						<div class="flex flex-wrap justify-end" transition:slide|local={{ duration: 500 }}>
-							<div class="m-1">
+							<div class="m-1 min-w-32">
 								<Select
 									bind:value={selectedServicePriority}
 									name="select-priority"
@@ -202,7 +202,7 @@
 								</Select>
 							</div>
 
-							<div class="m-1">
+							<div class="m-1 min-w-36">
 								<Select
 									name="select-status"
 									placeholder="Status:"
