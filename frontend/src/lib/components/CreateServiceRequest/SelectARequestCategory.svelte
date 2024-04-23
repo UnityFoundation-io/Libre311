@@ -28,6 +28,7 @@
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let selectedServiceCode: ServiceCode | undefined = params?.service?.service_code;
+	let selectedServiceName: string | undefined = params.service?.service_name;
 	let selectedService: Service | undefined;
 
 	$: selectedServiceCodeInputValue = selectedServiceCode ? String(selectedServiceCode) : '';
@@ -77,7 +78,7 @@
 {#if serviceList.type === 'success'}
 	{@const selectOptions = createSelectOptions(serviceList.value)}
 	<Select
-		value={selectedServiceCodeInputValue}
+		value={selectedServiceName}
 		name="select-1"
 		placeholder="Request Type"
 		on:change={issueTypeChange}
