@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { useLibre311Service } from '$lib/context/Libre311Context';
-	import type { GetServiceListResponse } from '$lib/services/Libre311/Libre311';
+	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import type { GetServiceListResponse, Service } from '$lib/services/Libre311/Libre311';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
 	import { Breadcrumbs, Button, Card, Input, List } from 'stwui';
 	import { onMount, type ComponentEvents } from 'svelte';
@@ -16,6 +16,7 @@
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import CheckMark from '$lib/components/Svg/outline/CheckMark.svelte';
 	import ServiceListItem from '$lib/components/ServiceDefinitionEditor/ServiceListItem.svelte';
+	import DragAndDrop from '$lib/components/DragAndDrop.svelte';
 
 	interface Crumb {
 		label: string;
@@ -66,7 +67,7 @@
 		serviceList = serviceList;
 	}
 
-	async function handleServiceEdited(e: ComponentEvents<ServiceListItem>['serviceEdited']) {
+	function handleServiceEdited(e: ComponentEvents<ServiceListItem>['serviceEdited']) {
 		if (serviceList.type !== 'success') return;
 		const idx = serviceList.value.findIndex((s) => s.service_code == e.detail.service_code);
 		serviceList.value[idx] = e.detail;
@@ -75,6 +76,26 @@
 	function removeServiceFromState(e: ComponentEvents<ServiceListItem>['serviceDeleted']) {
 		if (serviceList.type !== 'success') return;
 		serviceList.value = serviceList.value.filter((s) => s.service_code != e.detail.service_code);
+	}
+
+	async function updateServicesOrder(e: ComponentEvents<DragAndDrop<Service>>['itemsChanged']) {
+		if (serviceList.type !== 'success') return;
+		try {
+			await libre311.updateServicesOrder({
+				group_id: groupId,
+				services: e.detail.map((s, i) => {
+					return {
+						service_code: s.service_code,
+						order_position: i
+					};
+				})
+			});
+
+			serviceList.value = e.detail;
+			serviceList = serviceList;
+		} catch (error: unknown) {
+			useLibre311Context().alertError('Unable to update order of services');
+		}
 	}
 
 	onMount(fetchServiceList);
@@ -131,13 +152,15 @@
 					</div>
 				{/if}
 
-				{#each serviceList.value as service}
+				<DragAndDrop items={serviceList.value} on:itemsChanged={updateServicesOrder}>
 					<ServiceListItem
+						slot="item"
+						let:item
 						on:serviceEdited={handleServiceEdited}
 						on:serviceDeleted={removeServiceFromState}
-						{service}
+						service={item}
 					/>
-				{/each}
+				</DragAndDrop>
 			</List>
 		</Card.Content>
 	{:else if serviceList.type === 'failure'}
