@@ -30,8 +30,6 @@
 	let selectedServiceCode: ServiceCode | undefined = params?.service?.service_code;
 	let selectedService: Service | undefined;
 
-	$: selectedServiceCodeInputValue = selectedServiceCode ? String(selectedServiceCode) : '';
-
 	$: if (selectedServiceCode && serviceList.type === 'success') {
 		selectedService = findService(selectedServiceCode);
 		dispatch('serviceSelected', selectedService);
@@ -77,7 +75,6 @@
 {#if serviceList.type === 'success'}
 	{@const selectOptions = createSelectOptions(serviceList.value)}
 	<Select
-		value={selectedServiceCodeInputValue}
 		name="select-1"
 		placeholder="Request Type"
 		on:change={issueTypeChange}
@@ -93,7 +90,6 @@
 {:else if serviceList.type === 'inProgress'}
 	<Select
 		disabled
-		value={selectedServiceCodeInputValue}
 		name="select-1"
 		placeholder="Loading Request Types..."
 		on:change={issueTypeChange}
@@ -106,7 +102,6 @@
 {:else}
 	<Select
 		disabled
-		value={selectedServiceCodeInputValue}
 		name="select-1"
 		placeholder="Failed to Load Request Types"
 		on:change={issueTypeChange}
