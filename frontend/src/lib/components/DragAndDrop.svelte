@@ -6,7 +6,7 @@
 
 	const dispatch = createEventDispatcher<{ itemsChanged: ItemsArray }>();
 
-	export let items: ItemsArray;
+	export let items: Readonly<ItemsArray>;
 
 	let internalItems: ItemsArray = [...items];
 	let draggingIndex: number | undefined = undefined;
@@ -20,10 +20,11 @@
 		if (draggingIndex === undefined || draggingIndex === index) return;
 		// we must get a reference to the item being dragged before mutating the array
 		const draggingItem = internalItems[draggingIndex];
+
 		internalItems.splice(draggingIndex, 1);
 		internalItems.splice(index, 0, draggingItem);
 		draggingIndex = index;
-		internalItems = items;
+		internalItems = internalItems;
 	}
 
 	function handleDragEnd() {
@@ -32,7 +33,7 @@
 	}
 </script>
 
-{#each items as item, index}
+{#each internalItems as item, index}
 	<div
 		role="listitem"
 		class="drag-item {draggingIndex === index && 'dragging'}"
