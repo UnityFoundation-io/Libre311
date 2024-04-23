@@ -142,6 +142,9 @@ public class ServiceService {
             service.setDescription(serviceDTO.getDescription());
         }
         if (serviceDTO.getServiceName() != null) {
+            if (serviceDTO.getServiceName().isBlank()) {
+                throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Service name cannot be blank");
+            }
             service.setServiceName(serviceDTO.getServiceName());
         }
         if (serviceDTO.getOrderPosition() != null) {

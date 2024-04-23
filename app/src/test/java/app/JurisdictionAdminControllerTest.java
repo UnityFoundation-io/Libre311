@@ -401,17 +401,29 @@ public class JurisdictionAdminControllerTest  {
 
         assertEquals(groupDTO.getId(), serviceDTO.getGroupId());
 
-        // update Service
-        UpdateServiceDTO updateServiceDTO = new UpdateServiceDTO();
-        updateServiceDTO.setServiceName("Inner City Bust Stops");
-        updateServiceDTO.setDescription("Issues pertaining to inner city bus stops.");
-        updateServiceDTO.setOrderPosition(3);
-
         response = createGroup("Group - Bus Stop 2", "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
         Optional<GroupDTO> secondGroupOptional = response.getBody(GroupDTO.class);
         assertTrue(secondGroupOptional.isPresent());
         GroupDTO secondGroupDTO = secondGroupOptional.get();
+
+        UpdateServiceDTO updateServiceDTO = new UpdateServiceDTO();
+
+        // update fail
+        updateServiceDTO.setServiceName("   ");
+        exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            HttpRequest failUpdateRequest = HttpRequest.PATCH(
+                            "/jurisdiction-admin/services/" + serviceDTO.getId() + "?jurisdiction_id=fakecity.gov",
+                            updateServiceDTO)
+                    .header("Authorization", "Bearer token.text.here");
+            client.toBlocking().exchange(failUpdateRequest, ServiceDTO.class);
+        });
+        assertEquals(BAD_REQUEST, exception.getStatus());
+
+        // update Service
+        updateServiceDTO.setServiceName("Inner City Bust Stops");
+        updateServiceDTO.setDescription("Issues pertaining to inner city bus stops.");
+        updateServiceDTO.setOrderPosition(3);
         updateServiceDTO.setGroupId(secondGroupDTO.getId());
 
         request = HttpRequest.PATCH(
