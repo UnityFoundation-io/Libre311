@@ -43,6 +43,7 @@ import io.micronaut.security.rules.SecurityRule;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.annotation.Nullable;
 
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -93,17 +94,7 @@ public class RootController {
     public HttpResponse<List<ServiceDTO>> indexJson(@Valid Pageable pageable,
                                                     @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
 
-        Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable, jurisdiction_id);
-
-        return HttpResponse.ok(serviceDTOPage.getContent())
-                .headers(Map.of(
-                        "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
-                        "page-TotalSize", String.valueOf(serviceDTOPage.getTotalSize()),
-                        "page-TotalPages", String.valueOf(serviceDTOPage.getTotalPages()),
-                        "page-PageNumber", String.valueOf(serviceDTOPage.getPageNumber()),
-                        "page-Offset", String.valueOf(serviceDTOPage.getOffset()),
-                        "page-Size", String.valueOf(serviceDTOPage.getSize())
-                ));
+        return HttpResponse.ok(serviceService.findAll(jurisdiction_id));
     }
 
     @Get("/services.xml{?jurisdiction_id}")
@@ -113,24 +104,16 @@ public class RootController {
                                          @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
 
         XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).build();
-        Page<ServiceDTO> serviceDTOPage = serviceService.findAll(pageable, jurisdiction_id)
+        List<ServiceDTO> serviceDTOList = serviceService.findAll(jurisdiction_id).stream()
                 .map(serviceDTO -> {
                     if (serviceDTO.getDescription() != null) {
                         serviceDTO.setDescription(XmlEscapers.xmlContentEscaper().escape(serviceDTO.getDescription()));
                     }
                     return serviceDTO;
-                });
-        ServiceList serviceList = new ServiceList(serviceDTOPage.getContent());
+                }).collect(Collectors.toList());
+        ServiceList serviceList = new ServiceList(serviceDTOList);
 
-        return HttpResponse.ok(xmlMapper.writeValueAsString(serviceList))
-                .headers(Map.of(
-                        "Access-Control-Expose-Headers", "page-TotalSize, page-TotalPages, page-PageNumber, page-Offset, page-Size ",
-                        "page-TotalSize", String.valueOf(serviceDTOPage.getTotalSize()),
-                        "page-TotalPages", String.valueOf(serviceDTOPage.getTotalPages()),
-                        "page-PageNumber", String.valueOf(serviceDTOPage.getPageNumber()),
-                        "page-Offset", String.valueOf(serviceDTOPage.getOffset()),
-                        "page-Size", String.valueOf(serviceDTOPage.getSize())
-                ));
+        return HttpResponse.ok(xmlMapper.writeValueAsString(serviceList));
     }
 
     @Get(uris = {"/services/{serviceCode}{?jurisdiction_id}", "/services/{serviceCode}.json{?jurisdiction_id}"})
