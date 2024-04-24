@@ -18,13 +18,18 @@
 	import ServiceListItem from '$lib/components/ServiceDefinitionEditor/ServiceListItem.svelte';
 	import DragAndDrop from '$lib/components/DragAndDrop.svelte';
 
-	interface Crumb {
-		label: string;
-		href: string;
+	let groupId = Number($page.params.group_id);
+	let groupName = '';
+
+	async function getGroupName(groupId: number) {
+		const groups = await libre311.getGroupList();
+
+		const group = groups.find((group) => group.id === groupId);
+		if (group) groupName = group.name;
 	}
 
-	const crumbs: Crumb[] = [
-		{ label: 'Groups', href: '/groups' },
+	$: crumbs = [
+		{ label: `Groups: ${groupName}`, href: '/groups' },
 		{ label: 'Services', href: `/groups/${$page.params.group_id}` }
 	];
 
@@ -33,10 +38,10 @@
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let isDropDownVisable = false;
-	let groupId = Number($page.params.group_id);
 	let newServiceName: FormInputValue<string> = createInput();
 
 	function fetchServiceList() {
+		getGroupName(groupId);
 		libre311
 			.getServiceList()
 			.then((res) => {
