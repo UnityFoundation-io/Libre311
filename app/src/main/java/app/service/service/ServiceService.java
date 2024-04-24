@@ -93,10 +93,10 @@ public class ServiceService {
         }
     }
 
-    public Page<ServiceDTO> findAll(Pageable pageable, String jurisdictionId) {
-        Page<Service> servicePage = serviceRepository.findAllByJurisdictionId(jurisdictionId, pageable);
+    public List<ServiceDTO> findAll(String jurisdictionId) {
+        List<Service> servicePage = serviceRepository.findAllByJurisdictionIdOrderByOrderPosition(jurisdictionId);
 
-        return servicePage.map(this::toServiceDTO);
+        return servicePage.stream().map(this::toServiceDTO).collect(Collectors.toList());
     }
 
     public ServiceDefinitionDTO getServiceDefinition(Long serviceCode, String jurisdictionId) {

@@ -27,7 +27,7 @@ import java.util.Optional;
 
 @Repository
 public interface ServiceRepository extends PageableRepository<Service, Long> {
-    Page<Service> findAllByJurisdictionId(String jurisdictionId, Pageable pageable);
+    List<Service> findAllByJurisdictionIdOrderByOrderPosition(String jurisdictionId);
     List<Service> findAllByServiceGroupIdOrderByOrderPositionAsc(Long groupId);
     void updateOrderPositionByIdAndServiceGroupId(@Id Long id, @Id Long groupId, Integer orderPosition);
     Long countByServiceGroup(ServiceGroup serviceGroup);
