@@ -10,6 +10,7 @@
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 	import type { CreateServiceRequestUIParams } from './shared';
+	import Camera from '../Svg/outline/Camera.svelte';
 
 	let input: HTMLInputElement;
 	let reuploadInput: HTMLInputElement;
@@ -150,7 +151,12 @@
 						bind:this={reuploadInput}
 						on:change={reuploadImage}
 					/>
-					<label for="camera-roll-btn-reupload">{messages['photo']['change_image']}</label>
+					<label for="camera-roll-btn-reupload">
+						<div class="flex items-center justify-center">
+							<Camera />
+							<span class="ml-2">{messages['photo']['change_image']}</span>
+						</div>
+					</label>
 
 					<Button
 						class="w-full"
