@@ -18,7 +18,10 @@
 	const serviceRequestResStore = useServiceRequestsResponseStore();
 	let listElement: HTMLElement | undefined;
 
-	$: if ($serviceRequestResStore.type === 'success') listElement?.scrollIntoView();
+	$: if ($serviceRequestResStore.type === 'success') {
+		listElement?.scrollIntoView();
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	}
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
