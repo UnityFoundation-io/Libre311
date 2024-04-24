@@ -513,6 +513,11 @@ type DeleteAttributeParams = {
 	attributeCode: number;
 };
 
+type UpdateServiceOrder = { order_position: number } & HasServiceCode;
+type UpdateServicesOrderParams = {
+	services: Array<UpdateServiceOrder>;
+} & HasGroupId;
+
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
@@ -523,6 +528,7 @@ export interface Libre311Service extends Open311Service {
 	editGroup(params: EditGroupParams): Promise<Group>;
 	downloadServiceRequests(params: FilteredServiceRequestsParams): Promise<Blob>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
+	updateServicesOrder(params: UpdateServicesOrderParams): Promise<GetServiceListResponse>;
 	createAttribute(
 		params: CreateServiceDefinitionAttributesParams
 	): Promise<CreateServiceDefinitionAttributeResponse>;
@@ -578,7 +584,9 @@ const ROUTES = {
 	getServiceRequest: (params: HasJurisdictionId & HasServiceRequestId) =>
 		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequestsDownload: (params: URLSearchParams) =>
-		`/jurisdiction-admin/requests/download?${params.toString()}`
+		`/jurisdiction-admin/requests/download?${params.toString()}`,
+	updateServicesOrder: (params: UpdateServicesOrderParams & HasJurisdictionId) =>
+		`/jurisdiction-admin/groups/${params.group_id}/services-order?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -743,6 +751,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 			console.log(error);
 			throw error;
 		}
+	}
+
+	async updateServicesOrder(params: UpdateServicesOrderParams): Promise<GetServiceListResponse> {
+		const res = await this.axiosInstance.patch<unknown>(
+			ROUTES.updateServicesOrder({
+				...params,
+				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+			}),
+			params.services
+		);
+		return GetServiceListResponseSchema.parse(res.data);
 	}
 
 	async deleteService(params: HasServiceCode): Promise<void> {
