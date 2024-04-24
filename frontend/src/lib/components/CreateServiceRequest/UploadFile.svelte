@@ -202,7 +202,7 @@
 					</Button>
 
 					<Button
-						class="w-full rounded-md"
+						class="w-full"
 						type="ghost"
 						on:click={() => {
 							dispatch('stepChange');
