@@ -29,6 +29,7 @@
 	];
 
 	const libre311 = useLibre311Service();
+	const alert = useLibre311Context().alert;
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let isDropDownVisable = false;
@@ -81,7 +82,7 @@
 	async function updateServicesOrder(e: ComponentEvents<DragAndDrop<Service>>['itemsChanged']) {
 		if (serviceList.type !== 'success') return;
 		try {
-			await libre311.updateServicesOrder({
+			const res = await libre311.updateServicesOrder({
 				group_id: groupId,
 				services: e.detail.map((s, i) => {
 					return {
@@ -90,11 +91,14 @@
 					};
 				})
 			});
-
-			serviceList.value = e.detail;
+			serviceList.value = res;
 			serviceList = serviceList;
 		} catch (error: unknown) {
-			useLibre311Context().alertError('Unable to update order of services');
+			alert({
+				type: 'error',
+				title: 'Unable to update the service order',
+				description: 'The request was unsuccessful'
+			});
 		}
 	}
 
