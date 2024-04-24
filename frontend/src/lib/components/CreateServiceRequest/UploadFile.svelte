@@ -11,6 +11,7 @@
 	import { page } from '$app/stores';
 	import type { CreateServiceRequestUIParams } from './shared';
 	import Camera from '../Svg/outline/Camera.svelte';
+	import Upload from '../Svg/outline/Upload.svelte';
 
 	let input: HTMLInputElement;
 	let reuploadInput: HTMLInputElement;
@@ -145,21 +146,39 @@
 					<img class="rounded-lg" src={imageData} alt="preview" />
 				</div>
 
-				<div class="grid w-full grid-rows-3 gap-2">
+				<div class="grid w-full grid-rows-4 gap-2">
 					<input
 						class="w-full"
 						type="file"
 						name="photo"
-						id="camera-roll-btn-reupload"
+						id="re-take-photo-button"
+						accept="image/*"
+						capture="environment"
+						hidden
+						bind:this={reuploadInput}
+						on:change={reuploadImage}
+					/>
+					<label for="re-take-photo-button">
+						<div class="flex items-center justify-center">
+							<Camera />
+							<span class="ml-2">{messages['photo']['change_image']}</span>
+						</div>
+					</label>
+
+					<input
+						class="w-full"
+						type="file"
+						name="photo"
+						id="re-upload-image-button"
 						accept="image/*"
 						hidden
 						bind:this={reuploadInput}
 						on:change={reuploadImage}
 					/>
-					<label for="camera-roll-btn-reupload">
+					<label for="re-upload-image-button">
 						<div class="flex items-center justify-center">
-							<Camera />
-							<span class="ml-2">{messages['photo']['change_image']}</span>
+							<Upload />
+							<span class="ml-2">{messages['photo']['upload']}</span>
 						</div>
 					</label>
 
@@ -190,11 +209,33 @@
 						name="photo"
 						id="camera-roll-btn"
 						accept="image/*"
+						capture="environment"
 						hidden
 						bind:this={input}
 						on:change={onChange}
 					/>
-					<label class="w-full" for="camera-roll-btn">{messages['photo']['upload']}</label>
+					<label class="w-full" for="camera-roll-btn">
+						<div class="flex items-center justify-center">
+							<Camera />
+							<span class="ml-2">{messages['photo']['take_photo']}</span>
+						</div>
+					</label>
+
+					<input
+						type="file"
+						name="photo"
+						id="upload-image-btn"
+						accept="image/*"
+						hidden
+						bind:this={input}
+						on:change={onChange}
+					/>
+					<label class="w-full" for="upload-image-btn">
+						<div class="flex items-center justify-center">
+							<Upload />
+							<span class="ml-2">{messages['photo']['upload']}</span>
+						</div>
+					</label>
 
 					<Button
 						class="w-full"
