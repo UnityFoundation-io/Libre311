@@ -79,16 +79,12 @@
 						bind:this={input}
 						on:change={onChange}
 					/>
-					<label for="camera-roll-btn-desktop">{messages['photo']['change_image']}</label>
-
-					<Button
-						type="ghost"
-						on:click={() => {
-							dispatch('stepChange');
-						}}
-					>
-						{messages['photo']['use_current_image']}
-					</Button>
+					<label for="camera-roll-btn-desktop">
+						<div class="flex items-center justify-center">
+							<Camera />
+							<span class="ml-2">{messages['photo']['change_image']}</span>
+						</div>
+					</label>
 
 					<Button
 						type="ghost"
@@ -97,6 +93,15 @@
 						}}
 					>
 						{messages['photo']['no_upload']}
+					</Button>
+
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
 					</Button>
 				</div>
 			{:else}
@@ -162,20 +167,20 @@
 						class="w-full"
 						type="ghost"
 						on:click={() => {
-							dispatch('stepChange');
-						}}
-					>
-						{messages['photo']['use_current_image']}
-					</Button>
-
-					<Button
-						class="w-full"
-						type="ghost"
-						on:click={() => {
 							dispatch('stepChange', { file: undefined });
 						}}
 					>
 						{messages['photo']['no_upload']}
+					</Button>
+
+					<Button
+						class="w-full rounded-md"
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
 					</Button>
 				</div>
 			{:else}
