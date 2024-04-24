@@ -27,8 +27,16 @@
 		return s.slice(s.indexOf('/') + 1);
 	});
 
-	async function onChange() {
+	async function handleDesktopImageInput() {
 		if (input.files && input.files.length < 2) dispatchFile(input.files[0]);
+	}
+
+	async function handleMobileImageInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+
+		if (input.files) {
+			dispatchFile(input.files?.[0]);
+		}
 	}
 
 	async function reuploadImage() {
@@ -78,7 +86,7 @@
 						accept="image/*"
 						hidden
 						bind:this={input}
-						on:change={onChange}
+						on:change={handleDesktopImageInput}
 					/>
 					<label for="camera-roll-btn-desktop">
 						<div class="flex items-center justify-center">
@@ -110,10 +118,12 @@
 					<div class="mb-4">
 						<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
 							<FilePicker.Icon slot="icon" data={uploadIcon} />
-							<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
-							<FilePicker.Description slot="description"
-								>Drag & Drop your file</FilePicker.Description
-							>
+							<FilePicker.Title slot="title">
+								{messages['photo']['upload']}
+							</FilePicker.Title>
+							<FilePicker.Description slot="description">
+								Drag & Drop your file
+							</FilePicker.Description>
 						</FilePicker>
 					</div>
 
@@ -172,8 +182,7 @@
 						id="re-upload-image-button"
 						accept="image/*"
 						hidden
-						bind:this={reuploadInput}
-						on:change={reuploadImage}
+						on:change={handleMobileImageInput}
 					/>
 					<label for="re-upload-image-button">
 						<div class="flex items-center justify-center">
@@ -212,7 +221,7 @@
 						capture="environment"
 						hidden
 						bind:this={input}
-						on:change={onChange}
+						on:change={handleMobileImageInput}
 					/>
 					<label class="w-full" for="camera-roll-btn">
 						<div class="flex items-center justify-center">
@@ -228,7 +237,7 @@
 						accept="image/*"
 						hidden
 						bind:this={input}
-						on:change={onChange}
+						on:change={handleMobileImageInput}
 					/>
 					<label class="w-full" for="upload-image-btn">
 						<div class="flex items-center justify-center">
