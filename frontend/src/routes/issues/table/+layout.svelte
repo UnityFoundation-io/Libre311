@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts">
-	import messages from '$media/messages.json';
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
 	import { Button, Card, DatePicker, Input, Table } from 'stwui';
 	import { page } from '$app/stores';
@@ -12,7 +11,6 @@
 		useSelectedServiceRequestStore,
 		useServiceRequestsContext
 	} from '$lib/context/ServiceRequestsContext';
-	import Pagination from '$lib/components/Pagination.svelte';
 	import { goto } from '$app/navigation';
 	import { saveAs } from 'file-saver';
 	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
@@ -153,26 +151,6 @@
 	<SideBarMainContentLayout>
 		<slot slot="side-bar" />
 		<div slot="main-content" class="relative flex h-full flex-col">
-			<div class="m-3 flex items-center justify-between">
-				<div>
-					<p class="text-base">{messages['sidebar']['title']}</p>
-				</div>
-
-				<div>
-					<Pagination
-						pagination={$serviceRequestsRes.value.metadata.pagination}
-						nextPage={linkResolver.nextIssuesTablePage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-						prevPage={linkResolver.prevIssuesTablePage(
-							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
-						)}
-					/>
-				</div>
-			</div>
-
 			<div
 				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
