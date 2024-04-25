@@ -77,11 +77,13 @@
 		if (serviceList.type !== 'success') return;
 		const idx = serviceList.value.findIndex((s) => s.service_code == e.detail.service_code);
 		serviceList.value[idx] = e.detail;
+		serviceList = serviceList;
 	}
 
 	function removeServiceFromState(e: ComponentEvents<ServiceListItem>['serviceDeleted']) {
 		if (serviceList.type !== 'success') return;
 		serviceList.value = serviceList.value.filter((s) => s.service_code != e.detail.service_code);
+		serviceList = serviceList;
 	}
 
 	async function updateServicesOrder(e: ComponentEvents<DragAndDrop<Service>>['itemsChanged']) {

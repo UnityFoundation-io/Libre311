@@ -62,6 +62,7 @@
 		const updatedGroup = e.detail;
 		let foundIndex = groupList.value.findIndex((x) => x.id == updatedGroup.id);
 		groupList.value[foundIndex] = updatedGroup;
+		groupList = groupList;
 	}
 
 	onMount(fetchGroupList);
