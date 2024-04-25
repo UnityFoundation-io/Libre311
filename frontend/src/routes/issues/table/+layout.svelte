@@ -126,15 +126,10 @@
 	) {
 		// Sets endDate to be one day later than what's selected to play nicely with STWUI
 		const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // Number of milliseconds in one day
-		let nextEndDate;
 
-		if (endDate == undefined) {
-			nextEndDate = endDate;
-		} else {
-			nextEndDate = new Date(endDate.getTime() + oneDayInMilliseconds);
+		if (endDate != undefined) {
+			endDate = new Date(endDate.getTime() + oneDayInMilliseconds);
 		}
-
-		// console.log(endDate);
 
 		ctx.applyServiceRequestParams(
 			{
@@ -142,7 +137,7 @@
 				serviceCode: selectedServiceCodes?.map((s) => Number(s)),
 				status: statusInput,
 				startDate: startDate?.toISOString(),
-				endDate: nextEndDate?.toISOString()
+				endDate: endDate?.toISOString()
 			},
 			$page.url
 		);
@@ -164,7 +159,7 @@
 		<slot slot="side-bar" />
 		<div slot="main-content" class="relative flex h-full flex-col">
 			<div
-				class="border-border m-3 flex items-center justify-end rounded-md border-t-[1px] shadow-md"
+				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
