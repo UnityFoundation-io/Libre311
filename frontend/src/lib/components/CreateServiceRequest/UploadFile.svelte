@@ -10,6 +10,8 @@
 	import type { DropResult } from 'stwui/types';
 	import { page } from '$app/stores';
 	import type { CreateServiceRequestUIParams } from './shared';
+	import Camera from '../Svg/outline/Camera.svelte';
+	import Upload from '../Svg/outline/Upload.svelte';
 
 	let input: HTMLInputElement;
 	let reuploadInput: HTMLInputElement;
@@ -25,8 +27,16 @@
 		return s.slice(s.indexOf('/') + 1);
 	});
 
-	async function onChange() {
+	async function handleDesktopImageInput() {
 		if (input.files && input.files.length < 2) dispatchFile(input.files[0]);
+	}
+
+	async function handleMobileImageInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+
+		if (input.files) {
+			dispatchFile(input.files?.[0]);
+		}
 	}
 
 	async function reuploadImage() {
@@ -76,18 +86,14 @@
 						accept="image/*"
 						hidden
 						bind:this={input}
-						on:change={onChange}
+						on:change={handleDesktopImageInput}
 					/>
-					<label for="camera-roll-btn-desktop">{messages['photo']['change_image']}</label>
-
-					<Button
-						type="ghost"
-						on:click={() => {
-							dispatch('stepChange');
-						}}
-					>
-						{messages['photo']['use_current_image']}
-					</Button>
+					<label for="camera-roll-btn-desktop">
+						<div class="flex items-center justify-center">
+							<Camera />
+							<span class="ml-2">{messages['photo']['change_image']}</span>
+						</div>
+					</label>
 
 					<Button
 						type="ghost"
@@ -97,16 +103,27 @@
 					>
 						{messages['photo']['no_upload']}
 					</Button>
+
+					<Button
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
+					</Button>
 				</div>
 			{:else}
 				<div class="items-center justify-center">
 					<div class="mb-4">
 						<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
 							<FilePicker.Icon slot="icon" data={uploadIcon} />
-							<FilePicker.Title slot="title">{messages['photo']['upload']}</FilePicker.Title>
-							<FilePicker.Description slot="description"
-								>Drag & Drop your file</FilePicker.Description
-							>
+							<FilePicker.Title slot="title">
+								{messages['photo']['upload']}
+							</FilePicker.Title>
+							<FilePicker.Description slot="description">
+								Drag & Drop your file
+							</FilePicker.Description>
 						</FilePicker>
 					</div>
 
@@ -139,28 +156,40 @@
 					<img class="rounded-lg" src={imageData} alt="preview" />
 				</div>
 
-				<div class="grid w-full grid-rows-3 gap-2">
+				<div class="grid w-full grid-rows-4 gap-2">
 					<input
 						class="w-full"
 						type="file"
 						name="photo"
-						id="camera-roll-btn-reupload"
+						id="re-take-photo-button"
 						accept="image/*"
+						capture="environment"
 						hidden
 						bind:this={reuploadInput}
 						on:change={reuploadImage}
 					/>
-					<label for="camera-roll-btn-reupload">{messages['photo']['change_image']}</label>
+					<label for="re-take-photo-button">
+						<div class="flex items-center justify-center">
+							<Camera />
+							<span class="ml-2">{messages['photo']['change_image']}</span>
+						</div>
+					</label>
 
-					<Button
+					<input
 						class="w-full"
-						type="ghost"
-						on:click={() => {
-							dispatch('stepChange');
-						}}
-					>
-						{messages['photo']['use_current_image']}
-					</Button>
+						type="file"
+						name="photo"
+						id="re-upload-image-button"
+						accept="image/*"
+						hidden
+						on:change={handleMobileImageInput}
+					/>
+					<label for="re-upload-image-button">
+						<div class="flex items-center justify-center">
+							<Upload />
+							<span class="ml-2">{messages['photo']['upload']}</span>
+						</div>
+					</label>
 
 					<Button
 						class="w-full"
@@ -171,6 +200,16 @@
 					>
 						{messages['photo']['no_upload']}
 					</Button>
+
+					<Button
+						class="w-full"
+						type="ghost"
+						on:click={() => {
+							dispatch('stepChange');
+						}}
+					>
+						{messages['photo']['use_current_image']}
+					</Button>
 				</div>
 			{:else}
 				<div class="grid grid-rows-2 gap-2">
@@ -179,11 +218,33 @@
 						name="photo"
 						id="camera-roll-btn"
 						accept="image/*"
+						capture="environment"
 						hidden
 						bind:this={input}
-						on:change={onChange}
+						on:change={handleMobileImageInput}
 					/>
-					<label class="w-full" for="camera-roll-btn">{messages['photo']['upload']}</label>
+					<label class="w-full" for="camera-roll-btn">
+						<div class="flex items-center justify-center">
+							<Camera />
+							<span class="ml-2">{messages['photo']['take_photo']}</span>
+						</div>
+					</label>
+
+					<input
+						type="file"
+						name="photo"
+						id="upload-image-btn"
+						accept="image/*"
+						hidden
+						bind:this={input}
+						on:change={handleMobileImageInput}
+					/>
+					<label class="w-full" for="upload-image-btn">
+						<div class="flex items-center justify-center">
+							<Upload />
+							<span class="ml-2">{messages['photo']['upload']}</span>
+						</div>
+					</label>
 
 					<Button
 						class="w-full"

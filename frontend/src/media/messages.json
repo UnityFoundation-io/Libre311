@@ -81,12 +81,12 @@
 		"button_submit": "Submit"
 	},
 	"photo": {
-		"upload": "Add An Image",
+		"upload": "Upload An Image",
 		"camera_roll": "Camera Roll",
 		"take_photo": "Take Photo",
 		"no_upload": "Continue Without Image",
-		"use_current_image": "Continue With Current Image",
-		"change_image": "Change Image",
+		"use_current_image": "Continue With Original Image",
+		"change_image": "Re-Take Photo",
 		"back": "Back",
 		"submit": "Submit"
 	},
