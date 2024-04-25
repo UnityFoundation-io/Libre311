@@ -518,6 +518,10 @@ type UpdateServicesOrderParams = {
 	services: Array<UpdateServiceOrder>;
 } & HasGroupId;
 
+type UpdateAttributeOrder = { code: HasAttributeCode['attribute_code']; order: number };
+type UpdateAttributesOrderParams = {
+	attributes: Array<UpdateAttributeOrder>;
+} & HasServiceCode;
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
@@ -536,6 +540,7 @@ export interface Libre311Service extends Open311Service {
 		params: EditServiceDefinitionAttributeParams
 	): Promise<EditServiceDefinitionAttributeResponse>;
 	deleteAttribute(params: DeleteAttributeParams): Promise<void>;
+	updateAttributesOrder(params: UpdateAttributesOrderParams): Promise<ServiceDefinition>;
 	editService(params: EditServiceParams): Promise<Service>;
 	deleteService(params: HasServiceCode): Promise<void>;
 	updateServiceRequest(
@@ -586,7 +591,9 @@ const ROUTES = {
 	getServiceRequestsDownload: (params: URLSearchParams) =>
 		`/jurisdiction-admin/requests/download?${params.toString()}`,
 	updateServicesOrder: (params: UpdateServicesOrderParams & HasJurisdictionId) =>
-		`/jurisdiction-admin/groups/${params.group_id}/services-order?jurisdiction_id=${params.jurisdiction_id}`
+		`/jurisdiction-admin/groups/${params.group_id}/services-order?jurisdiction_id=${params.jurisdiction_id}`,
+	updateAttributesOrder: (params: UpdateAttributesOrderParams & HasJurisdictionId) =>
+		`/jurisdiction-admin/services/${params.service_code}/attributes-order?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -811,6 +818,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 		await this.axiosInstance.delete<void>(
 			ROUTES.deleteAttribute({ ...params, jurisdiction_id: this.jurisdictionId })
 		);
+	}
+
+	async updateAttributesOrder(params: UpdateAttributesOrderParams): Promise<ServiceDefinition> {
+		const res = await this.axiosInstance.patch<unknown>(
+			ROUTES.updateAttributesOrder({
+				...params,
+				jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+			}),
+			params.attributes
+		);
+		return ServiceDefinitionSchema.parse(res.data);
 	}
 
 	async createServiceRequest(
