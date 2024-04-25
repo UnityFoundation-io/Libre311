@@ -50,7 +50,7 @@ export type DateTimeServiceDefinitionAttributeInput = ServiceDefinitionAttribute
 
 export type TextServiceDefinitionAttributeInput = ServiceDefinitionAttributeInput<'text', string>;
 
-type ServiceDefinitionAttributeInputUnion =
+export type ServiceDefinitionAttributeInputUnion =
 	| MultiSelectServiceDefinitionAttributeInput
 	| SingleValueListServiceDefinitionAttributeInput
 	| StringServiceDefinitionInput

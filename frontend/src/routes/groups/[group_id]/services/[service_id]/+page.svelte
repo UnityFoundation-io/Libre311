@@ -9,7 +9,8 @@
 	} from '$lib/services/http';
 	import {
 		createAttributeInputMap,
-		type AttributeInputMap
+		type AttributeInputMap,
+		type ServiceDefinitionAttributeInputUnion
 	} from '$lib/components/CreateServiceRequest/ServiceDefinitionAttributes/shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
@@ -20,6 +21,7 @@
 	import type { CreateServiceDefinitionAttributesParams } from '$lib/services/Libre311/Libre311';
 	import SdaListItem from '$lib/components/ServiceDefinitionEditor/SdaListItem.svelte';
 	import type { ComponentEvents } from 'svelte';
+	import DragAndDrop from '$lib/components/DragAndDrop.svelte';
 
 	type AttributeValue = {
 		id: number;
@@ -211,6 +213,27 @@
 		asyncAttributeInputMap.value.delete(e.detail.code);
 		asyncAttributeInputMap = asyncAttributeInputMap;
 	}
+
+	async function updateAttributesOrder(
+		e: ComponentEvents<DragAndDrop<ServiceDefinitionAttributeInputUnion>>['itemsChanged']
+	) {
+		if (asyncAttributeInputMap.type != 'success') return;
+
+		try {
+			const res = await libre311.updateAttributesOrder({
+				service_code: serviceCode,
+				attributes: e.detail.map((item, idx) => {
+					return {
+						code: item.attribute.code,
+						order: idx
+					};
+				})
+			});
+			asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(res, {}));
+		} catch (error: unknown) {
+			alertError(error);
+		}
+	}
 </script>
 
 <Card bordered={true} class="m-4">
@@ -227,14 +250,19 @@
 	<Card.Content slot="content" class="p-0 sm:p-0">
 		{#if asyncAttributeInputMap?.type === 'success'}
 			<List>
-				{#each asyncAttributeInputMap.value.values() as input}
+				<DragAndDrop
+					items={Array.from(asyncAttributeInputMap.value.values())}
+					on:itemsChanged={updateAttributesOrder}
+				>
 					<SdaListItem
+						slot="item"
+						let:item
 						on:attributeDeleted={removeFromAttributeMap}
 						groupId={Number($page.params.group_id)}
 						serviceCode={Number($page.params.service_id)}
-						sda={input.attribute}
+						sda={item.attribute}
 					/>
-				{/each}
+				</DragAndDrop>
 
 				{#if isNewAttributeDropDownVisable}
 					<div
