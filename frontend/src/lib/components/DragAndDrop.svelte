@@ -8,8 +8,17 @@
 
 	export let items: Readonly<ItemsArray>;
 
-	let internalItems: ItemsArray = [...items];
 	let draggingIndex: number | undefined = undefined;
+	let internalItems: ItemsArray;
+
+	// this doesn't work
+	//$: internalItems = [...items];
+
+	// but this does, not sure why
+	$: updateInternalItems(items);
+	function updateInternalItems(items: Readonly<ItemsArray>) {
+		internalItems = [...items];
+	}
 
 	function handleDragStart(index: number) {
 		draggingIndex = index;
