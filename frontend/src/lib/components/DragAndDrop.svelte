@@ -55,8 +55,6 @@
 	</div>
 {/each}
 
-{JSON.stringify(internalItems, null, 2)}
-
 <style>
 	.drag-item.dragging {
 		opacity: 0.2;
