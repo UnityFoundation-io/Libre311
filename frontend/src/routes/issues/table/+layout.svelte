@@ -124,6 +124,13 @@
 		startDate: Date,
 		endDate: Date
 	) {
+		// Sets endDate to be one day later than what's selected to play nicely with STWUI
+		const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // Number of milliseconds in one day
+
+		if (endDate != undefined) {
+			endDate = new Date(endDate.getTime() + oneDayInMilliseconds);
+		}
+
 		ctx.applyServiceRequestParams(
 			{
 				servicePriority: selectedServicePriority,
