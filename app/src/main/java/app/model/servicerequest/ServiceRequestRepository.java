@@ -15,17 +15,20 @@
 package app.model.servicerequest;
 
 import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.jpa.repository.JpaSpecificationExecutor;
+import io.micronaut.data.jpa.repository.criteria.Specification;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.model.Sort;
 import io.micronaut.data.repository.PageableRepository;
 
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ServiceRequestRepository extends PageableRepository<ServiceRequest, Long> {
+public interface ServiceRequestRepository extends PageableRepository<ServiceRequest, Long>, JpaSpecificationExecutor<ServiceRequest> {
 
     Page<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Pageable pageable);
     List<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Sort sort);
@@ -66,6 +69,75 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     List<ServiceRequest> findByJurisdictionIdAndDateCreatedAfter(String jurisdictionId, Instant start, Sort sort);
     Page<ServiceRequest> findByJurisdictionIdAndDateCreatedBefore(String jurisdictionId, Instant end, Pageable pageable);
     List<ServiceRequest> findByJurisdictionIdAndDateCreatedBefore(String jurisdictionId, Instant end, Sort sort);
+
+    @Transactional
+    default List<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
+                                           List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
+                                           Instant startDate, Instant endDate, Sort sort) {
+
+        Specification<ServiceRequest> specification;
+        specification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("jurisdiction_id"), jurisdictionId);
+
+        if (serviceCodes != null && !serviceCodes.isEmpty()) {
+            specification.and(Specifications.serviceCodeIn(serviceCodes));
+        }
+
+//        if (status != null && !status.isEmpty()) {
+//            specification.and(Specifications.statusIn(status));
+//        }
+//
+//        if (priority != null && !priority.isEmpty()) {
+//            specification.and(Specifications.priorityIn(priority));
+//        }
+
+
+        if (startDate != null && endDate != null) {
+            specification.and(Specifications.createdDateBetween(startDate, endDate));
+        } else if (startDate != null && endDate == null) {
+            specification.and(Specifications.createdDateAfter(startDate));
+        } else if (startDate == null && endDate != null) {
+            specification.and(Specifications.createdDateBefore(endDate));
+        }
+
+        return findAll(specification, sort);
+    }
+
+    class Specifications {
+
+        // serviceCode
+        public static Specification<ServiceRequest> serviceCodeIn(List<Long> serviceCodes) {
+            return (root, query, criteriaBuilder)
+                    -> root.get("service_id").in(serviceCodes);
+        }
+
+//        // status
+//        public static Specification<ServiceRequest> statusIn(List<ServiceRequestStatus> serviceRequestStatuses) {
+//            return (root, query, criteriaBuilder)
+//                    -> root.get("service_id").in(serviceCodes);
+//        }
+//
+//        // priority
+//        public static Specification<ServiceRequest> priorityIn(List<ServiceRequestPriority> serviceRequestPriorities) {
+//            return (root, query, criteriaBuilder)
+//                    -> root.get("service_id").in(serviceCodes);
+//        }
+
+        // dateCreated
+        public static Specification<ServiceRequest> createdDateBetween(Instant startDate, Instant endDate) {
+            return (root, query, criteriaBuilder)
+                    -> criteriaBuilder.between(root.get("date_created"), startDate, endDate);
+        }
+
+        public static Specification<ServiceRequest> createdDateAfter(Instant instant) {
+            return (root, query, criteriaBuilder)
+                    -> criteriaBuilder.greaterThanOrEqualTo(root.get("date_created"), instant);
+        }
+
+        public static Specification<ServiceRequest> createdDateBefore(Instant instant) {
+            return (root, query, criteriaBuilder)
+                    -> criteriaBuilder.lessThanOrEqualTo(root.get("date_created"), instant);
+        }
+    }
 
     Page<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Pageable pageable);
     List<ServiceRequest> findByJurisdictionIdAndServiceIdInAndStatusInAndPriorityIn(String jurisdictionId, List<Long> serviceIds, List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority, Sort sort);
