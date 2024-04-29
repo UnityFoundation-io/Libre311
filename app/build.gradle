@@ -30,6 +30,7 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
+    implementation("org.hibernate:hibernate-jpamodelgen-jakarta")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
@@ -58,6 +59,14 @@ dependencies {
         }
     } else {
         runtimeOnly("mysql:mysql-connector-java:8.0.31")
+    }
+}
+
+sourceSets {
+    generated {
+        java {
+            srcDirs = ["$build/generated/java"]
+        }
     }
 }
 
