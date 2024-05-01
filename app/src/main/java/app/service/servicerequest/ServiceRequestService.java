@@ -433,12 +433,6 @@ public class ServiceRequestService {
                 .orElse(null);
     }
 
-    public SensitiveServiceRequestDTO getSensitiveServiceRequest(Long serviceRequestId, String jurisdictionId) {
-        return findServiceRequest(serviceRequestId, jurisdictionId)
-                .map(ServiceRequestService::convertToSensitiveDTO)
-                .orElse(null);
-    }
-
     private Optional<ServiceRequest> findServiceRequest(Long serviceRequestId, String jurisdictionId) {
         return serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
     }
