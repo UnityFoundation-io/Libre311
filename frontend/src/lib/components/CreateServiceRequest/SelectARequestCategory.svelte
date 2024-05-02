@@ -1,7 +1,3 @@
-<script lang="ts" context="module">
-	let cachedServiceList: GetServiceListResponse | undefined = undefined;
-</script>
-
 <script lang="ts">
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type {
@@ -38,14 +34,9 @@
 	onMount(fetchServiceList);
 
 	function fetchServiceList() {
-		if (cachedServiceList) {
-			serviceList = asAsyncSuccess(cachedServiceList);
-			return;
-		}
 		libre311
 			.getServiceList()
 			.then((res) => {
-				cachedServiceList = res;
 				serviceList = asAsyncSuccess(res);
 			})
 			.catch((err) => (serviceList = asAsyncFailure(err)));
