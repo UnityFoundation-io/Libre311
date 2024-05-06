@@ -30,6 +30,8 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
+    annotationProcessor("org.hibernate:hibernate-jpamodelgen:5.6.15.Final")
+    compileOnly("org.hibernate:hibernate-jpamodelgen:5.6.15.Final")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
