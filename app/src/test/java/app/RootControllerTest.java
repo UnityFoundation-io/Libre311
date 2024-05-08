@@ -667,6 +667,58 @@ public class RootControllerTest {
         assertTrue(infoResponse.getBounds().length > 0);
     }
 
+    @Test
+    public void deletionOfServiceShouldCascadeToServiceRequests() {
+
+        // build service, attribute with values, service requests
+        Jurisdiction jurisdiction = jurisdictionRepository.save(
+                new Jurisdiction("fakecity.gov", 1L));
+        jurisdictionBoundaryService.saveBoundary(jurisdiction, DEFAULT_BOUNDS);
+        Jurisdiction savedJurisdiction = jurisdictionRepository.save(new Jurisdiction("faketown.gov", 1L));
+        ServiceGroup infrastructureGroup = serviceGroupRepository.save(
+                new ServiceGroup("TempInfrastructure", savedJurisdiction));
+        Service sidewalkService = new Service("SidewalkServiceToBeDeleted");
+        sidewalkService.setType(ServiceType.REALTIME);
+        sidewalkService.setJurisdiction(savedJurisdiction);
+        sidewalkService.setServiceGroup(infrastructureGroup);
+
+        Service serviceToBeDeleted = serviceRepository.save(sidewalkService);
+
+        ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
+        serviceDefinitionAttribute.setService(serviceToBeDeleted);
+        serviceDefinitionAttribute.setVariable(true);
+        serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
+        serviceDefinitionAttribute.setRequired(false);
+        serviceDefinitionAttribute.setDescription(
+                "Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.");
+        serviceDefinitionAttribute.setAttributeOrder(1);
+        serviceDefinitionAttribute.setDatatypeDescription("Please select one or more items.");
+
+        ServiceDefinitionAttribute savedSDA = serviceDefinitionAttributeRepository.save(
+                serviceDefinitionAttribute);
+
+        AttributeValue adaAccess = attributeValueRepository.save(new AttributeValue(savedSDA, "ADA Access"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Cracked"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Too narrow"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Heaved/Uneven Sidewalk"));
+        attributeValueRepository.save(new AttributeValue(savedSDA, "Other"));
+
+        ServiceRequest serviceRequest = new ServiceRequest();
+        serviceRequest.setJurisdiction(savedJurisdiction);
+        serviceRequest.setService(serviceToBeDeleted);
+        setLocation(serviceRequest, IN_BOUNDS_COORDINATE);
+        ServiceRequest savedServiceRequest = serviceRequestRepository.save(serviceRequest);
+
+        // delete service
+        serviceRepository.delete(serviceToBeDeleted);
+
+        // verify deletion of all entities
+        assertFalse(serviceRepository.existsById(serviceToBeDeleted.getId()));
+        assertFalse(serviceDefinitionAttributeRepository.existsById(savedSDA.getId()));
+        assertFalse(attributeValueRepository.existsById(adaAccess.getId()));
+        assertFalse(serviceRequestRepository.existsById(savedServiceRequest.getId()));
+    }
+
     private HttpResponse<?> createServiceRequest(Long serviceCode, String address, Map attributes, String jurisdictionId) {
         PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(serviceCode);
         serviceRequestDTO.setgRecaptchaResponse("abc");
