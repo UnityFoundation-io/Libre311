@@ -2,6 +2,51 @@
 
 Libre311 is a web application for service requests based on the [Open311](https://www.open311.org) standard.
 
+## Local Development Quick Start
+
+### Prerequisites
+
+1. Clone the UnityAuth Project https://github.com/UnityFoundation-io/UnityAuth
+   - run the docker compose for `UnityAuth` (see instructions in that repo).
+2. Get the Recaptcha Secret and Code from google console.
+3. Copy `.env.example` to `.env`
+4. Fill out with as many values as you can.
+
+```sh
+docker network create unity-network
+docker compose -f docker-compose.local.yml
+```
+
+There's also make files you can use to start up sub components
+
+```sh
+make compose_api ## For API and infrastructure
+# or
+make compose_ui ## For UI and infrastructure
+# or
+make compose_all ## For UI + API and infrastructure
+```
+
+The local `unity-network` is created in the UnityAuth project,
+creating it here if you don't yet have that repo available (or the feature you're working on doesn't require it.)
+
+This will start:
+
+- **Libre311 API** on port http://localhost:8080
+- **Libre311 UI** on port http://localhost:3000
+- **MySQL Database** for data persistence
+
+### Hosts File Updates
+
+For consistent internal-external service name resolution, add these to your `/etc/hosts` file
+
+```txt
+127.0.0.1 unity-auth-api
+127.0.0.1 unity-auth-ui
+127.0.0.1 libre311-api
+127.0.0.1 libre311-ui
+```
+
 ## Operator Documentation
 
 ### General Application Architecture
@@ -15,10 +60,10 @@ Libre311 is a web application for service requests based on the [Open311](https:
 
 The Libre311 application consists of
 
-* A Web App UI that can either be served by the Web API or independently
-* A Web API that serves data to the UI
-* A Database for persistent storage
-* An Auth Provider for authenticating users
+- A Web App UI that can either be served by the Web API or independently
+- A Web API that serves data to the UI
+- A Database for persistent storage
+- An Auth Provider for authenticating users
 
 The Web Application UI is built using Svelte and is served by the Web API.
 The Web API is built using Micronaut.
@@ -28,27 +73,27 @@ The Web API is horizontally scalable.
 
 Currently, the Libre311 application supports the following Databases:
 
-| Database     | Versions     | Driver                   | Reference                                                                                                                 |
-|--------------|--------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| MySQL Server | 8.0 and 5.7  | com.mysql.cj.jdbc.Driver | [link](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-versions.html)                                            |
+| Database     | Versions    | Driver                   | Reference                                                                      |
+| ------------ | ----------- | ------------------------ | ------------------------------------------------------------------------------ |
+| MySQL Server | 8.0 and 5.7 | com.mysql.cj.jdbc.Driver | [link](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-versions.html) |
 
 To connect to a database, the following environment variables must be set for the Web API:
 
-* LIBRE311_JDBC_URL - The JDBC URL of the database
-* LIBRE311_JDBC_DRIVER - The driver to use. See Driver column for values.
-* LIBRE311_JDBC_USER - The database user name.
-* LIBRE311_JDBC_PASSWORD - The database user password.
-* LIBRE311_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
+- LIBRE311_JDBC_URL - The JDBC URL of the database
+- LIBRE311_JDBC_DRIVER - The driver to use. See Driver column for values.
+- LIBRE311_JDBC_USER - The database user name.
+- LIBRE311_JDBC_PASSWORD - The database user password.
+- LIBRE311_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
 
 The following describes the options for LIBRE311_AUTO_SCHEMA_GEN environment variable in detail:
 
-* *none** - No action will be performed.
-* *create-only** - Database creation will be generated.
-* *drop** - Database dropping will be generated.
-* *create** - Database dropping will be generated followed by database creation.
-* *create-drop** - Drop the schema and recreate it on SessionFactory startup. Additionally, drop the schema on SessionFactory shutdown.
-* *validate** - Validate the database schema.
-* *update** - Update the database schema.
+- \*none\*\* - No action will be performed.
+- \*create-only\*\* - Database creation will be generated.
+- \*drop\*\* - Database dropping will be generated.
+- \*create\*\* - Database dropping will be generated followed by database creation.
+- \*create-drop\*\* - Drop the schema and recreate it on SessionFactory startup. Additionally, drop the schema on SessionFactory shutdown.
+- \*validate\*\* - Validate the database schema.
+- \*update\*\* - Update the database schema.
 
 The LIBRE311_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
 Examples include `mysql:mysql-connector-java:8.0.31` and `org.postgresql:postgresql:42.4.2`.
@@ -67,19 +112,18 @@ VALUES ('$EMAIL');
 ```
 
 ### Service Discovery Configuration
+
 As outlined in Open311's Service Discovery [page](https://wiki.open311.org/Service_Discovery), an endpoint is offered
-at `/discovery` which describes organization contact and the base URLs of endpoints. As a convenience, Libre311 provides 
+at `/discovery` which describes organization contact and the base URLs of endpoints. As a convenience, Libre311 provides
 a default set of endpoint configurations for a set of `production` and `test` environments as well as the ability to set
 configuration values via the following environment variables:
 
+- LIBRE311_DISCOVERY_CHANGESET_DATETIME
+- LIBRE311_DISCOVERY_CONTACT_MESSAGE
+- LIBRE311_DISCOVERY_PRODUCTION_URL
+- LIBRE311_DISCOVERY_TEST_URL
 
-* LIBRE311_DISCOVERY_CHANGESET_DATETIME
-* LIBRE311_DISCOVERY_CONTACT_MESSAGE
-* LIBRE311_DISCOVERY_PRODUCTION_URL
-* LIBRE311_DISCOVERY_TEST_URL
-
-
-Please feel free to modify `app/src/main/resources/application.yml`'s `app.discovery` content to your use case.  
+Please feel free to modify `app/src/main/resources/application.yml`'s `app.discovery` content to your use case.
 
 ### Building the Web Application UI
 
@@ -91,23 +135,23 @@ If the Web API will serve the UI, then set VITE_BACKEND_URL to `/api`.
 
 Set the following environment variables to enable Google as an auth provider:
 
-* GOOGLE_CLIENT_ID - The id of oauth client.
-* GOOGLE_CLIENT_SECRET - The secret of the oauth client.
-* MICRONAUT_SECURITY_OAUTH2_CLIENTS_GOOGLE_OPENID_ISSUER - Set to "https://accounts.google.com"
+- GOOGLE_CLIENT_ID - The id of oauth client.
+- GOOGLE_CLIENT_SECRET - The secret of the oauth client.
+- MICRONAUT_SECURITY_OAUTH2_CLIENTS_GOOGLE_OPENID_ISSUER - Set to "https://accounts.google.com"
 
 ### Configuring the Web API
 
 The following environment variables should be set to configure the application:
 
-* GCP_PROJECT_ID - The GCP project ID
-* STORAGE_BUCKET_ID - The ID of the bucket where user-uploaded images are hosted.
-* RECAPTCHA_SECRET - Site abuse prevention.
-* SAFESEARCH_KEY - Prevents explicit images from being uploaded. 
-* MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_SECRET_GENERATOR_SECRET - Secret uses to sign JWTs.
-* MICRONAUT_SECURITY_TOKEN_JWT_GENERATOR_REFRESH_TOKEN_SECRET - Secret for JWT renewal tokens.
-* MICRONAUT_SECURITY_REDIRECT_LOGIN_SUCCESS
-* MICRONAUT_SECURITY_REDIRECT_LOGIN_FAILURE
-* MICRONAUT_SECURITY_REDIRECT_LOGOUT
+- GCP_PROJECT_ID - The GCP project ID
+- STORAGE_BUCKET_ID - The ID of the bucket where user-uploaded images are hosted.
+- RECAPTCHA_SECRET - Site abuse prevention.
+- SAFESEARCH_KEY - Prevents explicit images from being uploaded.
+- MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_SECRET_GENERATOR_SECRET - Secret uses to sign JWTs.
+- MICRONAUT_SECURITY_TOKEN_JWT_GENERATOR_REFRESH_TOKEN_SECRET - Secret for JWT renewal tokens.
+- MICRONAUT_SECURITY_REDIRECT_LOGIN_SUCCESS
+- MICRONAUT_SECURITY_REDIRECT_LOGIN_FAILURE
+- MICRONAUT_SECURITY_REDIRECT_LOGOUT
 
 See `app/src/main/resources/application.yml` for a complete list of configuration options.
 
