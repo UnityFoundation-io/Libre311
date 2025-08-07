@@ -1,10 +1,13 @@
 #!/bin/bash
 
-export GCP_PROJECT_ID=<PROJECT_ID>
-export MICRONAUT_ENVIRONMENTS=dev,dev-data
-export MICRONAUT_SERVER_PORT=8080
+export GCP_PROJECT_ID=<GCP_PROJECT_ID>
+export MICRONAUT_ENVIRONMENTS=<MICRONAUT_ENVIRONMENTS> # Example: dev,dev-data
+# Don't set MICRONAUT_SERVER_PORT environment variable since it seems to be picked
+# up by both the app and the Test Resources server which cause port conflict.
+# Instead, set port for the app in the application-*.yml file for the
+# specific config environment, e.g., application-local.yml.
 
-export VITE_BACKEND_URL=<BACKEND_URL>
+export VITE_BACKEND_URL=<VITE_BACKEND_URL> # Example: http://localhost:8080
 export STORAGE_BUCKET_ID=<STORAGE_BUCKET_ID>
 export GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
 export GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
@@ -13,3 +16,12 @@ export RECAPTCHA_SECRET=<RECAPTCHA_SECRET>
 export VITE_GOOGLE_RECAPTCHA_KEY=<RECAPTCHA_KEY>
 
 export SAFESEARCH_KEY=<SAFESEARCH_KEY>
+
+# URLs for auth provider
+export AUTH_BASE_URL=<AUTH_BASE_URL> # Example: http://localhost:8081
+export AUTH_JWKS=<AUTH_JWKS> # Example: http://localhost:8081/keys
+
+# Update these if necessary, for example, to use a local database
+export DATASOURCES_DEFAULT_URL=<DATASOURCES_DEFAULT_URL>
+export DATASOURCES_DEFAULT_USERNAME=<DATASOURCES_DEFAULT_USERNAME>
+export DATASOURCES_DEFAULT_PASSWORD=<DATASOURCES_DEFAULT_PASSWORD>

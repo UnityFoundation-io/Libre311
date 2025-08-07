@@ -3,7 +3,7 @@ micronaut:
   http:
     services:
       auth:
-        url: ${AUTH_BASE_URL:`http://localhost:8080`}
+        url: ${AUTH_BASE_URL:`http://localhost:8081`}
   security:
     token:
       enabled: true
@@ -12,7 +12,7 @@ micronaut:
         signatures:
           jwks:
             unity:
-              url: ${AUTH_JWKS:`http://localhost:8080/keys`}
+              url: ${AUTH_JWKS:`http://localhost:8081/keys`}
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:3000/?login-failed=true
@@ -25,6 +25,7 @@ micronaut:
           - http://localhost:3000
           - localhost:3000
           - http://127.0.0.1:3000
+    port: 8080
 ---
 app:
   service-id: ${LIBRE311_SERVICE_ID:1}

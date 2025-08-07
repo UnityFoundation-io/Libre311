@@ -22,7 +22,7 @@ node_modules
 /build
 /.svelte-kit
 /package
-.env.docker
+.env
 .env.*
 !.env.example
 vite.config.js.timestamp-*
