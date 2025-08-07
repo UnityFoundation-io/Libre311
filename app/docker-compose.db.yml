@@ -19,7 +19,7 @@ services:
       interval: 10s
       start_period: 30s
     ports:
-      - "3306:3306"
+      - "23306:3306"
 
 networks:
   default:

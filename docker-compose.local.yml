@@ -1,11 +1,10 @@
-# You must start docker-compose.local.yml prior to starting this
 services:
   libre311-db:
     networks:
       - unity-network
     container_name: libre311-db
     extends:
-      file: app/docker-compose.local-infra.yml
+      file: app/docker-compose.db.yml
       service: libre311-db
 
   libre311-api:
@@ -13,26 +12,43 @@ services:
     networks:
       - unity-network
     extends:
-      file: app/docker-compose.local-service.yml
+      file: app/docker-compose.api.yml
       service: libre311-api
     depends_on:
       libre311-db:
         condition: service_healthy
 
-  libre311-ui:
-    container_name: libre311-ui
+  libre311-ui-dev:
+    container_name: libre311-ui-dev
     networks:
       - unity-network
     build:
-      dockerfile: FrontendDockerfile
+      dockerfile: DockerfileFrontend-dev
       context: .
-    restart: unless-stopped
-    environment:
-      VITE_BACKEND_URL: http://localhost:8080/api
+    restart: no
     env_file:
-      - frontend/.env
+      - frontend/.env.docker
+    ports:
+      - "3000:3000"
+    depends_on:
+      - libre311-api
+
+  libre311-ui-prod:
+    profiles:
+      - prod
+    container_name: libre311-ui-prod
+    networks:
+      - unity-network
+    build:
+      dockerfile: DockerfileFrontend-prod
+      context: .
+    restart: no
+    env_file:
+      - frontend/.env.docker
     ports:
       - "3000:80"
+    depends_on:
+      - libre311-api
 
 networks:
   default:

@@ -37,7 +37,6 @@ datasources:
     password: test
     db-type: mysql
 
-
 flyway:
   datasources:
     default:
