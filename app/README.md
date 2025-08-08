@@ -39,21 +39,7 @@ java -jar build/libs/app-[version number]-all.jar
 
 ```
 
-## External Service Dependencies
-The Libre311 Service API expects four external services offered by Google:
-
-* ReCaptcha - prevents abuse from bots
-* SafeSearch - inspects images for inappropriate content
-* Object Storage - storage for images uploaded by end user
-* OAuth/Identity Provision - Admin login to be able to access privileged endpoints
-
-OAuth/Identity Provision is covered in the Security section below.
-
-GCP related configuration such as project-id can be modified in application.yml or set as environment variables.
-For example, `micronaut.object-storage.gcp.default.bucket` in application.yml can be set as an environment variable
-with `MICRONAUT_OBJECT_STORAGE_GCP_DEFAULT_BUCKET`.
-
-### The Database
+## The Database
 
 Currently, the Libre311 supports the following Databases:
 
@@ -64,28 +50,56 @@ Currently, the Libre311 supports the following Databases:
 
 To connect to a database, the following environment variables must be set for the Web API:
 
-* LIBRE311_JDBC_URL - The JDBC URL of the database
-* LIBRE311_JDBC_DRIVER - The driver to use. See Driver column for values.
-* LIBRE311_JDBC_USER - The database user name.
-* LIBRE311_JDBC_PASSWORD - The database user password.
-* LIBRE311_AUTO_SCHEMA_GEN (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
+- `LIBRE311_JDBC_URL` - The JDBC URL of the database
+- `LIBRE311_JDBC_DRIVER` - The driver to use. See Driver column for values.
+- `LIBRE311_JDBC_USER` - The database user name.
+- `LIBRE311_JDBC_PASSWORD` - The database user password.
+- `LIBRE311_AUTO_SCHEMA_GEN` (Options include `none`, `create-only`, `drop`, `create`, `create-drop`, `validate`, and `update` (default value))
 
-The following describes the options for LIBRE311_AUTO_SCHEMA_GEN environment variable in detail:
+The following describes the options for `LIBRE311_AUTO_SCHEMA_GEN` environment variable in detail:
 
-* *none** - No action will be performed.
-* *create-only** - Database creation will be generated.
-* *drop** - Database dropping will be generated.
-* *create** - Database dropping will be generated followed by database creation.
-* *create-drop** - Drop the schema and recreate it on SessionFactory startup. Additionally, drop the schema on SessionFactory shutdown.
-* *validate** - Validate the database schema.
-* *update** - Update the database schema.
+- `none` - No action will be performed.
+- `create-only` - Database creation will be generated.
+- `drop` - Database dropping will be generated.
+- `create` - Database dropping will be generated followed by database creation.
+- `create-drop` - Drop the schema and recreate it on SessionFactory startup.
+  Additionally, drop the schema on SessionFactory shutdown.
+- `validate` - Validate the database schema.
+- `update` - Update the database schema.
 
-The LIBRE311_DATABASE_DEPENDENCY environment variable must be set when building the application to inject the correct driver.
+The `LIBRE311_DATABASE_DEPENDENCY` environment variable must be set when building
+the application to inject the correct driver.
 Examples include `mysql:mysql-connector-java:8.0.31` and `org.postgresql:postgresql:42.4.2`.
 Multiple drivers can be specified.
 For example, `mysql:mysql-connector-java:8.0.31,com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2`.
 
-#### Object Storage
+### CSV Download Users
+
+The database contains a table listing the email addresses of users that are authorized to download CSV reports.
+To authorize a user for this activity, insert their email address as follows:
+
+```sql
+USE libre311db;
+INSERT INTO app_users (email)
+VALUES ('$EMAIL');
+```
+
+## External Service Dependencies
+The Libre311 Service API expects four external services offered by Google:
+
+* Object Storage - storage for images uploaded by end user
+* ReCaptcha - prevents abuse from bots
+* SafeSearch - inspects images for inappropriate content
+* OAuth/Identity Provision - Admin login to be able to access privileged endpoints
+
+OAuth/Identity Provision is covered in the Security section below.
+
+GCP related configuration such as project-id can be modified in application.yml or set as environment variables.
+For example, `micronaut.object-storage.gcp.default.bucket` in application.yml can be set as an environment variable
+with `MICRONAUT_OBJECT_STORAGE_GCP_DEFAULT_BUCKET`.
+
+
+### Object Storage
 In the context of the Libre311 application, Google Object Storage is used to store images uploaded by an end user when 
 creating a Service Request (aka an Issue).
 The client code that interacts with the Object Storage service is a singleton object generated from the class
@@ -98,7 +112,7 @@ environment.  Please see relevant documentation:
 * [Application Default Credentials](https://cloud.google.com/docs/authentication/#adc)
 * [How Application Default Credentials works](https://cloud.google.com/docs/authentication/application-default-credentials)
 
-#### SafeSearch and ReCaptcha
+### SafeSearch and ReCaptcha
 Both SafeSearch and ReCaptcha rely on HTTP clients that are configured with secret values in application.yml like so:
 ```yaml
 app:
