@@ -15,8 +15,6 @@ export GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
 export RECAPTCHA_SECRET=<RECAPTCHA_SECRET>
 export VITE_GOOGLE_RECAPTCHA_KEY=<RECAPTCHA_KEY>
 
-export SAFESEARCH_KEY=<SAFESEARCH_KEY>
-
 # URLs for auth provider
 export AUTH_BASE_URL=<AUTH_BASE_URL> # Example: http://localhost:8081
 export AUTH_JWKS=<AUTH_JWKS> # Example: http://localhost:8081/keys

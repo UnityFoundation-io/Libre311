@@ -99,27 +99,26 @@ For example, `micronaut.object-storage.gcp.default.bucket` in application.yml ca
 with `MICRONAUT_OBJECT_STORAGE_GCP_DEFAULT_BUCKET`.
 
 
-### Object Storage
+### Object Storage and SafeSearch
 In the context of the Libre311 application, Google Object Storage is used to store images uploaded by an end user when 
 creating a Service Request (aka an Issue).
 The client code that interacts with the Object Storage service is a singleton object generated from the class
 `app/src/main/java/app/service/storage/StorageService.java`.
 
-In order to call Object Storage, the client must be authenticated. Authentication is managed by the
-`io.micronaut.objectstorage:micronaut-object-storage-gcp` dependency which attempts to find GCP credentials in the local
-environment.  Please see relevant documentation:
+In order to call Google Object Storage and SafeSearch APIs, the client must be authenticated.
+Authentication is managed by the `io.micronaut.objectstorage:micronaut-object-storage-gcp`
+dependency which attempts to find GCP credentials in the local environment.
 
+Please see relevant documentation:
 * [Application Default Credentials](https://cloud.google.com/docs/authentication/#adc)
 * [How Application Default Credentials works](https://cloud.google.com/docs/authentication/application-default-credentials)
 
-### SafeSearch and ReCaptcha
-Both SafeSearch and ReCaptcha rely on HTTP clients that are configured with secret values in application.yml like so:
+### ReCaptcha
+ReCaptcha rely on HTTP client configured with a secret value in application.yml like so:
 ```yaml
 app:
   recaptcha:
     secret: "secret-value"
-  safesearch:
-    key: "key-value"
 ```
 
 ## Application Design

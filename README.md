@@ -118,7 +118,6 @@ The following environment variables should be set to configure the application:
 - `GCP_PROJECT_ID` - The GCP project ID
 - `STORAGE_BUCKET_ID` - The ID of the bucket where user-uploaded images are hosted.
 - `RECAPTCHA_SECRET` - Site abuse prevention.
-- `SAFESEARCH_KEY` - Prevents explicit images from being uploaded.
 - `MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_SECRET_GENERATOR_SECRET` - Secret uses to sign JWTs.
 - `MICRONAUT_SECURITY_TOKEN_JWT_GENERATOR_REFRESH_TOKEN_SECRET` - Secret for JWT renewal tokens.
 - `MICRONAUT_SECURITY_REDIRECT_LOGIN_SUCCESS`
