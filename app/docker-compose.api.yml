@@ -1,0 +1,34 @@
+services:
+  libre311-db:
+    container_name: libre311-db
+    networks:
+      - unity-network
+    extends:
+      file: docker-compose.db.yml
+      service: libre311-db
+
+  libre311-api:
+    container_name: libre311-api
+    build:
+      dockerfile: app/DockerfileAPI
+      context: ..
+    restart: unless-stopped
+    networks:
+      - unity-network
+    depends_on:
+      libre311-db:
+        condition: service_healthy
+    env_file:
+      - ../.env.docker
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+
+networks:
+  default:
+    name: unity-network
+    external: true
+  unity-network:
+    external: true

@@ -62,20 +62,20 @@ jobs:
 #          MICRONAUT_ENVIRONMENTS: dev,dev-data
 #        run: |
 #          ./gradlew app:run &
-#      - name: Create and populate .env file
+#      - name: Create and populate .env.docker file
 #        working-directory: ./frontend
 #        env:
 #          VITE_BACKEND_URL: /api
 #          VITE_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
 #          VITE_GOOGLE_RECAPTCHA_KEY: ${{ secrets.GOOGLE_RECAPTCHA_KEY }}
 #        run: |
-#          touch .env
-#          echo VITE_BACKEND_URL="$VITE_BACKEND_URL" >> .env
-#          echo VITE_GOOGLE_API_KEY="$VITE_GOOGLE_API_KEY" >> .env
-#          echo VITE_GOOGLE_RECAPTCHA_KEY="$VITE_GOOGLE_RECAPTCHA_KEY" >> .env
+#          touch .env.docker
+#          echo VITE_BACKEND_URL="$VITE_BACKEND_URL" >> .env.docker
+#          echo VITE_GOOGLE_API_KEY="$VITE_GOOGLE_API_KEY" >> .env.docker
+#          echo VITE_GOOGLE_RECAPTCHA_KEY="$VITE_GOOGLE_RECAPTCHA_KEY" >> .env.docker
 #
-#          echo "cat .env"
-#          cat .env
+#          echo "cat .env.docker"
+#          cat .env.docker
 #        shell: bash
 #        ## step 2) install playwright
 #      - name: Install Playwright Browsers

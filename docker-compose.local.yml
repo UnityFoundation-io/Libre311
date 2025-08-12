@@ -1,0 +1,58 @@
+services:
+  libre311-db:
+    networks:
+      - unity-network
+    container_name: libre311-db
+    extends:
+      file: app/docker-compose.db.yml
+      service: libre311-db
+
+  libre311-api:
+    container_name: libre311-api
+    networks:
+      - unity-network
+    extends:
+      file: app/docker-compose.api.yml
+      service: libre311-api
+    depends_on:
+      libre311-db:
+        condition: service_healthy
+
+  libre311-ui-dev:
+    container_name: libre311-ui-dev
+    networks:
+      - unity-network
+    build:
+      dockerfile: DockerfileFrontend-dev
+      context: .
+    restart: no
+    env_file:
+      - frontend/.env.docker
+    ports:
+      - "3000:3000"
+    depends_on:
+      - libre311-api
+
+  libre311-ui-prod:
+    profiles:
+      - prod
+    container_name: libre311-ui-prod
+    networks:
+      - unity-network
+    build:
+      dockerfile: DockerfileFrontend-prod
+      context: .
+    restart: no
+    env_file:
+      - frontend/.env.docker
+    ports:
+      - "3000:80"
+    depends_on:
+      - libre311-api
+
+networks:
+  default:
+    name: unity-network
+    external: true
+  unity-network:
+    external: true
