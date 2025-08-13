@@ -92,7 +92,7 @@ The Libre311 Service API expects four external services offered by Google:
 * SafeSearch - inspects images for inappropriate content
 * OAuth/Identity Provision - Admin login to be able to access privileged endpoints
 
-OAuth/Identity Provision is covered in the Security section below.
+OAuth/Identity Provision is covered in the [Authentication & Authorization](#authentication--authorization) section below.
 
 GCP related configuration such as project-id can be modified in application.yml or set as environment variables.
 For example, `micronaut.object-storage.gcp.default.bucket` in application.yml can be set as an environment variable
@@ -100,18 +100,37 @@ with `MICRONAUT_OBJECT_STORAGE_GCP_DEFAULT_BUCKET`.
 
 
 ### Object Storage and SafeSearch
-In the context of the Libre311 application, Google Object Storage is used to store images uploaded by an end user when 
+In the context of the Libre311 application, Google Cloud Storage is used to store images uploaded by an end user when 
 creating a Service Request (aka an Issue).
-The client code that interacts with the Object Storage service is a singleton object generated from the class
+The client code that interacts with the Cloud Storage service is a singleton object generated from the class
 `app/src/main/java/app/service/storage/StorageService.java`.
 
-In order to call Google Object Storage and SafeSearch APIs, the client must be authenticated.
+In order to call Google Cloud Storage and SafeSearch APIs, the client must be authenticated.
 Authentication is managed by the `io.micronaut.objectstorage:micronaut-object-storage-gcp`
 dependency which attempts to find GCP credentials in the local environment.
+A common approach is using Application Default Credentials (ADC). The following links
+contain relevant information to setup ADC on your host:
 
-Please see relevant documentation:
 * [Application Default Credentials](https://cloud.google.com/docs/authentication/#adc)
 * [How Application Default Credentials works](https://cloud.google.com/docs/authentication/application-default-credentials)
+
+NOTE: If the app is launched using [Docker Compose](../README.md#docker-environment), the Docker container for
+Libre311 API must also have credentials to upload user images to Google Cloud Storage
+and call SafeSearch APIs. Libre311 currently supports sharing the credentials on your host
+with the container.
+
+To share the ADC from your host, define an `ADC_PATH` environment variable containing the
+path to the credentials file. For example, on Linux or macOS:
+```shell
+export ADC_PATH=$HOME/.config/gcloud/application_default_credentials.json
+```
+and, on Windows:
+```shell
+set ADC_PATH=%APPDATA%\gcloud\application_default_credentials.json
+```
+Replace the path on the right-hand side with the actual path on your local host.
+If `ADC_PATH` is not defined, [Docker Compose](../docker-compose.local.yml) will use the
+default file path for ADC on Linux and macOS.
 
 ### ReCaptcha
 ReCaptcha rely on HTTP client configured with a secret value in application.yml like so:
@@ -123,9 +142,7 @@ app:
 
 ## Application Design
 
-### Security
-
-#### Authentication & Authorization
+### Authentication & Authorization
 The authentication method leverages OAuth where the Identity Provider is Google. Once authenticated, the
 backend issues a JWT token (in the form of a cookie) with embedded details as defined in
 `app/src/main/java/app/security/CustomAuthenticationMapper.java`.

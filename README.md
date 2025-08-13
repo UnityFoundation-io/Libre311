@@ -38,6 +38,10 @@ Libre311 services can also be started using Docker Compose.
   - Note: the docker compose files read from `.env.docker` so make sure to use this file name.
 * Copy `frontend/.env.example` into `frontend/.env.docker` and also update the variables there.
 
+[The main Docker Compose file](docker-compose.local.yml) relies on the `ADC_PATH` environment
+variable from the host. Refer to the [app documentation](app/README.md#object-storage-and-safesearch)
+for how to set it for your environment.
+
 Run `docker compose` from the project root:
 ```sh
 docker compose -f docker-compose.local.yml up
