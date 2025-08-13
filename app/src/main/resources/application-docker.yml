@@ -34,6 +34,8 @@ micronaut:
           - http://localhost:3000
           - localhost:3000
           - http://127.0.0.1:3000
+          - http://libre311-ui:3000
+          - http://libre311-ui-dev:3000
     port: 8080
 ---
 app:
