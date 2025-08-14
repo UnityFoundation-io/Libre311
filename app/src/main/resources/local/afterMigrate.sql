@@ -55,7 +55,7 @@ INSERT IGNORE INTO service_definition_attribute_values (id, value_name, service_
 VALUES (6, 'ADA Access', 2),
        (7, 'Missing', 2),
        (8, 'Faded or worn paint', 2),
-       (9, 'Drivers failing to yieldr', 2),
+       (9, 'Drivers failing to yield', 2),
        (10, 'Other', 2);
 
 

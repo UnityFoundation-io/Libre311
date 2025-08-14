@@ -96,8 +96,6 @@ app:
     bucket:  ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
   recaptcha:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
-  safesearch:
-    key: ${SAFESEARCH_KEY:`safesearchKey`}
 
 flyway:
   datasources:
