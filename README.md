@@ -10,12 +10,15 @@ service is up and running.
 Clone the UnityAuth project and follow the instructions in that repo to run the UnityAuth
 service either locally or using Docker.
 
+Libre311 supports local development environment and containerized environment using Docker, as
+described below.
+
 ### Local Environment
-* Create a `setenv.sh` from `setenv.sh.example` and update it to use the correct environment
-  variable values
-   - If you use a local database, also update the `DATASOURCES_DEFAULT_*` variables in that file 
-   - Make sure the URLs and other configuration in `setenv.sh` is consistent with the
-     environment-specific Micronaut config file, e.g., application-local.yml.
+Create a `setenv.sh` from `setenv.sh.example` and update it to use the correct environment
+variable values
+- If you use a local database, also update the `DATASOURCES_DEFAULT_*` variables in that file 
+- Make sure the URLs and other configuration in `setenv.sh` are consistent with the
+  environment-specific Micronaut config file, e.g., application-local.yml.
 
 Run the Libre311 API server from the project root:
 ```shell
@@ -31,6 +34,9 @@ npm install
 npm run dev
 ```
 
+Refer to the [app](app/README.md) and [frontend](frontend/README.md) documentation for more details
+information on the Libre311 API and UI, respectively.
+
 ### Docker Environment
 Libre311 services can also be started using Docker Compose.
 * From the project root, copy `.env.example` into `.env.docker` and update it with the correct
@@ -38,15 +44,35 @@ Libre311 services can also be started using Docker Compose.
   - Note: the docker compose files read from `.env.docker` so make sure to use this file name.
 * Copy `frontend/.env.example` into `frontend/.env.docker` and also update the variables there.
 
-[The main Docker Compose file](docker-compose.local.yml) relies on the `ADC_PATH` environment
-variable from the host. Refer to the [app documentation](app/README.md#object-storage-and-safesearch)
-for how to set it for your environment.
+#### Access Credentials from Host
+As described in the [app documentation](app/README.md#object-storage-and-safesearch),
+Application Default Credentials (ADC) is used to authenticate the app to Google Cloud Storage
+and SafeSearch APIs. The Docker container for Libre311 API must also have access to ADC to
+upload user images to Google Cloud Storage and call SafeSearch APIs. Libre311 currently
+supports sharing the credentials on your host with the container via the `ADC_PATH` environment
+variable.
 
+To share the ADC from your host, set the `ADC_PATH` environment variable to the
+path of the credentials file. For example, on Linux or macOS:
+```shell
+export ADC_PATH=$HOME/.config/gcloud/application_default_credentials.json
+```
+and, on Windows:
+```shell
+set ADC_PATH=%APPDATA%\gcloud\application_default_credentials.json
+```
+Replace the path on the right-hand side with the actual path on your local host.
+If `ADC_PATH` is not defined, [Docker Compose](app/docker-compose.api.yml) will use the
+default file path for ADC on Linux and macOS. The container will then use the same
+credentials file when interacting with GCP.
+
+#### Launch Containers
 Run `docker compose` from the project root:
 ```sh
 docker compose -f docker-compose.local.yml up
 ```
-This will launch containers for Libre311 API server, frontend server, and database server with
+This will build the required Docker images if they don't already exist, and launch
+the containers for Libre311 API server, frontend server, and database server with
 names `libre311-api`, `libre311-ui-dev`, and `libre311-db`, respectively.
 
 The docker containers can be accessed from the host machine:
@@ -76,6 +102,18 @@ For consistent internal-external service name resolution, add these to your `/et
 ```
 Note: If you also use the docker environment for UnityAuth services, make sure to also add
 entries for them in `/etc/hosts` (see UnityAuth project documentation).
+
+#### Rebuild Images
+If there are changes to one or more files in `app/src/main`, make sure to rebuild
+the Docker image for the Libre311 API server for the changes to take effect.
+Similarly, rebuild the Docker image for the frontend if there are changes there.
+This can be done by removing the old images
+
+```shell
+docker rmi <your_libre311-api-image-id>
+docker rmi <your_libre311-ui-image-id>
+```
+, then rerun the [above Docker Compose command](#launch-containers).
 
 ## Operator Documentation
 

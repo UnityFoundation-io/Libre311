@@ -114,24 +114,6 @@ contain relevant information to setup ADC on your host:
 * [Application Default Credentials](https://cloud.google.com/docs/authentication/#adc)
 * [How Application Default Credentials works](https://cloud.google.com/docs/authentication/application-default-credentials)
 
-NOTE: If the app is launched using [Docker Compose](../README.md#docker-environment), the Docker container for
-Libre311 API must also have credentials to upload user images to Google Cloud Storage
-and call SafeSearch APIs. Libre311 currently supports sharing the credentials on your host
-with the container.
-
-To share the ADC from your host, define an `ADC_PATH` environment variable containing the
-path to the credentials file. For example, on Linux or macOS:
-```shell
-export ADC_PATH=$HOME/.config/gcloud/application_default_credentials.json
-```
-and, on Windows:
-```shell
-set ADC_PATH=%APPDATA%\gcloud\application_default_credentials.json
-```
-Replace the path on the right-hand side with the actual path on your local host.
-If `ADC_PATH` is not defined, [Docker Compose](../docker-compose.local.yml) will use the
-default file path for ADC on Linux and macOS.
-
 ### ReCaptcha
 ReCaptcha rely on HTTP client configured with a secret value in application.yml like so:
 ```yaml
