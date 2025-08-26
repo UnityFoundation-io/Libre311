@@ -13,9 +13,9 @@
 // limitations under the License.
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.7.10"
-    id("io.micronaut.test-resources") version "3.7.10"
+    id("com.gradleup.shadow") version "8.3.0"
+    id("io.micronaut.application") version "4.5.4"
+    id("io.micronaut.test-resources") version "4.5.4"
 }
 
 version = "0.1"
@@ -31,12 +31,13 @@ dependencies {
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
     annotationProcessor("org.hibernate:hibernate-jpamodelgen:5.6.15.Final")
+    //annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
     compileOnly("org.hibernate:hibernate-jpamodelgen:5.6.15.Final")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
     runtimeOnly("ch.qos.logback:logback-classic")
-    implementation("io.micronaut:micronaut-validation")
+    implementation("io.micronaut.validation:micronaut-validation")
     implementation("io.swagger.core.v3:swagger-annotations")
 
     implementation("io.micronaut.xml:micronaut-jackson-xml")

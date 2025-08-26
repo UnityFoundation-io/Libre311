@@ -17,7 +17,7 @@ package app.model.service.group;
 import app.model.jurisdiction.Jurisdiction;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "service_groups")

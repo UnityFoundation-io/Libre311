@@ -14,8 +14,8 @@
 
 package app.model.servicedefinition;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "service_definition_attribute_values")
