@@ -1,6 +1,7 @@
 package app.service.storage;
 
 import com.google.cloud.storage.Blob;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.uri.UriBuilder;
 import io.micronaut.objectstorage.googlecloud.GoogleCloudStorageOperations;
@@ -9,11 +10,12 @@ import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
 
 @Singleton
-public class GoogleCloudStorageHelper implements CloudStorageHelper {
+@Requires(property = "micronaut.object-storage.gcp")
+public class GoogleCloudStorageUploader implements CloudStorageUploader {
 
     GoogleCloudStorageOperations objectStorage;
 
-    GoogleCloudStorageHelper(GoogleCloudStorageOperations objectStorage) {
+    GoogleCloudStorageUploader(GoogleCloudStorageOperations objectStorage) {
         this.objectStorage = objectStorage;
     }
 
