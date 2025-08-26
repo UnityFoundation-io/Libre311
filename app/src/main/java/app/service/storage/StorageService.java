@@ -14,16 +14,12 @@
 
 package app.service.storage;
 
-
 import app.exception.Libre311BaseException;
 import app.recaptcha.ReCaptchaService;
-import app.safesearch.GoogleImageSafeSearchService;
-import com.google.cloud.storage.Blob;
+import app.imagedetection.ImageDetector;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.multipart.CompletedFileUpload;
-import io.micronaut.http.uri.UriBuilder;
-import io.micronaut.objectstorage.googlecloud.GoogleCloudStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
 import jakarta.inject.Singleton;
@@ -49,21 +45,20 @@ public class StorageService {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(StorageService.class);
-    private final GoogleCloudStorageOperations objectStorage;
+    private final CloudStorageUploader cloudStorageUploader;
     private final ReCaptchaService reCaptchaService;
-    private final GoogleImageSafeSearchService googleImageClassificationService;
+    private final ImageDetector imageDetector;
 
     private final Set<MediaType> supportedMediaTypes = Set.of(MediaType.IMAGE_PNG_TYPE,
         MediaType.IMAGE_JPEG_TYPE, MediaType.IMAGE_WEBP_TYPE);
 
-    public StorageService(GoogleCloudStorageOperations objectStorage,
-        ReCaptchaService reCaptchaService,
-        GoogleImageSafeSearchService googleImageClassificationService) {
-        this.objectStorage = objectStorage;
+    public StorageService(CloudStorageUploader cloudStorageUploader,
+                          ReCaptchaService reCaptchaService,
+                          ImageDetector imageDetector) {
+        this.cloudStorageUploader = cloudStorageUploader;
         this.reCaptchaService = reCaptchaService;
-        this.googleImageClassificationService = googleImageClassificationService;
+        this.imageDetector = imageDetector;
     }
-
 
     public String upload(CompletedFileUpload file, String gRecaptchaResponse) {
         reCaptchaService.verifyReCaptcha(gRecaptchaResponse);
@@ -79,18 +74,13 @@ public class StorageService {
             throw new RuntimeException(e);
         }
 
-        googleImageClassificationService.preventExplicitImage(fileBytes);
-        UploadResponse<Blob> response = objectStorage.upload(
+        imageDetector.preventExplicitImage(fileBytes);
+        UploadResponse<?> response = cloudStorageUploader.upload(
             UploadRequest.fromBytes(fileBytes, createName(mediaType)));
-        return getPublicURL(response.getNativeResponse());
+        return cloudStorageUploader.getPublicURL(response);
     }
 
     private static String createName(MediaType mediaType) {
         return UUID.randomUUID() + "." + mediaType.getExtension();
-    }
-
-    private static String getPublicURL(Blob res) {
-        return UriBuilder.of("https://storage.googleapis.com").path(res.getBucket())
-            .path(res.getName()).build().toString();
     }
 }
