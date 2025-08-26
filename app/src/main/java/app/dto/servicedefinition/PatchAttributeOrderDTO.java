@@ -16,7 +16,7 @@ package app.dto.servicedefinition;
 
 import io.micronaut.core.annotation.Introspected;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 @Introspected
 public class PatchAttributeOrderDTO {

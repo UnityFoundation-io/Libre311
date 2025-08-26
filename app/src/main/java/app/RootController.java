@@ -44,7 +44,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.annotation.Nullable;
 
 import java.util.stream.Collectors;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;

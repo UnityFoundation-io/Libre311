@@ -24,7 +24,7 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import jakarta.annotation.Nullable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import static app.security.Permission.*;
 
