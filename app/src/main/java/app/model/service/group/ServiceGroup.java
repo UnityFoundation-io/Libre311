@@ -16,7 +16,7 @@ package app.model.service.group;
 
 import app.model.jurisdiction.Jurisdiction;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 
 @Entity

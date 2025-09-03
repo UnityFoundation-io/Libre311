@@ -5,7 +5,6 @@ import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.hateoas.JsonError;
 import io.micronaut.http.server.exceptions.response.ErrorContext;
 import io.micronaut.http.server.exceptions.response.ErrorResponseProcessor;
-import io.micronaut.http.server.exceptions.response.HateoasErrorResponseProcessor;
 import jakarta.inject.Singleton;
 import java.util.Optional;
 
@@ -13,19 +12,17 @@ import java.util.Optional;
 @Singleton
 public class Libre311ErrorResponseProcessor implements ErrorResponseProcessor<JsonError> {
 
-    final HateoasErrorResponseProcessor hateoasErrorResponseProcessor;
+    final ErrorResponseProcessor<JsonError> errorResponseProcessor;
 
-    public Libre311ErrorResponseProcessor(
-        HateoasErrorResponseProcessor hateoasErrorResponseProcessor) {
-        this.hateoasErrorResponseProcessor = hateoasErrorResponseProcessor;
+    public Libre311ErrorResponseProcessor(ErrorResponseProcessor<JsonError> errorResponseProcessor) {
+        this.errorResponseProcessor = errorResponseProcessor;
     }
 
     @Override
     @NonNull
     public MutableHttpResponse<JsonError> processResponse(@NonNull ErrorContext errorContext,
         @NonNull MutableHttpResponse<?> baseResponse) {
-        MutableHttpResponse<JsonError> res = hateoasErrorResponseProcessor.processResponse(
-            errorContext, baseResponse);
+        MutableHttpResponse<JsonError> res = errorResponseProcessor.processResponse(errorContext, baseResponse);
         addLogrefToJsonError(res, errorContext);
 
         return res;
@@ -35,8 +32,7 @@ public class Libre311ErrorResponseProcessor implements ErrorResponseProcessor<Js
         Optional<JsonError> maybeJsonError = res.getBody();
         Optional<Throwable> maybeRootCause = errorContext.getRootCause();
         if (maybeJsonError.isPresent() && maybeRootCause.isPresent()
-            && maybeRootCause.get() instanceof Libre311BaseException) {
-            Libre311BaseException libre311BaseException = (Libre311BaseException) maybeRootCause.get();
+            && maybeRootCause.get() instanceof Libre311BaseException libre311BaseException) {
             maybeJsonError.get().logref(libre311BaseException.getLogref());
         }
     }

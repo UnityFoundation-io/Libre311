@@ -1,11 +1,7 @@
 package app.model.jurisdiction;
 
 import io.micronaut.core.annotation.NonNull;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 import org.locationtech.jts.geom.Polygon;
 
 @Entity
