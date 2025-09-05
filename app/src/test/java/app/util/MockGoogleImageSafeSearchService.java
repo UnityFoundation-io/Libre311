@@ -14,7 +14,7 @@
 
 package app.util;
 
-import app.safesearch.GoogleImageSafeSearchService;
+import app.imagedetection.GoogleImageSafeSearchService;
 import io.micronaut.context.annotation.Replaces;
 import jakarta.inject.Singleton;
 

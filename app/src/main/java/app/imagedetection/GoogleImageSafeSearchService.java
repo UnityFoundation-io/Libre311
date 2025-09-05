@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.safesearch;
+package app.imagedetection;
 
 import app.exception.Libre311BaseException;
 import com.google.cloud.vision.v1.AnnotateImageRequest;
@@ -24,6 +24,7 @@ import com.google.cloud.vision.v1.ImageAnnotatorClient;
 import com.google.cloud.vision.v1.Likelihood;
 import com.google.cloud.vision.v1.SafeSearchAnnotation;
 import com.google.protobuf.ByteString;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.http.HttpStatus;
 import jakarta.inject.Singleton;
 import java.io.IOException;
@@ -31,18 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class GoogleImageSafeSearchService {
-
-    public static class ExplicitImageDetected extends Libre311BaseException {
-
-        public ExplicitImageDetected() {
-            super("The uploaded image has a high likelihood of being explicit and was rejected.",
-                HttpStatus.BAD_REQUEST);
-        }
-    }
+@Requires(property = "micronaut.object-storage.gcp")
+public class GoogleImageSafeSearchService implements ImageDetector {
 
     static class FailedToAnnotateImage extends Libre311BaseException {
-
         public FailedToAnnotateImage(String message) {
             super(message, HttpStatus.BAD_GATEWAY);
         }
@@ -52,6 +45,7 @@ public class GoogleImageSafeSearchService {
      * @param bytes the image data in bytes
      * @throws ExplicitImageDetected if image is suspected of being explicit
      */
+    @Override
     public void preventExplicitImage(byte[] bytes) {
         List<AnnotateImageRequest> requests = new ArrayList<>();
 
@@ -81,7 +75,7 @@ public class GoogleImageSafeSearchService {
         }
     }
 
-    static boolean likelyExplicit(SafeSearchAnnotation annotation) {
+    private boolean likelyExplicit(SafeSearchAnnotation annotation) {
         int maxLikelihoodNum = Likelihood.POSSIBLE.getNumber();
         return annotation.getAdult().getNumber() > maxLikelihoodNum
             || annotation.getViolence().getNumber() > maxLikelihoodNum
