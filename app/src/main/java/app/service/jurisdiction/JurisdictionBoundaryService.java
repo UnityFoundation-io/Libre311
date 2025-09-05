@@ -6,7 +6,7 @@ import app.model.jurisdiction.JurisdictionBoundaryEntity;
 import app.model.jurisdiction.JurisdictionBoundaryRepository;
 import app.service.geometry.LibreGeometryFactory;
 import jakarta.inject.Singleton;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;

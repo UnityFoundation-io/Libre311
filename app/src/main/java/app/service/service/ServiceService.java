@@ -30,15 +30,13 @@ import app.model.service.ServiceRepository;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
 import app.model.servicedefinition.*;
-import io.micronaut.data.model.Page;
-import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

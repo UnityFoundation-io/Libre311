@@ -58,8 +58,8 @@ jpa:
       packages: "app.model"
     properties:
       hibernate:
-        dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
-        database-platform: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
+        dialect: org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect
+        database-platform: org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect
         hbm2ddl:
           auto: ${LIBRE311_AUTO_SCHEMA_GEN:update}
 #        show_sql: true

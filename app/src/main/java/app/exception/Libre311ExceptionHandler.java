@@ -1,15 +1,20 @@
 package app.exception;
 
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.hateoas.JsonError;
 import io.micronaut.http.server.exceptions.ExceptionHandler;
 import io.micronaut.http.server.exceptions.response.ErrorContext;
 import io.micronaut.http.server.exceptions.response.ErrorResponseProcessor;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 @Produces
 @Singleton
@@ -19,10 +24,10 @@ public class Libre311ExceptionHandler implements
 
     private static final Logger LOG = LoggerFactory.getLogger(Libre311ExceptionHandler.class);
 
-    private final ErrorResponseProcessor<?> responseProcessor;
+    private final ErrorResponseProcessor<JsonError> errorResponseProcessor;
 
-    public Libre311ExceptionHandler(Libre311ErrorResponseProcessor responseProcessor) {
-        this.responseProcessor = responseProcessor;
+    public Libre311ExceptionHandler(ErrorResponseProcessor<JsonError> errorResponseProcessor) {
+        this.errorResponseProcessor = errorResponseProcessor;
     }
 
     @Override
@@ -31,8 +36,26 @@ public class Libre311ExceptionHandler implements
             String.format("Libre311Exception" + "\nClass: %s" + "\nLogref: %s" + "\nMessage: %s",
                 exception.getClass(), exception.getLogref(), exception.getMessage()));
 
-        return responseProcessor.processResponse(
-            ErrorContext.builder(request).cause(exception).errorMessage(exception.getMessage())
+        return processResponse(ErrorContext.builder(request)
+                .cause(exception)
+                .errorMessage(exception.getMessage())
                 .build(), HttpResponse.status(exception.getStatus()));
+    }
+
+    private MutableHttpResponse<JsonError> processResponse(@NonNull ErrorContext errorContext,
+                                                           @NonNull MutableHttpResponse<?> baseResponse) {
+        MutableHttpResponse<JsonError> res = errorResponseProcessor.processResponse(errorContext, baseResponse);
+        addLogrefToJsonError(res, errorContext);
+        return res;
+    }
+
+    private void addLogrefToJsonError(MutableHttpResponse<JsonError> res, ErrorContext errorContext){
+        Optional<JsonError> maybeJsonError = res.getBody();
+        Optional<Throwable> maybeRootCause = errorContext.getRootCause();
+
+        if (maybeJsonError.isPresent() && maybeRootCause.isPresent()
+                && maybeRootCause.get() instanceof Libre311BaseException libre311BaseException) {
+            maybeJsonError.get().logref(libre311BaseException.getLogref());
+        }
     }
 }
