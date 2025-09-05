@@ -28,7 +28,7 @@ import java.util.Map;
 @Introspected
 public class PostRequestServiceRequestDTO {
 
-    @NotBlank
+    @NotNull
     @JsonProperty("service_code")
     private Long serviceCode;
 
