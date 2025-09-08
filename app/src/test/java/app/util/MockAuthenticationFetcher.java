@@ -47,7 +47,7 @@ public class MockAuthenticationFetcher implements AuthenticationFetcher {
     private Authentication authentication;
 
     @Override
-    public Publisher<Authentication> fetchAuthentication(HttpRequest<?> request) {
+    public Publisher<Authentication> fetchAuthentication(Object request) {
         return Publishers.just(this.authentication);
     }
 
