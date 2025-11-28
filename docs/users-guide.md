@@ -32,7 +32,7 @@ Open311 is a standardized protocol for civic issue tracking. Libre311 implements
 - **Mobile-friendly** interface optimized for smartphones and tablets
 - **Map-based** visualization of service requests
 - **Multi-format views** including list, map, and table layouts
-- **Image uploads** to document issues
+- **Image uploads** to help describe issues
 - **Administrator tools** for managing and responding to requests
 
 ---
@@ -77,8 +77,8 @@ The map view is the default landing page and provides a geographic overview of s
 1. **Pan the map**: Click and drag to move around
 2. **Zoom**: Use the +/- buttons or pinch-to-zoom on mobile
 3. **View markers**: Each marker represents a service request
-4. **Click a marker**: Opens a preview of the service request
-5. **View details**: Click on the preview to see the full request information
+4. **Click a marker**: Opens a detailed view of the service request
+5. **View details**: Displays additional information such as description, photos, and status
 
 **Map features:**
 - Color-coded markers by request status
@@ -98,7 +98,7 @@ The list view shows service requests in a scrollable format.
 - Requests are displayed with key information:
   - Service request ID
   - Request type (e.g., "Pothole", "Graffiti")
-  - Status (Open, Closed, In Progress)
+  - Status (Open, Assigned, In Progress, Closed)
   - Location address
   - Date submitted
   - Description preview
@@ -119,7 +119,7 @@ When you click on a service request, you'll see:
 - **Request ID**: Unique tracking number (e.g., #355)
 - **Status**: Current state of the request (displayed as a badge, e.g., "Open")
 - **Date Submitted**: When the request was created
-- **Photo**: Images uploaded by the reporter (if any)
+- **Photo**: Image uploaded by the reporter (if any)
 - **Service Type**: Category of the issue (e.g., "Trail Maintenance")
 - **Location**: Complete address information
 - **Custom Questions**: Additional details specific to the service type, as defined by jurisdiction administrators
@@ -133,9 +133,13 @@ Public users can submit service requests without logging in. The creation proces
 
 #### Step 1: Select a Request Category
 
-1. Click "Create Request" or "New Service Request" button
-2. Browse available service categories (e.g., Roads, Parks, Public Safety)
-3. Select the specific service type that matches your issue
+1. Click "New Request"
+2. Select the location of your issue on the map. 
+   - If location services are enabled, your current location will be used by default.
+   - Move the map to adjust the marker position if needed.
+3. Optionally take a photo or upload an image to illustrate the issue.
+   - You can also continue without an image.
+4. Select the specific request type that matches your issue
    - Examples: Pothole, Graffiti, Broken Streetlight, Tree Trimming
 
 #### Step 2: Select Location
@@ -317,6 +321,7 @@ Click any request in the table to view full details, including:
 2. Click the status dropdown
 3. Select new status:
    - Open
+   - Assigned
    - In Progress
    - Closed
 4. Optionally add a note about the status change
@@ -616,7 +621,7 @@ Refer to your jurisdiction's privacy policy regarding:
 
 **Request ID**: A unique identifier assigned to each service request
 
-**Status**: The current state of a service request (Open, In Progress, Closed)
+**Status**: The current state of a service request (Open, Assigned, In Progress, Closed)
 
 **GeoReport**: The Open311 specification for location-based service requests
 
