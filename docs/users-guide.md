@@ -20,11 +20,11 @@
 
 ## Introduction
 
-Libre311 is a mobile-friendly web application that implements the Open311 standard for civic service requests. It enables communities to report and track non-emergency issues such as potholes, graffiti, streetlight outages, and other municipal services.
+Libre311 is a mobile-friendly web application that implements the Open311 standard for civic service requests. It enables communities to report and track non-emergency issues such as potholes, graffiti, streetlight outages, and other municipal services. It is designed to enable administrators to define custome service types and to provide basic service request management capabilities.
 
 ### What is Open311?
 
-Open311 is a standardized protocol for civic issue tracking. Libre311 implements the Open311 GeoReport v2 API, making service request data accessible and interoperable with other civic technology tools.
+Open311 is a standardized protocol for civic issue tracking. Libre311 implements the [Open311 GeoReport v2 API](https://wiki.open311.org/GeoReport_v2/), making service request data accessible and interoperable with other civic technology tools.
 
 ### Key Features
 
@@ -70,7 +70,7 @@ The map view is the default landing page and provides a geographic overview of s
 
 ![Libre311 Map View showing service requests as color-coded markers](images/map-view-public.png)
 
-*Figure 1: Map view displaying service requests as color-coded markers. The map includes zoom controls, a toggle between Map/List views, and a "New Request" button.*
+*Figure 1: Map view displaying service requests as color-coded markers. The map includes zoom controls, a geolocation control, a toggle between Map/List views, and a "New Request" button.*
 
 **How to use the map:**
 
@@ -78,7 +78,6 @@ The map view is the default landing page and provides a geographic overview of s
 2. **Zoom**: Use the +/- buttons or pinch-to-zoom on mobile
 3. **View markers**: Each marker represents a service request
 4. **Click a marker**: Opens a detailed view of the service request
-5. **View details**: Displays additional information such as description, photos, and status
 
 **Map features:**
 - Color-coded markers by request status
