@@ -133,10 +133,7 @@ Public users can submit service requests without logging in. The creation proces
 
 #### Step 1: Select a Request Category
 
-1. Click "New Request"
-2. Select the location of your issue on the map. 
-   - If location services are enabled, your current location will be used by default.
-   - Move the map to adjust the marker position if needed.
+1. Click "New Request" button on the homepage or "Create Service Request" in the navigation menu.
 3. Optionally take a photo or upload an image to illustrate the issue.
    - You can also continue without an image.
 4. Select the specific request type that matches your issue
@@ -145,65 +142,64 @@ Public users can submit service requests without logging in. The creation proces
 #### Step 2: Select Location
 
 **Option A: Use Your Current Location**
+- If location services are enabled, your current location will be used by default.
 - Click "Use My Location" to automatically detect your position
-- Requires location permission in your browser
+- Move the map to adjust the marker position if needed.
 
 **Option B: Search for an Address**
 - Enter an address in the search box
 - Select from the autocomplete suggestions
 - The map will center on the selected location
 
-**Option C: Click on the Map**
-- Manually click on the map to place a marker
-- Adjust the marker position by dragging it
-
 **Tips:**
 - Be as precise as possible with the location
 - You can zoom in to pinpoint the exact spot
 - The marker shows where the issue will be recorded
 
-#### Step 3: Describe the Issue
+**Confirm Location** to proceed to the next step.
 
-Fill in the service request details:
+#### Step 3: Add Photo (Optional)
+
+You have the opportunity to add an image before entering details about your request. Photos help responders understand and prioritize the issue.
+
+**Options:**
+1. **Take a photo**: Use your device camera to capture an image of the issue
+2. **Upload an image**: Select an existing photo from your device
+3. **Continue without a photo**: Skip this step if you don't have an image or do not wish to supply one
+
+**Photo guidelines:**
+- Clear, well-lit photos work best
+- Include context (surroundings) to help locate the issue
+- Avoid including people's faces or vehicle license plates
+
+**Note:** Image uploads are subject to content moderation for safety and appropriateness.
+
+#### Step 4: Describe the Issue
+
+After optionally adding a photo, fill in the service request details:
 
 **Required fields** (marked with asterisk):
 - **Description**: Explain the issue clearly and concisely
 - **Additional details**: Provide context that helps responders understand the situation
 
 **Service-specific questions:**
-- Different service types may have custom fields
-- Examples: "Size of pothole", "Color of graffiti", "Number of affected streetlights"
+- Different service types may have custom fields configured by your jurisdiction
+- Examples: "What is the issue?", "Does this issue impact walkability?", "Size of pothole", "Color of graffiti"
 - Answer all applicable questions
+- These questions vary by service type
+- Required questions must be completed to proceed and are marked with an asterisk '*'
 
 **Best practices:**
 - Be specific and descriptive
 - Include landmarks or cross streets for easier identification
 - Mention safety hazards if applicable
 
-#### Step 4: Upload Photos (Optional)
-
-Photos help responders understand and prioritize the issue.
-
-**How to upload:**
-1. Click "Add Photo" or "Upload Image"
-2. Choose a photo from your device
-3. You can upload multiple photos
-4. Review photos before submitting
-
-**Photo guidelines:**
-- Clear, well-lit photos work best
-- Show the issue from multiple angles if helpful
-- Include context (surroundings) in at least one photo
-- Avoid including people's faces or vehicle license plates
-
-**Note:** Image uploads are subject to content moderation for safety and appropriateness.
-
 #### Step 5: Provide Contact Information (Optional)
 
-Contact information helps staff follow up with you about your request.
+Contact information helps staff follow up with you about your request. None of these are required. You can click "Skip" to proceed without providing contact details.
 
 **Fields:**
-- **Name**: Your full name
+- **Name**: Your name First and/or Last
 - **Email**: Contact email address
 - **Phone**: Contact phone number
 
@@ -217,47 +213,10 @@ Contact information helps staff follow up with you about your request.
 1. Review all information you've entered
 2. Make changes by clicking "Back" or editing specific sections
 3. Complete any required captcha verification
-4. Click "Submit" to create the request
+4. Click "Submit Request" to create the request
 
 **After submission:**
 - You'll receive a confirmation with your request ID
-- Write down or screenshot your request ID for future reference
-- You can search for your request using the ID or location
-
-### Searching and Filtering
-
-#### Search by Request ID
-
-If you have a service request ID:
-1. Enter the ID in the search box
-2. Press Enter or click Search
-3. The matching request will be displayed
-
-#### Filter by Service Type
-
-1. Use the service type dropdown or filter menu
-2. Select one or more service categories
-3. The map and list will update to show only matching requests
-
-#### Filter by Status
-
-View requests by their current status:
-- **Open**: Recently submitted, not yet addressed
-- **In Progress**: Being worked on by staff
-- **Closed**: Completed or resolved
-
-#### Filter by Date Range
-
-1. Select a start date
-2. Select an end date
-3. View only requests submitted within that timeframe
-
-#### Geographic Filtering
-
-On the map view:
-- Pan to your area of interest
-- Requests visible on the current map view are automatically filtered
-- Use "Search this area" to apply the geographic filter
 
 ---
 
@@ -285,25 +244,28 @@ Administrators have additional capabilities for managing service requests and co
 
 Administrators have access to a table view with enhanced functionality.
 
+![Libre311 Administrator Table View](images/table-view-admin.png)
+
+*Figure 4: Administrator table view showing service requests with detailed columns including Request ID, Priority, Service Name, Status, Address, Reported date, and Expected Completion. The view includes a sidebar with request previews, search functionality, pagination controls, and CSV download capability.*
+
 **Accessing table view:**
-- After logging in, click "Table" in the navigation
+- After logging in, click Service Request Table" in the navigation menu
 - Available only to authenticated users
 
 **Table features:**
 - Comprehensive list of all service requests
-- Sortable columns
 - Pagination controls
-- Bulk actions (when available)
-- Export capabilities
+- Filtering available by selecting the filter icon
+- Export capabilities ("Download CSV" button)
 
 **Columns displayed:**
 - Request ID
-- Service Type
+- Priority
+- Service Name (request type)
 - Status
-- Location
-- Submitted Date
-- Priority (if configured)
-- Assigned To (if configured)
+- Address (location)
+- Reported (submission date)
+- Expected Completion)
 
 #### Viewing Request Details
 
@@ -316,28 +278,49 @@ Click any request in the table to view full details, including:
 
 #### Updating Service Requests
 
-**Changing status:**
-1. Open a service request
-2. Click the status dropdown
-3. Select new status:
+Administrators can update service request details by clicking the "Update" button on any request. The update form is then displayed in the left sidebar. See the example below:
+
+![Administrator Update Form](images/update-request-admin.png)
+
+*Figure 5: Administrator update form showing all available fields including status, priority, estimated fix date, agency contact, recommended solution, and internal notes. The form displays the original request details at the top (photo, service type, location, and custom questions).*
+
+**Available fields for administrators:**
+
+3. **Estimated Fix** (date picker):
+   - Set expected completion date
+   - Visible to the public if configured
+
+1. **Status** (dropdown):
    - Open
    - Assigned
    - In Progress
    - Closed
-4. Optionally add a note about the status change
-5. Save changes
 
-**Adding internal notes:**
-- Internal notes are visible only to administrators
-- Use notes to communicate with other staff
-- Document actions taken or additional context
+2. **Priority** (dropdown):
+   - Set priority levels for request management
+   - Helps with triage and resource allocation
 
-**Updating request information:**
-- Edit description or details if needed
-- Correct location if misplaced
-- Update service type if miscategorized
-- Add priority levels
-- Assign to specific staff members or departments
+4. **Agency Contact**:
+   - Contact name
+   - Contact email
+   - For follow-up communication
+
+5. **Recommended Solution**:
+   - Proposed service or action plan
+   - Helps with work planning
+
+6. **Notes** (text area):
+   - Internal notes visible only to administrators
+   - Use to communicate with other staff
+   - Document actions taken or additional context
+
+**Updating a request:**
+1. Open a service request from the table view
+2. Click the "Update" button in the lower right corner
+3. Modify any of the administrative fields as needed
+4. Review original request details (displayed at top of form)
+5. Click "Submit" to save changes
+6. Click "Cancel" to discard changes
 
 **Best practices:**
 - Update status promptly to keep the public informed
@@ -345,19 +328,10 @@ Click any request in the table to view full details, including:
 - Use descriptive status updates
 - Close requests when fully resolved
 
-#### Bulk Operations
-
-For managing multiple requests efficiently:
-1. Select multiple requests using checkboxes
-2. Choose a bulk action from the menu
-3. Common bulk actions:
-   - Change status
-   - Assign to department
-   - Export selected requests
 
 ### Configuring Service Definitions
 
-Administrators can customize the types of service requests available.
+Administrators can customize the types of service requests available. This features is accessed via the "Service Definition Configuration" option in the admin menu.
 
 #### Managing Service Groups
 
@@ -368,10 +342,9 @@ Service groups organize related service types into categories.
 - View all existing service groups
 
 **Creating a new group:**
-1. Click "Add Group" or "New Group"
-2. Enter group name (e.g., "Transportation", "Parks & Recreation")
-3. Optionally add a description
-4. Save the group
+1. Click "+ Add Group"
+2. Enter group name (e.g., "Transportation", "Parks & Recreation") 
+4. Save the group by clicking the "Add" button
 
 **Editing a group:**
 1. Click on an existing group
@@ -387,50 +360,54 @@ Service groups organize related service types into categories.
 Service types are the specific issues that users can report.
 
 **Creating a new service type:**
-1. Navigate to a service group
-2. Click "Add Service" or "New Service"
-3. Configure service details:
-   - **Service name**: (e.g., "Pothole", "Graffiti Removal")
-   - **Description**: What this service covers
-   - **Keywords**: For search and filtering
-4. Save the service
+1. Navigate to the services with a group by selecting the ">" to the right of the group name.
+2. Click "+Add Service" 
 
 **Configuring service attributes:**
 
-Service attributes are custom fields specific to a service type.
+Service attributes are custom questions/fields specific to a service type. These appear when users create service requests of that type. You can edit a service type by selecting the ">" to the right of the service name.
 
-1. Open a service type
-2. Click "Add Attribute"
-3. Configure the attribute:
-   - **Field name**: Label for the field
-   - **Field type**:
-     - Text input
-     - Text area
-     - Dropdown/Select
-     - Checkbox
-     - Number
-     - Date
-   - **Required**: Whether users must complete this field
-   - **Options**: For dropdown fields, define available choices
-4. Reorder attributes by dragging
-5. Save changes
+![Service Attribute Configuration Form](images/attribute-editor-admin.png)
 
-**Example service configuration:**
+*Figure 6: Service attribute editor for configuring custom questions. This example shows a dropdown attribute for "Trail Maintenance" with multiple predefined values (Overgrown, Eroded, Standing Water, Too Steep, Fallen Tree).*
 
-Service: "Pothole Report"
-- Attribute 1: "Approximate size" (Dropdown: Small/Medium/Large)
-- Attribute 2: "Traffic impact" (Dropdown: None/Minor/Major)
-- Attribute 3: "Additional details" (Text area, optional)
+**To configure an attribute:**
+
+1. Navigate to the service type you want to configure
+2. Click the "Attributes" tab
+3. Click "Add Attribute" or select an existing attribute to edit by selecting the ">" to the right of the attribute name
+4. Configure the attribute fields:
+   - **Required Answer** (checkbox): Check if users must answer this question
+   - **Answer Type** (dropdown): Select the type of input (e.g., "Single Answer" or Multi-Answer")
+      - If Single Answer only one option can be selected. 
+      - For Multi-Answer, users can select multiple options.
+   - **Question**: The question text users will see (e.g., "What is the issue?")
+   - **Helper Text**: Additional guidance or context for the question (e.g., "Issue Type", or "Provide details about the problem")
+   - **Values**: For dropdown attributes, define the list of available options
+     - Enter each option value
+     - Click "+ Add" to add more options
+     - Click the "X" button to remove an option
+5. Click "Save Attribute" to save the changes
+6. Click "Cancel" to discard changes
+
+**Attribute types supported:**
+- Dropdown/Select lists with predefined values (as shown in example)
+- Text input fields
+- Text area for longer responses
+- Other field types as configured by your jurisdiction
+
+**Example attribute configuration:**
+
+Service: "Trail Maintenance"
+- Question: "What is the issue?"
+- Helper Text: "Issue Type"
+- Required: Yes
+- Values: Overgrown, Eroded, Standing Water, Too Steep, Fallen Tree
 
 **Editing service types:**
 - Click on a service to edit its configuration
 - Update name, description, or attributes
 - Changes apply to new requests only
-
-**Deactivating services:**
-- Services can be deactivated instead of deleted
-- Deactivated services are hidden from public view
-- Existing requests remain accessible
 
 #### Service Definition Best Practices
 
@@ -473,39 +450,6 @@ Libre311 is optimized for mobile devices with responsive design.
 - Bottom navigation bar for primary actions
 - Swipe back gestures where supported
 - Collapsible filters and search
-
----
-
-## Accessibility
-
-Libre311 is designed to be accessible to all users.
-
-### Keyboard Navigation
-
-- All interactive elements are keyboard-accessible
-- Tab through controls in logical order
-- Enter or Space to activate buttons
-- Escape to close dialogs and menus
-
-### Screen Reader Support
-
-- Semantic HTML structure
-- ARIA labels and descriptions
-- Meaningful link text
-- Status announcements for dynamic content
-
-### Visual Accessibility
-
-- Sufficient color contrast
-- Not relying on color alone to convey information
-- Resizable text (browser zoom supported)
-- Focus indicators on interactive elements
-
-### Alternative Text
-
-- All images have descriptive alt text
-- Map markers include text descriptions
-- Icons accompanied by text labels where appropriate
 
 ---
 
