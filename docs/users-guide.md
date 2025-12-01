@@ -93,7 +93,7 @@ The list view shows service requests in a scrollable format.
 *Figure 2: List view displaying service requests with ID, status, title, location, date, description, and associated photos. Includes pagination controls and toggle between Map/List views.*
 
 **Accessing list view:**
-- Click "List" in the navigation menu
+- Click "List" button in the center top of the map view to switch to list format
 - Requests are displayed with key information:
   - Service request ID
   - Request type (e.g., "Pothole", "Graffiti")
