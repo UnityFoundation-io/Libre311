@@ -471,7 +471,7 @@ public class ServiceRequestService {
         File tmpFile;
         Instant now = Instant.now();
         try {
-            tmpFile = File.createTempFile(now.toString(), ".csv");
+            tmpFile = File.createTempFile(now.toString().replaceAll(":", ""), ".csv");
             try (Writer writer  = new FileWriter(tmpFile)) {
 
                 CSVFormat.Builder builder = CSVFormat.Builder.create(CSVFormat.DEFAULT);
