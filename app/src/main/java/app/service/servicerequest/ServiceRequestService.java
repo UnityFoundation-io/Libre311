@@ -341,7 +341,7 @@ public class ServiceRequestService {
         return convertToSensitiveDTO(serviceRequestRepository.update(serviceRequest));
     }
 
-    private static void applyPatch(PatchServiceRequestDTO serviceRequestDTO, ServiceRequest serviceRequest) {
+    static void applyPatch(PatchServiceRequestDTO serviceRequestDTO, ServiceRequest serviceRequest) {
         if (serviceRequestDTO.getStatus() != null) {
             serviceRequest.setStatus(serviceRequestDTO.getStatus());
         }
