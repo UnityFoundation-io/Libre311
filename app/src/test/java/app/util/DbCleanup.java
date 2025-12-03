@@ -26,7 +26,7 @@ import app.model.user.UserRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 @Singleton
 public class DbCleanup {
