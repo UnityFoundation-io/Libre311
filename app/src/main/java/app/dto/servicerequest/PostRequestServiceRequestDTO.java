@@ -14,21 +14,30 @@
 
 package app.dto.servicerequest;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 @Introspected
 public class PostRequestServiceRequestDTO {
+   private static final Logger LOG = LoggerFactory.getLogger(PostRequestServiceRequestDTO.class);
 
-    @NotBlank
+
+    @NotNull
     @JsonProperty("service_code")
     private Long serviceCode;
 
@@ -80,6 +89,9 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("g_recaptcha_response")
     private String gRecaptchaResponse;
 
+    @JsonIgnore
+    private Map<String, String> attributes = new HashMap<>();
+    private static final java.util.regex.Pattern ATTRIBUTE_PATTERN = java.util.regex.Pattern.compile("attribute\\[([^]]+)]");
     public PostRequestServiceRequestDTO(Long serviceCode) {
         this.serviceCode = serviceCode;
     }
@@ -201,5 +213,51 @@ public class PostRequestServiceRequestDTO {
 
     public void setgRecaptchaResponse(String gRecaptchaResponse) {
         this.gRecaptchaResponse = gRecaptchaResponse;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    @JsonAnySetter
+    public void processDynamicField(String key, Object value) {
+        if (value instanceof Map<?, ?> valueMap) { // id = {attribute: value}
+            Object innerValue = valueMap.get("attribute");
+
+            if (innerValue != null) {
+                attributes.put("attribute[" + key + "]", innerValue.toString());
+            }
+        }
+        else if (value != null) { // attribute[id] = value
+            Matcher matcher = ATTRIBUTE_PATTERN.matcher(key);
+            LOG.debug("Processing dynamic field: {}, value = {}", key, value);
+            if (matcher.matches()) {
+                LOG.debug("Found attribute key: {}", key);
+                if (attributes == null) attributes = new HashMap<>();
+                String index = matcher.group(1);
+                attributes.put("attribute[" + index + "]", value.toString());
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "PostRequestServiceRequestDTO{" +
+                "serviceCode=" + serviceCode +
+                ", latitude='" + latitude + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", addressString='" + addressString + '\'' +
+                ", addressId='" + addressId + '\'' +
+                ", email='" + email + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", description='" + description + '\'' +
+                ", mediaUrl='" + mediaUrl + '\'' +
+                ", gRecaptchaResponse='" + gRecaptchaResponse + '\'' +
+                ", attributes=" + attributes +
+                '}';
     }
 }

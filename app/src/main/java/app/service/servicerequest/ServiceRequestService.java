@@ -130,7 +130,7 @@ public class ServiceRequestService {
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
         reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse());
-
+        LOG.debug(serviceRequestDTO.toString());
         double lat = Double.parseDouble(serviceRequestDTO.getLatitude());
         double lng = Double.parseDouble(serviceRequestDTO.getLongitude());
         if (!jurisdictionBoundaryService.existsInJurisdiction(jurisdictionId, lat, lng)){
@@ -157,7 +157,7 @@ public class ServiceRequestService {
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
         List<ServiceDefinitionAttribute> serviceDefinitionAttributes = attributeRepository.findAllByServiceId(service.getId());
         if (!serviceDefinitionAttributes.isEmpty()) {
-            List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(request, serviceDefinitionAttributes);
+            List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(serviceRequestDTO.getAttributes(), serviceDefinitionAttributes);
             if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
                 throw new InvalidServiceRequestException("Submitted Service Request does not contain required attribute values.");
             }
@@ -189,15 +189,15 @@ public class ServiceRequestService {
         List<Long> requestCodes = requestAttributes.stream()
                 .map(ServiceDefinitionAttributeDTO::getId)
                 .collect(Collectors.toList());
-
+        LOG.debug("Required attributes: {}", requiredCodes);
+        LOG.debug("Request attributes: {}", requestCodes);
         return requestCodes.containsAll(requiredCodes);
     }
 
-    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(HttpRequest<?> request, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
+    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(Map<String, String> dtoAttributes, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
 
-        Argument<Map<String, String>> type = Argument.mapOf(String.class, String.class);
-        Optional<Map<String, String>> body = request.getBody(type);
-
+        Optional<Map<String, String>> body = Optional.ofNullable(dtoAttributes);
+        LOG.debug("Request body: {}", body);
         List<ServiceDefinitionAttributeDTO> attributes = new ArrayList<>();
         if (body.isPresent()) {
             body.get().forEach((k, v) -> {
