@@ -71,6 +71,12 @@ application {
     mainClass.set("app.Application")
 }
 
+run {
+    systemProperties([
+            'micronaut.environments': 'local'
+    ])
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
