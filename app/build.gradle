@@ -96,3 +96,7 @@ tasks.withType(JavaCompile) {
     options.fork = true
     options.forkOptions.jvmArgs << '-Dmicronaut.openapi.views.spec=rapidoc.enabled=true,swagger-ui.enabled=true,swagger-ui.theme=flattop'
 }
+
+tasks.named('shadowJar') {
+    zip64 = true
+}
