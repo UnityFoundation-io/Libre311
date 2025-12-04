@@ -26,7 +26,7 @@ import org.reactivestreams.Publisher;
 
 @Replaces(AuthenticationFetcher.class)
 @Singleton
-public class MockAuthenticationFetcher implements AuthenticationFetcher {
+public class MockAuthenticationFetcher implements AuthenticationFetcher<HttpRequest<?>> {
 
     static class MockAuthentication implements Authentication {
 
