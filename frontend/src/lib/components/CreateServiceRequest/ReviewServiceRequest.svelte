@@ -12,6 +12,7 @@
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
 	import ServiceRequestStatusBadge from '../ServiceRequestStatusBadge.svelte';
+	import PolicyAcknowledgment from '../PolicyAcknowledgment.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -136,6 +137,8 @@
 				{/if}
 			</div>
 		</div>
+
+		<PolicyAcknowledgment />
 
 		<StepControls on:click={submitServiceReq} loading={submittingServiceRequest}>
 			<svelte:fragment slot="submit-text"
