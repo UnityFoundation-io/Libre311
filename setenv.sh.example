@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export GCP_PROJECT_ID=<GCP_PROJECT_ID>
-export MICRONAUT_ENVIRONMENTS=<MICRONAUT_ENVIRONMENTS> # Example: local
+
 # Don't set MICRONAUT_SERVER_PORT environment variable since it seems to be picked
 # up by both the app and the Test Resources server which cause port conflict.
 # Instead, set port for the app in the application-*.yml file for the
@@ -22,6 +22,6 @@ export AUTH_BASE_URL=<AUTH_BASE_URL>
 export AUTH_JWKS=<AUTH_JWKS>
 
 # Update these if necessary, for example, to use a local database
-export DATASOURCES_DEFAULT_URL=<DATASOURCES_DEFAULT_URL>
-export DATASOURCES_DEFAULT_USERNAME=<DATASOURCES_DEFAULT_USERNAME>
-export DATASOURCES_DEFAULT_PASSWORD=<DATASOURCES_DEFAULT_PASSWORD>
+#export DATASOURCES_DEFAULT_URL=<DATASOURCES_DEFAULT_URL>
+#export DATASOURCES_DEFAULT_USERNAME=<DATASOURCES_DEFAULT_USERNAME>
+#export DATASOURCES_DEFAULT_PASSWORD=<DATASOURCES_DEFAULT_PASSWORD>
