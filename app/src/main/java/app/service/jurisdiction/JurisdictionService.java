@@ -143,5 +143,15 @@ public class JurisdictionService {
         if (jurisdictionDTO.getLogoMediaUrl() != null) {
             jurisdiction.setLogoMediaUrl(jurisdictionDTO.getLogoMediaUrl());
         }
+        if (jurisdictionDTO.getTermsOfUseContent() != null) {
+            jurisdiction.setTermsOfUseContent(
+                jurisdictionDTO.getTermsOfUseContent().isEmpty() ? null : jurisdictionDTO.getTermsOfUseContent()
+            );
+        }
+        if (jurisdictionDTO.getPrivacyPolicyContent() != null) {
+            jurisdiction.setPrivacyPolicyContent(
+                jurisdictionDTO.getPrivacyPolicyContent().isEmpty() ? null : jurisdictionDTO.getPrivacyPolicyContent()
+            );
+        }
     }
 }

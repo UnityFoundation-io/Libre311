@@ -46,6 +46,12 @@ public class JurisdictionDTO {
     @JsonProperty("auth_base_url")
     private String unityAuthUrl;
 
+    @JsonProperty("terms_of_use_content")
+    private String termsOfUseContent;
+
+    @JsonProperty("privacy_policy_content")
+    private String privacyPolicyContent;
+
     private Double[][] bounds;
 
     public JurisdictionDTO() {
@@ -63,6 +69,8 @@ public class JurisdictionDTO {
         this.primaryColor = jurisdiction.getPrimaryColor();
         this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
+        this.termsOfUseContent = jurisdiction.getTermsOfUseContent();
+        this.privacyPolicyContent = jurisdiction.getPrivacyPolicyContent();
     }
 
     public JurisdictionDTO(Jurisdiction jurisdiction, JurisdictionBoundary boundary) {
@@ -72,6 +80,8 @@ public class JurisdictionDTO {
         this.primaryColor = jurisdiction.getPrimaryColor();
         this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
+        this.termsOfUseContent = jurisdiction.getTermsOfUseContent();
+        this.privacyPolicyContent = jurisdiction.getPrivacyPolicyContent();
         setBounds(boundary.getBoundary());
     }
 
@@ -142,5 +152,21 @@ public class JurisdictionDTO {
     @JsonSetter
     public void setBounds(Double[][] bounds) {
         this.bounds = bounds;
+    }
+
+    public String getTermsOfUseContent() {
+        return termsOfUseContent;
+    }
+
+    public void setTermsOfUseContent(String termsOfUseContent) {
+        this.termsOfUseContent = termsOfUseContent;
+    }
+
+    public String getPrivacyPolicyContent() {
+        return privacyPolicyContent;
+    }
+
+    public void setPrivacyPolicyContent(String privacyPolicyContent) {
+        this.privacyPolicyContent = privacyPolicyContent;
     }
 }

@@ -41,6 +41,12 @@ public class PatchJurisdictionDTO {
     @Size(min = 4)
     private Double[][] bounds;
 
+    @JsonProperty("terms_of_use_content")
+    private String termsOfUseContent;
+
+    @JsonProperty("privacy_policy_content")
+    private String privacyPolicyContent;
+
     public PatchJurisdictionDTO() {
     }
 
@@ -82,5 +88,21 @@ public class PatchJurisdictionDTO {
 
     public void setBounds(Double[][] bounds) {
         this.bounds = bounds;
+    }
+
+    public String getTermsOfUseContent() {
+        return termsOfUseContent;
+    }
+
+    public void setTermsOfUseContent(String termsOfUseContent) {
+        this.termsOfUseContent = termsOfUseContent;
+    }
+
+    public String getPrivacyPolicyContent() {
+        return privacyPolicyContent;
+    }
+
+    public void setPrivacyPolicyContent(String privacyPolicyContent) {
+        this.privacyPolicyContent = privacyPolicyContent;
     }
 }

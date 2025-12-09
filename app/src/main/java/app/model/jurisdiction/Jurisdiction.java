@@ -44,6 +44,12 @@ public class Jurisdiction {
 
     private String logoMediaUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String termsOfUseContent;
+
+    @Column(columnDefinition = "TEXT")
+    private String privacyPolicyContent;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
@@ -140,6 +146,22 @@ public class Jurisdiction {
 
     public void setLogoMediaUrl(String logoMediaUrl) {
         this.logoMediaUrl = logoMediaUrl;
+    }
+
+    public String getTermsOfUseContent() {
+        return termsOfUseContent;
+    }
+
+    public void setTermsOfUseContent(String termsOfUseContent) {
+        this.termsOfUseContent = termsOfUseContent;
+    }
+
+    public String getPrivacyPolicyContent() {
+        return privacyPolicyContent;
+    }
+
+    public void setPrivacyPolicyContent(String privacyPolicyContent) {
+        this.privacyPolicyContent = privacyPolicyContent;
     }
 
 }
