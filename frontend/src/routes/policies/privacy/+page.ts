@@ -1,9 +1,11 @@
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {
+	const backendUrl = import.meta.env.VITE_BACKEND_URL || '/api';
+
 	try {
 		// Fetch jurisdiction data
-		const response = await fetch('/api/jurisdiction', {
+		const response = await fetch(`${backendUrl}/config`, {
 			headers: {
 				Referer: typeof window !== 'undefined' ? window.location.href : ''
 			}
