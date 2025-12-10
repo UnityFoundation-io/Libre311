@@ -1,15 +1,12 @@
 /** @type {import('tailwindcss').Config}*/
 const config = {
-	content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/stwui/**/*.{svelte,js,ts,html}'],
+	content: ['./src/**/*.{html,js,svelte,ts}'],
 
 	theme: {
 		extend: {}
 	},
 
-	plugins: [require('@tailwindcss/forms'), require('stwui/plugin')],
-	stwui: {
-		themes: ['light']
-	}
+	plugins: [require('@tailwindcss/forms')]
 };
 
 module.exports = config;
