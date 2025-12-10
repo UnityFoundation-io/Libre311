@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ fetch }) => {
 		});
 
 		if (!response.ok) {
-			throw new Error('Failed to fetch jurisdiction');
+			throw new Error(`Failed to fetch jurisdiction: ${response.status} ${response.statusText}`);
 		}
 
 		const jurisdiction = await response.json();
@@ -29,16 +29,31 @@ export const load: PageLoad = async ({ fetch }) => {
 
 		return {
 			policyContent,
-			jurisdictionName: jurisdiction.name || 'This Jurisdiction'
+			jurisdictionName: jurisdiction.name || 'This Jurisdiction',
+			loadError: null
 		};
 	} catch (error) {
 		console.error('Error loading privacy policy:', error);
-		// Fallback to default on error
-		const defaultResponse = await fetch('/defaults/privacy.md');
-		const policyContent = await defaultResponse.text();
-		return {
-			policyContent,
-			jurisdictionName: 'This Jurisdiction'
-		};
+
+		// Attempt to load fallback content
+		try {
+			const defaultResponse = await fetch('/defaults/privacy.md');
+			if (!defaultResponse.ok) {
+				throw new Error('Failed to load default privacy policy');
+			}
+			const policyContent = await defaultResponse.text();
+			return {
+				policyContent,
+				jurisdictionName: 'This Jurisdiction',
+				loadError: 'Unable to load jurisdiction-specific privacy policy. Showing default content.'
+			};
+		} catch (fallbackError) {
+			console.error('Error loading fallback privacy policy:', fallbackError);
+			return {
+				policyContent: '# Privacy Policy\n\nWe were unable to load the privacy policy. Please try again later or contact support.',
+				jurisdictionName: 'This Jurisdiction',
+				loadError: 'Unable to load privacy policy. Please try again later.'
+			};
+		}
 	}
 };

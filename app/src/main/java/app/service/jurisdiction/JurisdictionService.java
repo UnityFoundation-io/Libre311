@@ -100,6 +100,16 @@ public class JurisdictionService {
         jurisdiction.setPrimaryColor(requestDTO.getPrimaryColor());
         jurisdiction.setPrimaryHoverColor(requestDTO.getPrimaryHoverColor());
         jurisdiction.setLogoMediaUrl(requestDTO.getLogoMediaUrl());
+        jurisdiction.setTermsOfUseContent(
+            requestDTO.getTermsOfUseContent() != null && !requestDTO.getTermsOfUseContent().isEmpty()
+                ? requestDTO.getTermsOfUseContent()
+                : null
+        );
+        jurisdiction.setPrivacyPolicyContent(
+            requestDTO.getPrivacyPolicyContent() != null && !requestDTO.getPrivacyPolicyContent().isEmpty()
+                ? requestDTO.getPrivacyPolicyContent()
+                : null
+        );
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
         JurisdictionBoundary savedBoundary = jurisdictionBoundaryService.saveBoundary(

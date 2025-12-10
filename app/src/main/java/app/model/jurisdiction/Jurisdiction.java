@@ -20,6 +20,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import jakarta.persistence.*;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,20 +34,26 @@ public class Jurisdiction {
     @Id
     private String id;
 
+    @NotNull
     private String name;
 
     @NotNull
     private Long tenantId;
 
+    @Nullable
     private String primaryColor;
 
+    @Nullable
     private String primaryHoverColor;
 
+    @Nullable
     private String logoMediaUrl;
 
+    @Nullable
     @Column(columnDefinition = "TEXT")
     private String termsOfUseContent;
 
+    @Nullable
     @Column(columnDefinition = "TEXT")
     private String privacyPolicyContent;
 

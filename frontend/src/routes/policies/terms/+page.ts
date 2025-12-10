@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ fetch }) => {
 		});
 
 		if (!response.ok) {
-			throw new Error('Failed to fetch jurisdiction');
+			throw new Error(`Failed to fetch jurisdiction: ${response.status} ${response.statusText}`);
 		}
 
 		const jurisdiction = await response.json();
@@ -29,16 +29,31 @@ export const load: PageLoad = async ({ fetch }) => {
 
 		return {
 			policyContent,
-			jurisdictionName: jurisdiction.name || 'This Jurisdiction'
+			jurisdictionName: jurisdiction.name || 'This Jurisdiction',
+			loadError: null
 		};
 	} catch (error) {
 		console.error('Error loading terms:', error);
-		// Fallback to default on error
-		const defaultResponse = await fetch('/defaults/terms.md');
-		const policyContent = await defaultResponse.text();
-		return {
-			policyContent,
-			jurisdictionName: 'This Jurisdiction'
-		};
+
+		// Attempt to load fallback content
+		try {
+			const defaultResponse = await fetch('/defaults/terms.md');
+			if (!defaultResponse.ok) {
+				throw new Error('Failed to load default terms');
+			}
+			const policyContent = await defaultResponse.text();
+			return {
+				policyContent,
+				jurisdictionName: 'This Jurisdiction',
+				loadError: 'Unable to load jurisdiction-specific terms of use. Showing default content.'
+			};
+		} catch (fallbackError) {
+			console.error('Error loading fallback terms:', fallbackError);
+			return {
+				policyContent: '# Terms of Use\n\nWe were unable to load the terms of use. Please try again later or contact support.',
+				jurisdictionName: 'This Jurisdiction',
+				loadError: 'Unable to load terms of use. Please try again later.'
+			};
+		}
 	}
 };
