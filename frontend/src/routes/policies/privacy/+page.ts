@@ -50,7 +50,8 @@ export const load: PageLoad = async ({ fetch }) => {
 		} catch (fallbackError) {
 			console.error('Error loading fallback privacy policy:', fallbackError);
 			return {
-				policyContent: '# Privacy Policy\n\nWe were unable to load the privacy policy. Please try again later or contact support.',
+				policyContent:
+					'# Privacy Policy\n\nWe were unable to load the privacy policy. Please try again later or contact support.',
 				jurisdictionName: 'This Jurisdiction',
 				loadError: 'Unable to load privacy policy. Please try again later.'
 			};

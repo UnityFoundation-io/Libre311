@@ -50,7 +50,8 @@ export const load: PageLoad = async ({ fetch }) => {
 		} catch (fallbackError) {
 			console.error('Error loading fallback terms:', fallbackError);
 			return {
-				policyContent: '# Terms of Use\n\nWe were unable to load the terms of use. Please try again later or contact support.',
+				policyContent:
+					'# Terms of Use\n\nWe were unable to load the terms of use. Please try again later or contact support.',
 				jurisdictionName: 'This Jurisdiction',
 				loadError: 'Unable to load terms of use. Please try again later.'
 			};

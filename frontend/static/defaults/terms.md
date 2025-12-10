@@ -50,4 +50,4 @@ For questions about these terms, please contact Libre311 Support at info@example
 
 ---
 
-_Last updated: 2025-12-09
+Last updated: 2025-12-09
