@@ -111,7 +111,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("louisville.city");
         createJurisdictionDTO.setName("City of Louisville");
-        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        createJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
         createJurisdictionDTO.setLogoMediaUrl("http://example.com/img/here");
 
         Double[][] bounds = {
@@ -132,7 +132,7 @@ public class TenantAdminControllerTest {
         assertTrue(optional.isPresent());
         JurisdictionDTO jurisdictionDTO = optional.get();
         assertEquals("louisville.city", jurisdictionDTO.getJurisdictionId());
-        assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
+        assertEquals("221, 83%, 53%", jurisdictionDTO.getPrimaryColor());
         assertEquals("http://example.com/img/here", jurisdictionDTO.getLogoMediaUrl());
     }
 
@@ -161,7 +161,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("ogdenville.city");
         createJurisdictionDTO.setName("City of Ogdenville");
-        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        createJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
 
         Double[][] bound = {
                 {-90.30025693587594, 38.68777201455936},
@@ -187,7 +187,7 @@ public class TenantAdminControllerTest {
         // update
         PatchJurisdictionDTO patchJurisdictionDTO = new PatchJurisdictionDTO();
         patchJurisdictionDTO.setName("Ogdenville - America's Barley Basket");
-        patchJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        patchJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
         Double[][] updateBound = {
                 {-90.30025693587594, 38.68777201455936},
                 {-90.34433315946103, 38.61729515893717},
@@ -205,7 +205,7 @@ public class TenantAdminControllerTest {
         assertTrue(jurisdictionDTOOptional.isPresent());
         jurisdictionDTO = jurisdictionDTOOptional.get();
         assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
-        assertEquals("221 83% 53%", jurisdictionDTO.getPrimaryColor());
+        assertEquals("221, 83%, 53%", jurisdictionDTO.getPrimaryColor());
         assertTrue(jurisdictionDTO.getBounds().length > 0);
         assertEquals(5, jurisdictionDTO.getBounds().length);
         assertTrue(Arrays.deepEquals(updateBound, jurisdictionDTO.getBounds()));
@@ -218,7 +218,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("ogdenville.town");
         createJurisdictionDTO.setName("City of Ogdenville");
-        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        createJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
 
         // first and last are not the same
         Double[][] bound = {
@@ -246,7 +246,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("springfield.city");
         createJurisdictionDTO.setName("City of Springfield");
-        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
+        createJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
 
         // not tuples
         Double[][] bound = {

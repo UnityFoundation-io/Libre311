@@ -34,7 +34,7 @@ public class Jurisdiction {
     @Id
     private String id;
 
-    @NotNull
+    @Nullable
     private String name;
 
     @NotNull
