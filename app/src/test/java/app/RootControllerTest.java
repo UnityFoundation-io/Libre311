@@ -668,6 +668,57 @@ public class RootControllerTest {
     }
 
     @Test
+    public void getJurisdictionReturnsDefaultPolicyContentWhenNotSet() {
+        Jurisdiction j = new Jurisdiction("policy-test-1", 1L, "Policy Test Jurisdiction", null);
+        RemoteHost h = new RemoteHost("policyhost1");
+        h.setJurisdiction(j);
+        j.getRemoteHosts().add(h);
+        // Explicitly leave policy content null
+        j.setPrivacyPolicyContent(null);
+        j.setTermsOfUseContent(null);
+        j = jurisdictionRepository.save(j);
+        jurisdictionBoundaryService.saveBoundary(j, DEFAULT_BOUNDS);
+
+        HttpRequest<?> request = HttpRequest.GET("/config")
+            .header("referer", "http://policyhost1");
+        HttpResponse<JurisdictionDTO> response = client.toBlocking()
+            .exchange(request, JurisdictionDTO.class);
+        JurisdictionDTO infoResponse = response.getBody().get();
+
+        // Should return default content, not null
+        assertNotNull(infoResponse.getPrivacyPolicyContent());
+        assertNotNull(infoResponse.getTermsOfUseContent());
+        // Verify it's the default content by checking for expected text
+        assertTrue(infoResponse.getPrivacyPolicyContent().contains("Privacy Policy"));
+        assertTrue(infoResponse.getTermsOfUseContent().contains("Terms of Use"));
+    }
+
+    @Test
+    public void getJurisdictionReturnsCustomPolicyContentWhenSet() {
+        String customPrivacy = "# Custom Privacy Policy\n\nThis is custom content.";
+        String customTerms = "# Custom Terms\n\nThese are custom terms.";
+
+        Jurisdiction j = new Jurisdiction("policy-test-2", 1L, "Custom Policy Jurisdiction", null);
+        RemoteHost h = new RemoteHost("policyhost2");
+        h.setJurisdiction(j);
+        j.getRemoteHosts().add(h);
+        j.setPrivacyPolicyContent(customPrivacy);
+        j.setTermsOfUseContent(customTerms);
+        j = jurisdictionRepository.save(j);
+        jurisdictionBoundaryService.saveBoundary(j, DEFAULT_BOUNDS);
+
+        HttpRequest<?> request = HttpRequest.GET("/config")
+            .header("referer", "http://policyhost2");
+        HttpResponse<JurisdictionDTO> response = client.toBlocking()
+            .exchange(request, JurisdictionDTO.class);
+        JurisdictionDTO infoResponse = response.getBody().get();
+
+        // Should return custom content, not defaults
+        assertEquals(customPrivacy, infoResponse.getPrivacyPolicyContent());
+        assertEquals(customTerms, infoResponse.getTermsOfUseContent());
+    }
+
+    @Test
     public void deletionOfServiceShouldCascadeToServiceRequests() {
 
         // build service, attribute with values, service requests
