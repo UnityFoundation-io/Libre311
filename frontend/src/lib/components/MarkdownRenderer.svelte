@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
+	import DOMPurify from 'dompurify';
 
 	export let markdown: string;
 	let className: string = '';
@@ -13,10 +14,11 @@
 		gfm: true // GitHub Flavored Markdown
 	});
 
-	// Render markdown to HTML
+	// Render markdown to HTML and sanitize to prevent XSS
 	$: {
 		try {
-			html = marked.parse(markdown);
+			const rawHtml = marked.parse(markdown, { async: false });
+			html = DOMPurify.sanitize(rawHtml);
 		} catch (error) {
 			console.error('Error parsing markdown:', error);
 			html = '<p>Error rendering content</p>';
