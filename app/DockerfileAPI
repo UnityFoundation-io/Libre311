@@ -1,5 +1,5 @@
 # Stage 1: Build with Gradle
-FROM gradle:jdk21-jammy AS builder
+FROM gradle:jdk25 AS builder
 WORKDIR /workspace
 
 # 1. Copy Gradle wrapper first (rarely changes)
@@ -18,14 +18,14 @@ COPY --chown=gradle:gradle ./app .
 RUN ./gradlew buildLayers --no-daemon
 
 # Stage 2: Create the final image
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:25-jre
 
 WORKDIR /home/app
 
+# Micronaut 4.x layer structure
 COPY --from=builder /workspace/build/docker/main/layers/libs /home/app/libs
-COPY --from=builder /workspace/build/docker/main/layers/classes /home/app/classes
 COPY --from=builder /workspace/build/docker/main/layers/resources /home/app/resources
-COPY --from=builder /workspace/build/docker/main/layers/application.jar /home/app/application.jar
+COPY --from=builder /workspace/build/docker/main/layers/app/application.jar /home/app/application.jar
 
 RUN useradd -u 8877 unity
 # Change to non-root privilege
