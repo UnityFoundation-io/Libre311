@@ -3,7 +3,6 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Breakpoint from '../Breakpoint.svelte';
 	import messages from '$media/messages.json';
-	import { Button } from 'stwui';
 	import { FilePicker } from 'stwui';
 	import { uploadIcon } from '$lib/components/Svg/outline/upload-icon.js';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
@@ -12,12 +11,17 @@
 	import type { CreateServiceRequestUIParams } from './shared';
 	import Camera from '../Svg/outline/Camera.svelte';
 	import Upload from '../Svg/outline/Upload.svelte';
+    import {Button} from "$lib/components/ui/button";
 
-	let input: HTMLInputElement;
-	let reuploadInput: HTMLInputElement;
-	let imageData: string | undefined;
+	let input: HTMLInputElement = $state();
+	let reuploadInput: HTMLInputElement = $state();
+	let imageData: string | undefined = $state();
 
-	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
+	interface Props {
+		params: Readonly<Partial<CreateServiceRequestUIParams>>;
+	}
+
+	let { params }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -71,6 +75,7 @@
 </script>
 
 <Breakpoint>
+	<!-- @migration-task: migrate this slot by hand, `is-desktop` is an invalid identifier -->
 	<div slot="is-desktop" class="flex h-full w-full flex-col">
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
@@ -86,7 +91,7 @@
 						accept="image/*"
 						hidden
 						bind:this={input}
-						on:change={handleDesktopImageInput}
+						onchange={handleDesktopImageInput}
 					/>
 					<label for="camera-roll-btn-desktop">
 						<div class="flex items-center justify-center">
@@ -96,7 +101,7 @@
 					</label>
 
 					<Button
-						type="ghost"
+						variant="ghost"
 						on:click={() => {
 							dispatch('stepChange', { file: undefined });
 						}}
@@ -105,7 +110,7 @@
 					</Button>
 
 					<Button
-						type="ghost"
+						variant="ghost"
 						on:click={() => {
 							dispatch('stepChange');
 						}}
@@ -117,19 +122,25 @@
 				<div class="items-center justify-center">
 					<div class="mb-4">
 						<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
-							<FilePicker.Icon slot="icon" data={uploadIcon} />
-							<FilePicker.Title slot="title">
-								{messages['photo']['upload']}
-							</FilePicker.Title>
-							<FilePicker.Description slot="description">
-								Drag & Drop your file
-							</FilePicker.Description>
+							{#snippet icon()}
+														<FilePicker.Icon  data={uploadIcon} />
+													{/snippet}
+							{#snippet title()}
+														<FilePicker.Title >
+									{messages['photo']['upload']}
+								</FilePicker.Title>
+													{/snippet}
+							{#snippet description()}
+														<FilePicker.Description >
+									Drag & Drop your file
+								</FilePicker.Description>
+													{/snippet}
 						</FilePicker>
 					</div>
 
 					<Button
 						class="w-full"
-						type="ghost"
+						variant="ghost"
 						on:click={() => {
 							dispatch('stepChange', { file: undefined });
 						}}
@@ -142,13 +153,14 @@
 
 		<Button
 			class="mb-4 flex w-14 justify-start"
-			type="ghost"
+			variant="ghost"
 			href={linkResolver.createIssuePagePrevious($page.url)}
 		>
 			{messages['photo']['back']}
 		</Button>
 	</div>
 
+	<!-- @migration-task: migrate this slot by hand, `is-mobile-or-tablet` is an invalid identifier -->
 	<div slot="is-mobile-or-tablet" class="flex h-full w-full flex-col">
 		<div class="flex h-screen flex-grow flex-col items-center justify-center">
 			{#if imageData}
@@ -166,7 +178,7 @@
 						capture="environment"
 						hidden
 						bind:this={reuploadInput}
-						on:change={reuploadImage}
+						onchange={reuploadImage}
 					/>
 					<label for="re-take-photo-button">
 						<div class="flex items-center justify-center">
@@ -182,7 +194,7 @@
 						id="re-upload-image-button"
 						accept="image/*"
 						hidden
-						on:change={handleMobileImageInput}
+						onchange={handleMobileImageInput}
 					/>
 					<label for="re-upload-image-button">
 						<div class="flex items-center justify-center">
@@ -193,7 +205,7 @@
 
 					<Button
 						class="w-full"
-						type="ghost"
+						variant="ghost"
 						on:click={() => {
 							dispatch('stepChange', { file: undefined });
 						}}
@@ -203,7 +215,7 @@
 
 					<Button
 						class="w-full"
-						type="ghost"
+						variant="ghost"
 						on:click={() => {
 							dispatch('stepChange');
 						}}
@@ -221,7 +233,7 @@
 						capture="environment"
 						hidden
 						bind:this={input}
-						on:change={handleMobileImageInput}
+						onchange={handleMobileImageInput}
 					/>
 					<label class="w-full" for="camera-roll-btn">
 						<div class="flex items-center justify-center">
@@ -237,7 +249,7 @@
 						accept="image/*"
 						hidden
 						bind:this={input}
-						on:change={handleMobileImageInput}
+						onchange={handleMobileImageInput}
 					/>
 					<label class="w-full" for="upload-image-btn">
 						<div class="flex items-center justify-center">
@@ -248,7 +260,7 @@
 
 					<Button
 						class="w-full"
-						type="ghost"
+						variant="ghost"
 						on:click={() => {
 							dispatch('stepChange', { file: undefined });
 						}}
@@ -261,7 +273,7 @@
 
 		<Button
 			class="mb-4 flex w-14 justify-start"
-			type="ghost"
+			variant="ghost"
 			href={linkResolver.createIssuePagePrevious($page.url)}
 		>
 			{messages['photo']['back']}

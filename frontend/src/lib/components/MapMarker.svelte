@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount, onDestroy, getContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
 
-	export let latLng: L.LatLngExpression;
-	export let options: L.MarkerOptions | undefined = undefined;
+	interface Props {
+		latLng: L.LatLngExpression;
+		options?: L.MarkerOptions | undefined;
+	}
+
+	let { latLng, options = undefined }: Props = $props();
 
 	let marker: L.Marker | undefined;
 
@@ -19,9 +25,11 @@
 		marker?.remove();
 	});
 
-	$: updateLatLng(latLng);
 
 	function updateLatLng(latLng: L.LatLngExpression) {
 		marker?.setLatLng(latLng);
 	}
+	run(() => {
+		updateLatLng(latLng);
+	});
 </script>

@@ -1,10 +1,13 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	let cachedServiceList: GetServiceListResponse | undefined = undefined;
 </script>
 
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
-	import { Button, Card, DatePicker, Input, Table } from 'stwui';
+	import { Card, DatePicker, Input, Table } from 'stwui';
+    import { Button } from '$lib/components/ui/button';
 	import { page } from '$app/stores';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import {
@@ -43,6 +46,11 @@
 	import type { SelectOption } from 'stwui/types';
 	import ServiceRequestStatusBadge from '$lib/components/ServiceRequestStatusBadge.svelte';
 	import { FilteredServiceRequestsParamsMapper } from '$lib/services/Libre311/FilteredServiceRequestsParamsMapper';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
@@ -50,14 +58,14 @@
 	const libre311 = useLibre311Service();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 
-	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
-	let selectedServicePriority: ServiceRequestPriority[];
-	let selectedServiceCodes: string[] | undefined;
-	let isSearchFiltersOpen: boolean = false;
-	let statusInput: ServiceRequestStatus[];
+	let serviceList: AsyncResult<GetServiceListResponse> = $state(ASYNC_IN_PROGRESS);
+	let selectedServicePriority: ServiceRequestPriority[] = $state();
+	let selectedServiceCodes: string[] | undefined = $state();
+	let isSearchFiltersOpen: boolean = $state(false);
+	let statusInput: ServiceRequestStatus[] = $state();
 	let orderBy: string;
-	let startDate: Date;
-	let endDate: Date;
+	let startDate: Date = $state();
+	let endDate: Date = $state();
 
 	function selectRow(service_request_id: ServiceRequestId) {
 		goto(linkResolver.issueDetailsTable($page.url, service_request_id));
@@ -145,28 +153,36 @@
 
 	onMount(fetchServiceList);
 
-	$: handleFilterInput(
-		selectedServicePriority,
-		selectedServiceCodes,
-		statusInput,
-		startDate,
-		endDate
-	);
+	run(() => {
+		handleFilterInput(
+			selectedServicePriority,
+			selectedServiceCodes,
+			statusInput,
+			startDate,
+			endDate
+		);
+	});
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
 	<SideBarMainContentLayout>
-		<slot slot="side-bar" />
-		<div slot="main-content" class="relative flex h-full flex-col">
+		<!-- @migration-task: migrate this slot by hand, `side-bar` is an invalid identifier -->
+	{@render children?.()}
+		<!-- @migration-task: migrate this slot by hand, `main-content` is an invalid identifier -->
+	<div slot="main-content" class="relative flex h-full flex-col">
 			<div
 				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
 				<div class="m-3 flex items-center">
 					{#if !isSearchFiltersOpen}
 						<div transition:slide|local={{ duration: 500 }}>
-							<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
-								<Input.Leading slot="trailing" data={magnifingGlassIcon} />
-							</Input>
+							{#snippet extra()}
+														<Input  placeholder="#Request ID" on:change={handleSearchInput}>
+									{#snippet trailing()}
+																<Input.Leading  data={magnifingGlassIcon} />
+															{/snippet}
+								</Input>
+													{/snippet}
 						</div>
 					{:else}
 						<div class="flex flex-wrap justify-end" transition:slide|local={{ duration: 500 }}>
@@ -178,8 +194,11 @@
 									multiple
 									options={serviceRequestPrioritySelectOptions}
 								>
-									<Select.Label slot="label">Priority</Select.Label>
-									<Select.Options slot="options">
+									{#snippet label()}
+																		<Select.Label >Priority</Select.Label>
+																	{/snippet}
+									<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
+	<Select.Options slot="options">
 										{#each serviceRequestPrioritySelectOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
@@ -195,8 +214,11 @@
 									options={serviceRequestStatusSelectOptions}
 									bind:value={statusInput}
 								>
-									<Select.Label slot="label">Status</Select.Label>
-									<Select.Options slot="options">
+									{#snippet label()}
+																		<Select.Label >Status</Select.Label>
+																	{/snippet}
+									<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
+	<Select.Options slot="options">
 										{#each serviceRequestStatusSelectOptions as option}
 											<Select.Options.Option {option} />
 										{/each}
@@ -214,8 +236,11 @@
 										multiple
 										options={selectOptions}
 									>
-										<Select.Label slot="label">Service</Select.Label>
-										<Select.Options slot="options">
+										{#snippet label()}
+																				<Select.Label >Service</Select.Label>
+																			{/snippet}
+										<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
+	<Select.Options slot="options">
 											{#each selectOptions as option}
 												<Select.Options.Option {option} />
 											{/each}
@@ -226,103 +251,121 @@
 
 							<div class="m-1">
 								<DatePicker name="start-datetime" allowClear bind:value={startDate}>
-									<DatePicker.Label slot="label">Reported From</DatePicker.Label>
-									<DatePicker.Leading slot="leading" data={calendarIcon} />
+									{#snippet label()}
+																		<DatePicker.Label >Reported From</DatePicker.Label>
+																	{/snippet}
+									{#snippet leading()}
+																		<DatePicker.Leading  data={calendarIcon} />
+																	{/snippet}
 								</DatePicker>
 							</div>
 
 							<div class="m-1">
 								<DatePicker name="end-datetime" allowClear bind:value={endDate}>
-									<DatePicker.Label slot="label">Reported To</DatePicker.Label>
-									<DatePicker.Leading slot="leading" data={calendarIcon} />
+									{#snippet label()}
+																		<DatePicker.Label >Reported To</DatePicker.Label>
+																	{/snippet}
+									{#snippet leading()}
+																		<DatePicker.Leading  data={calendarIcon} />
+																	{/snippet}
 								</DatePicker>
 							</div>
 						</div>
 					{/if}
 				</div>
 
-				<button class="mr-3" on:click={handleFunnelClick}>
+				<button class="mr-3" onclick={handleFunnelClick}>
 					<Funnel />
 				</button>
 			</div>
 
 			<Card bordered={true} class="m-2">
-				<Card.Content slot="content" class="p-0 sm:p-0">
-					<div class="issues-table-override">
-						<Table class="h-full overflow-hidden rounded-md" {columns}>
-							<Table.Header slot="header" {orderBy} />
-							<Table.Body slot="body">
-								{#each $serviceRequestsRes.value.serviceRequests as item}
-									<Table.Body.Row
-										id={resolveStyleId(item, $selectedServiceRequestStore)}
-										on:click={() => selectRow(item.service_request_id)}
-									>
-										<Table.Body.Row.Cell column={0}>
-											<div class="flex items-center justify-center">
-												{item.service_request_id}
-											</div>
-										</Table.Body.Row.Cell>
+				{#snippet content()}
+								<Card.Content  class="p-0 sm:p-0">
+						<div class="issues-table-override">
+							<Table class="h-full overflow-hidden rounded-md" {columns}>
+								{#snippet header()}
+														<Table.Header  {orderBy} />
+													{/snippet}
+								{#snippet body()}
+														<Table.Body >
+										{#each $serviceRequestsRes.value.serviceRequests as item}
+											<Table.Body.Row
+												id={resolveStyleId(item, $selectedServiceRequestStore)}
+												on:click={() => selectRow(item.service_request_id)}
+											>
+												<Table.Body.Row.Cell column={0}>
+													<div class="flex items-center justify-center">
+														{item.service_request_id}
+													</div>
+												</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={1}>
-											<div class="flex items-center justify-center">
-												{item.priority
-													? `${item.priority.charAt(0).toUpperCase()}${item.priority.slice(1)}`
-													: '--'}
-											</div>
-										</Table.Body.Row.Cell>
+												<Table.Body.Row.Cell column={1}>
+													<div class="flex items-center justify-center">
+														{item.priority
+															? `${item.priority.charAt(0).toUpperCase()}${item.priority.slice(1)}`
+															: '--'}
+													</div>
+												</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={2}>
-											<div class="flex items-center justify-center">
-												{item.service_name}
-											</div>
-										</Table.Body.Row.Cell>
+												<Table.Body.Row.Cell column={2}>
+													<div class="flex items-center justify-center">
+														{item.service_name}
+													</div>
+												</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={3}>
-											<div class="flex items-center justify-center">
-												<ServiceRequestStatusBadge status={item.status} />
-											</div>
-										</Table.Body.Row.Cell>
+												<Table.Body.Row.Cell column={3}>
+													<div class="flex items-center justify-center">
+														<ServiceRequestStatusBadge status={item.status} />
+													</div>
+												</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={4}>
-											<div class="flex items-center justify-center">
-												<p
-													class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm 2xl:w-32"
-												>
-													{item.address}
-												</p>
-											</div>
-										</Table.Body.Row.Cell>
+												<Table.Body.Row.Cell column={4}>
+													<div class="flex items-center justify-center">
+														<p
+															class="w-24 overflow-hidden text-ellipsis whitespace-nowrap text-sm 2xl:w-32"
+														>
+															{item.address}
+														</p>
+													</div>
+												</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={5}>
-											<div class="flex items-center justify-center">
-												{toAbbreviatedTimeStamp(item.requested_datetime)}
-											</div>
-										</Table.Body.Row.Cell>
+												<Table.Body.Row.Cell column={5}>
+													<div class="flex items-center justify-center">
+														{toAbbreviatedTimeStamp(item.requested_datetime)}
+													</div>
+												</Table.Body.Row.Cell>
 
-										<Table.Body.Row.Cell column={6}>
-											<div class="flex items-center justify-center">
-												{#if item.expected_datetime}
-													{toAbbreviatedTimeStamp(item.expected_datetime)}
-												{:else}
-													--
-												{/if}
-											</div>
-										</Table.Body.Row.Cell>
-									</Table.Body.Row>
-								{/each}
-							</Table.Body>
+												<Table.Body.Row.Cell column={6}>
+													<div class="flex items-center justify-center">
+														{#if item.expected_datetime}
+															{toAbbreviatedTimeStamp(item.expected_datetime)}
+														{:else}
+															--
+														{/if}
+													</div>
+												</Table.Body.Row.Cell>
+											</Table.Body.Row>
+										{/each}
+									</Table.Body>
+													{/snippet}
 
-							<Table.Footer slot="footer">
-								<div class="m-2 flex justify-end">
-									<Button on:click={handleDownloadCsv}>
-										Download CSV
-										<Button.Trailing data={arrowDownTray} slot="trailing" />
-									</Button>
-								</div>
-							</Table.Footer>
-						</Table>
-					</div>
-				</Card.Content>
+								{#snippet footer()}
+														<Table.Footer >
+										<div class="m-2 flex justify-end">
+											<Button on:click={handleDownloadCsv}>
+												Download CSV
+												{#snippet trailing()}
+																				<Button.Trailing data={arrowDownTray}  />
+																			{/snippet}
+											</Button>
+										</div>
+									</Table.Footer>
+													{/snippet}
+							</Table>
+						</div>
+					</Card.Content>
+							{/snippet}
 			</Card>
 		</div>
 	</SideBarMainContentLayout>

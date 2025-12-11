@@ -4,11 +4,16 @@
 
 	type RequiresOpts = 'is-authenticated' | 'is-anonymous' | LibrePermissions[];
 
-	// user must have one of the permissions in the array
-	export let requires: RequiresOpts;
+	
+	interface Props {
+		// user must have one of the permissions in the array
+		requires: RequiresOpts;
+		children?: import('svelte').Snippet;
+	}
+
+	let { requires, children }: Props = $props();
 	const user = useLibre311Context().user;
 
-	$: canView = userCanView(requires, $user);
 
 	function userCanView(requires: RequiresOpts, user: UserInfo) {
 		if (requires == 'is-anonymous') {
@@ -21,8 +26,9 @@
 
 		return user.permissions.some((p) => requires.includes(p));
 	}
+	let canView = $derived(userCanView(requires, $user));
 </script>
 
 {#if canView}
-	<slot />
+	{@render children?.()}
 {/if}

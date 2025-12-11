@@ -2,7 +2,7 @@
 	import messages from '$media/messages.json';
 	import ServiceRequestPreview from '$lib/components/ServiceRequestPreview.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import MapListToggle from '$lib/components/MapListToggle.svelte';
@@ -12,7 +12,7 @@
 
 	const linkResolver = useLibre311Context().linkResolver;
 
-	let listElement: HTMLElement;
+	let listElement: HTMLElement = $state();
 
 	function scrollToTop() {
 		listElement.scrollIntoView();
@@ -38,11 +38,11 @@
 								pagination={$serviceRequestsRes.value.metadata.pagination}
 								nextPage={linkResolver.nextIssuesPage(
 									$serviceRequestsRes.value.metadata.pagination,
-									$page.url
+									page.url
 								)}
 								prevPage={linkResolver.prevIssuesPage(
 									$serviceRequestsRes.value.metadata.pagination,
-									$page.url
+									page.url
 								)}
 								on:pageChange={scrollToTop}
 							/>
@@ -56,7 +56,7 @@
 							<ServiceRequestPreview
 								{serviceRequest}
 								detailsLink={linkResolver.issueDetailsMobile(
-									$page.url,
+									page.url,
 									serviceRequest.service_request_id
 								)}
 							/>

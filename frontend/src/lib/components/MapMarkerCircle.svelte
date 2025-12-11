@@ -8,7 +8,11 @@
 	import { iconPositionOpts } from '$lib/utils/functions';
 	import MapMarker from './MapMarker.svelte';
 
-	export let serviceRequest: ServiceRequest;
+	interface Props {
+		serviceRequest: ServiceRequest;
+	}
+
+	let { serviceRequest }: Props = $props();
 
 	const circleLookupMap = {
 		closed: Closed,

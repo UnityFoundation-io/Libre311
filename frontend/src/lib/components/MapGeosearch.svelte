@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	// https://smeijer.github.io/leaflet-geosearch/usage#results
 	export type GeosearchLocation = {
 		x: number; // lon

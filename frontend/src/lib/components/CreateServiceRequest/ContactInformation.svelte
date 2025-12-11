@@ -18,17 +18,21 @@
 
 	const dispatch = createEventDispatcher<StepChangeEvent>();
 
-	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
+	interface Props {
+		params: Readonly<Partial<CreateServiceRequestUIParams>>;
+	}
 
-	let firstNameInput: FormInputValue<string | undefined> = createInput(params.first_name);
-	let lastNameInput: FormInputValue<string | undefined> = createInput(params.last_name);
-	let emailInput: FormInputValue<string | undefined> = createInput(params.email);
-	let phoneInput: FormInputValue<string | undefined> = createInput(params.phone);
+	let { params }: Props = $props();
 
-	$: btnText =
-		firstNameInput.value || lastNameInput.value || emailInput.value || phoneInput.value
+	let firstNameInput: FormInputValue<string | undefined> = $state(createInput(params.first_name));
+	let lastNameInput: FormInputValue<string | undefined> = $state(createInput(params.last_name));
+	let emailInput: FormInputValue<string | undefined> = $state(createInput(params.email));
+	let phoneInput: FormInputValue<string | undefined> = $state(createInput(params.phone));
+
+	let btnText =
+		$derived(firstNameInput.value || lastNameInput.value || emailInput.value || phoneInput.value
 			? messages['contact']['button']['submit']
-			: messages['contact']['button']['skip'];
+			: messages['contact']['button']['skip']);
 
 	function handleSubmit() {
 		firstNameInput = optionalCoalesceNameValidator(firstNameInput);
@@ -77,7 +81,9 @@
 					error={firstNameInput.error}
 					bind:value={firstNameInput.value}
 				>
-					<Input.Label slot="label">{messages['contact']['name']['label']}</Input.Label>
+					{#snippet label()}
+										<Input.Label >{messages['contact']['name']['label']}</Input.Label>
+									{/snippet}
 				</Input>
 				<Input
 					type="text"
@@ -96,8 +102,12 @@
 					error={emailInput.error}
 					bind:value={emailInput.value}
 				>
-					<Input.Label slot="label">{messages['contact']['email']['label']}</Input.Label>
-					<Input.Leading slot="leading" data={mailIcon} />
+					{#snippet label()}
+										<Input.Label >{messages['contact']['email']['label']}</Input.Label>
+									{/snippet}
+					{#snippet leading()}
+										<Input.Leading  data={mailIcon} />
+									{/snippet}
 				</Input>
 			</div>
 
@@ -110,14 +120,19 @@
 					bind:value={phoneInput.value}
 					on:input={formatPhoneNumber}
 				>
-					<Input.Label slot="label">{messages['contact']['phone']['label']}</Input.Label>
-					<Input.Leading slot="leading" data={phoneIcon} />
+					{#snippet label()}
+										<Input.Label >{messages['contact']['phone']['label']}</Input.Label>
+									{/snippet}
+					{#snippet leading()}
+										<Input.Leading  data={phoneIcon} />
+									{/snippet}
 				</Input>
 			</div>
 		</div>
 
 		<StepControls on:click={handleSubmit}>
-			<svelte:fragment slot="submit-text">{btnText}</svelte:fragment>
+			<!-- @migration-task: migrate this slot by hand, `submit-text` is an invalid identifier -->
+	<svelte:fragment slot="submit-text">{btnText}</svelte:fragment>
 		</StepControls>
 	</div>
 </form>

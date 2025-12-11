@@ -3,7 +3,11 @@
 
 	import type { StringServiceDefinitionInput } from './shared';
 
-	export let input: StringServiceDefinitionInput;
+	interface Props {
+		input: StringServiceDefinitionInput;
+	}
+
+	let { input = $bindable() }: Props = $props();
 </script>
 
 <Input
@@ -13,10 +17,12 @@
 	placeholder={input.attribute.datatype_description ?? undefined}
 	class="relative my-4"
 >
-	<Input.Label slot="label">
-		{input.attribute.description}
-		{#if input.attribute.required}
-			<span class="text-red-600">*</span>
-		{/if}
-	</Input.Label>
+	{#snippet label()}
+		<Input.Label >
+			{input.attribute.description}
+			{#if input.attribute.required}
+				<span class="text-red-600">*</span>
+			{/if}
+		</Input.Label>
+	{/snippet}
 </Input>

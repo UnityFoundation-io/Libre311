@@ -2,8 +2,12 @@
 	import { DatePicker } from 'stwui';
 	import type { DateTimeServiceDefinitionAttributeInput } from './shared';
 
-	export let input: DateTimeServiceDefinitionAttributeInput;
-	$: attribute = input.attribute;
+	interface Props {
+		input: DateTimeServiceDefinitionAttributeInput;
+	}
+
+	let { input = $bindable() }: Props = $props();
+	let attribute = $derived(input.attribute);
 </script>
 
 <DatePicker
@@ -14,7 +18,10 @@
 	showTime
 	class="relative  my-4"
 >
+	<!-- @migration-task: migrate this slot by hand, `label` would shadow a prop on the parent component -->
 	<DatePicker.Label slot="label">{attribute.description}</DatePicker.Label>
 	<!-- TODO: Data Prop -->
-	<DatePicker.Trailing slot="trailing" />
+	{#snippet trailing()}
+		<DatePicker.Trailing  />
+	{/snippet}
 </DatePicker>

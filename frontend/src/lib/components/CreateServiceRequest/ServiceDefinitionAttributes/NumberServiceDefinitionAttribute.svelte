@@ -2,8 +2,12 @@
 	import { InputNumber } from 'stwui';
 	import type { NumberServiceDefinitionInput } from './shared';
 
-	export let input: NumberServiceDefinitionInput;
-	$: attribute = input.attribute;
+	interface Props {
+		input: NumberServiceDefinitionInput;
+	}
+
+	let { input = $bindable() }: Props = $props();
+	let attribute = $derived(input.attribute);
 </script>
 
 <InputNumber
@@ -14,5 +18,7 @@
 	placeholder={attribute.datatype_description ?? undefined}
 	class="relative  my-4"
 >
-	<InputNumber.Label slot="label">{attribute.description}</InputNumber.Label>
+	{#snippet label()}
+		<InputNumber.Label >{attribute.description}</InputNumber.Label>
+	{/snippet}
 </InputNumber>

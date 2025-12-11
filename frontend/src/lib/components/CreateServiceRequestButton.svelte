@@ -1,14 +1,14 @@
 <script>
-	import { Button } from 'stwui';
+	import { Button } from '$lib/components/ui/button';
 
 	import PlusCircleIcon from './Svg/outline/PlusCircleIcon.svelte';
 </script>
 
 <div class="absolute bottom-5 left-1/2 z-[1] -translate-x-1/2">
-	<Button type="primary" href={'/issue/create'}>
-		<div slot="leading">
-			<PlusCircleIcon />
-		</div>
+	<Button variant="default" href={'/issue/create'}>
+				<div >
+				<PlusCircleIcon />
+			</div>
 		New Request
 	</Button>
 </div>

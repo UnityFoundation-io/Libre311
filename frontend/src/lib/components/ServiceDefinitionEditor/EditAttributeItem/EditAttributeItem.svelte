@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import messages from '$media/messages.json';
 	import { page } from '$app/stores';
 	import {
@@ -13,7 +15,8 @@
 		asAsyncSuccess
 	} from '$lib/services/http';
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
-	import { Breadcrumbs, Button, Card, Input, Progress } from 'stwui';
+	import { Breadcrumbs, Card, Input, Progress } from 'stwui';
+	import { Button } from '$lib/components/ui/button';
 	import { fade } from 'svelte/transition';
 	import { type AttributeValue } from '$lib/services/Libre311/Libre311';
 	import { goto } from '$app/navigation';
@@ -30,27 +33,21 @@
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 
-	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
+	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = $state(ASYNC_IN_PROGRESS);
 	let groupId = $page.params.group_id;
 	let serviceCode = Number($page.params.service_id);
 	let attributeCode = Number($page.params.attribute_id);
-	let groupName = '';
-	let serviceName = '';
-	let editAttributeInput: EditAttributeInput = {
+	let groupName = $state('');
+	let serviceName = $state('');
+	let editAttributeInput: EditAttributeInput = $state({
 		attribute_code: 0,
 		required: false,
 		description: createInput<string>(),
 		dataTypeDescription: createInput<string>(),
 		values: undefined
-	};
+	});
 
-	$: crumbs = [
-		{ label: `Group: ${groupName}`, href: '/groups' },
-		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
-		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
-	];
 
-	$: updateAttributeMap(serviceCode);
 
 	function updateAttributeMap(service: number) {
 		if (!service) {
@@ -171,103 +168,121 @@
 			alertError(error);
 		}
 	}
+	let crumbs = $derived([
+		{ label: `Group: ${groupName}`, href: '/groups' },
+		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
+		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
+	]);
+	run(() => {
+		updateAttributeMap(serviceCode);
+	});
 </script>
 
 <Card bordered={true} class="m-4">
-	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
-		<Breadcrumbs>
-			{#each crumbs as crumb}
-				<Breadcrumbs.Crumb href={crumb.href}>
-					<Breadcrumbs.Crumb.Label slot="label"><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
-				</Breadcrumbs.Crumb>
-			{/each}
-		</Breadcrumbs>
-	</Card.Header>
+	{#snippet header()}
+		<Card.Header  class="flex items-center justify-between py-3 text-lg font-bold">
+			<Breadcrumbs>
+				{#each crumbs as crumb}
+					<Breadcrumbs.Crumb href={crumb.href}>
+						{#snippet label()}
+										<Breadcrumbs.Crumb.Label ><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
+									{/snippet}
+					</Breadcrumbs.Crumb>
+				{/each}
+			</Breadcrumbs>
+		</Card.Header>
+	{/snippet}
 
-	<Card.Content slot="content" class="p-0 sm:p-0">
-		{#if asyncAttributeInputMap?.type === 'success'}
-			<div class="mx-4" transition:fade={{ delay: 0, duration: 150 }}>
-				<div class="my-2 flex items-center justify-between">
-					<div class="my-2 items-center">
-						<label for="is-edit-attribute-required">
-							<strong class="text-base">
-								{messages['serviceDefinitionEditor']['attributes']['required']}
-							</strong>
-						</label>
-						<input
-							class="mx-2 rounded-sm"
-							id="is-edit-attribute-required"
-							type="checkbox"
-							bind:checked={editAttributeInput.required}
-						/>
-					</div>
-				</div>
-
-				<div class="my-2">
-					<Input
-						name="edit-attribute-description"
-						error={editAttributeInput.description.error}
-						bind:value={editAttributeInput.description.value}
-						placeholder={messages['serviceDefinitionEditor']['attributes'][
-							'description_placeholder'
-						]}
-					>
-						<Input.Label slot="label">
-							<strong class="text-base">
-								{messages['serviceDefinitionEditor']['attributes']['description']}
-							</strong>
-						</Input.Label>
-					</Input>
-				</div>
-
-				<div class="my-2">
-					<Input
-						name="edit-attribute-datatype-description"
-						error={editAttributeInput.dataTypeDescription.error}
-						bind:value={editAttributeInput.dataTypeDescription.value}
-						placeholder={messages['serviceDefinitionEditor']['attributes'][
-							'data_type_description_placeholder'
-						]}
-					>
-						<Input.Label slot="label">
-							<strong class="text-base">
-								{messages['serviceDefinitionEditor']['attributes']['data_type_description']}
-							</strong>
-						</Input.Label>
-					</Input>
-				</div>
-
-				{#if editAttributeInput.values}
-					<EditMultiValueList
-						bind:attribute={editAttributeInput}
-						on:submit={handleEditMultivaluelistAttribute}
-					/>
-				{:else}
+	{#snippet content()}
+		<Card.Content  class="p-0 sm:p-0">
+			{#if asyncAttributeInputMap?.type === 'success'}
+				<div class="mx-4" transition:fade={{ delay: 0, duration: 150 }}>
 					<div class="my-2 flex items-center justify-between">
-						<Button
-							class="mr-1 w-1/2"
-							aria-label="Close"
-							type="ghost"
-							on:click={() => window.history.back()}
-						>
-							{'Cancel'}
-						</Button>
-
-						<Button
-							class="ml-1 w-1/2"
-							aria-label="Submit"
-							type="primary"
-							on:click={handleEditStringAttribute}
-						>
-							{'Save Changes'}
-						</Button>
+						<div class="my-2 items-center">
+							<label for="is-edit-attribute-required">
+								<strong class="text-base">
+									{messages['serviceDefinitionEditor']['attributes']['required']}
+								</strong>
+							</label>
+							<input
+								class="mx-2 rounded-sm"
+								id="is-edit-attribute-required"
+								type="checkbox"
+								bind:checked={editAttributeInput.required}
+							/>
+						</div>
 					</div>
-				{/if}
-			</div>
-		{:else if asyncAttributeInputMap?.type === 'inProgress'}
-			<div class="mx-8 my-4">
-				<Progress value={0} indeterminate />
-			</div>
-		{/if}
-	</Card.Content>
+
+					<div class="my-2">
+						<Input
+							name="edit-attribute-description"
+							error={editAttributeInput.description.error}
+							bind:value={editAttributeInput.description.value}
+							placeholder={messages['serviceDefinitionEditor']['attributes'][
+								'description_placeholder'
+							]}
+						>
+							{#snippet label()}
+												<Input.Label >
+									<strong class="text-base">
+										{messages['serviceDefinitionEditor']['attributes']['description']}
+									</strong>
+								</Input.Label>
+											{/snippet}
+						</Input>
+					</div>
+
+					<div class="my-2">
+						<Input
+							name="edit-attribute-datatype-description"
+							error={editAttributeInput.dataTypeDescription.error}
+							bind:value={editAttributeInput.dataTypeDescription.value}
+							placeholder={messages['serviceDefinitionEditor']['attributes'][
+								'data_type_description_placeholder'
+							]}
+						>
+							{#snippet label()}
+												<Input.Label >
+									<strong class="text-base">
+										{messages['serviceDefinitionEditor']['attributes']['data_type_description']}
+									</strong>
+								</Input.Label>
+											{/snippet}
+						</Input>
+					</div>
+
+					{#if editAttributeInput.values}
+						<EditMultiValueList
+							bind:attribute={editAttributeInput}
+							on:submit={handleEditMultivaluelistAttribute}
+						/>
+					{:else}
+						<div class="my-2 flex items-center justify-between">
+							<Button
+								class="mr-1 w-1/2"
+								aria-label="Close"
+								variant="ghost"
+								on:click={() => window.history.back()}
+							>
+								{'Cancel'}
+							</Button>
+
+							<Button
+								class="ml-1 w-1/2"
+								aria-label="Submit"
+								variant="default"
+								on:click={handleEditStringAttribute}
+							>
+								{'Save Changes'}
+							</Button>
+						</div>
+					{/if}
+				</div>
+			{:else if asyncAttributeInputMap?.type === 'inProgress'}
+				<div class="mx-8 my-4">
+					<Progress value={0} indeterminate />
+				</div>
+			{/if}
+		</Card.Content>
+	{/snippet}
 </Card>

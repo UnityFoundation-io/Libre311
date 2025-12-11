@@ -14,9 +14,9 @@
 
 	const authService = useUnityAuthService();
 
-	let emailInput = createInput('');
-	let passwordInput = createInput('');
-	let errorMessage: string | undefined;
+	let emailInput = $state(createInput(''));
+	let passwordInput = $state(createInput(''));
+	let errorMessage: string | undefined = $state();
 
 	function handleChange(e: CustomEvent<EventDispatchTypeMap['inputChange']>) {
 		if (e.detail.type == 'email') {
@@ -51,6 +51,7 @@
 </script>
 
 <Breakpoint>
+	<!-- @migration-task: migrate this slot by hand, `is-desktop` is an invalid identifier -->
 	<LoginDesktop
 		slot="is-desktop"
 		{emailInput}
@@ -59,6 +60,7 @@
 		on:inputChange={handleChange}
 		on:login={login}
 	/>
+	<!-- @migration-task: migrate this slot by hand, `is-mobile-or-tablet` is an invalid identifier -->
 	<LoginMobile
 		slot="is-mobile-or-tablet"
 		{emailInput}

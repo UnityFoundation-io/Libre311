@@ -25,13 +25,17 @@
 	import { matchesDesktopMedia } from '$lib/utils/functions';
 	import CreateServiceRequestButton from '$lib/components/CreateServiceRequestButton.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const libre311 = useLibre311Context().service;
 	const serviceRequestsResponseStore = useServiceRequestsResponseStore();
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
-	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
 
 	function isSelected(
 		serviceRequest: ServiceRequest,
@@ -58,13 +62,17 @@
 			goto(linkResolver.issueDetailsMobile($page.url, serviceRequest.service_request_id));
 		}
 	}
+	let mapBounds = $derived(createMapBounds($serviceRequestsResponseStore));
 </script>
 
 <SideBarMainContentLayout>
-	<slot slot="side-bar" />
+	<!-- @migration-task: migrate this slot by hand, `side-bar` is an invalid identifier -->
+	{@render children?.()}
+	<!-- @migration-task: migrate this slot by hand, `main-content` is an invalid identifier -->
 	<div slot="main-content" class="relative flex h-full">
 		<Breakpoint>
-			<div slot="is-mobile-or-tablet" class="absolute left-1/2 top-5 z-[1] -translate-x-1/2">
+			<!-- @migration-task: migrate this slot by hand, `is-mobile-or-tablet` is an invalid identifier -->
+	<div slot="is-mobile-or-tablet" class="absolute left-1/2 top-5 z-[1] -translate-x-1/2">
 				<MapListToggle />
 			</div>
 		</Breakpoint>

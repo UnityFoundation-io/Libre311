@@ -4,7 +4,7 @@
 
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 
 	const ctx = useServiceRequestsContext();
@@ -12,7 +12,7 @@
 
 	const linkResolver = useLibre311Context().linkResolver;
 
-	let listElement: HTMLElement;
+	let listElement: HTMLElement = $state();
 
 	function scrollToTop() {
 		listElement.scrollIntoView();
@@ -32,11 +32,11 @@
 						pagination={$serviceRequestsRes.value.metadata.pagination}
 						nextPage={linkResolver.nextIssuesPage(
 							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
+							page.url
 						)}
 						prevPage={linkResolver.prevIssuesPage(
 							$serviceRequestsRes.value.metadata.pagination,
-							$page.url
+							page.url
 						)}
 						on:pageChange={scrollToTop}
 					/>
@@ -50,7 +50,7 @@
 					<ServiceRequestPreview
 						{serviceRequest}
 						detailsLink={linkResolver.issueDetailsDesktop(
-							$page.url,
+							page.url,
 							serviceRequest.service_request_id
 						)}
 					/>

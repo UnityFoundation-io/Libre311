@@ -3,9 +3,13 @@
 	import { statusToColorMap, statusToTextMap } from '$lib/utils/functions';
 	import { Badge } from 'stwui';
 
-	let clazz: string = '';
-	export { clazz as class };
-	export let status: ServiceRequestStatus;
+	
+	interface Props {
+		class?: string;
+		status: ServiceRequestStatus;
+	}
+
+	let { class: clazz = '', status }: Props = $props();
 </script>
 
 <div

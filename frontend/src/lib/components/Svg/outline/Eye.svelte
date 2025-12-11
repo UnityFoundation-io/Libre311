@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 	export const eyeSvg = `<svg
 	xmlns="http://www.w3.org/2000/svg"
 	fill="none"
@@ -19,7 +19,11 @@
 
 <script lang="ts">
 	import type { TwSizes } from 'stwui/types';
-	export let size: TwSizes = '6';
+	interface Props {
+		size?: TwSizes;
+	}
+
+	let { size = '6' }: Props = $props();
 </script>
 
 <svg

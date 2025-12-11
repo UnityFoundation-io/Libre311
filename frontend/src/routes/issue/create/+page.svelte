@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import SelectLocation from '$lib/components/CreateServiceRequest/SelectLocation.svelte';
 	import UploadFile from '$lib/components/CreateServiceRequest/UploadFile.svelte';
 	import MapComponent from '$lib/components/MapComponent.svelte';
@@ -21,20 +23,21 @@
 	import type { ComponentEvents } from 'svelte';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
-	import { Button } from 'stwui';
 	import { page } from '$app/stores';
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
+    import {Button} from "$lib/components/ui/button";
+    import {Spinner} from "$lib/components/ui/spinner";
 
 	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
 
-	let params: Partial<CreateServiceRequestUIParams> = {};
-	let centerPos: PointTuple = getStartingCenterPos();
-	let loadingLocation: boolean = false;
+	let params: Partial<CreateServiceRequestUIParams> = $state({});
+	let centerPos: PointTuple = $state(getStartingCenterPos());
+	let loadingLocation: boolean = $state(false);
 
-	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
+	let step = $derived(linkResolver.createIssuePageGetCurrentStep($page.url));
 
 	const icon = L.icon({
 		iconUrl: WaypointOpen,
@@ -86,9 +89,11 @@
 	}
 
 	// Redirect user because they navigated to an invalid step
-	$: if (step == CreateServiceRequestSteps.REVIEW && !isCreateServiceRequestUIParams(params)) {
-		goto('/issue/create');
-	}
+	run(() => {
+		if (step == CreateServiceRequestSteps.REVIEW && !isCreateServiceRequestUIParams(params)) {
+			goto('/issue/create');
+		}
+	});
 </script>
 
 <svelte:head>
@@ -96,15 +101,18 @@
 </svelte:head>
 
 <CreateServiceRequestLayout {step}>
+	<!-- @migration-task: migrate this slot by hand, `side-bar` is an invalid identifier -->
 	<div slot="side-bar" class="mx-4 h-full">
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
 		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
 			<ReviewServiceRequest {params} />
 		{:else}
-			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
+			{@const SvelteComponent = componentMap.get(step)}
+			<SvelteComponent {params} on:stepChange={handleChange} />
 		{/if}
 	</div>
+	<!-- @migration-task: migrate this slot by hand, `main-content` is an invalid identifier -->
 	<div slot="main-content" class="relative h-full">
 		<MapComponent
 			controlFactories={[mapCenterControlFactory]}
@@ -118,14 +126,17 @@
 			{/if}
 		</MapComponent>
 		<Breakpoint>
-			<div
+			<!-- @migration-task: migrate this slot by hand, `is-mobile-or-tablet` is an invalid identifier -->
+	<div
 				class="display absolute inset-x-0 bottom-6 flex justify-center gap-2"
 				slot="is-mobile-or-tablet"
 			>
-				<Button type="primary" href={linkResolver.issuesMap($page.url)}>Cancel</Button>
-				<Button loading={loadingLocation} on:click={confirmLocation} type="primary"
-					>Select Location</Button
-				>
+				<Button href={linkResolver.issuesMap($page.url)}>Cancel</Button>
+        {#if loadingLocation}
+				<Button disabled><Spinner /> Select Location</Button>
+            {:else}
+            <Button on:click={confirmLocation}>Select Location</Button>
+            {/if}
 			</div>
 		</Breakpoint>
 	</div>

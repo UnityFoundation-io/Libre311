@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { MultiSelectServiceDefinitionAttributeInput } from '../ServiceDefinitionAttributes/shared';
 
-	export let attributes: MultiSelectServiceDefinitionAttributeInput;
+	interface Props {
+		attributes: MultiSelectServiceDefinitionAttributeInput;
+	}
+
+	let { attributes }: Props = $props();
 
 	function extractAttributeValueNames(attributes: MultiSelectServiceDefinitionAttributeInput) {
 		let values: string[] = [];
@@ -16,7 +20,7 @@
 		return values;
 	}
 
-	$: values = extractAttributeValueNames(attributes);
+	let values = $derived(extractAttributeValueNames(attributes));
 </script>
 
 <strong>{attributes.attribute.description}</strong>

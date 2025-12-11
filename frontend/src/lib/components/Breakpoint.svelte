@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (is-mobile to is_mobile) making the component unusable -->
 <div class="is-mobile"><slot name="is-mobile" /></div>
 <div class="is-mobile-or-tablet"><slot name="is-mobile-or-tablet" /></div>
 <div class="is-tablet"><slot name="is-tablet" /></div>

@@ -10,9 +10,13 @@
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 
-	let editing = false;
+	let editing = $state(false);
 
-	export let group: Group;
+	interface Props {
+		group: Group;
+	}
+
+	let { group }: Props = $props();
 
 	async function handleConfirm(e: ComponentEvents<EditListItem>['confirm']) {
 		try {
@@ -45,8 +49,10 @@
 	></EditListItem>
 {:else}
 	<DisplayListItem {dropDownItems} href={`/groups/${group.id}`} on:toggleEdit={toggle}>
-		<svelte:fragment slot="text">
-			{group.name}
-		</svelte:fragment>
+		{#snippet text()}
+			
+				{group.name}
+			
+			{/snippet}
 	</DisplayListItem>
 {/if}

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type {
 		GetServiceListResponse,
@@ -11,25 +13,26 @@
 		type AsyncResult,
 		asAsyncFailure
 	} from '$lib/services/http';
-	import { Button, Progress, Select } from 'stwui';
+	import { Progress, Select } from 'stwui';
 	import type { SelectOption } from 'stwui/types';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { arrowPath } from '../Svg/outline/arrowPath';
 	import type { CreateServiceRequestUIParams } from './shared';
+    import {Button} from "$lib/components/ui/button";
 
-	export let params: Partial<CreateServiceRequestUIParams>;
+	interface Props {
+		params: Partial<CreateServiceRequestUIParams>;
+	}
+
+	let { params }: Props = $props();
 
 	const libre311 = useLibre311Service();
 	const dispatch = createEventDispatcher<{ serviceSelected: Service | undefined }>();
 
-	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
-	let selectedServiceCode: ServiceCode | undefined = params?.service?.service_code;
-	let selectedService: Service | undefined;
+	let serviceList: AsyncResult<GetServiceListResponse> = $state(ASYNC_IN_PROGRESS);
+	let selectedServiceCode: ServiceCode | undefined = $state(params?.service?.service_code);
+	let selectedService: Service | undefined = $state();
 
-	$: if (selectedServiceCode && serviceList.type === 'success') {
-		selectedService = findService(selectedServiceCode);
-		dispatch('serviceSelected', selectedService);
-	}
 
 	onMount(fetchServiceList);
 
@@ -61,6 +64,12 @@
 			dispatch('serviceSelected', selectedService);
 		}
 	}
+	run(() => {
+		if (selectedServiceCode && serviceList.type === 'success') {
+			selectedService = findService(selectedServiceCode);
+			dispatch('serviceSelected', selectedService);
+		}
+	});
 </script>
 
 {#if serviceList.type === 'success'}
@@ -72,7 +81,8 @@
 		options={selectOptions}
 		class="relative my-4"
 	>
-		<Select.Options slot="options">
+		<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
+	<Select.Options slot="options">
 			{#each selectOptions as option}
 				<Select.Options.Option {option} />
 			{/each}
@@ -100,8 +110,10 @@
 		class="relative mx-8 my-4"
 	></Select>
 	<div class="flex content-center justify-center">
-		<Button on:click={() => fetchServiceList()} type="primary">
-			<Button.Leading data={arrowPath} slot="leading" />
+		<Button on:click={() => fetchServiceList()} >
+			<!--{#snippet leading()}-->
+			<!--					<Button.Leading data={arrowPath}  />-->
+			<!--				{/snippet}-->
 			Reload
 		</Button>
 	</div>

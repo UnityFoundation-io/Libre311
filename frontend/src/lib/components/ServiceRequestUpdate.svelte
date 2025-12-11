@@ -1,6 +1,6 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Button, DatePicker, Input, Select, TextArea } from 'stwui';
+	import { DatePicker, Input, Select, TextArea } from 'stwui';
 	import {
 		ServiceRequestPrioritySchema,
 		type ServiceRequest,
@@ -27,32 +27,29 @@
 		serviceRequestPrioritySelectOptions,
 		serviceRequestStatusSelectOptions
 	} from '$lib/utils/functions';
+    import {Button} from "$lib/components/ui/button";
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
 		cancel: void;
 	}>();
 
-	export let serviceRequest: ServiceRequest;
+	interface Props {
+		serviceRequest: ServiceRequest;
+	}
 
-	let statusInput = createInput<ServiceRequestStatus>(serviceRequest.status);
-	let priorityInput = createInput<ServiceRequestPriority | undefined>(serviceRequest.priority);
-	let expectedDateInput = createInput<Date | undefined>(
+	let { serviceRequest }: Props = $props();
+
+	let statusInput = $state(createInput<ServiceRequestStatus>(serviceRequest.status));
+	let priorityInput = $state(createInput<ServiceRequestPriority | undefined>(serviceRequest.priority));
+	let expectedDateInput = $state(createInput<Date | undefined>(
 		serviceRequest.expected_datetime ? new Date(serviceRequest.expected_datetime) : undefined
-	);
-	let agencyNameInput = createInput<string | undefined>(serviceRequest.agency_responsible);
-	let agencyEmailInput = createInput<string | undefined>(serviceRequest.agency_email);
-	let serviceNoticeInput = createInput<string | undefined>(serviceRequest.service_notice);
-	let statusNotesInput = createInput<string | undefined>(serviceRequest.status_notes);
+	));
+	let agencyNameInput = $state(createInput<string | undefined>(serviceRequest.agency_responsible));
+	let agencyEmailInput = $state(createInput<string | undefined>(serviceRequest.agency_email));
+	let serviceNoticeInput = $state(createInput<string | undefined>(serviceRequest.service_notice));
+	let statusNotesInput = $state(createInput<string | undefined>(serviceRequest.status_notes));
 
-	$: hasUserInput =
-		statusInput.value != serviceRequest.status ||
-		priorityInput.value != serviceRequest.priority ||
-		userChangedDate(expectedDateInput.value) ||
-		userChangedText(agencyNameInput.value, serviceRequest.agency_responsible) ||
-		userChangedText(agencyEmailInput.value, serviceRequest.agency_email) ||
-		userChangedText(serviceNoticeInput.value, serviceRequest.service_notice) ||
-		userChangedText(statusNotesInput.value, serviceRequest.status_notes);
 
 	function userChangedDate(expectedDateInputValue: Date | undefined) {
 		const currentDate = serviceRequest.expected_datetime;
@@ -107,17 +104,29 @@
 
 		dispatch('updateServiceRequest', sensitiveServiceRequest);
 	}
+	let hasUserInput =
+		$derived(statusInput.value != serviceRequest.status ||
+		priorityInput.value != serviceRequest.priority ||
+		userChangedDate(expectedDateInput.value) ||
+		userChangedText(agencyNameInput.value, serviceRequest.agency_responsible) ||
+		userChangedText(agencyEmailInput.value, serviceRequest.agency_email) ||
+		userChangedText(serviceNoticeInput.value, serviceRequest.service_notice) ||
+		userChangedText(statusNotesInput.value, serviceRequest.status_notes));
 </script>
 
 <form>
 	<!-- UPDATE EXPECTED TIMESTAMP -->
 	<DatePicker name="datetime" bind:value={expectedDateInput.value}>
-		<DatePicker.Label slot="label">
-			<strong class="text-base">
-				{messages['serviceRequest']['expected_datetime']}
-			</strong>
-		</DatePicker.Label>
-		<DatePicker.Leading slot="leading" data={calendarIcon} />
+		{#snippet label()}
+				<DatePicker.Label >
+				<strong class="text-base">
+					{messages['serviceRequest']['expected_datetime']}
+				</strong>
+			</DatePicker.Label>
+			{/snippet}
+		{#snippet leading()}
+				<DatePicker.Leading  data={calendarIcon} />
+			{/snippet}
 	</DatePicker>
 
 	<!-- UPDATE STATUS -->
@@ -128,10 +137,13 @@
 			options={serviceRequestStatusSelectOptions}
 			on:change={updateStatus}
 		>
-			<Select.Label slot="label">
-				<strong class="text-base">{messages['serviceRequest']['status']}</strong>
-			</Select.Label>
-			<Select.Options slot="options">
+			{#snippet label()}
+						<Select.Label >
+					<strong class="text-base">{messages['serviceRequest']['status']}</strong>
+				</Select.Label>
+					{/snippet}
+			<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
+	<Select.Options slot="options">
 				{#each serviceRequestStatusSelectOptions as option}
 					<Select.Options.Option {option} />
 				{/each}
@@ -149,12 +161,15 @@
 			options={serviceRequestPrioritySelectOptions}
 			on:change={updatePriority}
 		>
-			<Select.Label slot="label">
-				<strong class="text-base">
-					{messages['serviceRequest']['priority']}
-				</strong>
-			</Select.Label>
-			<Select.Options slot="options">
+			{#snippet label()}
+						<Select.Label >
+					<strong class="text-base">
+						{messages['serviceRequest']['priority']}
+					</strong>
+				</Select.Label>
+					{/snippet}
+			<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
+	<Select.Options slot="options">
 				{#each serviceRequestPrioritySelectOptions as option}
 					<Select.Options.Option {option} />
 				{/each}
@@ -171,12 +186,16 @@
 			error={agencyNameInput.error}
 			bind:value={agencyNameInput.value}
 		>
-			<Input.Label slot="label">
-				<strong class="text-base">
-					{messages['serviceRequest']['agency_contact']}
-				</strong>
-			</Input.Label>
-			<Input.Leading slot="leading" data={user} />
+			{#snippet label()}
+						<Input.Label >
+					<strong class="text-base">
+						{messages['serviceRequest']['agency_contact']}
+					</strong>
+				</Input.Label>
+					{/snippet}
+			{#snippet leading()}
+						<Input.Leading  data={user} />
+					{/snippet}
 		</Input>
 
 		<Input
@@ -186,7 +205,9 @@
 			error={agencyEmailInput.error}
 			bind:value={agencyEmailInput.value}
 		>
-			<Input.Leading slot="leading" data={mailIcon} />
+			{#snippet leading()}
+						<Input.Leading  data={mailIcon} />
+					{/snippet}
 		</Input>
 	</div>
 
@@ -198,10 +219,14 @@
 			placeholder={messages['serviceRequest']['service_notice_placeholder']}
 			bind:value={serviceNoticeInput.value}
 		>
-			<Input.Label slot="label">
-				<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
-			</Input.Label>
-			<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
+			{#snippet label()}
+						<Input.Label >
+					<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+				</Input.Label>
+					{/snippet}
+			{#snippet leading()}
+						<Input.Leading  data={wrenchScrewDriverIcon} />
+					{/snippet}
 		</Input>
 	</div>
 
@@ -218,20 +243,24 @@
 </form>
 
 <ServiceRequestButtonsContainer>
-	<Button
-		slot="left"
-		on:click={() => {
-			dispatch('cancel');
-		}}
-	>
-		{messages['updateServiceRequest']['button_cancel']}
-	</Button>
-	<Button
-		disabled={!hasUserInput}
-		slot="right"
-		type={!hasUserInput ? undefined : 'primary'}
-		on:click={() => updateServiceRequest(serviceRequest)}
-	>
-		Submit
-	</Button>
+	{#snippet left()}
+		<Button
+			
+			on:click={() => {
+				dispatch('cancel');
+			}}
+		>
+			{messages['updateServiceRequest']['button_cancel']}
+		</Button>
+	{/snippet}
+	{#snippet right()}
+		<Button
+			disabled={!hasUserInput}
+			
+			variant={!hasUserInput ? undefined : 'default'}
+			on:click={() => updateServiceRequest(serviceRequest)}
+		>
+			Submit
+		</Button>
+	{/snippet}
 </ServiceRequestButtonsContainer>

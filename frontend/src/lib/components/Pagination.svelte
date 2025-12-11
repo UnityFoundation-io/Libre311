@@ -1,23 +1,28 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { Button } from 'stwui';
+
 
 	import ChevronRight from './Svg/outline/ChevronRight.svelte';
 	import ChevronLeft from './Svg/outline/ChevronLeft.svelte';
 	import type { Pagination } from '$lib/services/Libre311/Libre311';
+    import {Button} from "$lib/components/ui/button";
 
-	export let pagination: Pagination;
-	export let prevPage: string | undefined = undefined;
-	export let nextPage: string | undefined = undefined;
+	interface Props {
+		pagination: Pagination;
+		prevPage?: string | undefined;
+		nextPage?: string | undefined;
+	}
+
+	let { pagination, prevPage = undefined, nextPage = undefined }: Props = $props();
 
 	const dispatch = createEventDispatcher<{ pageChange: void }>();
 	function scrollDispatch() {
 		dispatch('pageChange');
 	}
 
-	$: maxUpperBound = (pagination.pageNumber + 1) * pagination.size;
-	$: upperBound = Math.min(maxUpperBound, pagination.totalSize);
-	$: lowerBound = maxUpperBound - pagination.size + 1;
+	let maxUpperBound = $derived((pagination.pageNumber + 1) * pagination.size);
+	let upperBound = $derived(Math.min(maxUpperBound, pagination.totalSize));
+	let lowerBound = $derived(maxUpperBound - pagination.size + 1);
 </script>
 
 <div class="text-base font-semibold text-slate-600">
@@ -25,21 +30,25 @@
 	<span class="ml-1">
 		<Button
 			href={prevPage}
-			type={prevPage ? 'text' : 'ghost'}
+			variant={prevPage ? 'ghost' : 'ghost'}
 			disabled={!prevPage}
-			shape="circle"
+			size="icon"
 			on:click={scrollDispatch}
 		>
-			<ChevronLeft slot="icon" />
+			{#snippet icon()}
+						<ChevronLeft  />
+					{/snippet}
 		</Button>
 		<Button
 			href={nextPage}
-			type={nextPage ? 'text' : 'ghost'}
+			variant={nextPage ? 'ghost' : 'ghost'}
 			disabled={!nextPage}
-			shape="circle"
+			size="icon"
 			on:click={scrollDispatch}
 		>
-			<ChevronRight slot="icon" />
+			{#snippet icon()}
+						<ChevronRight  />
+					{/snippet}
 		</Button>
 	</span>
 </div>

@@ -17,10 +17,14 @@
 	const alertError = useLibre311Context().alertError;
 	const alert = useLibre311Context().alert;
 
-	export let params: CreateServiceRequestUIParams;
+	interface Props {
+		params: CreateServiceRequestUIParams;
+	}
 
-	let imageData: string | undefined;
-	let submittingServiceRequest: boolean = false;
+	let { params = $bindable() }: Props = $props();
+
+	let imageData: string | undefined = $state();
+	let submittingServiceRequest: boolean = $state(false);
 
 	function createName(params: CreateServiceRequestUIParams) {
 		if (params.first_name || params.last_name)
@@ -72,7 +76,7 @@
 		}
 	});
 
-	$: name = createName(params);
+	let name = $derived(createName(params));
 </script>
 
 <div class="flex h-full items-center justify-center">
@@ -138,7 +142,8 @@
 		</div>
 
 		<StepControls on:click={submitServiceReq} loading={submittingServiceRequest}>
-			<svelte:fragment slot="submit-text"
+			<!-- @migration-task: migrate this slot by hand, `submit-text` is an invalid identifier -->
+	<svelte:fragment slot="submit-text"
 				>{messages['reviewServiceRequest']['button_submit']}</svelte:fragment
 			>
 		</StepControls>

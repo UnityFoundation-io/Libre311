@@ -4,14 +4,18 @@
 	import type { SingleValueListServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
 	import type { SingleValueListServiceDefinitionAttributeInput } from './shared';
 
-	export let input: SingleValueListServiceDefinitionAttributeInput;
-	$: attribute = input.attribute;
+	interface Props {
+		input: SingleValueListServiceDefinitionAttributeInput;
+	}
 
-	$: selectOptions = createSelectOptions(attribute);
+	let { input = $bindable() }: Props = $props();
+
 
 	function createSelectOptions(res: SingleValueListServiceDefinitionAttribute): SelectOption[] {
 		return res.values.map((s) => ({ value: s.key, label: s.name }));
 	}
+	let attribute = $derived(input.attribute);
+	let selectOptions = $derived(createSelectOptions(attribute));
 </script>
 
 <Select
@@ -22,7 +26,10 @@
 	options={selectOptions}
 	class="relative my-4"
 >
-	<Select.Label slot="label">{attribute.description}</Select.Label>
+	{#snippet label()}
+		<Select.Label >{attribute.description}</Select.Label>
+	{/snippet}
+	<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
 	<Select.Options slot="options">
 		{#each selectOptions as option}
 			<Select.Options.Option {option} />

@@ -1,17 +1,17 @@
 <script>
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 
 	const linkResolver = useLibre311Context().linkResolver;
 </script>
 
 <div class="toggle">
-	<a href={linkResolver.issuesMap($page.url)}>
-		<button class="rounded-l-lg" class:selected={$page.route.id == '/issues/map'}> Map </button>
+	<a href={linkResolver.issuesMap(page.url)}>
+		<button class="rounded-l-lg" class:selected={page.route.id == '/issues/map'}> Map </button>
 	</a>
 
-	<a href={linkResolver.issuesList($page.url)}>
-		<button class="rounded-r-lg" class:selected={$page.route.id == '/issues/list'}>List </button>
+	<a href={linkResolver.issuesList(page.url)}>
+		<button class="rounded-r-lg" class:selected={page.route.id == '/issues/list'}>List </button>
 	</a>
 </div>
 

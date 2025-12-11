@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (item to item_1) making the component unusable -->
 <script lang="ts" generics="T">
 	import { createEventDispatcher } from 'svelte';
 	// we have to disable the eslint warning because it doesn't recognize the svelte generics syntax above even though it is valid

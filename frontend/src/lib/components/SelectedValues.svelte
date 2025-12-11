@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { SelectedValue } from '$lib/services/Libre311/Libre311';
 
-	export let selectedValues: SelectedValue[];
+	interface Props {
+		selectedValues: SelectedValue[];
+	}
+
+	let { selectedValues }: Props = $props();
 </script>
 
 {#each selectedValues as selectedValue}

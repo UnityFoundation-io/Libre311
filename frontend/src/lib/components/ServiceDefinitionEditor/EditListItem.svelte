@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button, Dropdown, Input } from 'stwui';
-	import ToggleState from '../ToggleState.svelte';
+
+	// import ToggleState from '../ToggleState.svelte';
 	import EllipsisVertical from '../Svg/outline/EllipsisVertical.svelte';
 	import ListItemContainer from './ListItemContainer.svelte';
 	import { createEventDispatcher } from 'svelte';
@@ -9,6 +9,10 @@
 	import { createInput, inputValidatorFactory } from '$lib/utils/validation';
 	import { z } from 'zod';
 
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+    import {Button} from "$lib/components/ui/button";
+    import {Input} from "$lib/components/ui/input";
+
 	const minLengthStringValidator = inputValidatorFactory(z.string().min(1));
 	const dispatch = createEventDispatcher<{
 		toggleEdit: void;
@@ -16,9 +20,13 @@
 		close: void;
 	}>();
 
-	export let startingText: string;
+	interface Props {
+		startingText: string;
+	}
 
-	$: editListItemInput = createInput(startingText);
+	let { startingText }: Props = $props();
+
+	let editListItemInput = $derived(createInput(startingText));
 
 	function handleSubmit() {
 		editListItemInput = minLengthStringValidator(editListItemInput);
@@ -29,42 +37,50 @@
 </script>
 
 <ListItemContainer>
-	<div slot="leading">
-		<ToggleState startingValue={false} let:show let:toggle>
-			<Dropdown visible={show}>
-				<Button type="ghost" slot="trigger" on:click={toggle}>
-					<EllipsisVertical slot="icon" />
-				</Button>
+	{#snippet leading()}
+		<div >
+						<DropdownMenu.Root>
 
-				<Dropdown.Items slot="items" class="w-[100px]">
-					<Button type="ghost" class="w-full" on:click={() => dispatch('toggleEdit')}>Edit</Button>
-				</Dropdown.Items>
-			</Dropdown>
-		</ToggleState>
-	</div>
+						    <DropdownMenu.Trigger>
+                                {#snippet child({props})}
+								<Button variant="ghost"  {...props}>
+										<EllipsisVertical  />
+							    </Button>
+                                {/snippet}
+                            </DropdownMenu.Trigger>
 
-	<Input
-		slot="main"
-		class="w-full"
-		type="text"
-		name="new-service-name"
-		error={editListItemInput.error}
-		bind:value={editListItemInput.value}
-	></Input>
+                            <DropdownMenu.Content>
+                                <DropdownMenu.Item onSelect={() => dispatch('toggleEdit')}>Edit</DropdownMenu.Item>
+                            </DropdownMenu.Content>
+					</DropdownMenu.Root>
+		</div>
+	{/snippet}
 
-	<div slot="trailing" class="mx-2 flex items-center justify-center">
-		<Button
-			aria-label="Close"
-			type="ghost"
-			on:click={() => {
-				dispatch('close');
-			}}
-		>
-			<XMark slot="icon" />
-		</Button>
+	{#snippet main()}
+		<Input
+			
+			class="w-full"
+			type="text"
+			name="new-service-name"
+			bind:value={editListItemInput.value}
+		></Input>
+	{/snippet}
 
-		<Button aria-label="Submit" type="ghost" on:click={handleSubmit}>
-			<CheckMark slot="icon" />
-		</Button>
-	</div>
+	{#snippet trailing()}
+		<div  class="mx-2 flex items-center justify-center">
+			<Button
+				aria-label="Close"
+				variant="ghost"
+				on:click={() => {
+					dispatch('close');
+				}}
+			>
+						<XMark  />
+			</Button>
+
+			<Button aria-label="Submit" variant="ghost" on:click={handleSubmit}>
+						<CheckMark  />
+			</Button>
+		</div>
+	{/snippet}
 </ListItemContainer>

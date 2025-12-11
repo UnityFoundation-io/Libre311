@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ServiceRequest from '$lib/components/ServiceRequest.svelte';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { useSelectedServiceRequestStore } from '$lib/context/ServiceRequestsContext';
@@ -11,6 +11,6 @@
 {#if $selectedServiceRequest}
 	<ServiceRequest
 		serviceRequest={$selectedServiceRequest}
-		back={linkResolver.issuesTable($page.url)}
+		back={linkResolver.issuesTable(page.url)}
 	/>
 {/if}

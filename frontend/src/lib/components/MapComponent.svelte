@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Events = {
 		boundsChanged: L.LatLngBounds;
 	};
@@ -7,22 +7,38 @@
 </script>
 
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount, onDestroy, setContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
 
-	export let locateOpts: L.LocateOptions | undefined = undefined;
-	export let bounds: L.LatLngBoundsExpression | undefined = undefined;
-	export let center: L.LatLngExpression | undefined = undefined;
-	export let zoom: number | undefined = undefined;
-	export let disabled: boolean = false;
-	export let controlFactories: Array<ControlFactory> = [];
-	export let controlOps: L.ControlOptions = { position: 'topleft' };
+	interface Props {
+		locateOpts?: L.LocateOptions | undefined;
+		bounds?: L.LatLngBoundsExpression | undefined;
+		center?: L.LatLngExpression | undefined;
+		zoom?: number | undefined;
+		disabled?: boolean;
+		controlFactories?: Array<ControlFactory>;
+		controlOps?: L.ControlOptions;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		locateOpts = undefined,
+		bounds = undefined,
+		center = undefined,
+		zoom = undefined,
+		disabled = false,
+		controlFactories = [],
+		controlOps = { position: 'topleft' },
+		children
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher<Events>();
 
-	let map: L.Map;
-	let mapElement: HTMLElement;
+	let map: L.Map = $state();
+	let mapElement: HTMLElement = $state();
 
 	onMount(() => {
 		map = L.map(mapElement);
@@ -49,7 +65,6 @@
 		getMap: () => map
 	});
 
-	$: toggleDisabled(map, disabled);
 
 	function toggleDisabled(map: L.Map | undefined, disabled: boolean) {
 		if (!map) return;
@@ -73,19 +88,24 @@
 		}
 	}
 
-	$: if (map) {
-		if (bounds) {
-			map.fitBounds(bounds);
-		} else if (center && zoom) {
-			map.setView(center, zoom);
-		} else if (locateOpts) {
-			map.locate(locateOpts);
+	run(() => {
+		toggleDisabled(map, disabled);
+	});
+	run(() => {
+		if (map) {
+			if (bounds) {
+				map.fitBounds(bounds);
+			} else if (center && zoom) {
+				map.setView(center, zoom);
+			} else if (locateOpts) {
+				map.locate(locateOpts);
+			}
 		}
-	}
+	});
 </script>
 
 <div class="z-0 h-full w-full" bind:this={mapElement}>
 	{#if map}
-		<slot />
+		{@render children?.()}
 	{/if}
 </div>

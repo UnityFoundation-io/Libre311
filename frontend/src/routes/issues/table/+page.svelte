@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import messages from '$media/messages.json';
 	import ServiceRequestPreview from '$lib/components/ServiceRequestPreview.svelte';
 
@@ -16,12 +18,14 @@
 	const linkResolver = useLibre311Context().linkResolver;
 
 	const serviceRequestResStore = useServiceRequestsResponseStore();
-	let listElement: HTMLElement | undefined;
+	let listElement: HTMLElement | undefined = $state();
 
-	$: if ($serviceRequestResStore.type === 'success') {
-		listElement?.scrollIntoView();
-		window.scrollTo({ top: 0, behavior: 'instant' });
-	}
+	run(() => {
+		if ($serviceRequestResStore.type === 'success') {
+			listElement?.scrollIntoView();
+			window.scrollTo({ top: 0, behavior: 'instant' });
+		}
+	});
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}

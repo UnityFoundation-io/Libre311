@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Alert, Button } from 'stwui';
+
 	import { informationCircle } from './Svg/solid/informationCircle';
 	import { exclamationTriangle } from './Svg/solid/exclamationTriangle';
 	import { exclamationCircle } from './Svg/solid/exclamationCircle';
@@ -7,6 +7,8 @@
 	import { createEventDispatcher } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { checkCircle } from './Svg/solid/checkCircle';
+    import {Button} from "$lib/components/ui/button";
+    import * as Alert from "$lib/components/ui/alert";
 
 	const dispatch = createEventDispatcher<{ close: void }>();
 
@@ -17,27 +19,31 @@
 		success: checkCircle
 	};
 
-	export let type: AlertType;
-	export let title: string;
-	export let description: string | undefined;
+	interface Props {
+		type: AlertType;
+		title: string;
+		description: string | undefined;
+	}
+
+	let { type, title, description }: Props = $props();
 </script>
 
 <div
 	in:fly|global={{ y: 200, duration: ALERT_ANIMATION_DURATION }}
 	out:fly|global={{ x: 200, duration: ALERT_ANIMATION_DURATION }}
 >
-	<Alert {type} on:fade>
-		<Alert.Leading slot="leading" data={typeIconMap[type]} />
-		<Alert.Title slot="title">{title}</Alert.Title>
+	<Alert.Root>
+                {typeIconMap[type]}
+				<Alert.Title >{title}</Alert.Title>
 
-		<Alert.Description slot="description">
-			<!-- todo change back to @html once csp policy is corrected -> https://kit.svelte.dev/docs/configuration#csp -->
-			<!-- {@html description} -->
-			{description}
-		</Alert.Description>
+				<Alert.Description >
+				<!-- todo change back to @html once csp policy is corrected -> https://kit.svelte.dev/docs/configuration#csp -->
+				<!-- {@html description} -->
+				{description}
+			</Alert.Description>
 
-		<Button on:click={() => dispatch('close')} class="ml-3" slot="extra" type="ghost">Close</Button>
-	</Alert>
+				<Button on:click={() => dispatch('close')} class="ml-3"  variant="ghost">Close</Button>
+	</Alert.Root>
 </div>
 
 <style>

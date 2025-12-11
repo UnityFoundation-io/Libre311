@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import messages from '$media/messages.json';
-	import { Breadcrumbs, Button, Card, Input, List, Progress, Select } from 'stwui';
+	import { Breadcrumbs, Card, Input, List, Progress, Select } from 'stwui';
+	import { Button } from '$lib/components/ui/button';
 	import {
 		asAsyncFailure,
 		asAsyncSuccess,
@@ -51,43 +54,37 @@
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 
-	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = ASYNC_IN_PROGRESS;
+	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> = $state(ASYNC_IN_PROGRESS);
 
 	let groupId = $page.params.group_id;
 	let serviceCode = Number($page.params.service_id);
 	let serviceId: number;
 
-	let isNewAttributeDropDownVisable: boolean = false;
+	let isNewAttributeDropDownVisable: boolean = $state(false);
 
-	let newAttribute: AttributeInput = {
+	let newAttribute: AttributeInput = $state({
 		description: createInput<string>(),
 		dataTypeDescription: createInput<string>(),
 		dataType: undefined,
 		required: false,
 		order: 0,
 		values: undefined
-	};
+	});
 
-	let values: AttributeValue[] = [
+	let values: AttributeValue[] = $state([
 		{
 			id: 0,
 			name: ''
 		}
-	];
+	]);
 
-	let multivalueErrorMessage: string | undefined;
-	let dataTypeSelectError: string | undefined;
+	let multivalueErrorMessage: string | undefined = $state();
+	let dataTypeSelectError: string | undefined = $state();
 
-	let groupName = '';
-	let serviceName = '';
+	let groupName = $state('');
+	let serviceName = $state('');
 
-	$: crumbs = [
-		{ label: `Group: ${groupName}`, href: '/groups' },
-		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
-		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
-	];
 
-	$: updateAttributeMap(serviceCode);
 
 	function updateAttributeMap(service: number) {
 		if (!service) {
@@ -234,195 +231,216 @@
 			alertError(error);
 		}
 	}
+	let crumbs = $derived([
+		{ label: `Group: ${groupName}`, href: '/groups' },
+		{ label: `Service: ${serviceName}`, href: `/groups/${groupId}` },
+		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
+	]);
+	run(() => {
+		updateAttributeMap(serviceCode);
+	});
 </script>
 
 <Card bordered={true} class="m-4">
-	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
-		<Breadcrumbs>
-			{#each crumbs as crumb}
-				<Breadcrumbs.Crumb href={crumb.href}>
-					<Breadcrumbs.Crumb.Label slot="label"><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
-				</Breadcrumbs.Crumb>
-			{/each}
-		</Breadcrumbs>
-	</Card.Header>
+	{#snippet header()}
+		<Card.Header  class="flex items-center justify-between py-3 text-lg font-bold">
+			<Breadcrumbs>
+				{#each crumbs as crumb}
+					<Breadcrumbs.Crumb href={crumb.href}>
+						{#snippet label()}
+										<Breadcrumbs.Crumb.Label ><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
+									{/snippet}
+					</Breadcrumbs.Crumb>
+				{/each}
+			</Breadcrumbs>
+		</Card.Header>
+	{/snippet}
 
-	<Card.Content slot="content" class="p-0 sm:p-0">
-		{#if asyncAttributeInputMap?.type === 'success'}
-			<List>
-				<DragAndDrop
-					items={Array.from(asyncAttributeInputMap.value.values())}
-					on:itemsChanged={updateAttributesOrder}
-				>
-					<SdaListItem
-						slot="item"
-						let:item
-						on:attributeDeleted={removeFromAttributeMap}
-						groupId={Number($page.params.group_id)}
-						serviceCode={Number($page.params.service_id)}
-						sda={item.attribute}
-					/>
-				</DragAndDrop>
-
-				{#if isNewAttributeDropDownVisable}
-					<div
-						class="flex w-full flex-col justify-between"
-						transition:slide|local={{ duration: 500 }}
+	{#snippet content()}
+		<Card.Content  class="p-0 sm:p-0">
+			{#if asyncAttributeInputMap?.type === 'success'}
+				<List>
+					<DragAndDrop
+						items={Array.from(asyncAttributeInputMap.value.values())}
+						on:itemsChanged={updateAttributesOrder}
 					>
-						<div class="mx-4 my-2">
-							<div class="my-2 flex items-center justify-between">
-								<div class="items-center">
-									<label for="is-attribute-required">
-										<strong class="text-base"
-											>{messages['serviceDefinitionEditor']['attributes']['required']}</strong
-										>
-									</label>
-									<input
-										class="mx-2 rounded-sm"
-										id="is-attribute-required"
-										type="checkbox"
-										bind:checked={newAttribute.required}
-									/>
-								</div>
+						{#snippet item({ item })}
+										<SdaListItem
+								
+								
+								on:attributeDeleted={removeFromAttributeMap}
+								groupId={Number($page.params.group_id)}
+								serviceCode={Number($page.params.service_id)}
+								sda={item.attribute}
+							/>
+									{/snippet}
+					</DragAndDrop>
 
-								<Select
-									name="select-datatype"
-									placeholder={messages['serviceDefinitionEditor']['attributes'][
-										'select_data_type_placeholder'
-									]}
-									options={dataTypeOptions}
-									error={dataTypeSelectError}
-									bind:value={newAttribute.dataType}
-								>
-									<Select.Options slot="options">
-										{#each dataTypeOptions as option}
-											<Select.Options.Option {option} />
-										{/each}
-									</Select.Options>
-								</Select>
-							</div>
-
-							<div class="my-4">
-								<Input
-									name="new-attribute-description"
-									error={newAttribute.description.error}
-									bind:value={newAttribute.description.value}
-									placeholder={messages['serviceDefinitionEditor']['attributes'][
-										'description_placeholder'
-									]}
-								>
-									<Input.Label slot="label">
-										<strong class="text-base"
-											>{messages['serviceDefinitionEditor']['attributes']['description']}</strong
-										>
-									</Input.Label>
-								</Input>
-							</div>
-
-							<div class="my-4">
-								<Input
-									name="new-attribute-datatype-description"
-									error={newAttribute.dataTypeDescription.error}
-									bind:value={newAttribute.dataTypeDescription.value}
-									placeholder={messages['serviceDefinitionEditor']['attributes'][
-										'data_type_description_placeholder'
-									]}
-								>
-									<Input.Label slot="label">
-										<strong class="text-base"
-											>{messages['serviceDefinitionEditor']['attributes'][
-												'data_type_description'
-											]}</strong
-										>
-									</Input.Label>
-								</Input>
-							</div>
-
-							{#if newAttribute.dataType == 'multivaluelist'}
-								<div class="flex flex-col" transition:slide|local={{ duration: 500 }}>
-									<strong class="text-base">{'Values:'}</strong>
-
-									<ul>
-										{#each values as value, index}
-											<li
-												class="my-2 flex justify-between"
-												transition:slide|local={{ duration: 500 }}
+					{#if isNewAttributeDropDownVisable}
+						<div
+							class="flex w-full flex-col justify-between"
+							transition:slide|local={{ duration: 500 }}
+						>
+							<div class="mx-4 my-2">
+								<div class="my-2 flex items-center justify-between">
+									<div class="items-center">
+										<label for="is-attribute-required">
+											<strong class="text-base"
+												>{messages['serviceDefinitionEditor']['attributes']['required']}</strong
 											>
-												<Input
-													class="w-11/12 rounded-md"
-													type="text"
-													placeholder={messages['serviceDefinitionEditor']['attributes'][
-														'value_placeholder'
-													]}
-													error={multivalueErrorMessage}
-													bind:value={value.name}
-												/>
+										</label>
+										<input
+											class="mx-2 rounded-sm"
+											id="is-attribute-required"
+											type="checkbox"
+											bind:checked={newAttribute.required}
+										/>
+									</div>
 
-												{#if index != 0}
-													<Button on:click={() => removeValue(index)}>
-														<XMark />
-													</Button>
-												{/if}
-											</li>
-										{/each}
-									</ul>
-
-									<Button class="mt-1" type="ghost" on:click={addValue}>
-										{'+ Add'}
-									</Button>
+									<Select
+										name="select-datatype"
+										placeholder={messages['serviceDefinitionEditor']['attributes'][
+											'select_data_type_placeholder'
+										]}
+										options={dataTypeOptions}
+										error={dataTypeSelectError}
+										bind:value={newAttribute.dataType}
+									>
+										<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
+	<Select.Options slot="options">
+											{#each dataTypeOptions as option}
+												<Select.Options.Option {option} />
+											{/each}
+										</Select.Options>
+									</Select>
 								</div>
-							{/if}
+
+								<div class="my-4">
+									<Input
+										name="new-attribute-description"
+										error={newAttribute.description.error}
+										bind:value={newAttribute.description.value}
+										placeholder={messages['serviceDefinitionEditor']['attributes'][
+											'description_placeholder'
+										]}
+									>
+										{#snippet label()}
+																		<Input.Label >
+												<strong class="text-base"
+													>{messages['serviceDefinitionEditor']['attributes']['description']}</strong
+												>
+											</Input.Label>
+																	{/snippet}
+									</Input>
+								</div>
+
+								<div class="my-4">
+									<Input
+										name="new-attribute-datatype-description"
+										error={newAttribute.dataTypeDescription.error}
+										bind:value={newAttribute.dataTypeDescription.value}
+										placeholder={messages['serviceDefinitionEditor']['attributes'][
+											'data_type_description_placeholder'
+										]}
+									>
+										{#snippet label()}
+																		<Input.Label >
+												<strong class="text-base"
+													>{messages['serviceDefinitionEditor']['attributes'][
+														'data_type_description'
+													]}</strong
+												>
+											</Input.Label>
+																	{/snippet}
+									</Input>
+								</div>
+
+								{#if newAttribute.dataType == 'multivaluelist'}
+									<div class="flex flex-col" transition:slide|local={{ duration: 500 }}>
+										<strong class="text-base">{'Values:'}</strong>
+
+										<ul>
+											{#each values as value, index}
+												<li
+													class="my-2 flex justify-between"
+													transition:slide|local={{ duration: 500 }}
+												>
+													<Input
+														class="w-11/12 rounded-md"
+														type="text"
+														placeholder={messages['serviceDefinitionEditor']['attributes'][
+															'value_placeholder'
+														]}
+														error={multivalueErrorMessage}
+														bind:value={value.name}
+													/>
+
+													{#if index != 0}
+														<Button on:click={() => removeValue(index)}>
+															<XMark />
+														</Button>
+													{/if}
+												</li>
+											{/each}
+										</ul>
+
+										<Button class="mt-1" variant="ghost" on:click={addValue}>
+											{'+ Add'}
+										</Button>
+									</div>
+								{/if}
+							</div>
 						</div>
-					</div>
-				{/if}
+					{/if}
 
-				{#if isNewAttributeDropDownVisable}
-					<List.Item class="flex h-[3.5rem] items-center justify-between">
-						<Button
-							class="mx-2 w-1/2"
-							aria-label="Close"
-							type="ghost"
-							on:click={() => {
-								isNewAttributeDropDownVisable = false;
-								newAttribute.description.value = undefined;
-								newAttribute.dataTypeDescription.value = undefined;
-								newAttribute.dataType = undefined;
-								newAttribute.required = false;
-								values = [{ id: 0, name: '' }];
-								multivalueErrorMessage = undefined;
-							}}
-						>
-							{'Cancel'}
-						</Button>
+					{#if isNewAttributeDropDownVisable}
+						<List.Item class="flex h-[3.5rem] items-center justify-between">
+							<Button
+								class="mx-2 w-1/2"
+								aria-label="Close"
+								variant="ghost"
+								on:click={() => {
+									isNewAttributeDropDownVisable = false;
+									newAttribute.description.value = undefined;
+									newAttribute.dataTypeDescription.value = undefined;
+									newAttribute.dataType = undefined;
+									newAttribute.required = false;
+									values = [{ id: 0, name: '' }];
+									multivalueErrorMessage = undefined;
+								}}
+							>
+								{'Cancel'}
+							</Button>
 
-						<Button
-							class="mx-2 w-1/2"
-							aria-label="Submit"
-							type="primary"
-							on:click={handleAddNewAttribute}
-						>
-							{'Save Attribute'}
-						</Button>
-					</List.Item>
-				{:else}
-					<List.Item class="flex h-[3.5rem] items-center justify-end">
-						<Button
-							class="mr-2"
-							aria-label="Add"
-							type="ghost"
-							on:click={() => {
-								isNewAttributeDropDownVisable = true;
-							}}
-						>
-							{messages['serviceDefinitionEditor']['attributes']['add_attribute']}
-						</Button>
-					</List.Item>
-				{/if}
-			</List>
-		{:else if asyncAttributeInputMap?.type === 'inProgress'}
-			<div class="mx-8 my-4">
-				<Progress value={0} indeterminate />
-			</div>
-		{/if}
-	</Card.Content>
+							<Button
+								class="mx-2 w-1/2"
+								aria-label="Submit"
+								variant="default"
+								on:click={handleAddNewAttribute}
+							>
+								{'Save Attribute'}
+							</Button>
+						</List.Item>
+					{:else}
+						<List.Item class="flex h-[3.5rem] items-center justify-end">
+							<Button
+								class="mr-2"
+								aria-label="Add"
+								variant="ghost"
+								on:click={() => {
+									isNewAttributeDropDownVisable = true;
+								}}
+							>
+								{messages['serviceDefinitionEditor']['attributes']['add_attribute']}
+							</Button>
+						</List.Item>
+					{/if}
+				</List>
+			{:else if asyncAttributeInputMap?.type === 'inProgress'}
+				<div class="mx-8 my-4">
+					<Progress value={0} indeterminate />
+				</div>
+			{/if}
+		</Card.Content>
+	{/snippet}
 </Card>

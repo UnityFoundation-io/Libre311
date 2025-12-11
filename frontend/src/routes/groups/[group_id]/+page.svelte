@@ -2,7 +2,8 @@
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
 	import type { GetServiceListResponse, Service } from '$lib/services/Libre311/Libre311';
 	import { stringValidator, type FormInputValue, createInput } from '$lib/utils/validation';
-	import { Breadcrumbs, Button, Card, Input, List } from 'stwui';
+	import { Breadcrumbs, Card, Input, List } from 'stwui';
+	import { Button } from '$lib/components/ui/button';
 	import { onMount, type ComponentEvents } from 'svelte';
 	import {
 		ASYNC_IN_PROGRESS,
@@ -19,7 +20,7 @@
 	import DragAndDrop from '$lib/components/DragAndDrop.svelte';
 
 	let groupId = Number($page.params.group_id);
-	let groupName = '';
+	let groupName = $state('');
 
 	async function getGroupName(groupId: number) {
 		const groups = await libre311.getGroupList();
@@ -28,17 +29,17 @@
 		if (group) groupName = group.name;
 	}
 
-	$: crumbs = [
+	let crumbs = $derived([
 		{ label: `Groups: ${groupName}`, href: '/groups' },
 		{ label: 'Services', href: `/groups/${$page.params.group_id}` }
-	];
+	]);
 
 	const libre311 = useLibre311Service();
 	const alert = useLibre311Context().alert;
 
-	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
-	let isDropDownVisable = false;
-	let newServiceName: FormInputValue<string> = createInput();
+	let serviceList: AsyncResult<GetServiceListResponse> = $state(ASYNC_IN_PROGRESS);
+	let isDropDownVisable = $state(false);
+	let newServiceName: FormInputValue<string> = $state(createInput());
 
 	function fetchServiceList() {
 		getGroupName(groupId);
@@ -113,67 +114,79 @@
 </script>
 
 <Card bordered={true} class="m-4">
-	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
-		<Breadcrumbs>
-			{#each crumbs as crumb}
-				<Breadcrumbs.Crumb href={crumb.href}>
-					<Breadcrumbs.Crumb.Label slot="label"><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
-				</Breadcrumbs.Crumb>
-			{/each}
-		</Breadcrumbs>
-		<div class="flex justify-end">
-			<Button
-				type="ghost"
-				on:click={() => {
-					isDropDownVisable = true;
-				}}
-				>{'+ Add Service'}
-			</Button>
-		</div>
-	</Card.Header>
+	{#snippet header()}
+		<Card.Header  class="flex items-center justify-between py-3 text-lg font-bold">
+			<Breadcrumbs>
+				{#each crumbs as crumb}
+					<Breadcrumbs.Crumb href={crumb.href}>
+						{#snippet label()}
+										<Breadcrumbs.Crumb.Label ><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
+									{/snippet}
+					</Breadcrumbs.Crumb>
+				{/each}
+			</Breadcrumbs>
+			<div class="flex justify-end">
+				<Button
+					variant="ghost"
+					on:click={() => {
+						isDropDownVisable = true;
+					}}
+					>{'+ Add Service'}
+				</Button>
+			</div>
+		</Card.Header>
+	{/snippet}
 
 	{#if serviceList.type === 'success'}
-		<Card.Content slot="content" class="p-0 sm:p-0">
-			<List>
-				{#if isDropDownVisable}
-					<div class="m-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
-						<Input
-							class="w-[80%]"
-							name="new-service-name"
-							error={newServiceName.error}
-							bind:value={newServiceName.value}
-						></Input>
+		{#snippet content()}
+				<Card.Content  class="p-0 sm:p-0">
+				<List>
+					{#if isDropDownVisable}
+						<div class="m-2 flex justify-between" transition:slide|local={{ duration: 500 }}>
+							<Input
+								class="w-[80%]"
+								name="new-service-name"
+								error={newServiceName.error}
+								bind:value={newServiceName.value}
+							></Input>
 
-						<div class="flex">
-							<Button
-								aria-label="Close"
-								type="ghost"
-								on:click={() => {
-									isDropDownVisable = false;
-									newServiceName.value = undefined;
-								}}
-							>
-								<XMark slot="icon" />
-							</Button>
+							<div class="flex">
+								<Button
+									aria-label="Close"
+									variant="ghost"
+									on:click={() => {
+										isDropDownVisable = false;
+										newServiceName.value = undefined;
+									}}
+								>
+									{#snippet icon()}
+																<XMark  />
+															{/snippet}
+								</Button>
 
-							<Button aria-label="Submit" type="ghost" on:click={handleAddNewService}>
-								<CheckMark slot="icon" />
-							</Button>
+								<Button aria-label="Submit" variant="ghost" on:click={handleAddNewService}>
+									{#snippet icon()}
+																<CheckMark  />
+															{/snippet}
+								</Button>
+							</div>
 						</div>
-					</div>
-				{/if}
+					{/if}
 
-				<DragAndDrop items={serviceList.value} on:itemsChanged={updateServicesOrder}>
-					<ServiceListItem
-						slot="item"
-						let:item
-						on:serviceEdited={handleServiceEdited}
-						on:serviceDeleted={removeServiceFromState}
-						service={item}
-					/>
-				</DragAndDrop>
-			</List>
-		</Card.Content>
+					<DragAndDrop items={serviceList.value} on:itemsChanged={updateServicesOrder}>
+						{#snippet item({ item })}
+										<ServiceListItem
+								
+								
+								on:serviceEdited={handleServiceEdited}
+								on:serviceDeleted={removeServiceFromState}
+								service={item}
+							/>
+									{/snippet}
+					</DragAndDrop>
+				</List>
+			</Card.Content>
+			{/snippet}
 	{:else if serviceList.type === 'failure'}
 		{JSON.stringify(serviceList.error, null, 2)}
 	{/if}

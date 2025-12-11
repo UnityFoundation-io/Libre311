@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { StringServiceDefinitionInput } from '../ServiceDefinitionAttributes/shared';
 
-	export let attributes: StringServiceDefinitionInput;
+	interface Props {
+		attributes: StringServiceDefinitionInput;
+	}
+
+	let { attributes }: Props = $props();
 </script>
 
 <strong>{attributes.attribute.description}</strong>

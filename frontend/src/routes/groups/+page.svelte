@@ -10,7 +10,8 @@
 		asAsyncFailure
 	} from '$lib/services/http';
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
-	import { Breadcrumbs, Button, Card, Input, List } from 'stwui';
+	import { Breadcrumbs, Card, Input, List } from 'stwui';
+	import { Button } from '$lib/components/ui/button';
 	import { onMount, type ComponentEvents } from 'svelte';
 	import { slide } from 'svelte/transition';
 
@@ -23,9 +24,9 @@
 
 	const libre311 = useLibre311Service();
 
-	let groupList: AsyncResult<GetGroupListResponse> = ASYNC_IN_PROGRESS;
-	let isDropdownVisible = false;
-	let newGroupName: FormInputValue<string> = createInput();
+	let groupList: AsyncResult<GetGroupListResponse> = $state(ASYNC_IN_PROGRESS);
+	let isDropdownVisible = $state(false);
+	let newGroupName: FormInputValue<string> = $state(createInput());
 
 	function fetchGroupList() {
 		libre311
@@ -69,53 +70,59 @@
 </script>
 
 <Card bordered={true} class="m-4">
-	<Card.Header slot="header" class="flex items-center justify-between py-3 text-lg font-bold">
-		<Breadcrumbs>
-			{#each crumbs as crumb}
-				<Breadcrumbs.Crumb href={crumb.href}>
-					<Breadcrumbs.Crumb.Label slot="label"><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
-				</Breadcrumbs.Crumb>
-			{/each}
-		</Breadcrumbs>
-		<div class="flex justify-end">
-			<Button
-				type="ghost"
-				on:click={() => {
-					isDropdownVisible = true;
-				}}
-				>{'+ Add Group'}
-			</Button>
-		</div>
-	</Card.Header>
+	{#snippet header()}
+		<Card.Header  class="flex items-center justify-between py-3 text-lg font-bold">
+			<Breadcrumbs>
+				{#each crumbs as crumb}
+					<Breadcrumbs.Crumb href={crumb.href}>
+						{#snippet label()}
+										<Breadcrumbs.Crumb.Label ><h3>{crumb.label}</h3></Breadcrumbs.Crumb.Label>
+									{/snippet}
+					</Breadcrumbs.Crumb>
+				{/each}
+			</Breadcrumbs>
+			<div class="flex justify-end">
+				<Button
+					variant="ghost"
+					on:click={() => {
+						isDropdownVisible = true;
+					}}
+					>{'+ Add Group'}
+				</Button>
+			</div>
+		</Card.Header>
+	{/snippet}
 
 	{#if groupList.type === 'success'}
-		<Card.Content slot="content" class="p-0 sm:p-0">
-			<List>
-				{#if isDropdownVisible}
-					<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
-						<Input
-							class="w-[80%]"
-							name="new-service-name"
-							error={newGroupName.error}
-							bind:value={newGroupName.value}
-						></Input>
+		{#snippet content()}
+				<Card.Content  class="p-0 sm:p-0">
+				<List>
+					{#if isDropdownVisible}
+						<div class="m-2 flex" transition:slide|local={{ duration: 500 }}>
+							<Input
+								class="w-[80%]"
+								name="new-service-name"
+								error={newGroupName.error}
+								bind:value={newGroupName.value}
+							></Input>
 
-						<Button
-							class="w-[10%]"
-							on:click={() => {
-								isDropdownVisible = false;
-								newGroupName.value = undefined;
-							}}>Cancel</Button
-						>
-						<Button class="w-[10%]" type="primary" on:click={handleAddNewGroup}>Add</Button>
-					</div>
-				{/if}
+							<Button
+								class="w-[10%]"
+								on:click={() => {
+									isDropdownVisible = false;
+									newGroupName.value = undefined;
+								}}>Cancel</Button
+							>
+							<Button class="w-[10%]" variant="default" on:click={handleAddNewGroup}>Add</Button>
+						</div>
+					{/if}
 
-				{#each groupList.value as group}
-					<GroupListItem on:editSuccess={updateGroupListState} {group} />
-				{/each}
-			</List>
-		</Card.Content>
+					{#each groupList.value as group}
+						<GroupListItem on:editSuccess={updateGroupListState} {group} />
+					{/each}
+				</List>
+			</Card.Content>
+			{/snippet}
 	{:else if groupList.type === 'failure'}
 		{JSON.stringify(groupList.error, null, 2)}
 	{:else if groupList.type === 'inProgress'}

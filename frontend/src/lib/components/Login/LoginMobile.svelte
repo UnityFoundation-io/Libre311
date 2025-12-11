@@ -1,7 +1,8 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { rocketLaunch } from '$lib/components/Svg/outline/rocket-launch.js';
-	import { Button, Input } from 'stwui';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import { type FormInputValue } from '$lib/utils/validation';
 	import { fade, draw } from 'svelte/transition';
 	import { createEventDispatcher, onMount } from 'svelte';
@@ -9,11 +10,15 @@
 
 	const dispatch = createEventDispatcher<EventDispatchTypeMap>();
 
-	export let emailInput: FormInputValue<string | undefined>;
-	export let passwordInput: FormInputValue<string | undefined>;
-	export let errorMessage: string | undefined;
+	interface Props {
+		emailInput: FormInputValue<string | undefined>;
+		passwordInput: FormInputValue<string | undefined>;
+		errorMessage: string | undefined;
+	}
 
-	let visible = false;
+	let { emailInput, passwordInput, errorMessage }: Props = $props();
+
+	let visible = $state(false);
 
 	onMount(() => {
 		visible = true;
@@ -69,7 +74,9 @@
 				value={emailInput.value}
 				on:change={(e) => onChange(e, 'email')}
 			>
-				<Input.Label slot="label">{messages['login']['email']['label']}</Input.Label>
+				{#snippet label()}
+								<Input.Label >{messages['login']['email']['label']}</Input.Label>
+							{/snippet}
 			</Input>
 		</div>
 
@@ -85,12 +92,14 @@
 				value={passwordInput.value}
 				on:change={(e) => onChange(e, 'password')}
 			>
-				<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
+				{#snippet label()}
+								<Input.Label >{messages['login']['password']['label']}</Input.Label>
+							{/snippet}
 			</Input>
 		</div>
 
 		<div class="m-4">
-			<Button type="primary" on:click={onSubmit}>
+			<Button variant="default" on:click={onSubmit}>
 				{messages['login']['submit']}
 			</Button>
 		</div>

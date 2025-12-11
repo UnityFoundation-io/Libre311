@@ -2,8 +2,12 @@
 	import { TextArea } from 'stwui';
 	import type { TextServiceDefinitionAttributeInput } from './shared';
 
-	export let input: TextServiceDefinitionAttributeInput;
-	$: attribute = input.attribute;
+	interface Props {
+		input: TextServiceDefinitionAttributeInput;
+	}
+
+	let { input = $bindable() }: Props = $props();
+	let attribute = $derived(input.attribute);
 </script>
 
 <TextArea
@@ -13,5 +17,7 @@
 	placeholder={attribute.datatype_description ?? undefined}
 	class="relative my-4"
 >
-	<TextArea.Label slot="label">{attribute.description}</TextArea.Label>
+	{#snippet label()}
+		<TextArea.Label >{attribute.description}</TextArea.Label>
+	{/snippet}
 </TextArea>

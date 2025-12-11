@@ -1,7 +1,8 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { slide } from 'svelte/transition';
-	import { Button, Input } from 'stwui';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import type { AttributeValue } from '$lib/services/Libre311/Libre311';
@@ -17,11 +18,15 @@
 
 	const dispatch = createEventDispatcher<{ submit: EditAttributeInput }>();
 
-	export let attribute: EditAttributeInput;
+	interface Props {
+		attribute: EditAttributeInput;
+	}
 
-	let multivalueErrorMessage: string | undefined;
+	let { attribute = $bindable() }: Props = $props();
 
-	$: multivalueErrorIndex = -1;
+	let multivalueErrorMessage: string | undefined = $state();
+
+	let multivalueErrorIndex = $derived(-1);
 
 	function addEditValue() {
 		if (attribute.values == undefined) {
@@ -93,7 +98,7 @@
 			{/each}
 		</ul>
 
-		<Button class="mt-1" type="ghost" on:click={addEditValue}>
+		<Button class="mt-1" variant="ghost" on:click={addEditValue}>
 			{'+ Add'}
 		</Button>
 
@@ -101,13 +106,13 @@
 			<Button
 				class="mr-1 w-1/2"
 				aria-label="Close"
-				type="ghost"
+				variant="ghost"
 				on:click={() => window.history.back()}
 			>
 				{'Cancel'}
 			</Button>
 
-			<Button class="ml-1 w-1/2" aria-label="Submit" type="primary" on:click={handleSubmit}>
+			<Button class="ml-1 w-1/2" aria-label="Submit" variant="default" on:click={handleSubmit}>
 				{'Submit'}
 			</Button>
 		</div>

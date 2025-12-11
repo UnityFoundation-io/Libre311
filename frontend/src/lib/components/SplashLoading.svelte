@@ -1,11 +1,11 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { rocketLaunch } from '$lib/components/Svg/outline/rocket-launch.js';
-	import { Progress } from 'stwui';
 	import { fade, draw } from 'svelte/transition';
 	import { onMount } from 'svelte';
+    import {Progress} from "$lib/components/ui/progress";
 
-	let visible = false;
+	let visible = $state(false);
 
 	onMount(() => {
 		visible = true;
@@ -40,7 +40,7 @@
 	<h1 class="m-2 text-2xl">{messages['metadata']['app']}</h1>
 	<p class="m-2 text-base font-normal">{messages['environment']['loading']}</p>
 	<div class="m-2 w-52 max-w-52">
-		<Progress value={0} indeterminate size="md" />
+		<Progress value={0}  />
 	</div>
 </div>
 

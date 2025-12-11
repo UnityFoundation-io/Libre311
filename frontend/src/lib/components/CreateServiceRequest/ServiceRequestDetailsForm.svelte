@@ -1,6 +1,8 @@
-<script lang="ts" context="module"></script>
+<script lang="ts" module></script>
 
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import { asAsyncSuccess, type AsyncResult } from '$lib/services/http';
@@ -23,16 +25,19 @@
 	import StepControls from './StepControls.svelte';
 	import type { Service } from '$lib/services/Libre311/Libre311';
 
-	export let params: Partial<CreateServiceRequestUIParams>;
+	interface Props {
+		params: Partial<CreateServiceRequestUIParams>;
+	}
+
+	let { params = $bindable() }: Props = $props();
 
 	const libre311 = useLibre311Service();
 	const dispatch = createEventDispatcher<StepChangeEvent>();
 
-	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> | undefined;
-	let selectedService: Service | undefined = params.service;
-	let imageData: string | undefined;
+	let asyncAttributeInputMap: AsyncResult<AttributeInputMap> | undefined = $state();
+	let selectedService: Service | undefined = $state(params.service);
+	let imageData: string | undefined = $state();
 
-	$: updateAttributeMap(selectedService);
 
 	function updateAttributeMap(service: Service | undefined) {
 		if (!service) {
@@ -115,6 +120,9 @@
 			};
 		}
 	});
+	run(() => {
+		updateAttributeMap(selectedService);
+	});
 </script>
 
 <form class="flex-container">
@@ -153,7 +161,8 @@
 	</div>
 
 	<StepControls on:click={validate}>
-		<svelte:fragment slot="submit-text">Confirm Details</svelte:fragment>
+		<!-- @migration-task: migrate this slot by hand, `submit-text` is an invalid identifier -->
+	<svelte:fragment slot="submit-text">Confirm Details</svelte:fragment>
 	</StepControls>
 </form>
 

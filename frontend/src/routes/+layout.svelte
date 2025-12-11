@@ -19,10 +19,15 @@
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { loadRecaptchaProps } from '$lib/services/RecaptchaService';
 	import User from '$lib/components/User.svelte';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
 
-	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
+	let { children }: Props = $props();
 
-	let open: boolean = false;
+	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = $state(ASYNC_IN_PROGRESS);
+
+	let open: boolean = $state(false);
 
 	function closeDrawer() {
 		open = false;
@@ -58,30 +63,34 @@
 	}
 
 	initLibre311ContextProps();
+
+	const children_render = $derived(children);
 </script>
 
 {#if contextProviderProps.type == 'success'}
-	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
-		<header class="flex items-center justify-center">
-			<div class="flex gap-4">
-				<button
-					type="button"
-					on:click={() => {
-						open = !open;
-					}}
-				>
-					<Bars3 />
-				</button>
-				<h1>{libre311Context.service.getJurisdictionConfig().name}</h1>
-			</div>
+	<Libre311ContextProvider props={contextProviderProps.value} >
+		{#snippet children({ libre311Context })}
+				<header class="flex items-center justify-center">
+				<div class="flex gap-4">
+					<button
+						type="button"
+						onclick={() => {
+							open = !open;
+						}}
+					>
+						<Bars3 />
+					</button>
+					<h1>{libre311Context.service.getJurisdictionConfig().name}</h1>
+				</div>
 
-			<User />
-		</header>
-		<main>
-			<MenuDrawer {open} handleClose={closeDrawer} />
-			<slot />
-		</main>
-	</Libre311ContextProvider>
+				<User />
+			</header>
+			<main>
+				<MenuDrawer {open} handleClose={closeDrawer} />
+				{@render children_render?.()}
+			</main>
+					{/snippet}
+		</Libre311ContextProvider>
 {:else if contextProviderProps.type == 'inProgress'}
 	<SplashLoading />
 {:else}

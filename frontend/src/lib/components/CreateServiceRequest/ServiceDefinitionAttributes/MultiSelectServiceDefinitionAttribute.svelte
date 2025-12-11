@@ -5,13 +5,17 @@
 
 	import type { MultiSelectServiceDefinitionAttributeInput } from './shared';
 
-	export let input: MultiSelectServiceDefinitionAttributeInput;
+	interface Props {
+		input: MultiSelectServiceDefinitionAttributeInput;
+	}
 
-	$: selectOptions = createSelectOptions(input.attribute);
+	let { input = $bindable() }: Props = $props();
+
 
 	function createSelectOptions(res: MultiSelectServiceDefinitionAttribute): SelectOption[] {
 		return res.values.map((s) => ({ value: s.key, label: s.name }));
 	}
+	let selectOptions = $derived(createSelectOptions(input.attribute));
 </script>
 
 <Select
@@ -23,12 +27,15 @@
 	options={selectOptions}
 	class="relative  my-4"
 >
-	<Select.Label slot="label">
-		{input.attribute.description}
-		{#if input.attribute.required}
-			<span class="text-red-600">*</span>
-		{/if}
-	</Select.Label>
+	{#snippet label()}
+		<Select.Label >
+			{input.attribute.description}
+			{#if input.attribute.required}
+				<span class="text-red-600">*</span>
+			{/if}
+		</Select.Label>
+	{/snippet}
+	<!-- @migration-task: migrate this slot by hand, `options` would shadow a prop on the parent component -->
 	<Select.Options slot="options">
 		{#each selectOptions as option}
 			<Select.Options.Option {option} />

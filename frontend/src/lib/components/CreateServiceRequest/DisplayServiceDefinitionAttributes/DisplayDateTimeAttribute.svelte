@@ -2,7 +2,11 @@
 	import { toTimeStamp } from '$lib/utils/functions';
 	import type { DateTimeServiceDefinitionAttributeInput } from '../ServiceDefinitionAttributes/shared';
 
-	export let attributes: DateTimeServiceDefinitionAttributeInput;
+	interface Props {
+		attributes: DateTimeServiceDefinitionAttributeInput;
+	}
+
+	let { attributes }: Props = $props();
 </script>
 
 <strong>{attributes.attribute.description}</strong>

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { SingleValueListServiceDefinitionAttributeInput } from '../ServiceDefinitionAttributes/shared';
 
-	export let attributes: SingleValueListServiceDefinitionAttributeInput;
+	interface Props {
+		attributes: SingleValueListServiceDefinitionAttributeInput;
+	}
+
+	let { attributes }: Props = $props();
 
 	function extractAttributeValueNames(attributes: SingleValueListServiceDefinitionAttributeInput) {
 		const keys = attributes.value;
@@ -12,7 +16,7 @@
 		}
 	}
 
-	$: value = extractAttributeValueNames(attributes);
+	let value = $derived(extractAttributeValueNames(attributes));
 </script>
 
 <strong>{attributes.attribute.description}</strong>

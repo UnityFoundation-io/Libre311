@@ -1,9 +1,14 @@
 <script lang="ts">
-	export let startingValue: boolean;
+	interface Props {
+		startingValue: boolean;
+		children?: import('svelte').Snippet<[any]>;
+	}
+
+	let { startingValue = $bindable(), children }: Props = $props();
 
 	function toggle() {
 		startingValue = !startingValue;
 	}
 </script>
 
-<slot show={startingValue} {toggle} />
+{@render children?.({ show: startingValue, toggle, })}
