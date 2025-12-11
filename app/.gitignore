@@ -14,3 +14,4 @@ out/
 .classpath
 .factorypath
 bin/
+image-store/

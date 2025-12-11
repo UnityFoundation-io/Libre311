@@ -47,6 +47,7 @@ dependencies {
     implementation("io.micronaut.objectstorage:micronaut-object-storage-gcp")
     implementation("io.micronaut.objectstorage:micronaut-object-storage-aws")
     implementation("io.micronaut.objectstorage:micronaut-object-storage-azure")
+    implementation("io.micronaut.objectstorage:micronaut-object-storage-local")
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
