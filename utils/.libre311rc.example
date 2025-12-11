@@ -1,0 +1,18 @@
+# Libre311 Environment Configuration Template
+# Copy this file to .libre311rc (or any name) and customize for your environment
+# Source it before running utility scripts:
+#   source .libre311rc && ./utils/update-jurisdiction.sh <jurisdiction_id> [options]
+
+# Base URL of the Libre311 API
+export API_BASE_URL='http://localhost:8080'
+
+# Base URL of the UnityAuth service
+export AUTH_BASE_URL='http://localhost:9090'
+
+# Tenant ID (usually 1 for single-tenant deployments)
+export TENANT_ID='1'
+
+# AUTH_TOKEN (optional)
+# Leave unset to be prompted for credentials interactively
+# Or set it for non-interactive use (e.g., CI/CD):
+# export AUTH_TOKEN='your-jwt-token-here'
