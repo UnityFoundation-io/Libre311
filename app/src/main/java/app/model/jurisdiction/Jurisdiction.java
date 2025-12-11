@@ -20,6 +20,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import jakarta.persistence.*;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,16 +34,28 @@ public class Jurisdiction {
     @Id
     private String id;
 
+    @Nullable
     private String name;
 
     @NotNull
     private Long tenantId;
 
+    @Nullable
     private String primaryColor;
 
+    @Nullable
     private String primaryHoverColor;
 
+    @Nullable
     private String logoMediaUrl;
+
+    @Nullable
+    @Column(columnDefinition = "TEXT")
+    private String termsOfUseContent;
+
+    @Nullable
+    @Column(columnDefinition = "TEXT")
+    private String privacyPolicyContent;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -140,6 +153,22 @@ public class Jurisdiction {
 
     public void setLogoMediaUrl(String logoMediaUrl) {
         this.logoMediaUrl = logoMediaUrl;
+    }
+
+    public String getTermsOfUseContent() {
+        return termsOfUseContent;
+    }
+
+    public void setTermsOfUseContent(String termsOfUseContent) {
+        this.termsOfUseContent = termsOfUseContent;
+    }
+
+    public String getPrivacyPolicyContent() {
+        return privacyPolicyContent;
+    }
+
+    public void setPrivacyPolicyContent(String privacyPolicyContent) {
+        this.privacyPolicyContent = privacyPolicyContent;
     }
 
 }

@@ -28,11 +28,13 @@ public class PatchJurisdictionDTO {
     private String name;
 
     @JsonProperty("primary_color")
-    @Pattern(regexp = "(\\d+),?\\s?(\\.?\\d+%?),?\\s?(\\.?\\d+%?)")
+    @Pattern(regexp = "^\\d{1,3},\\s*\\d{1,3}%,\\s*\\d{1,3}%$",
+             message = "Must be valid HSL format: hue,saturation%,lightness%")
     private String primaryColor;
 
     @JsonProperty("primary_hover_color")
-    @Pattern(regexp = "(\\d+),?\\s?(\\.?\\d+%?),?\\s?(\\.?\\d+%?)")
+    @Pattern(regexp = "^\\d{1,3},\\s*\\d{1,3}%,\\s*\\d{1,3}%$",
+             message = "Must be valid HSL format: hue,saturation%,lightness%")
     private String primaryHoverColor;
 
     @JsonProperty("logo_media_url")
@@ -40,6 +42,14 @@ public class PatchJurisdictionDTO {
 
     @Size(min = 4)
     private Double[][] bounds;
+
+    @JsonProperty("terms_of_use_content")
+    @Size(max = 50000, message = "Terms of use content must not exceed 50000 characters")
+    private String termsOfUseContent;
+
+    @JsonProperty("privacy_policy_content")
+    @Size(max = 50000, message = "Privacy policy content must not exceed 50000 characters")
+    private String privacyPolicyContent;
 
     public PatchJurisdictionDTO() {
     }
@@ -82,5 +92,21 @@ public class PatchJurisdictionDTO {
 
     public void setBounds(Double[][] bounds) {
         this.bounds = bounds;
+    }
+
+    public String getTermsOfUseContent() {
+        return termsOfUseContent;
+    }
+
+    public void setTermsOfUseContent(String termsOfUseContent) {
+        this.termsOfUseContent = termsOfUseContent;
+    }
+
+    public String getPrivacyPolicyContent() {
+        return privacyPolicyContent;
+    }
+
+    public void setPrivacyPolicyContent(String privacyPolicyContent) {
+        this.privacyPolicyContent = privacyPolicyContent;
     }
 }

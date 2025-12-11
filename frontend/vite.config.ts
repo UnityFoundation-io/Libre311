@@ -9,5 +9,17 @@ export default defineConfig({
 	server: {
 		port: 3000,
 		host: true
+	},
+	optimizeDeps: {
+		include: [
+			'axios',
+			'zod',
+			'stwui',
+			'leaflet',
+			'leaflet-geosearch',
+			'google-libphonenumber',
+			'marked',
+			'dompurify'
+		]
 	}
 });
