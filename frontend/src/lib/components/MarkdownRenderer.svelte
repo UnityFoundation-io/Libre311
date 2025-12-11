@@ -31,8 +31,8 @@
 	{@html html}
 </div>
 
-<style>
-	/* Basic markdown styling - enhance with Tailwind if needed */
+<style lang="postcss">
+	/* Basic markdown styling using Tailwind @apply */
 	.markdown-renderer :global(h1) {
 		@apply mb-4 mt-6 text-3xl font-bold;
 	}

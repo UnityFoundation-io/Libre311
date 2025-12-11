@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>Privacy Policy - {data.jurisdictionName}</title>
+	<title>{data.policyTitle} - {data.jurisdictionName}</title>
 </svelte:head>
 
 <div class="container mx-auto max-w-4xl px-4 py-8">
