@@ -276,9 +276,9 @@ fi
 payload="{}"
 
 for i in "${!update_keys[@]}"; do
-    key="${update_keys[$i]}"
-    value="${update_values[$i]}"
-    payload=$(echo "$payload" | jq --arg k "$key" --arg v "$value" '. + {($k): $v}')
+  key="${update_keys[$i]}"
+  value="${update_values[$i]}"
+  payload=$(echo "$payload" | jq --arg k "$key" --arg v "$value" '. + {($k): $v}')
   done
 
 # Add privacy policy content if provided
@@ -299,20 +299,20 @@ if [ -n "$terms_of_use_file" ]; then
   payload=$(echo "$payload" | jq --arg content "$terms_content" '. + {terms_of_use_content: $content}')
 fi
 
-  # Add bounds if provided
-  if [ -n "$bounds_file" ]; then
-    if [ ! -f "$bounds_file" ]; then
-      error "Bounds file not found: $bounds_file" $EXIT_FILE_NOT_FOUND
-    fi
+# Add bounds if provided
+if [ -n "$bounds_file" ]; then
+  if [ ! -f "$bounds_file" ]; then
+    error "Bounds file not found: $bounds_file" $EXIT_FILE_NOT_FOUND
+  fi
 
-    bounds=$(cat "$bounds_file")
+  bounds=$(cat "$bounds_file")
 
-    # Validate JSON
-    if ! echo "$bounds" | jq empty 2>/dev/null; then
-      error "Invalid JSON in bounds file: $bounds_file" $EXIT_USAGE
-    fi
+  # Validate JSON
+  if ! echo "$bounds" | jq empty 2>/dev/null; then
+    error "Invalid JSON in bounds file: $bounds_file" $EXIT_USAGE
+  fi
 
-    payload=$(echo "$payload" | jq --argjson bounds "$bounds" '. + {bounds: $bounds}')
+  payload=$(echo "$payload" | jq --argjson bounds "$bounds" '. + {bounds: $bounds}')
 fi
 
 [ "$OUTPUT_FORMAT" != "quiet" ] && info "Updating jurisdiction: $jurisdiction_id"
