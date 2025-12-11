@@ -50,27 +50,17 @@ public class DefaultPolicyContentProvider {
     }
 
     private String loadResource(String path, String name) {
-        // Try multiple classloaders to handle different deployment scenarios
-        // (layered Docker deployment uses context classloader)
-        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-        if (inputStream == null) {
-            inputStream = getClass().getClassLoader().getResourceAsStream(path);
-        }
-        if (inputStream == null) {
-            inputStream = ClassLoader.getSystemResourceAsStream(path);
-        }
-
-        if (inputStream != null) {
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                String content = reader.lines().collect(Collectors.joining("\n"));
-                LOG.debug("Successfully loaded {} from {}", name, path);
-                return content;
-            } catch (IOException e) {
-                LOG.error("Failed to read resource: {}", path, e);
+        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
+            if (inputStream != null) {
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                    return reader.lines().collect(Collectors.joining("\n"));
+                }
+            } else {
+                LOG.warn("Resource not found: {}", path);
             }
-        } else {
-            LOG.warn("Resource not found: {}", path);
+        } catch (IOException e) {
+            LOG.error("Failed to read resource: {}", path, e);
         }
         return "# " + name + "\n\nNo default " + name.toLowerCase() + " available.";
     }
