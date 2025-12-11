@@ -11,6 +11,7 @@
 
 	import L, { type PointTuple } from 'leaflet';
 	import MapMarker from '$lib/components/MapMarker.svelte';
+	import MapBoundaryPolygon from '$lib/components/MapBoundaryPolygon.svelte';
 	import type { ComponentType } from 'svelte';
 	import {
 		CreateServiceRequestSteps,
@@ -112,6 +113,7 @@
 			locateOpts={{ setView: true, enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
 		>
+			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
 			<MapMarker latLng={centerPos} options={{ icon }} />
 			{#if step == CreateServiceRequestSteps.LOCATION}
 				<MapGeosearch on:geosearch={handleGeosearch} />

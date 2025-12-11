@@ -18,6 +18,7 @@
 	export let disabled: boolean = false;
 	export let controlFactories: Array<ControlFactory> = [];
 	export let controlOps: L.ControlOptions = { position: 'topleft' };
+	export let keyboardPanDelta: number = 20;
 
 	const dispatch = createEventDispatcher<Events>();
 
@@ -25,7 +26,7 @@
 	let mapElement: HTMLElement;
 
 	onMount(() => {
-		map = L.map(mapElement);
+		map = L.map(mapElement, { keyboardPanDelta });
 		map.addEventListener('moveend', () => {
 			dispatch('boundsChanged', map.getBounds());
 		});
