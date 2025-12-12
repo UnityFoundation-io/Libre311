@@ -68,7 +68,7 @@
 				<MapListToggle />
 			</div>
 		</Breakpoint>
-		<MapComponent controlFactories={[mapCenterControlFactory]} bounds={mapBounds}>
+		<MapComponent keyboardPanDelta={40} controlFactories={[mapCenterControlFactory]} bounds={mapBounds}>
 			{#if $serviceRequestsResponseStore.type === 'success'}
 				{#each $serviceRequestsResponseStore.value.serviceRequests as req (req.service_request_id)}
 					{#if isSelected(req, $selectedServiceRequestStore)}

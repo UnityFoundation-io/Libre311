@@ -107,11 +107,12 @@
 		{/if}
 	</div>
 	<div slot="main-content" class="relative h-full">
-		<MapComponent
-			controlFactories={[mapCenterControlFactory]}
-			disabled={step != 0}
-			locateOpts={{ setView: true, enableHighAccuracy: true }}
-			on:boundsChanged={boundsChanged}
+			<MapComponent
+				keyboardPanDelta={20}
+				controlFactories={[mapCenterControlFactory]}
+				disabled={step != 0}
+				locateOpts={{ setView: true, enableHighAccuracy: true }}
+				on:boundsChanged={boundsChanged}
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
 			<MapMarker latLng={centerPos} options={{ icon }} />
