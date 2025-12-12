@@ -1,53 +1,52 @@
 # Terms of Use
 
-**Default Template** - Jurisdictions should customize this content.
+Last update: Dec 12, 2025
 
 ## Acceptance of Terms
-
 By submitting a service request through this platform, you agree to these Terms of Use. If you do not agree to these terms, please do not use this service.
 
-## Service Description
-
-This platform allows you to submit service requests to Libre311. The service is provided "as-is" without warranties of any kind.
-
 ## User Responsibilities
-
 You agree to:
-
 - Provide accurate and truthful information in your service requests
 - Use the service only for legitimate municipal service requests
 - Not submit frivolous, abusive, or harassing requests
 - Not attempt to disrupt or compromise the service
 
 ## Prohibited Activities
-
 You may not:
-
 - Violate any applicable laws or regulations
 - Impersonate any person or entity
 - Submit false reports or information
 - Use the service to distribute spam or malicious content
 
-## Service Availability
+## Service Description
+Libre311 is a mobile-friendly web application designed to help communities report and track municipal services. It implements the Open311 standard for civic service requests.
 
-We strive to maintain service availability but do not guarantee uninterrupted access. The service may be temporarily unavailable for maintenance or due to technical issues.
+## Emergency Warning
+**This service is for non-emergency issues only**. Examples of appropriate reports include potholes, graffiti, and streetlight outages. Do not use this service for immediate threats to life or safety.
 
-## Limitations of Liability
+## Public Access and Visibility
+* **No Account Required:** Public users can browse and submit service requests without creating an account or logging in.
+* **Public Visibility:** Submitted requests, including descriptions, locations, and photos, are displayed publicly on map and list views.
 
-The jurisdiction provides this service on a best-effort basis and is not liable for delays, errors, or omissions in service request processing.
+## Content Guidelines
+* **Accuracy:** Users should be as precise as possible when pinpointing the location of an issue. Descriptions should be clear and concise.
+* **Photos:**
+    * Users may optionally upload images to describe issues.
+    * **Privacy in Photos:** Avoid including people's faces or vehicle license plates in images.
+    * **Moderation:** Image uploads are subject to content moderation for safety and appropriateness.
 
-## Modifications to Terms
+## User Privacy
+* **Contact Information:** Providing contact information (name, email, phone) is strictly optional.
+* **Usage:** If provided, contact details are used only for follow-up communication.
+* **Confidentiality:** Contact information is not displayed publicly with the request.
 
-These terms may be updated from time to time. Continued use of the service constitutes acceptance of updated terms.
+## Service Management
+Administrators utilize specific tools to manage, respond to, and update the status of service requests. They may add internal notes or change the priority of requests to manage resources.
 
-## Governing Law
+## Technical Requirements
+* **Connectivity:** An internet connection is required for all features, and draft requests are not saved if you navigate away.
+* **Supported Browsers:** The application works best on modern browsers such as Chrome, Firefox, and Safari.
 
-These terms are governed by all applicable federal laws.
-
-## Contact
-
-For questions about these terms, please contact Libre311 Support at info@example.com.
-
----
-
-Last updated: 2025-12-09
+Contact
+For questions about these terms, please contact Libre311 Support at [info@objectcomputing.com](mailto:info@objectcomputing.com).
