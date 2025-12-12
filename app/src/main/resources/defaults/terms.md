@@ -1,6 +1,6 @@
 # Terms of Use
 
-Last update: Dec 12, 2025
+Last updated: Dec 12, 2025
 
 ## Acceptance of Terms
 By submitting a service request through this platform, you agree to these Terms of Use. If you do not agree to these terms, please do not use this service.
