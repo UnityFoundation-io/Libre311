@@ -12,6 +12,7 @@
 	import L, { type PointTuple } from 'leaflet';
 	import MapMarker from '$lib/components/MapMarker.svelte';
 	import MapBoundaryPolygon from '$lib/components/MapBoundaryPolygon.svelte';
+	import { KEYBOARD_PAN_DELTA_FINE } from '$lib/constants/map';
 	import type { ComponentType } from 'svelte';
 	import {
 		CreateServiceRequestSteps,
@@ -108,7 +109,7 @@
 	</div>
 	<div slot="main-content" class="relative h-full">
 			<MapComponent
-				keyboardPanDelta={20}
+				keyboardPanDelta={KEYBOARD_PAN_DELTA_FINE}
 				controlFactories={[mapCenterControlFactory]}
 				disabled={step != 0}
 				locateOpts={{ setView: true, enableHighAccuracy: true }}

@@ -25,6 +25,7 @@
 	import { matchesDesktopMedia } from '$lib/utils/functions';
 	import CreateServiceRequestButton from '$lib/components/CreateServiceRequestButton.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
+	import { KEYBOARD_PAN_DELTA_COARSE } from '$lib/constants/map';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const libre311 = useLibre311Context().service;
@@ -68,7 +69,7 @@
 				<MapListToggle />
 			</div>
 		</Breakpoint>
-		<MapComponent keyboardPanDelta={40} controlFactories={[mapCenterControlFactory]} bounds={mapBounds}>
+		<MapComponent keyboardPanDelta={KEYBOARD_PAN_DELTA_COARSE} controlFactories={[mapCenterControlFactory]} bounds={mapBounds}>
 			{#if $serviceRequestsResponseStore.type === 'success'}
 				{#each $serviceRequestsResponseStore.value.serviceRequests as req (req.service_request_id)}
 					{#if isSelected(req, $selectedServiceRequestStore)}
