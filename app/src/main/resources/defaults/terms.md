@@ -1,52 +1,76 @@
-# Terms of Use
+# Terms of Use — Libre311 / Community Issue Reporting
 
-Last updated: Dec 12, 2025
+*Effective date:* **12/12/2025**  
+*Last updated:* **12/12/2025**
 
-## Acceptance of Terms
-By submitting a service request through this platform, you agree to these Terms of Use. If you do not agree to these terms, please do not use this service.
+> **Plain‑language summary:** Libre311 helps communities report non‑emergency issues. Be respectful, keep people safe, and don’t share private information.
 
-## User Responsibilities
-You agree to:
-- Provide accurate and truthful information in your service requests
-- Use the service only for legitimate municipal service requests
-- Not submit frivolous, abusive, or harassing requests
-- Not attempt to disrupt or compromise the service
+---
 
-## Prohibited Activities
-You may not:
-- Violate any applicable laws or regulations
-- Impersonate any person or entity
-- Submit false reports or information
-- Use the service to distribute spam or malicious content
+## 1. Acceptance of these Terms
+By accessing or using the Libre311 Services, you agree to these Terms of Use (“Terms”). If you do not agree, please do not use the Services.
 
-## Service Description
-Libre311 is a mobile-friendly web application designed to help communities report and track municipal services. It implements the Open311 standard for civic service requests.
+## 2. Purpose of the Services
+Libre311 is a community tool for reporting **non‑emergency issues** to nonprofit and community organizations.
 
-## Emergency Warning
-**This service is for non-emergency issues only**. Examples of appropriate reports include potholes, graffiti, and streetlight outages. Do not use this service for immediate threats to life or safety.
+**Do not use Libre311 for emergencies.** If there is an immediate danger to people or property, contact local emergency services.
 
-## Public Access and Visibility
-* **No Account Required:** Public users can browse and submit service requests without creating an account or logging in.
-* **Public Visibility:** Submitted requests, including descriptions, locations, and photos, are displayed publicly on map and list views.
+## 3. Eligibility
+You must be at least **13 years old** to use the Services. If you are under the age of majority in your jurisdiction, you represent that you have permission from a parent or guardian.
 
-## Content Guidelines
-* **Accuracy:** Users should be as precise as possible when pinpointing the location of an issue. Descriptions should be clear and concise.
-* **Photos:**
-    * Users may optionally upload images to describe issues.
-    * **Privacy in Photos:** Avoid including people's faces or vehicle license plates in images.
-    * **Moderation:** Image uploads are subject to content moderation for safety and appropriateness.
+## 4. Anonymous participation
+You may submit reports without creating an account or providing contact information.  
+Providing contact details is optional and intended only to support follow‑up.
 
-## User Privacy
-* **Contact Information:** Providing contact information (name, email, phone) is strictly optional.
-* **Usage:** If provided, contact details are used only for follow-up communication.
-* **Confidentiality:** Contact information is not displayed publicly with the request.
+## 5. Community standards and acceptable use
+To keep the platform safe and useful, you agree that you will not:
+- Post content that is unlawful, threatening, abusive, or harassing
+- Share personal or sensitive information about yourself or others
+- Upload photos showing faces, license plates, or private details
+- Impersonate another person or organization
+- Submit false, misleading, or malicious reports
+- Attempt to disrupt or misuse the Services
 
-## Service Management
-Administrators utilize specific tools to manage, respond to, and update the status of service requests. They may add internal notes or change the priority of requests to manage resources.
+## 6. User‑generated content
+You are responsible for the content you submit.
 
-## Technical Requirements
-* **Connectivity:** An internet connection is required for all features, and draft requests are not saved if you navigate away.
-* **Supported Browsers:** The application works best on modern browsers such as Chrome, Firefox, and Safari.
+Reports may be visible publicly, depending on how the Services are configured. Please write reports as if they could be read by the broader community.
 
-Contact
-For questions about these terms, please contact Libre311 Support at [info@objectcomputing.com](mailto:info@objectcomputing.com).
+## 7. License to use content
+By submitting content, you grant **Object Computing, Inc.** a non‑exclusive, royalty‑free license to:
+- Host, store, and display the content
+- Share it with partners or volunteers involved in resolving the issue
+- Modify it as needed for safety, accessibility, or formatting
+
+This license is limited to operating and improving the Services and supporting community outcomes.
+
+## 8. Moderation and enforcement
+We may review, moderate, remove, or restrict content that:
+- Violates these Terms
+- Poses a safety or privacy risk
+- Is inconsistent with the mission or values of the organization
+
+We may suspend or limit access to the Services if misuse occurs.
+
+## 9. Availability and changes
+We may change, pause, or discontinue the Services or features at any time. Availability may vary by community or organization.
+
+## 10. Disclaimers
+The Services are provided **“as is”** and **“as available.”** We do not guarantee:
+- That every report will result in action
+- Specific response times or outcomes
+- Continuous or error‑free availability
+
+## 11. Limitation of liability
+To the maximum extent permitted by law, **Object Computing, Inc.** is not liable for indirect or consequential damages arising from use of the Services.
+
+## 12. Privacy
+Your use of the Services is governed by the Privacy Policy, which explains how information is collected and used.
+
+## 13. Changes to these Terms
+We may update these Terms from time to time. Continued use of the Services means you accept the updated Terms.
+
+## 14. Contact
+**Organization:** Object Computing, Inc.  
+**Email:** [info@objectcomputing.com](mailto:info@objectcomputing.com)  
+**Address:** 12140 Woodcrest Executive Dr., Ste 300, St. Louis, MO 63141
