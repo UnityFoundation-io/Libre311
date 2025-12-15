@@ -10,6 +10,7 @@ export class MapCenterControl extends L.Control {
 		img.src = locationSearching;
 		img.style.cursor = 'pointer';
 		img.style.width = '25';
+		img.setAttribute('title', 'Center Map');
 
 		const div = L.DomUtil.create('div');
 		div.addEventListener('click', () => map.locate());
