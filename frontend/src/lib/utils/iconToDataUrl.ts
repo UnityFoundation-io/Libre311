@@ -1,7 +1,7 @@
 import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 
 /** Default size for map marker icons in pixels */
-export const DEFAULT_MARKER_SIZE = 20;
+export const DEFAULT_MARKER_SIZE = 25;
 
 // Status color mapping (matches existing statusToColorMap)
 const statusColors: Record<ServiceRequestStatus, string> = {
@@ -15,18 +15,18 @@ const statusColors: Record<ServiceRequestStatus, string> = {
 // Source: node_modules/carbon-icons-svelte/lib/*.svelte
 // Additional markers can be found here:
 // https://carbon-icons-svelte.onrender.com/
-const iconPaths: Record<ServiceRequestStatus, string> = {
-	// CircleSolid - filled circle
-	open: '<circle cx="16" cy="16" r="14"/>',
+// These icons are rendered in white on a colored background circle
+const iconPaths: Record<ServiceRequestStatus, string | null> = {
+	// Solid circle - no overlay icon needed
+	open: null,
 	// UserAvatarFilledAlt - person silhouette in circle
 	assigned:
 		'<path d="M16,8a5,5,0,1,0,5,5A5,5,0,0,0,16,8Z"/><path d="M16,2A14,14,0,1,0,30,16,14.0158,14.0158,0,0,0,16,2Zm7.9925,22.9258A5.0016,5.0016,0,0,0,19,20H13a5.0016,5.0016,0,0,0-4.9925,4.9258,12,12,0,1,1,15.985,0Z"/>',
 	// InProgress - pie chart style progress indicator
 	in_progress:
 		'<path d="M16,2A14,14,0,1,0,30,16,14.0158,14.0158,0,0,0,16,2Zm0,26A12,12,0,0,1,16,4V16l8.4812,8.4814A11.9625,11.9625,0,0,1,16,28Z"/>',
-	// CheckmarkFilled - checkmark in circle
-	closed:
-		'<path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2ZM14,21.5908l-5-5L10.5906,15,14,18.4092,21.41,11l1.5957,1.5859Z"/>'
+	// Checkmark - simple checkmark (no circle)
+	closed: '<path d="M13 24L4 15L5.414 13.586L13 21.171L26.586 7.586L28 9L13 24Z"/>'
 };
 
 /**
@@ -40,9 +40,16 @@ export function getStatusIconDataUrl(
 	size: number = DEFAULT_MARKER_SIZE
 ): string {
 	const color = statusColors[status];
-	const path = iconPaths[status];
+	const iconPath = iconPaths[status];
 
-	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" fill="${color}">${path}</svg>`;
+	// Background circle 4px larger than inner icon's r=14
+	const backgroundCircle = `<circle cx="20" cy="20" r="18" fill="${color}"/>`;
+
+	// For open status, just show the colored circle
+	// For other statuses, overlay the white icon centered in the 40x40 viewBox
+	const whiteIcon = iconPath ? `<g transform="translate(4,4)" fill="white">${iconPath}</g>` : '';
+
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${backgroundCircle}${whiteIcon}</svg>`;
 
 	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
