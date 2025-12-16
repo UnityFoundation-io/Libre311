@@ -1,15 +1,21 @@
 import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
+import { statusToColorMap } from './functions';
 
 /** Default size for map marker icons in pixels */
-export const DEFAULT_MARKER_SIZE = 25;
+export const DEFAULT_MARKER_SIZE = 30;
 
-// Status color mapping (matches existing statusToColorMap)
-const statusColors: Record<ServiceRequestStatus, string> = {
-	open: '#FABE23',
-	assigned: '#67E8F9',
-	in_progress: '#38BDF9',
-	closed: '#37D39A'
-};
+/** Inner Carbon icon dimensions (standard 32x32 viewBox with r=14 circles) */
+const INNER_ICON_SIZE = 32;
+const INNER_ICON_RADIUS = 14;
+
+/** How much larger the background circle radius is than the inner icon */
+const BACKGROUND_PADDING = 4;
+
+// Derived viewBox and circle dimensions
+const BACKGROUND_RADIUS = INNER_ICON_RADIUS + BACKGROUND_PADDING;
+const VIEWBOX_SIZE = INNER_ICON_SIZE + BACKGROUND_PADDING * 2;
+const CENTER = VIEWBOX_SIZE / 2;
+const ICON_OFFSET = BACKGROUND_PADDING;
 
 // Carbon icon SVG paths (from carbon-icons-svelte v11.x)
 // Source: node_modules/carbon-icons-svelte/lib/*.svelte
@@ -39,17 +45,18 @@ export function getStatusIconDataUrl(
 	status: ServiceRequestStatus,
 	size: number = DEFAULT_MARKER_SIZE
 ): string {
-	const color = statusColors[status];
+	const color = statusToColorMap[status];
 	const iconPath = iconPaths[status];
 
-	// Background circle 4px larger than inner icon's r=14
-	const backgroundCircle = `<circle cx="20" cy="20" r="18" fill="${color}"/>`;
+	const backgroundCircle = `<circle cx="${CENTER}" cy="${CENTER}" r="${BACKGROUND_RADIUS}" fill="${color}"/>`;
 
 	// For open status, just show the colored circle
-	// For other statuses, overlay the white icon centered in the 40x40 viewBox
-	const whiteIcon = iconPath ? `<g transform="translate(4,4)" fill="white">${iconPath}</g>` : '';
+	// For other statuses, overlay the white icon centered in the viewBox
+	const whiteIcon = iconPath
+		? `<g transform="translate(${ICON_OFFSET},${ICON_OFFSET})" fill="white">${iconPath}</g>`
+		: '';
 
-	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${backgroundCircle}${whiteIcon}</svg>`;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}" width="${size}" height="${size}">${backgroundCircle}${whiteIcon}</svg>`;
 
 	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
