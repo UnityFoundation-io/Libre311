@@ -10,6 +10,7 @@
 	import { onMount, onDestroy, setContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
+	import { KEYBOARD_PAN_DELTA_FINE } from '$lib/constants/map';
 
 	export let locateOpts: L.LocateOptions | undefined = undefined;
 	export let bounds: L.LatLngBoundsExpression | undefined = undefined;
@@ -18,6 +19,7 @@
 	export let disabled: boolean = false;
 	export let controlFactories: Array<ControlFactory> = [];
 	export let controlOps: L.ControlOptions = { position: 'topleft' };
+	export let keyboardPanDelta: number = KEYBOARD_PAN_DELTA_FINE;
 
 	const dispatch = createEventDispatcher<Events>();
 
@@ -25,7 +27,7 @@
 	let mapElement: HTMLElement;
 
 	onMount(() => {
-		map = L.map(mapElement);
+		map = L.map(mapElement, { keyboardPanDelta });
 		map.addEventListener('moveend', () => {
 			dispatch('boundsChanged', map.getBounds());
 		});
