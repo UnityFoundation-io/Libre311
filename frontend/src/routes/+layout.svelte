@@ -65,6 +65,7 @@
 		<header class="flex items-center justify-center">
 			<div class="flex gap-4">
 				<button
+					aria-label="navigation"
 					type="button"
 					on:click={() => {
 						open = !open;
