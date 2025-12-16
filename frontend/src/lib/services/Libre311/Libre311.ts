@@ -670,9 +670,37 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse> {
-		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords[0]}&lon=${coords[1]}`;
-		const res = await axios.get<unknown>(url);
-		return ReverseGeocodeResponseSchema.parse(res.data);
+		const startTime = performance.now();
+		const fallbackAddress = `${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`;
+		console.log('[reverseGeocode] Starting reverse geocode for coords:', coords);
+
+		try {
+			const fetchStart = performance.now();
+			// Use Nominatim reverse geocoding API
+			// In development, requests go through Vite proxy (/nominatim) to bypass CORS
+			// In production, requests go directly to Nominatim (assuming proper server-side handling)
+			const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+			const baseUrl = isDev ? '/nominatim' : 'https://nominatim.openstreetmap.org';
+			const url = `${baseUrl}/reverse?format=jsonv2&lat=${coords[0]}&lon=${coords[1]}`;
+
+			console.log('[reverseGeocode] Fetching:', url);
+			const res = await axios.get<unknown>(url);
+			console.log(
+				'[reverseGeocode] Response received in:',
+				`${(performance.now() - fetchStart).toFixed(1)}ms`
+			);
+
+			const parsed = ReverseGeocodeResponseSchema.parse(res.data);
+			console.log('[reverseGeocode] Result:', parsed.display_name);
+			console.log('[reverseGeocode] Total time:', `${(performance.now() - startTime).toFixed(1)}ms`);
+
+			return parsed;
+		} catch (error) {
+			console.error('[reverseGeocode] Error during geocoding:', error);
+			console.log('[reverseGeocode] Using fallback coordinates due to error');
+			// Return fallback coordinates instead of throwing - allows flow to continue
+			return { display_name: fallbackAddress };
+		}
 	}
 
 	async getServiceList(): Promise<GetServiceListResponse> {
