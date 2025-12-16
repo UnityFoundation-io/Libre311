@@ -16,10 +16,8 @@ export const DEFAULT_MARKER_SIZE = 30;
  * - Icon offset: 4 (centers the 32x32 icon in the 40x40 viewBox)
  */
 
-// Carbon icon SVG paths (from carbon-icons-svelte v11.x)
-// Source: node_modules/carbon-icons-svelte/lib/*.svelte
-// Additional markers can be found here:
-// https://carbon-icons-svelte.onrender.com/
+// SVG paths for status icons (sourced from Carbon Design System icons)
+// Browse icons at: https://carbon-icons-svelte.onrender.com/
 // These icons are rendered in white on a colored background circle
 const iconPaths: Record<ServiceRequestStatus, string | null> = {
 	// Solid circle - no overlay icon needed
