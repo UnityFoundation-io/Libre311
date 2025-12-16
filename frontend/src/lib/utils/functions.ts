@@ -63,7 +63,7 @@ export const statusToColorMap = {
 	closed: '#37D39A',
 	open: '#FABE23',
 	in_progress: '#38BDF9',
-	assigned: '#67E8F9'
+	assigned: '#C084FC'
 };
 
 export const statusToTextMap = {

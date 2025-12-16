@@ -1,25 +1,15 @@
 <script lang="ts">
 	import L from 'leaflet';
-	import Closed from '$lib/assets/closed.png';
-	import Open from '$lib/assets/open.png';
-	import InProgress from '$lib/assets/in_progress.png';
-	import Assigned from '$lib/assets/assigned.png';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import { iconPositionOpts } from '$lib/utils/functions';
+	import { getStatusIconDataUrl, DEFAULT_MARKER_SIZE } from '$lib/utils/iconToDataUrl';
 	import MapMarker from './MapMarker.svelte';
 
 	export let serviceRequest: ServiceRequest;
 
-	const circleLookupMap = {
-		closed: Closed,
-		open: Open,
-		in_progress: InProgress,
-		assigned: Assigned
-	};
-
 	const icon = L.icon({
-		iconUrl: circleLookupMap[serviceRequest.status],
-		...iconPositionOpts(1 / 1, 20, 'center')
+		iconUrl: getStatusIconDataUrl(serviceRequest.status),
+		...iconPositionOpts(1 / 1, DEFAULT_MARKER_SIZE, 'center')
 	});
 </script>
 
