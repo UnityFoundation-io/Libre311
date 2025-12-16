@@ -1,7 +1,7 @@
 import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 
 /** Default size for map marker icons in pixels */
-export const DEFAULT_MARKER_SIZE = 25;
+export const DEFAULT_MARKER_SIZE = 20;
 
 // Status color mapping (matches existing statusToColorMap)
 const statusColors: Record<ServiceRequestStatus, string> = {
@@ -13,6 +13,8 @@ const statusColors: Record<ServiceRequestStatus, string> = {
 
 // Carbon icon SVG paths (from carbon-icons-svelte v11.x)
 // Source: node_modules/carbon-icons-svelte/lib/*.svelte
+// Additional markers can be found here:
+// https://carbon-icons-svelte.onrender.com/
 const iconPaths: Record<ServiceRequestStatus, string> = {
 	// CircleSolid - filled circle
 	open: '<circle cx="16" cy="16" r="14"/>',
@@ -30,7 +32,7 @@ const iconPaths: Record<ServiceRequestStatus, string> = {
 /**
  * Creates a data URL for a status-colored Carbon icon
  * @param status - The service request status
- * @param size - Icon size in pixels (default 20)
+ * @param size - Icon size in pixels (default: DEFAULT_MARKER_SIZE)
  * @returns Data URL string for use with Leaflet L.icon()
  */
 export function getStatusIconDataUrl(
