@@ -1,27 +1,16 @@
 <script lang="ts">
 	import L from 'leaflet';
-
-	import WaypointClosed from '$lib/assets/waypoint/closed.png';
-	import WaypointOpen from '$lib/assets/waypoint/open.png';
-	import WaypointInProgress from '$lib/assets/waypoint/in_progress.png';
-	import WayPointAssigned from '$lib/assets/waypoint/assigned.png';
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
-
 	import { iconPositionOpts } from '$lib/utils/functions';
+	import { getWaypointIconDataUrl, DEFAULT_WAYPOINT_SIZE } from '$lib/utils/iconToDataUrl';
 	import MapMarker from './MapMarker.svelte';
 
 	export let serviceRequest: ServiceRequest;
 
-	const waypointLookupMap = {
-		closed: WaypointClosed,
-		open: WaypointOpen,
-		in_progress: WaypointInProgress,
-		assigned: WayPointAssigned
-	};
-
+	// Waypoint pin aspect ratio: 24/32 = 0.75
 	const icon = L.icon({
-		iconUrl: waypointLookupMap[serviceRequest.status],
-		...iconPositionOpts(128 / 169, 35, 'bottom-center')
+		iconUrl: getWaypointIconDataUrl(serviceRequest.status, DEFAULT_WAYPOINT_SIZE),
+		...iconPositionOpts(24 / 32, DEFAULT_WAYPOINT_SIZE, 'bottom-center')
 	});
 </script>
 

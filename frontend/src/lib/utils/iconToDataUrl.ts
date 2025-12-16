@@ -1,21 +1,20 @@
 import type { ServiceRequestStatus } from '$lib/services/Libre311/Libre311';
 import { statusToColorMap } from './functions';
 
-/** Default size for map marker icons in pixels */
+/** Default rendered size for map marker icons in pixels */
 export const DEFAULT_MARKER_SIZE = 30;
 
-/** Inner Carbon icon dimensions (standard 32x32 viewBox with r=14 circles) */
-const INNER_ICON_SIZE = 32;
-const INNER_ICON_RADIUS = 14;
-
-/** How much larger the background circle radius is than the inner icon */
-const BACKGROUND_PADDING = 4;
-
-// Derived viewBox and circle dimensions
-const BACKGROUND_RADIUS = INNER_ICON_RADIUS + BACKGROUND_PADDING;
-const VIEWBOX_SIZE = INNER_ICON_SIZE + BACKGROUND_PADDING * 2;
-const CENTER = VIEWBOX_SIZE / 2;
-const ICON_OFFSET = BACKGROUND_PADDING;
+/**
+ * SVG Geometry Notes:
+ * Carbon icons use a 32x32 viewBox with r=14 inner circles.
+ * We add 4px padding around the icon for the colored background circle.
+ *
+ * Derived values (used as literals below):
+ * - ViewBox: 32 + (4 * 2) = 40x40
+ * - Center: 40 / 2 = 20
+ * - Background radius: 14 + 4 = 18
+ * - Icon offset: 4 (centers the 32x32 icon in the 40x40 viewBox)
+ */
 
 // Carbon icon SVG paths (from carbon-icons-svelte v11.x)
 // Source: node_modules/carbon-icons-svelte/lib/*.svelte
@@ -48,15 +47,35 @@ export function getStatusIconDataUrl(
 	const color = statusToColorMap[status];
 	const iconPath = iconPaths[status];
 
-	const backgroundCircle = `<circle cx="${CENTER}" cy="${CENTER}" r="${BACKGROUND_RADIUS}" fill="${color}"/>`;
+	const backgroundCircle = `<circle cx="20" cy="20" r="18" fill="${color}"/>`;
 
 	// For open status, just show the colored circle
 	// For other statuses, overlay the white icon centered in the viewBox
-	const whiteIcon = iconPath
-		? `<g transform="translate(${ICON_OFFSET},${ICON_OFFSET})" fill="white">${iconPath}</g>`
-		: '';
+	const whiteIcon = iconPath ? `<g transform="translate(4,4)" fill="white">${iconPath}</g>` : '';
 
-	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}" width="${size}" height="${size}">${backgroundCircle}${whiteIcon}</svg>`;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${backgroundCircle}${whiteIcon}</svg>`;
 
+	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+/** Default height for waypoint pin icons in pixels */
+export const DEFAULT_WAYPOINT_SIZE = 35;
+
+/**
+ * Creates a data URL for a waypoint/pin icon (used for selected markers)
+ * Pin shape: teardrop with pointed bottom and white center dot
+ * ViewBox: 24x32, aspect ratio 0.75
+ *
+ * @param status - The service request status
+ * @param size - Icon height in pixels (default: DEFAULT_WAYPOINT_SIZE)
+ * @returns Data URL string for use with Leaflet L.icon()
+ */
+export function getWaypointIconDataUrl(
+	status: ServiceRequestStatus,
+	size: number = DEFAULT_WAYPOINT_SIZE
+): string {
+	const color = statusToColorMap[status];
+	const width = size * 0.75;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32" width="${width}" height="${size}"><path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 20 12 20s12-12.8 12-20c0-6.6-5.4-12-12-12z" fill="${color}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;
 	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
