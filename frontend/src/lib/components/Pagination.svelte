@@ -28,6 +28,7 @@
 			type={prevPage ? 'text' : 'ghost'}
 			disabled={!prevPage}
 			shape="circle"
+			aria-label="previous set"
 			on:click={scrollDispatch}
 		>
 			<ChevronLeft slot="icon" />
@@ -37,6 +38,7 @@
 			type={nextPage ? 'text' : 'ghost'}
 			disabled={!nextPage}
 			shape="circle"
+			aria-label="next set"
 			on:click={scrollDispatch}
 		>
 			<ChevronRight slot="icon" />
