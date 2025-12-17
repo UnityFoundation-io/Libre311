@@ -16,7 +16,7 @@ export class MapCenterControl extends L.Control {
 		control.appendChild(img);
 		control.setAttribute('role', 'button');
 		control.setAttribute('title', 'Center Map');
-		control.setAttribute('aria-label', 'Center Map');
+	    control.setAttribute('aria-label', 'Center Map');
 		control.href = "#";
 		control.style.backgroundColor = '#fff';
 		control.style.border = '2px solid rgba(0, 0, 0, 0.2)';
