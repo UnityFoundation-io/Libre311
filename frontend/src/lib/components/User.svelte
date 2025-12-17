@@ -25,13 +25,15 @@
 		<Avatar initials={$user?.username.charAt(0).toUpperCase()} />
 	</button>
 	<Dropdown.Items slot="items">
-		<Dropdown.Items.Item on:click={logout} label="Logout"
+		<Dropdown.Items.Item
+			on:click={logout}
+			label="Logout"
 			on:keydown={(e) => {
-    			if (e.key === 'Enter' || e.key === ' ') {
-      				e.preventDefault();
-      				logout();
-    			}
-  			}}
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					logout();
+				}
+			}}
 		></Dropdown.Items.Item>
 	</Dropdown.Items>
 </Dropdown>
