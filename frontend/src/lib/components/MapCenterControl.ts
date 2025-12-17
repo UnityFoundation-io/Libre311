@@ -10,12 +10,13 @@ export class MapCenterControl extends L.Control {
 		img.src = locationSearching;
 		img.style.cursor = 'pointer';
 		img.style.width = '25';
-		img.setAttribute('title', 'Center Map');
 
 		const control = L.DomUtil.create('a');
 		control.addEventListener('click', () => map.locate());
 		control.appendChild(img);
 		control.setAttribute('role', 'button');
+		control.setAttribute('title', 'Center Map');
+		control.setAttribute('aria-label', 'Center Map');
 		control.href = "#";
 		control.style.backgroundColor = '#fff';
 		control.style.border = '2px solid rgba(0, 0, 0, 0.2)';
@@ -27,13 +28,19 @@ export class MapCenterControl extends L.Control {
 		control.style.justifyContent = 'center';
 		control.style.alignItems = 'center';
 
-		control.addEventListener('mouseenter', () => {
+		const highlight = () => {
 			control.style.backgroundColor = '#f4f4f4';
-		});
+		}
 
-		control.addEventListener('mouseleave', () => {
+		const unhighlight = () => {
 			control.style.backgroundColor = '#fff';
-		});
+		}
+
+		control.addEventListener('mouseenter', highlight);
+		control.addEventListener('focus', highlight);
+
+		control.addEventListener('mouseleave', unhighlight);
+       	control.addEventListener('blur', unhighlight);
 
 		return control;
 	}
