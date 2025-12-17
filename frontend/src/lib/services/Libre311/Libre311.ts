@@ -8,6 +8,9 @@ import type {
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
+import type { NominatimService, ReverseGeocodeResponse } from '../Nominatim';
+import { nominatimServiceFactory } from '../Nominatim';
+import { getModeFromEnv } from '../mode';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -482,10 +485,9 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
-export const ReverseGeocodeResponseSchema = z.object({
-	display_name: z.string()
-});
-export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema>;
+// ReverseGeocodeResponse is now imported from '../Nominatim'
+// Re-export for backwards compatibility
+export { ReverseGeocodeResponseSchema, type ReverseGeocodeResponse } from '../Nominatim';
 
 export const LibrePermissionsSchema = z.union([
 	z.literal('AUTH_SERVICE_EDIT-SYSTEM'),
@@ -555,6 +557,7 @@ const Libre311ServicePropsSchema = z.object({
 
 export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema> & {
 	recaptchaService: RecaptchaService;
+	nominatimService?: NominatimService;
 };
 
 const ROUTES = {
@@ -644,6 +647,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
 	private recaptchaService: RecaptchaService;
+	private nominatimService: NominatimService;
 	public static readonly supportedImageTypes = [
 		'image/png',
 		'image/jpg',
@@ -657,6 +661,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 		this.jurisdictionConfig = props.jurisdictionConfig;
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
 		this.recaptchaService = props.recaptchaService;
+		this.nominatimService =
+			props.nominatimService ?? nominatimServiceFactory(getModeFromEnv(import.meta.env));
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
@@ -676,25 +682,18 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 		try {
 			const fetchStart = performance.now();
-			// Use Nominatim reverse geocoding API
-			// In development, requests go through Vite proxy (/nominatim) to bypass CORS
-			// In production, requests go directly to Nominatim (assuming proper server-side handling)
-			const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-			const baseUrl = isDev ? '/nominatim' : 'https://nominatim.openstreetmap.org';
-			const url = `${baseUrl}/reverse?format=jsonv2&lat=${coords[0]}&lon=${coords[1]}`;
-
-			console.log('[reverseGeocode] Fetching:', url);
-			const res = await axios.get<unknown>(url);
+			const result = await this.nominatimService.reverseGeocode(coords[0], coords[1]);
 			console.log(
 				'[reverseGeocode] Response received in:',
 				`${(performance.now() - fetchStart).toFixed(1)}ms`
 			);
+			console.log('[reverseGeocode] Result:', result.display_name);
+			console.log(
+				'[reverseGeocode] Total time:',
+				`${(performance.now() - startTime).toFixed(1)}ms`
+			);
 
-			const parsed = ReverseGeocodeResponseSchema.parse(res.data);
-			console.log('[reverseGeocode] Result:', parsed.display_name);
-			console.log('[reverseGeocode] Total time:', `${(performance.now() - startTime).toFixed(1)}ms`);
-
-			return parsed;
+			return { display_name: result.display_name };
 		} catch (error) {
 			console.error('[reverseGeocode] Error during geocoding:', error);
 			console.log('[reverseGeocode] Using fallback coordinates due to error');

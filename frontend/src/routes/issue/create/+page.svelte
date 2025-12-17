@@ -103,7 +103,10 @@
 				'[confirmLocation] Navigation completed in:',
 				`${(performance.now() - navStart).toFixed(1)}ms`
 			);
-			console.log('[confirmLocation] Total time:', `${(performance.now() - startTime).toFixed(1)}ms`);
+			console.log(
+				'[confirmLocation] Total time:',
+				`${(performance.now() - startTime).toFixed(1)}ms`
+			);
 		} catch (error) {
 			console.error('[confirmLocation] Error:', error);
 			// Use fallback coordinates as address if geocoding fails completely

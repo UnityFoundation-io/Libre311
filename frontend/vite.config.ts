@@ -3,6 +3,11 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	// Expose shell environment variables to import.meta.env
+	// This allows Docker's env_file to set VITE_NOMINATIM_MODE
+	define: {
+		'import.meta.env.VITE_NOMINATIM_MODE': JSON.stringify(process.env.VITE_NOMINATIM_MODE)
+	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},

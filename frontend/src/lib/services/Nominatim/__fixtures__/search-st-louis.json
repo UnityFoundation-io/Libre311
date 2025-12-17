@@ -1,0 +1,34 @@
+[
+	{
+		"place_id": 298085623,
+		"licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+		"osm_type": "relation",
+		"osm_id": 183983,
+		"lat": "38.6280278",
+		"lon": "-90.1910154",
+		"class": "boundary",
+		"type": "administrative",
+		"place_rank": 12,
+		"importance": 0.7039824680473788,
+		"addresstype": "city",
+		"name": "St. Louis",
+		"display_name": "St. Louis, St. Louis City, Missouri, United States",
+		"boundingbox": ["38.5338180", "38.7743580", "-90.3208740", "-90.1654940"]
+	},
+	{
+		"place_id": 298085624,
+		"licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+		"osm_type": "relation",
+		"osm_id": 183984,
+		"lat": "38.6356988",
+		"lon": "-90.2445816",
+		"class": "boundary",
+		"type": "administrative",
+		"place_rank": 10,
+		"importance": 0.5823094856743126,
+		"addresstype": "county",
+		"name": "St. Louis County",
+		"display_name": "St. Louis County, Missouri, United States",
+		"boundingbox": ["38.3833440", "38.8923800", "-90.7365200", "-90.1659530"]
+	}
+]
