@@ -29,6 +29,7 @@
 			disabled={!prevPage}
 			shape="circle"
 			title="Previous Set"
+			aria-label="Previous Set"
 			on:click={scrollDispatch}
 		>
 			<ChevronLeft slot="icon" />
@@ -39,6 +40,7 @@
 			disabled={!nextPage}
 			shape="circle"
 			title="Next Set"
+			aria-label="Next Set"
 			on:click={scrollDispatch}
 		>
 			<ChevronRight slot="icon" />
