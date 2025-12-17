@@ -241,7 +241,7 @@
 					{/if}
 				</div>
 
-				<button class="mr-3" title="Filter" on:click={handleFunnelClick}>
+				<button class="mr-3" title="Filter" aria-label="Filter" on:click={handleFunnelClick}>
 					<Funnel />
 				</button>
 			</div>
