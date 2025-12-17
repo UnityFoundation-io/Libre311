@@ -8,6 +8,8 @@ import type {
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
+import type { DeleteServiceRequestRequest } from '$lib/services/Libre311/types/DeleteServiceRequestRequest';
+import type { DeleteServiceRequestResponse } from '$lib/services/Libre311/types/DeleteServiceRequestResponse';
 
 const JurisdicationIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -546,6 +548,9 @@ export interface Libre311Service extends Open311Service {
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse>;
+	deleteServiceRequest(
+		params: DeleteServiceRequestRequest
+	): Promise<DeleteServiceRequestResponse>
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -593,7 +598,9 @@ const ROUTES = {
 	updateServicesOrder: (params: UpdateServicesOrderParams & HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/${params.group_id}/services-order?jurisdiction_id=${params.jurisdiction_id}`,
 	updateAttributesOrder: (params: UpdateAttributesOrderParams & HasJurisdictionId) =>
-		`/jurisdiction-admin/services/${params.service_code}/attributes-order?jurisdiction_id=${params.jurisdiction_id}`
+		`/jurisdiction-admin/services/${params.service_code}/attributes-order?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteServiceRequest: (params: HasServiceRequestId & HasJurisdictionId) =>
+		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -657,6 +664,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 		this.jurisdictionConfig = props.jurisdictionConfig;
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
 		this.recaptchaService = props.recaptchaService;
+	}
+	async deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<DeleteServiceRequestResponse> {
+		try{
+		const res = await this.axiosInstance.delete(ROUTES.deleteServiceRequest(
+            {...params, jurisdiction_id: this.jurisdictionId }))
+		const  response :DeleteServiceRequestResponse = res.data;
+		return response;
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
