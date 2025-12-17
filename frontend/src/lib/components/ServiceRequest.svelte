@@ -33,6 +33,26 @@
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
 	}
 
+    async function deleteServiceReq() {
+        let confirmed = window.confirm("Are you sure you would like to delete this request?")
+        if (!confirmed) return;
+        try {
+
+
+            await libre311.deleteServiceRequest({service_request_id: serviceRequest.service_request_id});
+
+
+            alert({
+                type: 'success',
+                title: 'Success',
+                description: 'Service request has been deleted'
+            });
+            goto('/issues/table');
+        } catch (error) {
+            alertError(error);
+        }
+    }
+
 	async function updateServiceRequest(e: CustomEvent<UpdateSensitiveServiceRequestRequest>) {
 		try {
 			await libre311.updateServiceRequest(e.detail);
@@ -179,6 +199,17 @@
 						<Button slot="left" href={back}>
 							{messages['updateServiceRequest']['button_back']}
 						</Button>
+                        <AuthGuard
+                            slot="middle"
+                            requires={[
+								'LIBRE311_REQUEST_EDIT-TENANT',
+								'LIBRE311_REQUEST_EDIT-SYSTEM',
+								'LIBRE311_REQUEST_EDIT-SUBTENANT'
+							]}>
+                            <Button on:click={deleteServiceReq}>
+                                {messages['updateServiceRequest']['button_delete']}
+                           </Button>
+                        </AuthGuard>
 
 						<AuthGuard
 							slot="right"
