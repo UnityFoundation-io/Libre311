@@ -14,14 +14,14 @@
 
 package app.util;
 
-import app.model.jurisdiction.JurisdictionBoundaryRepository;
-import app.model.jurisdiction.JurisdictionRepository;
-import app.model.jurisdictionuser.JurisdictionUserRepository;
-import app.model.service.ServiceRepository;
+import app.jurisdiction.JurisdictionBoundaryRepository;
+import app.jurisdiction.JurisdictionRepository;
+import app.security.user.JurisdictionUserRepository;
+import app.servicedefinition.ServiceRepository;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.servicedefinition.AttributeValueRepository;
-import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
-import app.model.servicerequest.ServiceRequestRepository;
+import app.servicedefinition.AttributeValueRepository;
+import app.servicedefinition.ServiceDefinitionAttributeRepository;
+import app.servicerequest.ServiceRequestRepository;
 import app.model.user.UserRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

@@ -14,7 +14,7 @@
 
 package app.util;
 
-import app.service.storage.StorageService;
+import app.storage.StorageService;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.http.multipart.CompletedFileUpload;
 import jakarta.inject.Singleton;

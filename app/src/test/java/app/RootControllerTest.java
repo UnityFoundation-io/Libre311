@@ -14,36 +14,36 @@
 
 package app;
 
-import app.dto.discovery.DiscoveryDTO;
-import app.dto.jurisdiction.JurisdictionDTO;
-import app.dto.service.ServiceDTO;
-import app.dto.servicerequest.PostRequestServiceRequestDTO;
-import app.dto.servicerequest.PostResponseServiceRequestDTO;
-import app.dto.servicerequest.SensitiveServiceRequestDTO;
-import app.dto.servicerequest.ServiceRequestDTO;
-import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.JurisdictionRepository;
+import app.discovery.Discovery;
+import app.jurisdiction.JurisdictionDTO;
+import app.servicedefinition.ServiceDTO;
+import app.servicedefinition.ServiceDefinition;
+import app.servicerequest.ServiceRequestPostRequest;
+import app.servicerequest.ServiceRequestPostResponse;
+import app.servicerequest.SensitiveServiceRequestDTO;
+import app.servicerequest.ServiceRequestDTO;
+import app.jurisdiction.Jurisdiction;
+import app.jurisdiction.JurisdictionRepository;
 
-import app.model.jurisdiction.RemoteHost;
-import app.model.service.AttributeDataType;
-import app.model.service.Service;
-import app.model.service.ServiceRepository;
-import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
-import app.model.service.ServiceType;
+import app.jurisdiction.RemoteHost;
+import app.servicedefinition.AttributeDataType;
+import app.servicedefinition.ServiceRepository;
+import app.servicedefinition.ServiceDefinitionAttributeDTO;
+import app.servicedefinition.ServiceType;
 import app.model.service.group.ServiceGroup;
 import app.model.service.group.ServiceGroupRepository;
-import app.model.servicedefinition.AttributeValue;
-import app.model.servicedefinition.AttributeValueRepository;
-import app.model.servicedefinition.ServiceDefinitionAttribute;
-import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
-import app.model.servicerequest.ServiceRequest;
-import app.model.servicerequest.ServiceRequestPriority;
-import app.model.servicerequest.ServiceRequestRepository;
-import app.model.servicerequest.ServiceRequestStatus;
+import app.servicedefinition.AttributeValue;
+import app.servicedefinition.AttributeValueRepository;
+import app.servicedefinition.ServiceDefinitionAttribute;
+import app.servicedefinition.ServiceDefinitionAttributeRepository;
+import app.servicerequest.ServiceRequest;
+import app.servicerequest.ServiceRequestPriority;
+import app.servicerequest.ServiceRequestRepository;
+import app.servicerequest.ServiceRequestStatus;
 import app.security.HasPermissionResponse;
 import app.security.Permission;
-import app.service.geometry.LibreGeometryFactory;
-import app.service.jurisdiction.JurisdictionBoundaryService;
+import app.geometry.LibreGeometryFactory;
+import app.jurisdiction.JurisdictionBoundaryService;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockUnityAuthClient;
@@ -115,9 +115,9 @@ public class RootControllerTest {
     @Inject
     LibreGeometryFactory libreGeometryFactory;
 
-    private Service sidewalkService;
-    private Service bikeLaneService;
-    private Service townOtherService;
+    private ServiceDefinition sidewalkServiceDefinition;
+    private ServiceDefinition bikeLaneServiceDefinition;
+    private ServiceDefinition townOtherServiceDefinition;
     private ServiceDefinitionAttribute sidewalkMultiValueAttr;
     private ServiceDefinitionAttribute sdwlkString;
     private ServiceDefinitionAttribute sdwlkNumber;
@@ -154,15 +154,15 @@ public class RootControllerTest {
 
     private void setupSidewalkServiceDefinition(Jurisdiction city, ServiceGroup infrastructureGroup) {
         // Sidewalk Service
-        Service newSidewalkService = new Service("Sidewalk");
-        newSidewalkService.setType(ServiceType.REALTIME);
-        newSidewalkService.setJurisdiction(city);
-        newSidewalkService.setServiceGroup(infrastructureGroup);
-        sidewalkService = serviceRepository.save(newSidewalkService);
+        ServiceDefinition newSidewalkServiceDefinition = new ServiceDefinition("Sidewalk");
+        newSidewalkServiceDefinition.setType(ServiceType.REALTIME);
+        newSidewalkServiceDefinition.setJurisdiction(city);
+        newSidewalkServiceDefinition.setServiceGroup(infrastructureGroup);
+        sidewalkServiceDefinition = serviceRepository.save(newSidewalkServiceDefinition);
 
         // Sidewalk Service Definitions
         ServiceDefinitionAttribute sidewalkMultiValueAttr = new ServiceDefinitionAttribute();
-        sidewalkMultiValueAttr.setService(sidewalkService);
+        sidewalkMultiValueAttr.setService(sidewalkServiceDefinition);
         sidewalkMultiValueAttr.setVariable(true);
         sidewalkMultiValueAttr.setDatatype(AttributeDataType.MULTIVALUELIST);
         sidewalkMultiValueAttr.setRequired(true);
@@ -176,7 +176,7 @@ public class RootControllerTest {
 
 
         ServiceDefinitionAttribute sdwlkString = new ServiceDefinitionAttribute();
-        sdwlkString.setService(sidewalkService);
+        sdwlkString.setService(sidewalkServiceDefinition);
         sdwlkString.setVariable(true);
         sdwlkString.setDatatype(AttributeDataType.STRING);
         sdwlkString.setRequired(false);
@@ -188,7 +188,7 @@ public class RootControllerTest {
 
 
         ServiceDefinitionAttribute sdwlkNumber = new ServiceDefinitionAttribute();
-        sdwlkNumber.setService(sidewalkService);
+        sdwlkNumber.setService(sidewalkServiceDefinition);
         sdwlkNumber.setVariable(true);
         sdwlkNumber.setDatatype(AttributeDataType.NUMBER);
         sdwlkNumber.setRequired(false);
@@ -200,7 +200,7 @@ public class RootControllerTest {
 
 
         ServiceDefinitionAttribute sdwlkDatetime = new ServiceDefinitionAttribute();
-        sdwlkDatetime.setService(sidewalkService);
+        sdwlkDatetime.setService(sidewalkServiceDefinition);
         sdwlkDatetime.setVariable(true);
         sdwlkDatetime.setDatatype(AttributeDataType.DATETIME);
         sdwlkDatetime.setRequired(false);
@@ -212,7 +212,7 @@ public class RootControllerTest {
 
 
         ServiceDefinitionAttribute sdwlkText = new ServiceDefinitionAttribute();
-        sdwlkText.setService(sidewalkService);
+        sdwlkText.setService(sidewalkServiceDefinition);
         sdwlkText.setVariable(true);
         sdwlkText.setDatatype(AttributeDataType.TEXT);
         sdwlkText.setRequired(false);
@@ -224,7 +224,7 @@ public class RootControllerTest {
 
 
         ServiceDefinitionAttribute sdwlkSingleValueList = new ServiceDefinitionAttribute();
-        sdwlkSingleValueList.setService(sidewalkService);
+        sdwlkSingleValueList.setService(sidewalkServiceDefinition);
         sdwlkSingleValueList.setVariable(true);
         sdwlkSingleValueList.setDatatype(AttributeDataType.SINGLEVALUELIST);
         sdwlkSingleValueList.setRequired(false);
@@ -238,15 +238,15 @@ public class RootControllerTest {
 
     private void setupBikeLaneServiceDefinition(Jurisdiction city, ServiceGroup infrastructureGroup) {
         // Bike Lane Service
-        Service newBikeLaneService = new Service("Bike Lane");
-        newBikeLaneService.setType(ServiceType.REALTIME);
-        newBikeLaneService.setJurisdiction(city);
-        newBikeLaneService.setServiceGroup(infrastructureGroup);
-        bikeLaneService = serviceRepository.save(newBikeLaneService);
+        ServiceDefinition newBikeLaneServiceDefinition = new ServiceDefinition("Bike Lane");
+        newBikeLaneServiceDefinition.setType(ServiceType.REALTIME);
+        newBikeLaneServiceDefinition.setJurisdiction(city);
+        newBikeLaneServiceDefinition.setServiceGroup(infrastructureGroup);
+        bikeLaneServiceDefinition = serviceRepository.save(newBikeLaneServiceDefinition);
 
         // Bike Lane Service Definition
         ServiceDefinitionAttribute bikeLaneServiceDefinitionAttribute = new ServiceDefinitionAttribute();
-        bikeLaneServiceDefinitionAttribute.setService(bikeLaneService);
+        bikeLaneServiceDefinitionAttribute.setService(bikeLaneServiceDefinition);
         bikeLaneServiceDefinitionAttribute.setVariable(true);
         bikeLaneServiceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
         bikeLaneServiceDefinitionAttribute.setRequired(true);
@@ -279,11 +279,11 @@ public class RootControllerTest {
                 new ServiceGroup("Unknown", town));
 
         // Sidewalk Service
-        Service newSidewalkService = new Service("Other");
-        newSidewalkService.setType(ServiceType.REALTIME);
-        newSidewalkService.setJurisdiction(town);
-        newSidewalkService.setServiceGroup(unknownGroup);
-        townOtherService = serviceRepository.save(newSidewalkService);
+        ServiceDefinition newSidewalkServiceDefinition = new ServiceDefinition("Other");
+        newSidewalkServiceDefinition.setType(ServiceType.REALTIME);
+        newSidewalkServiceDefinition.setJurisdiction(town);
+        newSidewalkServiceDefinition.setServiceGroup(unknownGroup);
+        townOtherServiceDefinition = serviceRepository.save(newSidewalkServiceDefinition);
     }
 
     @AfterAll
@@ -312,35 +312,35 @@ public class RootControllerTest {
     public void canCreateServiceRequestThatDoesNotRequireAdditionalAttributes() {
         HttpResponse<?> response;
 
-        response = createServiceRequest(townOtherService.getId(), "12345 Fairway", Map.of(), "town.gov");
+        response = createServiceRequest(townOtherServiceDefinition.getId(), "12345 Fairway", Map.of(), "town.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        Optional<ServiceRequestPostResponse[]> optional = response.getBody(ServiceRequestPostResponse[].class);
         assertTrue(optional.isPresent());
-        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
-        assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
-            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+        ServiceRequestPostResponse[] serviceRequestPostResponses = optional.get();
+        assertTrue(Arrays.stream(serviceRequestPostResponses)
+            .anyMatch(serviceRequestPostResponse -> serviceRequestPostResponse.getId() != null));
     }
 
     @Test
     public void canCreateServiceRequestWithRequiredAttributes() {
         HttpResponse<?> response;
 
-        response = createServiceRequest(sidewalkService.getId(), "12345 Fairway",
+        response = createServiceRequest(sidewalkServiceDefinition.getId(), "12345 Fairway",
                 Map.of("attribute["+sidewalkMultiValueAttr.getId()+"]", getAttributeValueId(sidewalkMultiValueAttr, "Too narrow")),
                 "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        Optional<ServiceRequestPostResponse[]> optional = response.getBody(ServiceRequestPostResponse[].class);
         assertTrue(optional.isPresent());
-        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
-        assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
-            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+        ServiceRequestPostResponse[] serviceRequestPostResponses = optional.get();
+        assertTrue(Arrays.stream(serviceRequestPostResponses)
+            .anyMatch(serviceRequestPostResponse -> serviceRequestPostResponse.getId() != null));
     }
 
     @Test
     public void canCreateServiceRequestWithVaryingDatatypes() {
         HttpResponse<?> response;
 
-        response = createServiceRequest(sidewalkService.getId(), "12345 Fairway",
+        response = createServiceRequest(sidewalkServiceDefinition.getId(), "12345 Fairway",
             Map.of(
                 "attribute["+sidewalkMultiValueAttr.getId()+"]", getAttributeValueId(sidewalkMultiValueAttr, "Too narrow"),
                 "attribute["+sdwlkString.getId()+"]", "A string description",
@@ -351,17 +351,17 @@ public class RootControllerTest {
             ),
             "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        Optional<ServiceRequestPostResponse[]> optional = response.getBody(ServiceRequestPostResponse[].class);
         assertTrue(optional.isPresent());
-        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
-        assertTrue(Arrays.stream(postResponseServiceRequestDTOS)
-            .anyMatch(postResponseServiceRequestDTO -> postResponseServiceRequestDTO.getId() != null));
+        ServiceRequestPostResponse[] serviceRequestPostResponses = optional.get();
+        assertTrue(Arrays.stream(serviceRequestPostResponses)
+            .anyMatch(serviceRequestPostResponse -> serviceRequestPostResponse.getId() != null));
 
-        PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
+        ServiceRequestPostResponse serviceRequestPostResponse = serviceRequestPostResponses[0];
 
 
         // GET
-        response = client.toBlocking().exchange("/requests/" + postResponseServiceRequestDTO.getId() + "?jurisdiction_id=city.gov", ServiceRequestDTO[].class);
+        response = client.toBlocking().exchange("/requests/" + serviceRequestPostResponse.getId() + "?jurisdiction_id=city.gov", ServiceRequestDTO[].class);
         assertEquals(HttpStatus.OK, response.status());
 
         Optional<ServiceRequestDTO[]> bodyOptional = response.getBody(ServiceRequestDTO[].class);
@@ -380,7 +380,7 @@ public class RootControllerTest {
     @Test
     public void cannotCreateServiceRequestWithInvalidFormattedDateField() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
-            createServiceRequest(sidewalkService.getId(), "12345 Fairway",
+            createServiceRequest(sidewalkServiceDefinition.getId(), "12345 Fairway",
                 Map.of(
                     "attribute["+sidewalkMultiValueAttr.getId()+"]", getAttributeValueId(sidewalkMultiValueAttr, "Too narrow"),
                     "attribute["+sdwlkDatetime.getId()+"]", "0015/04/14Z"
@@ -393,7 +393,7 @@ public class RootControllerTest {
     @Test
     public void cannotCreateServiceRequestWithInvalidFormattedNumberField() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
-            createServiceRequest(sidewalkService.getId(), "12345 Fairway",
+            createServiceRequest(sidewalkServiceDefinition.getId(), "12345 Fairway",
                 Map.of(
                     "attribute["+sidewalkMultiValueAttr.getId()+"]", getAttributeValueId(sidewalkMultiValueAttr, "Too narrow"),
                     "attribute["+sdwlkNumber.getId()+"]", "NotANumber"
@@ -406,14 +406,14 @@ public class RootControllerTest {
     @Test
     public void cannotCreateServiceRequestWithoutRequiredAttributes() {
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
-            createServiceRequest(sidewalkService.getId(), "12345 Fairway", Map.of(), "city.gov");
+            createServiceRequest(sidewalkServiceDefinition.getId(), "12345 Fairway", Map.of(), "city.gov");
         });
         assertEquals(BAD_REQUEST, thrown.getStatus());
     }
 
     @Test
     public void cannotCreateServiceRequestWithBlankJurisdiction() {
-        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(townOtherService.getId());
+        ServiceRequestPostRequest serviceRequestDTO = new ServiceRequestPostRequest(townOtherServiceDefinition.getId());
         serviceRequestDTO.setgRecaptchaResponse("abc");
         serviceRequestDTO.setAddressString("12345 Fairway");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -430,7 +430,7 @@ public class RootControllerTest {
 
     @Test
     public void cannotCreateServiceRequestIfLatLngNotProvided() {
-        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(townOtherService.getId());
+        ServiceRequestPostRequest serviceRequestDTO = new ServiceRequestPostRequest(townOtherServiceDefinition.getId());
         HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
             createServiceRequest(serviceRequestDTO, Map.of(), "town.gov");
         });
@@ -461,7 +461,7 @@ public class RootControllerTest {
     public void canGetServiceDefinitionByServiceCodeAndRequiredJurisdictionId() {
         HttpResponse<?> response;
 
-        response = client.toBlocking().exchange("/services/"+sidewalkService.getId()+"?jurisdiction_id=city.gov", String.class);
+        response = client.toBlocking().exchange("/services/"+ sidewalkServiceDefinition.getId()+"?jurisdiction_id=city.gov", String.class);
         assertEquals(HttpStatus.OK, response.status());
         Optional<String> serviceDefinitionOptional = response.getBody(String.class);
         assertTrue(serviceDefinitionOptional.isPresent());
@@ -474,10 +474,10 @@ public class RootControllerTest {
         HttpResponse<?> response;
 
         // create service requests
-        response = createServiceRequest(townOtherService.getId(), "12345 Fairway", Map.of(), "town.gov");
+        response = createServiceRequest(townOtherServiceDefinition.getId(), "12345 Fairway", Map.of(), "town.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
-        response = createServiceRequest(sidewalkService.getId(), "12345 Fairway",
+        response = createServiceRequest(sidewalkServiceDefinition.getId(), "12345 Fairway",
             Map.of("attribute["+sidewalkMultiValueAttr.getId()+"]", getAttributeValueId(sidewalkMultiValueAttr, "Too narrow")), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
 
@@ -497,7 +497,7 @@ public class RootControllerTest {
     public void authenticatedUsersCanViewSensitiveServiceRequestDetails() {
         setAuthHasPermissionSuccessResponse(true, List.of(Permission.LIBRE311_REQUEST_VIEW_TENANT));
 
-        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(sidewalkService.getId());
+        ServiceRequestPostRequest serviceRequestDTO = new ServiceRequestPostRequest(sidewalkServiceDefinition.getId());
         serviceRequestDTO.setgRecaptchaResponse("abc");
         serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
         serviceRequestDTO.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
@@ -521,31 +521,31 @@ public class RootControllerTest {
         ServiceRequest closedHighPriority = new ServiceRequest();
         closedHighPriority.setStatus(ServiceRequestStatus.CLOSED);
         closedHighPriority.setPriority(ServiceRequestPriority.HIGH);
-        closedHighPriority.setService(sidewalkService);
-        closedHighPriority.setJurisdiction(sidewalkService.getJurisdiction());
+        closedHighPriority.setService(sidewalkServiceDefinition);
+        closedHighPriority.setJurisdiction(sidewalkServiceDefinition.getJurisdiction());
         setLocation(closedHighPriority, IN_BOUNDS_COORDINATE);
         ServiceRequest closedHighSR = serviceRequestRepository.save(closedHighPriority);
 
         ServiceRequest openLowPriority = new ServiceRequest();
         openLowPriority.setStatus(ServiceRequestStatus.OPEN);
         openLowPriority.setPriority(ServiceRequestPriority.LOW);
-        openLowPriority.setService(sidewalkService);
-        openLowPriority.setJurisdiction(sidewalkService.getJurisdiction());
+        openLowPriority.setService(sidewalkServiceDefinition);
+        openLowPriority.setJurisdiction(sidewalkServiceDefinition.getJurisdiction());
         setLocation(openLowPriority, IN_BOUNDS_COORDINATE);
         ServiceRequest openLowSR = serviceRequestRepository.save(openLowPriority);
 
         ServiceRequest assignedMedium = new ServiceRequest();
         assignedMedium.setStatus(ServiceRequestStatus.ASSIGNED);
         assignedMedium.setPriority(ServiceRequestPriority.MEDIUM);
-        assignedMedium.setService(sidewalkService);
-        assignedMedium.setJurisdiction(sidewalkService.getJurisdiction());
+        assignedMedium.setService(sidewalkServiceDefinition);
+        assignedMedium.setJurisdiction(sidewalkServiceDefinition.getJurisdiction());
         setLocation(assignedMedium, IN_BOUNDS_COORDINATE);
         serviceRequestRepository.save(assignedMedium);
 
         ServiceRequest bikeLaneRequest = new ServiceRequest();
         bikeLaneRequest.setStatus(ServiceRequestStatus.ASSIGNED);
-        bikeLaneRequest.setService(bikeLaneService);
-        bikeLaneRequest.setJurisdiction(bikeLaneService.getJurisdiction());
+        bikeLaneRequest.setService(bikeLaneServiceDefinition);
+        bikeLaneRequest.setJurisdiction(bikeLaneServiceDefinition.getJurisdiction());
         setLocation(bikeLaneRequest, IN_BOUNDS_COORDINATE);
         ServiceRequest bikeLaneSR = serviceRequestRepository.save(bikeLaneRequest);
 
@@ -585,7 +585,7 @@ public class RootControllerTest {
         assertEquals(2, body.get().size());
 
         // filter service_codes for bike lane and sidewalk
-        req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&service_code="+bikeLaneService.getId()+"&service_code="+sidewalkService.getId()).bearerAuth( "eyekljdsl");
+        req = HttpRequest.GET("/requests?jurisdiction_id=city.gov&service_code="+ bikeLaneServiceDefinition.getId()+"&service_code="+ sidewalkServiceDefinition.getId()).bearerAuth( "eyekljdsl");
         response = client.toBlocking().exchange(req,
             Argument.listOf(SensitiveServiceRequestDTO.class));
         assertEquals(HttpStatus.OK, response.status());
@@ -605,12 +605,12 @@ public class RootControllerTest {
         response = createServiceRequest(sidewalkMultiValueAttr.getService().getId(), "12345 Fairway",
             Map.of("attribute["+sidewalkMultiValueAttr.getId()+"]", getAttributeValueId(sidewalkMultiValueAttr, "Too narrow")), "city.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(PostResponseServiceRequestDTO[].class);
+        Optional<ServiceRequestPostResponse[]> optional = response.getBody(ServiceRequestPostResponse[].class);
         assertTrue(optional.isPresent());
-        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
-        PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
+        ServiceRequestPostResponse[] serviceRequestPostResponses = optional.get();
+        ServiceRequestPostResponse serviceRequestPostResponse = serviceRequestPostResponses[0];
 
-        response = client.toBlocking().exchange("/requests/" + postResponseServiceRequestDTO.getId()+"?jurisdiction_id=city.gov", ServiceRequestDTO[].class);
+        response = client.toBlocking().exchange("/requests/" + serviceRequestPostResponse.getId()+"?jurisdiction_id=city.gov", ServiceRequestDTO[].class);
         assertEquals(HttpStatus.OK, response.status());
 
         Optional<ServiceRequestDTO[]> bodyOptional = response.getBody(ServiceRequestDTO[].class);
@@ -626,7 +626,7 @@ public class RootControllerTest {
         HttpResponse<?> response = client.toBlocking().exchange(request, Map.class);
         assertEquals(HttpStatus.OK, response.status());
 
-        Optional<DiscoveryDTO> bodyOptional = response.getBody(DiscoveryDTO.class);
+        Optional<Discovery> bodyOptional = response.getBody(Discovery.class);
         assertTrue(bodyOptional.isPresent());
         assertNotNull(bodyOptional.get().getContact());
     }
@@ -728,15 +728,15 @@ public class RootControllerTest {
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(new Jurisdiction("faketown.gov", 1L));
         ServiceGroup infrastructureGroup = serviceGroupRepository.save(
                 new ServiceGroup("TempInfrastructure", savedJurisdiction));
-        Service sidewalkService = new Service("SidewalkServiceToBeDeleted");
-        sidewalkService.setType(ServiceType.REALTIME);
-        sidewalkService.setJurisdiction(savedJurisdiction);
-        sidewalkService.setServiceGroup(infrastructureGroup);
+        ServiceDefinition sidewalkServiceDefinition = new ServiceDefinition("SidewalkServiceToBeDeleted");
+        sidewalkServiceDefinition.setType(ServiceType.REALTIME);
+        sidewalkServiceDefinition.setJurisdiction(savedJurisdiction);
+        sidewalkServiceDefinition.setServiceGroup(infrastructureGroup);
 
-        Service serviceToBeDeleted = serviceRepository.save(sidewalkService);
+        ServiceDefinition serviceDefinitionToBeDeleted = serviceRepository.save(sidewalkServiceDefinition);
 
         ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-        serviceDefinitionAttribute.setService(serviceToBeDeleted);
+        serviceDefinitionAttribute.setService(serviceDefinitionToBeDeleted);
         serviceDefinitionAttribute.setVariable(true);
         serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
         serviceDefinitionAttribute.setRequired(false);
@@ -756,22 +756,22 @@ public class RootControllerTest {
 
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setJurisdiction(savedJurisdiction);
-        serviceRequest.setService(serviceToBeDeleted);
+        serviceRequest.setService(serviceDefinitionToBeDeleted);
         setLocation(serviceRequest, IN_BOUNDS_COORDINATE);
         ServiceRequest savedServiceRequest = serviceRequestRepository.save(serviceRequest);
 
         // delete service
-        serviceRepository.delete(serviceToBeDeleted);
+        serviceRepository.delete(serviceDefinitionToBeDeleted);
 
         // verify deletion of all entities
-        assertFalse(serviceRepository.existsById(serviceToBeDeleted.getId()));
+        assertFalse(serviceRepository.existsById(serviceDefinitionToBeDeleted.getId()));
         assertFalse(serviceDefinitionAttributeRepository.existsById(savedSDA.getId()));
         assertFalse(attributeValueRepository.existsById(adaAccess.getId()));
         assertFalse(serviceRequestRepository.existsById(savedServiceRequest.getId()));
     }
 
     private HttpResponse<?> createServiceRequest(Long serviceCode, String address, Map attributes, String jurisdictionId) {
-        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(serviceCode);
+        ServiceRequestPostRequest serviceRequestDTO = new ServiceRequestPostRequest(serviceCode);
         serviceRequestDTO.setgRecaptchaResponse("abc");
         serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));
         serviceRequestDTO.setLatitude(String.valueOf(IN_BOUNDS_COORDINATE.getY()));
@@ -787,7 +787,7 @@ public class RootControllerTest {
         return client.toBlocking().exchange(request, Map.class);
     }
 
-    private HttpResponse<?> createServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Map attributes, String jurisdictionId) {
+    private HttpResponse<?> createServiceRequest(ServiceRequestPostRequest serviceRequestDTO, Map attributes, String jurisdictionId) {
         ObjectMapper objectMapper = new ObjectMapper();
         Map payload = objectMapper.convertValue(serviceRequestDTO, Map.class);
         payload.putAll(attributes);

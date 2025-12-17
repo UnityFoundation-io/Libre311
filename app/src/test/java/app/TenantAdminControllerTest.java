@@ -14,9 +14,9 @@
 
 package app;
 
-import app.dto.jurisdiction.CreateJurisdictionDTO;
-import app.dto.jurisdiction.JurisdictionDTO;
-import app.dto.jurisdiction.PatchJurisdictionDTO;
+import app.jurisdiction.CreateJurisdictionDTO;
+import app.jurisdiction.JurisdictionDTO;
+import app.jurisdiction.PatchJurisdictionDTO;
 import app.security.HasPermissionResponse;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockUnityAuthClient;

@@ -14,19 +14,16 @@
 
 package app.security;
 
-import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.JurisdictionRepository;
-import app.model.jurisdictionuser.JurisdictionUser;
-import app.model.jurisdictionuser.JurisdictionUserRepository;
-import app.model.user.User;
-import app.model.user.UserRepository;
+import app.jurisdiction.Jurisdiction;
+import app.jurisdiction.JurisdictionRepository;
+import app.security.user.User;
+import app.security.user.UserRepository;
+import app.security.user.JurisdictionUser;
+import app.security.user.JurisdictionUserRepository;
 import io.micronaut.context.annotation.Property;
-import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

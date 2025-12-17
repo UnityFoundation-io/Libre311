@@ -14,7 +14,12 @@
 
 package app;
 
-import app.dto.download.CsvHeaders;
+import app.security.user.User;
+import app.security.user.UserRepository;
+import app.servicedefinition.*;
+import app.servicedefinition.group.ServiceGroup;
+import app.servicedefinition.group.ServiceGroupRepository;
+import app.servicerequest.download.CsvHeaders;
 import static app.util.JurisdictionBoundaryUtil.DEFAULT_BOUNDS;
 import static app.util.JurisdictionBoundaryUtil.IN_BOUNDS_COORDINATE;
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
@@ -29,37 +34,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import app.dto.group.CreateUpdateGroupDTO;
-import app.dto.group.GroupDTO;
-import app.dto.service.CreateServiceDTO;
-import app.dto.service.PatchServiceOrderPositionDTO;
-import app.dto.service.ServiceDTO;
-import app.dto.service.UpdateServiceDTO;
-import app.dto.servicedefinition.*;
-import app.dto.servicerequest.PatchServiceRequestDTO;
-import app.dto.servicerequest.PostRequestServiceRequestDTO;
-import app.dto.servicerequest.PostResponseServiceRequestDTO;
-import app.dto.servicerequest.SensitiveServiceRequestDTO;
-import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.JurisdictionRepository;
-import app.model.jurisdictionuser.JurisdictionUser;
-import app.model.jurisdictionuser.JurisdictionUserRepository;
-import app.model.service.AttributeDataType;
-import app.model.service.Service;
-import app.model.service.ServiceRepository;
-import app.model.service.ServiceType;
-import app.model.service.group.ServiceGroup;
-import app.model.service.group.ServiceGroupRepository;
-import app.model.servicedefinition.AttributeValue;
-import app.model.servicedefinition.AttributeValueRepository;
-import app.model.servicedefinition.ServiceDefinitionAttribute;
-import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
-import app.model.servicerequest.ServiceRequestPriority;
-import app.model.servicerequest.ServiceRequestStatus;
-import app.model.user.User;
-import app.model.user.UserRepository;
+import app.servicedefinition.group.CreateUpdateGroupDTO;
+import app.servicedefinition.group.GroupDTO;
+import app.servicerequest.ServiceRequestUpdateRequest;
+import app.servicerequest.ServiceRequestPostRequest;
+import app.servicerequest.ServiceRequestPostResponse;
+import app.servicerequest.SensitiveServiceRequestDTO;
+import app.jurisdiction.Jurisdiction;
+import app.jurisdiction.JurisdictionRepository;
+import app.security.user.JurisdictionUser;
+import app.security.user.JurisdictionUserRepository;
+import app.servicedefinition.AttributeValue;
+import app.servicedefinition.AttributeValueRepository;
+import app.servicedefinition.ServiceDefinitionAttribute;
+import app.servicedefinition.ServiceDefinitionAttributeRepository;
+import app.servicerequest.ServiceRequestPriority;
+import app.servicerequest.ServiceRequestStatus;
 import app.security.HasPermissionResponse;
-import app.service.jurisdiction.JurisdictionBoundaryService;
+import app.jurisdiction.JurisdictionBoundaryService;
 import app.util.DbCleanup;
 import app.util.MockAuthenticationFetcher;
 import app.util.MockUnityAuthClient;
@@ -130,7 +122,7 @@ public class JurisdictionAdminControllerTest  {
     @Inject
     JurisdictionBoundaryService jurisdictionBoundaryService;
 
-    private Service sidewalkService;
+    private ServiceDefinition sidewalkServiceDefinition;
     private ServiceDefinitionAttribute savedSDA;
     private HashMap<String, Long> sidewalkAttrIdMap = new HashMap<>();
 
@@ -161,15 +153,15 @@ public class JurisdictionAdminControllerTest  {
         // service
         ServiceGroup infrastructureGroup = serviceGroupRepository.save(
             new ServiceGroup("Infrastructure", jurisdiction));
-        Service sidewalkService = new Service("Sidewalk");
-        sidewalkService.setType(ServiceType.REALTIME);
-        sidewalkService.setJurisdiction(jurisdiction);
-        sidewalkService.setServiceGroup(infrastructureGroup);
+        ServiceDefinition sidewalkServiceDefinition = new ServiceDefinition("Sidewalk");
+        sidewalkServiceDefinition.setType(ServiceType.REALTIME);
+        sidewalkServiceDefinition.setJurisdiction(jurisdiction);
+        sidewalkServiceDefinition.setServiceGroup(infrastructureGroup);
 
-        this.sidewalkService = serviceRepository.save(sidewalkService);
+        this.sidewalkServiceDefinition = serviceRepository.save(sidewalkServiceDefinition);
 
         ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-        serviceDefinitionAttribute.setService(sidewalkService);
+        serviceDefinitionAttribute.setService(sidewalkServiceDefinition);
         serviceDefinitionAttribute.setVariable(true);
         serviceDefinitionAttribute.setDatatype(AttributeDataType.MULTIVALUELIST);
         serviceDefinitionAttribute.setRequired(false);
@@ -560,7 +552,7 @@ public class JurisdictionAdminControllerTest  {
         HttpResponse<?> response;
 
         ServiceDefinitionAttribute serviceDefinitionAttribute = new ServiceDefinitionAttribute();
-        serviceDefinitionAttribute.setService(sidewalkService);
+        serviceDefinitionAttribute.setService(sidewalkServiceDefinition);
         serviceDefinitionAttribute.setVariable(true);
         serviceDefinitionAttribute.setDatatype(AttributeDataType.STRING);
         serviceDefinitionAttribute.setRequired(true);
@@ -578,7 +570,7 @@ public class JurisdictionAdminControllerTest  {
         );
 
         HttpRequest<?> request = HttpRequest.PATCH(
-                "/jurisdiction-admin/services/"+sidewalkService.getId()+"/attributes-order?jurisdiction_id=fakecity.gov",
+                "/jurisdiction-admin/services/"+ sidewalkServiceDefinition.getId()+"/attributes-order?jurisdiction_id=fakecity.gov",
                 payload).header("Authorization", "Bearer token.text.here");
         response = client.toBlocking().exchange(request, ServiceDefinitionDTO.class);
         assertEquals(HttpStatus.OK, response.getStatus());
@@ -626,24 +618,24 @@ public class JurisdictionAdminControllerTest  {
         response = createSidewalkServiceRequest("12345 Fairway",
             Map.of("attribute["+savedSDA.getId()+"]", sidewalkAttrIdMap.get("Cracked")), "fakecity.gov");
         assertEquals(HttpStatus.OK, response.getStatus());
-        Optional<PostResponseServiceRequestDTO[]> optional = response.getBody(
-            PostResponseServiceRequestDTO[].class);
+        Optional<ServiceRequestPostResponse[]> optional = response.getBody(
+            ServiceRequestPostResponse[].class);
         assertTrue(optional.isPresent());
-        PostResponseServiceRequestDTO[] postResponseServiceRequestDTOS = optional.get();
-        PostResponseServiceRequestDTO postResponseServiceRequestDTO = postResponseServiceRequestDTOS[0];
+        ServiceRequestPostResponse[] serviceRequestPostResponses = optional.get();
+        ServiceRequestPostResponse serviceRequestPostResponse = serviceRequestPostResponses[0];
 
         // update attempt
-        PatchServiceRequestDTO patchServiceRequestDTO = new PatchServiceRequestDTO();
-        patchServiceRequestDTO.setPriority(ServiceRequestPriority.HIGH);
-        patchServiceRequestDTO.setStatus(ServiceRequestStatus.IN_PROGRESS);
-        patchServiceRequestDTO.setServiceNotice("To be fulfilled by Acme Concrete Co.");
-        patchServiceRequestDTO.setAgencyEmail("acme@example.com");
-        patchServiceRequestDTO.setAgencyResponsible("Acme Concrete");
-        patchServiceRequestDTO.setStatusNotes("Will investigate and remediate within 2 weeks");
+        ServiceRequestUpdateRequest serviceRequestUpdateRequest = new ServiceRequestUpdateRequest();
+        serviceRequestUpdateRequest.setPriority(ServiceRequestPriority.HIGH);
+        serviceRequestUpdateRequest.setStatus(ServiceRequestStatus.IN_PROGRESS);
+        serviceRequestUpdateRequest.setServiceNotice("To be fulfilled by Acme Concrete Co.");
+        serviceRequestUpdateRequest.setAgencyEmail("acme@example.com");
+        serviceRequestUpdateRequest.setAgencyResponsible("Acme Concrete");
+        serviceRequestUpdateRequest.setStatusNotes("Will investigate and remediate within 2 weeks");
 
-        Map payload = (new ObjectMapper()).convertValue(patchServiceRequestDTO, Map.class);
+        Map payload = (new ObjectMapper()).convertValue(serviceRequestUpdateRequest, Map.class);
         HttpRequest<?> request = HttpRequest
-            .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()
+            .PATCH("/jurisdiction-admin/requests/" + serviceRequestPostResponse.getId()
                 + "?jurisdiction_id=fakecity.gov", payload)
             .header("Authorization", "Bearer token.text.here");
 
@@ -675,7 +667,7 @@ public class JurisdictionAdminControllerTest  {
 
         // update dates
         request = HttpRequest
-            .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()
+            .PATCH("/jurisdiction-admin/requests/" + serviceRequestPostResponse.getId()
                     + "?jurisdiction_id=fakecity.gov",
                 Map.of(
                     "jurisdiction_id", "fakecity.gov",
@@ -874,7 +866,7 @@ public class JurisdictionAdminControllerTest  {
     private HttpResponse<?> createSidewalkServiceRequest(String address, Map attributes,
                                                          String jurisdictionId) {
 
-        PostRequestServiceRequestDTO serviceRequestDTO = new PostRequestServiceRequestDTO(sidewalkService.getId());
+        ServiceRequestPostRequest serviceRequestDTO = new ServiceRequestPostRequest(sidewalkServiceDefinition.getId());
         serviceRequestDTO.setgRecaptchaResponse("abc");
 
         serviceRequestDTO.setLongitude(String.valueOf(IN_BOUNDS_COORDINATE.getX()));

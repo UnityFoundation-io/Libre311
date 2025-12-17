@@ -14,11 +14,11 @@
 
 package app;
 
-import app.dto.jurisdiction.CreateJurisdictionDTO;
-import app.dto.jurisdiction.JurisdictionDTO;
-import app.dto.jurisdiction.PatchJurisdictionDTO;
+import app.jurisdiction.CreateJurisdictionDTO;
+import app.jurisdiction.JurisdictionDTO;
+import app.jurisdiction.PatchJurisdictionDTO;
 import app.security.RequiresPermissions;
-import app.service.jurisdiction.JurisdictionService;
+import app.jurisdiction.JurisdictionService;
 import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;

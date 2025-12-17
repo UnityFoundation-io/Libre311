@@ -14,7 +14,7 @@
 
 package app.security;
 
-import app.model.jurisdiction.JurisdictionRepository;
+import app.jurisdiction.JurisdictionRepository;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;

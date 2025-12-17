@@ -1,5 +1,10 @@
 ---
 micronaut:
+  object-storage:
+    local:
+      default:
+        enabled: true
+        path: image-store
   http:
     services:
       auth:
@@ -31,6 +36,10 @@ micronaut:
 ---
 app:
   service-id: ${LIBRE311_SERVICE_ID:1}
+  image-storage:
+    bucket: images
+    bucket-url-format: http://localhost:7000/%s/
+
 
 datasources:
   default:
@@ -46,3 +55,6 @@ flyway:
       locations:
         - classpath:db/migration
         - classpath:local
+logger:
+  levels:
+    app: DEBUG
