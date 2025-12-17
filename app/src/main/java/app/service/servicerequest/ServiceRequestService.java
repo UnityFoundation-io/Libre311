@@ -543,4 +543,8 @@ public class ServiceRequestService {
 
         return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
     }
+
+    public int delete(Long serviceRequestId, String jurisdictionId) {
+        return serviceRequestRepository.updateDeletedByIdAndJurisdictionIdAndDeletedFalse(serviceRequestId, jurisdictionId, true);
+    }
 }

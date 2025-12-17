@@ -1,0 +1,1 @@
+ALTER TABLE service_requests add column deleted bool default false;
