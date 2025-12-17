@@ -6,35 +6,36 @@ export class MapCenterControl extends L.Control {
 		super(opts);
 	}
 	onAdd(map: L.Map): HTMLElement {
-		const img = L.DomUtil.create('img');
+    	const img = L.DomUtil.create('img');
 		img.src = locationSearching;
 		img.style.cursor = 'pointer';
 		img.style.width = '25';
 		img.setAttribute('title', 'Center Map');
 
-		const div = L.DomUtil.create('div');
-		div.addEventListener('click', () => map.locate());
-		div.appendChild(img);
-		div.style.backgroundColor = '#fff';
-		div.style.border = '2px solid rgba(0, 0, 0, 0.2)';
-		div.style.backgroundClip = 'padding-box';
-		div.style.borderRadius = '4px';
-		div.style.width = '34px';
-		div.style.height = '34px';
-		div.style.display = 'flex';
-		div.style.justifyContent = 'center';
-		div.style.alignItems = 'center';
+		const control = L.DomUtil.create('a');
+		control.addEventListener('click', () => map.locate());
+		control.appendChild(img);
+		control.setAttribute('role', 'button');
+		control.href = "#";
+		control.style.backgroundColor = '#fff';
+		control.style.border = '2px solid rgba(0, 0, 0, 0.2)';
+		control.style.backgroundClip = 'padding-box';
+		control.style.borderRadius = '4px';
+		control.style.width = '34px';
+		control.style.height = '34px';
+		control.style.display = 'flex';
+		control.style.justifyContent = 'center';
+		control.style.alignItems = 'center';
 
-		div.addEventListener('mouseenter', () => {
-			console.log('enter');
-			div.style.backgroundColor = '#f4f4f4';
+		control.addEventListener('mouseenter', () => {
+			control.style.backgroundColor = '#f4f4f4';
 		});
 
-		div.addEventListener('mouseleave', () => {
-			div.style.backgroundColor = '#fff';
+		control.addEventListener('mouseleave', () => {
+			control.style.backgroundColor = '#fff';
 		});
 
-		return div;
+		return control;
 	}
 }
 
