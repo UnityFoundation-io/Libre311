@@ -63,7 +63,7 @@ const DEFAULT_CONFIG: RecordConfig = {
 	]
 };
 
-async function sleep(ms: number): Promise<void> {
+function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -83,7 +83,7 @@ async function fetchWithRetry(url: string, retries = 3): Promise<unknown> {
 			return await response.json();
 		} catch (error) {
 			if (i === retries - 1) throw error;
-			console.log(`  Retry ${i + 1}/${retries - 1}...`);
+			console.info(`  Retry ${i + 1}/${retries - 1}...`);
 			await sleep(RATE_LIMIT_MS * 2);
 		}
 	}
@@ -91,29 +91,28 @@ async function fetchWithRetry(url: string, retries = 3): Promise<unknown> {
 
 async function recordReverseGeocode(name: string, lat: number, lon: number): Promise<void> {
 	const url = `${NOMINATIM_BASE_URL}/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
-	console.log(`Recording reverse geocode for ${name}...`);
-	console.log(`  URL: ${url}`);
+	console.info(`Recording reverse geocode for ${name}...`);
 
 	const data = await fetchWithRetry(url);
 	const filename = `reverse-geocode-${name}.json`;
 	const filepath = path.join(FIXTURES_DIR, filename);
 
 	fs.writeFileSync(filepath, JSON.stringify(data, null, '\t'));
-	console.log(`  Saved to: ${filename}`);
+	console.info(`  Saved to: ${filename}`);
 }
 
 async function recordSearch(name: string, query: string): Promise<void> {
 	const encodedQuery = encodeURIComponent(query);
 	const url = `${NOMINATIM_BASE_URL}/search?format=json&q=${encodedQuery}`;
-	console.log(`Recording search for "${query}"...`);
-	console.log(`  URL: ${url}`);
+	console.info(`Recording search for "${query}"...`);
+	console.info(`  URL: ${url}`);
 
 	const data = await fetchWithRetry(url);
 	const filename = `search-${name}.json`;
 	const filepath = path.join(FIXTURES_DIR, filename);
 
 	fs.writeFileSync(filepath, JSON.stringify(data, null, '\t'));
-	console.log(`  Saved to: ${filename}`);
+	console.info(`  Saved to: ${filename}`);
 }
 
 async function main(): Promise<void> {
@@ -126,7 +125,7 @@ async function main(): Promise<void> {
 		if (fs.existsSync(configPath)) {
 			const customConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 			config = { ...DEFAULT_CONFIG, ...customConfig };
-			console.log(`Using custom config from: ${configPath}\n`);
+			console.info(`Using custom config from: ${configPath}\n`);
 		} else {
 			console.error(`Config file not found: ${configPath}`);
 			process.exit(1);
@@ -134,7 +133,7 @@ async function main(): Promise<void> {
 	}
 
 	if (args.includes('--help')) {
-		console.log(`
+		console.info(`
 Nominatim Fixture Recording Utility
 
 Usage:
@@ -163,32 +162,32 @@ Default locations are used if no config file is provided.
 		fs.mkdirSync(FIXTURES_DIR, { recursive: true });
 	}
 
-	console.log('Recording Nominatim API fixtures...\n');
-	console.log(`Output directory: ${FIXTURES_DIR}\n`);
+	console.info('Recording Nominatim API fixtures...\n');
+	console.info(`Output directory: ${FIXTURES_DIR}\n`);
 
 	// Record reverse geocode responses
 	if (config.reverseGeocode) {
-		console.log('=== Reverse Geocode ===');
+		console.info('=== Reverse Geocode ===');
 		for (const item of config.reverseGeocode) {
 			await recordReverseGeocode(item.name, item.lat, item.lon);
 			await sleep(RATE_LIMIT_MS);
 		}
-		console.log();
+		console.info();
 	}
 
 	// Record search responses
 	if (config.search) {
-		console.log('=== Search ===');
+		console.info('=== Search ===');
 		for (const item of config.search) {
 			await recordSearch(item.name, item.query);
 			await sleep(RATE_LIMIT_MS);
 		}
-		console.log();
+		console.info();
 	}
 
-	console.log('Done! Fixtures have been recorded.');
-	console.log('\nNote: Run contract tests to verify fixtures match expected schemas:');
-	console.log('  npm run test:unit -- NominatimService.contract');
+	console.info('Done! Fixtures have been recorded.');
+	console.info('\nNote: Run contract tests to verify fixtures match expected schemas:');
+	console.info('  npm run test:unit -- NominatimService.contract');
 }
 
 main().catch((error) => {

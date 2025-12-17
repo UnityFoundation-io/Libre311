@@ -97,11 +97,7 @@ export class NominatimServiceImpl implements NominatimService {
 	}
 
 	private getBaseUrl(): string {
-		// In development, use Vite proxy to bypass CORS
-		if (import.meta.env.DEV) {
-			return '/nominatim';
-		}
-		return this.config.baseUrl;
+		return import.meta.env.DEV ? '/nominatim' : this.config.baseUrl;
 	}
 
 	async reverseGeocode(lat: number, lon: number): Promise<NominatimReverseResponse> {

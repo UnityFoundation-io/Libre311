@@ -71,14 +71,11 @@
 		try {
 			const res = await libre311.reverseGeocode(centerPos);
 			params.address_string = res.display_name;
-			params = params;
-			await goto(linkResolver.createIssuePageNext($page.url));
 		} catch (error) {
 			console.error('[confirmLocation] Unexpected error:', error);
 			params.address_string = `Location: ${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
-			params = params;
-			await goto(linkResolver.createIssuePageNext($page.url));
 		} finally {
+			await goto(linkResolver.createIssuePageNext($page.url));
 			loadingLocation = false;
 		}
 	}
