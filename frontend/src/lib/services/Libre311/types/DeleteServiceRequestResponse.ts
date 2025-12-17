@@ -1,3 +1,3 @@
 export type DeleteServiceRequestResponse = {
-    success: boolean
-}
+	success: boolean;
+};
