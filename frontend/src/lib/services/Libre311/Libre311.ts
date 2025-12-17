@@ -676,27 +676,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse> {
-		const startTime = performance.now();
-		const fallbackAddress = `${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`;
-		console.log('[reverseGeocode] Starting reverse geocode for coords:', coords);
+		const fallbackAddress = `Location: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`;
 
 		try {
-			const fetchStart = performance.now();
 			const result = await this.nominatimService.reverseGeocode(coords[0], coords[1]);
-			console.log(
-				'[reverseGeocode] Response received in:',
-				`${(performance.now() - fetchStart).toFixed(1)}ms`
-			);
-			console.log('[reverseGeocode] Result:', result.display_name);
-			console.log(
-				'[reverseGeocode] Total time:',
-				`${(performance.now() - startTime).toFixed(1)}ms`
-			);
-
 			return { display_name: result.display_name };
-		} catch (error) {
-			console.error('[reverseGeocode] Error during geocoding:', error);
-			console.log('[reverseGeocode] Using fallback coordinates due to error');
+		} catch {
 			// Return fallback coordinates instead of throwing - allows flow to continue
 			return { display_name: fallbackAddress };
 		}

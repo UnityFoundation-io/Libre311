@@ -9,6 +9,7 @@ import {
 
 // Import recorded fixtures
 import reverseGeocodeStLouis from './__fixtures__/reverse-geocode-st-louis.json';
+import reverseGeocodeError from './__fixtures__/reverse-geocode-error.json';
 import searchStLouis from './__fixtures__/search-st-louis.json';
 
 describe('Nominatim Response Contracts', () => {
@@ -34,6 +35,13 @@ describe('Nominatim Response Contracts', () => {
 				expect(parsed.data.length).toBeGreaterThan(0);
 				expect(parsed.data[0].display_name).toBe(searchStLouis[0].display_name);
 			}
+		});
+
+		it('error responses do not pass the success schema', () => {
+			// Nominatim returns error objects when geocoding fails
+			// Our schema should reject these as invalid
+			const parsed = NominatimReverseResponseSchema.safeParse(reverseGeocodeError);
+			expect(parsed.success).toBe(false);
 		});
 	});
 

@@ -98,7 +98,7 @@ export class NominatimServiceImpl implements NominatimService {
 
 	private getBaseUrl(): string {
 		// In development, use Vite proxy to bypass CORS
-		if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+		if (import.meta.env.DEV) {
 			return '/nominatim';
 		}
 		return this.config.baseUrl;
@@ -153,7 +153,6 @@ export class MockNominatimService implements NominatimService {
 
 	async reverseGeocode(lat: number, lon: number): Promise<NominatimReverseResponse> {
 		console.log('MockNominatimService.reverseGeocode called with:', { lat, lon });
-
 		const key = `${lat.toFixed(6)},${lon.toFixed(6)}`;
 		const response = this.reverseResponses.get(key) || this.defaultReverseResponse;
 
@@ -186,19 +185,15 @@ export class MockNominatimService implements NominatimService {
 // Factory function to create a pre-configured mock service
 export function createMockNominatimService(): MockNominatimService {
 	const mock = new MockNominatimService();
-	// Pre-configure with fixtures so it works out of the box
-	mock.setDefaultReverseResponse(reverseGeocodeFixture as NominatimReverseResponse);
-	mock.setDefaultSearchResponse(searchFixture as NominatimSearchResponse);
-	console.log('MockNominatimService created with default fixtures');
+	// Pre-configure with fixtures so it works out of the box (validated at load time)
+	mock.setDefaultReverseResponse(NominatimReverseResponseSchema.parse(reverseGeocodeFixture));
+	mock.setDefaultSearchResponse(NominatimSearchResponseSchema.parse(searchFixture));
 	return mock;
 }
 
 // Factory function
 export function nominatimServiceFactory(mode: Mode, config?: NominatimConfig): NominatimService {
-	// Could either be in 'test' mode or explicitly set to 'mock' via env variable
 	const nominatimMode = import.meta.env.VITE_NOMINATIM_MODE;
-	console.log('NominatimService factory:', { mode, VITE_NOMINATIM_MODE: nominatimMode });
-
 	const useMock = mode === 'test' || nominatimMode === 'mock';
 	return useMock ? createMockNominatimService() : new NominatimServiceImpl(config);
 }

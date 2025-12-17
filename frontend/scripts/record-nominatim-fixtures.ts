@@ -2,7 +2,7 @@
  * Fixture Recording Utility for Nominatim API
  *
  * This script records real API responses from Nominatim and saves them as fixtures.
- * Run with: npx tsx src/lib/services/Nominatim/record-fixtures.ts
+ * Run with: npx tsx scripts/record-nominatim-fixtures.ts
  *
  * Use this when:
  * - Setting up contract tests for the first time
@@ -17,7 +17,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const FIXTURES_DIR = path.join(__dirname, '__fixtures__');
+// Output to the Nominatim service fixtures directory
+const FIXTURES_DIR = path.join(__dirname, '../src/lib/services/Nominatim/__fixtures__');
 const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org';
 const USER_AGENT = 'Libre311/1.0 (https://github.com/UnityFoundation-io/Libre311)';
 
@@ -137,7 +138,7 @@ async function main(): Promise<void> {
 Nominatim Fixture Recording Utility
 
 Usage:
-  npx tsx record-fixtures.ts [config.json]
+  npx tsx scripts/record-nominatim-fixtures.ts [config.json]
 
 Options:
   --help    Show this help message

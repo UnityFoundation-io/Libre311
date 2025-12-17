@@ -64,55 +64,19 @@
 	}
 
 	async function confirmLocation() {
-		const startTime = performance.now();
-		console.log('[confirmLocation] Started at:', new Date().toISOString());
-
 		params.lat = String(centerPos[0]);
 		params.long = String(centerPos[1]);
-		console.log(
-			'[confirmLocation] Coords set:',
-			{ lat: params.lat, long: params.long },
-			`(+${(performance.now() - startTime).toFixed(1)}ms)`
-		);
-
 		loadingLocation = true;
 
 		try {
-			console.log('[confirmLocation] Starting reverseGeocode...');
-			const geocodeStart = performance.now();
 			const res = await libre311.reverseGeocode(centerPos);
-			console.log(
-				'[confirmLocation] reverseGeocode completed in:',
-				`${(performance.now() - geocodeStart).toFixed(1)}ms`,
-				'Result:',
-				res.display_name
-			);
-
 			params.address_string = res.display_name;
 			params = params;
-			console.log(
-				'[confirmLocation] Params updated, starting navigation...',
-				`(+${(performance.now() - startTime).toFixed(1)}ms)`
-			);
-
-			const navStart = performance.now();
-			const nextUrl = linkResolver.createIssuePageNext($page.url);
-			console.log('[confirmLocation] Navigating to:', nextUrl);
-			await goto(nextUrl);
-			console.log(
-				'[confirmLocation] Navigation completed in:',
-				`${(performance.now() - navStart).toFixed(1)}ms`
-			);
-			console.log(
-				'[confirmLocation] Total time:',
-				`${(performance.now() - startTime).toFixed(1)}ms`
-			);
+			await goto(linkResolver.createIssuePageNext($page.url));
 		} catch (error) {
-			console.error('[confirmLocation] Error:', error);
-			// Use fallback coordinates as address if geocoding fails completely
-			params.address_string = `${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
+			console.error('[confirmLocation] Unexpected error:', error);
+			params.address_string = `Location: ${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
 			params = params;
-			// Still navigate to next step - don't block the user
 			await goto(linkResolver.createIssuePageNext($page.url));
 		} finally {
 			loadingLocation = false;
