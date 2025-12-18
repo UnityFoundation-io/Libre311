@@ -127,5 +127,3 @@
 		</StepControls>
 	</div>
 </form>
-
-}
