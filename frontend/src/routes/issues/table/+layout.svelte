@@ -158,7 +158,6 @@
 	$: detailPaneOpen = Boolean($page.params.issue_id);
 </script>
 
-
 {#if $serviceRequestsRes.type === 'success'}
 	<TableWithDetailPane {detailPaneOpen}>
 		<div slot="detail-pane">

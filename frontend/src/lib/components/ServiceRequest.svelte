@@ -81,12 +81,12 @@
 	<Card class="m-2 w-full overflow-y-auto">
 		<div class="flex h-full w-full flex-col" slot="content">
 			<h3 class="ml-4 text-base">
-                {#if isUpdateButtonClicked }
-                	{messages['serviceRequest']['update']}
-                {:else}
-                    {messages['serviceRequest']['detail']}
-                {/if}
-            </h3>
+				{#if isUpdateButtonClicked}
+					{messages['serviceRequest']['update']}
+				{:else}
+					{messages['serviceRequest']['detail']}
+				{/if}
+			</h3>
 			<div class="m-2 flex-grow">
 				<!-- ID & STATUS -->
 				<div class="flow-root">

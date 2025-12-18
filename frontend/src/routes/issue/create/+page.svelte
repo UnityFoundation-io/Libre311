@@ -29,7 +29,7 @@
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
-	import messages from "$media/messages.json";
+	import messages from '$media/messages.json';
 
 	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
