@@ -29,6 +29,7 @@
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
+	import messages from "$media/messages.json";
 
 	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
@@ -105,6 +106,7 @@
 
 <CreateServiceRequestLayout {step}>
 	<div slot="side-bar" class="mx-4 h-full">
+		<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
 		{#if step == CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
 		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
@@ -115,6 +117,8 @@
 	</div>
 	<div slot="main-content" class="relative h-full">
 		<MapComponent
+			mapDescription="Request Location"
+			descriptionLocation="bottom"
 			keyboardPanDelta={KEYBOARD_PAN_DELTA_FINE}
 			controlFactories={[mapCenterControlFactory]}
 			disabled={step != 0}
