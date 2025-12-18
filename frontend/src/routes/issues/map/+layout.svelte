@@ -70,6 +70,7 @@
 			</div>
 		</Breakpoint>
 		<MapComponent
+			mapDescription="Request Map"
 			keyboardPanDelta={KEYBOARD_PAN_DELTA_COARSE}
 			controlFactories={[mapCenterControlFactory]}
 			bounds={mapBounds}

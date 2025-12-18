@@ -13,6 +13,7 @@
 <div class="flex h-full">
 	<Card class="m-2 w-full overflow-y-auto">
 		<div class="flex h-full w-full flex-col" slot="content">
+			<h3 class="ml-4 text-base">{messages['serviceRequest']['detail']}</h3>
 			<div class="m-2 flex-grow">
 				<div class="flow-root">
 					<h2 class="float-left text-base tracking-wide">
