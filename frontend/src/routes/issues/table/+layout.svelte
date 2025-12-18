@@ -154,7 +154,6 @@
 	);
 </script>
 
-
 {#if $serviceRequestsRes.type === 'success'}
 	<SideBarMainContentLayout>
 		<slot slot="side-bar" />

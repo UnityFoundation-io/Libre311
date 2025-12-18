@@ -21,7 +21,7 @@
 	export let controlOps: L.ControlOptions = { position: 'topleft' };
 	export let keyboardPanDelta: number = KEYBOARD_PAN_DELTA_FINE;
 	export let mapDescription: string | undefined = undefined;
-	export let descriptionLocation: string = "top"
+	export let descriptionLocation: string = 'top';
 
 	const dispatch = createEventDispatcher<Events>();
 
@@ -88,14 +88,13 @@
 	}
 </script>
 
-
 <div class="z-0 h-full w-full" bind:this={mapElement}>
 	{#if map}
 		<div class="absolute {descriptionLocation}-1 left-1/2 z-[1000] -translate-x-1/2">
-		{#if mapDescription}
-			<h3 class="text-base">{mapDescription}</h3>
-		{/if}
-		<slot />
+			{#if mapDescription}
+				<h3 class="text-base">{mapDescription}</h3>
+			{/if}
+			<slot />
 		</div>
 	{/if}
 </div>
