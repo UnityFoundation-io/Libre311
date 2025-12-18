@@ -2,6 +2,10 @@
 FROM gradle:jdk25 AS builder
 WORKDIR /workspace
 
+ARG DB_TYPE=mysql
+ARG CLOUD_DB=false
+ENV LIBRE311_DATABASE_TYPE=${DB_TYPE}
+ENV LIBRE311_CLOUD_DB=${CLOUD_DB}
 # 1. Copy Gradle wrapper first (rarely changes)
 COPY gradle/ gradle/
 COPY gradlew gradlew.bat ./
