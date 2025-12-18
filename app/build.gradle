@@ -50,21 +50,22 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
-    runtimeOnly("org.flywaydb:flyway-mysql")
 
     implementation('com.google.cloud:google-cloud-vision:3.35.0')
     // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html
     implementation('org.hibernate:hibernate-spatial:6.6.32.Final')
     implementation("org.apache.commons:commons-csv:1.10.0")
 
-    String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
-    if (databaseSelection != null) {
-        databaseSelection.split(',').each {part ->
-            runtimeOnly(part)
-        }
-    } else {
+    String databaseSelection = System.getenv("LIBRE311_DATABASE_TYPE")
+    Boolean cloudDb = Boolean.parseBoolean(System.getenv("LIBRE311_CLOUD_DB"))
+    if (databaseSelection && databaseSelection == "mysql"){
         runtimeOnly("mysql:mysql-connector-java:8.0.31")
-    }
+        runtimeOnly("org.flywaydb:flyway-mysql")
+        if (cloudDb) {
+            runtimeOnly('com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2')
+        }
+    } // TODO: add postgres at least
+
 }
 
 application {
