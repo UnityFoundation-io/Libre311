@@ -67,11 +67,17 @@
 		params.lat = String(centerPos[0]);
 		params.long = String(centerPos[1]);
 		loadingLocation = true;
-		const res = await libre311.reverseGeocode(centerPos);
-		loadingLocation = false;
-		params.address_string = res.display_name;
-		params = params;
-		goto(linkResolver.createIssuePageNext($page.url));
+
+		try {
+			const res = await libre311.reverseGeocode(centerPos);
+			params.address_string = res.display_name;
+		} catch (error) {
+			console.error('[confirmLocation] Unexpected error:', error);
+			params.address_string = `Location: ${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
+		} finally {
+			await goto(linkResolver.createIssuePageNext($page.url));
+			loadingLocation = false;
+		}
 	}
 
 	function handleGeosearch(e: ComponentEvents<MapGeosearch>['geosearch']) {
