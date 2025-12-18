@@ -93,6 +93,7 @@
 					name="email"
 					type="email"
 					placeholder={messages['contact']['email']['placeholder']}
+					autocomplete="on"
 					error={emailInput.error}
 					bind:value={emailInput.value}
 				>
@@ -106,6 +107,7 @@
 					type="text"
 					name="phone"
 					placeholder={messages['contact']['phone']['placeholder']}
+					autocomplete="on"
 					error={phoneInput.error}
 					bind:value={phoneInput.value}
 					on:input={formatPhoneNumber}
