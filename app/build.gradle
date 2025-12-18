@@ -56,9 +56,9 @@ dependencies {
     implementation('org.hibernate:hibernate-spatial:6.6.32.Final')
     implementation("org.apache.commons:commons-csv:1.10.0")
 
-    String databaseSelection = System.getenv("LIBRE311_DATABASE_TYPE")
+    String databaseSelection = System.getenv("LIBRE311_DATABASE_TYPE") ?: "mysql"
     Boolean cloudDb = Boolean.parseBoolean(System.getenv("LIBRE311_CLOUD_DB"))
-    if (databaseSelection && databaseSelection == "mysql"){
+    if (databaseSelection == "mysql"){
         runtimeOnly("mysql:mysql-connector-java:8.0.31")
         runtimeOnly("org.flywaydb:flyway-mysql")
         if (cloudDb) {
