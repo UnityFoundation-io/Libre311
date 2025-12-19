@@ -69,7 +69,7 @@
 				placeholder={messages['login']['email']['placeholder']}
 				error={emailInput.error}
 				value={emailInput.value}
-				autocomplete="on"
+				autocomplete="email"
 				on:change={(e) => onChange(e, 'email')}
 			>
 				<Input.Label slot="label">{messages['login']['email']['label']}</Input.Label>
@@ -82,7 +82,7 @@
 				id="password-desktop"
 				type="password"
 				name="password-desktop"
-				autocomplete="on"
+				autocomplete="current-password"
 				showPasswordToggle={true}
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
