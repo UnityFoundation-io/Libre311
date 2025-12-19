@@ -8,17 +8,15 @@ import type {
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
-import type { NominatimService, ReverseGeocodeResponse } from '../Nominatim';
-import { nominatimServiceFactory } from '../Nominatim';
-import { getModeFromEnv } from '../mode';
 import type { DeleteServiceRequestRequest } from '$lib/services/Libre311/types/DeleteServiceRequestRequest';
+import { GeocodingServiceImpl, type ReverseGeocodeResponse } from '../geocoding';
 
-const JurisdicationIdSchema = z.string();
+const JurisdictionIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
-	jurisdiction_id: JurisdicationIdSchema
+	jurisdiction_id: JurisdictionIdSchema
 });
 export type HasJurisdictionId = z.infer<typeof HasJurisdictionIdSchema>;
-export type JurisdictionId = z.infer<typeof JurisdicationIdSchema>;
+export type JurisdictionId = z.infer<typeof JurisdictionIdSchema>;
 
 const RealtimeServiceTypeSchema = z.literal('realtime');
 const OtherServiceTypeSchema = z.literal('other'); // todo remove once second type is found
@@ -486,9 +484,8 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
-// ReverseGeocodeResponse is now imported from '../Nominatim'
-// Re-export for backwards compatibility
-export { ReverseGeocodeResponseSchema, type ReverseGeocodeResponse } from '../Nominatim';
+// Re-export geocoding types for backwards compatibility
+export { ReverseGeocodeResponseSchema, type ReverseGeocodeResponse } from '../geocoding';
 
 export const LibrePermissionsSchema = z.union([
 	z.literal('AUTH_SERVICE_EDIT-SYSTEM'),
@@ -559,7 +556,6 @@ const Libre311ServicePropsSchema = z.object({
 
 export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema> & {
 	recaptchaService: RecaptchaService;
-	nominatimService?: NominatimService;
 };
 
 const ROUTES = {
@@ -651,7 +647,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
 	private recaptchaService: RecaptchaService;
-	private nominatimService: NominatimService;
+	private geocodingService: GeocodingServiceImpl;
 	public static readonly supportedImageTypes = [
 		'image/png',
 		'image/jpg',
@@ -665,8 +661,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		this.jurisdictionConfig = props.jurisdictionConfig;
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
 		this.recaptchaService = props.recaptchaService;
-		this.nominatimService =
-			props.nominatimService ?? nominatimServiceFactory(getModeFromEnv(import.meta.env));
+		this.geocodingService = new GeocodingServiceImpl();
 	}
 	async deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean> {
 		try {
@@ -691,14 +686,18 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse> {
-		const fallbackAddress = `Location: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`;
+		const fallbackResult: ReverseGeocodeResponse = {
+			displayName: `Location: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`,
+			address: null,
+			latitude: coords[0],
+			longitude: coords[1],
+			provider: 'fallback'
+		};
 
 		try {
-			const result = await this.nominatimService.reverseGeocode(coords[0], coords[1]);
-			return { display_name: result.display_name };
+			return await this.geocodingService.reverseGeocode(coords[0], coords[1]);
 		} catch {
-			// Return fallback coordinates instead of throwing - allows flow to continue
-			return { display_name: fallbackAddress };
+			return fallbackResult;
 		}
 	}
 
