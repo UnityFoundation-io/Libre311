@@ -241,7 +241,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_EDIT_SYSTEM, LIBRE311_REQUEST_EDIT_TENANT, LIBRE311_REQUEST_EDIT_SUBTENANT})
-    public Map<String, Boolean> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @Nullable @QueryValue("jurisdiction_id") String jurisdictionId){
+    public Map<String, Boolean> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @QueryValue("jurisdiction_id") String jurisdictionId){
         return Map.of("success", serviceRequestService.delete(serviceRequestId, jurisdictionId) > 0);
     }
 
