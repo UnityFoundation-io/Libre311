@@ -107,4 +107,20 @@ public class GeocodeControllerTest {
 
 		assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 	}
+
+	@Test
+	void testReverseGeocodeWhenProviderFailsReturns500() {
+		// Use sentinel coordinates that trigger mock provider to throw
+		double lat = MockGeocodingProvider.ERROR_LAT;
+		double lon = MockGeocodingProvider.ERROR_LON;
+
+		HttpRequest<?> request = HttpRequest.GET("/reverse?lat=" + lat + "&lon=" + lon);
+
+		HttpClientResponseException exception = assertThrows(
+			HttpClientResponseException.class,
+			() -> client.toBlocking().retrieve(request, ReverseGeocodeResult.class)
+		);
+
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus());
+	}
 }

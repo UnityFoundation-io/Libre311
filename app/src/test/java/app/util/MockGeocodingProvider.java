@@ -23,6 +23,9 @@ import jakarta.inject.Singleton;
 /**
  * Mock implementation of GeocodingProvider for testing.
  * Returns predictable fixture data without making external HTTP calls.
+ *
+ * Special coordinates for testing error scenarios:
+ * - lat=0.0, lon=0.0: Throws RuntimeException to simulate provider failure
  */
 @Singleton
 @Replaces(GeocodingProvider.class)
@@ -31,8 +34,16 @@ public class MockGeocodingProvider implements GeocodingProvider {
 	public static final String MOCK_DISPLAY_NAME = "100 Market Street, St. Louis, St. Louis City, Missouri, 63101, United States";
 	public static final String PROVIDER_NAME = "mock";
 
+	// Sentinel coordinates that trigger an error for testing
+	public static final double ERROR_LAT = 0.0;
+	public static final double ERROR_LON = 0.0;
+
 	@Override
 	public ReverseGeocodeResult reverseGeocode(double lat, double lon) {
+		if (lat == ERROR_LAT && lon == ERROR_LON) {
+			throw new RuntimeException("Simulated geocoding provider failure");
+		}
+
 		return new ReverseGeocodeResult(
 			MOCK_DISPLAY_NAME,
 			new GeocodeAddress(
