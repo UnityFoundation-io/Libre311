@@ -18,6 +18,14 @@
 		unityAuthService.logout();
 		goto('/');
 	}
+
+	function logout_keydown(e: CustomEvent) {
+		const ke = e as unknown as KeyboardEvent;
+		if (ke.key === 'Enter' || ke.key === ' ') {
+			e.preventDefault();
+			logout();
+		}
+	}
 </script>
 
 <Dropdown bind:visible={isUserDropdownVisible}>
@@ -25,6 +33,7 @@
 		<Avatar initials={$user?.username.charAt(0).toUpperCase()} />
 	</button>
 	<Dropdown.Items slot="items">
-		<Dropdown.Items.Item on:click={logout} label="Logout"></Dropdown.Items.Item>
+		<Dropdown.Items.Item label="Logout" on:click={logout} on:keydown={logout_keydown}
+		></Dropdown.Items.Item>
 	</Dropdown.Items>
 </Dropdown>
