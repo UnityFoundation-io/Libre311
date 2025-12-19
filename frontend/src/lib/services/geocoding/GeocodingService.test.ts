@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { formatAddress, type ReverseGeocodeResult } from './GeocodingService';
+import { getFormattedAddress, type ReverseGeocodeResponse } from './GeocodingService';
 
-function createResult(address: ReverseGeocodeResult['address']): ReverseGeocodeResult {
+function createResult(address: ReverseGeocodeResponse['address']): ReverseGeocodeResponse {
 	return {
 		displayName: '100 Market Street, St. Louis, Missouri, 63101, United States',
 		address,
@@ -11,10 +11,10 @@ function createResult(address: ReverseGeocodeResult['address']): ReverseGeocodeR
 	};
 }
 
-describe('formatAddress', () => {
+describe('getFormattedAddress', () => {
 	it('returns displayName when address is null', () => {
 		const result = createResult(null);
-		expect(formatAddress(result)).toBe(result.displayName);
+		expect(getFormattedAddress(result)).toBe(result.displayName);
 	});
 
 	it('formats complete address with all fields', () => {
@@ -29,7 +29,7 @@ describe('formatAddress', () => {
 			country: 'United States',
 			countryCode: 'us'
 		});
-		expect(formatAddress(result)).toBe('100 Market Street, St. Louis, Missouri 63101');
+		expect(getFormattedAddress(result)).toBe('100 Market Street, St. Louis, Missouri 63101');
 	});
 
 	it('handles missing streetNumber', () => {
@@ -44,7 +44,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe('Market Street, St. Louis, Missouri 63101');
+		expect(getFormattedAddress(result)).toBe('Market Street, St. Louis, Missouri 63101');
 	});
 
 	it('handles missing street', () => {
@@ -59,7 +59,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe('100, St. Louis, Missouri 63101');
+		expect(getFormattedAddress(result)).toBe('100, St. Louis, Missouri 63101');
 	});
 
 	it('handles missing city', () => {
@@ -74,7 +74,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe('100 Market Street, Missouri 63101');
+		expect(getFormattedAddress(result)).toBe('100 Market Street, Missouri 63101');
 	});
 
 	it('handles missing state', () => {
@@ -89,7 +89,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe('100 Market Street, St. Louis, 63101');
+		expect(getFormattedAddress(result)).toBe('100 Market Street, St. Louis, 63101');
 	});
 
 	it('handles missing postalCode', () => {
@@ -104,7 +104,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe('100 Market Street, St. Louis, Missouri');
+		expect(getFormattedAddress(result)).toBe('100 Market Street, St. Louis, Missouri');
 	});
 
 	it('handles city only', () => {
@@ -119,7 +119,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe('St. Louis');
+		expect(getFormattedAddress(result)).toBe('St. Louis');
 	});
 
 	it('handles state and postalCode only', () => {
@@ -134,7 +134,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe('Missouri 63101');
+		expect(getFormattedAddress(result)).toBe('Missouri 63101');
 	});
 
 	it('falls back to displayName when all address fields are null', () => {
@@ -149,7 +149,7 @@ describe('formatAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(formatAddress(result)).toBe(result.displayName);
+		expect(getFormattedAddress(result)).toBe(result.displayName);
 	});
 
 	it('handles undefined fields (omitted by backend)', () => {
@@ -164,6 +164,6 @@ describe('formatAddress', () => {
 			country: undefined,
 			countryCode: undefined
 		});
-		expect(formatAddress(result)).toBe('Market Street, St. Louis');
+		expect(getFormattedAddress(result)).toBe('Market Street, St. Louis');
 	});
 });
