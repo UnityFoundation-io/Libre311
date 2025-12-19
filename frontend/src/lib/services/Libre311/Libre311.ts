@@ -550,7 +550,7 @@ export interface Libre311Service extends Open311Service {
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse>;
-	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<DeleteServiceRequestResponse>;
+	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<Boolean>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -669,15 +669,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 		this.nominatimService =
 			props.nominatimService ?? nominatimServiceFactory(getModeFromEnv(import.meta.env));
 	}
-	async deleteServiceRequest(
-		params: DeleteServiceRequestRequest
-	): Promise<DeleteServiceRequestResponse> {
+	async deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<Boolean> {
 		try {
 			const res = await this.axiosInstance.delete(
 				ROUTES.deleteServiceRequest({ ...params, jurisdiction_id: this.jurisdictionId })
 			);
-			const response: DeleteServiceRequestResponse = res.data;
-			return response;
+			return res.status === 204;
 		} catch (error) {
 			console.log(error);
 			throw error;

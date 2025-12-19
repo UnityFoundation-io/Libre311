@@ -34,6 +34,7 @@ import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.uri.UriBuilder;
@@ -241,8 +242,9 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_EDIT_SYSTEM, LIBRE311_REQUEST_EDIT_TENANT, LIBRE311_REQUEST_EDIT_SUBTENANT})
-    public Map<String, Boolean> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @QueryValue("jurisdiction_id") String jurisdictionId){
-        return Map.of("success", serviceRequestService.delete(serviceRequestId, jurisdictionId) > 0);
+    public HttpResponse<?> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @QueryValue("jurisdiction_id") String jurisdictionId){
+        serviceRequestService.delete(serviceRequestId, jurisdictionId);
+        return HttpResponse.status(HttpStatus.NO_CONTENT);
     }
 
     @Get(value =  "/config")
