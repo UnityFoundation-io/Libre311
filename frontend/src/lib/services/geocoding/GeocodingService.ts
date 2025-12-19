@@ -72,13 +72,13 @@ export class GeocodingServiceImpl implements GeocodingService {
 	private baseUrl: string;
 
 	constructor() {
-		const backendUrl = import.meta.env.VITE_BACKEND_URL || '/api';
+		const backendUrl = (import.meta.env.VITE_BACKEND_URL || '/api').replace(/\/$/, '');
 		this.baseUrl = `${backendUrl}/geocode`;
 	}
 
 	async reverseGeocode(lat: number, lon: number): Promise<ReverseGeocodeResponse> {
 		const url = `${this.baseUrl}/reverse?lat=${lat}&lon=${lon}`;
-		const res = await axios.get<unknown>(url);
+		const res = await axios.get<unknown>(url, { timeout: 5000 });
 		return ReverseGeocodeResponseSchema.parse(res.data);
 	}
 }
