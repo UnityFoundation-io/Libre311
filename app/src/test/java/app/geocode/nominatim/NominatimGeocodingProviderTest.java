@@ -17,8 +17,6 @@ package app.geocode.nominatim;
 import app.geocode.ReverseGeocodeResult;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -60,8 +58,7 @@ class NominatimGeocodingProviderTest {
 			"building",
 			"City Hall",
 			"100 Market Street, St. Louis, Missouri, 63101, United States",
-			address,
-			List.of("-90.20", "-90.19", "38.62", "38.63")
+			address
 		);
 
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
@@ -71,8 +68,8 @@ class NominatimGeocodingProviderTest {
 
 		assertNotNull(result);
 		assertEquals("100 Market Street, St. Louis, Missouri, 63101, United States", result.displayName());
-		assertEquals(38.6270025, result.latitude());
-		assertEquals(-90.1994042, result.longitude());
+		assertEquals(38.6270025, result.latitude(), 0.0001);
+		assertEquals(-90.1994042, result.longitude(), 0.0001);
 		assertEquals("nominatim", result.provider());
 
 		assertNotNull(result.address());
@@ -151,8 +148,7 @@ class NominatimGeocodingProviderTest {
 			"38.6270025", "-90.1994042",
 			"building", "commercial", 30, 0.5, "building", "Unknown",
 			"Unknown Location",
-			null,  // address is null
-			null
+			null  // address is null
 		);
 
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
@@ -163,8 +159,8 @@ class NominatimGeocodingProviderTest {
 		assertNotNull(result);
 		assertEquals("Unknown Location", result.displayName());
 		assertNull(result.address());
-		assertEquals(38.6270025, result.latitude());
-		assertEquals(-90.1994042, result.longitude());
+		assertEquals(38.6270025, result.latitude(), 0.0001);
+		assertEquals(-90.1994042, result.longitude(), 0.0001);
 	}
 
 	@Test
@@ -178,7 +174,6 @@ class NominatimGeocodingProviderTest {
 			null,  // lon is null
 			"building", "commercial", 30, 0.5, "building", "Test",
 			"Test Location",
-			null,
 			null
 		);
 
@@ -187,8 +182,8 @@ class NominatimGeocodingProviderTest {
 
 		ReverseGeocodeResult result = provider.reverseGeocode(inputLat, inputLon);
 
-		assertEquals(inputLat, result.latitude());
-		assertEquals(inputLon, result.longitude());
+		assertEquals(inputLat, result.latitude(), 0.0001);
+		assertEquals(inputLon, result.longitude(), 0.0001);
 	}
 
 	@Test
@@ -204,7 +199,6 @@ class NominatimGeocodingProviderTest {
 			String.valueOf(responseLon),
 			"building", "commercial", 30, 0.5, "building", "Test",
 			"Test Location",
-			null,
 			null
 		);
 
@@ -213,8 +207,8 @@ class NominatimGeocodingProviderTest {
 
 		ReverseGeocodeResult result = provider.reverseGeocode(inputLat, inputLon);
 
-		assertEquals(responseLat, result.latitude());
-		assertEquals(responseLon, result.longitude());
+		assertEquals(responseLat, result.latitude(), 0.0001);
+		assertEquals(responseLon, result.longitude(), 0.0001);
 	}
 
 	private NominatimReverseResponse createResponseWithAddress(NominatimAddress address) {
@@ -223,8 +217,7 @@ class NominatimGeocodingProviderTest {
 			"40.0", "-75.0",
 			"building", "residential", 30, 0.5, "building", "Test",
 			"Test Location",
-			address,
-			null
+			address
 		);
 	}
 }

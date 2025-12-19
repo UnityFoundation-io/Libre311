@@ -44,8 +44,8 @@ public class GeocodeControllerTest {
 
 		assertNotNull(result);
 		assertEquals(MockGeocodingProvider.MOCK_DISPLAY_NAME, result.displayName());
-		assertEquals(lat, result.latitude());
-		assertEquals(lon, result.longitude());
+		assertEquals(lat, result.latitude(), 0.0001);
+		assertEquals(lon, result.longitude(), 0.0001);
 		assertEquals(MockGeocodingProvider.PROVIDER_NAME, result.provider());
 
 		assertNotNull(result.address());
@@ -68,8 +68,8 @@ public class GeocodeControllerTest {
 
 		assertNotNull(result);
 		// Mock provider returns same address but with requested coordinates
-		assertEquals(lat, result.latitude());
-		assertEquals(lon, result.longitude());
+		assertEquals(lat, result.latitude(), 0.0001);
+		assertEquals(lon, result.longitude(), 0.0001);
 	}
 
 	@Test

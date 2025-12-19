@@ -18,8 +18,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.serde.annotation.Serdeable;
 
-import java.util.List;
-
 /**
  * Internal DTO for parsing Nominatim reverse geocode response (jsonv2 format).
  */
@@ -39,6 +37,5 @@ public record NominatimReverseResponse(
 	String addresstype,
 	String name,
 	@JsonProperty("display_name") String displayName,
-	NominatimAddress address,
-	List<String> boundingbox
+	NominatimAddress address
 ) {}
