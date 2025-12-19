@@ -242,7 +242,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_REQUEST_EDIT_SYSTEM, LIBRE311_REQUEST_EDIT_TENANT, LIBRE311_REQUEST_EDIT_SUBTENANT})
-    public HttpResponse<?> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @QueryValue("jurisdiction_id") String jurisdictionId){
+    public HttpResponse<?> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @Nullable @QueryValue("jurisdiction_id") String jurisdictionId){
         serviceRequestService.delete(serviceRequestId, jurisdictionId);
         return HttpResponse.status(HttpStatus.NO_CONTENT);
     }
