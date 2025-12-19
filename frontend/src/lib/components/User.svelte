@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Avatar, Button, Dropdown } from 'stwui';
+	import { Avatar, Dropdown } from 'stwui';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
 
