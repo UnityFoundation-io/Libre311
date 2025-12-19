@@ -15,6 +15,7 @@
 package app.util;
 
 import app.geocode.GeocodeAddress;
+import app.geocode.GeocodeException;
 import app.geocode.GeocodingProvider;
 import app.geocode.ReverseGeocodeResult;
 import io.micronaut.context.annotation.Replaces;
@@ -25,7 +26,7 @@ import jakarta.inject.Singleton;
  * Returns predictable fixture data without making external HTTP calls.
  *
  * Special coordinates for testing error scenarios:
- * - lat=0.0, lon=0.0: Throws RuntimeException to simulate provider failure
+ * - lat=0.0, lon=0.0: Throws GeocodeException to simulate provider failure
  */
 @Singleton
 @Replaces(GeocodingProvider.class)
@@ -41,7 +42,7 @@ public class MockGeocodingProvider implements GeocodingProvider {
 	@Override
 	public ReverseGeocodeResult reverseGeocode(double lat, double lon) {
 		if (lat == ERROR_LAT && lon == ERROR_LON) {
-			throw new RuntimeException("Simulated geocoding provider failure");
+			throw new GeocodeException("Simulated geocoding provider failure");
 		}
 
 		return new ReverseGeocodeResult(

@@ -109,7 +109,7 @@ public class GeocodeControllerTest {
 	}
 
 	@Test
-	void testReverseGeocodeWhenProviderFailsReturns500() {
+	void testReverseGeocodeWhenProviderFailsReturns503() {
 		// Use sentinel coordinates that trigger mock provider to throw
 		double lat = MockGeocodingProvider.ERROR_LAT;
 		double lon = MockGeocodingProvider.ERROR_LON;
@@ -121,6 +121,30 @@ public class GeocodeControllerTest {
 			() -> client.toBlocking().retrieve(request, ReverseGeocodeResult.class)
 		);
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus());
+		assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+	}
+
+	@Test
+	void testReverseGeocodeWithLatOutOfRangeReturns400() {
+		HttpRequest<?> request = HttpRequest.GET("/reverse?lat=91&lon=-90.0");
+
+		HttpClientResponseException exception = assertThrows(
+			HttpClientResponseException.class,
+			() -> client.toBlocking().retrieve(request, ReverseGeocodeResult.class)
+		);
+
+		assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+	}
+
+	@Test
+	void testReverseGeocodeWithLonOutOfRangeReturns400() {
+		HttpRequest<?> request = HttpRequest.GET("/reverse?lat=38.0&lon=181");
+
+		HttpClientResponseException exception = assertThrows(
+			HttpClientResponseException.class,
+			() -> client.toBlocking().retrieve(request, ReverseGeocodeResult.class)
+		);
+
+		assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 	}
 }
