@@ -1,25 +1,22 @@
 # Stage 1: Build with Gradle
-FROM gradle:jdk25 AS builder
+FROM gradle:9-jdk25 AS builder
 WORKDIR /workspace
 
 ARG DB_TYPE=mysql
 ARG CLOUD_DB=false
 ENV LIBRE311_DATABASE_TYPE=${DB_TYPE}
 ENV LIBRE311_CLOUD_DB=${CLOUD_DB}
-# 1. Copy Gradle wrapper first (rarely changes)
-COPY gradle/ gradle/
-COPY gradlew gradlew.bat ./
 
 # 2. Copy Gradle config files
 COPY app/gradle.properties app/settings.gradle ./
 
 # 3. Download Gradle
-RUN ./gradlew --version --no-daemon
+RUN gradle --version --no-daemon
 
 COPY --chown=gradle:gradle ./app .
 
 # Run the builder w/ the secret
-RUN ./gradlew buildLayers --no-daemon
+RUN gradle buildLayers --no-daemon
 
 # Stage 2: Create the final image
 FROM eclipse-temurin:25-jre

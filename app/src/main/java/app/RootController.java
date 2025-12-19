@@ -20,6 +20,7 @@ import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
 import app.dto.servicedefinition.ServiceDefinitionDTO;
+import app.security.RequiresPermissions;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
@@ -33,6 +34,7 @@ import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.uri.UriBuilder;
@@ -49,6 +51,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+
+import static app.security.Permission.*;
 
 @Controller("/api")
 @Secured(SecurityRule.IS_ANONYMOUS)
@@ -232,6 +236,15 @@ public class RootController {
         ServiceRequestList serviceRequestList = new ServiceRequestList(List.of(serviceRequestDTO));
 
         return xmlMapper.writeValueAsString(serviceRequestList);
+    }
+
+    @Delete(uris = {"/requests/{service_request_id}{?jurisdiction_id}", "/requests/{service_request_id}.json{?jurisdiction_id}"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_REQUEST_EDIT_SYSTEM, LIBRE311_REQUEST_EDIT_TENANT, LIBRE311_REQUEST_EDIT_SUBTENANT})
+    public HttpResponse<?> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @Nullable @QueryValue("jurisdiction_id") String jurisdictionId){
+        serviceRequestService.delete(serviceRequestId, jurisdictionId);
+        return HttpResponse.status(HttpStatus.NO_CONTENT);
     }
 
     @Get(value =  "/config")

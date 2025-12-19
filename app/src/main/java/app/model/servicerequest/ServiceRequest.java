@@ -126,6 +126,8 @@ public class ServiceRequest {
     @DateUpdated
     private Instant dateUpdated;
 
+    private boolean deleted;
+
     public ServiceRequest() {
     }
 
@@ -364,6 +366,14 @@ public class ServiceRequest {
     @Transient
     public String getLongitude(){
         return String.valueOf(this.location.getX());
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
 }
