@@ -63,8 +63,8 @@
 	}
 
 	// pass svelte checks
-	const telAutocomplete = "tel" as any;
-	const emailAutocomplete = "email" as any;
+	const telAutocomplete = 'tel' as any;
+	const emailAutocomplete = 'email' as any;
 </script>
 
 <form class="flex h-full items-center justify-center">

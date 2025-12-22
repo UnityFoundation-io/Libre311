@@ -22,8 +22,8 @@
 	const { onChange, onSubmit } = dispatchEventFunctionFactory(dispatch);
 
 	// pass svelte checks
-	const passwordAutocomplete = "current-password" as any;
-	const emailAutocomplete = "email" as any;
+	const passwordAutocomplete = 'current-password' as any;
+	const emailAutocomplete = 'email' as any;
 </script>
 
 <div
