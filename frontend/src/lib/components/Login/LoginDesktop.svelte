@@ -88,11 +88,11 @@
 				id="password-desktop"
 				type="password"
 				name="password-desktop"
-				autocomplete={passwordAutocomplete}
 				showPasswordToggle={true}
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
 				value={passwordInput.value}
+				autocomplete={passwordAutocomplete}
 				on:change={(e) => onChange(e, 'password')}
 			>
 				<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
