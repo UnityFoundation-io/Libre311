@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class NominatimGeocodingProviderTest {
 
+	private static final String TEST_URL = "http://localhost:8088";
+
 	@Test
 	void testMapsAllFieldsCorrectly() {
 		NominatimAddress address = new NominatimAddress(
@@ -60,7 +62,7 @@ class NominatimGeocodingProviderTest {
 		);
 
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
-		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient);
+		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient, TEST_URL);
 
 		ReverseGeocodeResult result = provider.reverseGeocode(38.6270025, -90.1994042);
 
@@ -101,7 +103,7 @@ class NominatimGeocodingProviderTest {
 
 		NominatimReverseResponse response = createResponseWithAddress(address);
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
-		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient);
+		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient, TEST_URL);
 
 		ReverseGeocodeResult result = provider.reverseGeocode(40.0, -75.0);
 
@@ -127,7 +129,7 @@ class NominatimGeocodingProviderTest {
 
 		NominatimReverseResponse response = createResponseWithAddress(address);
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
-		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient);
+		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient, TEST_URL);
 
 		ReverseGeocodeResult result = provider.reverseGeocode(40.0, -75.0);
 
@@ -153,7 +155,7 @@ class NominatimGeocodingProviderTest {
 
 		NominatimReverseResponse response = createResponseWithAddress(address);
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
-		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient);
+		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient, TEST_URL);
 
 		ReverseGeocodeResult result = provider.reverseGeocode(40.0, -75.0);
 
@@ -171,7 +173,7 @@ class NominatimGeocodingProviderTest {
 		);
 
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
-		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient);
+		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient, TEST_URL);
 
 		ReverseGeocodeResult result = provider.reverseGeocode(38.6270025, -90.1994042);
 
@@ -197,7 +199,7 @@ class NominatimGeocodingProviderTest {
 		);
 
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
-		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient);
+		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient, TEST_URL);
 
 		ReverseGeocodeResult result = provider.reverseGeocode(inputLat, inputLon);
 
@@ -222,7 +224,7 @@ class NominatimGeocodingProviderTest {
 		);
 
 		NominatimClient stubClient = (lat, lon, userAgent) -> response;
-		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient);
+		NominatimGeocodingProvider provider = new NominatimGeocodingProvider(stubClient, TEST_URL);
 
 		ReverseGeocodeResult result = provider.reverseGeocode(inputLat, inputLon);
 

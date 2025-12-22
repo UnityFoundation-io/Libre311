@@ -18,6 +18,7 @@ import app.geocode.GeocodeAddress;
 import app.geocode.GeocodingProvider;
 import app.geocode.ReverseGeocodeResult;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.http.client.exceptions.HttpClientException;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
@@ -38,15 +39,19 @@ public class NominatimGeocodingProvider implements GeocodingProvider {
 	private static final String PROVIDER_NAME = "nominatim";
 
 	private final NominatimClient nominatimClient;
+	private final String nominatimUrl;
 
-	public NominatimGeocodingProvider(NominatimClient nominatimClient) {
+	public NominatimGeocodingProvider(
+			NominatimClient nominatimClient,
+			@Value("${micronaut.http.services.nominatim.url}") String nominatimUrl) {
 		this.nominatimClient = nominatimClient;
-		LOG.debug("NominatimGeocodingProvider initialized");
+		this.nominatimUrl = nominatimUrl;
+		LOG.info("NominatimGeocodingProvider initialized with URL: {}", nominatimUrl);
 	}
 
 	@Override
 	public ReverseGeocodeResult reverseGeocode(double lat, double lon) {
-		LOG.debug("Calling Nominatim API for reverse geocode: lat={}, lon={}", lat, lon);
+		LOG.debug("Calling Nominatim API at {} for reverse geocode: lat={}, lon={}", nominatimUrl, lat, lon);
 		try {
 			NominatimReverseResponse response = nominatimClient.reverseGeocode(lat, lon, USER_AGENT);
 			LOG.debug("Nominatim raw response: placeId={}, displayName={}, address={}",
@@ -55,15 +60,16 @@ public class NominatimGeocodingProvider implements GeocodingProvider {
 			LOG.debug("Mapped result: displayName={}, address={}", result.displayName(), result.address());
 			return result;
 		} catch (HttpClientResponseException e) {
-			LOG.warn("Nominatim returned error status {} for lat={}, lon={}: {}",
-				e.getStatus().getCode(), lat, lon, e.getMessage());
+			LOG.warn("Nominatim at {} returned error status {} for lat={}, lon={}: {}",
+				nominatimUrl, e.getStatus().getCode(), lat, lon, e.getMessage());
 			return createFallbackResult(lat, lon);
 		} catch (HttpClientException e) {
-			LOG.warn("Failed to connect to Nominatim for lat={}, lon={}: {}", lat, lon, e.getMessage());
+			LOG.warn("Failed to connect to Nominatim at {} for lat={}, lon={}: {}",
+				nominatimUrl, lat, lon, e.getMessage());
 			return createFallbackResult(lat, lon);
 		} catch (Exception e) {
-			LOG.error("Unexpected error calling Nominatim API for lat={}, lon={}: {}",
-				lat, lon, e.getMessage(), e);
+			LOG.error("Unexpected error calling Nominatim API at {} for lat={}, lon={}: {}",
+				nominatimUrl, lat, lon, e.getMessage(), e);
 			return createFallbackResult(lat, lon);
 		}
 	}
