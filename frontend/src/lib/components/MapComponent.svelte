@@ -83,7 +83,12 @@
 	// flyToTarget takes precedence when set (e.g., when a marker is selected)
 	$: if (map) {
 		if (flyToTarget) {
-			map.flyTo(flyToTarget.latLng, flyToTarget.zoom, flyToOptions);
+			// flyTo requires an existing view; use setView for initial positioning
+			if (map.getZoom() === undefined) {
+				map.setView(flyToTarget.latLng, flyToTarget.zoom);
+			} else {
+				map.flyTo(flyToTarget.latLng, flyToTarget.zoom, flyToOptions);
+			}
 		} else if (bounds) {
 			map.fitBounds(bounds);
 		} else if (center && zoom) {
