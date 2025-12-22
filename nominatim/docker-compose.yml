@@ -24,6 +24,9 @@ services:
       REVERSE_ONLY: ${REVERSE_ONLY:-false}
       # Flatnode file for faster import (uses more disk, less RAM)
       FLATNODE_FILE: ${FLATNODE_FILE:-}
+      # TIGER address data for US house number interpolation
+      # Downloads ~600MB, adds 30-60 min to import, but enables residential addresses
+      IMPORT_TIGER_ADDRESSES: ${IMPORT_TIGER_ADDRESSES:-true}
     volumes:
       # Persistent data volume
       - nominatim-data:/var/lib/postgresql/16/main
