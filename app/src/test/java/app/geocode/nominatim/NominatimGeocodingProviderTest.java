@@ -28,20 +28,18 @@ class NominatimGeocodingProviderTest {
 	@Test
 	void testMapsAllFieldsCorrectly() {
 		NominatimAddress address = new NominatimAddress(
-			"100",
-			"Market Street",
-			"Downtown",
-			"Suburb Area",
-			"St. Louis",
-			null,
-			null,
-			null,
-			"St. Louis City",
-			"Missouri",
-			"US-MO",
-			"63101",
-			"United States",
-			"us"
+			"100",           // houseNumber
+			"Market Street", // road
+			"Downtown",      // neighbourhood
+			"St. Louis",     // city
+			null,            // town
+			null,            // village
+			null,            // municipality
+			"St. Louis City",// county
+			"Missouri",      // state
+			"63101",         // postcode
+			"United States", // country
+			"us"             // countryCode
 		);
 
 		NominatimReverseResponse response = new NominatimReverseResponse(
@@ -87,10 +85,18 @@ class NominatimGeocodingProviderTest {
 	@Test
 	void testResolveCityFallsBackToTown() {
 		NominatimAddress address = new NominatimAddress(
-			"1", "Main St", null, null,
-			null,  // city is null
-			"Springfield",  // town
-			null, null, null, "Pennsylvania", null, "19000", "United States", "us"
+			"1",           // houseNumber
+			"Main St",     // road
+			null,          // neighbourhood
+			null,          // city
+			"Springfield", // town
+			null,          // village
+			null,          // municipality
+			null,          // county
+			"Pennsylvania",// state
+			"19000",       // postcode
+			"United States", // country
+			"us"           // countryCode
 		);
 
 		NominatimReverseResponse response = createResponseWithAddress(address);
@@ -105,11 +111,18 @@ class NominatimGeocodingProviderTest {
 	@Test
 	void testResolveCityFallsBackToVillage() {
 		NominatimAddress address = new NominatimAddress(
-			"1", "Main St", null, null,
-			null,  // city is null
-			null,  // town is null
-			"Small Village",  // village
-			null, null, "Pennsylvania", null, "19000", "United States", "us"
+			"1",             // houseNumber
+			"Main St",       // road
+			null,            // neighbourhood
+			null,            // city
+			null,            // town
+			"Small Village", // village
+			null,            // municipality
+			null,            // county
+			"Pennsylvania",  // state
+			"19000",         // postcode
+			"United States", // country
+			"us"             // countryCode
 		);
 
 		NominatimReverseResponse response = createResponseWithAddress(address);
@@ -124,12 +137,18 @@ class NominatimGeocodingProviderTest {
 	@Test
 	void testResolveCityFallsBackToMunicipality() {
 		NominatimAddress address = new NominatimAddress(
-			"1", "Main St", null, null,
-			null,  // city is null
-			null,  // town is null
-			null,  // village is null
-			"Rural Municipality",  // municipality
-			null, "Pennsylvania", null, "19000", "United States", "us"
+			"1",                  // houseNumber
+			"Main St",            // road
+			null,                 // neighbourhood
+			null,                 // city
+			null,                 // town
+			null,                 // village
+			"Rural Municipality", // municipality
+			null,                 // county
+			"Pennsylvania",       // state
+			"19000",              // postcode
+			"United States",      // country
+			"us"                  // countryCode
 		);
 
 		NominatimReverseResponse response = createResponseWithAddress(address);

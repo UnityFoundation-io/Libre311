@@ -38,10 +38,10 @@ public class GeocodeController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(GeocodeController.class);
 
-	private final GeocodeService geocodeService;
+	private final GeocodingProvider geocodingProvider;
 
-	public GeocodeController(GeocodeService geocodeService) {
-		this.geocodeService = geocodeService;
+	public GeocodeController(GeocodingProvider geocodingProvider) {
+		this.geocodingProvider = geocodingProvider;
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class GeocodeController {
 	) {
 		LOG.debug("Reverse geocode request received: lat={}, lon={}", lat, lon);
 		validateCoordinates(lat, lon);
-		ReverseGeocodeResult result = geocodeService.reverseGeocode(lat, lon);
+		ReverseGeocodeResult result = geocodingProvider.reverseGeocode(lat, lon);
 		LOG.debug("Reverse geocode result: displayName={}, address={}", result.displayName(), result.address());
 		return result;
 	}
