@@ -18,25 +18,22 @@ npm run dev -- --open
 
 Copy `.env.example` to `.env` and configure the following variables:
 
-| Variable                    | Description                                                     | Example                     |
-| --------------------------- | --------------------------------------------------------------- | --------------------------- |
-| `VITE_BACKEND_URL`          | URL to the Libre311 API server                                  | `http://localhost:8080/api` |
-| `VITE_GOOGLE_RECAPTCHA_KEY` | Google reCAPTCHA site key                                       | `6Lc1rB4sAAAAA...`          |
-| `VITE_NOMINATIM_MODE`       | Set to `mock` to use fixture data instead of live Nominatim API | `mock` or empty             |
+| Variable                    | Description                    | Example                     |
+| --------------------------- | ------------------------------ | --------------------------- |
+| `VITE_BACKEND_URL`          | URL to the Libre311 API server | `http://localhost:8080/api` |
+| `VITE_GOOGLE_RECAPTCHA_KEY` | Google reCAPTCHA site key      | `6Lc1rB4sAAAAA...`          |
 
-### Nominatim Service
+### Geocoding Service
 
-The frontend uses [Nominatim](https://nominatim.openstreetmap.org/) for reverse geocoding (converting coordinates to addresses).
+The frontend uses the backend API for reverse geocoding (converting coordinates to addresses). The backend proxies requests to [Nominatim](https://nominatim.openstreetmap.org/), which centralizes geocoding configuration and avoids CORS issues.
 
-- **Development**: Requests are proxied through Vite to bypass CORS restrictions
-- **Docker**: Set `VITE_NOMINATIM_MODE=mock` in `.env.docker` to use fixture data
-- **Production**: Requests go directly to Nominatim (or your configured endpoint)
+All geocoding requests go through:
 
-To use mock data during development or testing:
-
-```bash
-VITE_NOMINATIM_MODE=mock
 ```
+{VITE_BACKEND_URL}/geocode/reverse?lat={lat}&lon={lon}
+```
+
+No additional frontend configuration is required for geocoding.
 
 ## Building
 
@@ -66,4 +63,3 @@ npm run test:integration
 For Docker deployments, use `.env.docker` to configure:
 
 - Backend URL pointing to the API container
-- Optional Mock Nominatim service to avoid external dependencies

@@ -22,6 +22,7 @@
 	import MapGeosearch from '$lib/components/MapGeosearch.svelte';
 	import type { ComponentEvents } from 'svelte';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { getFormattedAddress } from '$lib/services/geocoding';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
@@ -70,9 +71,8 @@
 
 		try {
 			const res = await libre311.reverseGeocode(centerPos);
-			params.address_string = res.display_name;
-		} catch (error) {
-			console.error('[confirmLocation] Unexpected error:', error);
+			params.address_string = getFormattedAddress(res);
+		} catch {
 			params.address_string = `Location: ${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
 		} finally {
 			await goto(linkResolver.createIssuePageNext($page.url));
