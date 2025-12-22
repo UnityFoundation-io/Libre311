@@ -31,7 +31,7 @@
 		{/if}
 
 		<div class="mb-2 mt-2 flow-root">
-			<a href={detailsLink} class="float-left">
+			<a href={detailsLink} class="float-left hover:opacity-80">
 				<h1 class="text-lg underline">{serviceRequest.service_name}</h1>
 			</a>
 			<div class="float-right">
