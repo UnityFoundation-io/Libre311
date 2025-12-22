@@ -9,6 +9,25 @@ This directory contains everything needed to run a local Nominatim geocoding ser
 - **Coverage**: Greater St. Louis Metropolitan Area (St. Louis City, St. Louis County, and surrounding areas)
 - **Port**: 8088 (to avoid conflict with backend on 8080)
 
+## TIGER Address Data
+
+By default, the setup imports [TIGER address data](https://nominatim.org/release-docs/latest/customize/Tiger/) from the US Census Bureau. This enables:
+
+- **House number interpolation** - Resolves specific street addresses (e.g., "1234 Oak Street") even when not explicitly mapped in OSM
+- **Better residential coverage** - Most US residential addresses work out of the box
+
+| Setting | Impact |
+|---------|--------|
+| Downloads | ~600 MB additional data |
+| Import time | +30-60 minutes |
+| Disk space | +1-2 GB |
+
+To disable TIGER import (faster setup, less coverage):
+```bash
+# In .env
+IMPORT_TIGER_ADDRESSES=false
+```
+
 ## Quick Start
 
 ### 1. Start Nominatim
@@ -20,7 +39,7 @@ docker compose up -d
 
 ### 2. Monitor Import Progress
 
-The first startup downloads OSM data and imports it into PostgreSQL. This takes **15-30 minutes** for the Missouri extract.
+The first startup downloads OSM data and imports it into PostgreSQL. This takes **45-90 minutes** with TIGER data (default), or **15-30 minutes** without TIGER.
 
 ```bash
 # Watch import logs
@@ -54,10 +73,10 @@ curl "http://localhost:8088/reverse?lat=38.6270&lon=-90.1994&format=json"
 
 | Resource | Requirement | Notes |
 |----------|-------------|-------|
-| Disk Space | ~3-5 GB | After import (156 MB download) |
+| Disk Space | ~5-8 GB | After import with TIGER (~3-5 GB without) |
 | Memory | 4-6 GB | During import; 1-2 GB at runtime |
 | CPU | 4+ cores | For import; fewer at runtime |
-| Import Time | 15-30 min | Missouri extract on modern laptop |
+| Import Time | 45-90 min | With TIGER (default); 15-30 min without |
 
 ## File Structure
 
