@@ -22,7 +22,9 @@
 	const { onChange, onSubmit } = dispatchEventFunctionFactory(dispatch);
 
 	// pass svelte checks
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const passwordAutocomplete = 'current-password' as any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const emailAutocomplete = 'email' as any;
 </script>
 
