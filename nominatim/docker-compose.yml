@@ -1,0 +1,49 @@
+services:
+  nominatim:
+    image: mediagis/nominatim:4.5
+    container_name: nominatim
+    restart: unless-stopped
+    ports:
+      - "${NOMINATIM_PORT:-8088}:8080"
+    environment:
+      # OSM data source - Missouri state (includes St. Louis metro)
+      PBF_URL: ${PBF_URL:-https://download.geofabrik.de/north-america/us/missouri-latest.osm.pbf}
+      # Replication URL for updates (optional)
+      REPLICATION_URL: ${REPLICATION_URL:-https://download.geofabrik.de/north-america/us/missouri-updates/}
+      # Import style - 'full' for complete address data, 'address' for faster import
+      IMPORT_STYLE: ${IMPORT_STYLE:-full}
+      # Number of threads for import (adjust based on CPU cores)
+      THREADS: ${THREADS:-4}
+      # PostgreSQL tuning for local development
+      POSTGRES_SHARED_BUFFERS: ${POSTGRES_SHARED_BUFFERS:-2GB}
+      POSTGRES_MAINTENANCE_WORK_MEM: ${POSTGRES_MAINTENANCE_WORK_MEM:-1GB}
+      POSTGRES_EFFECTIVE_CACHE_SIZE: ${POSTGRES_EFFECTIVE_CACHE_SIZE:-4GB}
+      POSTGRES_SYNCHRONOUS_COMMIT: ${POSTGRES_SYNCHRONOUS_COMMIT:-off}
+      POSTGRES_MAX_WAL_SIZE: ${POSTGRES_MAX_WAL_SIZE:-1GB}
+      # Reverse-only mode (set to true to skip search index for faster import)
+      REVERSE_ONLY: ${REVERSE_ONLY:-false}
+      # Flatnode file for faster import (uses more disk, less RAM)
+      FLATNODE_FILE: ${FLATNODE_FILE:-}
+    volumes:
+      # Persistent data volume
+      - nominatim-data:/var/lib/postgresql/16/main
+      # Optional: mount local OSM file instead of downloading
+      # - ./data:/nominatim/data
+    shm_size: ${SHM_SIZE:-1g}
+    # Resource limits for local development
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-6G}
+        reservations:
+          memory: ${MEMORY_RESERVATION:-2G}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
+volumes:
+  nominatim-data:
+    driver: local
