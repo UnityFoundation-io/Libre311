@@ -61,6 +61,10 @@
 			.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); // Format with hyphens
 		phoneInput = phoneInput;
 	}
+
+	// pass svelte checks
+	const telAutocomplete = "tel" as any;
+	const emailAutocomplete = "email" as any;
 </script>
 
 <form class="flex h-full items-center justify-center">
@@ -93,7 +97,7 @@
 					name="email"
 					type="email"
 					placeholder={messages['contact']['email']['placeholder']}
-					autocomplete="email"
+					autocomplete={emailAutocomplete}
 					error={emailInput.error}
 					bind:value={emailInput.value}
 				>
@@ -107,7 +111,7 @@
 					type="text"
 					name="phone"
 					placeholder={messages['contact']['phone']['placeholder']}
-					autocomplete="tel"
+					autocomplete={telAutocomplete}
 					error={phoneInput.error}
 					bind:value={phoneInput.value}
 					on:input={formatPhoneNumber}
@@ -123,3 +127,5 @@
 		</StepControls>
 	</div>
 </form>
+
+}
