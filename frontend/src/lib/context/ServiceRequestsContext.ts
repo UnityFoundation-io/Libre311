@@ -49,20 +49,29 @@ export function createServiceRequestsContext(
 
 			selectedServiceRequest.set(selected);
 		} else {
-			// this covers a bit of an edge case where the user navigated straight to the page and we don't have any incidents loaded
-			// so we need to fetch the specific ServiceRequest, add it to our serviceRequestsMapStore, and update the serviceRequests store.
+			// User navigated directly to a detail page (e.g., page refresh)
+			// Fetch filtered service requests to populate the table, then select the specific one
 			try {
-				const res = await libreService.getServiceRequest({
-					service_request_id: +page.params.issue_id
-				});
-				selectedServiceRequest.set(res);
-				const asList: ServiceRequestsResponse = {
-					serviceRequests: [res],
-					metadata: {
-						pagination: EMPTY_PAGINATION
-					}
-				};
-				serviceRequestsResponse.set(asAsyncSuccess(asList));
+				const updatedParams = FilteredServiceRequestsParamsMapper.toRequestParams(
+					page.url.searchParams
+				);
+				const res = await libreService.getServiceRequests(updatedParams);
+				serviceRequestsResponse.set(asAsyncSuccess(res));
+
+				// Find and select the specific service request from the list
+				const selected = res.serviceRequests.find(
+					(req) => req.service_request_id === +page.params.issue_id
+				);
+
+				if (selected) {
+					selectedServiceRequest.set(selected);
+				} else {
+					// Request not in filtered results - fetch it individually and add to list
+					const singleRequest = await libreService.getServiceRequest({
+						service_request_id: +page.params.issue_id
+					});
+					selectedServiceRequest.set(singleRequest);
+				}
 			} catch (error) {
 				serviceRequestsResponse.set(asAsyncFailure(error));
 			}
