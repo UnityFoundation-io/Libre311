@@ -4,7 +4,6 @@ import {
 	type Libre311Service,
 	type ServiceRequest,
 	type ServiceRequestsResponse,
-	EMPTY_PAGINATION,
 	type FilteredServiceRequestsParams
 } from '$lib/services/Libre311/Libre311';
 import {

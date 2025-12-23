@@ -10,13 +10,13 @@
 /* WCAG 2.4.7 Focus Visible - Add visible focus indicators for keyboard navigation */
 .stwui-button:focus-visible,
 button:focus-visible,
-a[role="button"]:focus-visible {
+a[role='button']:focus-visible {
 	outline: 2px solid hsl(var(--primary));
 	outline-offset: 2px;
 }
 
 /* Ensure focus ring is visible on all interactive elements */
-[tabindex]:focus-visible:not([tabindex="-1"]) {
+[tabindex]:focus-visible:not([tabindex='-1']) {
 	outline: 2px solid hsl(var(--primary));
 	outline-offset: 2px;
 }
