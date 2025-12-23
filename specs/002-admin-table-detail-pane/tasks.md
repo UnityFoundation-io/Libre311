@@ -66,13 +66,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Configure detail pane slot to receive child route content in frontend/src/routes/issues/table/+layout.svelte
-- [ ] T014 [US2] Pass detailPaneOpen prop based on $page.params.issue_id presence in frontend/src/routes/issues/table/+layout.svelte
-- [ ] T015 [US2] Verify ServiceRequest component renders in detail-pane slot in frontend/src/routes/issues/table/[issue_id]/+page.svelte
-- [ ] T016 [US2] Verify row highlighting via existing #selected CSS styling
-- [ ] T017 [US2] Test split view layout with 400px detail pane and remaining table width
+- [X] T013 [US2] Configure detail pane slot to receive child route content in frontend/src/routes/issues/table/+layout.svelte
+- [X] T014 [US2] Pass detailPaneOpen prop based on $page.params.issue_id presence in frontend/src/routes/issues/table/+layout.svelte
+- [X] T015 [US2] Verify ServiceRequest component renders in detail-pane slot in frontend/src/routes/issues/table/[issue_id]/+page.svelte
+- [X] T016 [US2] Verify row highlighting via existing #selected CSS styling
+- [X] T017 [US2] Test split view layout with 400px detail pane and remaining table width
 
-**Checkpoint**: User Story 2 complete - clicking row opens detail pane in split view
+**Checkpoint**: User Story 2 complete - clicking row opens detail pane in split view ✅
 
 ---
 
@@ -84,12 +84,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] Add Close button to detail pane header in frontend/src/routes/issues/table/[issue_id]/+page.svelte
-- [ ] T019 [US3] Implement Close button navigation to /issues/table in frontend/src/routes/issues/table/[issue_id]/+page.svelte
-- [ ] T020 [US3] Verify row deselection styling when navigating away from [issue_id] route
-- [ ] T021 [US3] Verify detail pane closes with slide-out animation
+- [X] T018 [US3] Add Close button to detail pane header in frontend/src/routes/issues/table/[issue_id]/+page.svelte
+- [X] T019 [US3] Implement Close button navigation to /issues/table in frontend/src/routes/issues/table/[issue_id]/+page.svelte
+- [X] T020 [US3] Verify row deselection styling when navigating away from [issue_id] route
+- [X] T021 [US3] Verify detail pane closes with slide-out animation
 
-**Checkpoint**: User Story 3 complete - Close button returns to full-width table
+**Checkpoint**: User Story 3 complete - Close button returns to full-width table ✅
 
 ---
 
@@ -101,9 +101,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T022 [US4] Verify existing Update functionality works in new detail pane context in frontend/src/lib/components/ServiceRequest.svelte
-- [ ] T023 [US4] Ensure table data refreshes after update via context in frontend/src/lib/context/ServiceRequestsContext.ts
-- [ ] T024 [US4] Verify detail pane stays open after successful update (optional UX enhancement per research.md)
+- [X] T022 [US4] Verify existing Update functionality works in new detail pane context in frontend/src/lib/components/ServiceRequest.svelte
+- [X] T023 [US4] Ensure table data refreshes after update via context in frontend/src/lib/context/ServiceRequestsContext.ts
+- [X] T024 [US4] Verify detail pane stays open after successful update (optional UX enhancement per research.md)
 
 **Checkpoint**: User Story 4 complete - Update functionality works in detail pane
 

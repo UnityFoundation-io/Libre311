@@ -25,6 +25,7 @@ export type ServiceRequestsContext = {
 	selectedServiceRequest: Readable<Maybe<ServiceRequest>>;
 	serviceRequestsResponse: Readable<AsyncResult<ServiceRequestsResponse>>;
 	applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL): void;
+	refreshSelectedServiceRequest(updatedServiceRequest: ServiceRequest): void;
 };
 
 export function createServiceRequestsContext(
@@ -98,10 +99,30 @@ export function createServiceRequestsContext(
 		goto(`${url.pathname}?${queryParams.toString()}`);
 	}
 
+	function refreshSelectedServiceRequest(updatedServiceRequest: ServiceRequest) {
+		selectedServiceRequest.set(updatedServiceRequest);
+
+		const currentResponse = get(serviceRequestsResponse);
+		if (currentResponse.type === 'success') {
+			const updatedServiceRequests = currentResponse.value.serviceRequests.map((req) =>
+				req.service_request_id === updatedServiceRequest.service_request_id
+					? updatedServiceRequest
+					: req
+			);
+			serviceRequestsResponse.set(
+				asAsyncSuccess({
+					...currentResponse.value,
+					serviceRequests: updatedServiceRequests
+				})
+			);
+		}
+	}
+
 	const ctx: ServiceRequestsContext = {
 		selectedServiceRequest,
 		serviceRequestsResponse,
-		applyServiceRequestParams
+		applyServiceRequestParams,
+		refreshSelectedServiceRequest
 	};
 
 	setContext(key, ctx);

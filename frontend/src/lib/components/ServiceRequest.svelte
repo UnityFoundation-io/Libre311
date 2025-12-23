@@ -7,6 +7,7 @@
 	import ServiceRequestUpdate from './ServiceRequestUpdate.svelte';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
@@ -16,6 +17,7 @@
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 	const alert = useLibre311Context().alert;
+	const { refreshSelectedServiceRequest } = useServiceRequestsContext();
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -56,6 +58,12 @@
 		try {
 			await libre311.updateServiceRequest(e.detail);
 
+			const updatedRequest = await libre311.getServiceRequest({
+				service_request_id: serviceRequest.service_request_id
+			});
+
+			refreshSelectedServiceRequest(updatedRequest);
+
 			isUpdateButtonClicked = false;
 
 			alert({
@@ -63,8 +71,6 @@
 				title: 'Success',
 				description: 'Your service request has been updated'
 			});
-
-			goto(back);
 		} catch (error) {
 			alertError(error);
 		}
