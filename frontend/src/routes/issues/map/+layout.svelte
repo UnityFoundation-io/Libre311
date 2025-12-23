@@ -25,7 +25,7 @@
 	import { matchesDesktopMedia } from '$lib/utils/functions';
 	import CreateServiceRequestButton from '$lib/components/CreateServiceRequestButton.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
-	import { KEYBOARD_PAN_DELTA_COARSE } from '$lib/constants/map';
+	import { KEYBOARD_PAN_DELTA_COARSE, SELECTION_ZOOM_LEVEL } from '$lib/constants/map';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const libre311 = useLibre311Context().service;
@@ -33,6 +33,17 @@
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
 	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
+
+	// Compute flyTo target when a service request is selected
+	$: flyToTarget = $selectedServiceRequestStore
+		? {
+				latLng: [
+					+$selectedServiceRequestStore.lat,
+					+$selectedServiceRequestStore.long
+				] as LatLngTuple,
+				zoom: SELECTION_ZOOM_LEVEL
+			}
+		: undefined;
 
 	function isSelected(
 		serviceRequest: ServiceRequest,
@@ -73,6 +84,7 @@
 			keyboardPanDelta={KEYBOARD_PAN_DELTA_COARSE}
 			controlFactories={[mapCenterControlFactory]}
 			bounds={mapBounds}
+			{flyToTarget}
 		>
 			{#if $serviceRequestsResponseStore.type === 'success'}
 				{#each $serviceRequestsResponseStore.value.serviceRequests as req (req.service_request_id)}

@@ -21,6 +21,10 @@
 	export let controlOps: L.ControlOptions = { position: 'topleft' };
 	export let keyboardPanDelta: number = KEYBOARD_PAN_DELTA_FINE;
 
+	// Configuration for animated flyTo when selecting a marker
+	export let flyToTarget: { latLng: L.LatLngExpression; zoom: number } | undefined = undefined;
+	export let flyToOptions: L.ZoomPanOptions = { duration: 0.4 };
+
 	const dispatch = createEventDispatcher<Events>();
 
 	let map: L.Map;
@@ -75,8 +79,17 @@
 		}
 	}
 
+	// Handle map view initialization and updates
+	// flyToTarget takes precedence when set (e.g., when a marker is selected)
 	$: if (map) {
-		if (bounds) {
+		if (flyToTarget) {
+			// flyTo requires an existing view; use setView for initial positioning
+			if (map.getZoom() === undefined) {
+				map.setView(flyToTarget.latLng, flyToTarget.zoom);
+			} else {
+				map.flyTo(flyToTarget.latLng, flyToTarget.zoom, flyToOptions);
+			}
+		} else if (bounds) {
 			map.fitBounds(bounds);
 		} else if (center && zoom) {
 			map.setView(center, zoom);
