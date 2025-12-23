@@ -25,9 +25,9 @@
 	/**
 	 * Breakpoint (in pixels) below which mobile behavior activates.
 	 * On mobile, detail pane replaces table entirely instead of split view.
-	 * @default 769
+	 * @default 768
 	 */
-	export let mobileBreakpoint = 769;
+	export let mobileBreakpoint = 768;
 
 	const dispatch = createEventDispatcher<{ close: void }>();
 
@@ -36,6 +36,9 @@
 
 	// Track reduced motion preference (WCAG 2.3.3)
 	let prefersReducedMotion = false;
+
+	// Track mobile viewport state using JavaScript (CSS media queries can't use CSS variables)
+	let isMobile = false;
 
 	onMount(() => {
 		if (browser) {
@@ -48,7 +51,17 @@
 			};
 			mediaQuery.addEventListener('change', handleChange);
 
-			return () => mediaQuery.removeEventListener('change', handleChange);
+			// Track mobile viewport using the configurable breakpoint
+			const checkMobile = () => {
+				isMobile = window.innerWidth <= mobileBreakpoint;
+			};
+			checkMobile();
+			window.addEventListener('resize', checkMobile);
+
+			return () => {
+				mediaQuery.removeEventListener('change', handleChange);
+				window.removeEventListener('resize', checkMobile);
+			};
 		}
 	});
 
@@ -72,8 +85,8 @@
 
 <div
 	class="layout-container"
+	class:is-mobile={isMobile}
 	style:--detail-pane-width={detailPaneWidth}
-	style:--mobile-breakpoint="{mobileBreakpoint}px"
 	style:grid-template-columns={gridColumns}
 >
 	{#if detailPaneOpen}
@@ -88,7 +101,7 @@
 		</aside>
 	{/if}
 
-	<main class="table-area" class:hidden-on-mobile={detailPaneOpen}>
+	<main class="table-area" class:hidden-on-mobile={detailPaneOpen && isMobile}>
 		<slot name="table" />
 	</main>
 </div>
@@ -116,26 +129,25 @@
 		flex-direction: column;
 	}
 
-	/* Mobile styles: detail pane replaces table entirely */
-	@media (max-width: 768px) {
-		.layout-container {
-			grid-template-columns: 1fr !important;
-		}
+	/* Mobile styles: detail pane replaces table entirely.
+	   Uses JS-based detection via .is-mobile class for configurable breakpoint. */
+	.layout-container.is-mobile {
+		grid-template-columns: 1fr !important;
+	}
 
-		.detail-pane {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			width: 100%;
-			z-index: 10;
-			box-shadow: none;
-			border-right: none;
-		}
+	.is-mobile .detail-pane {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: 100%;
+		z-index: 10;
+		box-shadow: none;
+		border-right: none;
+	}
 
-		.hidden-on-mobile {
-			display: none;
-		}
+	.hidden-on-mobile {
+		display: none;
 	}
 </style>
