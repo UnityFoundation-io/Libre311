@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
+	import TableWithDetailPane from '$lib/components/TableWithDetailPane.svelte';
 	import { Button, Card, DatePicker, Input, Table } from 'stwui';
 	import { page } from '$app/stores';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
@@ -152,12 +152,17 @@
 		startDate,
 		endDate
 	);
+
+	// Detail pane is open when we have an issue_id in the route
+	$: detailPaneOpen = Boolean($page.params.issue_id);
 </script>
 
 {#if $serviceRequestsRes.type === 'success'}
-	<SideBarMainContentLayout>
-		<slot slot="side-bar" />
-		<div slot="main-content" class="relative flex h-full flex-col">
+	<TableWithDetailPane {detailPaneOpen}>
+		<div slot="detail-pane">
+			<slot />
+		</div>
+		<div slot="table" class="relative flex h-full flex-col">
 			<div
 				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
@@ -246,9 +251,9 @@
 				</button>
 			</div>
 
-			<Card bordered={true} class="m-2">
-				<Card.Content slot="content" class="p-0 sm:p-0">
-					<div class="issues-table-override">
+			<Card bordered={true} class="m-2 flex-1 overflow-hidden">
+				<Card.Content slot="content" class="h-full p-0 sm:p-0">
+					<div class="issues-table-override h-full">
 						<Table class="h-full overflow-hidden rounded-md" {columns}>
 							<Table.Header slot="header" {orderBy} />
 							<Table.Body slot="body">
@@ -325,7 +330,7 @@
 				</Card.Content>
 			</Card>
 		</div>
-	</SideBarMainContentLayout>
+	</TableWithDetailPane>
 {:else if $serviceRequestsRes.type === 'failure'}
 	{JSON.stringify($serviceRequestsRes, null, 2)}
 {/if}
