@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, tick, onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	/**
 	 * Whether the detail pane is currently visible.
@@ -30,8 +31,39 @@
 
 	const dispatch = createEventDispatcher<{ close: void }>();
 
+	// Reference to detail pane element for focus management
+	let detailPaneElement: HTMLElement | undefined;
+
+	// Track reduced motion preference (WCAG 2.3.3)
+	let prefersReducedMotion = false;
+
+	onMount(() => {
+		if (browser) {
+			const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+			prefersReducedMotion = mediaQuery.matches;
+
+			// Listen for changes to the preference
+			const handleChange = (e: MediaQueryListEvent) => {
+				prefersReducedMotion = e.matches;
+			};
+			mediaQuery.addEventListener('change', handleChange);
+
+			return () => mediaQuery.removeEventListener('change', handleChange);
+		}
+	});
+
+	// Effective animation duration respecting reduced motion preference
+	$: effectiveDuration = prefersReducedMotion ? 0 : animationDuration;
+
 	function handleClose() {
 		dispatch('close');
+	}
+
+	// Focus management: move focus to detail pane when opened (WCAG 2.4.3)
+	$: if (detailPaneOpen && browser) {
+		tick().then(() => {
+			detailPaneElement?.focus();
+		});
 	}
 
 	// Reactive CSS variable for detail pane width
@@ -46,9 +78,11 @@
 >
 	{#if detailPaneOpen}
 		<aside
+			bind:this={detailPaneElement}
 			class="detail-pane"
 			aria-label="Detail view"
-			transition:slide={{ duration: animationDuration, axis: 'x' }}
+			tabindex="-1"
+			transition:slide={{ duration: effectiveDuration, axis: 'x' }}
 		>
 			<slot name="detail-pane" {handleClose} />
 		</aside>
