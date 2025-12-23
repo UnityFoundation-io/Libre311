@@ -117,11 +117,11 @@
 
 ### Implementation for User Story 5
 
-- [ ] T025 [US5] Verify existing Delete functionality works in new detail pane context in frontend/src/lib/components/ServiceRequest.svelte
-- [ ] T026 [US5] Verify delete navigates to /issues/table and closes detail pane
-- [ ] T027 [US5] Verify table refreshes to remove deleted request
+- [X] T025 [US5] Verify existing Delete functionality works in new detail pane context in frontend/src/lib/components/ServiceRequest.svelte
+- [X] T026 [US5] Verify delete navigates to /issues/table and closes detail pane
+- [X] T027 [US5] Verify table refreshes to remove deleted request
 
-**Checkpoint**: User Story 5 complete - Delete functionality works in detail pane
+**Checkpoint**: User Story 5 complete - Delete functionality works in detail pane ✅
 
 ---
 
