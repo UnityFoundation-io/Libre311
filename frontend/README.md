@@ -27,7 +27,7 @@ Copy `.env.example` to `.env` and configure the following variables:
 
 The frontend uses the backend API for reverse geocoding (converting coordinates to addresses). The backend proxies requests to [Nominatim](https://nominatim.openstreetmap.org/), which centralizes geocoding configuration and avoids CORS issues.
 
-All geocoding requests go through:
+All reverse geocoding requests go through:
 
 ```
 {VITE_BACKEND_URL}/geocode/reverse?lat={lat}&lon={lon}
