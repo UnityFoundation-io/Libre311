@@ -20,6 +20,12 @@
 	});
 
 	const { onChange, onSubmit } = dispatchEventFunctionFactory(dispatch);
+
+	// pass svelte checks
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const passwordAutocomplete = 'current-password' as any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const emailAutocomplete = 'email' as any;
 </script>
 
 <div
@@ -69,6 +75,7 @@
 				placeholder={messages['login']['email']['placeholder']}
 				error={emailInput.error}
 				value={emailInput.value}
+				autocomplete={emailAutocomplete}
 				on:change={(e) => onChange(e, 'email')}
 			>
 				<Input.Label slot="label">{messages['login']['email']['label']}</Input.Label>
@@ -85,6 +92,7 @@
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
 				value={passwordInput.value}
+				autocomplete={passwordAutocomplete}
 				on:change={(e) => onChange(e, 'password')}
 			>
 				<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
