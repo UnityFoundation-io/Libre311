@@ -83,12 +83,7 @@
 	$: gridColumns = detailPaneOpen ? `${detailPaneWidth} 1fr` : '1fr';
 </script>
 
-<div
-	class="layout-container"
-	class:is-mobile={isMobile}
-	style:--detail-pane-width={detailPaneWidth}
-	style:grid-template-columns={gridColumns}
->
+<div class="layout-container" class:is-mobile={isMobile} style:grid-template-columns={gridColumns}>
 	{#if detailPaneOpen}
 		<aside
 			bind:this={detailPaneElement}

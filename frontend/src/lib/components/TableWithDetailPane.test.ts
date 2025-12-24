@@ -43,11 +43,12 @@ describe('TableWithDetailPane - Grid Column Calculation', () => {
 
 describe('TableWithDetailPane - Default Props', () => {
 	// These tests document the expected default values per the contract
+	// Must match the actual defaults in TableWithDetailPane.svelte
 	const defaultProps = {
 		detailPaneOpen: false,
 		detailPaneWidth: '400px',
 		animationDuration: 300,
-		mobileBreakpoint: 769
+		mobileBreakpoint: 768
 	};
 
 	it('has correct default detailPaneOpen value', () => {
@@ -63,31 +64,33 @@ describe('TableWithDetailPane - Default Props', () => {
 	});
 
 	it('has correct default mobileBreakpoint value', () => {
-		expect(defaultProps.mobileBreakpoint).toBe(769);
+		expect(defaultProps.mobileBreakpoint).toBe(768);
 	});
 });
 
 describe('TableWithDetailPane - Mobile Breakpoint Logic', () => {
-	// Helper function to determine if viewport is mobile
+	// Helper function to determine if viewport is mobile (mirrors component logic)
+	// Component uses: isMobile = window.innerWidth <= mobileBreakpoint
 	function isMobileViewport(viewportWidth: number, mobileBreakpoint: number): boolean {
-		return viewportWidth < mobileBreakpoint;
+		return viewportWidth <= mobileBreakpoint;
 	}
 
-	it('considers viewport mobile when below breakpoint', () => {
-		expect(isMobileViewport(768, 769)).toBe(true);
-		expect(isMobileViewport(500, 769)).toBe(true);
-		expect(isMobileViewport(320, 769)).toBe(true);
+	it('considers viewport mobile when at or below breakpoint', () => {
+		expect(isMobileViewport(768, 768)).toBe(true);
+		expect(isMobileViewport(500, 768)).toBe(true);
+		expect(isMobileViewport(320, 768)).toBe(true);
 	});
 
-	it('considers viewport desktop when at or above breakpoint', () => {
-		expect(isMobileViewport(769, 769)).toBe(false);
-		expect(isMobileViewport(1024, 769)).toBe(false);
-		expect(isMobileViewport(1920, 769)).toBe(false);
+	it('considers viewport desktop when above breakpoint', () => {
+		expect(isMobileViewport(769, 768)).toBe(false);
+		expect(isMobileViewport(1024, 768)).toBe(false);
+		expect(isMobileViewport(1920, 768)).toBe(false);
 	});
 
 	it('respects custom breakpoint values', () => {
-		expect(isMobileViewport(1000, 1024)).toBe(true);
-		expect(isMobileViewport(1024, 1024)).toBe(false);
+		expect(isMobileViewport(1023, 1024)).toBe(true);
+		expect(isMobileViewport(1024, 1024)).toBe(true);
+		expect(isMobileViewport(1025, 1024)).toBe(false);
 	});
 });
 
