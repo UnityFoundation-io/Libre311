@@ -35,11 +35,12 @@
 	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
 
 	// Compute flyTo target when a service request is selected
+	// Note: lat/long are strings from the API, convert to numbers for Leaflet
 	$: flyToTarget = $selectedServiceRequestStore
 		? {
 				latLng: [
-					+$selectedServiceRequestStore.lat,
-					+$selectedServiceRequestStore.long
+					Number($selectedServiceRequestStore.lat),
+					Number($selectedServiceRequestStore.long)
 				] as LatLngTuple,
 				zoom: SELECTION_ZOOM_LEVEL
 			}
@@ -59,7 +60,11 @@
 		) {
 			return L.latLngBounds(libre311.getJurisdictionConfig().bounds);
 		}
-		let latLngs: LatLngTuple[] = res.value.serviceRequests.map((req) => [+req.lat, +req.long]);
+		// Note: lat/long are strings from the API, convert to numbers for Leaflet
+		let latLngs: LatLngTuple[] = res.value.serviceRequests.map((req) => [
+			Number(req.lat),
+			Number(req.long)
+		]);
 		return L.latLngBounds(latLngs);
 	}
 
