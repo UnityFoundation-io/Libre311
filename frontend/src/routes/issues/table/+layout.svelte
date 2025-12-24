@@ -184,7 +184,7 @@
 					<div class="m-3 flex items-center">
 						{#if !isSearchFiltersOpen}
 							<div transition:slide|local={{ duration: 500 }}>
-								<Input slot="extra" placeholder="#Request ID" on:change={handleSearchInput}>
+								<Input class="w-36" placeholder="#Request ID" on:change={handleSearchInput}>
 									<Input.Leading slot="trailing" data={magnifingGlassIcon} />
 								</Input>
 							</div>
