@@ -65,11 +65,20 @@ export function createServiceRequestsContext(
 				if (selected) {
 					selectedServiceRequest.set(selected);
 				} else {
-					// Request not in filtered results - fetch it individually and add to list
-					const singleRequest = await libreService.getServiceRequest({
-						service_request_id: +page.params.issue_id
-					});
-					selectedServiceRequest.set(singleRequest);
+					// Request not in filtered results - fetch it individually
+					try {
+						const singleRequest = await libreService.getServiceRequest({
+							service_request_id: +page.params.issue_id
+						});
+						selectedServiceRequest.set(singleRequest);
+					} catch (singleRequestError) {
+						// Individual request fetch failed - clear selection and let UI handle the error state
+						selectedServiceRequest.set(undefined);
+						console.error(
+							`Failed to fetch service request ${page.params.issue_id}:`,
+							singleRequestError
+						);
+					}
 				}
 			} catch (error) {
 				serviceRequestsResponse.set(asAsyncFailure(error));
