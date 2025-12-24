@@ -251,6 +251,7 @@
 				</button>
 			</div>
 
+			<!-- flex-1 allows the table card to fill remaining vertical space in the layout -->
 			<Card bordered={true} class="m-2 flex-1 overflow-hidden">
 				<Card.Content slot="content" class="h-full p-0 sm:p-0">
 					<div class="issues-table-override h-full">
