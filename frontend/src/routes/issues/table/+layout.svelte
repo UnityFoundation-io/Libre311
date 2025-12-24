@@ -157,7 +157,8 @@
 {#if $serviceRequestsRes.type === 'success'}
 	<SideBarMainContentLayout>
 		<slot slot="side-bar" />
-		<div slot="main-content" class="relative flex h-full flex-col">
+		<div slot="main-content" class="relative flex h-full flex-col text-center">
+			<h3 class="text-base">Service Requests</h3>
 			<div
 				class="m-3 flex items-center justify-end rounded-md border-t-[1px] border-border shadow-md"
 			>
