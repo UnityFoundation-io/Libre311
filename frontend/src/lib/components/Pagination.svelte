@@ -20,8 +20,10 @@
 	$: lowerBound = maxUpperBound - pagination.size + 1;
 </script>
 
-<div class="text-base font-semibold text-slate-600">
-	{lowerBound} - {upperBound} of {pagination?.totalSize}
+<nav aria-label="Pagination" class="text-base font-semibold text-slate-600">
+	<span aria-live="polite" aria-atomic="true"
+		>{lowerBound} - {upperBound} of {pagination?.totalSize}</span
+	>
 	<span class="ml-1">
 		<Button
 			href={prevPage}
@@ -46,4 +48,4 @@
 			<ChevronRight slot="icon" />
 		</Button>
 	</span>
-</div>
+</nav>
