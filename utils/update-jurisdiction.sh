@@ -38,7 +38,12 @@ NC='\033[0m' # No Color
 usage() {
   echo "Usage: $0 <jurisdiction_id> <options>"
   echo ""
-  echo "Update an existing jurisdiction"
+  echo "Update an existing jurisdiction's configuration."
+  echo ""
+  echo "Arguments:"
+  echo "  jurisdiction_id              The string identifier of the jurisdiction to update"
+  echo "                               (e.g., 'stlma', 'lomocomo'). This is NOT a numeric ID."
+  echo "                               Use the jurisdiction_id from the jurisdictions table."
   echo ""
   echo "Options (at least one required):"
   echo "  -n, --name <name>              Update the display name"
