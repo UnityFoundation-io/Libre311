@@ -45,8 +45,8 @@ usage() {
   echo "                               (e.g., 'stlma', 'lomocomo'). This is NOT a numeric ID."
   echo "                               Use the jurisdiction_id from the jurisdictions table."
   echo ""
-  echo "Options (at least one required):"
-  echo "  -n, --name <name>              Update the display name"
+  echo "Options:"
+  echo "  -n, --name <name>              Update the display name (REQUIRED for all updates)"
   echo "  -c, --primary-color <color>    Update primary color (HSL format: 'H S% L%')"
   echo "  -C, --primary-hover-color <color>"
   echo "                                 Update hover color (HSL format: 'H S% L%')"
@@ -81,10 +81,10 @@ usage() {
   echo ""
   echo "Examples:"
   echo "  $0 stlma -n 'St Louis Metropolitan Area'  # Update name"
-  echo "  $0 stlma --primary-color '221 83% 53%' --primary-hover-color '221 83% 45%'"
+  echo "  $0 stlma -n 'STLMA' --primary-color '221 83% 53%' --primary-hover-color '221 83% 45%'"
   echo "  $0 stlma --name 'New Name' --logo-url 'https://example.com/logo.png'"
-  echo "  $0 stlma --privacy-policy privacy.md --terms-of-use terms.md"
-  echo "  $0 stlma --bounds-file bounds.json"
+  echo "  $0 stlma -n 'STLMA' --privacy-policy privacy.md --terms-of-use terms.md"
+  echo "  $0 stlma -n 'STLMA' --bounds-file bounds.json"
   echo "  $0 stlma --name 'Test' --dry-run          # Preview without updating"
   echo "  $0 stlma --name 'Test' -y                 # Update without confirmation"
   echo ""
@@ -270,6 +270,19 @@ done
 if [ ${#update_keys[@]} -eq 0 ] && [ -z "$bounds_file" ] && \
    [ -z "$privacy_policy_file" ] && [ -z "$terms_of_use_file" ]; then
   error "At least one update option is required.\nQuery mode is not yet supported (backend GET endpoint missing).\nRun '$0 --help' for usage information." $EXIT_USAGE
+fi
+
+# Check if name is provided (required by backend for all PATCH requests)
+name_provided=false
+for key in "${update_keys[@]}"; do
+  if [ "$key" = "name" ]; then
+    name_provided=true
+    break
+  fi
+done
+
+if [ "$name_provided" = false ]; then
+  error "The --name option is required for all updates (backend validation requirement).\nExample: $0 $jurisdiction_id --name 'Jurisdiction Name' --bounds-file bounds.json" $EXIT_USAGE
 fi
 
 # Get AUTH_TOKEN - either from environment or interactively (skip for dry-run without token)
