@@ -32,7 +32,7 @@
 		emailInput = emailValidator(emailInput);
 		passwordInput = passwordValidator(passwordInput);
 
-		if (emailInput.value && passwordInput.value !== undefined) {
+		if (emailInput.value && passwordInput.type === 'valid') {
 			try {
 				await authService.login(emailInput.value, passwordInput.value);
 
