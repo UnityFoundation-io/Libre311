@@ -676,7 +676,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
-		console.log({ props });
 		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
 	}
