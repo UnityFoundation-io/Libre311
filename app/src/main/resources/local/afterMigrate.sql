@@ -62,3 +62,50 @@ VALUES (6, 'ADA Access', 2),
 -- Other Service
 INSERT IGNORE INTO services (id, jurisdiction_id, service_name, description, type, service_group_id)
 VALUES (3, 'stlma', 'Other', 'Other', 'REALTIME', 1);
+
+-- ============================================
+-- LoMoCoMo Jurisdiction Setup
+-- ============================================
+
+-- Add LoMoCoMo Jurisdiction (same tenant as stlma)
+-- Note: primary_color and primary_hover_color columns are created by Hibernate auto-schema
+-- and may not exist when Flyway runs. Set colors via admin API after startup.
+INSERT IGNORE INTO jurisdictions (id, name, tenant_id)
+VALUES ('lomocomo', 'LoMoCoMo', 1);
+
+-- Add jurisdiction boundary for lomocomo (same as stlma for now)
+INSERT IGNORE INTO jurisdiction_boundary (boundary, jurisdiction_id)
+VALUES (ST_GeomFromText('POLYGON((
+        38.88908245157475 -90.82207996696539,
+        38.28511105115126 -90.32668241294714,
+        38.73098601356233 -89.86006757704696,
+        39.04413540068816 -90.36058752072049,
+        38.88908245157475 -90.82207996696539))', 4326),
+        'lomocomo');
+
+-- ============================================
+-- Remote Host Mappings for .localhost subdomains
+-- ============================================
+
+-- Map stlma.localhost to stlma jurisdiction
+INSERT IGNORE INTO remote_hosts (id, name, jurisdiction_id)
+VALUES (2, 'stlma.localhost', 'stlma');
+
+-- Map lomocomo.localhost to lomocomo jurisdiction
+INSERT IGNORE INTO remote_hosts (id, name, jurisdiction_id)
+VALUES (3, 'lomocomo.localhost', 'lomocomo');
+
+-- ============================================
+-- LoMoCoMo Service Groups and Services
+-- ============================================
+
+-- Add a service group for lomocomo
+INSERT IGNORE INTO service_groups (id, name, jurisdiction_id)
+VALUES (2, 'Infrastructure', 'lomocomo');
+
+-- Add basic services for lomocomo
+INSERT IGNORE INTO services (id, jurisdiction_id, service_name, description, type, service_group_id)
+VALUES (4, 'lomocomo', 'Bus Stop', 'For problems with bus stops', 'REALTIME', 2);
+
+INSERT IGNORE INTO services (id, jurisdiction_id, service_name, description, type, service_group_id)
+VALUES (5, 'lomocomo', 'Other', 'Other issues', 'REALTIME', 2);
