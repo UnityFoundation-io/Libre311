@@ -108,13 +108,17 @@
 		<div class="m-4">
 			<!-- disbling the warning until we have valid link for this -->
 			<!-- eslint-disable-next-line svelte/valid-compile -->
-			<a class="text-sm" href="javascript:void(0);">{messages['login']['forgot_password']}</a>
+			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
+				>{messages['login']['forgot_password']}</a
+			>
 		</div>
 
 		<div class="m-4">
 			<!-- disbling the warning until we have valid link for this -->
 			<!-- eslint-disable-next-line svelte/valid-compile -->
-			<a class="text-sm" href="javascript:void(0);">{messages['login']['create_account']}</a>
+			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
+				>{messages['login']['create_account']}</a
+			>
 		</div>
 	</Card>
 </div>
