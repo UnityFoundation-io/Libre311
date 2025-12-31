@@ -16,6 +16,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { arrowPath } from '../Svg/outline/arrowPath';
 	import type { CreateServiceRequestUIParams } from './shared';
+	import messages from '$media/messages.json';
 
 	export let params: Partial<CreateServiceRequestUIParams>;
 
@@ -67,11 +68,15 @@
 	{@const selectOptions = createSelectOptions(serviceList.value)}
 	<Select
 		name="select-1"
-		placeholder="Request Type"
+		placeholder={messages['serviceRequest']['request_type']}
 		on:change={issueTypeChange}
 		options={selectOptions}
 		class="relative my-4"
 	>
+		<Select.Label slot="label">
+			<strong class="text-base">{messages['serviceRequest']['request_type']}:</strong>
+		</Select.Label>
+
 		<Select.Options slot="options">
 			{#each selectOptions as option}
 				<Select.Options.Option {option} />

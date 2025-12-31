@@ -22,6 +22,7 @@
 	import type { CreateServiceRequestUIParams, StepChangeEvent } from './shared';
 	import StepControls from './StepControls.svelte';
 	import type { Service } from '$lib/services/Libre311/Libre311';
+	import messages from '$media/messages.json';
 
 	export let params: Partial<CreateServiceRequestUIParams>;
 
@@ -145,9 +146,13 @@
 				<TextArea
 					bind:value={params.description}
 					name="comments"
-					placeholder="Description"
+					placeholder={messages['serviceRequest']['description']}
 					class="relative  my-4"
-				/>
+				>
+					<TextArea.Label slot="label">
+						<strong class="text-base">{messages['serviceRequest']['description']}:</strong>
+					</TextArea.Label>
+				</TextArea>
 			</div>
 		{/if}
 	</div>
