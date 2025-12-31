@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Definition Editor - Libre311 Mockup</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f0ebf8;
+            min-height: 100vh;
+            color: #202124;
+        }
+
+        /* Navigation */
+        .nav-header {
+            background: white;
+            padding: 16px 24px;
+            border-bottom: 1px solid #dadce0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #202124;
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border: 1px solid #dadce0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .view-btn.active {
+            background: #673ab7;
+            color: white;
+            border-color: #673ab7;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .container-wide {
+            max-width: 1000px;
+        }
+
+        /* View 1: Groups & Services List */
+        .list-view {
+            display: none;
+        }
+
+        .list-view.active {
+            display: block;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: #5f6368;
+            margin-bottom: 24px;
+        }
+
+        .add-group-btn {
+            float: right;
+            padding: 10px 24px;
+            background: #673ab7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-group-btn:hover {
+            background: #5e35b1;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+        }
+
+        .group-header.expanded {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .expand-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            transition: transform 0.2s;
+        }
+
+        .group-header.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .group-name {
+            font-size: 16px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .group-count {
+            color: #5f6368;
+            font-size: 14px;
+            margin-right: 16px;
+        }
+
+        .group-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+        }
+
+        .icon-btn:hover {
+            background: #f1f3f4;
+        }
+
+        .service-list {
+            padding: 0 20px 16px 56px;
+            display: none;
+        }
+
+        .service-list.expanded {
+            display: block;
+        }
+
+        .service-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .service-item:last-child {
+            border-bottom: none;
+        }
+
+        .service-icon {
+            width: 8px;
+            height: 8px;
+            background: #dadce0;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .service-name {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .service-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn {
+            padding: 6px 16px;
+            background: #f1f3f4;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #5f6368;
+        }
+
+        .edit-btn:hover {
+            background: #e8eaed;
+        }
+
+        .add-service-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            color: #673ab7;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+
+        .add-service-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* View 2: Editor */
+        .editor-view {
+            display: none;
+        }
+
+        .editor-view.active {
+            display: block;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border-top: 10px solid #673ab7;
+        }
+
+        .header-content {
+            padding: 24px;
+        }
+
+        .header-input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #dadce0;
+            font-size: 32px;
+            font-weight: 400;
+            padding: 8px 0;
+            outline: none;
+        }
+
+        .header-input:focus {
+            border-bottom: 2px solid #673ab7;
+        }
+
+        .description-input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #dadce0;
+            font-size: 14px;
+            padding: 12px 0;
+            outline: none;
+            margin-top: 16px;
+            resize: none;
+        }
+
+        .description-input:focus {
+            border-bottom: 2px solid #673ab7;
+        }
+
+        /* Attribute Cards */
+        .attribute-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            cursor: pointer;
+            position: relative;
+            border-left: 6px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .attribute-card.active {
+            border-left-color: #4285f4;
+            cursor: default;
+        }
+
+        .attribute-card.active .attribute-collapsed {
+            display: none;
+        }
+
+        .attribute-card:not(.active) .attribute-expanded {
+            display: none;
+        }
+
+        /* Collapsed State */
+        .attribute-collapsed {
+            padding: 20px 24px;
+        }
+
+        .collapsed-question {
+            font-size: 14px;
+            color: #202124;
+            margin-bottom: 8px;
+        }
+
+        .collapsed-question .required {
+            color: #d93025;
+        }
+
+        .collapsed-type {
+            font-size: 14px;
+            color: #80868b;
+        }
+
+        .collapsed-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .collapsed-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: #5f6368;
+        }
+
+        .option-radio {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #5f6368;
+            border-radius: 50%;
+        }
+
+        /* Expanded State */
+        .attribute-expanded {
+            padding: 0;
+        }
+
+        .drag-handle {
+            text-align: center;
+            padding: 8px;
+            color: #dadce0;
+            cursor: grab;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .attribute-body {
+            padding: 0 24px 16px;
+        }
+
+        .question-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .question-input {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            border-bottom: 1px solid transparent;
+        }
+
+        .question-input:focus {
+            background: #e8f0fe;
+            border-bottom: 1px solid #4285f4;
+        }
+
+        .image-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+        }
+
+        .image-btn:hover {
+            background: #f1f3f4;
+        }
+
+        .type-dropdown {
+            padding: 12px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        /* Options List */
+        .options-list {
+            margin-top: 16px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .option-indicator {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #dadce0;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .option-input {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            border-bottom: 1px solid transparent;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .option-input:focus {
+            border-bottom: 1px solid #dadce0;
+        }
+
+        .option-delete {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .option-row:hover .option-delete {
+            opacity: 1;
+        }
+
+        .option-delete:hover {
+            background: #f1f3f4;
+        }
+
+        .add-option-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            cursor: pointer;
+            color: #5f6368;
+        }
+
+        .add-option-row:hover {
+            color: #202124;
+        }
+
+        .other-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .other-label {
+            font-size: 14px;
+            color: #5f6368;
+        }
+
+        .other-input {
+            flex: 1;
+            border: none;
+            border-bottom: 1px dotted #dadce0;
+            padding: 4px 0;
+            font-size: 14px;
+            color: #80868b;
+        }
+
+        /* Attribute Footer */
+        .attribute-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 16px 24px;
+            border-top: 1px solid #dadce0;
+            gap: 16px;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .divider {
+            width: 1px;
+            height: 32px;
+            background: #dadce0;
+        }
+
+        .required-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .required-label {
+            font-size: 14px;
+            color: #202124;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background: #dadce0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch.on {
+            background: #673ab7;
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .toggle-switch.on .toggle-knob {
+            left: 22px;
+        }
+
+        .more-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+        }
+
+        .more-btn:hover {
+            background: #f1f3f4;
+        }
+
+        /* Add Field Button */
+        .add-field-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px dashed #dadce0;
+            color: #5f6368;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .add-field-card:hover {
+            border-color: #673ab7;
+            color: #673ab7;
+        }
+
+        /* Floating Action Sidebar */
+        .floating-sidebar {
+            position: fixed;
+            right: calc((100vw - 800px) / 2 - 80px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+            font-size: 20px;
+        }
+
+        .sidebar-btn:hover {
+            background: #f1f3f4;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #323232;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .floating-sidebar {
+                display: none;
+            }
+        }
+
+        /* Icons (using text/emoji for simplicity) */
+        .icon {
+            font-style: normal;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-header">
+        <a href="#" class="back-link" onclick="switchView('list')">
+            <span>&#8592;</span>
+            <span id="backText">Admin</span>
+        </a>
+        <div class="view-toggle">
+            <button class="view-btn active" id="listViewBtn" onclick="switchView('list')">Services List</button>
+            <button class="view-btn" id="editorViewBtn" onclick="switchView('editor')">Editor View</button>
+        </div>
+    </nav>
+
+    <!-- View 1: Groups & Services List -->
+    <div class="list-view active" id="listView">
+        <div class="container container-wide">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                <div>
+                    <h1 class="page-title">SERVICE DEFINITION CONFIGURATION</h1>
+                    <p class="page-description">Configure the types of service requests citizens can submit.</p>
+                </div>
+                <button class="add-group-btn">
+                    <span>+</span> New Group
+                </button>
+            </div>
+
+            <!-- Group 1: Roads & Traffic -->
+            <div class="group-card">
+                <div class="group-header expanded" onclick="toggleGroup(this)">
+                    <div class="expand-icon">&#9654;</div>
+                    <span class="group-name">Roads & Traffic</span>
+                    <div class="group-actions">
+                        <button class="icon-btn" title="Edit group"><i class="icon">&#9998;</i></button>
+                        <button class="icon-btn" title="Delete group"><i class="icon">&#128465;</i></button>
+                    </div>
+                </div>
+                <div class="service-list expanded">
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Pothole Repair</span>
+                        <div class="service-actions">
+                            <button class="edit-btn" onclick="editService('Pothole Repair')">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Broken Streetlight</span>
+                        <div class="service-actions">
+                            <button class="edit-btn" onclick="editService('Broken Streetlight')">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Traffic Signal Issue</span>
+                        <div class="service-actions">
+                            <button class="edit-btn" onclick="editService('Traffic Signal Issue')">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <button class="add-service-btn">
+                        <span>+</span> Add Service Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- Group 2: Community Input -->
+            <div class="group-card">
+                <div class="group-header expanded" onclick="toggleGroup(this)">
+                    <div class="expand-icon">&#9654;</div>
+                    <span class="group-name">Community Input</span>
+                    <div class="group-actions">
+                        <button class="icon-btn" title="Edit group"><i class="icon">&#9998;</i></button>
+                        <button class="icon-btn" title="Delete group"><i class="icon">&#128465;</i></button>
+                    </div>
+                </div>
+                <div class="service-list expanded">
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Transportation Survey</span>
+                        <div class="service-actions">
+                            <button class="edit-btn" onclick="editService('Transportation')">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Accessibility Feedback</span>
+                        <div class="service-actions">
+                            <button class="edit-btn" onclick="editService('Accessibility Feedback')">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <button class="add-service-btn">
+                        <span>+</span> Add Service Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- Group 3: Sanitation (Collapsed) -->
+            <div class="group-card">
+                <div class="group-header" onclick="toggleGroup(this)">
+                    <div class="expand-icon">&#9654;</div>
+                    <span class="group-name">Sanitation</span>
+                    <span class="group-count">3 service requests</span>
+                    <div class="group-actions">
+                        <button class="icon-btn" title="Edit group"><i class="icon">&#9998;</i></button>
+                        <button class="icon-btn" title="Delete group"><i class="icon">&#128465;</i></button>
+                    </div>
+                </div>
+                <div class="service-list">
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Missed Garbage Collection</span>
+                        <div class="service-actions">
+                            <button class="edit-btn">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Illegal Dumping</span>
+                        <div class="service-actions">
+                            <button class="edit-btn">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <span class="service-name">Recycling Issue</span>
+                        <div class="service-actions">
+                            <button class="edit-btn">Edit</button>
+                            <button class="icon-btn" title="More options">&#8942;</button>
+                        </div>
+                    </div>
+                    <button class="add-service-btn">
+                        <span>+</span> Add Service Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View 2: Service Request Editor -->
+    <div class="editor-view" id="editorView">
+        <div class="container">
+            <!-- Header Card -->
+            <div class="header-card">
+                <div class="header-content">
+                    <input type="text" class="header-input" value="Transportation" placeholder="Service Request Title" oninput="showSaveToast()">
+                    <textarea class="description-input" rows="2" placeholder="Form description" oninput="showSaveToast()">Survey to understand community transportation needs and accessibility</textarea>
+                </div>
+            </div>
+
+            <!-- Attribute Card 1 (Collapsed) -->
+            <div class="attribute-card" onclick="activateCard(this)">
+                <div class="attribute-collapsed">
+                    <div class="collapsed-question">
+                        Describe getting around without a car in your community <span class="required">*</span>
+                    </div>
+                    <div class="collapsed-type">Long answer text</div>
+                </div>
+                <div class="attribute-expanded">
+                    <div class="drag-handle">&#8942;&#8942;</div>
+                    <div class="attribute-body">
+                        <div class="question-row">
+                            <input type="text" class="question-input" value="Describe getting around without a car in your community" oninput="showSaveToast()">
+                            <button class="image-btn" title="Add image">&#128247;</button>
+                            <select class="type-dropdown" onchange="showSaveToast()">
+                                <option value="string">Short answer</option>
+                                <option value="text" selected>Paragraph</option>
+                                <option value="multi">Multiple choice</option>
+                                <option value="single">Dropdown</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
+                            </select>
+                        </div>
+                        <div style="padding: 16px; background: #f8f9fa; border-radius: 4px; color: #80868b;">
+                            Long answer text
+                        </div>
+                    </div>
+                    <div class="attribute-footer">
+                        <div class="footer-actions">
+                            <button class="icon-btn" title="Duplicate">&#128203;</button>
+                            <button class="icon-btn" title="Delete">&#128465;</button>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="required-toggle">
+                            <span class="required-label">Required</span>
+                            <div class="toggle-switch on" onclick="toggleRequired(this, event)">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                        <button class="more-btn" title="More options">&#8942;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attribute Card 2 (Expanded - Active) -->
+            <div class="attribute-card active" onclick="activateCard(this)">
+                <div class="attribute-collapsed">
+                    <div class="collapsed-question">
+                        What mode of transportation do you use on a weekly basis?
+                    </div>
+                    <div class="collapsed-options">
+                        <span class="collapsed-option"><span class="option-radio"></span> Walking</span>
+                        <span class="collapsed-option"><span class="option-radio"></span> Biking</span>
+                        <span class="collapsed-option"><span class="option-radio"></span> Bus</span>
+                        <span style="color: #80868b;">...</span>
+                    </div>
+                </div>
+                <div class="attribute-expanded">
+                    <div class="drag-handle">&#8942;&#8942;</div>
+                    <div class="attribute-body">
+                        <div class="question-row">
+                            <input type="text" class="question-input" value="What mode of transportation do you use on a weekly basis? (select all that apply)" oninput="showSaveToast()">
+                            <button class="image-btn" title="Add image">&#128247;</button>
+                            <select class="type-dropdown" onchange="showSaveToast()">
+                                <option value="string">Short answer</option>
+                                <option value="text">Paragraph</option>
+                                <option value="multi" selected>Multiple choice</option>
+                                <option value="single">Dropdown</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
+                            </select>
+                        </div>
+                        <div class="options-list">
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Walking" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Mobility device (e.g. wheelchair, walker)" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Biking" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Motorcycle or moped" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Personal vehicle (e.g. car, truck)" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Borrowing / sharing a personal vehicle" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Carpooling or getting a ride from a friend, neighbor" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Taxi service or rideshare" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Campus / apartment shuttle" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Bus / public transit" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Paratransit" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Micromobility (e.g. scooters, skateboards)" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="other-row">
+                                <div class="option-indicator"></div>
+                                <span class="other-label">Other:</span>
+                                <input type="text" class="other-input" disabled>
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="add-option-row" onclick="addOption(this)">
+                                <div class="option-indicator" style="border-style: dashed;"></div>
+                                <span>Add option</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="attribute-footer">
+                        <div class="footer-actions">
+                            <button class="icon-btn" title="Duplicate">&#128203;</button>
+                            <button class="icon-btn" title="Delete">&#128465;</button>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="required-toggle">
+                            <span class="required-label">Required</span>
+                            <div class="toggle-switch" onclick="toggleRequired(this, event)">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                        <button class="more-btn" title="More options">&#8942;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attribute Card 3 (Collapsed) -->
+            <div class="attribute-card" onclick="activateCard(this)">
+                <div class="attribute-collapsed">
+                    <div class="collapsed-question">
+                        Race
+                    </div>
+                    <div class="collapsed-options">
+                        <span class="collapsed-option"><span class="option-radio"></span> White</span>
+                        <span class="collapsed-option"><span class="option-radio"></span> Black or African American</span>
+                        <span class="collapsed-option"><span class="option-radio"></span> American Indian...</span>
+                    </div>
+                </div>
+                <div class="attribute-expanded">
+                    <div class="drag-handle">&#8942;&#8942;</div>
+                    <div class="attribute-body">
+                        <div class="question-row">
+                            <input type="text" class="question-input" value="Race" oninput="showSaveToast()">
+                            <button class="image-btn" title="Add image">&#128247;</button>
+                            <select class="type-dropdown" onchange="showSaveToast()">
+                                <option value="string">Short answer</option>
+                                <option value="text">Paragraph</option>
+                                <option value="multi" selected>Multiple choice</option>
+                                <option value="single">Dropdown</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
+                            </select>
+                        </div>
+                        <div class="options-list">
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="White" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Black or African American" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="American Indian or Alaska Native" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Asian" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="option-row">
+                                <div class="option-indicator"></div>
+                                <input type="text" class="option-input" value="Native Hawaiian or Other Pacific Islander" oninput="showSaveToast()">
+                                <button class="option-delete" title="Remove">&times;</button>
+                            </div>
+                            <div class="add-option-row" onclick="addOption(this)">
+                                <div class="option-indicator" style="border-style: dashed;"></div>
+                                <span>Add option</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="attribute-footer">
+                        <div class="footer-actions">
+                            <button class="icon-btn" title="Duplicate">&#128203;</button>
+                            <button class="icon-btn" title="Delete">&#128465;</button>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="required-toggle">
+                            <span class="required-label">Required</span>
+                            <div class="toggle-switch" onclick="toggleRequired(this, event)">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                        <button class="more-btn" title="More options">&#8942;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Field Card -->
+            <div class="add-field-card" onclick="addNewField()">
+                <span style="font-size: 24px;">&#8853;</span>
+                <span>Add field</span>
+            </div>
+        </div>
+
+        <!-- Floating Action Sidebar -->
+        <div class="floating-sidebar">
+            <button class="sidebar-btn" title="Add field" onclick="addNewField()">&#8853;</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Changes saved</div>
+
+    <script>
+        // View switching
+        function switchView(view) {
+            const listView = document.getElementById('listView');
+            const editorView = document.getElementById('editorView');
+            const listBtn = document.getElementById('listViewBtn');
+            const editorBtn = document.getElementById('editorViewBtn');
+            const backText = document.getElementById('backText');
+
+            if (view === 'list') {
+                listView.classList.add('active');
+                editorView.classList.remove('active');
+                listBtn.classList.add('active');
+                editorBtn.classList.remove('active');
+                backText.textContent = 'Admin';
+            } else {
+                listView.classList.remove('active');
+                editorView.classList.add('active');
+                listBtn.classList.remove('active');
+                editorBtn.classList.add('active');
+                backText.textContent = 'Back to Services';
+            }
+        }
+
+        // Toggle group expansion
+        function toggleGroup(header) {
+            header.classList.toggle('expanded');
+            const serviceList = header.nextElementSibling;
+            serviceList.classList.toggle('expanded');
+        }
+
+        // Edit service (switch to editor view)
+        function editService(serviceName) {
+            switchView('editor');
+            event.stopPropagation();
+        }
+
+        // Activate attribute card
+        function activateCard(card) {
+            // Don't do anything if clicking on inputs or buttons
+            if (event.target.tagName === 'INPUT' ||
+                event.target.tagName === 'SELECT' ||
+                event.target.tagName === 'BUTTON' ||
+                event.target.closest('button')) {
+                return;
+            }
+
+            // Deactivate all cards
+            document.querySelectorAll('.attribute-card').forEach(c => {
+                c.classList.remove('active');
+            });
+
+            // Activate clicked card
+            card.classList.add('active');
+        }
+
+        // Toggle required switch
+        function toggleRequired(toggle, event) {
+            event.stopPropagation();
+            toggle.classList.toggle('on');
+            showSaveToast();
+        }
+
+        // Add new option
+        function addOption(addRow) {
+            event.stopPropagation();
+            const optionsList = addRow.parentElement;
+            const newOption = document.createElement('div');
+            newOption.className = 'option-row';
+            newOption.innerHTML = `
+                <div class="option-indicator"></div>
+                <input type="text" class="option-input" placeholder="Option" oninput="showSaveToast()">
+                <button class="option-delete" title="Remove">&times;</button>
+            `;
+            optionsList.insertBefore(newOption, addRow);
+            newOption.querySelector('input').focus();
+            showSaveToast();
+        }
+
+        // Add new field
+        function addNewField() {
+            const addFieldCard = document.querySelector('.add-field-card');
+            const newCard = document.createElement('div');
+            newCard.className = 'attribute-card active';
+            newCard.onclick = function() { activateCard(this); };
+            newCard.innerHTML = `
+                <div class="attribute-collapsed">
+                    <div class="collapsed-question">
+                        Question
+                    </div>
+                    <div class="collapsed-type">Short answer text</div>
+                </div>
+                <div class="attribute-expanded">
+                    <div class="drag-handle">&#8942;&#8942;</div>
+                    <div class="attribute-body">
+                        <div class="question-row">
+                            <input type="text" class="question-input" placeholder="Question" oninput="showSaveToast()">
+                            <button class="image-btn" title="Add image">&#128247;</button>
+                            <select class="type-dropdown" onchange="showSaveToast()">
+                                <option value="string" selected>Short answer</option>
+                                <option value="text">Paragraph</option>
+                                <option value="multi">Multiple choice</option>
+                                <option value="single">Dropdown</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
+                            </select>
+                        </div>
+                        <div style="padding: 16px; background: #f8f9fa; border-radius: 4px; color: #80868b;">
+                            Short answer text
+                        </div>
+                    </div>
+                    <div class="attribute-footer">
+                        <div class="footer-actions">
+                            <button class="icon-btn" title="Duplicate">&#128203;</button>
+                            <button class="icon-btn" title="Delete">&#128465;</button>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="required-toggle">
+                            <span class="required-label">Required</span>
+                            <div class="toggle-switch" onclick="toggleRequired(this, event)">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                        <button class="more-btn" title="More options">&#8942;</button>
+                    </div>
+                </div>
+            `;
+
+            // Deactivate all cards
+            document.querySelectorAll('.attribute-card').forEach(c => {
+                c.classList.remove('active');
+            });
+
+            addFieldCard.parentElement.insertBefore(newCard, addFieldCard);
+            newCard.querySelector('.question-input').focus();
+            showSaveToast();
+        }
+
+        // Show save toast
+        let toastTimeout;
+        function showSaveToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Click outside to deactivate cards
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.attribute-card') &&
+                !event.target.closest('.add-field-card') &&
+                !event.target.closest('.sidebar-btn')) {
+                // Keep at least one card active or none
+            }
+        });
+    </script>
+</body>
+</html>
