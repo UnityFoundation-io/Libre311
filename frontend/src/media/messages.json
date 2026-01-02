@@ -35,6 +35,7 @@
 		"attributes": "Attributes:",
 		"citizen_contact": "Citizen Contact:",
 		"agency_contact": "Agency Contact:",
+		"agency_contact_email": "Agency Contact Email:",
 		"agency_name": "agency name",
 		"expected_datetime": "Estimated Fix:",
 		"service_notice": "Recommended Solution:",

@@ -186,6 +186,11 @@
 			error={agencyEmailInput.error}
 			bind:value={agencyEmailInput.value}
 		>
+			<Input.Label slot="label">
+				<strong class="text-base">
+					{messages['serviceRequest']['agency_contact_email']}
+				</strong>
+			</Input.Label>
 			<Input.Leading slot="leading" data={mailIcon} />
 		</Input>
 	</div>
