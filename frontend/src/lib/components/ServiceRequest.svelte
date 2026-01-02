@@ -165,6 +165,8 @@
 						<div class="mb-1">
 							<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
 							<p class="text-sm">{serviceRequest.agency_responsible ?? ''}</p>
+							<strong class="text-base">{messages['serviceRequest']['agency_contact_email']}</strong
+							>
 							<p class="text-sm">{serviceRequest.agency_email ?? ''}</p>
 						</div>
 					{/if}
