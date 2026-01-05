@@ -140,8 +140,8 @@ An administrator wants to create a new service request type within an existing g
 - What happens when attempting to delete the last option in a list-type attribute? The system should prevent deletion and show a warning that at least one option is required.
 - How does the system handle extremely long question text? Text should wrap within the card and not break the layout.
 - What happens if auto-save fails due to network error? An error toast should appear with a retry option.
-- How does the system behave when two administrators edit the same service simultaneously? Changes should be applied in order received; consider showing a "modified by another user" warning.
-- What happens when attempting to delete a service group that contains services? The system should require confirmation and either prevent deletion or cascade delete all contained services.
+- How does the system behave when two administrators edit the same service simultaneously? Changes are applied in order received with no special handling or notification (last-write-wins).
+- What happens when attempting to delete a service group that contains services? The system prevents deletion and displays an error message requiring services to be moved or deleted first.
 
 ## Requirements *(mandatory)*
 
@@ -169,6 +169,7 @@ An administrator wants to create a new service request type within an existing g
 - **FR-020**: System MUST provide navigation to return from editor view to services list
 - **FR-021**: System MUST allow creating new service groups via "+ New Group" button
 - **FR-022**: System MUST allow adding new service requests via "+ Add Service Request" within each group
+- **FR-023**: System MUST prevent deletion of service groups that contain services, displaying an error message
 
 ### Key Entities
 
@@ -176,6 +177,10 @@ An administrator wants to create a new service request type within an existing g
 - **Service (Service Request)**: A type of issue that citizens can report (e.g., "Pothole Repair"). Has a name, description, and ordered list of attributes.
 - **Service Definition Attribute**: A field/question that collects information for a service request. Has a question text (description), data type, required flag, and display order. May contain attribute values for list types.
 - **Attribute Value**: A selectable option for list-type attributes (Multiple choice, Dropdown). Has a value name that is displayed to users.
+
+### Non-Functional Requirements
+
+- **NFR-001**: System MUST meet WCAG 2.1 Level AA accessibility standards including keyboard navigation, focus indicators, color contrast ratios, and screen reader compatibility
 
 ## Success Criteria *(mandatory)*
 
@@ -189,8 +194,21 @@ An administrator wants to create a new service request type within an existing g
 - **SC-006**: 90% of administrators can successfully add a new attribute field on their first attempt without documentation
 - **SC-007**: The UI remains responsive and usable on screens 1024 pixels wide or larger
 
+## Clarifications
+
+### Session 2026-01-05
+
+- Q: Do service definition changes go live immediately, or should there be a draft/publish workflow? → A: Immediate - all changes are live instantly after auto-save
+- Q: How should the system handle concurrent edits when two administrators edit the same service definition? → A: No special handling - accept all writes without notification
+- Q: When deleting a service group that contains services, what should happen? → A: Prevent deletion - show error requiring services to be moved or deleted first
+- Q: What level of accessibility compliance is required for this admin interface? → A: WCAG 2.1 Level AA
+- Q: Should there be limits on the number of attributes per service or options per list-type attribute? → A: No limits - administrators can add unlimited attributes and options
+
 ## Assumptions
 
+- Service definition changes take effect immediately upon auto-save; there is no draft/publish workflow
+- Concurrent edits use simple last-write-wins with no conflict detection or notification
+- No artificial limits on number of attributes per service or options per list-type attribute
 - The existing API endpoints from `JurisdictionAdminController` for service and attribute CRUD operations are available and functional
 - The existing STWUI component library and Svelte stores are sufficient for building this UI
 - The existing `DragAndDrop` component in the frontend can be reused for attribute reordering
