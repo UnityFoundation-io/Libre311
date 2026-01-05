@@ -1,5 +1,7 @@
 import { z, ZodError } from 'zod';
 import libphonenumber from 'google-libphonenumber';
+import messages from '$media/messages.json';
+
 import {
 	ServiceRequestPrioritySchema,
 	ServiceRequestStatusSchema
@@ -95,7 +97,7 @@ export const optionalCoalescePhoneNumberValidator = inputValidatorFactory(
 			.superRefine((val, ctx) => {
 				const defaultErr = {
 					code: z.ZodIssueCode.custom,
-					message: 'Phone number is invalid'
+					message: `Phone number needs to be valid for the region in format: ${messages['contact']['phone']['placeholder']}`
 				};
 				try {
 					const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
