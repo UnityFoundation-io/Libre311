@@ -24,16 +24,18 @@ import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.rules.SecurityRuleResult;
 import io.micronaut.web.router.MethodBasedRouteMatch;
+import io.micronaut.web.router.RouteAttributes;
 import io.micronaut.web.router.RouteMatch;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Singleton
-public class RequiresPermissionsAnnotationRule implements SecurityRule {
+public class RequiresPermissionsAnnotationRule implements SecurityRule<HttpRequest<?>> {
 
     private final UnityAuthService unityAuthService;
 
@@ -42,12 +44,12 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
     }
 
     @Override
-    public Publisher<SecurityRuleResult> check(HttpRequest<?> request,
-                                               @Nullable RouteMatch<?> routeMatch, @Nullable Authentication authentication) {
-        if (!(routeMatch instanceof MethodBasedRouteMatch)) {
+    public Publisher<SecurityRuleResult> check(HttpRequest<?> request, @Nullable Authentication authentication) {
+        RouteMatch<?> routeMatch = RouteAttributes.getRouteMatch(request).orElse(null);
+        if (!(routeMatch instanceof MethodBasedRouteMatch<?, ?> methodRoute)) {
             return UNKNOWN;
         }
-        MethodBasedRouteMatch<?, ?> methodRoute = ((MethodBasedRouteMatch) routeMatch);
+
         if (!methodRoute.hasAnnotation(RequiresPermissions.class)) {
             return UNKNOWN;
         }
@@ -68,18 +70,17 @@ public class RequiresPermissionsAnnotationRule implements SecurityRule {
                     "Either the Jurisdiction Id or Tenant Id must exist as a query parameter when using @RequiresPermissions");
         }
 
-        boolean result;
-        if (jurisdictionId != null) {
-            result = unityAuthService.isUserPermittedForJurisdictionAction(bearerToken, jurisdictionId, declaredPermissions);
-        } else {
-            result = unityAuthService.isUserPermittedForTenantAction(bearerToken, Long.valueOf(tenantId), declaredPermissions);
-        }
-
-        if (result) {
-            return ALLOWED;
-        }
-
-        return REJECTED;
+        return Mono.fromCallable(() -> {
+                    boolean result;
+                    if (jurisdictionId != null) {
+                        result = unityAuthService.isUserPermittedForJurisdictionAction(bearerToken, jurisdictionId, declaredPermissions);
+                    } else {
+                        result = unityAuthService.isUserPermittedForTenantAction(bearerToken, Long.valueOf(tenantId), declaredPermissions);
+                    }
+                    return result ? ALLOWED : REJECTED;
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(ruleResult -> ruleResult);
     }
 
     private List<Permission> resolvePermissionsFromAnnotation(

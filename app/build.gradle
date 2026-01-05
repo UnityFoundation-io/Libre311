@@ -13,9 +13,9 @@
 // limitations under the License.
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.7.10"
-    id("io.micronaut.test-resources") version "3.7.10"
+    id("io.micronaut.application") version "4.6.1"
+    id("com.gradleup.shadow") version "8.3.9"
+    id("io.micronaut.test-resources") version "4.6.1"
 }
 
 version = "0.1"
@@ -26,17 +26,19 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor("org.hibernate:hibernate-jpamodelgen:6.6.32.Final")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
-    annotationProcessor("org.hibernate:hibernate-jpamodelgen:5.6.15.Final")
-    compileOnly("org.hibernate:hibernate-jpamodelgen:5.6.15.Final")
+    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
+    compileOnly("org.hibernate:hibernate-jpamodelgen:6.6.32.Final")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
     runtimeOnly("ch.qos.logback:logback-classic")
-    implementation("io.micronaut:micronaut-validation")
+    runtimeOnly("org.yaml:snakeyaml")
+    implementation("io.micronaut.validation:micronaut-validation")
     implementation("io.swagger.core.v3:swagger-annotations")
 
     implementation("io.micronaut.xml:micronaut-jackson-xml")
@@ -48,29 +50,37 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
-    runtimeOnly("org.flywaydb:flyway-mysql")
 
     implementation('com.google.cloud:google-cloud-vision:3.35.0')
     // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html
-    implementation('org.hibernate:hibernate-spatial:5.6.15.Final')
+    implementation('org.hibernate:hibernate-spatial:6.6.32.Final')
     implementation("org.apache.commons:commons-csv:1.10.0")
 
-    String databaseSelection = System.getenv("LIBRE311_DATABASE_DEPENDENCY")
-    if (databaseSelection != null) {
-        databaseSelection.split(',').each {part ->
-            runtimeOnly(part)
-        }
-    } else {
+    String databaseSelection = System.getenv("LIBRE311_DATABASE_TYPE") ?: "mysql"
+    Boolean cloudDb = Boolean.parseBoolean(System.getenv("LIBRE311_CLOUD_DB"))
+    if (databaseSelection == "mysql"){
         runtimeOnly("mysql:mysql-connector-java:8.0.31")
-    }
+        runtimeOnly("org.flywaydb:flyway-mysql")
+        if (cloudDb) {
+            runtimeOnly('com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2')
+        }
+    } // TODO: add postgres at least
+
 }
 
 application {
     mainClass.set("app.Application")
 }
+
+run {
+    systemProperties([
+            'micronaut.environments': 'local'
+    ])
+}
+
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-    targetCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 graalvmNative.toolchainDetection = false
@@ -86,4 +96,12 @@ micronaut {
 tasks.withType(JavaCompile) {
     options.fork = true
     options.forkOptions.jvmArgs << '-Dmicronaut.openapi.views.spec=rapidoc.enabled=true,swagger-ui.enabled=true,swagger-ui.theme=flattop'
+}
+
+tasks.withType(io.micronaut.gradle.testresources.StartTestResourcesService).configureEach {
+    useClassDataSharing = false
+}
+
+tasks.named('shadowJar') {
+    zip64 = true
 }

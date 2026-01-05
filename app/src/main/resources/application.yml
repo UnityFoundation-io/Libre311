@@ -16,6 +16,10 @@ micronaut:
     services:
       auth:
         url: ${AUTH_BASE_URL}
+      nominatim:
+        url: ${NOMINATIM_URL:`https://nominatim.openstreetmap.org`}
+        read-timeout: 5s
+        connect-timeout: 3s
   security:
     token:
       enabled: true
@@ -58,8 +62,8 @@ jpa:
       packages: "app.model"
     properties:
       hibernate:
-        dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
-        database-platform: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
+        dialect: org.hibernate.dialect.MySQLDialect
+        database-platform: org.hibernate.dialect.MySQLDialect
         hbm2ddl:
           auto: ${LIBRE311_AUTO_SCHEMA_GEN:update}
 #        show_sql: true
@@ -96,6 +100,10 @@ app:
     bucket:  ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
   recaptcha:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
+
+libre311:
+  geocoding:
+    provider: ${GEOCODING_PROVIDER:`nominatim`}
 
 flyway:
   datasources:

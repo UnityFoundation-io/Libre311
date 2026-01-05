@@ -31,8 +31,8 @@
 		{/if}
 
 		<div class="mb-2 mt-2 flow-root">
-			<a href={detailsLink}>
-				<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
+			<a href={detailsLink} class="float-left hover:opacity-80">
+				<h1 class="text-lg underline">{serviceRequest.service_name}</h1>
 			</a>
 			<div class="float-right">
 				<!-- <Flag /> -->

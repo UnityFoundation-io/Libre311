@@ -16,8 +16,8 @@ package app.model.user;
 
 import io.micronaut.core.annotation.NonNull;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 
 @Entity
 @Table(name = "app_users")

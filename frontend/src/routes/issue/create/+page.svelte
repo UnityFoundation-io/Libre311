@@ -11,6 +11,8 @@
 
 	import L, { type PointTuple } from 'leaflet';
 	import MapMarker from '$lib/components/MapMarker.svelte';
+	import MapBoundaryPolygon from '$lib/components/MapBoundaryPolygon.svelte';
+	import { KEYBOARD_PAN_DELTA_FINE } from '$lib/constants/map';
 	import type { ComponentType } from 'svelte';
 	import {
 		CreateServiceRequestSteps,
@@ -20,6 +22,7 @@
 	import MapGeosearch from '$lib/components/MapGeosearch.svelte';
 	import type { ComponentEvents } from 'svelte';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { getFormattedAddress } from '$lib/services/geocoding';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
@@ -65,11 +68,16 @@
 		params.lat = String(centerPos[0]);
 		params.long = String(centerPos[1]);
 		loadingLocation = true;
-		const res = await libre311.reverseGeocode(centerPos);
-		loadingLocation = false;
-		params.address_string = res.display_name;
-		params = params;
-		goto(linkResolver.createIssuePageNext($page.url));
+
+		try {
+			const res = await libre311.reverseGeocode(centerPos);
+			params.address_string = getFormattedAddress(res);
+		} catch {
+			params.address_string = `Location: ${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
+		} finally {
+			await goto(linkResolver.createIssuePageNext($page.url));
+			loadingLocation = false;
+		}
 	}
 
 	function handleGeosearch(e: ComponentEvents<MapGeosearch>['geosearch']) {
@@ -107,11 +115,13 @@
 	</div>
 	<div slot="main-content" class="relative h-full">
 		<MapComponent
+			keyboardPanDelta={KEYBOARD_PAN_DELTA_FINE}
 			controlFactories={[mapCenterControlFactory]}
 			disabled={step != 0}
 			locateOpts={{ setView: true, enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
 		>
+			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
 			<MapMarker latLng={centerPos} options={{ icon }} />
 			{#if step == CreateServiceRequestSteps.LOCATION}
 				<MapGeosearch on:geosearch={handleGeosearch} />

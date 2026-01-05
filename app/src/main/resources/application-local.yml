@@ -34,7 +34,7 @@ app:
 
 datasources:
   default:
-    url: jdbc:mysql://localhost:3306/libre311?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:23306/libre311?allowPublicKeyRetrieval=true&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: test

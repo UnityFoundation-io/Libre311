@@ -1,29 +1,39 @@
-# create-svelte
+# Libre311 Frontend
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+SvelteKit web application for Libre311 municipal service requests.
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Install dependencies and start a development server:
 
 ```bash
+npm install
 npm run dev
 
 # or start the server and open the app in a new browser tab
 npm run dev -- --open
 ```
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and configure the following variables:
+
+| Variable                    | Description                    | Example                     |
+| --------------------------- | ------------------------------ | --------------------------- |
+| `VITE_BACKEND_URL`          | URL to the Libre311 API server | `http://localhost:8080/api` |
+| `VITE_GOOGLE_RECAPTCHA_KEY` | Google reCAPTCHA site key      | `6Lc1rB4sAAAAA...`          |
+
+### Geocoding Service
+
+The frontend uses the backend API for reverse geocoding (converting coordinates to addresses). The backend proxies requests to [Nominatim](https://nominatim.openstreetmap.org/), which centralizes geocoding configuration and avoids CORS issues.
+
+All reverse geocoding requests go through:
+
+```
+{VITE_BACKEND_URL}/geocode/reverse?lat={lat}&lon={lon}
+```
+
+No additional frontend configuration is required for geocoding.
 
 ## Building
 
@@ -35,4 +45,21 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Testing
+
+```bash
+# Run all tests
+npm run test
+
+# Run unit tests only
+npm run test:unit
+
+# Run integration tests only
+npm run test:integration
+```
+
+## Docker
+
+For Docker deployments, use `.env.docker` to configure:
+
+- Backend URL pointing to the API container

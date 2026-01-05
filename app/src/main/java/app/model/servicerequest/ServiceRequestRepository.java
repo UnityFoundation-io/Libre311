@@ -17,14 +17,14 @@ package app.model.servicerequest;
 import app.model.jurisdiction.Jurisdiction_;
 import app.model.service.Service_;
 import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.jpa.repository.JpaSpecificationExecutor;
-import io.micronaut.data.jpa.repository.criteria.Specification;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.model.Sort;
 import io.micronaut.data.repository.PageableRepository;
 
-import javax.transaction.Transactional;
+import io.micronaut.data.repository.jpa.JpaSpecificationExecutor;
+import io.micronaut.data.repository.jpa.criteria.QuerySpecification;
+import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -33,19 +33,33 @@ import java.util.Optional;
 public interface ServiceRequestRepository extends PageableRepository<ServiceRequest, Long>,
         JpaSpecificationExecutor<ServiceRequest> {
 
-    Page<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId,
-                                                     Pageable pageable);
+    default Page<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId,
+                                                             Pageable pageable) {
+        return findByIdInAndJurisdictionIdAndDeleted(serviceRequestIds, jurisdictionId, false, pageable);
+    }
 
-    List<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Sort sort);
 
-    Optional<ServiceRequest> findByIdAndJurisdictionId(Long serviceRequestId, String jurisdictionId);
+    default List<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Sort sort) {
+        return findByIdInAndJurisdictionIdAndDeleted(serviceRequestIds, jurisdictionId, false, sort);
+    }
+
+
+    default Optional<ServiceRequest> findByIdAndJurisdictionId(Long serviceRequestId, String jurisdictionId) {
+        return findByIdAndJurisdictionIdAndDeleted(serviceRequestId, jurisdictionId, false);
+    }
+
+    Page<ServiceRequest> findByIdInAndJurisdictionIdAndDeleted(List<Long> serviceRequestIds, String jurisdictionId, boolean deleted, Pageable pageable);
+    List<ServiceRequest> findByIdInAndJurisdictionIdAndDeleted(List<Long> serviceRequestIds, String jurisdictionId, boolean deleted, Sort sort);
+    Optional<ServiceRequest> findByIdAndJurisdictionIdAndDeleted(Long serviceRequestId, String jurisdictionId, boolean deleted);
+
+    Integer updateDeletedByIdAndJurisdictionIdAndDeletedFalse(Long id, String jurisdictionId, boolean deleted);
 
     @Transactional
     default Page<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
                                            Instant startDate, Instant endDate, Pageable pageable) {
 
-        Specification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
+        QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
                 status, priority, startDate, endDate);
 
         return findAll(specification, pageable);
@@ -56,19 +70,21 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
                                            Instant startDate, Instant endDate, Sort sort) {
 
-        Specification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
+        QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
                 status, priority, startDate, endDate);
 
         return findAll(specification, sort);
     }
 
-    private static Specification<ServiceRequest> getServiceRequestSpecification(String jurisdictionId,
-                                                                                List<Long> serviceCodes,
-                                                                                List<ServiceRequestStatus> status,
-                                                                                List<ServiceRequestPriority> priority,
-                                                                                Instant startDate, Instant endDate) {
-        Specification<ServiceRequest> specification =
+    private static QuerySpecification<ServiceRequest> getServiceRequestSpecification(String jurisdictionId,
+                                                                                     List<Long> serviceCodes,
+                                                                                     List<ServiceRequestStatus> status,
+                                                                                     List<ServiceRequestPriority> priority,
+                                                                                     Instant startDate, Instant endDate) {
+        QuerySpecification<ServiceRequest> specification =
                 (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(ServiceRequest_.jurisdiction).get(Jurisdiction_.id), jurisdictionId);
+
+        specification = specification.and(Specifications.notDeleted());
 
         if (serviceCodes != null && !serviceCodes.isEmpty()) {
             specification = specification.and(Specifications.serviceCodeIn(serviceCodes));
@@ -95,32 +111,36 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
 
     class Specifications {
 
+        public static QuerySpecification<ServiceRequest> notDeleted() {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(ServiceRequest_.deleted), false);
+        }
+
         // serviceCode
-        public static Specification<ServiceRequest> serviceCodeIn(List<Long> serviceCodes) {
+        public static QuerySpecification<ServiceRequest> serviceCodeIn(List<Long> serviceCodes) {
             return (root, query, criteriaBuilder) -> root.get(ServiceRequest_.service).get(Service_.id).in(serviceCodes);
         }
 
         // status
-        public static Specification<ServiceRequest> statusIn(List<ServiceRequestStatus> serviceRequestStatuses) {
+        public static QuerySpecification<ServiceRequest> statusIn(List<ServiceRequestStatus> serviceRequestStatuses) {
             return (root, query, criteriaBuilder) -> root.get(ServiceRequest_.status).in(serviceRequestStatuses);
         }
 
         // priority
-        public static Specification<ServiceRequest> priorityIn(List<ServiceRequestPriority> serviceRequestPriorities) {
+        public static QuerySpecification<ServiceRequest> priorityIn(List<ServiceRequestPriority> serviceRequestPriorities) {
             return (root, query, criteriaBuilder) -> root.get(ServiceRequest_.priority).in(serviceRequestPriorities);
         }
 
         // dateCreated
-        public static Specification<ServiceRequest> createdDateBetween(Instant startDate, Instant endDate) {
+        public static QuerySpecification<ServiceRequest> createdDateBetween(Instant startDate, Instant endDate) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get(ServiceRequest_.dateCreated),
                     startDate, endDate);
         }
 
-        public static Specification<ServiceRequest> createdDateAfter(Instant instant) {
+        public static QuerySpecification<ServiceRequest> createdDateAfter(Instant instant) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get(ServiceRequest_.dateCreated), instant);
         }
 
-        public static Specification<ServiceRequest> createdDateBefore(Instant instant) {
+        public static QuerySpecification<ServiceRequest> createdDateBefore(Instant instant) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get(ServiceRequest_.dateCreated), instant);
         }
     }

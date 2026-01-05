@@ -66,15 +66,18 @@ public class JurisdictionService {
     protected String authUrl;
 
     private final JurisdictionRepository jurisdictionRepository;
+    private final DefaultPolicyContentProvider defaultPolicyContentProvider;
     JurisdictionBoundaryRepository jurisdictionBoundaryRepository;
     JurisdictionBoundaryService jurisdictionBoundaryService;
 
     public JurisdictionService(JurisdictionRepository jurisdictionRepository,
         JurisdictionBoundaryRepository jurisdictionBoundaryRepository,
-        JurisdictionBoundaryService jurisdictionBoundaryService) {
+        JurisdictionBoundaryService jurisdictionBoundaryService,
+        DefaultPolicyContentProvider defaultPolicyContentProvider) {
         this.jurisdictionRepository = jurisdictionRepository;
         this.jurisdictionBoundaryRepository = jurisdictionBoundaryRepository;
         this.jurisdictionBoundaryService = jurisdictionBoundaryService;
+        this.defaultPolicyContentProvider = defaultPolicyContentProvider;
     }
 
     public JurisdictionDTO findJurisdictionByHostName(String hostName) {
@@ -86,8 +89,19 @@ public class JurisdictionService {
                     jurisdiction.getId());
                 jurisdictionDTO.setBounds(jurisdictionBoundary.getBoundary());
 
+                applyDefaultPolicyContent(jurisdictionDTO);
+
                 return jurisdictionDTO;
             }).orElseThrow(() -> JurisdictionNotFoundException.noJurisdictionForHostname(hostName));
+    }
+
+    private void applyDefaultPolicyContent(JurisdictionDTO jurisdictionDTO) {
+        if (jurisdictionDTO.getPrivacyPolicyContent() == null || jurisdictionDTO.getPrivacyPolicyContent().isEmpty()) {
+            jurisdictionDTO.setPrivacyPolicyContent(defaultPolicyContentProvider.getDefaultPrivacyPolicy());
+        }
+        if (jurisdictionDTO.getTermsOfUseContent() == null || jurisdictionDTO.getTermsOfUseContent().isEmpty()) {
+            jurisdictionDTO.setTermsOfUseContent(defaultPolicyContentProvider.getDefaultTermsOfUse());
+        }
     }
 
     public JurisdictionDTO createJurisdiction(CreateJurisdictionDTO requestDTO, Long tenantId) {
@@ -100,6 +114,16 @@ public class JurisdictionService {
         jurisdiction.setPrimaryColor(requestDTO.getPrimaryColor());
         jurisdiction.setPrimaryHoverColor(requestDTO.getPrimaryHoverColor());
         jurisdiction.setLogoMediaUrl(requestDTO.getLogoMediaUrl());
+        jurisdiction.setTermsOfUseContent(
+            requestDTO.getTermsOfUseContent() != null && !requestDTO.getTermsOfUseContent().isEmpty()
+                ? requestDTO.getTermsOfUseContent()
+                : null
+        );
+        jurisdiction.setPrivacyPolicyContent(
+            requestDTO.getPrivacyPolicyContent() != null && !requestDTO.getPrivacyPolicyContent().isEmpty()
+                ? requestDTO.getPrivacyPolicyContent()
+                : null
+        );
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
         JurisdictionBoundary savedBoundary = jurisdictionBoundaryService.saveBoundary(
@@ -142,6 +166,16 @@ public class JurisdictionService {
         }
         if (jurisdictionDTO.getLogoMediaUrl() != null) {
             jurisdiction.setLogoMediaUrl(jurisdictionDTO.getLogoMediaUrl());
+        }
+        if (jurisdictionDTO.getTermsOfUseContent() != null) {
+            jurisdiction.setTermsOfUseContent(
+                jurisdictionDTO.getTermsOfUseContent().isEmpty() ? null : jurisdictionDTO.getTermsOfUseContent()
+            );
+        }
+        if (jurisdictionDTO.getPrivacyPolicyContent() != null) {
+            jurisdiction.setPrivacyPolicyContent(
+                jurisdictionDTO.getPrivacyPolicyContent().isEmpty() ? null : jurisdictionDTO.getPrivacyPolicyContent()
+            );
         }
     }
 }

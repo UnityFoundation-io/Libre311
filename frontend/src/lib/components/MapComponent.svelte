@@ -10,6 +10,7 @@
 	import { onMount, onDestroy, setContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
+	import { KEYBOARD_PAN_DELTA_FINE } from '$lib/constants/map';
 
 	export let locateOpts: L.LocateOptions | undefined = undefined;
 	export let bounds: L.LatLngBoundsExpression | undefined = undefined;
@@ -18,6 +19,11 @@
 	export let disabled: boolean = false;
 	export let controlFactories: Array<ControlFactory> = [];
 	export let controlOps: L.ControlOptions = { position: 'topleft' };
+	export let keyboardPanDelta: number = KEYBOARD_PAN_DELTA_FINE;
+
+	// Configuration for animated flyTo when selecting a marker
+	export let flyToTarget: { latLng: L.LatLngExpression; zoom: number } | undefined = undefined;
+	export let flyToOptions: L.ZoomPanOptions = { duration: 0.4 };
 
 	const dispatch = createEventDispatcher<Events>();
 
@@ -25,7 +31,7 @@
 	let mapElement: HTMLElement;
 
 	onMount(() => {
-		map = L.map(mapElement);
+		map = L.map(mapElement, { keyboardPanDelta });
 		map.addEventListener('moveend', () => {
 			dispatch('boundsChanged', map.getBounds());
 		});
@@ -73,8 +79,17 @@
 		}
 	}
 
+	// Handle map view initialization and updates
+	// flyToTarget takes precedence when set (e.g., when a marker is selected)
 	$: if (map) {
-		if (bounds) {
+		if (flyToTarget) {
+			// flyTo requires an existing view; use setView for initial positioning
+			if (map.getZoom() === undefined) {
+				map.setView(flyToTarget.latLng, flyToTarget.zoom);
+			} else {
+				map.flyTo(flyToTarget.latLng, flyToTarget.zoom, flyToOptions);
+			}
+		} else if (bounds) {
 			map.fitBounds(bounds);
 		} else if (center && zoom) {
 			map.setView(center, zoom);

@@ -8,6 +8,19 @@ export default defineConfig({
 	},
 	server: {
 		port: 3000,
-		host: true
+		host: true,
+		allowedHosts: ['stlma.localhost', 'lomocomo.localhost']
+	},
+	optimizeDeps: {
+		include: [
+			'axios',
+			'zod',
+			'stwui',
+			'leaflet',
+			'leaflet-geosearch',
+			'google-libphonenumber',
+			'marked',
+			'dompurify'
+		]
 	}
 });

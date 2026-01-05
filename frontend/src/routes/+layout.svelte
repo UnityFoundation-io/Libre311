@@ -48,8 +48,6 @@
 				unityAuthServiceProps: { baseURL: jurisdictionConfig.auth_base_url }
 			};
 
-			console.log({ ctxProps });
-
 			contextProviderProps = asAsyncSuccess(ctxProps);
 		} catch (error) {
 			console.error(error);
@@ -65,6 +63,7 @@
 		<header class="flex items-center justify-center">
 			<div class="flex gap-4">
 				<button
+					aria-label="navigation"
 					type="button"
 					on:click={() => {
 						open = !open;

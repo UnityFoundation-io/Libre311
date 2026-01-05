@@ -7,6 +7,7 @@
 	import ServiceRequestUpdate from './ServiceRequestUpdate.svelte';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
@@ -16,6 +17,7 @@
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 	const alert = useLibre311Context().alert;
+	const { refreshSelectedServiceRequest } = useServiceRequestsContext();
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -33,9 +35,34 @@
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
 	}
 
+	async function deleteServiceReq() {
+		let confirmed = window.confirm('Are you sure you would like to delete this request?');
+		if (!confirmed) return;
+		try {
+			await libre311.deleteServiceRequest({
+				service_request_id: serviceRequest.service_request_id
+			});
+
+			alert({
+				type: 'success',
+				title: 'Success',
+				description: 'Service request has been deleted'
+			});
+			goto('/issues/table');
+		} catch (error) {
+			alertError(error);
+		}
+	}
+
 	async function updateServiceRequest(e: CustomEvent<UpdateSensitiveServiceRequestRequest>) {
 		try {
 			await libre311.updateServiceRequest(e.detail);
+
+			const updatedRequest = await libre311.getServiceRequest({
+				service_request_id: serviceRequest.service_request_id
+			});
+
+			refreshSelectedServiceRequest(updatedRequest);
 
 			isUpdateButtonClicked = false;
 
@@ -44,8 +71,6 @@
 				title: 'Success',
 				description: 'Your service request has been updated'
 			});
-
-			goto(back);
 		} catch (error) {
 			alertError(error);
 		}
@@ -179,6 +204,18 @@
 						<Button slot="left" href={back}>
 							{messages['updateServiceRequest']['button_back']}
 						</Button>
+						<AuthGuard
+							slot="middle"
+							requires={[
+								'LIBRE311_REQUEST_EDIT-TENANT',
+								'LIBRE311_REQUEST_EDIT-SYSTEM',
+								'LIBRE311_REQUEST_EDIT-SUBTENANT'
+							]}
+						>
+							<Button on:click={deleteServiceReq}>
+								{messages['updateServiceRequest']['button_delete']}
+							</Button>
+						</AuthGuard>
 
 						<AuthGuard
 							slot="right"

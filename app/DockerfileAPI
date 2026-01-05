@@ -1,31 +1,32 @@
 # Stage 1: Build with Gradle
-FROM gradle:jdk21-jammy AS builder
+FROM gradle:9-jdk25 AS builder
 WORKDIR /workspace
 
-# 1. Copy Gradle wrapper first (rarely changes)
-COPY gradle/ gradle/
-COPY gradlew gradlew.bat ./
+ARG DB_TYPE=mysql
+ARG CLOUD_DB=false
+ENV LIBRE311_DATABASE_TYPE=${DB_TYPE}
+ENV LIBRE311_CLOUD_DB=${CLOUD_DB}
 
 # 2. Copy Gradle config files
 COPY app/gradle.properties app/settings.gradle ./
 
 # 3. Download Gradle
-RUN ./gradlew --version --no-daemon
+RUN gradle --version --no-daemon
 
 COPY --chown=gradle:gradle ./app .
 
 # Run the builder w/ the secret
-RUN ./gradlew buildLayers --no-daemon
+RUN gradle buildLayers --no-daemon
 
 # Stage 2: Create the final image
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:25-jre
 
 WORKDIR /home/app
 
+# Micronaut 4.x layer structure
 COPY --from=builder /workspace/build/docker/main/layers/libs /home/app/libs
-COPY --from=builder /workspace/build/docker/main/layers/classes /home/app/classes
 COPY --from=builder /workspace/build/docker/main/layers/resources /home/app/resources
-COPY --from=builder /workspace/build/docker/main/layers/application.jar /home/app/application.jar
+COPY --from=builder /workspace/build/docker/main/layers/app/application.jar /home/app/application.jar
 
 RUN useradd -u 8877 unity
 # Change to non-root privilege
