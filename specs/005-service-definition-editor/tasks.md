@@ -27,12 +27,12 @@
 
 **Purpose**: Create project structure and shared types/stores for the Service Definition Editor
 
-- [ ] T001 Create EditorView directory at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/
-- [ ] T002 Create ListView directory at frontend/src/lib/components/ServiceDefinitionEditor/ListView/
-- [ ] T003 [P] Create TypeScript types file with AttributeTypeLabel, DATATYPE_MAP, CardState, AttributeCardState, EditorState, SaveStatus at frontend/src/lib/components/ServiceDefinitionEditor/types.ts
-- [ ] T004 [P] Create editor store with editorState, expandedAttribute, hasUnsavedChanges, saveStatus at frontend/src/lib/components/ServiceDefinitionEditor/stores/editorStore.ts
-- [ ] T005 [P] Create list view store with ListViewState, GroupListState at frontend/src/lib/components/ServiceDefinitionEditor/stores/listViewStore.ts
-- [ ] T006 Create integration tests directory at frontend/tests/service-definition-editor/
+- [X] T001 Create EditorView directory at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/
+- [X] T002 Create ListView directory at frontend/src/lib/components/ServiceDefinitionEditor/ListView/
+- [X] T003 [P] Create TypeScript types file with AttributeTypeLabel, DATATYPE_MAP, CardState, AttributeCardState, EditorState, SaveStatus at frontend/src/lib/components/ServiceDefinitionEditor/types.ts
+- [X] T004 [P] Create editor store with editorState, expandedAttribute, hasUnsavedChanges, saveStatus at frontend/src/lib/components/ServiceDefinitionEditor/stores/editorStore.ts
+- [X] T005 [P] Create list view store with ListViewState, GroupListState at frontend/src/lib/components/ServiceDefinitionEditor/stores/listViewStore.ts
+- [X] T006 Create integration tests directory at frontend/tests/service-definition-editor/
 
 ---
 
@@ -42,12 +42,12 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Create SaveToast component with success/error states and auto-dismiss at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/SaveToast.svelte
-- [ ] T008 [P] Create SaveToast unit tests for success, error, and auto-dismiss behavior at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/SaveToast.test.ts
-- [ ] T009 Create auto-save utility function with 500ms debounce and optimistic updates at frontend/src/lib/components/ServiceDefinitionEditor/utils/autoSave.ts
-- [ ] T010 [P] Create auto-save utility unit tests for debounce timing and error handling at frontend/src/lib/components/ServiceDefinitionEditor/utils/autoSave.test.ts
-- [ ] T011 Create EditorContainer layout component with navigation header and scrollable content area at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/EditorContainer.svelte
-- [ ] T012 [P] Create EditorContainer unit tests for layout and navigation rendering at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/EditorContainer.test.ts
+- [X] T007 Create SaveToast component with success/error states and auto-dismiss at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/SaveToast.svelte
+- [X] T008 [P] Create SaveToast unit tests for success, error, and auto-dismiss behavior at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/SaveToast.test.ts
+- [X] T009 Create auto-save utility function with 500ms debounce and optimistic updates at frontend/src/lib/components/ServiceDefinitionEditor/utils/autoSave.ts
+- [X] T010 [P] Create auto-save utility unit tests for debounce timing and error handling at frontend/src/lib/components/ServiceDefinitionEditor/utils/autoSave.test.ts
+- [X] T011 Create EditorContainer layout component with navigation header and scrollable content area at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/EditorContainer.svelte
+- [X] T012 [P] Create EditorContainer unit tests for layout and navigation rendering at frontend/src/lib/components/ServiceDefinitionEditor/EditorView/EditorContainer.test.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
