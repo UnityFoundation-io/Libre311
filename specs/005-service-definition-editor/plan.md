@@ -1,104 +1,219 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Service Definition Editor
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Branch**: `005-service-definition-editor` | **Date**: 2026-01-05 | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `/specs/005-service-definition-editor/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Implement a Google Forms-style UI for administrators to manage service definitions (service request types and their attributes/questions). This is a **frontend-only feature** that builds new UI components on top of existing API endpoints in `JurisdictionAdminController`. The editor will allow browsing service groups, editing service definitions, managing attribute cards with drag-and-drop reordering, and configuring list options for multiple choice fields.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript 5.x (SvelteKit frontend)
+**Primary Dependencies**: SvelteKit, STWUI (UI components), Tailwind CSS, Svelte transitions, axios
+**Storage**: N/A (frontend-only, data fetched via existing API)
+**Testing**: Vitest (unit), Playwright (integration)
+**Target Platform**: Web browsers (desktop-first, 1024px+ viewport)
+**Project Type**: Web application (frontend-only feature)
+**Performance Goals**: Page load <3s, auto-save <1s (per SC-001, SC-003)
+**Constraints**: WCAG 2.1 Level AA accessibility compliance
+**Scale/Scope**: Admin interface for managing ~10-50 service groups, ~5-20 services per group, ~5-30 attributes per service
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I. Open311 Compliance | ✅ PASS | No API changes; uses existing Open311-compliant endpoints |
+| II. Layered Architecture | ✅ N/A | Frontend-only feature; backend architecture unchanged |
+| III. Security First | ✅ PASS | Uses existing JWT auth via UnityAuth; no new security surface |
+| IV. Test Coverage | ⚠️ PENDING | Unit tests required for new components; integration tests for critical flows |
+| V. Dual Environment Support | ✅ PASS | Standard SvelteKit dev/build; no special config |
+| VI. Database Flexibility | ✅ N/A | No schema changes |
+| VII. Minimal External Dependencies | ✅ PASS | No new dependencies; uses existing STWUI, Svelte |
+| VIII. Consistent Code Formatting | ✅ PASS | Prettier enforced via npm run lint |
+| IX. Accessibility (WCAG 2.2 AA) | ⚠️ PENDING | Requires keyboard navigation, focus management, ARIA labels, color contrast |
+
+**Gate Result**: PASS with pending test and accessibility requirements to fulfill during implementation.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+specs/005-service-definition-editor/
+├── plan.md              # This file
+├── research.md          # Phase 0 output
+├── data-model.md        # Phase 1 output
+├── quickstart.md        # Phase 1 output
+├── contracts/           # Phase 1 output (API documentation)
+└── tasks.md             # Phase 2 output (/speckit.tasks command)
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
 frontend/
 ├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+│   ├── routes/
+│   │   └── groups/
+│   │       ├── +page.svelte                    # Groups list (EXISTING - enhance)
+│   │       └── [group_id]/
+│   │           ├── +page.svelte                # Services in group (EXISTING)
+│   │           └── services/
+│   │               └── [service_id]/
+│   │                   ├── +page.svelte        # Service attribute list (EXISTING)
+│   │                   └── edit/
+│   │                       └── +page.svelte    # NEW: Google Forms-style editor
+│   ├── lib/
+│   │   └── components/
+│   │       └── ServiceDefinitionEditor/
+│   │           ├── GroupListItem.svelte        # EXISTING
+│   │           ├── ServiceListItem.svelte      # EXISTING
+│   │           ├── SdaListItem.svelte          # EXISTING
+│   │           ├── DragAndDrop.svelte          # EXISTING (at lib/components/)
+│   │           ├── EditorView/                 # NEW: Google Forms-style components
+│   │           │   ├── EditorContainer.svelte
+│   │           │   ├── HeaderCard.svelte
+│   │           │   ├── AttributeCard.svelte
+│   │           │   ├── AttributeCardCollapsed.svelte
+│   │           │   ├── AttributeCardExpanded.svelte
+│   │           │   ├── AttributeTypeSelector.svelte
+│   │           │   ├── OptionsList.svelte
+│   │           │   ├── AttributeFooter.svelte
+│   │           │   ├── AddFieldButton.svelte
+│   │           │   └── SaveToast.svelte
+│   │           └── ListView/                   # NEW: Enhanced list view
+│   │               ├── ServiceGroupCard.svelte
+│   │               └── ServiceListRow.svelte
+│   └── tests/                                  # Playwright integration tests
+│       └── service-definition-editor/
+│           ├── browse-groups.spec.ts
+│           ├── edit-service.spec.ts
+│           └── manage-attributes.spec.ts
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Web application frontend-only. New components organized under `ServiceDefinitionEditor/EditorView/` for the Google Forms-style editor, with the existing list view components enhanced in-place. New route at `/groups/[group_id]/services/[service_id]/edit` for the full-page editor.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+No constitution violations requiring justification. The feature uses existing patterns and dependencies.
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+## Existing Assets Analysis
+
+### Backend API (Already Complete)
+
+All required endpoints exist in `JurisdictionAdminController.java`:
+
+| Operation | Endpoint | Method | Status |
+|-----------|----------|--------|--------|
+| List groups | `/jurisdiction-admin/groups/` | GET | ✅ Exists |
+| Create group | `/jurisdiction-admin/groups/` | POST | ✅ Exists |
+| Edit group | `/jurisdiction-admin/groups/{groupId}` | PATCH | ✅ Exists |
+| Delete group | `/jurisdiction-admin/groups/{groupId}` | DELETE | ✅ Exists |
+| Create service | `/jurisdiction-admin/services` | POST | ✅ Exists |
+| Edit service | `/jurisdiction-admin/services/{serviceCode}` | PATCH | ✅ Exists |
+| Delete service | `/jurisdiction-admin/services/{serviceCode}` | DELETE | ✅ Exists |
+| Reorder services | `/jurisdiction-admin/groups/{groupId}/services-order` | PATCH | ✅ Exists |
+| Create attribute | `/jurisdiction-admin/services/{serviceCode}/attributes` | POST | ✅ Exists |
+| Edit attribute | `/jurisdiction-admin/services/{serviceCode}/attributes/{code}` | PATCH | ✅ Exists |
+| Delete attribute | `/jurisdiction-admin/services/{serviceCode}/attributes/{code}` | DELETE | ✅ Exists |
+| Reorder attributes | `/jurisdiction-admin/services/{serviceCode}/attributes-order` | PATCH | ✅ Exists |
+
+### Frontend API Client (Already Complete)
+
+All API methods exist in `Libre311.ts`:
+
+- `getGroupList()`, `createGroup()`, `editGroup()`
+- `createService()`, `editService()`, `deleteService()`, `updateServicesOrder()`
+- `createAttribute()`, `editAttribute()`, `deleteAttribute()`, `updateAttributesOrder()`
+- `getServiceDefinition()` (for loading existing attributes)
+
+### Existing Components (Reusable)
+
+| Component | Location | Reuse Strategy |
+|-----------|----------|----------------|
+| DragAndDrop.svelte | `lib/components/` | Direct reuse for attribute reordering |
+| GroupListItem.svelte | `ServiceDefinitionEditor/` | Enhance for expand/collapse UX |
+| ServiceListItem.svelte | `ServiceDefinitionEditor/` | Enhance with Edit button navigation |
+| DisplayListItem.svelte | `ServiceDefinitionEditor/` | Reuse for collapsed views |
+| EditListItem.svelte | `ServiceDefinitionEditor/` | Reuse for inline editing |
+
+## Design Decisions
+
+### 1. Route Structure
+
+**Decision**: Add new `/groups/[group_id]/services/[service_id]/edit` route for the Google Forms-style editor rather than replacing existing routes.
+
+**Rationale**: Preserves existing functionality, allows gradual migration, and provides clear separation between list view and editor view.
+
+### 2. State Management
+
+**Decision**: Use Svelte stores with context for editor state (current service, attributes list, expanded card index, pending saves).
+
+**Rationale**: Matches existing patterns in the codebase, avoids new dependencies, and provides reactive updates.
+
+### 3. Auto-Save Implementation
+
+**Decision**: Debounced save on blur/change with optimistic UI updates and error recovery.
+
+**Pattern**:
+1. User edits field → immediate UI update
+2. Debounce 500ms → API call
+3. Success → show toast
+4. Failure → show error toast with retry, revert UI if needed
+
+### 4. Accordion Behavior
+
+**Decision**: Only one attribute card expanded at a time; clicking a collapsed card expands it and collapses the previously expanded card.
+
+**Rationale**: Matches Google Forms UX and reduces visual clutter.
+
+### 5. Accessibility Strategy
+
+**Decision**: Full keyboard navigation with focus trapping in expanded cards, ARIA live regions for save confirmations, visible focus indicators.
+
+**Implementation**:
+- Tab order: groups → services → editor cards → card controls
+- Escape key: collapse expanded card
+- Arrow keys: navigate between options in lists
+- Screen reader announcements for saves/errors
+
+---
+
+## Constitution Check (Post-Design)
+
+*Re-evaluation after Phase 1 design completion.*
+
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I. Open311 Compliance | ✅ PASS | No API changes; uses existing Open311-compliant endpoints |
+| II. Layered Architecture | ✅ N/A | Frontend-only feature; backend architecture unchanged |
+| III. Security First | ✅ PASS | Uses existing JWT auth via UnityAuth; no new security surface |
+| IV. Test Coverage | ✅ PLANNED | Unit tests specified for new components (co-located .test.ts); integration tests in tests/service-definition-editor/ |
+| V. Dual Environment Support | ✅ PASS | Standard SvelteKit dev/build; no special config |
+| VI. Database Flexibility | ✅ N/A | No schema changes |
+| VII. Minimal External Dependencies | ✅ PASS | No new dependencies added; uses existing STWUI, Svelte, Tailwind |
+| VIII. Consistent Code Formatting | ✅ PASS | Prettier enforced via npm run lint; all new files follow existing patterns |
+| IX. Accessibility (WCAG 2.2 AA) | ✅ PLANNED | Detailed accessibility strategy defined: keyboard nav, ARIA labels, focus management, live regions |
+
+**Post-Design Gate Result**: ✅ PASS - All principles addressed. Testing and accessibility requirements have implementation plans.
+
+---
+
+## Generated Artifacts
+
+| Artifact | Path | Description |
+|----------|------|-------------|
+| Implementation Plan | [plan.md](plan.md) | This file |
+| Research | [research.md](research.md) | Codebase exploration, existing assets analysis |
+| Data Model | [data-model.md](data-model.md) | TypeScript types, Svelte stores, state management |
+| API Contract | [contracts/admin-api.md](contracts/admin-api.md) | Existing API endpoint documentation |
+| Quickstart | [quickstart.md](quickstart.md) | Development setup, key files, coding patterns |
+
+---
+
+## Next Steps
+
+Run `/speckit.tasks` to generate the task breakdown for implementation.
