@@ -27,17 +27,18 @@
 		"citizen_comments": "Citizen Comments"
 	},
 	"sidebar": {
-		"title": "Requests"
+		"title": "Service Requests"
 	},
 	"serviceRequest": {
 		"description": "Description:",
-		"detail": "Details:",
+		"detail": "Service Request Detail",
+		"update": "Service Request Update",
+		"create": "Service Request Create",
 		"attributes": "Attributes:",
 		"agency_contact": "Agency Contact:",
 		"agency_contact_email": "Agency Contact Email:",
 		"agency_name": "agency name",
 		"citizen_contact": "Citizen Contact:",
-		"description": "Description",
 		"expected_datetime": "Estimated Fix:",
 		"request_type": "Request Type",
 		"service_notice": "Recommended Solution:",

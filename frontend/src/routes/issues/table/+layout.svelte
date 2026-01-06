@@ -164,6 +164,7 @@
 			<slot />
 		</div>
 		<div slot="table" class="relative flex h-full flex-col">
+			<h3 class="ml-3 mt-2 text-base">Service Requests</h3>
 			<div
 				class="m-3 flex items-center justify-between rounded-md border-t-[1px] border-border shadow-md"
 			>
