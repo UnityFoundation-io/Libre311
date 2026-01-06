@@ -3,7 +3,7 @@
 	import LoginDesktop from '$lib/components/Login/LoginDesktop.svelte';
 	import type { EventDispatchTypeMap } from '$lib/components/Login/shared';
 	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
-	import { createInput, emailValidator } from '$lib/utils/validation';
+	import { createInput, emailValidator, passwordValidator } from '$lib/utils/validation';
 	import { useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
 	import {
@@ -30,8 +30,9 @@
 
 	async function login() {
 		emailInput = emailValidator(emailInput);
+		passwordInput = passwordValidator(passwordInput);
 
-		if (emailInput.value && passwordInput.value) {
+		if (emailInput.type === 'valid' && passwordInput.type === 'valid') {
 			try {
 				await authService.login(emailInput.value, passwordInput.value);
 

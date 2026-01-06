@@ -58,6 +58,10 @@ export function inputValidatorFactory<T>(schema: z.ZodType<T, z.ZodTypeDef, T>):
 	return validator;
 }
 
+export const passwordValidator: InputValidator<string> = inputValidatorFactory(
+	z.string().trim().min(1, 'Password is required')
+);
+
 export const numberValidator: InputValidator<number> = inputValidatorFactory(z.number());
 
 export const stringValidator: InputValidator<string> = inputValidatorFactory(z.string());
