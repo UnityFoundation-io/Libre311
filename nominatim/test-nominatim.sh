@@ -30,11 +30,11 @@ print_result() {
 
 	if [ "$success" = "true" ]; then
 		echo -e "${GREEN}[PASS]${NC} $test_name"
-		((PASS_COUNT++))
+		PASS_COUNT=$((PASS_COUNT + 1))
 	else
 		echo -e "${RED}[FAIL]${NC} $test_name"
 		echo -e "       ${details}"
-		((FAIL_COUNT++))
+		FAIL_COUNT=$((FAIL_COUNT + 1))
 	fi
 }
 
@@ -157,7 +157,7 @@ echo "Test 7: Bounded Search"
 echo "----------------------"
 echo "Searching within St. Louis bounding box"
 
-BOUNDED_RESPONSE=$(curl -s "$NOMINATIM_URL/search?q=Main+Street&format=json&limit=5&viewbox=-90.4,-38.5,-90.1,-38.8&bounded=1" 2>/dev/null)
+BOUNDED_RESPONSE=$(curl -s "$NOMINATIM_URL/search?q=Main+Street&format=json&limit=5&viewbox=-90.4,38.8,-90.1,38.5&bounded=1" 2>/dev/null)
 
 RESULT_COUNT=$(echo "$BOUNDED_RESPONSE" | grep -o '"place_id"' | wc -l | tr -d ' ')
 
