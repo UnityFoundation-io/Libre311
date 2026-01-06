@@ -8,39 +8,20 @@ export class MapCenterControl extends L.Control {
 	onAdd(map: L.Map): HTMLElement {
 		const img = L.DomUtil.create('img');
 		img.src = locationSearching;
-		img.style.cursor = 'pointer';
-		img.style.width = '25';
+		img.alt = '';
 
 		const control = L.DomUtil.create('a');
-		control.addEventListener('click', () => map.locate());
-		control.appendChild(img);
+		control.className = 'map-center-control';
+		control.href = '#';
 		control.setAttribute('role', 'button');
 		control.setAttribute('title', 'Center Map');
 		control.setAttribute('aria-label', 'Center Map');
-		control.href = '#';
-		control.style.backgroundColor = '#fff';
-		control.style.border = '2px solid rgba(0, 0, 0, 0.2)';
-		control.style.backgroundClip = 'padding-box';
-		control.style.borderRadius = '4px';
-		control.style.width = '34px';
-		control.style.height = '34px';
-		control.style.display = 'flex';
-		control.style.justifyContent = 'center';
-		control.style.alignItems = 'center';
+		control.appendChild(img);
 
-		const highlight = () => {
-			control.style.backgroundColor = '#f4f4f4';
-		};
-
-		const unhighlight = () => {
-			control.style.backgroundColor = '#fff';
-		};
-
-		control.addEventListener('mouseenter', highlight);
-		control.addEventListener('focus', highlight);
-
-		control.addEventListener('mouseleave', unhighlight);
-		control.addEventListener('blur', unhighlight);
+		control.addEventListener('click', (e) => {
+			e.preventDefault();
+			map.locate();
+		});
 
 		return control;
 	}
