@@ -20,6 +20,12 @@
 	});
 
 	const { onChange, onSubmit } = dispatchEventFunctionFactory(dispatch);
+
+	// pass svelte checks
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const passwordAutocomplete = 'current-password' as any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const emailAutocomplete = 'email' as any;
 </script>
 
 <div class="flex h-full w-full items-center justify-center">
@@ -57,7 +63,6 @@
 
 			<h1 class="text-lg">{messages['login']['title']}</h1>
 		</div>
-
 		<div class="m-4">
 			<Input
 				allowClear
@@ -67,6 +72,7 @@
 				placeholder={messages['login']['email']['placeholder']}
 				error={emailInput.error}
 				value={emailInput.value}
+				autocomplete={emailAutocomplete}
 				on:change={(e) => onChange(e, 'email')}
 			>
 				<Input.Label slot="label">{messages['login']['email']['label']}</Input.Label>
@@ -83,6 +89,7 @@
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
 				value={passwordInput.value}
+				autocomplete={passwordAutocomplete}
 				on:change={(e) => onChange(e, 'password')}
 			>
 				<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
@@ -98,13 +105,17 @@
 		<div class="m-4">
 			<!-- disbling the warning until we have valid link for this -->
 			<!-- eslint-disable-next-line svelte/valid-compile -->
-			<a class="text-sm" href="javascript:void(0);">{messages['login']['forgot_password']}</a>
+			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
+				>{messages['login']['forgot_password']}</a
+			>
 		</div>
 
 		<div class="m-4">
 			<!-- disbling the warning until we have valid link for this -->
 			<!-- eslint-disable-next-line svelte/valid-compile -->
-			<a class="text-sm" href="javascript:void(0);">{messages['login']['create_account']}</a>
+			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
+				>{messages['login']['create_account']}</a
+			>
 		</div>
 	</div>
 </div>

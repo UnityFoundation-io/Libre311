@@ -8,13 +8,15 @@ import type {
 } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
+import type { DeleteServiceRequestRequest } from '$lib/services/Libre311/types/DeleteServiceRequestRequest';
+import { GeocodingServiceImpl, type ReverseGeocodeResponse } from '../geocoding';
 
-const JurisdicationIdSchema = z.string();
+const JurisdictionIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
-	jurisdiction_id: JurisdicationIdSchema
+	jurisdiction_id: JurisdictionIdSchema
 });
 export type HasJurisdictionId = z.infer<typeof HasJurisdictionIdSchema>;
-export type JurisdictionId = z.infer<typeof JurisdicationIdSchema>;
+export type JurisdictionId = z.infer<typeof JurisdictionIdSchema>;
 
 const RealtimeServiceTypeSchema = z.literal('realtime');
 const OtherServiceTypeSchema = z.literal('other'); // todo remove once second type is found
@@ -482,10 +484,8 @@ export interface Open311Service {
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest>;
 }
 
-export const ReverseGeocodeResponseSchema = z.object({
-	display_name: z.string()
-});
-export type ReverseGeocodeResponse = z.infer<typeof ReverseGeocodeResponseSchema>;
+// Re-export geocoding types for backwards compatibility
+export { ReverseGeocodeResponseSchema, type ReverseGeocodeResponse } from '../geocoding';
 
 export const LibrePermissionsSchema = z.union([
 	z.literal('AUTH_SERVICE_EDIT-SYSTEM'),
@@ -546,6 +546,7 @@ export interface Libre311Service extends Open311Service {
 	updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
 	): Promise<UpdateSensitiveServiceRequestResponse>;
+	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -593,7 +594,9 @@ const ROUTES = {
 	updateServicesOrder: (params: UpdateServicesOrderParams & HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/${params.group_id}/services-order?jurisdiction_id=${params.jurisdiction_id}`,
 	updateAttributesOrder: (params: UpdateAttributesOrderParams & HasJurisdictionId) =>
-		`/jurisdiction-admin/services/${params.service_code}/attributes-order?jurisdiction_id=${params.jurisdiction_id}`
+		`/jurisdiction-admin/services/${params.service_code}/attributes-order?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteServiceRequest: (params: HasServiceRequestId & HasJurisdictionId) =>
+		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -644,6 +647,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	private jurisdictionId: JurisdictionId;
 	private jurisdictionConfig: JurisdictionConfig;
 	private recaptchaService: RecaptchaService;
+	private geocodingService: GeocodingServiceImpl;
 	public static readonly supportedImageTypes = [
 		'image/png',
 		'image/jpg',
@@ -657,10 +661,21 @@ export class Libre311ServiceImpl implements Libre311Service {
 		this.jurisdictionConfig = props.jurisdictionConfig;
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
 		this.recaptchaService = props.recaptchaService;
+		this.geocodingService = new GeocodingServiceImpl();
+	}
+	async deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean> {
+		try {
+			const res = await this.axiosInstance.delete(
+				ROUTES.deleteServiceRequest({ ...params, jurisdiction_id: this.jurisdictionId })
+			);
+			return res.status === 204;
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
 	}
 
 	public static async create(props: Libre311ServiceProps): Promise<Libre311Service> {
-		console.log({ props });
 		const jurisdictionConfig = await getJurisdictionConfig(props.baseURL);
 		return new Libre311ServiceImpl({ ...props, jurisdictionConfig });
 	}
@@ -670,9 +685,19 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse> {
-		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords[0]}&lon=${coords[1]}`;
-		const res = await axios.get<unknown>(url);
-		return ReverseGeocodeResponseSchema.parse(res.data);
+		const fallbackResult: ReverseGeocodeResponse = {
+			displayName: `Location: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`,
+			address: null,
+			latitude: coords[0],
+			longitude: coords[1],
+			provider: 'fallback'
+		};
+
+		try {
+			return await this.geocodingService.reverseGeocode(coords[0], coords[1]);
+		} catch {
+			return fallbackResult;
+		}
 	}
 
 	async getServiceList(): Promise<GetServiceListResponse> {

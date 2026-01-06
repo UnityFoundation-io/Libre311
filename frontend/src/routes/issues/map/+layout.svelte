@@ -25,7 +25,7 @@
 	import { matchesDesktopMedia } from '$lib/utils/functions';
 	import CreateServiceRequestButton from '$lib/components/CreateServiceRequestButton.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
-	import { KEYBOARD_PAN_DELTA_COARSE } from '$lib/constants/map';
+	import { KEYBOARD_PAN_DELTA_COARSE, SELECTION_ZOOM_LEVEL } from '$lib/constants/map';
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const libre311 = useLibre311Context().service;
@@ -33,6 +33,18 @@
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
 	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
+
+	// Compute flyTo target when a service request is selected
+	// Note: lat/long are strings from the API, convert to numbers for Leaflet
+	$: flyToTarget = $selectedServiceRequestStore
+		? {
+				latLng: [
+					Number($selectedServiceRequestStore.lat),
+					Number($selectedServiceRequestStore.long)
+				] as LatLngTuple,
+				zoom: SELECTION_ZOOM_LEVEL
+			}
+		: undefined;
 
 	function isSelected(
 		serviceRequest: ServiceRequest,
@@ -48,7 +60,11 @@
 		) {
 			return L.latLngBounds(libre311.getJurisdictionConfig().bounds);
 		}
-		let latLngs: LatLngTuple[] = res.value.serviceRequests.map((req) => [+req.lat, +req.long]);
+		// Note: lat/long are strings from the API, convert to numbers for Leaflet
+		let latLngs: LatLngTuple[] = res.value.serviceRequests.map((req) => [
+			Number(req.lat),
+			Number(req.long)
+		]);
 		return L.latLngBounds(latLngs);
 	}
 
@@ -73,6 +89,7 @@
 			keyboardPanDelta={KEYBOARD_PAN_DELTA_COARSE}
 			controlFactories={[mapCenterControlFactory]}
 			bounds={mapBounds}
+			{flyToTarget}
 		>
 			{#if $serviceRequestsResponseStore.type === 'success'}
 				{#each $serviceRequestsResponseStore.value.serviceRequests as req (req.service_request_id)}

@@ -48,8 +48,6 @@
 				unityAuthServiceProps: { baseURL: jurisdictionConfig.auth_base_url }
 			};
 
-			console.log({ ctxProps });
-
 			contextProviderProps = asAsyncSuccess(ctxProps);
 		} catch (error) {
 			console.error(error);

@@ -20,11 +20,13 @@
 	}
 </script>
 
-<Dropdown bind:visible={isUserDropdownVisible}>
-	<button slot="trigger" on:click={toggleDropdown}>
-		<Avatar initials={$user?.username.charAt(0).toUpperCase()} />
-	</button>
-	<Dropdown.Items slot="items">
-		<Dropdown.Items.Item on:click={logout} label="Logout"></Dropdown.Items.Item>
-	</Dropdown.Items>
-</Dropdown>
+{#if $user}
+	<Dropdown bind:visible={isUserDropdownVisible}>
+		<button slot="trigger" aria-label="User" on:click={toggleDropdown}>
+			<Avatar initials={$user?.username.charAt(0).toUpperCase()} />
+		</button>
+		<Dropdown.Items slot="items">
+			<Dropdown.Items.Item on:click={logout} label="Logout"></Dropdown.Items.Item>
+		</Dropdown.Items>
+	</Dropdown>
+{/if}

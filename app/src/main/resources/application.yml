@@ -16,6 +16,10 @@ micronaut:
     services:
       auth:
         url: ${AUTH_BASE_URL}
+      nominatim:
+        url: ${NOMINATIM_URL:`https://nominatim.openstreetmap.org`}
+        read-timeout: 5s
+        connect-timeout: 3s
   security:
     token:
       enabled: true
@@ -96,6 +100,10 @@ app:
     bucket:  ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
   recaptcha:
     secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
+
+libre311:
+  geocoding:
+    provider: ${GEOCODING_PROVIDER:`nominatim`}
 
 flyway:
   datasources:
