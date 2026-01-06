@@ -56,11 +56,8 @@
 
 	async function updateServiceRequest(e: CustomEvent<UpdateSensitiveServiceRequestRequest>) {
 		try {
-			await libre311.updateServiceRequest(e.detail);
-
-			const updatedRequest = await libre311.getServiceRequest({
-				service_request_id: serviceRequest.service_request_id
-			});
+			// Use the response directly - it contains the full updated service request
+			const updatedRequest = await libre311.updateServiceRequest(e.detail);
 
 			refreshSelectedServiceRequest(updatedRequest);
 
@@ -162,7 +159,7 @@
 							<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
 							<p class="text-sm">
 								{serviceRequest.priority.charAt(0).toUpperCase() +
-									serviceRequest.priority.slice(1) ?? ''}
+									serviceRequest.priority.slice(1)}
 							</p>
 						</div>
 					{/if}
