@@ -306,6 +306,10 @@ The following environment variables should be set to configure the application:
 - `NOMINATIM_URL` - Geocoding service URL (default: `https://nominatim.openstreetmap.org`)
 - `GEOCODING_PROVIDER` - Provider selection (default: `nominatim`)
 
+For local development, you can run a self-hosted Nominatim instance. See [nominatim/README.md](nominatim/README.md) for setup instructions. To use it:
+- Local development: Set `NOMINATIM_URL=http://localhost:8088` in `setenv.sh`
+- Docker development: Set `NOMINATIM_URL=http://host.docker.internal:8088` in `.env.docker`
+
 ### Configuring the Web Application UI
 
 The Web Application UI requires the URL of the API when built.

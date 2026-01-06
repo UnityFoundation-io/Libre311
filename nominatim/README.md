@@ -172,36 +172,36 @@ docker compose down -v
 docker compose up -d
 ```
 
-## Frontend Integration
+## Libre311 Backend Integration
 
-### Environment Variable
+To configure the Libre311 backend to use your local Nominatim instance:
 
-Add to your frontend `.env.local`:
+### Local Development (without Docker)
+
+Add to your `setenv.sh`:
 
 ```bash
-VITE_NOMINATIM_URL=http://localhost:8088
+export NOMINATIM_URL=http://localhost:8088
 ```
 
-### leaflet-geosearch Configuration
+### Docker Development
 
-```typescript
-import { OpenStreetMapProvider } from 'leaflet-geosearch';
+Add to your `.env.docker`:
 
-const provider = new OpenStreetMapProvider({
-  params: {
-    viewbox: '-90.7,38.4,-89.8,38.9',
-    bounded: 1,
-    addressdetails: 1
-  },
-  searchUrl: 'http://localhost:8088/search',
-  reverseUrl: 'http://localhost:8088/reverse'
-});
-
-// Use it
-const results = await provider.search({ query: 'City Hall, St Louis' });
+```bash
+# Use the local Nominatim instance for geocoding
+NOMINATIM_URL=http://host.docker.internal:8088
 ```
 
-See `integration-example.ts` for complete examples including Svelte integration.
+Note: Use `host.docker.internal` to reach services running on your host machine from within Docker containers. The port is `8088` (the host-mapped port), not the internal container port.
+
+### Verification
+
+After configuring, you can verify the backend is using your local Nominatim by calling the geocode endpoint:
+
+```bash
+curl "http://localhost:8080/api/geocode/reverse?lat=38.6270&lon=-90.1994"
+```
 
 ## Troubleshooting
 
