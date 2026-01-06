@@ -20,14 +20,18 @@
 	$: lowerBound = maxUpperBound - pagination.size + 1;
 </script>
 
-<div class="text-base font-semibold text-slate-600">
-	{lowerBound} - {upperBound} of {pagination?.totalSize}
+<nav aria-label="Pagination" class="text-base font-semibold text-slate-600">
+	<span aria-live="polite" aria-atomic="true"
+		>{lowerBound} - {upperBound} of {pagination?.totalSize}</span
+	>
 	<span class="ml-1">
 		<Button
 			href={prevPage}
 			type={prevPage ? 'text' : 'ghost'}
 			disabled={!prevPage}
 			shape="circle"
+			title="Previous Set"
+			aria-label="Previous Set"
 			on:click={scrollDispatch}
 		>
 			<ChevronLeft slot="icon" />
@@ -37,9 +41,11 @@
 			type={nextPage ? 'text' : 'ghost'}
 			disabled={!nextPage}
 			shape="circle"
+			title="Next Set"
+			aria-label="Next Set"
 			on:click={scrollDispatch}
 		>
 			<ChevronRight slot="icon" />
 		</Button>
 	</span>
-</div>
+</nav>

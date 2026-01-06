@@ -1,143 +1,265 @@
 # Libre311
 
-Libre311 is a web application for service requests based on the [Open311](https://www.open311.org) standard.
+Libre311 is an open-source web application for managing municipal service requests, built on the [Open311 GeoReport v2](https://wiki.open311.org/GeoReport_v2/) specification.
 
-## Quickstart
-### Prerequisites
-Libre311 uses the UnityAuth project (https://github.com/UnityFoundation-io/UnityAuth) as its
-authentication and authorization service. Before running Libre311, make sure the UnityAuth
-service is up and running.
-Clone the UnityAuth project and follow the instructions in that repo to run the UnityAuth
-service either locally or using Docker.
+## What is Open311?
 
-Libre311 supports local development environment and containerized environment using Docker, as
-described below.
+[Open311](https://www.open311.org) is a standardized protocol for civic issue tracking, enabling residents to report non-emergency problems (potholes, broken streetlights, graffiti, etc.) to their local government. Libre311 provides a complete implementation of this standard, including:
 
-### Local Environment
-Create a `setenv.sh` from `setenv.sh.example` and update it to use the correct environment
-variable values
-- If you use a local database, also update the `DATASOURCES_DEFAULT_*` variables in that file 
-- Make sure the URLs and other configuration in `setenv.sh` are consistent with the
-  environment-specific Micronaut config file, e.g., application-local.yml.
+- **Public Interface** - Citizens can submit service requests with location, photos, and details
+- **Multiple Views** - Browse issues via interactive map, searchable list, or data table
+- **Admin Dashboard** - Configure service types, manage jurisdictions, and track request status
+- **REST API** - Open311-compliant endpoints for integration with other civic tech tools
 
-Run the Libre311 API server from the project root:
-```shell
-source setenv.sh
-gradlew app:run
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Backend API | Java 25 / Micronaut 4.x |
+| Frontend | SvelteKit / TypeScript / Tailwind CSS |
+| Database | MySQL or PostgreSQL |
+| Authentication | OAuth via UnityAuth service |
+| Maps | Leaflet with Nominatim geocoding |
+
+## Prerequisites
+
+### Required Software
+
+| Software | Version | Notes |
+|----------|---------|-------|
+| Java JDK | 25 | [Eclipse Temurin](https://adoptium.net/) recommended. Use [SDKMAN](https://sdkman.io/) for easy installation. |
+| Node.js | 18+ | Required for frontend development |
+| npm | 9+ | Comes with Node.js |
+| Docker | 20+ | Optional, for containerized development |
+| Docker Compose | 2.0+ | Optional, for containerized development |
+
+### Required Services
+
+**UnityAuth** - Libre311 uses [UnityAuth](https://github.com/UnityFoundation-io/UnityAuth) for authentication and authorization. You must have UnityAuth running before starting Libre311.
+
+1. Clone the UnityAuth repository
+2. Follow its setup instructions to run locally or via Docker
+3. Note the UnityAuth URL for configuring Libre311
+
+### Optional Services
+
+- **Google Cloud Platform** - For image storage (Cloud Storage) and content moderation (SafeSearch API)
+- **MySQL or PostgreSQL** - Can use Docker-provided database for development
+
+## Quick Start
+
+### Local Development
+
+1. **Configure environment variables**
+   ```shell
+   cp setenv.sh.example setenv.sh
+   # Edit setenv.sh with your configuration (database, auth URLs, etc.)
+   ```
+
+2. **Start the API server** (from project root)
+   ```shell
+   source setenv.sh
+   ./gradlew app:run
+   ```
+   API will be available at http://localhost:8080
+
+3. **Start the frontend** (in a new terminal)
+   ```shell
+   source setenv.sh
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   UI will be available at http://localhost:3000
+
+See [app/README.md](app/README.md) and [frontend/README.md](frontend/README.md) for detailed configuration options.
+
+## Architecture
+
+### System Overview
+
 ```
-
-In another terminal window, run the Libre311 UI:
-```shell
-source setenv.sh
-cd frontend
-npm install
-npm run dev
-```
-
-Refer to the [app](app/README.md) and [frontend](frontend/README.md) documentation for more details
-information on the Libre311 API and UI, respectively.
-
-### Docker Environment
-Libre311 services can also be started using Docker Compose.
-* From the project root, copy `.env.example` into `.env.docker` and update it with the correct
-  environment variable values.
-  - Note: the docker compose files read from `.env.docker` so make sure to use this file name.
-* Copy `frontend/.env.example` into `frontend/.env.docker` and also update the variables there.
-
-#### Access Credentials from Host
-As described in the [app documentation](app/README.md#object-storage-and-safesearch),
-Application Default Credentials (ADC) is used to authenticate the app to Google Cloud Storage
-and SafeSearch APIs. The Docker container for Libre311 API must also have access to ADC to
-upload user images to Google Cloud Storage and call SafeSearch APIs. Libre311 currently
-supports sharing the credentials on your host with the container via the `ADC_PATH` environment
-variable.
-
-To share the ADC from your host, set the `ADC_PATH` environment variable to the
-path of the credentials file. For example, on Linux or macOS:
-```shell
-export ADC_PATH=$HOME/.config/gcloud/application_default_credentials.json
-```
-and, on Windows:
-```shell
-set ADC_PATH=%APPDATA%\gcloud\application_default_credentials.json
-```
-Replace the path on the right-hand side with the actual path on your local host.
-If `ADC_PATH` is not defined, [Docker Compose](app/docker-compose.api.yml) will use the
-default file path for ADC on Linux and macOS. The container will then use the same
-credentials file when interacting with GCP.
-
-#### Launch Containers
-Run `docker compose` from the project root:
-```sh
-docker compose -f docker-compose.local.yml up
-```
-This will build the required Docker images if they don't already exist, and launch
-the containers for Libre311 API server, frontend server, and database server with
-names `libre311-api`, `libre311-ui-dev`, and `libre311-db`, respectively.
-
-The docker containers can be accessed from the host machine:
-- **Libre311 API** with http://localhost:8080 (inside Docker: http://libre311-api:8080)
-- **Libre311 UI** with http://localhost:3000 (inside Docker: http://libre311-ui-dev:3000)
-- **MySQL Database** is open via port `23306` from `localhost`
-    (within Docker, host is `libre311-db`, port is `3306`)
-
-#### Start Sub-Components
-There's also a Makefile you can use to start groups of services as follows:
-```sh
-make compose_api ## For API and database
-# or
-make compose_ui ## For UI and database
-# or
-make compose_all ## For UI + API and database
-```
-
-#### Hosts File Updates
-For consistent internal-external service name resolution, add these to your `/etc/hosts` file:
-
-```txt
-127.0.0.1 libre311-api
-127.0.0.1 libre311-db
-127.0.0.1 libre311-ui
-127.0.0.1 libre311-ui-dev
-```
-Note: If you also use the docker environment for UnityAuth services, make sure to also add
-entries for them in `/etc/hosts` (see UnityAuth project documentation).
-
-#### Rebuild Images
-If there are changes to one or more files in `app/src/main`, make sure to rebuild
-the Docker image for the Libre311 API server for the changes to take effect.
-Similarly, rebuild the Docker image for the frontend if there are changes there.
-This can be done by removing the old images
-
-```shell
-docker rmi <your_libre311-api-image-id>
-docker rmi <your_libre311-ui-image-id>
-```
-, then rerun the [above Docker Compose command](#launch-containers).
-
-## Operator Documentation
-
-### General Application Architecture
-
               +------------+     +---------+     +----------+
               | Web App UI |<--->| Web API |<-+->| Database |
               +------------+     +---------+  |  +----------+
                                               |  +---------------+
                                               +->| Auth Provider |
+                                              |  +---------------+
+                                              |  +------------------+
+                                              +->| Geocoding Service|
+                                              |  +------------------+
+                                              |  +---------------+
+                                              +->| Object Storage |
                                                  +---------------+
+```
 
-The Libre311 application consists of
+| Component | Description |
+|-----------|-------------|
+| **Web App UI** | SvelteKit application served independently or by the API |
+| **Web API** | Micronaut REST API (horizontally scalable) |
+| **Database** | MySQL or PostgreSQL with spatial extensions |
+| **Auth Provider** | UnityAuth service for OAuth/JWT authentication |
+| **Geocoding Service** | Nominatim (default) for reverse geocoding |
+| **Object Storage** | GCP, AWS, or Azure for user-uploaded images |
 
-- A Web App UI that can either be served by the Web API or independently
-- A Web API that serves data to the UI
-- A Database for persistent storage
-- An Auth Provider for authenticating users
+### Code Structure
 
-The Web Application UI is built using Svelte and is served by the Web API.
-The Web API is built using Micronaut.
-The Web API is horizontally scalable.
+```
+Libre311/
+├── app/                          # Backend API (Java/Micronaut)
+│   └── src/main/java/app/
+│       ├── RootController.java       # Open311 GeoReport API endpoints
+│       ├── JurisdictionAdminController.java
+│       ├── ImageStorageController.java
+│       ├── dto/                      # Request/response objects
+│       ├── model/                    # JPA entities (Service, ServiceRequest, etc.)
+│       ├── service/                  # Business logic layer
+│       ├── security/                 # OAuth/JWT authentication
+│       └── geocode/                  # Geocoding provider abstraction
+│
+├── frontend/                     # Frontend UI (SvelteKit)
+│   └── src/
+│       ├── routes/
+│       │   ├── issues/               # Browse service requests (map, list, table)
+│       │   ├── issue/create/         # Submit new service request
+│       │   ├── groups/               # Admin: manage service types
+│       │   ├── policies/             # Terms of use, privacy policy
+│       │   └── login/                # Authentication
+│       └── lib/
+│           ├── components/           # Reusable UI components
+│           └── context/              # Svelte context providers
+│
+├── docker-compose.local.yml      # Local Docker environment
+└── setenv.sh.example             # Environment variable template
+```
 
-### Service Discovery Configuration
+### Key Data Models
+
+| Model | Description |
+|-------|-------------|
+| `Service` | Type of issue (e.g., "Pothole", "Streetlight Out") |
+| `ServiceDefinition` | Attributes/subtypes for a service |
+| `ServiceRequest` | A reported issue with location, description, status |
+| `Jurisdiction` | Geographic/administrative boundary for services |
+| `User` | Authorized admin user |
+
+## Development
+
+### Running Tests
+
+**Backend (Java)**
+```shell
+# Run all tests
+./gradlew app:test
+
+# Run specific test class
+./gradlew app:test --tests app.RootControllerTest
+
+# Run with continuous rebuild
+./gradlew app:test -t
+```
+
+**Frontend (SvelteKit)**
+```shell
+cd frontend
+
+# Run all tests (unit + integration)
+npm run test
+
+# Run unit tests only
+npm run test:unit
+
+# Run integration tests (Playwright)
+npm run test:integration
+```
+
+### Code Quality
+
+**Frontend**
+```shell
+cd frontend
+npm run lint      # Check for linting errors
+npm run format    # Auto-format code with Prettier
+npm run check     # TypeScript type checking
+```
+
+### Building for Production
+
+**Backend**
+```shell
+./gradlew app:assemble
+# Output: app/build/libs/app-*-all.jar
+```
+
+**Frontend**
+```shell
+cd frontend
+npm run build     # Production build
+npm run preview   # Preview production build locally
+```
+
+## Docker Environment
+
+### Setup
+
+1. **Configure environment files**
+   ```shell
+   cp .env.example .env.docker
+   cp frontend/.env.example frontend/.env.docker
+   # Edit both files with your configuration
+   ```
+
+2. **Configure GCP credentials** (if using image uploads)
+   ```shell
+   # Linux/macOS
+   export ADC_PATH=$HOME/.config/gcloud/application_default_credentials.json
+
+   # Windows
+   set ADC_PATH=%APPDATA%\gcloud\application_default_credentials.json
+   ```
+   See [app/README.md](app/README.md#object-storage-and-safesearch) for details on Application Default Credentials.
+
+3. **Add hosts entries** (recommended)
+   ```
+   # Add to /etc/hosts
+   127.0.0.1 libre311-api
+   127.0.0.1 libre311-db
+   127.0.0.1 libre311-ui
+   127.0.0.1 libre311-ui-dev
+   ```
+
+### Running Containers
+
+```shell
+# Start all services
+docker compose -f docker-compose.local.yml up
+
+# Or use Makefile shortcuts:
+make compose_api    # API + database only
+make compose_ui     # UI + database only
+make compose_all    # All services
+```
+
+**Service URLs:**
+
+| Service | Host URL | Docker Internal |
+|---------|----------|-----------------|
+| API | http://localhost:8080 | http://libre311-api:8080 |
+| UI | http://localhost:3000 | http://libre311-ui-dev:3000 |
+| MySQL | localhost:23306 | libre311-db:3306 |
+
+### Rebuilding Images
+
+After code changes, rebuild the affected images:
+```shell
+docker compose -f docker-compose.local.yml build libre311-api
+docker compose -f docker-compose.local.yml build libre311-ui-dev
+docker compose -f docker-compose.local.yml up
+```
+
+## Configuration
+
+### Service Discovery
 
 As outlined in Open311's Service Discovery [page](https://wiki.open311.org/Service_Discovery), an endpoint is offered
 at `/discovery` which describes organization contact and the base URLs of endpoints.
@@ -157,14 +279,32 @@ content to your use case.
 
 The following environment variables should be set to configure the application:
 
+**Database:**
+- `LIBRE311_JDBC_URL` - JDBC connection URL
+- `LIBRE311_JDBC_DRIVER` - JDBC driver class
+- `LIBRE311_JDBC_USER` - Database username
+- `LIBRE311_JDBC_PASSWORD` - Database password
+- `LIBRE311_AUTO_SCHEMA_GEN` - Schema generation mode (`update` for development)
+
+**Object Storage:**
 - `GCP_PROJECT_ID` - The GCP project ID
-- `STORAGE_BUCKET_ID` - The ID of the bucket where user-uploaded images are hosted.
-- `RECAPTCHA_SECRET` - Site abuse prevention.
-- `MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_SECRET_GENERATOR_SECRET` - Secret uses to sign JWTs.
-- `MICRONAUT_SECURITY_TOKEN_JWT_GENERATOR_REFRESH_TOKEN_SECRET` - Secret for JWT renewal tokens.
+- `STORAGE_BUCKET_ID` - The ID of the bucket where user-uploaded images are hosted
+
+**Security:**
+- `RECAPTCHA_SECRET` - Site abuse prevention
+- `MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_SECRET_GENERATOR_SECRET` - Secret used to sign JWTs
+- `MICRONAUT_SECURITY_TOKEN_JWT_GENERATOR_REFRESH_TOKEN_SECRET` - Secret for JWT renewal tokens
 - `MICRONAUT_SECURITY_REDIRECT_LOGIN_SUCCESS`
 - `MICRONAUT_SECURITY_REDIRECT_LOGIN_FAILURE`
 - `MICRONAUT_SECURITY_REDIRECT_LOGOUT`
+
+**Authentication (UnityAuth):**
+- `AUTH_BASE_URL` - UnityAuth service base URL
+- `AUTH_JWKS` - UnityAuth JWKS endpoint for JWT validation
+
+**Geocoding (optional, has sensible defaults):**
+- `NOMINATIM_URL` - Geocoding service URL (default: `https://nominatim.openstreetmap.org`)
+- `GEOCODING_PROVIDER` - Provider selection (default: `nominatim`)
 
 ### Configuring the Web Application UI
 
@@ -182,16 +322,6 @@ Set the following environment variables to enable Google as an auth provider:
 
 See `app/src/main/resources/application.yml` for a complete list of configuration options.
 
-Copyright 2023 Libre311 Authors
+## License
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Copyright 2023-2025 Libre311 Authors. Licensed under the [Apache License 2.0](LICENSE).

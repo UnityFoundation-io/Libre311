@@ -8,33 +8,22 @@ export class MapCenterControl extends L.Control {
 	onAdd(map: L.Map): HTMLElement {
 		const img = L.DomUtil.create('img');
 		img.src = locationSearching;
-		img.style.cursor = 'pointer';
-		img.style.width = '25';
-		img.setAttribute('title', 'Center Map');
+		img.alt = '';
 
-		const div = L.DomUtil.create('div');
-		div.addEventListener('click', () => map.locate());
-		div.appendChild(img);
-		div.style.backgroundColor = '#fff';
-		div.style.border = '2px solid rgba(0, 0, 0, 0.2)';
-		div.style.backgroundClip = 'padding-box';
-		div.style.borderRadius = '4px';
-		div.style.width = '34px';
-		div.style.height = '34px';
-		div.style.display = 'flex';
-		div.style.justifyContent = 'center';
-		div.style.alignItems = 'center';
+		const control = L.DomUtil.create('a');
+		control.className = 'map-center-control';
+		control.href = '#';
+		control.setAttribute('role', 'button');
+		control.setAttribute('title', 'Center Map');
+		control.setAttribute('aria-label', 'Center Map');
+		control.appendChild(img);
 
-		div.addEventListener('mouseenter', () => {
-			console.log('enter');
-			div.style.backgroundColor = '#f4f4f4';
+		control.addEventListener('click', (e) => {
+			e.preventDefault();
+			map.locate();
 		});
 
-		div.addEventListener('mouseleave', () => {
-			div.style.backgroundColor = '#fff';
-		});
-
-		return div;
+		return control;
 	}
 }
 

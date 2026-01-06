@@ -6,3 +6,51 @@
 .grecaptcha-badge {
 	visibility: hidden;
 }
+
+.map-center-control {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 34px;
+	height: 34px;
+	background-color: #fff;
+	border: 2px solid rgba(0, 0, 0, 0.2);
+	background-clip: padding-box;
+	border-radius: 4px;
+}
+
+.map-center-control:hover,
+.map-center-control:focus {
+	background-color: #f4f4f4;
+}
+
+.map-center-control:focus {
+	outline: 2px solid #0066cc;
+	outline-offset: 2px;
+}
+
+.map-center-control img {
+	cursor: pointer;
+	width: 25px;
+}
+
+/* WCAG 2.4.7 Focus Visible - Add visible focus indicators for keyboard navigation */
+.stwui-button:focus-visible,
+button:focus-visible,
+a[role='button']:focus-visible {
+	outline: 2px solid hsl(var(--primary));
+	outline-offset: 2px;
+}
+
+/* Header elements need contrasting focus color (primary background requires primary-content outline) */
+header button:focus-visible,
+header a:focus-visible {
+	outline: 2px solid hsl(var(--primary-content));
+	outline-offset: 2px;
+}
+
+/* Ensure focus ring is visible on all interactive elements */
+[tabindex]:focus-visible:not([tabindex='-1']) {
+	outline: 2px solid hsl(var(--primary));
+	outline-offset: 2px;
+}
