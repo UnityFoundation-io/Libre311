@@ -163,7 +163,8 @@
 		<div slot="detail-pane">
 			<slot />
 		</div>
-		<div slot="table" class="relative flex h-full flex-col">
+		<div slot="table" class="relative flex h-full flex-col text-center">
+			<h3 class="text-base">Service Requests</h3>
 			<div
 				class="m-3 flex items-center justify-between rounded-md border-t-[1px] border-border shadow-md"
 			>
