@@ -158,8 +158,7 @@
 						<div class="mb-1">
 							<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
 							<p class="text-sm">
-								{serviceRequest.priority.charAt(0).toUpperCase() +
-									serviceRequest.priority.slice(1)}
+								{serviceRequest.priority.charAt(0).toUpperCase() + serviceRequest.priority.slice(1)}
 							</p>
 						</div>
 					{/if}
