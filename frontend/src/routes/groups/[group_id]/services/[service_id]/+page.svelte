@@ -18,7 +18,10 @@
 	import { createInput, stringValidator, type FormInputValue } from '$lib/utils/validation';
 	import type { SelectOption } from 'stwui/types';
 	import XMark from '$lib/components/Svg/outline/XMark.svelte';
-	import type { CreateServiceDefinitionAttributesParams } from '$lib/services/Libre311/Libre311';
+	import type {
+		CreateServiceDefinitionAttributesParams,
+		ServiceDefinition
+	} from '$lib/services/Libre311/Libre311';
 	import SdaListItem from '$lib/components/ServiceDefinitionEditor/SdaListItem.svelte';
 	import type { ComponentEvents } from 'svelte';
 	import DragAndDrop from '$lib/components/DragAndDrop.svelte';
@@ -87,42 +90,56 @@
 		{ label: `Attributes`, href: `/groups/${groupId}/services/${serviceCode}` }
 	];
 
-	$: updateAttributeMap(serviceCode);
+	$: updateAttributeMap(serviceCode, $page.state?.serviceDefinition);
 
-	function updateAttributeMap(service: number) {
+	async function loadBreadcrumbData() {
+		const groups = await libre311.getGroupList();
+		const group = groups.find((g) => g.id === Number(groupId));
+		if (group) {
+			groupName = group.name;
+		}
+
+		const serviceList = await libre311.getServiceList();
+		const service = serviceList.find((s) => s.service_code === serviceCode);
+		if (service) {
+			serviceId = service.service_code;
+			serviceName = service.service_name;
+		}
+	}
+
+	function updateAttributeMap(service: number, stateData: ServiceDefinition | undefined) {
 		if (!service) {
 			return;
 		}
-		getServiceDefinition(service);
+
+		// Use navigation state if available (passed from edit operations)
+		if (stateData && stateData.service_code === service) {
+			applyServiceDefinition(stateData);
+			return;
+		}
+
+		fetchServiceDefinition(service);
 	}
 
-	async function getServiceDefinition(serviceCode: number) {
+	async function applyServiceDefinition(serviceDefinition: ServiceDefinition) {
 		try {
-			// Get Group
-			const groups = await libre311.getGroupList();
+			await loadBreadcrumbData();
+			newAttribute.order = serviceDefinition.attributes.length;
+			asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(serviceDefinition, {}));
+		} catch (error) {
+			asyncAttributeInputMap = asAsyncFailure(error);
+			alertError(error);
+		}
+	}
 
-			const group = groups.find((group) => group.id === Number(groupId));
-			if (group) {
-				groupName = group.name;
-			}
+	async function fetchServiceDefinition(serviceCode: number) {
+		try {
+			await loadBreadcrumbData();
 
-			// Get Service Definition
 			const payload = { service_code: serviceCode };
 			const res = await libre311.getServiceDefinition(payload);
-			const attributes = res.attributes;
 
-			// Get order
-			newAttribute.order = attributes.length;
-
-			// Get Service ID
-			const serviceList = await libre311.getServiceList();
-			for (let service of serviceList) {
-				if (service.service_code == serviceCode) {
-					serviceId = service.service_code;
-					serviceName = service.service_name;
-				}
-			}
-
+			newAttribute.order = res.attributes.length;
 			asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(res, {}));
 		} catch (error) {
 			asyncAttributeInputMap = asAsyncFailure(error);

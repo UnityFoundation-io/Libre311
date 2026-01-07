@@ -128,10 +128,12 @@
 		};
 
 		try {
-			await libre311.editAttribute(body);
+			const res = await libre311.editAttribute(body);
 
-			// Navigate to attributes list - page will load fresh data on mount
-			goto(`/groups/${groupId}/services/${serviceCode}`);
+			// Pass response data via navigation state to avoid redundant GET request
+			goto(`/groups/${groupId}/services/${serviceCode}`, {
+				state: { serviceDefinition: res }
+			});
 		} catch (error) {
 			alertError(error);
 		}
@@ -163,10 +165,12 @@
 		};
 
 		try {
-			await libre311.editAttribute(body);
+			const res = await libre311.editAttribute(body);
 
-			// Navigate to attributes list - page will load fresh data on mount
-			goto(`/groups/${groupId}/services/${serviceCode}`);
+			// Pass response data via navigation state to avoid redundant GET request
+			goto(`/groups/${groupId}/services/${serviceCode}`, {
+				state: { serviceDefinition: res }
+			});
 		} catch (error) {
 			alertError(error);
 		}
