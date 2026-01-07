@@ -130,7 +130,7 @@
 		try {
 			await libre311.editAttribute(body);
 
-			updateAttributeMap(serviceCode);
+			// Navigate to attributes list - page will load fresh data on mount
 			goto(`/groups/${groupId}/services/${serviceCode}`);
 		} catch (error) {
 			alertError(error);
@@ -165,7 +165,7 @@
 		try {
 			await libre311.editAttribute(body);
 
-			updateAttributeMap(serviceCode);
+			// Navigate to attributes list - page will load fresh data on mount
 			goto(`/groups/${groupId}/services/${serviceCode}`);
 		} catch (error) {
 			alertError(error);

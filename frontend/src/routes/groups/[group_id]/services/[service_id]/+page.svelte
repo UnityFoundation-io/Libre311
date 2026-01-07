@@ -183,7 +183,11 @@
 				}
 			}
 
-			await libre311.createAttribute(body);
+			const res = await libre311.createAttribute(body);
+
+			// Use the response directly instead of making another GET request
+			asyncAttributeInputMap = asAsyncSuccess(createAttributeInputMap(res, {}));
+			newAttribute.order = res.attributes.length;
 
 			// Reset inputs
 			isNewAttributeDropDownVisable = false;
@@ -192,7 +196,6 @@
 			newAttribute.required = false;
 			newAttribute.dataType = undefined;
 			values = [{ id: 0, name: '' }];
-			updateAttributeMap(serviceCode);
 		} catch (error) {
 			alertError(error);
 		}
