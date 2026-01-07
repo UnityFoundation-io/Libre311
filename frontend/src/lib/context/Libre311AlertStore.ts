@@ -44,9 +44,7 @@ export function createAlertStore(): AlertStore {
 		clearAutoDismiss();
 		const duration = getEffectiveDuration(alert);
 		if (duration !== null) {
-			autoDismissTimeout = setTimeout(() => {
-				close();
-			}, duration);
+			autoDismissTimeout = setTimeout(close, duration);
 		}
 	}
 
