@@ -17,7 +17,6 @@ export class MapStatusLegendControl extends L.Control {
 		container.setAttribute('aria-labelledby', 'map-legend-title');
 
 		L.DomEvent.disableClickPropagation(container);
-		L.DomEvent.disableScrollPropagation(container);
 
 		const title = L.DomUtil.create('div');
 		title.id = 'map-legend-title';
