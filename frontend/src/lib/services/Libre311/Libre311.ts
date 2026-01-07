@@ -2,10 +2,7 @@ import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
-import type {
-	UpdateSensitiveServiceRequestRequest,
-	UpdateSensitiveServiceRequestResponse
-} from './types/UpdateSensitiveServiceRequest';
+import type { UpdateSensitiveServiceRequestRequest } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
 import type { DeleteServiceRequestRequest } from '$lib/services/Libre311/types/DeleteServiceRequestRequest';
@@ -543,9 +540,7 @@ export interface Libre311Service extends Open311Service {
 	updateAttributesOrder(params: UpdateAttributesOrderParams): Promise<ServiceDefinition>;
 	editService(params: EditServiceParams): Promise<Service>;
 	deleteService(params: HasServiceCode): Promise<void>;
-	updateServiceRequest(
-		params: UpdateSensitiveServiceRequestRequest
-	): Promise<UpdateSensitiveServiceRequestResponse>;
+	updateServiceRequest(params: UpdateSensitiveServiceRequestRequest): Promise<ServiceRequest>;
 	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean>;
 }
 
@@ -875,13 +870,13 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	async updateServiceRequest(
 		params: UpdateSensitiveServiceRequestRequest
-	): Promise<UpdateSensitiveServiceRequestResponse> {
+	): Promise<ServiceRequest> {
 		const res = await this.axiosInstance.patch<unknown>(
 			ROUTES.patchServiceRequest(params.service_request_id, this.jurisdictionConfig),
 			params
 		);
 
-		return CreateServiceRequestResponseSchema.parse(res.data);
+		return ServiceRequestSchema.parse(res.data);
 	}
 
 	async downloadServiceRequests(params: FilteredServiceRequestsParams): Promise<Blob> {
