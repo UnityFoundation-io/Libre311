@@ -101,15 +101,16 @@
 	}
 </script>
 
-<div class="z-0 h-full w-full" bind:this={mapElement}>
+<div class="relative z-0 h-full w-full">
+	<div bind:this={mapElement} class="h-full w-full"></div>
 	{#if map}
 		<div
-			class="absolute left-1/2 z-[1] -translate-x-1/2"
+			class="pointer-events-none absolute left-1/2 z-[1000] -translate-x-1/2"
 			class:top-1={descriptionLocation === 'top'}
 			class:bottom-1={descriptionLocation === 'bottom'}
 		>
 			{#if mapDescription}
-				<h3 class="text-base">{mapDescription}</h3>
+				<h3 class="sr-only text-base md:not-sr-only">{mapDescription}</h3>
 			{/if}
 			<slot />
 		</div>
