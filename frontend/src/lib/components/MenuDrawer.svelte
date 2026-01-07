@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { Drawer, Menu, Portal } from 'stwui';
+	import { fade } from 'svelte/transition';
 
 	import { mapIcon } from './Svg/outline/mapIcon';
 	import { pencilIcon } from './Svg/outline/pencilIcon';
@@ -20,6 +21,13 @@
 <Portal>
 	{#if open}
 		<Drawer {handleClose} placement="left">
+			<div
+				slot="backdrop"
+				class="fixed inset-0 bg-black/10 backdrop-blur-sm transition-opacity"
+				aria-hidden="true"
+				on:click={handleClose}
+				transition:fade
+			/>
 			<Drawer.Content slot="content">
 				<Menu>
 					<Menu.Item
