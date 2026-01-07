@@ -25,7 +25,6 @@
 	import { matchesDesktopMedia } from '$lib/utils/functions';
 	import CreateServiceRequestButton from '$lib/components/CreateServiceRequestButton.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
-	import { mapStatusLegendControlFactory } from '$lib/components/MapStatusLegendControl';
 	import { KEYBOARD_PAN_DELTA_COARSE, SELECTION_ZOOM_LEVEL } from '$lib/constants/map';
 
 	const linkResolver = useLibre311Context().linkResolver;
@@ -89,7 +88,7 @@
 		<MapComponent
 			mapDescription="Request Map"
 			keyboardPanDelta={KEYBOARD_PAN_DELTA_COARSE}
-			controlFactories={[mapCenterControlFactory, mapStatusLegendControlFactory]}
+			controlFactories={[mapCenterControlFactory]}
 			bounds={mapBounds}
 			{flyToTarget}
 		>
