@@ -2,10 +2,7 @@ import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import { z } from 'zod';
 import type { RecaptchaService } from '../RecaptchaService';
-import type {
-	UpdateSensitiveServiceRequestRequest,
-	UpdateSensitiveServiceRequestResponse
-} from './types/UpdateSensitiveServiceRequest';
+import type { UpdateSensitiveServiceRequestRequest } from './types/UpdateSensitiveServiceRequest';
 import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
 import type { DeleteServiceRequestRequest } from '$lib/services/Libre311/types/DeleteServiceRequestRequest';
