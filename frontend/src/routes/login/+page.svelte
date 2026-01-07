@@ -29,7 +29,7 @@
 	}
 
 	function cancel() {
-		goto('/issues/map');
+		history.back();
 	}
 
 	async function login() {
