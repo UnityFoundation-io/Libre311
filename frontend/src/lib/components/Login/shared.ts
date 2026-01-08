@@ -6,6 +6,7 @@ export type EventDispatchTypeMap = {
 		value: string | undefined;
 	};
 	login: undefined;
+	cancel: undefined;
 };
 
 function dispatchInputChangeFactory(dispatch: EventDispatcher<EventDispatchTypeMap>) {
@@ -15,13 +16,10 @@ function dispatchInputChangeFactory(dispatch: EventDispatcher<EventDispatchTypeM
 	};
 }
 
-function dispatchLoginEventFactory(dispatch: EventDispatcher<EventDispatchTypeMap>) {
-	return () => dispatch('login');
-}
-
 export function dispatchEventFunctionFactory(dispatch: EventDispatcher<EventDispatchTypeMap>) {
 	return {
 		onChange: dispatchInputChangeFactory(dispatch),
-		onSubmit: dispatchLoginEventFactory(dispatch)
+		onSubmit: () => dispatch('login'),
+		onCancel: () => dispatch('cancel')
 	};
 }

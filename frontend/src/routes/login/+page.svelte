@@ -28,6 +28,10 @@
 		}
 	}
 
+	function cancel() {
+		history.back();
+	}
+
 	async function login() {
 		emailInput = emailValidator(emailInput);
 		passwordInput = passwordValidator(passwordInput);
@@ -59,6 +63,7 @@
 		{errorMessage}
 		on:inputChange={handleChange}
 		on:login={login}
+		on:cancel={cancel}
 	/>
 	<LoginMobile
 		slot="is-mobile-or-tablet"
@@ -67,5 +72,6 @@
 		{errorMessage}
 		on:inputChange={handleChange}
 		on:login={login}
+		on:cancel={cancel}
 	/>
 </Breakpoint>

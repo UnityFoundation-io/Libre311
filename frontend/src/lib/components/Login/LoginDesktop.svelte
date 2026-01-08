@@ -19,7 +19,7 @@
 		visible = true;
 	});
 
-	const { onChange, onSubmit } = dispatchEventFunctionFactory(dispatch);
+	const { onChange, onSubmit, onCancel } = dispatchEventFunctionFactory(dispatch);
 
 	// pass svelte checks
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,9 +99,12 @@
 			</Input>
 		</div>
 
-		<div class="m-4">
+		<div class="m-4 flex gap-2">
 			<Button type="primary" on:click={onSubmit}>
 				{messages['login']['submit']}
+			</Button>
+			<Button type="default" on:click={onCancel}>
+				{messages['login']['cancel']}
 			</Button>
 		</div>
 

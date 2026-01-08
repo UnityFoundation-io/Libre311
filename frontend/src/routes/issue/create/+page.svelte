@@ -100,10 +100,6 @@
 	}
 </script>
 
-<svelte:head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-</svelte:head>
-
 <CreateServiceRequestLayout {step}>
 	<div slot="side-bar" class="mx-4 h-full">
 		<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>

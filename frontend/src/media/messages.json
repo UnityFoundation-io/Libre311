@@ -18,6 +18,7 @@
 		},
 		"show_password": "Show Password",
 		"submit": "Sign In",
+		"cancel": "Cancel",
 		"forgot_password": "Forgot Password",
 		"create_account": "Create New Account"
 	},
