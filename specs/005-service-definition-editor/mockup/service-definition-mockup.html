@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Service Definition Editor - Option 2</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+			background-color: #f5f5f5;
+			min-height: 100vh;
+			color: #202124;
+		}
+
+		/* Navigation Header */
+		.nav-header {
+			background: white;
+			padding: 12px 24px;
+			border-bottom: 1px solid #dadce0;
+			display: flex;
+			align-items: center;
+			gap: 16px;
+		}
+
+		.back-link {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			color: #5f6368;
+			text-decoration: none;
+			font-size: 14px;
+		}
+
+		.back-link:hover {
+			color: #202124;
+		}
+
+		.page-title {
+			font-size: 18px;
+			font-weight: 500;
+			color: #202124;
+			flex: 1;
+		}
+
+		.unsaved-badge {
+			display: none;
+			background: #fb8c00;
+			color: white;
+			font-size: 12px;
+			padding: 2px 8px;
+			border-radius: 4px;
+		}
+
+		.unsaved-badge.visible {
+			display: inline-block;
+		}
+
+		/* Main Split-Pane Layout */
+		.main-container {
+			display: flex;
+			height: calc(100vh - 53px);
+		}
+
+		/* Left Panel - Tree View */
+		.tree-panel {
+			width: 320px;
+			min-width: 280px;
+			background: white;
+			border-right: 1px solid #dadce0;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+		}
+
+		.tree-header {
+			padding: 16px;
+			border-bottom: 1px solid #e0e0e0;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.tree-header h2 {
+			font-size: 12px;
+			font-weight: 600;
+			color: #5f6368;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.add-group-btn {
+			padding: 6px 12px;
+			background: #673ab7;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 13px;
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.add-group-btn:hover {
+			background: #5e35b1;
+		}
+
+		.tree-content {
+			flex: 1;
+			overflow-y: auto;
+			padding: 8px 0;
+		}
+
+		/* Tree Group */
+		.tree-group {
+			margin-bottom: 2px;
+		}
+
+		.tree-group-header {
+			display: flex;
+			align-items: center;
+			padding: 10px 16px;
+			cursor: pointer;
+			user-select: none;
+			border-left: 3px solid transparent;
+			transition: all 0.15s;
+		}
+
+		.tree-group-header:hover {
+			background: #f5f5f5;
+		}
+
+		.tree-group-header.selected {
+			background: #e8f0fe;
+			border-left-color: #673ab7;
+		}
+
+		.drag-handle {
+			cursor: grab;
+			color: #bdbdbd;
+			padding: 4px;
+			font-size: 14px;
+			opacity: 0;
+			transition: opacity 0.15s;
+			margin-right: 4px;
+		}
+
+		.tree-group-header:hover .drag-handle,
+		.tree-service:hover .drag-handle {
+			opacity: 1;
+		}
+
+		.expand-icon {
+			width: 20px;
+			height: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #5f6368;
+			font-size: 10px;
+			transition: transform 0.2s;
+			margin-right: 8px;
+		}
+
+		.tree-group.expanded .expand-icon {
+			transform: rotate(90deg);
+		}
+
+		.tree-group-name {
+			flex: 1;
+			font-size: 14px;
+			font-weight: 500;
+			color: #202124;
+		}
+
+		.tree-group-count {
+			font-size: 12px;
+			color: #80868b;
+			background: #f1f3f4;
+			padding: 2px 8px;
+			border-radius: 10px;
+		}
+
+		/* Tree Services */
+		.tree-services {
+			display: none;
+			padding-left: 24px;
+		}
+
+		.tree-group.expanded .tree-services {
+			display: block;
+		}
+
+		.tree-service {
+			display: flex;
+			align-items: center;
+			padding: 8px 16px 8px 12px;
+			cursor: pointer;
+			border-left: 3px solid transparent;
+			transition: all 0.15s;
+		}
+
+		.tree-service:hover {
+			background: #f5f5f5;
+		}
+
+		.tree-service.selected {
+			background: #e8f0fe;
+			border-left-color: #673ab7;
+		}
+
+		.tree-service-bullet {
+			width: 6px;
+			height: 6px;
+			background: #bdbdbd;
+			border-radius: 50%;
+			margin-right: 12px;
+		}
+
+		.tree-service.selected .tree-service-bullet {
+			background: #673ab7;
+		}
+
+		.tree-service-name {
+			flex: 1;
+			font-size: 14px;
+			color: #202124;
+		}
+
+		.unsaved-dot {
+			width: 8px;
+			height: 8px;
+			background: #fb8c00;
+			border-radius: 50%;
+			margin-left: 8px;
+			display: none;
+		}
+
+		.unsaved-dot.visible {
+			display: block;
+		}
+
+		/* Add Service Button in Tree */
+		.add-service-btn {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 16px 8px 30px;
+			color: #673ab7;
+			font-size: 13px;
+			cursor: pointer;
+			border: none;
+			background: transparent;
+			width: 100%;
+			text-align: left;
+		}
+
+		.add-service-btn:hover {
+			background: #f5f5f5;
+		}
+
+		/* Drop Indicator */
+		.drop-indicator {
+			height: 2px;
+			background: #673ab7;
+			margin: 0 16px;
+			display: none;
+			position: relative;
+		}
+
+		.drop-indicator::before {
+			content: '';
+			position: absolute;
+			left: -4px;
+			top: -3px;
+			width: 8px;
+			height: 8px;
+			background: #673ab7;
+			border-radius: 50%;
+		}
+
+		.drop-indicator.visible {
+			display: block;
+		}
+
+		/* Right Panel - Editor */
+		.editor-panel {
+			flex: 1;
+			background: #f0ebf8;
+			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.editor-empty {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #80868b;
+			font-size: 16px;
+		}
+
+		.editor-container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 24px;
+			width: 100%;
+		}
+
+		/* Group Editor */
+		.group-editor {
+			display: none;
+		}
+
+		.group-editor.active {
+			display: block;
+		}
+
+		.group-editor-card {
+			background: white;
+			border-radius: 8px;
+			overflow: hidden;
+			box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+			border-top: 10px solid #673ab7;
+		}
+
+		.group-editor-content {
+			padding: 24px;
+		}
+
+		.form-field {
+			margin-bottom: 24px;
+		}
+
+		.form-field:last-child {
+			margin-bottom: 0;
+		}
+
+		.form-label {
+			font-size: 12px;
+			font-weight: 500;
+			color: #5f6368;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 8px;
+			display: block;
+		}
+
+		.form-input {
+			width: 100%;
+			padding: 12px;
+			border: 1px solid #dadce0;
+			border-radius: 4px;
+			font-size: 16px;
+			outline: none;
+			transition: border-color 0.2s;
+		}
+
+		.form-input:focus {
+			border-color: #673ab7;
+		}
+
+		.form-textarea {
+			width: 100%;
+			padding: 12px;
+			border: 1px solid #dadce0;
+			border-radius: 4px;
+			font-size: 14px;
+			outline: none;
+			resize: vertical;
+			min-height: 80px;
+			transition: border-color 0.2s;
+			font-family: inherit;
+		}
+
+		.form-textarea:focus {
+			border-color: #673ab7;
+		}
+
+		/* Editor Footer */
+		.editor-footer {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 16px 24px;
+			background: white;
+			border-radius: 0 0 8px 8px;
+			margin-top: 12px;
+			box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+		}
+
+		.footer-left {
+			display: flex;
+			gap: 8px;
+		}
+
+		.footer-right {
+			display: flex;
+			gap: 12px;
+		}
+
+		.btn-icon {
+			width: 36px;
+			height: 36px;
+			border: none;
+			background: transparent;
+			cursor: pointer;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #5f6368;
+			font-size: 18px;
+		}
+
+		.btn-icon:hover {
+			background: #f1f3f4;
+		}
+
+		.btn-cancel {
+			padding: 8px 20px;
+			background: white;
+			color: #5f6368;
+			border: 1px solid #dadce0;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 14px;
+		}
+
+		.btn-cancel:hover {
+			background: #f5f5f5;
+		}
+
+		.btn-save {
+			padding: 8px 20px;
+			background: #673ab7;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 14px;
+		}
+
+		.btn-save:hover {
+			background: #5e35b1;
+		}
+
+		.btn-save:disabled {
+			background: #e0e0e0;
+			color: #9e9e9e;
+			cursor: not-allowed;
+		}
+
+		/* Service Editor */
+		.service-editor {
+			display: none;
+		}
+
+		.service-editor.active {
+			display: block;
+		}
+
+		/* Header Card */
+		.header-card {
+			background: white;
+			border-radius: 8px;
+			overflow: hidden;
+			margin-bottom: 12px;
+			box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+			border-top: 10px solid #673ab7;
+		}
+
+		.header-card-content {
+			padding: 24px;
+		}
+
+		.service-name-input {
+			width: 100%;
+			border: none;
+			border-bottom: 1px solid #dadce0;
+			font-size: 28px;
+			font-weight: 400;
+			padding: 8px 0;
+			outline: none;
+		}
+
+		.service-name-input:focus {
+			border-bottom: 2px solid #673ab7;
+		}
+
+		.service-desc-input {
+			width: 100%;
+			border: none;
+			border-bottom: 1px solid #dadce0;
+			font-size: 14px;
+			padding: 12px 0;
+			outline: none;
+			margin-top: 16px;
+			resize: none;
+			font-family: inherit;
+		}
+
+		.service-desc-input:focus {
+			border-bottom: 2px solid #673ab7;
+		}
+
+		/* Attribute Cards */
+		.attribute-card {
+			background: white;
+			border-radius: 8px;
+			margin-bottom: 12px;
+			box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+			cursor: pointer;
+			border-left: 6px solid transparent;
+			transition: border-color 0.2s;
+		}
+
+		.attribute-card.active {
+			border-left-color: #4285f4;
+			cursor: default;
+		}
+
+		/* Collapsed State */
+		.attribute-collapsed {
+			padding: 20px 24px;
+		}
+
+		.attribute-card.active .attribute-collapsed {
+			display: none;
+		}
+
+		.collapsed-question {
+			font-size: 14px;
+			color: #202124;
+			margin-bottom: 8px;
+		}
+
+		.required-marker {
+			color: #d93025;
+		}
+
+		.collapsed-type-hint {
+			font-size: 14px;
+			color: #80868b;
+		}
+
+		.collapsed-options-preview {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			margin-top: 8px;
+		}
+
+		.collapsed-option {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			font-size: 13px;
+			color: #5f6368;
+		}
+
+		.radio-circle {
+			width: 14px;
+			height: 14px;
+			border: 2px solid #5f6368;
+			border-radius: 50%;
+		}
+
+		.checkbox-square {
+			width: 14px;
+			height: 14px;
+			border: 2px solid #5f6368;
+			border-radius: 2px;
+		}
+
+		/* Expanded State */
+		.attribute-expanded {
+			display: none;
+		}
+
+		.attribute-card.active .attribute-expanded {
+			display: block;
+		}
+
+		.attribute-drag-handle {
+			text-align: center;
+			padding: 8px;
+			color: #dadce0;
+			cursor: grab;
+			font-size: 16px;
+			letter-spacing: 2px;
+		}
+
+		.attribute-drag-handle:active {
+			cursor: grabbing;
+		}
+
+		.attribute-body {
+			padding: 0 24px 16px;
+		}
+
+		.question-row {
+			display: flex;
+			gap: 16px;
+			align-items: flex-start;
+			margin-bottom: 20px;
+		}
+
+		.question-input {
+			flex: 1;
+			padding: 16px;
+			border: none;
+			background: #f8f9fa;
+			border-radius: 4px;
+			font-size: 14px;
+			outline: none;
+			border-bottom: 1px solid transparent;
+		}
+
+		.question-input:focus {
+			background: #e8f0fe;
+			border-bottom: 1px solid #4285f4;
+		}
+
+		.type-dropdown {
+			padding: 12px 16px;
+			border: 1px solid #dadce0;
+			border-radius: 4px;
+			font-size: 14px;
+			background: white;
+			cursor: pointer;
+			min-width: 150px;
+		}
+
+		/* Text Type Placeholder */
+		.text-placeholder {
+			padding: 16px;
+			background: #f8f9fa;
+			border-radius: 4px;
+			color: #80868b;
+			font-size: 14px;
+		}
+
+		/* Options List */
+		.options-list {
+			margin-top: 12px;
+		}
+
+		.option-row {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 8px 0;
+		}
+
+		.option-drag-handle {
+			cursor: grab;
+			color: #dadce0;
+			padding: 4px;
+			font-size: 12px;
+			opacity: 0;
+			transition: opacity 0.15s;
+		}
+
+		.option-row:hover .option-drag-handle {
+			opacity: 1;
+		}
+
+		.option-indicator {
+			width: 18px;
+			height: 18px;
+			border: 2px solid #dadce0;
+			border-radius: 50%;
+			flex-shrink: 0;
+		}
+
+		.option-indicator.checkbox {
+			border-radius: 3px;
+		}
+
+		.option-input {
+			flex: 1;
+			padding: 8px 0;
+			border: none;
+			border-bottom: 1px solid transparent;
+			font-size: 14px;
+			outline: none;
+		}
+
+		.option-input:focus {
+			border-bottom: 1px solid #dadce0;
+		}
+
+		.option-delete {
+			width: 28px;
+			height: 28px;
+			border: none;
+			background: transparent;
+			cursor: pointer;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #5f6368;
+			font-size: 18px;
+			opacity: 0;
+			transition: opacity 0.2s;
+		}
+
+		.option-row:hover .option-delete {
+			opacity: 1;
+		}
+
+		.option-delete:hover {
+			background: #f1f3f4;
+		}
+
+		.add-option-row {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 8px 0;
+			padding-left: 28px;
+			cursor: pointer;
+			color: #5f6368;
+		}
+
+		.add-option-row:hover {
+			color: #202124;
+		}
+
+		.add-option-indicator {
+			width: 18px;
+			height: 18px;
+			border: 2px dashed #dadce0;
+			border-radius: 50%;
+		}
+
+		.add-option-indicator.checkbox {
+			border-radius: 3px;
+		}
+
+		/* Attribute Footer */
+		.attribute-footer {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			padding: 16px 24px;
+			border-top: 1px solid #dadce0;
+			gap: 16px;
+		}
+
+		.attr-save-actions {
+			display: flex;
+			gap: 8px;
+		}
+
+		.btn-attr-cancel {
+			padding: 6px 16px;
+			background: white;
+			color: #5f6368;
+			border: 1px solid #dadce0;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 13px;
+		}
+
+		.btn-attr-cancel:hover {
+			background: #f5f5f5;
+		}
+
+		.btn-attr-save {
+			padding: 6px 16px;
+			background: #673ab7;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 13px;
+		}
+
+		.btn-attr-save:hover {
+			background: #5e35b1;
+		}
+
+		.btn-attr-save:disabled {
+			background: #e0e0e0;
+			color: #9e9e9e;
+			cursor: not-allowed;
+		}
+
+		.attr-footer-actions {
+			display: flex;
+			gap: 4px;
+		}
+
+		.divider {
+			width: 1px;
+			height: 28px;
+			background: #dadce0;
+		}
+
+		.required-toggle {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.required-label {
+			font-size: 14px;
+			color: #202124;
+		}
+
+		.toggle-switch {
+			position: relative;
+			width: 36px;
+			height: 18px;
+			background: #dadce0;
+			border-radius: 9px;
+			cursor: pointer;
+			transition: background 0.2s;
+		}
+
+		.toggle-switch.on {
+			background: #673ab7;
+		}
+
+		.toggle-knob {
+			position: absolute;
+			top: 2px;
+			left: 2px;
+			width: 14px;
+			height: 14px;
+			background: white;
+			border-radius: 50%;
+			transition: left 0.2s;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+		}
+
+		.toggle-switch.on .toggle-knob {
+			left: 20px;
+		}
+
+		.more-options-btn {
+			width: 28px;
+			height: 28px;
+			border: none;
+			background: transparent;
+			cursor: pointer;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #5f6368;
+			font-size: 16px;
+		}
+
+		.more-options-btn:hover {
+			background: #f1f3f4;
+		}
+
+		/* Add Question Card */
+		.add-question-card {
+			background: white;
+			border-radius: 8px;
+			padding: 24px;
+			margin-bottom: 12px;
+			box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			border: 2px dashed #dadce0;
+			color: #5f6368;
+			gap: 8px;
+			transition: all 0.2s;
+		}
+
+		.add-question-card:hover {
+			border-color: #673ab7;
+			color: #673ab7;
+		}
+
+		.add-icon {
+			width: 24px;
+			height: 24px;
+			border: 2px solid currentColor;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+		}
+
+		/* Modal */
+		.modal-overlay {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(0,0,0,0.5);
+			z-index: 1000;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.modal-overlay.visible {
+			display: flex;
+		}
+
+		.modal {
+			background: white;
+			border-radius: 8px;
+			padding: 24px;
+			max-width: 400px;
+			width: 90%;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+		}
+
+		.modal-title {
+			font-size: 18px;
+			font-weight: 500;
+			margin-bottom: 12px;
+		}
+
+		.modal-message {
+			font-size: 14px;
+			color: #5f6368;
+			margin-bottom: 24px;
+			line-height: 1.5;
+		}
+
+		.modal-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: 12px;
+		}
+
+		/* Responsive */
+		@media (max-width: 900px) {
+			.tree-panel {
+				width: 260px;
+				min-width: 200px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<!-- Navigation Header -->
+	<nav class="nav-header">
+		<a href="#" class="back-link">
+			<span>&#8592;</span>
+			<span>Admin</span>
+		</a>
+		<span class="page-title">Service Definition Configuration</span>
+		<span class="unsaved-badge" id="unsavedBadge">unsaved*</span>
+	</nav>
+
+	<!-- Main Split-Pane Layout -->
+	<div class="main-container">
+		<!-- Left Panel - Tree View -->
+		<div class="tree-panel">
+			<div class="tree-header">
+				<h2>Services</h2>
+				<button class="add-group-btn" onclick="addGroup()">
+					<span>+</span> Group
+				</button>
+			</div>
+			<div class="tree-content">
+				<!-- Group 1: Roads & Traffic (Expanded) -->
+				<div class="tree-group expanded" data-group-id="1">
+					<div class="tree-group-header" onclick="selectGroup(1)">
+						<span class="drag-handle">::</span>
+						<div class="expand-icon" onclick="toggleGroup(event, 1)">&#9654;</div>
+						<span class="tree-group-name">Roads & Traffic</span>
+						<span class="tree-group-count">3</span>
+					</div>
+					<div class="tree-services">
+						<div class="tree-service" data-service-id="1" onclick="selectService(1)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Pothole Repair</span>
+						</div>
+						<div class="tree-service" data-service-id="2" onclick="selectService(2)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Broken Streetlight</span>
+						</div>
+						<div class="tree-service" data-service-id="3" onclick="selectService(3)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Traffic Signal Issue</span>
+						</div>
+						<button class="add-service-btn" onclick="addService(event, 1)">
+							<span>+</span> Add Service
+						</button>
+					</div>
+				</div>
+
+				<!-- Group 2: Community Input (Expanded, Service Selected) -->
+				<div class="tree-group expanded" data-group-id="2">
+					<div class="tree-group-header" onclick="selectGroup(2)">
+						<span class="drag-handle">::</span>
+						<div class="expand-icon" onclick="toggleGroup(event, 2)">&#9654;</div>
+						<span class="tree-group-name">Community Input</span>
+						<span class="tree-group-count">2</span>
+					</div>
+					<div class="tree-services">
+						<div class="tree-service selected" data-service-id="4" onclick="selectService(4)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Transportation Survey</span>
+							<div class="unsaved-dot visible"></div>
+						</div>
+						<div class="tree-service" data-service-id="5" onclick="selectService(5)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Accessibility Feedback</span>
+						</div>
+						<button class="add-service-btn" onclick="addService(event, 2)">
+							<span>+</span> Add Service
+						</button>
+					</div>
+				</div>
+
+				<!-- Group 3: Sanitation (Collapsed) -->
+				<div class="tree-group" data-group-id="3">
+					<div class="tree-group-header" onclick="selectGroup(3)">
+						<span class="drag-handle">::</span>
+						<div class="expand-icon" onclick="toggleGroup(event, 3)">&#9654;</div>
+						<span class="tree-group-name">Sanitation</span>
+						<span class="tree-group-count">3</span>
+					</div>
+					<div class="tree-services">
+						<div class="tree-service" data-service-id="6" onclick="selectService(6)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Missed Garbage Collection</span>
+						</div>
+						<div class="tree-service" data-service-id="7" onclick="selectService(7)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Illegal Dumping</span>
+						</div>
+						<div class="tree-service" data-service-id="8" onclick="selectService(8)">
+							<span class="drag-handle">::</span>
+							<div class="tree-service-bullet"></div>
+							<span class="tree-service-name">Recycling Issue</span>
+						</div>
+						<button class="add-service-btn" onclick="addService(event, 3)">
+							<span>+</span> Add Service
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Right Panel - Editor -->
+		<div class="editor-panel">
+			<!-- Empty State (hidden by default) -->
+			<div class="editor-empty" id="editorEmpty" style="display: none;">
+				Select a group or service to edit
+			</div>
+
+			<!-- Group Editor (hidden by default) -->
+			<div class="group-editor" id="groupEditor">
+				<div class="editor-container">
+					<div class="group-editor-card">
+						<div class="group-editor-content">
+							<div class="form-field">
+								<label class="form-label">Group Name</label>
+								<input type="text" class="form-input" id="groupNameInput" value="Roads & Traffic" oninput="markDirty()">
+							</div>
+							<div class="form-field">
+								<label class="form-label">Description (optional)</label>
+								<textarea class="form-textarea" id="groupDescInput" placeholder="Brief description of this service group..." oninput="markDirty()">Services related to road maintenance and traffic infrastructure.</textarea>
+							</div>
+						</div>
+					</div>
+					<div class="editor-footer">
+						<div class="footer-left">
+							<button class="btn-icon" title="Delete group" onclick="deleteItem()">&#128465;</button>
+						</div>
+						<div class="footer-right">
+							<button class="btn-cancel" onclick="cancelChanges()">Cancel</button>
+							<button class="btn-save" onclick="saveChanges()">Save</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Service Editor (active by default for demo) -->
+			<div class="service-editor active" id="serviceEditor">
+				<div class="editor-container">
+					<!-- Header Card -->
+					<div class="header-card">
+						<div class="header-card-content">
+							<input type="text" class="service-name-input" id="serviceNameInput" value="Transportation Survey" placeholder="Service Name" oninput="markDirty()">
+							<textarea class="service-desc-input" id="serviceDescInput" rows="2" placeholder="Description shown to citizens" oninput="markDirty()">Survey to understand community transportation needs and accessibility</textarea>
+						</div>
+					</div>
+
+					<!-- Attribute 1: Paragraph (Collapsed) -->
+					<div class="attribute-card" onclick="activateCard(this)" data-attr-id="1">
+						<div class="attribute-collapsed">
+							<div class="collapsed-question">
+								Describe getting around without a car in your community <span class="required-marker">*</span>
+							</div>
+							<div class="collapsed-type-hint">Long answer text</div>
+						</div>
+						<div class="attribute-expanded">
+							<div class="attribute-drag-handle" title="Drag to reorder">::</div>
+							<div class="attribute-body">
+								<div class="question-row">
+									<input type="text" class="question-input" value="Describe getting around without a car in your community" oninput="markDirty(); markAttrDirty(this)">
+									<select class="type-dropdown" onchange="markDirty(); markAttrDirty(this)">
+										<option value="string">Short answer</option>
+										<option value="text" selected>Paragraph</option>
+										<option value="multi">Multiple choice</option>
+										<option value="single">Dropdown</option>
+										<option value="number">Number</option>
+										<option value="date">Date</option>
+									</select>
+								</div>
+								<div class="text-placeholder">Long answer text</div>
+							</div>
+							<div class="attribute-footer">
+								<div class="attr-save-actions">
+									<button class="btn-attr-cancel" onclick="cancelAttrChanges(event)">Cancel</button>
+									<button class="btn-attr-save" disabled onclick="saveAttrChanges(event)">Save</button>
+								</div>
+								<div class="divider"></div>
+								<div class="attr-footer-actions">
+									<button class="btn-icon" title="Duplicate">&#128203;</button>
+									<button class="btn-icon" title="Delete">&#128465;</button>
+								</div>
+								<div class="divider"></div>
+								<div class="required-toggle">
+									<span class="required-label">Required</span>
+									<div class="toggle-switch on" onclick="toggleRequired(this, event)">
+										<div class="toggle-knob"></div>
+									</div>
+								</div>
+								<button class="more-options-btn" title="More options">&#8942;</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Attribute 2: Multiple Choice (Active/Expanded) -->
+					<div class="attribute-card active" onclick="activateCard(this)" data-attr-id="2">
+						<div class="attribute-collapsed">
+							<div class="collapsed-question">
+								What mode of transportation do you use on a weekly basis?
+							</div>
+							<div class="collapsed-options-preview">
+								<span class="collapsed-option"><span class="checkbox-square"></span> Walking</span>
+								<span class="collapsed-option"><span class="checkbox-square"></span> Biking</span>
+								<span class="collapsed-option"><span class="checkbox-square"></span> Bus / public transit</span>
+								<span style="color: #80868b;">...</span>
+							</div>
+						</div>
+						<div class="attribute-expanded">
+							<div class="attribute-drag-handle" title="Drag to reorder">::</div>
+							<div class="attribute-body">
+								<div class="question-row">
+									<input type="text" class="question-input" value="What mode of transportation do you use on a weekly basis? (select all that apply)" oninput="markDirty(); markAttrDirty(this)">
+									<select class="type-dropdown" onchange="markDirty(); markAttrDirty(this)">
+										<option value="string">Short answer</option>
+										<option value="text">Paragraph</option>
+										<option value="multi" selected>Multiple choice</option>
+										<option value="single">Dropdown</option>
+										<option value="number">Number</option>
+										<option value="date">Date</option>
+									</select>
+								</div>
+								<div class="options-list">
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator checkbox"></div>
+										<input type="text" class="option-input" value="Walking" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator checkbox"></div>
+										<input type="text" class="option-input" value="Mobility device (e.g. wheelchair, walker)" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator checkbox"></div>
+										<input type="text" class="option-input" value="Biking" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator checkbox"></div>
+										<input type="text" class="option-input" value="Motorcycle or moped" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator checkbox"></div>
+										<input type="text" class="option-input" value="Personal vehicle (e.g. car, truck)" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator checkbox"></div>
+										<input type="text" class="option-input" value="Bus / public transit" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="add-option-row" onclick="addOption(this)">
+										<div class="add-option-indicator checkbox"></div>
+										<span>Add option</span>
+									</div>
+								</div>
+							</div>
+							<div class="attribute-footer">
+								<div class="attr-save-actions">
+									<button class="btn-attr-cancel" onclick="cancelAttrChanges(event)">Cancel</button>
+									<button class="btn-attr-save" disabled onclick="saveAttrChanges(event)">Save</button>
+								</div>
+								<div class="divider"></div>
+								<div class="attr-footer-actions">
+									<button class="btn-icon" title="Duplicate">&#128203;</button>
+									<button class="btn-icon" title="Delete">&#128465;</button>
+								</div>
+								<div class="divider"></div>
+								<div class="required-toggle">
+									<span class="required-label">Required</span>
+									<div class="toggle-switch" onclick="toggleRequired(this, event)">
+										<div class="toggle-knob"></div>
+									</div>
+								</div>
+								<button class="more-options-btn" title="More options">&#8942;</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Attribute 3: Race (Collapsed) - Dropdown type -->
+					<div class="attribute-card" onclick="activateCard(this)" data-attr-id="3">
+						<div class="attribute-collapsed">
+							<div class="collapsed-question">Race</div>
+							<div class="collapsed-options-preview">
+								<span class="collapsed-option"><span class="radio-circle"></span> White</span>
+								<span class="collapsed-option"><span class="radio-circle"></span> Black or African American</span>
+								<span class="collapsed-option"><span class="radio-circle"></span> American Indian...</span>
+							</div>
+						</div>
+						<div class="attribute-expanded">
+							<div class="attribute-drag-handle" title="Drag to reorder">::</div>
+							<div class="attribute-body">
+								<div class="question-row">
+									<input type="text" class="question-input" value="Race" oninput="markDirty(); markAttrDirty(this)">
+									<select class="type-dropdown" onchange="markDirty(); markAttrDirty(this)">
+										<option value="string">Short answer</option>
+										<option value="text">Paragraph</option>
+										<option value="multi">Multiple choice</option>
+										<option value="single" selected>Dropdown</option>
+										<option value="number">Number</option>
+										<option value="date">Date</option>
+									</select>
+								</div>
+								<div class="options-list">
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator"></div>
+										<input type="text" class="option-input" value="White" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator"></div>
+										<input type="text" class="option-input" value="Black or African American" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator"></div>
+										<input type="text" class="option-input" value="American Indian or Alaska Native" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator"></div>
+										<input type="text" class="option-input" value="Asian" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="option-row">
+										<span class="option-drag-handle">::</span>
+										<div class="option-indicator"></div>
+										<input type="text" class="option-input" value="Native Hawaiian or Other Pacific Islander" oninput="markDirty(); markAttrDirty(this)">
+										<button class="option-delete" title="Remove">&times;</button>
+									</div>
+									<div class="add-option-row" onclick="addOption(this)">
+										<div class="add-option-indicator"></div>
+										<span>Add option</span>
+									</div>
+								</div>
+							</div>
+							<div class="attribute-footer">
+								<div class="attr-save-actions">
+									<button class="btn-attr-cancel" onclick="cancelAttrChanges(event)">Cancel</button>
+									<button class="btn-attr-save" disabled onclick="saveAttrChanges(event)">Save</button>
+								</div>
+								<div class="divider"></div>
+								<div class="attr-footer-actions">
+									<button class="btn-icon" title="Duplicate">&#128203;</button>
+									<button class="btn-icon" title="Delete">&#128465;</button>
+								</div>
+								<div class="divider"></div>
+								<div class="required-toggle">
+									<span class="required-label">Required</span>
+									<div class="toggle-switch" onclick="toggleRequired(this, event)">
+										<div class="toggle-knob"></div>
+									</div>
+								</div>
+								<button class="more-options-btn" title="More options">&#8942;</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Add Question Card -->
+					<div class="add-question-card" onclick="addQuestion()">
+						<div class="add-icon">+</div>
+						<span>Add question</span>
+					</div>
+
+					<!-- Service Editor Footer -->
+					<div class="editor-footer">
+						<div class="footer-left">
+							<button class="btn-icon" title="Delete service" onclick="deleteItem()">&#128465;</button>
+						</div>
+						<div class="footer-right">
+							<button class="btn-cancel" onclick="cancelChanges()">Cancel</button>
+							<button class="btn-save" onclick="saveChanges()">Save</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Unsaved Changes Modal -->
+	<div class="modal-overlay" id="unsavedModal">
+		<div class="modal">
+			<div class="modal-title">Unsaved Changes</div>
+			<div class="modal-message">
+				You have unsaved changes. Do you want to save them before leaving?
+			</div>
+			<div class="modal-actions">
+				<button class="btn-cancel" onclick="discardChanges()">Discard</button>
+				<button class="btn-save" onclick="saveAndContinue()">Save</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// State
+		let isDirty = true; // Start dirty for demo
+		let pendingAction = null;
+
+		// Toggle group expand/collapse
+		function toggleGroup(event, groupId) {
+			event.stopPropagation();
+			const group = document.querySelector(`[data-group-id="${groupId}"]`);
+			group.classList.toggle('expanded');
+		}
+
+		// Select group
+		function selectGroup(groupId) {
+			if (isDirty) {
+				pendingAction = () => performGroupSelection(groupId);
+				showModal();
+				return;
+			}
+			performGroupSelection(groupId);
+		}
+
+		function performGroupSelection(groupId) {
+			clearSelections();
+			const group = document.querySelector(`[data-group-id="${groupId}"]`);
+			group.querySelector('.tree-group-header').classList.add('selected');
+
+			document.getElementById('groupEditor').classList.add('active');
+			document.getElementById('serviceEditor').classList.remove('active');
+			document.getElementById('editorEmpty').style.display = 'none';
+
+			isDirty = false;
+			updateUnsavedIndicators();
+		}
+
+		// Select service
+		function selectService(serviceId) {
+			event.stopPropagation();
+			if (isDirty) {
+				pendingAction = () => performServiceSelection(serviceId);
+				showModal();
+				return;
+			}
+			performServiceSelection(serviceId);
+		}
+
+		function performServiceSelection(serviceId) {
+			clearSelections();
+			const service = document.querySelector(`[data-service-id="${serviceId}"]`);
+			service.classList.add('selected');
+
+			// Expand parent group if collapsed
+			const group = service.closest('.tree-group');
+			if (!group.classList.contains('expanded')) {
+				group.classList.add('expanded');
+			}
+
+			document.getElementById('serviceEditor').classList.add('active');
+			document.getElementById('groupEditor').classList.remove('active');
+			document.getElementById('editorEmpty').style.display = 'none';
+
+			isDirty = false;
+			updateUnsavedIndicators();
+		}
+
+		function clearSelections() {
+			document.querySelectorAll('.tree-group-header, .tree-service').forEach(el => {
+				el.classList.remove('selected');
+			});
+		}
+
+		// Activate attribute card
+		function activateCard(card) {
+			if (event.target.tagName === 'INPUT' ||
+				event.target.tagName === 'SELECT' ||
+				event.target.tagName === 'BUTTON' ||
+				event.target.closest('button') ||
+				event.target.classList.contains('toggle-switch') ||
+				event.target.classList.contains('toggle-knob')) {
+				return;
+			}
+
+			document.querySelectorAll('.attribute-card').forEach(c => {
+				c.classList.remove('active');
+			});
+			card.classList.add('active');
+		}
+
+		// Toggle required
+		function toggleRequired(toggle, event) {
+			event.stopPropagation();
+			toggle.classList.toggle('on');
+			markDirty();
+			markAttrDirty(toggle);
+		}
+
+		// Mark as dirty (unsaved changes)
+		function markDirty() {
+			isDirty = true;
+			updateUnsavedIndicators();
+		}
+
+		// Mark attribute card as dirty (enable its Save button)
+		function markAttrDirty(element) {
+			const card = element.closest('.attribute-card');
+			if (card) {
+				const saveBtn = card.querySelector('.btn-attr-save');
+				if (saveBtn) {
+					saveBtn.disabled = false;
+				}
+			}
+		}
+
+		// Cancel attribute changes
+		function cancelAttrChanges(event) {
+			event.stopPropagation();
+			const card = event.target.closest('.attribute-card');
+			if (card) {
+				const saveBtn = card.querySelector('.btn-attr-save');
+				if (saveBtn) {
+					saveBtn.disabled = true;
+				}
+				// In real implementation, would revert changes
+				alert('Changes to this question have been cancelled.');
+			}
+		}
+
+		// Save attribute changes
+		function saveAttrChanges(event) {
+			event.stopPropagation();
+			const card = event.target.closest('.attribute-card');
+			if (card) {
+				const saveBtn = card.querySelector('.btn-attr-save');
+				if (saveBtn) {
+					saveBtn.disabled = true;
+				}
+				alert('Question saved successfully!');
+			}
+		}
+
+		function updateUnsavedIndicators() {
+			document.getElementById('unsavedBadge').classList.toggle('visible', isDirty);
+			// Update dot on selected service
+			const selectedService = document.querySelector('.tree-service.selected .unsaved-dot');
+			if (selectedService) {
+				selectedService.classList.toggle('visible', isDirty);
+			}
+		}
+
+		// Modal handling
+		function showModal() {
+			document.getElementById('unsavedModal').classList.add('visible');
+		}
+
+		function hideModal() {
+			document.getElementById('unsavedModal').classList.remove('visible');
+		}
+
+		function discardChanges() {
+			hideModal();
+			isDirty = false;
+			updateUnsavedIndicators();
+			if (pendingAction) {
+				pendingAction();
+				pendingAction = null;
+			}
+		}
+
+		function saveAndContinue() {
+			hideModal();
+			isDirty = false;
+			updateUnsavedIndicators();
+			alert('Changes saved!');
+			if (pendingAction) {
+				pendingAction();
+				pendingAction = null;
+			}
+		}
+
+		// Save/Cancel
+		function saveChanges() {
+			isDirty = false;
+			updateUnsavedIndicators();
+			alert('Changes saved successfully!');
+		}
+
+		function cancelChanges() {
+			if (isDirty) {
+				if (confirm('Discard all changes?')) {
+					isDirty = false;
+					updateUnsavedIndicators();
+				}
+			}
+		}
+
+		// Add option
+		function addOption(addRow) {
+			event.stopPropagation();
+			const optionsList = addRow.parentElement;
+			// Check if this is a checkbox (multiple choice) or radio (dropdown) type
+			const isCheckbox = addRow.querySelector('.add-option-indicator').classList.contains('checkbox');
+			const indicatorClass = isCheckbox ? 'option-indicator checkbox' : 'option-indicator';
+			const newOption = document.createElement('div');
+			newOption.className = 'option-row';
+			newOption.innerHTML = `
+				<span class="option-drag-handle">::</span>
+				<div class="${indicatorClass}"></div>
+				<input type="text" class="option-input" placeholder="Option" oninput="markDirty(); markAttrDirty(this)">
+				<button class="option-delete" title="Remove">&times;</button>
+			`;
+			optionsList.insertBefore(newOption, addRow);
+			newOption.querySelector('input').focus();
+			markDirty();
+			markAttrDirty(addRow);
+		}
+
+		// Add question
+		function addQuestion() {
+			alert('Add new question dialog would open here');
+		}
+
+		// Add group/service
+		function addGroup() {
+			alert('Add new group dialog would open here');
+		}
+
+		function addService(event, groupId) {
+			event.stopPropagation();
+			alert(`Add new service to group ${groupId}`);
+		}
+
+		// Delete
+		function deleteItem() {
+			if (confirm('Are you sure you want to delete this item?')) {
+				alert('Item deleted');
+			}
+		}
+
+		// Initialize
+		updateUnsavedIndicators();
+	</script>
+</body>
+</html>
