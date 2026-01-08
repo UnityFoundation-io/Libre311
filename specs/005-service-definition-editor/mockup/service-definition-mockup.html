@@ -511,6 +511,14 @@
 			border-bottom: 2px solid #673ab7;
 		}
 
+		.header-card-footer {
+			display: flex;
+			justify-content: flex-end;
+			gap: 12px;
+			padding: 16px 24px;
+			border-top: 1px solid #e0e0e0;
+		}
+
 		/* Attribute Cards */
 		.attribute-card {
 			background: white;
@@ -979,7 +987,6 @@
 				<!-- Group 1: Roads & Traffic (Expanded) -->
 				<div class="tree-group expanded" data-group-id="1">
 					<div class="tree-group-header" onclick="selectGroup(1)">
-						<span class="drag-handle">::</span>
 						<div class="expand-icon" onclick="toggleGroup(event, 1)">&#9654;</div>
 						<span class="tree-group-name">Roads & Traffic</span>
 						<span class="tree-group-count">3</span>
@@ -1009,7 +1016,6 @@
 				<!-- Group 2: Community Input (Expanded, Service Selected) -->
 				<div class="tree-group expanded" data-group-id="2">
 					<div class="tree-group-header" onclick="selectGroup(2)">
-						<span class="drag-handle">::</span>
 						<div class="expand-icon" onclick="toggleGroup(event, 2)">&#9654;</div>
 						<span class="tree-group-name">Community Input</span>
 						<span class="tree-group-count">2</span>
@@ -1035,7 +1041,6 @@
 				<!-- Group 3: Sanitation (Collapsed) -->
 				<div class="tree-group" data-group-id="3">
 					<div class="tree-group-header" onclick="selectGroup(3)">
-						<span class="drag-handle">::</span>
 						<div class="expand-icon" onclick="toggleGroup(event, 3)">&#9654;</div>
 						<span class="tree-group-name">Sanitation</span>
 						<span class="tree-group-count">3</span>
@@ -1078,21 +1083,18 @@
 						<div class="group-editor-content">
 							<div class="form-field">
 								<label class="form-label">Group Name</label>
-								<input type="text" class="form-input" id="groupNameInput" value="Roads & Traffic" oninput="markDirty()">
-							</div>
-							<div class="form-field">
-								<label class="form-label">Description (optional)</label>
-								<textarea class="form-textarea" id="groupDescInput" placeholder="Brief description of this service group..." oninput="markDirty()">Services related to road maintenance and traffic infrastructure.</textarea>
+								<input type="text" class="form-input" id="groupNameInput" value="Roads & Traffic" oninput="markGroupDirty()">
 							</div>
 						</div>
 					</div>
 					<div class="editor-footer">
 						<div class="footer-left">
-							<button class="btn-icon" title="Delete group" onclick="deleteItem()">&#128465;</button>
+							<button class="btn-icon" title="Delete group" onclick="deleteGroup()">&#128465;</button>
+							<span style="color: #5f6368; font-size: 14px; margin-left: 8px;">Delete Group</span>
 						</div>
 						<div class="footer-right">
-							<button class="btn-cancel" onclick="cancelChanges()">Cancel</button>
-							<button class="btn-save" onclick="saveChanges()">Save</button>
+							<button class="btn-cancel" onclick="cancelGroupChanges()">Cancel</button>
+							<button class="btn-save" id="groupSaveBtn" onclick="saveGroupChanges()">Save</button>
 						</div>
 					</div>
 				</div>
@@ -1104,8 +1106,12 @@
 					<!-- Header Card -->
 					<div class="header-card">
 						<div class="header-card-content">
-							<input type="text" class="service-name-input" id="serviceNameInput" value="Transportation Survey" placeholder="Service Name" oninput="markDirty()">
-							<textarea class="service-desc-input" id="serviceDescInput" rows="2" placeholder="Description shown to citizens" oninput="markDirty()">Survey to understand community transportation needs and accessibility</textarea>
+							<input type="text" class="service-name-input" id="serviceNameInput" value="Transportation Survey" placeholder="Service Name" oninput="markHeaderDirty()">
+							<textarea class="service-desc-input" id="serviceDescInput" rows="2" placeholder="Description shown to citizens" oninput="markHeaderDirty()">Survey to understand community transportation needs and accessibility</textarea>
+						</div>
+						<div class="header-card-footer">
+							<button class="btn-cancel" id="headerCancelBtn" onclick="cancelHeaderChanges()" style="visibility: hidden;">Cancel</button>
+							<button class="btn-save" id="headerSaveBtn" onclick="saveHeaderChanges()" disabled>Save</button>
 						</div>
 					</div>
 
@@ -1121,8 +1127,8 @@
 							<div class="attribute-drag-handle" title="Drag to reorder">::</div>
 							<div class="attribute-body">
 								<div class="question-row">
-									<input type="text" class="question-input" value="Describe getting around without a car in your community" oninput="markDirty(); markAttrDirty(this)">
-									<select class="type-dropdown" onchange="markDirty(); markAttrDirty(this)">
+									<input type="text" class="question-input" value="Describe getting around without a car in your community" oninput="markAttrDirty(this)">
+									<select class="type-dropdown" onchange="markAttrDirty(this)">
 										<option value="string">Short answer</option>
 										<option value="text" selected>Paragraph</option>
 										<option value="multi">Multiple choice</option>
@@ -1172,8 +1178,8 @@
 							<div class="attribute-drag-handle" title="Drag to reorder">::</div>
 							<div class="attribute-body">
 								<div class="question-row">
-									<input type="text" class="question-input" value="What mode of transportation do you use on a weekly basis? (select all that apply)" oninput="markDirty(); markAttrDirty(this)">
-									<select class="type-dropdown" onchange="markDirty(); markAttrDirty(this)">
+									<input type="text" class="question-input" value="What mode of transportation do you use on a weekly basis? (select all that apply)" oninput="markAttrDirty(this)">
+									<select class="type-dropdown" onchange="markAttrDirty(this)">
 										<option value="string">Short answer</option>
 										<option value="text">Paragraph</option>
 										<option value="multi" selected>Multiple choice</option>
@@ -1186,37 +1192,37 @@
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator checkbox"></div>
-										<input type="text" class="option-input" value="Walking" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Walking" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator checkbox"></div>
-										<input type="text" class="option-input" value="Mobility device (e.g. wheelchair, walker)" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Mobility device (e.g. wheelchair, walker)" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator checkbox"></div>
-										<input type="text" class="option-input" value="Biking" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Biking" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator checkbox"></div>
-										<input type="text" class="option-input" value="Motorcycle or moped" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Motorcycle or moped" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator checkbox"></div>
-										<input type="text" class="option-input" value="Personal vehicle (e.g. car, truck)" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Personal vehicle (e.g. car, truck)" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator checkbox"></div>
-										<input type="text" class="option-input" value="Bus / public transit" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Bus / public transit" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="add-option-row" onclick="addOption(this)">
@@ -1261,8 +1267,8 @@
 							<div class="attribute-drag-handle" title="Drag to reorder">::</div>
 							<div class="attribute-body">
 								<div class="question-row">
-									<input type="text" class="question-input" value="Race" oninput="markDirty(); markAttrDirty(this)">
-									<select class="type-dropdown" onchange="markDirty(); markAttrDirty(this)">
+									<input type="text" class="question-input" value="Race" oninput="markAttrDirty(this)">
+									<select class="type-dropdown" onchange="markAttrDirty(this)">
 										<option value="string">Short answer</option>
 										<option value="text">Paragraph</option>
 										<option value="multi">Multiple choice</option>
@@ -1275,31 +1281,31 @@
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator"></div>
-										<input type="text" class="option-input" value="White" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="White" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator"></div>
-										<input type="text" class="option-input" value="Black or African American" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Black or African American" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator"></div>
-										<input type="text" class="option-input" value="American Indian or Alaska Native" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="American Indian or Alaska Native" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator"></div>
-										<input type="text" class="option-input" value="Asian" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Asian" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="option-row">
 										<span class="option-drag-handle">::</span>
 										<div class="option-indicator"></div>
-										<input type="text" class="option-input" value="Native Hawaiian or Other Pacific Islander" oninput="markDirty(); markAttrDirty(this)">
+										<input type="text" class="option-input" value="Native Hawaiian or Other Pacific Islander" oninput="markAttrDirty(this)">
 										<button class="option-delete" title="Remove">&times;</button>
 									</div>
 									<div class="add-option-row" onclick="addOption(this)">
@@ -1339,11 +1345,10 @@
 					<!-- Service Editor Footer -->
 					<div class="editor-footer">
 						<div class="footer-left">
-							<button class="btn-icon" title="Delete service" onclick="deleteItem()">&#128465;</button>
+							<button class="btn-icon" title="Delete service" onclick="deleteService()">&#128465;</button>
+							<span style="color: #5f6368; font-size: 14px; margin-left: 8px;">Delete Service</span>
 						</div>
 						<div class="footer-right">
-							<button class="btn-cancel" onclick="cancelChanges()">Cancel</button>
-							<button class="btn-save" onclick="saveChanges()">Save</button>
 						</div>
 					</div>
 				</div>
@@ -1367,7 +1372,9 @@
 
 	<script>
 		// State
-		let isDirty = true; // Start dirty for demo
+		let isDirty = false;
+		let isHeaderDirty = false;
+		let isGroupDirty = false;
 		let pendingAction = null;
 
 		// Toggle group expand/collapse
@@ -1457,14 +1464,55 @@
 		function toggleRequired(toggle, event) {
 			event.stopPropagation();
 			toggle.classList.toggle('on');
-			markDirty();
 			markAttrDirty(toggle);
 		}
 
-		// Mark as dirty (unsaved changes)
-		function markDirty() {
+		// Mark header as dirty (unsaved changes)
+		function markHeaderDirty() {
+			isHeaderDirty = true;
+			isDirty = true;
+			document.getElementById('headerSaveBtn').disabled = false;
+			document.getElementById('headerCancelBtn').style.visibility = 'visible';
+			updateUnsavedIndicators();
+		}
+
+		// Mark group as dirty
+		function markGroupDirty() {
+			isGroupDirty = true;
 			isDirty = true;
 			updateUnsavedIndicators();
+		}
+
+		// Save header changes
+		function saveHeaderChanges() {
+			isHeaderDirty = false;
+			document.getElementById('headerSaveBtn').disabled = true;
+			document.getElementById('headerCancelBtn').style.visibility = 'hidden';
+			checkIfStillDirty();
+			alert('Service name and description saved!');
+		}
+
+		// Cancel header changes
+		function cancelHeaderChanges() {
+			isHeaderDirty = false;
+			document.getElementById('headerSaveBtn').disabled = true;
+			document.getElementById('headerCancelBtn').style.visibility = 'hidden';
+			// In real implementation, would revert the values
+			checkIfStillDirty();
+		}
+
+		// Check if any card still has unsaved changes
+		function checkIfStillDirty() {
+			const hasUnsavedAttrs = document.querySelectorAll('.btn-attr-save:not([disabled])').length > 0;
+			isDirty = isHeaderDirty || isGroupDirty || hasUnsavedAttrs;
+			updateUnsavedIndicators();
+		}
+
+		// Delete service
+		function deleteService() {
+			if (confirm('Are you sure you want to delete this service? This action cannot be undone.')) {
+				alert('Service deleted');
+			}
 		}
 
 		// Mark attribute card as dirty (enable its Save button)
@@ -1474,6 +1522,8 @@
 				const saveBtn = card.querySelector('.btn-attr-save');
 				if (saveBtn) {
 					saveBtn.disabled = false;
+					isDirty = true;
+					updateUnsavedIndicators();
 				}
 			}
 		}
@@ -1488,7 +1538,7 @@
 					saveBtn.disabled = true;
 				}
 				// In real implementation, would revert changes
-				alert('Changes to this question have been cancelled.');
+				checkIfStillDirty();
 			}
 		}
 
@@ -1501,6 +1551,7 @@
 				if (saveBtn) {
 					saveBtn.disabled = true;
 				}
+				checkIfStillDirty();
 				alert('Question saved successfully!');
 			}
 		}
@@ -1544,20 +1595,17 @@
 			}
 		}
 
-		// Save/Cancel
-		function saveChanges() {
-			isDirty = false;
-			updateUnsavedIndicators();
-			alert('Changes saved successfully!');
+		// Group Save/Cancel
+		function saveGroupChanges() {
+			isGroupDirty = false;
+			checkIfStillDirty();
+			alert('Group saved successfully!');
 		}
 
-		function cancelChanges() {
-			if (isDirty) {
-				if (confirm('Discard all changes?')) {
-					isDirty = false;
-					updateUnsavedIndicators();
-				}
-			}
+		function cancelGroupChanges() {
+			isGroupDirty = false;
+			// In real implementation, would revert changes
+			checkIfStillDirty();
 		}
 
 		// Add option
@@ -1572,18 +1620,147 @@
 			newOption.innerHTML = `
 				<span class="option-drag-handle">::</span>
 				<div class="${indicatorClass}"></div>
-				<input type="text" class="option-input" placeholder="Option" oninput="markDirty(); markAttrDirty(this)">
+				<input type="text" class="option-input" placeholder="Option" oninput="markAttrDirty(this)">
 				<button class="option-delete" title="Remove">&times;</button>
 			`;
 			optionsList.insertBefore(newOption, addRow);
 			newOption.querySelector('input').focus();
-			markDirty();
 			markAttrDirty(addRow);
 		}
 
 		// Add question
+		let nextAttrId = 4; // Start after existing attributes (1, 2, 3)
+
 		function addQuestion() {
-			alert('Add new question dialog would open here');
+			const addQuestionCard = document.querySelector('.add-question-card');
+			const attrId = nextAttrId++;
+
+			// Deactivate all existing cards
+			document.querySelectorAll('.attribute-card').forEach(c => {
+				c.classList.remove('active');
+			});
+
+			const newCard = document.createElement('div');
+			newCard.className = 'attribute-card active';
+			newCard.setAttribute('data-attr-id', attrId);
+			newCard.setAttribute('onclick', 'activateCard(this)');
+			newCard.innerHTML = `
+				<div class="attribute-collapsed">
+					<div class="collapsed-question">
+						Untitled Question
+					</div>
+					<div class="collapsed-type-hint">Short answer text</div>
+				</div>
+				<div class="attribute-expanded">
+					<div class="attribute-drag-handle" title="Drag to reorder">::</div>
+					<div class="attribute-body">
+						<div class="question-row">
+							<input type="text" class="question-input" placeholder="Question" oninput="markAttrDirty(this)">
+							<select class="type-dropdown" onchange="handleTypeChange(this); markAttrDirty(this)">
+								<option value="string" selected>Short answer</option>
+								<option value="text">Paragraph</option>
+								<option value="multi">Multiple choice</option>
+								<option value="single">Dropdown</option>
+								<option value="number">Number</option>
+								<option value="date">Date</option>
+							</select>
+						</div>
+						<div class="text-placeholder">Short answer text</div>
+					</div>
+					<div class="attribute-footer">
+						<div class="attr-save-actions">
+							<button class="btn-attr-cancel" onclick="cancelAttrChanges(event)">Cancel</button>
+							<button class="btn-attr-save" disabled onclick="saveAttrChanges(event)">Save</button>
+						</div>
+						<div class="divider"></div>
+						<div class="attr-footer-actions">
+							<button class="btn-icon" title="Duplicate">&#128203;</button>
+							<button class="btn-icon" title="Delete" onclick="deleteQuestion(event)">&#128465;</button>
+						</div>
+						<div class="divider"></div>
+						<div class="required-toggle">
+							<span class="required-label">Required</span>
+							<div class="toggle-switch" onclick="toggleRequired(this, event)">
+								<div class="toggle-knob"></div>
+							</div>
+						</div>
+						<button class="more-options-btn" title="More options">&#8942;</button>
+					</div>
+				</div>
+			`;
+
+			addQuestionCard.parentNode.insertBefore(newCard, addQuestionCard);
+
+			// Focus the question input
+			const questionInput = newCard.querySelector('.question-input');
+			if (questionInput) {
+				questionInput.focus();
+			}
+		}
+
+		// Delete question card
+		function deleteQuestion(event) {
+			event.stopPropagation();
+			const card = event.target.closest('.attribute-card');
+			if (card && confirm('Are you sure you want to delete this question?')) {
+				card.remove();
+				checkIfStillDirty();
+			}
+		}
+
+		// Handle type change to update the body content
+		function handleTypeChange(select) {
+			const card = select.closest('.attribute-card');
+			const body = card.querySelector('.attribute-body');
+			const questionRow = body.querySelector('.question-row');
+			const existingContent = body.querySelector('.text-placeholder, .options-list');
+
+			if (existingContent) {
+				existingContent.remove();
+			}
+
+			const type = select.value;
+			let newContent;
+
+			if (type === 'string') {
+				newContent = document.createElement('div');
+				newContent.className = 'text-placeholder';
+				newContent.textContent = 'Short answer text';
+			} else if (type === 'text') {
+				newContent = document.createElement('div');
+				newContent.className = 'text-placeholder';
+				newContent.textContent = 'Long answer text';
+			} else if (type === 'multi' || type === 'single') {
+				const isCheckbox = type === 'multi';
+				const indicatorClass = isCheckbox ? 'option-indicator checkbox' : 'option-indicator';
+				const addIndicatorClass = isCheckbox ? 'add-option-indicator checkbox' : 'add-option-indicator';
+				newContent = document.createElement('div');
+				newContent.className = 'options-list';
+				newContent.innerHTML = `
+					<div class="option-row">
+						<span class="option-drag-handle">::</span>
+						<div class="${indicatorClass}"></div>
+						<input type="text" class="option-input" placeholder="Option 1" oninput="markAttrDirty(this)">
+						<button class="option-delete" title="Remove">&times;</button>
+					</div>
+					<div class="add-option-row" onclick="addOption(this)">
+						<div class="${addIndicatorClass}"></div>
+						<span>Add option</span>
+					</div>
+				`;
+			} else if (type === 'number') {
+				newContent = document.createElement('div');
+				newContent.className = 'text-placeholder';
+				newContent.textContent = 'Number';
+			} else if (type === 'date') {
+				newContent = document.createElement('div');
+				newContent.className = 'text-placeholder';
+				newContent.textContent = 'Date';
+			}
+
+			if (newContent) {
+				body.appendChild(newContent);
+			}
 		}
 
 		// Add group/service
@@ -1596,10 +1773,10 @@
 			alert(`Add new service to group ${groupId}`);
 		}
 
-		// Delete
-		function deleteItem() {
-			if (confirm('Are you sure you want to delete this item?')) {
-				alert('Item deleted');
+		// Delete group
+		function deleteGroup() {
+			if (confirm('Are you sure you want to delete this group? Groups with services cannot be deleted.')) {
+				alert('Group deleted');
 			}
 		}
 

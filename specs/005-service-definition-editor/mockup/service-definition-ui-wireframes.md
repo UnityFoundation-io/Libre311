@@ -29,27 +29,27 @@ The interface uses a split-pane layout with a tree navigation panel on the left 
 
 ```
 +-----------------------------------------------------------------------------------+
-| <- Admin          Service Definition Configuration                    [unsaved*]  |
+| <- Admin          Service Definition Configuration                                |
 +----------------+------------------------------------------------------------------+
 |                |                                                                  |
 |  SERVICES      |                      EDITOR PANEL                                |
 |  [+ Group]     |                                                                  |
 |                |  Shows either:                                                   |
-|  :: Roads &    |  - Group editor (when group selected)                            |
-|     Traffic    |  - Service editor (when service selected)                        |
-|     > Pothole  |  - Empty state (when nothing selected)                           |
-|     > Street.  |                                                                  |
-|     > Traffic  |                                                                  |
-|     [+ Add]    |                                                                  |
+|  v Roads &     |  - Group editor (when group selected)                            |
+|    Traffic     |  - Service editor (when service selected)                        |
+|    > Pothole   |  - Empty state (when nothing selected)                           |
+|    > Street.   |                                                                  |
+|    > Traffic   |                                                                  |
+|    [+ Add]     |                                                                  |
 |                |                                                                  |
-|  :: Community  |                                                                  |
-|     Input      |                                                                  |
-|     > Trans.*  |                                                                  |
-|     > Access.  |                                                                  |
-|     [+ Add]    |                                                                  |
+|  v Community   |                                                                  |
+|    Input       |                                                                  |
+|    > Trans.*   |                                                                  |
+|    > Access.   |                                                                  |
+|    [+ Add]     |                                                                  |
 |                |                                                                  |
-|  :: Sanitation |                                                                  |
-|     (3)        |                                                                  |
+|  > Sanitation  |                                                                  |
+|    (3)         |                                                                  |
 |                |                                                                  |
 +----------------+------------------------------------------------------------------+
 ```
@@ -67,27 +67,29 @@ The tree panel displays groups and their service types hierarchically.
 | SERVICES [+Group]|
 +------------------+
 |                  |
-| :: Roads &       |  <- Drag handle (::) for group reordering
-|    Traffic    3  |  <- Service count badge
-|    +-------------+
-|    | :: > Pothole|  <- Drag handle for service reordering
-|    | :: > Street.|
-|    | :: > Traffic|
-|    | [+ Add Svc] |
-|    +-------------+
+| v Roads &        |  <- Expand/collapse chevron
+|   Traffic     3  |  <- Service count badge (includes all services)
+|   +-------------+
+|   | :: > Pothole|  <- Drag handle (::) for service reordering
+|   | :: > Street.|
+|   | :: > Traffic|
+|   | [+ Add Svc] |
+|   +-------------+
 |                  |
-| :: Community     |
-|    Input      2  |
-|    +-------------+
-|    | :: > Trans. |  <- Selected (highlighted)
-|    | :: > Access.|
-|    | [+ Add Svc] |
-|    +-------------+
+| v Community      |
+|   Input       2  |
+|   +-------------+
+|   | :: > Trans. |  <- Selected (highlighted)
+|   | :: > Access.|
+|   | [+ Add Svc] |
+|   +-------------+
 |                  |
 | > Sanitation  3  |  <- Collapsed group
 |                  |
 +------------------+
 ```
+
+**Note**: Service count badge shows the total number of services in the group, including hidden/inactive services.
 
 ### Tree Item States
 
@@ -101,10 +103,9 @@ The tree panel displays groups and their service types hierarchically.
 
 ### Drag and Drop Behaviors
 
-1. **Group Reordering**: Drag groups by their handle (::) to reorder
-2. **Service Reordering**: Drag services within a group to reorder
-3. **Service Moving**: Drag services between groups to move them
-4. **Drop Indicator**: Purple line with dot shows insertion point
+1. **Service Reordering**: Drag services within a group to reorder
+2. **Service Moving**: Drag services between groups to move them
+3. **Drop Indicator**: Purple line with dot shows insertion point
 
 ```
 | :: > Pothole    |
@@ -129,14 +130,8 @@ When a group is selected, the editor shows group properties.
 |  |  | Roads & Traffic                                      |  |  |
 |  |  +------------------------------------------------------+  |  |
 |  |                                                            |  |
-|  |  DESCRIPTION (OPTIONAL)                                    |  |
-|  |  +------------------------------------------------------+  |  |
-|  |  | Services related to road maintenance and traffic     |  |  |
-|  |  | infrastructure.                                      |  |  |
-|  |  +------------------------------------------------------+  |  |
-|  |                                                            |  |
 |  +------------------------------------------------------------+  |
-|  |  [Delete]                           [Cancel]  [Save]       |  |
+|  |  [Delete]                                         [Save]   |  |
 |  +------------------------------------------------------------+  |
 |                                                                  |
 +------------------------------------------------------------------+
@@ -147,7 +142,6 @@ When a group is selected, the editor shows group properties.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | Group Name | Text input | Yes | Display name for the group |
-| Description | Textarea | No | Optional description of the group |
 
 ---
 
@@ -201,7 +195,7 @@ When a service is selected, the editor shows the full Google Forms-style interfa
 |  + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+  |
 |                                                                  |
 |  +------------------------------------------------------------+  |
-|  |  [Delete]                           [Cancel]  [Save]       |  |  <- Footer with actions
+|  |  [Delete Service]                                          |  |  <- Footer with delete action
 |  +------------------------------------------------------------+  |
 |                                                                  |
 +------------------------------------------------------------------+
@@ -227,6 +221,8 @@ The top card with a colored banner identifies the Service being edited.
 |  | Survey to understand community transportation needs  |  |  <- Description textarea
 |  +------------------------------------------------------+  |
 |                                                            |
+|  --------------------------------------------------------- |
+|                                      [Cancel]  [Save]      |  <- Save/Cancel for header
 +------------------------------------------------------------+
 
 Fields:
@@ -246,8 +242,28 @@ When an attribute is not being edited, it shows a compact preview.
 |                                                            |
 +------------------------------------------------------------+
 
++------------------------------------------------------------+
+|                                                            |
+|  What mode of transportation do you use? *                 |  <- Question text
+|  [ ] Walking  [ ] Biking  [ ] Bus...                       |  <- Checkboxes for MULTIVALUELIST
+|                                                            |
++------------------------------------------------------------+
+
++------------------------------------------------------------+
+|                                                            |
+|  Race                                                      |  <- Question text
+|  O White  O Black or African American  O American...       |  <- Circles for SINGLEVALUELIST
+|                                                            |
++------------------------------------------------------------+
+
 - Shows the question text (description)
-- Shows placeholder hint for the field type
+- Shows placeholder hint OR option preview based on field type:
+  - STRING: "Short answer text"
+  - TEXT: "Long answer text"
+  - NUMBER: "Number"
+  - DATETIME: "Date"
+  - MULTIVALUELIST: Shows `[ ]` checkboxes with option names
+  - SINGLEVALUELIST: Shows `O` circles with option names
 - Asterisk (*) indicates required
 - Click anywhere to expand and edit
 ```
@@ -347,15 +363,15 @@ Maps to `AttributeDataType` enum:
 
 ### Save/Cancel Behavior
 
-**Service-level (footer):**
-- **Save button**: Disabled until changes are made, saves all pending changes for the service
-- **Cancel button**: Prompts to confirm discarding changes
-- **Unsaved indicator**: Orange dot appears in header when changes exist
-
 **Attribute-level (each question card):**
 - **Save button**: Disabled until changes are made to that specific attribute, saves only that attribute
 - **Cancel button**: Reverts changes to that specific attribute
-- Allows granular saving of individual questions without saving entire service
+- Each question is saved independently - no service-level save button
+
+**Header card (service name/description):**
+- **Save button**: Saves changes to the service name and/or description
+- **Cancel button**: Reverts changes to the service name and description
+- Changes are independent of attribute changes
 
 ### Clicking a Collapsed Card
 
@@ -377,6 +393,37 @@ Maps to `AttributeDataType` enum:
 2. Drag to new position within list
 3. Updates option order on drop
 4. Marks changes as unsaved
+
+### Adding a Question
+
+1. Click the "+ Add question" card at the bottom of the questions list
+2. New question card is created and automatically expanded (active)
+3. Defaults to "Short answer" type
+4. Question input shows greyed placeholder text: "Question"
+5. Below the question input, greyed placeholder text shows: "Short answer text"
+6. Focus automatically moves to the question input field
+7. All other question cards collapse when new card is added
+
+```
+New Question Card (Expanded):
++------------------------------------------------------------+
+|                            ::                              |  <- Drag handle
+|  --------------------------------------------------------- |
+|                                                            |
+|  +-------------------------------------+     +-----------+ |
+|  | Question                            |     | Short   v | |  <- Placeholder text
+|  |        (greyed placeholder)         |     | answer    | |     (greyed)
+|  +-------------------------------------+     +-----------+ |
+|                                                            |
+|  Short answer text                                         |  <- Type hint
+|        (greyed placeholder)                                |     (greyed)
+|                                                            |
+|  --------------------------------------------------------- |
+|                                                            |
+|  [Cancel] [Save] | [Copy] [Delete] | Required O--  :       |
+|                                                            |
++------------------------------------------------------------+
+```
 
 ### Adding an Option (for list types)
 
@@ -420,18 +467,18 @@ Maps to `AttributeDataType` enum:
 | SERVICES       | +------------------------------------------------------------+  |
 | [+ Group]      | |############################################################ |  |
 |                | |                                                            |  |
-| :: Roads &     | |  Transportation Survey                                     |  |
-|    Traffic   3 | |  ---------------------------------------------------------  |  |
-|    > Pothole   | |  Survey to understand community transportation needs       |  |
-|    > Street.   | |                                                            |  |
-|    > Traffic   | +------------------------------------------------------------+  |
-|    [+ Add]     |                                                                  |
+| v Roads &      | |  Transportation Survey                                     |  |
+|   Traffic    3 | |  ---------------------------------------------------------  |  |
+|   > Pothole    | |  Survey to understand community transportation needs       |  |
+|   > Street.    | |                                              [Cancel][Save] |  |
+|   > Traffic    | +------------------------------------------------------------+  |
+|   [+ Add]      |                                                                  |
 |                | +------------------------------------------------------------+  |
-| :: Community   | |  Describe getting around without a car... *                |  |
-|    Input     2 | |  Long answer text                                          |  |
-|    > Trans. *  | +------------------------------------------------------------+  |
-|    > Access.   |                                                                  |
-|    [+ Add]     | +------------------------------------------------------------+  |
+| v Community    | |  Describe getting around without a car... *                |  |
+|   Input      2 | |  Long answer text                                          |  |
+|   > Trans. *   | +------------------------------------------------------------+  |
+|   > Access.    |                                                                  |
+|   [+ Add]      | +------------------------------------------------------------+  |
 |                | |                          ::                                |  |
 | > Sanitation 3 | |  +-------------------------------------------+ +--------+  |  |
 |                | |  | What mode of transportation do you use... | |Multiple|  |  |
@@ -449,7 +496,7 @@ Maps to `AttributeDataType` enum:
 |                | +------------------------------------------------------------+  |
 |                |                                                                  |
 |                | +------------------------------------------------------------+  |
-|                | |  Race (Dropdown type)                                      |  |
+|                | |  Race                                                      |  |
 |                | |  O White  O Black or African American  O American...       |  |
 |                | +------------------------------------------------------------+  |
 |                |                                                                  |
@@ -458,7 +505,7 @@ Maps to `AttributeDataType` enum:
 |                | + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+  |
 |                |                                                                  |
 |                | +------------------------------------------------------------+  |
-|                | |  [Delete]                           [Cancel]  [Save]       |  |
+|                | |  [Delete Service]                                          |  |
 |                | +------------------------------------------------------------+  |
 |                |                                                                  |
 +----------------+------------------------------------------------------------------+
@@ -474,8 +521,6 @@ Maps to `AttributeDataType` enum:
 Group Editor Fields:
 +------------------------------------------------------------+
 | Group Name          ->  ServiceGroup.name                   |
-| Description         ->  ServiceGroup.description (if added) |
-| (Display order)     ->  ServiceGroup.orderPosition          |
 +------------------------------------------------------------+
 ```
 
@@ -521,12 +566,11 @@ For SINGLEVALUELIST / MULTIVALUELIST types:
 
 ### Unsaved Changes Tracking
 
-The editor tracks unsaved changes at the selected item level:
+The editor tracks unsaved changes at the card level (header card or attribute card):
 
-1. Any edit to group/service fields marks state as "dirty"
-2. Dirty state shows orange indicator in header
-3. Save button becomes enabled when dirty
-4. Navigation triggers save/discard prompt when dirty
+1. Any edit to a card's fields marks that card as "dirty"
+2. Save button on the card becomes enabled when dirty
+3. Navigation triggers save/discard prompt when any card has unsaved changes
 
 ### Change Types That Trigger Dirty State
 
@@ -540,9 +584,10 @@ The editor tracks unsaved changes at the selected item level:
 
 ### Save Behavior
 
-- Explicit save via Save button
-- All pending changes saved atomically
-- Success shows confirmation
+- Each card (header or attribute) has its own Save button
+- Save is explicit - click the Save button to persist changes
+- Each card saves independently (no batch save for entire service)
+- Success shows confirmation toast
 - Tree view updates to reflect changes (e.g., name change)
 
 ---
@@ -580,7 +625,6 @@ Uses existing endpoints from `JurisdictionAdminController`:
 - `POST /api/jurisdiction-admin/groups` - Create group
 - `PATCH /api/jurisdiction-admin/groups/{groupId}` - Update group
 - `DELETE /api/jurisdiction-admin/groups/{groupId}` - Delete group
-- `PATCH /api/jurisdiction-admin/groups-order` - Reorder groups
 
 **Service Operations:**
 - `POST /api/jurisdiction-admin/services` - Create service
@@ -596,8 +640,9 @@ Uses existing endpoints from `JurisdictionAdminController`:
 
 ### Explicit Save Behavior
 
-- Changes are collected locally until Save is clicked
+- Each card (header or attribute) tracks its own changes
+- Changes are collected locally until the card's Save button is clicked
 - No automatic saving on blur/change
-- Save button sends all pending changes to API
-- Cancel discards all local changes
-- Unsaved changes prompt on navigation
+- Each card's Save button sends only that card's changes to API
+- Cancel on a card discards only that card's local changes
+- Unsaved changes prompt on navigation if any card has pending changes
