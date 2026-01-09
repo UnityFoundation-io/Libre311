@@ -27,6 +27,7 @@
 	on:mousedown
 	on:touchstart
 	on:keydown
+	on:click
 >
 	<!-- Six-dot drag handle icon (::) -->
 	<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

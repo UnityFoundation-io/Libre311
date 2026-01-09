@@ -169,6 +169,31 @@
 
 	let questionInput: HTMLInputElement;
 
+	// Track if a drag operation actually started (mouse moved while down)
+	let dragStarted = false;
+
+	function handleDragHandleMouseDown() {
+		dragStarted = false;
+		dispatch('dragstart');
+	}
+
+	function handleDragHandleMouseUp() {
+		dispatch('dragend');
+	}
+
+	function handleDragHandleClick() {
+		// Only collapse if we didn't actually drag
+		if (!dragStarted) {
+			dispatch('collapse');
+		}
+		dragStarted = false;
+	}
+
+	// Listen for actual drag events to know if dragging occurred
+	function handleActualDragStart() {
+		dragStarted = true;
+	}
+
 	onMount(() => {
 		questionInput?.focus();
 	});
@@ -177,13 +202,18 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <div class="border-t border-gray-200">
-	<!-- Drag Handle -->
-	<div class="flex justify-center border-b border-gray-100 py-2">
+	<!-- Drag Handle - click to collapse, drag to reorder -->
+	<div
+		class="flex justify-center border-b border-gray-100 py-2"
+		role="presentation"
+		on:dragstart={handleActualDragStart}
+	>
 		<DragHandle
 			{isDragging}
-			ariaLabel="Drag to reorder this question"
-			on:mousedown={() => dispatch('dragstart')}
-			on:mouseup={() => dispatch('dragend')}
+			ariaLabel="Click to collapse, drag to reorder"
+			on:mousedown={handleDragHandleMouseDown}
+			on:mouseup={handleDragHandleMouseUp}
+			on:click={handleDragHandleClick}
 		/>
 	</div>
 
