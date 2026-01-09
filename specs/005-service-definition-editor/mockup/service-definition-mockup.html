@@ -600,14 +600,33 @@
 		.attribute-drag-handle {
 			text-align: center;
 			padding: 8px;
-			color: #dadce0;
+			color: #9e9e9e;
 			cursor: grab;
 			font-size: 16px;
 			letter-spacing: 2px;
+			transition: color 0.15s;
+		}
+
+		.attribute-drag-handle:hover {
+			color: #5f6368;
 		}
 
 		.attribute-drag-handle:active {
 			cursor: grabbing;
+		}
+
+		/* Drag and Drop States */
+		.attribute-card.dragging {
+			opacity: 0.5;
+			transform: rotate(2deg);
+		}
+
+		.attribute-card.drag-over {
+			border-top: 3px solid #673ab7;
+		}
+
+		.attribute-card.drag-over-bottom {
+			border-bottom: 3px solid #673ab7;
 		}
 
 		.attribute-body {
@@ -1780,8 +1799,109 @@
 			}
 		}
 
+		// Drag and Drop for Question Cards
+		let draggedCard = null;
+
+		function initDragAndDrop() {
+			// Add drag events to all attribute cards
+			document.querySelectorAll('.attribute-card').forEach(card => {
+				setupCardDragEvents(card);
+			});
+		}
+
+		function setupCardDragEvents(card) {
+			const dragHandle = card.querySelector('.attribute-drag-handle');
+			if (!dragHandle) return;
+
+			// Make the card draggable when dragging from handle
+			dragHandle.addEventListener('mousedown', (e) => {
+				card.setAttribute('draggable', 'true');
+			});
+
+			card.addEventListener('dragstart', (e) => {
+				// Only allow drag if initiated from drag handle
+				if (!card.getAttribute('draggable')) {
+					e.preventDefault();
+					return;
+				}
+				draggedCard = card;
+				card.classList.add('dragging');
+				e.dataTransfer.effectAllowed = 'move';
+				e.dataTransfer.setData('text/plain', card.dataset.attrId);
+			});
+
+			card.addEventListener('dragend', (e) => {
+				card.classList.remove('dragging');
+				card.removeAttribute('draggable');
+				draggedCard = null;
+				// Remove all drag-over indicators
+				document.querySelectorAll('.attribute-card').forEach(c => {
+					c.classList.remove('drag-over', 'drag-over-bottom');
+				});
+			});
+
+			card.addEventListener('dragover', (e) => {
+				e.preventDefault();
+				if (!draggedCard || draggedCard === card) return;
+
+				const rect = card.getBoundingClientRect();
+				const midY = rect.top + rect.height / 2;
+
+				// Remove existing indicators
+				document.querySelectorAll('.attribute-card').forEach(c => {
+					c.classList.remove('drag-over', 'drag-over-bottom');
+				});
+
+				// Add indicator based on cursor position
+				if (e.clientY < midY) {
+					card.classList.add('drag-over');
+				} else {
+					card.classList.add('drag-over-bottom');
+				}
+			});
+
+			card.addEventListener('dragleave', (e) => {
+				card.classList.remove('drag-over', 'drag-over-bottom');
+			});
+
+			card.addEventListener('drop', (e) => {
+				e.preventDefault();
+				if (!draggedCard || draggedCard === card) return;
+
+				const rect = card.getBoundingClientRect();
+				const midY = rect.top + rect.height / 2;
+				const insertBefore = e.clientY < midY;
+
+				// Remove drag indicators
+				card.classList.remove('drag-over', 'drag-over-bottom');
+
+				// Perform the reorder
+				if (insertBefore) {
+					card.parentNode.insertBefore(draggedCard, card);
+				} else {
+					card.parentNode.insertBefore(draggedCard, card.nextSibling);
+				}
+
+				// Mark as dirty since order changed
+				isDirty = true;
+				updateUnsavedIndicators();
+			});
+		}
+
+		// Override addQuestion to setup drag events on new cards
+		const originalAddQuestion = addQuestion;
+		addQuestion = function() {
+			originalAddQuestion();
+			// Setup drag events for the newly added card
+			const newCard = document.querySelector('.attribute-card.active');
+			if (newCard) {
+				setupCardDragEvents(newCard);
+			}
+		};
+
 		// Initialize
 		updateUnsavedIndicators();
+		initDragAndDrop();
 	</script>
 </body>
 </html>
