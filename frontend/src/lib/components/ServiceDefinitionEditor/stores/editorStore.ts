@@ -473,3 +473,36 @@ export function isCardDirty(cardId: CardId) {
 export const currentSelection = derived(splitPaneStore, ($state): EditorSelection => {
 	return $state.selection;
 });
+
+/**
+ * Helper function to attempt navigation with unsaved changes protection
+ * If there are unsaved changes, shows the modal. Otherwise, executes immediately.
+ * @param navigate The navigation callback to execute
+ * @returns true if navigation happened immediately, false if modal was shown
+ */
+export function attemptNavigation(navigate: () => void): boolean {
+	const state = get(splitPaneStore);
+	const hasUnsaved = Array.from(state.cardStates.values()).some((card) => card.isDirty);
+
+	if (hasUnsaved) {
+		splitPaneStore.showUnsavedChangesModal(navigate);
+		return false;
+	} else {
+		navigate();
+		return true;
+	}
+}
+
+/**
+ * Helper function to attempt selecting a group with unsaved changes protection
+ */
+export function attemptSelectGroup(groupId: number): boolean {
+	return attemptNavigation(() => splitPaneStore.selectGroup(groupId));
+}
+
+/**
+ * Helper function to attempt selecting a service with unsaved changes protection
+ */
+export function attemptSelectService(groupId: number, serviceCode: number): boolean {
+	return attemptNavigation(() => splitPaneStore.selectService(groupId, serviceCode));
+}

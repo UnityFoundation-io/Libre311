@@ -8,6 +8,7 @@
 	} from '$lib/services/Libre311/Libre311';
 	import AttributeCardCollapsed from './AttributeCardCollapsed.svelte';
 	import AttributeCardExpanded from './AttributeCardExpanded.svelte';
+	import ConfirmDeleteModal from '../Shared/ConfirmDeleteModal.svelte';
 
 	/**
 	 * The attribute to display/edit
@@ -34,6 +35,11 @@
 	 */
 	export let isDragging = false;
 
+	/**
+	 * Whether a delete operation is in progress
+	 */
+	export let isDeleting = false;
+
 	const dispatch = createEventDispatcher<{
 		expand: void;
 		collapse: void;
@@ -45,12 +51,16 @@
 			values?: AttributeValue[];
 		};
 		cancel: void;
-		copy: void;
+		copy: { suggestedDescription: string };
 		delete: void;
+		deleteConfirm: void;
 		dirty: { isDirty: boolean };
 		dragstart: void;
 		dragend: void;
 	}>();
+
+	// Delete confirmation modal state
+	let showDeleteModal = false;
 
 	function handleExpand() {
 		if (!isExpanded) {
@@ -67,6 +77,38 @@
 		dispatch('dirty', event.detail);
 	}
 
+	/**
+	 * Handle copy request - adds "(copy)" suffix to description
+	 */
+	function handleCopy() {
+		const copySuffix = ' (copy)';
+		const suggestedDescription = attribute.description.endsWith(copySuffix)
+			? attribute.description
+			: attribute.description + copySuffix;
+		dispatch('copy', { suggestedDescription });
+	}
+
+	/**
+	 * Handle delete request - shows confirmation modal
+	 */
+	function handleDeleteRequest() {
+		showDeleteModal = true;
+	}
+
+	/**
+	 * Handle delete confirmation - dispatches delete event
+	 */
+	function handleDeleteConfirm() {
+		dispatch('deleteConfirm');
+	}
+
+	/**
+	 * Handle delete cancel - closes modal
+	 */
+	function handleDeleteCancel() {
+		showDeleteModal = false;
+	}
+
 	// Ref to expanded component for reset
 	let expandedComponent: AttributeCardExpanded;
 
@@ -77,6 +119,13 @@
 		if (expandedComponent) {
 			expandedComponent.resetToSaved(savedAttr);
 		}
+	}
+
+	/**
+	 * Close delete modal (called after delete completes)
+	 */
+	export function closeDeleteModal() {
+		showDeleteModal = false;
 	}
 
 	// Reduce motion preference
@@ -102,8 +151,8 @@
 				{isDragging}
 				on:save
 				on:cancel
-				on:copy
-				on:delete
+				on:copy={handleCopy}
+				on:delete={handleDeleteRequest}
 				on:dirty={handleDirtyChange}
 				on:collapse={handleCollapse}
 				on:dragstart
@@ -115,3 +164,13 @@
 		<AttributeCardCollapsed {attribute} {isDirty} on:click={handleExpand} />
 	{/if}
 </div>
+
+<!-- Delete Confirmation Modal -->
+<ConfirmDeleteModal
+	open={showDeleteModal}
+	title="Delete Question"
+	message="Are you sure you want to delete this question? This action cannot be undone."
+	{isDeleting}
+	on:confirm={handleDeleteConfirm}
+	on:cancel={handleDeleteCancel}
+/>
