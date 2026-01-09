@@ -1396,6 +1396,25 @@
 		let isGroupDirty = false;
 		let pendingAction = null;
 
+		// Service data (would come from API in real implementation)
+		const servicesData = {
+			1: { name: 'Pothole Repair', description: 'Report potholes and road damage in your area' },
+			2: { name: 'Broken Streetlight', description: 'Report streetlights that are broken, flickering, or not working' },
+			3: { name: 'Traffic Signal Issue', description: 'Report problems with traffic lights or pedestrian signals' },
+			4: { name: 'Transportation Survey', description: 'Survey to understand community transportation needs and accessibility' },
+			5: { name: 'Accessibility Feedback', description: 'Share feedback about accessibility in public spaces' },
+			6: { name: 'Missed Garbage Collection', description: 'Report missed garbage or recycling pickup' },
+			7: { name: 'Illegal Dumping', description: 'Report illegal dumping of waste or debris' },
+			8: { name: 'Recycling Issue', description: 'Report problems with recycling services or bins' }
+		};
+
+		// Group data (would come from API in real implementation)
+		const groupsData = {
+			1: { name: 'Roads & Traffic' },
+			2: { name: 'Community Input' },
+			3: { name: 'Sanitation' }
+		};
+
 		// Toggle group expand/collapse
 		function toggleGroup(event, groupId) {
 			event.stopPropagation();
@@ -1417,6 +1436,15 @@
 			clearSelections();
 			const group = document.querySelector(`[data-group-id="${groupId}"]`);
 			group.querySelector('.tree-group-header').classList.add('selected');
+
+			// Update the Group Editor with the selected group's data
+			const groupData = groupsData[groupId];
+			if (groupData) {
+				document.getElementById('groupNameInput').value = groupData.name;
+			}
+
+			// Reset group dirty state
+			isGroupDirty = false;
 
 			document.getElementById('groupEditor').classList.add('active');
 			document.getElementById('serviceEditor').classList.remove('active');
@@ -1447,6 +1475,18 @@
 			if (!group.classList.contains('expanded')) {
 				group.classList.add('expanded');
 			}
+
+			// Update the Editor Panel with the selected service's data
+			const serviceData = servicesData[serviceId];
+			if (serviceData) {
+				document.getElementById('serviceNameInput').value = serviceData.name;
+				document.getElementById('serviceDescInput').value = serviceData.description;
+			}
+
+			// Reset header save/cancel buttons
+			document.getElementById('headerSaveBtn').disabled = true;
+			document.getElementById('headerCancelBtn').style.visibility = 'hidden';
+			isHeaderDirty = false;
 
 			document.getElementById('serviceEditor').classList.add('active');
 			document.getElementById('groupEditor').classList.remove('active');

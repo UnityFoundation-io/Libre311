@@ -572,7 +572,7 @@ Header Card Fields:
 Attribute Card Fields:
 +------------------------------------------------------------+
 | Question text       ->  ServiceDefinitionAttribute.description        |
-| Answer type dropdown->  ServiceDefinitionAttribute.datatype           |
+| Attribute Type Selector ->  ServiceDefinitionAttribute.datatype       |
 | Required toggle     ->  ServiceDefinitionAttribute.required           |
 | Card position       ->  ServiceDefinitionAttribute.attributeOrder     |
 | Help text (in : menu)->  ServiceDefinitionAttribute.datatypeDescription|
