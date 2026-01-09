@@ -79,22 +79,24 @@
 </script>
 
 <div class="space-y-4 py-2">
-	{#each values as option, index (option.key)}
-		<div class="flex items-center gap-3">
-			<!-- Type indicator: checkbox for multi-select, circle for single-select -->
-			{#if isMultiSelect}
-				<!-- Checkbox indicator (square with rounded corners) -->
-				<span
-					class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-gray-300"
-					aria-hidden="true"
-				></span>
-			{:else}
-				<!-- Radio indicator (circle) -->
-				<span
-					class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-300"
-					aria-hidden="true"
-				></span>
-			{/if}
+	<!-- Key block forces re-render of indicators when type changes -->
+	{#key isMultiSelect}
+		{#each values as option, index (option.key)}
+			<div class="flex items-center gap-3">
+				<!-- Type indicator: checkbox for multi-select, circle for single-select -->
+				{#if isMultiSelect}
+					<!-- Checkbox indicator (square with rounded corners) -->
+					<span
+						class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-gray-300"
+						aria-hidden="true"
+					></span>
+				{:else}
+					<!-- Radio indicator (circle) -->
+					<span
+						class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-300"
+						aria-hidden="true"
+					></span>
+				{/if}
 
 			<!-- Option input (borderless) -->
 			<input
@@ -131,30 +133,31 @@
 				</svg>
 			</button>
 		</div>
-	{/each}
+		{/each}
 
-	<!-- Add option button with dashed indicator -->
-	<button
-		type="button"
-		class="flex items-center gap-3 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-		on:click={handleAddOption}
-		{disabled}
-	>
-		{#if isMultiSelect}
-			<!-- Dashed checkbox indicator -->
-			<span
-				class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-dashed border-gray-300"
-				aria-hidden="true"
-			></span>
-		{:else}
-			<!-- Dashed circle indicator -->
-			<span
-				class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-gray-300"
-				aria-hidden="true"
-			></span>
-		{/if}
-		<span class="text-base">Add option</span>
-	</button>
+		<!-- Add option button with dashed indicator -->
+		<button
+			type="button"
+			class="flex items-center gap-3 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			on:click={handleAddOption}
+			{disabled}
+		>
+			{#if isMultiSelect}
+				<!-- Dashed checkbox indicator -->
+				<span
+					class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-dashed border-gray-300"
+					aria-hidden="true"
+				></span>
+			{:else}
+				<!-- Dashed circle indicator -->
+				<span
+					class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-gray-300"
+					aria-hidden="true"
+				></span>
+			{/if}
+			<span class="text-base">Add option</span>
+		</button>
+	{/key}
 
 	{#if values.length === 0}
 		<p class="text-sm text-red-600">At least one option is required</p>
