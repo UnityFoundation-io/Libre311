@@ -367,7 +367,8 @@ export const ServiceRequestSchema = z
 		long: z.string(),
 		media_url: urlSchema.optional(),
 		selected_values: z.array(SelectedValuesSchema).optional(),
-		priority: ServiceRequestPrioritySchema.optional()
+		priority: ServiceRequestPrioritySchema.optional(),
+        removal_suggestions_count: z.number().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -578,8 +579,9 @@ export interface Libre311Service extends Open311Service {
 	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean>;
 	createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void>;
 	getRemovalSuggestions(
-		params: HasPagination & HasJurisdictionId
+		params: HasPagination & HasJurisdictionId & { service_request_id?: number }
 	): Promise<GetRemovalSuggestionsResponse>;
+	deleteRemovalSuggestion(params: { id: number } & HasJurisdictionId): Promise<void>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -633,7 +635,9 @@ const ROUTES = {
 	postRemovalSuggestion: (params: HasServiceRequestId & HasJurisdictionId) =>
 		`/requests/${params.service_request_id}/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
 	getRemovalSuggestions: (params: HasJurisdictionId) =>
-		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`
+		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
+		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -719,14 +723,15 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async getRemovalSuggestions(
-		params: HasPagination & HasJurisdictionId
+		params: HasPagination & HasJurisdictionId & { service_request_id?: number }
 	): Promise<GetRemovalSuggestionsResponse> {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getRemovalSuggestions({ jurisdiction_id: this.jurisdictionId }),
 			{
 				params: {
 					page: params.pagination.pageNumber,
-					size: params.pagination.size
+					size: params.pagination.size,
+					service_request_id: params.service_request_id
 				}
 			}
 		);
@@ -755,6 +760,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 			}
 		};
 		return GetRemovalSuggestionsResponseSchema.parse(response);
+	}
+
+	async deleteRemovalSuggestion(params: { id: number } & HasJurisdictionId): Promise<void> {
+		await this.axiosInstance.delete(
+			ROUTES.deleteRemovalSuggestion({ id: params.id, jurisdiction_id: this.jurisdictionId })
+		);
 	}
 
 	async deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean> {

@@ -25,6 +25,7 @@ export type ServiceRequestsContext = {
 	serviceRequestsResponse: Readable<AsyncResult<ServiceRequestsResponse>>;
 	applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL): void;
 	refreshSelectedServiceRequest(updatedServiceRequest: ServiceRequest): void;
+    refresh(): Promise<void>;
 };
 
 export function createServiceRequestsContext(
@@ -116,6 +117,19 @@ export function createServiceRequestsContext(
 		goto(`${url.pathname}?${queryParams.toString()}`);
 	}
 
+    async function refresh() {
+		const currentPage = get(page);
+		const updatedParams = FilteredServiceRequestsParamsMapper.toRequestParams(
+			currentPage.url.searchParams
+		);
+		try {
+			const res = await libreService.getServiceRequests(updatedParams);
+			serviceRequestsResponse.set(asAsyncSuccess(res));
+		} catch (error) {
+			serviceRequestsResponse.set(asAsyncFailure(error));
+		}
+	}
+
 	function refreshSelectedServiceRequest(updatedServiceRequest: ServiceRequest) {
 		selectedServiceRequest.set(updatedServiceRequest);
 
@@ -139,7 +153,8 @@ export function createServiceRequestsContext(
 		selectedServiceRequest,
 		serviceRequestsResponse,
 		applyServiceRequestParams,
-		refreshSelectedServiceRequest
+		refreshSelectedServiceRequest,
+        refresh
 	};
 
 	setContext(key, ctx);
