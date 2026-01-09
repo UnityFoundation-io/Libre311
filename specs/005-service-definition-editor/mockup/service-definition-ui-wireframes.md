@@ -174,10 +174,10 @@ When a service is selected, the Editor Panel shows the full Google Forms-style i
 |  |  | What mode of transportation do you use... |  |Multiple| |  |
 |  |  +-------------------------------------------+  | choice | |  |
 |  |                                                 +--------+ |  |
-|  |  :: [ ] Walking                                        x   |  |  <- Checkboxes for
-|  |  :: [ ] Biking                                         x   |  |     multiple choice
-|  |  :: [ ] Bus / public transit                           x   |  |
-|  |  :: [ ] Personal vehicle                               x   |  |
+|  |  [ ] Walking                                           x   |  |  <- Checkboxes for
+|  |  [ ] Biking                                            x   |  |     multiple choice
+|  |  [ ] Bus / public transit                              x   |  |
+|  |  [ ] Personal vehicle                                  x   |  |
 |  |                                                            |  |
 |  |  [ ] Add option                                            |  |
 |  |  --------------------------------------------------------- |  |
@@ -282,12 +282,12 @@ When clicked, the card expands to show all editing controls.
 |  | use on a weekly basis?              |     | choice  v | |  <- Type dropdown
 |  +-------------------------------------+     +-----------+ |
 |                                                            |
-|  :: [ ] Walking                                        x   |  <- Checkbox for multi-select
-|  :: [ ] Mobility device (e.g. wheelchair, walker)      x   |     with drag handle and
-|  :: [ ] Biking                                         x   |     delete button
-|  :: [ ] Motorcycle or moped                            x   |
-|  :: [ ] Personal vehicle (e.g. car, truck)             x   |
-|  :: [ ] Bus / public transit                           x   |
+|  [ ] Walking                                           x   |  <- Checkbox for multi-select
+|  [ ] Mobility device (e.g. wheelchair, walker)         x   |     with delete button
+|  [ ] Biking                                            x   |
+|  [ ] Motorcycle or moped                               x   |
+|  [ ] Personal vehicle (e.g. car, truck)                x   |
+|  [ ] Bus / public transit                              x   |
 |                                                            |
 |  [ ] Add option                                            |  <- Add new option
 |                                                            |
@@ -309,7 +309,6 @@ When clicked, the card expands to show all editing controls.
 | Attribute Type Selector | Select field type | `datatype` |
 | Options List | Available choices | `AttributeValue.valueName` |
 | [ ] or O indicator | Checkbox for multi-select, circle for single-select | - |
-| :: on options | Drag handle for reordering options | Option order |
 | x buttons | Delete individual options | - |
 | Add option | Create new choice | - |
 | [Cancel] | Revert changes to this attribute | - |
@@ -417,13 +416,6 @@ During Drag:
 - Changes are marked as unsaved (unsaved indicator appears)
 - Updates `attributeOrder` field when saved
 
-### Drag to Reorder Options
-
-1. Grab the :: handle next to option
-2. Drag to new position within list
-3. Updates option order on drop
-4. Marks changes as unsaved
-
 ### Adding a Question
 
 1. Click the "+ Add question" card at the bottom of the questions list
@@ -514,11 +506,11 @@ New Question Card (Expanded):
 |                | |  | What mode of transportation do you use... | |Multiple|  |  |
 |                | |  +-------------------------------------------+ | choice |  |  |
 |                | |                                                +--------+  |  |
-|                | |  :: [ ] Walking                                        x   |  |
-|                | |  :: [ ] Mobility device                                x   |  |
-|                | |  :: [ ] Biking                                         x   |  |
-|                | |  :: [ ] Personal vehicle                               x   |  |
-|                | |  :: [ ] Bus / public transit                           x   |  |
+|                | |  [ ] Walking                                           x   |  |
+|                | |  [ ] Mobility device                                   x   |  |
+|                | |  [ ] Biking                                            x   |  |
+|                | |  [ ] Personal vehicle                                  x   |  |
+|                | |  [ ] Bus / public transit                              x   |  |
 |                | |                                                            |  |
 |                | |  [ ] Add option                                            |  |
 |                | |  ---------------------------------------------------------  |  |
@@ -590,6 +582,8 @@ For SINGLEVALUELIST / MULTIVALUELIST types:
 +------------------------------------------------------------+
 ```
 
+**Note:** The Open311 specification does not define an ordering field for attribute values (options). Options are displayed in the order returned by the API, and reordering options via drag-and-drop is not supported.
+
 ---
 
 ## State Management
@@ -608,7 +602,6 @@ The editor tracks unsaved changes at the card level (header card or attribute ca
 - Adding/removing/editing attributes
 - Reordering attributes (drag and drop)
 - Adding/removing/editing options
-- Reordering options (drag and drop)
 - Toggling required flag
 - Changing attribute type
 
@@ -642,7 +635,7 @@ The editor tracks unsaved changes at the card level (header card or attribute ca
 7. **HeaderCard.svelte** - Service name/description card
 8. **AttributeCard.svelte** - Individual field editor
 9. **AttributeTypeSelector.svelte** - Attribute Type Selector dropdown
-10. **OptionsList.svelte** - Options List with drag/drop reordering
+10. **OptionsList.svelte** - Options List for managing attribute values
 11. **AttributeFooter.svelte** - Duplicate/delete/required controls
 12. **UnsavedChangesModal.svelte** - Confirmation dialog
 
