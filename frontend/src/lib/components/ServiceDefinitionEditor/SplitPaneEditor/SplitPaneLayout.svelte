@@ -82,6 +82,7 @@
 			toGroupId: number;
 			newIndex: number;
 		};
+		deleteService: { groupId: number; serviceCode: number; serviceName: string };
 	}>();
 
 	function handleCreateGroup() {
@@ -101,6 +102,12 @@
 		}>
 	) {
 		dispatch('reorderService', event.detail);
+	}
+
+	function handleDeleteService(
+		event: CustomEvent<{ groupId: number; serviceCode: number; serviceName: string }>
+	) {
+		dispatch('deleteService', event.detail);
 	}
 
 	// Resizer state
@@ -170,6 +177,7 @@
 			on:createGroup={handleCreateGroup}
 			on:addService={handleAddService}
 			on:reorderService={handleReorderService}
+			on:deleteService={handleDeleteService}
 		/>
 	</div>
 

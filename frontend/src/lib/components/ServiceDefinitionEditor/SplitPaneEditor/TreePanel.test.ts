@@ -222,8 +222,9 @@ describe('TreePanel', () => {
 			}
 		});
 
-		// The selected service should have the highlight class
-		const serviceItems = screen.getAllByRole('treeitem', { level: 2 });
+		// Filter treeitems by aria-level attribute since testing-library doesn't support level option
+		const allTreeitems = screen.getAllByRole('treeitem');
+		const serviceItems = allTreeitems.filter((item) => item.getAttribute('aria-level') === '2');
 		const selectedItem = serviceItems.find((item) => item.getAttribute('aria-selected') === 'true');
 		expect(selectedItem).toBeInTheDocument();
 	});

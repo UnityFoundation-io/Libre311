@@ -32,6 +32,7 @@
 		select: void;
 		dragstart: void;
 		dragend: void;
+		delete: void;
 	}>();
 
 	function handleClick() {
@@ -51,6 +52,11 @@
 
 	function handleDragEnd() {
 		dispatch('dragend');
+	}
+
+	function handleDelete(event: MouseEvent) {
+		event.stopPropagation(); // Prevent triggering select
+		dispatch('delete');
 	}
 </script>
 
@@ -97,4 +103,22 @@
 
 	<!-- Service Name -->
 	<span class="flex-1 truncate text-sm text-gray-700">{service.service_name}</span>
+
+	<!-- Delete Button (visible on hover) -->
+	<button
+		type="button"
+		class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 group-hover:opacity-100"
+		on:click={handleDelete}
+		aria-label="Delete {service.service_name}"
+		title="Delete service"
+	>
+		<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+			/>
+		</svg>
+	</button>
 </div>

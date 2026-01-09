@@ -44,6 +44,7 @@
 		};
 		createGroup: void;
 		addService: { groupId: number };
+		deleteService: { groupId: number; serviceCode: number; serviceName: string };
 	}>();
 
 	function handleCreateGroup() {
@@ -327,6 +328,12 @@
 						on:serviceDrop={(e) => handleServiceDrop(group.id, e.detail.serviceIndex)}
 						on:serviceDragEnd={handleServiceDragEnd}
 						on:addService={() => dispatch('addService', { groupId: group.id })}
+						on:deleteService={(e) =>
+							dispatch('deleteService', {
+								groupId: group.id,
+								serviceCode: e.detail.serviceCode,
+								serviceName: e.detail.serviceName
+							})}
 					/>
 				{/each}
 			</div>

@@ -70,17 +70,17 @@ The Tree Panel displays groups and their services hierarchically.
 | v Roads &        |  <- Expand/collapse chevron
 |   Traffic     3  |  <- Service count badge (includes all services)
 |   +-------------+
-|   | :: > Pothole|  <- Drag handle (::) for service reordering
-|   | :: > Street.|
-|   | :: > Traffic|
+|   | :: Pothole x|  <- Drag handle (::), delete icon (x) on hover
+|   | :: Street. x|
+|   | :: Traffic x|
 |   | [+ Add Svc] |
 |   +-------------+
 |                  |
 | v Community      |
 |   Input       2  |
 |   +-------------+
-|   | :: > Trans. |  <- Selected (highlighted)
-|   | :: > Access.|
+|   | :: Trans.  x|  <- Selected (highlighted)
+|   | :: Access. x|
 |   | [+ Add Svc] |
 |   +-------------+
 |                  |
@@ -96,10 +96,17 @@ The Tree Panel displays groups and their services hierarchically.
 | State | Visual Treatment |
 |-------|------------------|
 | Default | Normal text, light background |
-| Hover | Slightly darker background, drag handle visible |
+| Hover | Slightly darker background, drag handle and delete icon visible |
 | Selected | Purple left border, blue-tinted background |
 | Dragging | Semi-transparent (50% opacity) |
 | Drop target | Purple insertion line with dot indicator |
+
+### Service Actions
+
+Each service in the tree has the following actions available on hover:
+
+1. **Drag Handle (::)**: Grab to reorder or move between groups
+2. **Delete Icon (trash)**: Click to delete the service (with confirmation dialog)
 
 ### Drag and Drop Behaviors
 
@@ -194,12 +201,10 @@ When a service is selected, the Editor Panel shows the full Google Forms-style i
 |  |                    Add question                            |  |
 |  + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+  |
 |                                                                  |
-|  +------------------------------------------------------------+  |
-|  |  [Delete Service]                                          |  |  <- Footer with delete action
-|  +------------------------------------------------------------+  |
-|                                                                  |
 +------------------------------------------------------------------+
 ```
+
+**Note**: Service deletion is performed from the Tree Panel using the delete icon (trash) that appears on hover next to each service.
 
 ---
 
@@ -526,12 +531,10 @@ New Question Card (Expanded):
 |                | |                    (+) Add question                        |  |
 |                | + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+  |
 |                |                                                                  |
-|                | +------------------------------------------------------------+  |
-|                | |  [Delete Service]                                          |  |
-|                | +------------------------------------------------------------+  |
-|                |                                                                  |
 +----------------+------------------------------------------------------------------+
 ```
+
+**Note**: To delete a service, hover over it in the Tree Panel and click the trash icon.
 
 ---
 

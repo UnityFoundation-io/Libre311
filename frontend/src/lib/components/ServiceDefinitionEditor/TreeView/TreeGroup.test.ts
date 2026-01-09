@@ -163,7 +163,9 @@ describe('TreeGroup', () => {
 			}
 		});
 
-		const serviceItems = screen.getAllByRole('treeitem', { level: 2 });
+		// Filter treeitems by aria-level attribute since testing-library doesn't support level option
+		const allTreeitems = screen.getAllByRole('treeitem');
+		const serviceItems = allTreeitems.filter((item) => item.getAttribute('aria-level') === '2');
 		const selectedItem = serviceItems.find((item) => item.getAttribute('aria-selected') === 'true');
 		expect(selectedItem).toBeInTheDocument();
 	});
@@ -253,7 +255,8 @@ describe('TreeGroup', () => {
 			toggleCalled = true;
 		});
 
-		const groupHeader = screen.getByRole('button', { name: /infrastructure/i });
+		// Use more specific selector - the group header has the service count in its aria-label
+		const groupHeader = screen.getByRole('button', { name: /infrastructure, 2 services/i });
 		await fireEvent.keyDown(groupHeader, { key: 'ArrowLeft' });
 
 		expect(toggleCalled).toBe(true);
@@ -268,8 +271,9 @@ describe('TreeGroup', () => {
 			}
 		});
 
-		// Check that the expanded state shows different icon
-		const treeitem = screen.getByRole('treeitem');
-		expect(treeitem).toHaveAttribute('aria-expanded', 'true');
+		// Check that the expanded state shows different icon - get the group treeitem (level 1)
+		const allTreeitems = screen.getAllByRole('treeitem');
+		const groupTreeitem = allTreeitems.find((item) => item.getAttribute('aria-level') === '1');
+		expect(groupTreeitem).toHaveAttribute('aria-expanded', 'true');
 	});
 });

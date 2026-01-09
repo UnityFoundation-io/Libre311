@@ -120,7 +120,7 @@ describe('AttributeCardList', () => {
 		expect(listItems).toHaveLength(3);
 	});
 
-	it('dispatches delete event with correct attribute', async () => {
+	it('dispatches deleteConfirm event with correct attribute', async () => {
 		const { component } = render(AttributeCardList, {
 			props: {
 				attributes: mockAttributes,
@@ -129,13 +129,17 @@ describe('AttributeCardList', () => {
 		});
 
 		let deletedAttribute: ServiceDefinitionAttribute | null = null;
-		component.$on('delete', (e) => {
+		component.$on('deleteConfirm', (e) => {
 			deletedAttribute = e.detail.attribute;
 		});
 
-		// Find and click delete button
+		// Find and click delete button to open confirmation modal
 		const deleteButton = screen.getByRole('button', { name: /delete attribute/i });
 		await fireEvent.click(deleteButton);
+
+		// Click confirm in the modal
+		const confirmButton = screen.getByRole('button', { name: /^delete$/i });
+		await fireEvent.click(confirmButton);
 
 		expect(deletedAttribute).toEqual(mockAttributes[0]);
 	});
@@ -173,8 +177,8 @@ describe('AttributeCardList', () => {
 			dirtyEvent = { code: e.detail.code, isDirty: e.detail.isDirty };
 		});
 
-		// Type in the question input to trigger dirty
-		const questionInput = screen.getByLabelText(/question/i);
+		// Type in the question input to trigger dirty - use exact aria-label match
+		const questionInput = screen.getByRole('textbox', { name: /question text/i });
 		await fireEvent.input(questionInput, { target: { value: 'Modified question' } });
 
 		expect(dirtyEvent).toEqual({ code: 1, isDirty: true });

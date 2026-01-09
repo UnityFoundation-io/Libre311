@@ -11,6 +11,7 @@
 	import AttributeCardList from '$lib/components/ServiceDefinitionEditor/ServiceEditor/AttributeCardList.svelte';
 	import GroupEditor from '$lib/components/ServiceDefinitionEditor/GroupEditor/GroupEditor.svelte';
 	import UnsavedChangesModal from '$lib/components/ServiceDefinitionEditor/Shared/UnsavedChangesModal.svelte';
+	import ConfirmDeleteModal from '$lib/components/ServiceDefinitionEditor/Shared/ConfirmDeleteModal.svelte';
 	import {
 		splitPaneStore,
 		hasAnyUnsavedChanges,
@@ -46,6 +47,11 @@
 	let isGroupDirty = false;
 	let isGroupSaving = false;
 	let isGroupDeleting = false;
+
+	// Service deletion state
+	let showDeleteServiceModal = false;
+	let serviceToDelete: { groupId: number; serviceCode: number; serviceName: string } | null = null;
+	let isServiceDeleting = false;
 
 	// Expanded attribute index
 	let expandedAttributeIndex: number | null = null;
@@ -470,6 +476,58 @@
 		}
 	}
 
+	// ========== Service Deletion Handlers ==========
+
+	function handleDeleteServiceRequest(
+		event: CustomEvent<{ groupId: number; serviceCode: number; serviceName: string }>
+	) {
+		serviceToDelete = event.detail;
+		showDeleteServiceModal = true;
+	}
+
+	async function handleDeleteServiceConfirm() {
+		if (!serviceToDelete) return;
+
+		isServiceDeleting = true;
+		try {
+			await libre311.deleteService({ service_code: serviceToDelete.serviceCode });
+
+			// Remove from local state
+			groups = groups.map((g) =>
+				g.id === serviceToDelete!.groupId
+					? {
+							...g,
+							services: g.services.filter(
+								(s) => s.service_code !== serviceToDelete!.serviceCode
+							),
+							serviceCount: g.serviceCount - 1
+						}
+					: g
+			);
+
+			// Clear selection if the deleted service was selected
+			if (
+				selection.type === 'service' &&
+				selection.serviceCode === serviceToDelete.serviceCode
+			) {
+				selection = { type: null, groupId: null, serviceCode: null };
+				selectedService = null;
+				serviceAttributes = [];
+			}
+		} catch (err) {
+			console.error('Failed to delete service:', err);
+		} finally {
+			isServiceDeleting = false;
+			showDeleteServiceModal = false;
+			serviceToDelete = null;
+		}
+	}
+
+	function handleDeleteServiceCancel() {
+		showDeleteServiceModal = false;
+		serviceToDelete = null;
+	}
+
 	// ========== Attribute Creation Handler ==========
 
 	async function handleAddAttribute() {
@@ -563,6 +621,7 @@
 			on:reorderService={handleServiceReorder}
 			on:createGroup={handleCreateGroup}
 			on:addService={handleAddService}
+			on:deleteService={handleDeleteServiceRequest}
 		>
 			<!-- Group Editor Slot -->
 			<svelte:fragment slot="group-editor">
@@ -644,4 +703,14 @@
 	on:save={handleUnsavedSave}
 	on:discard={handleUnsavedDiscard}
 	on:cancel={handleUnsavedCancel}
+/>
+
+<!-- Delete Service Confirmation Modal -->
+<ConfirmDeleteModal
+	open={showDeleteServiceModal}
+	title="Delete Service"
+	message="Are you sure you want to delete the service '{serviceToDelete?.serviceName}'? This action cannot be undone."
+	isDeleting={isServiceDeleting}
+	on:confirm={handleDeleteServiceConfirm}
+	on:cancel={handleDeleteServiceCancel}
 />
