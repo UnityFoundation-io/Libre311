@@ -18,6 +18,7 @@ import app.model.jurisdiction.Jurisdiction_;
 import app.model.service.Service_;
 import io.micronaut.data.annotation.Query;
 import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.annotation.Where;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.data.model.Sort;
@@ -39,9 +40,11 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     List<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Sort sort);
     Optional<ServiceRequest> findByIdAndJurisdictionId(Long serviceRequestId, String jurisdictionId);
 
-    @Query("update ServiceRequest sr set sr.deleted = true where sr.id = :id and sr.jurisdiction.id = :jurisdictionId")
+    @Query("update ServiceRequest sr set sr.deleted = true where sr.id = :id and sr.jurisdiction.id = :jurisdictionId and sr.deleted = false")
     Integer delete(Long id, String jurisdictionId);
 
+    @Where("@.deleted = :deleted")
+    Optional<ServiceRequest> findByIdAndDeleted(Long id, boolean deleted);
     @Transactional
     default Page<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,

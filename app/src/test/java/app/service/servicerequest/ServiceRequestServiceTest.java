@@ -120,7 +120,7 @@ class ServiceRequestServiceTest {
 
         // Then
         assertEquals(1, updatedCount);
-        Optional<ServiceRequest> deletedServiceRequestOptional = serviceRequestRepository.findById(serviceRequest.getId());
+        Optional<ServiceRequest> deletedServiceRequestOptional = serviceRequestRepository.findByIdAndDeleted(serviceRequest.getId(), true);
         assertTrue(deletedServiceRequestOptional.isPresent());
         assertTrue(deletedServiceRequestOptional.get().isDeleted());
 
@@ -138,7 +138,7 @@ class ServiceRequestServiceTest {
         // First delete
         int firstUpdateCount = serviceRequestService.delete(serviceRequest.getId(), testJurisdiction.getId());
         assertEquals(1, firstUpdateCount);
-        Optional<ServiceRequest> deletedServiceRequestOptional = serviceRequestRepository.findById(serviceRequest.getId());
+        Optional<ServiceRequest> deletedServiceRequestOptional = serviceRequestRepository.findByIdAndDeleted(serviceRequest.getId(), true);
         assertTrue(deletedServiceRequestOptional.isPresent());
         assertTrue(deletedServiceRequestOptional.get().isDeleted());
 
