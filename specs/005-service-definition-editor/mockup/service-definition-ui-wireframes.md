@@ -25,7 +25,7 @@ This document describes the split-pane tree view interface for creating and edit
 
 ## Main Layout: Split-Pane Interface
 
-The interface uses a split-pane layout with a tree navigation panel on the left and an editor panel on the right.
+The interface uses a split-pane layout with the Tree Panel on the left and the Editor Panel on the right.
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -35,8 +35,8 @@ The interface uses a split-pane layout with a tree navigation panel on the left 
 |  SERVICES      |                      EDITOR PANEL                                |
 |  [+ Group]     |                                                                  |
 |                |  Shows either:                                                   |
-|  v Roads &     |  - Group editor (when group selected)                            |
-|    Traffic     |  - Service editor (when service selected)                        |
+|  v Roads &     |  - Group Editor (when group selected)                            |
+|    Traffic     |  - Service Editor (when service selected)                        |
 |    > Pothole   |  - Empty state (when nothing selected)                           |
 |    > Street.   |                                                                  |
 |    > Traffic   |                                                                  |
@@ -56,11 +56,11 @@ The interface uses a split-pane layout with a tree navigation panel on the left 
 
 ---
 
-## Left Panel: Tree View
+## Tree Panel
 
 ### Tree Structure
 
-The tree panel displays groups and their service types hierarchically.
+The Tree Panel displays groups and their services hierarchically.
 
 ```
 +------------------+
@@ -115,9 +115,9 @@ The tree panel displays groups and their service types hierarchically.
 
 ---
 
-## Right Panel: Group Editor
+## Editor Panel: Group Editor
 
-When a group is selected, the editor shows group properties.
+When a group is selected, the Editor Panel shows group properties.
 
 ```
 +------------------------------------------------------------------+
@@ -145,9 +145,9 @@ When a group is selected, the editor shows group properties.
 
 ---
 
-## Right Panel: Service Type Editor
+## Editor Panel: Service Editor
 
-When a service is selected, the editor shows the full Google Forms-style interface.
+When a service is selected, the Editor Panel shows the full Google Forms-style interface.
 
 ### Layout Structure
 
@@ -306,8 +306,8 @@ When clicked, the card expands to show all editing controls.
 |---------|-------------|--------------|
 | :: (drag handle) | Reorder attributes | `attributeOrder` |
 | Question text field | The prompt shown to users | `description` |
-| Type dropdown | Select field type | `datatype` |
-| Option rows | Available choices | `AttributeValue.valueName` |
+| Attribute Type Selector | Select field type | `datatype` |
+| Options List | Available choices | `AttributeValue.valueName` |
 | [ ] or O indicator | Checkbox for multi-select, circle for single-select | - |
 | :: on options | Drag handle for reordering options | Option order |
 | x buttons | Delete individual options | - |
@@ -319,9 +319,9 @@ When clicked, the card expands to show all editing controls.
 | Required toggle | Mark as mandatory | `required` |
 | : More options | Additional settings | `datatypeDescription`, etc. |
 
-### 4. Answer Type Dropdown
+### 4. Attribute Type Selector
 
-Maps to `AttributeDataType` enum:
+The Attribute Type Selector dropdown maps to `AttributeDataType` enum:
 
 ```
 +-------------------------------------+
@@ -342,8 +342,8 @@ Maps to `AttributeDataType` enum:
 
 ### Selection and Navigation
 
-1. **Clicking a group**: Shows group editor, highlights group in tree
-2. **Clicking a service**: Shows service editor, highlights service in tree
+1. **Clicking a group**: Shows Group Editor, highlights group in Tree Panel
+2. **Clicking a service**: Shows Service Editor, highlights service in Tree Panel
 3. **Unsaved changes warning**: Modal appears when switching with pending changes
 
 ### Unsaved Changes Modal
@@ -381,11 +381,41 @@ Maps to `AttributeDataType` enum:
 
 ### Drag to Reorder Questions
 
-1. Grab the :: handle at top of expanded card
-2. Drag to new position
-3. Insertion point shown visually
-4. Updates `attributeOrder` on drop
-5. Marks changes as unsaved
+Questions can be reordered by dragging them using the drag handle.
+
+**How to drag:**
+1. Expand the question card by clicking on it
+2. Grab the `::` drag handle at the top center of the expanded card
+3. Drag to the desired position
+4. Drop to reorder
+
+**Visual feedback during drag:**
+- **Dragging card**: Semi-transparent (50% opacity) with slight rotation
+- **Drop indicator**: Purple border appears on target card
+  - Top border: Card will be inserted before the target
+  - Bottom border: Card will be inserted after the target
+
+```
+During Drag:
++------------------------------------------------------------+
+|  Question 1 (collapsed)                                    |
++============================================================+  <- Purple top border = insert here
+|  Question 2 (target card)                                  |
++------------------------------------------------------------+
+
+                    OR
+
++------------------------------------------------------------+
+|  Question 2 (target card)                                  |
++============================================================+  <- Purple bottom border = insert here
+|  Question 3 (collapsed)                                    |
++------------------------------------------------------------+
+```
+
+**After drop:**
+- Card is moved to the new position
+- Changes are marked as unsaved (unsaved indicator appears)
+- Updates `attributeOrder` field when saved
 
 ### Drag to Reorder Options
 
@@ -550,7 +580,7 @@ Attribute Card Fields:
 +------------------------------------------------------------+
 ```
 
-### Option Rows -> AttributeValue Entities
+### Options List -> AttributeValue Entities
 
 ```
 For SINGLEVALUELIST / MULTIVALUELIST types:
@@ -604,15 +634,15 @@ The editor tracks unsaved changes at the card level (header card or attribute ca
 ### Key Components to Build
 
 1. **ServiceDefinitionEditor.svelte** - Main split-pane layout
-2. **TreePanel.svelte** - Left panel with tree navigation
-3. **TreeGroup.svelte** - Group item in tree
-4. **TreeService.svelte** - Service item in tree
-5. **GroupEditor.svelte** - Right panel for group editing
-6. **ServiceEditor.svelte** - Right panel for service editing
+2. **TreePanel.svelte** - Tree Panel with navigation
+3. **TreeGroup.svelte** - Group item in Tree Panel
+4. **TreeService.svelte** - Service item in Tree Panel
+5. **GroupEditor.svelte** - Editor Panel for group editing
+6. **ServiceEditor.svelte** - Editor Panel for service editing
 7. **HeaderCard.svelte** - Service name/description card
 8. **AttributeCard.svelte** - Individual field editor
-9. **AttributeTypeSelector.svelte** - Dropdown for field types
-10. **OptionsList.svelte** - Manage list options with drag/drop
+9. **AttributeTypeSelector.svelte** - Attribute Type Selector dropdown
+10. **OptionsList.svelte** - Options List with drag/drop reordering
 11. **AttributeFooter.svelte** - Duplicate/delete/required controls
 12. **UnsavedChangesModal.svelte** - Confirmation dialog
 
