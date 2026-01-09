@@ -146,7 +146,8 @@
 	}
 
 	function handleServiceDragLeave() {
-		dispatch('serviceDragLeave');
+		// Don't dispatch leave on dragleave - let dragover and dragend handle it
+		// This prevents flickering when moving between child elements
 	}
 
 	function handleServiceDrop(event: DragEvent, index: number) {
@@ -156,14 +157,6 @@
 
 	function handleServiceDragEnd() {
 		dispatch('serviceDragEnd');
-	}
-
-	// Check if this service has a drop indicator
-	function getDropIndicatorClass(index: number): string {
-		if (dropTargetGroupId !== group.id || dropTargetIndex !== index || !dropPosition) {
-			return '';
-		}
-		return dropPosition === 'before' ? 'drop-indicator-before' : 'drop-indicator-after';
 	}
 </script>
 
@@ -240,16 +233,19 @@
 			transition:slide={{ duration: prefersReducedMotion ? 0 : 150 }}
 		>
 			{#each services as service, index (service.service_code)}
+				<!-- Drop indicator BEFORE this service -->
+				{#if dropTargetGroupId === group.id && dropTargetIndex === index && dropPosition === 'before'}
+					<div class="drop-indicator" />
+				{/if}
+
 				<div
 					role="treeitem"
 					aria-level={level + 1}
 					aria-selected={selectedServiceCode === service.service_code}
-					class="group relative flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {selectedServiceCode ===
+					class="group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {selectedServiceCode ===
 					service.service_code
 						? 'bg-blue-50 ring-1 ring-purple-500'
-						: ''} {draggedServiceCode === service.service_code
-						? 'opacity-50'
-						: ''} {getDropIndicatorClass(index)}"
+						: ''} {draggedServiceCode === service.service_code ? 'opacity-50' : ''}"
 					draggable={draggableServices}
 					on:click={() => handleServiceClick(service.service_code)}
 					on:keydown={(e) => handleServiceKeydown(e, service.service_code)}
@@ -294,6 +290,11 @@
 					<!-- Service Name -->
 					<span class="flex-1 truncate text-sm text-gray-700">{service.service_name}</span>
 				</div>
+
+				<!-- Drop indicator AFTER this service -->
+				{#if dropTargetGroupId === group.id && dropTargetIndex === index && dropPosition === 'after'}
+					<div class="drop-indicator" />
+				{/if}
 			{/each}
 
 			<!-- Add Service Button -->
@@ -318,52 +319,11 @@
 </div>
 
 <style>
-	/* Drop indicator styles */
-	.drop-indicator-before::before {
-		content: '';
-		position: absolute;
-		top: -2px;
-		left: 0;
-		right: 0;
-		height: 3px;
-		background: rgb(147 51 234);
+	/* Drop indicator - blue line */
+	.drop-indicator {
+		height: 4px;
+		background: rgb(59 130 246);
 		border-radius: 2px;
-		z-index: 10;
-	}
-
-	.drop-indicator-before::after {
-		content: '';
-		position: absolute;
-		top: -4px;
-		left: -2px;
-		width: 8px;
-		height: 8px;
-		background: rgb(147 51 234);
-		border-radius: 50%;
-		z-index: 10;
-	}
-
-	.drop-indicator-after::before {
-		content: '';
-		position: absolute;
-		bottom: -2px;
-		left: 0;
-		right: 0;
-		height: 3px;
-		background: rgb(147 51 234);
-		border-radius: 2px;
-		z-index: 10;
-	}
-
-	.drop-indicator-after::after {
-		content: '';
-		position: absolute;
-		bottom: -4px;
-		left: -2px;
-		width: 8px;
-		height: 8px;
-		background: rgb(147 51 234);
-		border-radius: 50%;
-		z-index: 10;
+		margin: 2px 0;
 	}
 </style>

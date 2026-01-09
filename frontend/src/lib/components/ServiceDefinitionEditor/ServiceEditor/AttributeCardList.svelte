@@ -143,8 +143,8 @@
 	}
 
 	function handleDragLeave() {
-		dropTargetIndex = null;
-		dropPosition = null;
+		// Don't clear state on dragleave - let dragover and dragend handle it
+		// This prevents flickering when moving between child elements
 	}
 
 	function handleDrop(event: DragEvent, index: number) {
@@ -183,12 +183,6 @@
 		dropPosition = null;
 	}
 
-	// Get drop indicator position class
-	function getDropIndicatorClass(index: number): string {
-		if (dropTargetIndex !== index || !dropPosition) return '';
-		return dropPosition === 'before' ? 'drop-indicator-before' : 'drop-indicator-after';
-	}
-
 	// Ref to cards for resetting after save
 	let cardRefs: (AttributeCard | null)[] = [];
 
@@ -210,7 +204,7 @@
 <div class="space-y-4" role="list" aria-label="Attribute questions">
 	{#each attributes as attribute, index (attribute.code)}
 		<div
-			class="relative {getDropIndicatorClass(index)}"
+			class="relative"
 			role="listitem"
 			draggable={reorderEnabled && expandedIndex !== index}
 			on:dragstart={(e) => handleDragStart(e, index)}
@@ -220,6 +214,11 @@
 			on:dragend={handleDragEnd}
 			animate:flip={{ duration: prefersReducedMotion ? 0 : 200 }}
 		>
+			<!-- Drop indicator BEFORE this card -->
+			{#if dropTargetIndex === index && dropPosition === 'before'}
+				<div class="drop-indicator" />
+			{/if}
+
 			<AttributeCard
 				bind:this={cardRefs[index]}
 				{attribute}
@@ -236,57 +235,26 @@
 				on:deleteConfirm={() => handleDeleteConfirm(index)}
 				on:dirty={(e) => handleDirtyChange(e, index)}
 			/>
+
+			<!-- Drop indicator AFTER this card -->
+			{#if dropTargetIndex === index && dropPosition === 'after'}
+				<div class="drop-indicator drop-indicator-after" />
+			{/if}
 		</div>
 	{/each}
 </div>
 
 <style>
-	/* Drop indicator styles */
-	.drop-indicator-before::before {
-		content: '';
-		position: absolute;
-		top: -2px;
-		left: 0;
-		right: 0;
+	/* Drop indicator - blue line */
+	.drop-indicator {
 		height: 4px;
-		background: rgb(147 51 234);
+		background: rgb(59 130 246);
 		border-radius: 2px;
-		z-index: 10;
+		margin-bottom: 8px;
 	}
 
-	.drop-indicator-before::after {
-		content: '';
-		position: absolute;
-		top: -5px;
-		left: -3px;
-		width: 10px;
-		height: 10px;
-		background: rgb(147 51 234);
-		border-radius: 50%;
-		z-index: 10;
-	}
-
-	.drop-indicator-after::before {
-		content: '';
-		position: absolute;
-		bottom: -2px;
-		left: 0;
-		right: 0;
-		height: 4px;
-		background: rgb(147 51 234);
-		border-radius: 2px;
-		z-index: 10;
-	}
-
-	.drop-indicator-after::after {
-		content: '';
-		position: absolute;
-		bottom: -5px;
-		left: -3px;
-		width: 10px;
-		height: 10px;
-		background: rgb(147 51 234);
-		border-radius: 50%;
-		z-index: 10;
+	.drop-indicator-after {
+		margin-bottom: 0;
+		margin-top: 8px;
 	}
 </style>
