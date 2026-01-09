@@ -197,7 +197,7 @@
 
 ---
 
-## Phase 11: User Story 8 - Create and Edit Groups (Priority: P3)
+## Phase 11: User Story 8 - Create and Edit Groups (Priority: P3) ✅ COMPLETE
 
 **Goal**: Administrators can create new groups and edit group names
 
@@ -205,18 +205,18 @@
 
 ### Implementation for User Story 8
 
-- [ ] T055 [US8] Add "+ Group" button to TreePanel header in TreePanel.svelte
-- [ ] T056 [US8] Create GroupEditor component with name field, Save/Delete buttons in `frontend/src/lib/components/ServiceDefinitionEditor/GroupEditor/GroupEditor.svelte`
-- [ ] T057 [US8] Implement create group handler (POST /groups) in TreePanel.svelte
-- [ ] T058 [US8] Implement update group handler (PATCH /groups/{id}) in GroupEditor.svelte
-- [ ] T059 [US8] Implement delete group handler with empty check (DELETE /groups/{id}) in GroupEditor.svelte
+- [x] T055 [US8] Add "+ Group" button to TreePanel header in TreePanel.svelte
+- [x] T056 [US8] Create GroupEditor component with name field, Save/Delete buttons in `frontend/src/lib/components/ServiceDefinitionEditor/GroupEditor/GroupEditor.svelte`
+- [x] T057 [US8] Implement create group handler (POST /groups) in TreePanel.svelte
+- [x] T058 [US8] Implement update group handler (PATCH /groups/{id}) in GroupEditor.svelte
+- [x] T059 [US8] Implement delete group handler with empty check (DELETE /groups/{id}) in GroupEditor.svelte
 - [ ] T060 [US8] Create unit test for GroupEditor in `frontend/src/lib/components/ServiceDefinitionEditor/GroupEditor/GroupEditor.test.ts`
 
-**Checkpoint**: Group creation and editing functional
+**Checkpoint**: Group creation and editing functional ✅
 
 ---
 
-## Phase 12: User Story 9 - Add New Service to Group (Priority: P3)
+## Phase 12: User Story 9 - Add New Service to Group (Priority: P3) ✅ COMPLETE
 
 **Goal**: Administrators can add new services to groups
 
@@ -224,28 +224,28 @@
 
 ### Implementation for User Story 9
 
-- [ ] T061 [US9] Add "+ Add Svc" button to each expanded TreeGroup in TreeGroup.svelte
-- [ ] T062 [US9] Implement create service handler (POST /services) in TreeGroup.svelte
-- [ ] T063 [US9] Add "+ Add question" card at bottom of AttributeCardList in AttributeCardList.svelte
-- [ ] T064 [US9] Implement create attribute handler with Short answer default in AttributeCardList.svelte
-- [ ] T065 [US9] Implement auto-expand and focus for newly created attribute in AttributeCard.svelte
+- [x] T061 [US9] Add "+ Add Svc" button to each expanded TreeGroup in TreeGroup.svelte
+- [x] T062 [US9] Implement create service handler (POST /services) in TreeGroup.svelte
+- [x] T063 [US9] Add "+ Add question" card at bottom of AttributeCardList in AttributeCardList.svelte
+- [x] T064 [US9] Implement create attribute handler with Short answer default in AttributeCardList.svelte
+- [x] T065 [US9] Implement auto-expand and focus for newly created attribute in AttributeCard.svelte
 
-**Checkpoint**: Service and attribute creation functional
+**Checkpoint**: Service and attribute creation functional ✅
 
 ---
 
-## Phase 13: Polish & Cross-Cutting Concerns
+## Phase 13: Polish & Cross-Cutting Concerns ✅ COMPLETE
 
 **Purpose**: Final integration, accessibility audit, and cleanup
 
-- [ ] T066 [P] Integrate SplitPaneLayout into route page at `frontend/src/routes/groups/config/+page.svelte`
-- [ ] T067 [P] Add page header "Service Definition Configuration" with back navigation in +page.svelte
-- [ ] T068 Implement focus management when cards expand/collapse for accessibility
-- [ ] T069 Add ARIA labels for all interactive elements per WCAG 2.2 AA
-- [ ] T070 Add `prefers-reduced-motion` checks for all animations
-- [ ] T071 [P] Verify 4.5:1 contrast ratios for all text elements
-- [ ] T072 Run `npm run format && npm run lint && npm run check` and fix any issues
-- [ ] T073 Run `npm run test:unit` and verify all tests pass
+- [x] T066 [P] Integrate SplitPaneLayout into route page at `frontend/src/routes/groups/config/+page.svelte`
+- [x] T067 [P] Add page header "Service Definition Configuration" with back navigation in +page.svelte
+- [x] T068 Implement focus management when cards expand/collapse for accessibility
+- [x] T069 Add ARIA labels for all interactive elements per WCAG 2.2 AA
+- [x] T070 Add `prefers-reduced-motion` checks for all animations
+- [x] T071 [P] Verify 4.5:1 contrast ratios for all text elements
+- [x] T072 Run `npm run format && npm run lint && npm run check` and fix any issues
+- [x] T073 Run `npm run test:unit` and verify all tests pass
 - [ ] T074 Manual testing following quickstart.md scenarios
 
 ---

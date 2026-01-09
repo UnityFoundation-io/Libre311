@@ -42,7 +42,13 @@
 			toGroupId: number;
 			newIndex: number;
 		};
+		createGroup: void;
+		addService: { groupId: number };
 	}>();
+
+	function handleCreateGroup() {
+		dispatch('createGroup');
+	}
 
 	// Drag state for service reordering
 	let draggedServiceCode: number | null = null;
@@ -157,7 +163,7 @@
 		}
 	}
 
-	function navigateUp(currentGroup: GroupWithServices, isGroupExpanded: boolean) {
+	function navigateUp(_currentGroup: GroupWithServices, _isGroupExpanded: boolean) {
 		if (focusedServiceIndex !== null) {
 			if (focusedServiceIndex > 0) {
 				focusedServiceIndex--;
@@ -250,28 +256,29 @@
 		dropTargetIndex = null;
 		dropPosition = null;
 	}
-
-	// Get drop indicator class for a service
-	function getServiceDropIndicator(
-		groupId: number,
-		serviceIndex: number
-	): 'before' | 'after' | null {
-		if (dropTargetGroupId !== groupId || dropTargetIndex !== serviceIndex) {
-			return null;
-		}
-		return dropPosition;
-	}
 </script>
 
 <div
 	class="flex h-full flex-col overflow-hidden"
 	role="tree"
 	aria-label="Service groups and services"
+	tabindex="0"
 	on:keydown={handleKeydown}
 >
 	<!-- Panel Header -->
-	<div class="border-b border-gray-200 bg-white px-4 py-3">
+	<div class="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
 		<h2 class="text-sm font-semibold text-gray-900">Service Groups</h2>
+		<button
+			type="button"
+			class="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-purple-600 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+			on:click={handleCreateGroup}
+			aria-label="Create new group"
+		>
+			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+			</svg>
+			Group
+		</button>
 	</div>
 
 	<!-- Tree Content -->
@@ -297,7 +304,7 @@
 			<div class="py-8 text-center text-sm text-gray-500">No service groups found</div>
 		{:else}
 			<div class="space-y-1">
-				{#each groups as group, index (group.id)}
+				{#each groups as group (group.id)}
 					<TreeGroup
 						{group}
 						services={group.services}
@@ -319,6 +326,7 @@
 						on:serviceDragLeave={handleServiceDragLeave}
 						on:serviceDrop={(e) => handleServiceDrop(group.id, e.detail.serviceIndex)}
 						on:serviceDragEnd={handleServiceDragEnd}
+						on:addService={() => dispatch('addService', { groupId: group.id })}
 					/>
 				{/each}
 			</div>

@@ -9,6 +9,7 @@
 	import SplitPaneLayout from '$lib/components/ServiceDefinitionEditor/SplitPaneEditor/SplitPaneLayout.svelte';
 	import ServiceHeaderCard from '$lib/components/ServiceDefinitionEditor/ServiceEditor/ServiceHeaderCard.svelte';
 	import AttributeCardList from '$lib/components/ServiceDefinitionEditor/ServiceEditor/AttributeCardList.svelte';
+	import GroupEditor from '$lib/components/ServiceDefinitionEditor/GroupEditor/GroupEditor.svelte';
 	import UnsavedChangesModal from '$lib/components/ServiceDefinitionEditor/Shared/UnsavedChangesModal.svelte';
 	import {
 		splitPaneStore,
@@ -41,12 +42,16 @@
 	let isHeaderDirty = false;
 	let isHeaderSaving = false;
 
+	// Group editing state
+	let isGroupDirty = false;
+	let isGroupSaving = false;
+	let isGroupDeleting = false;
+
 	// Expanded attribute index
 	let expandedAttributeIndex: number | null = null;
 
 	// Unsaved changes modal
 	let showUnsavedModal = false;
-	let pendingNavigation: (() => void) | null = null;
 	let isSavingBeforeNav = false;
 
 	// Subscribe to store
@@ -100,7 +105,7 @@
 		const { groupId } = event.detail;
 
 		// Check for unsaved changes
-		if ($hasAnyUnsavedChanges || isHeaderDirty || dirtyAttributes.size > 0) {
+		if ($hasAnyUnsavedChanges || isHeaderDirty || isGroupDirty || dirtyAttributes.size > 0) {
 			attemptSelectGroup(groupId);
 			return;
 		}
@@ -121,7 +126,7 @@
 		const { groupId, serviceCode } = event.detail;
 
 		// Check for unsaved changes
-		if ($hasAnyUnsavedChanges || isHeaderDirty || dirtyAttributes.size > 0) {
+		if ($hasAnyUnsavedChanges || isHeaderDirty || isGroupDirty || dirtyAttributes.size > 0) {
 			attemptSelectService(groupId, serviceCode);
 			return;
 		}
@@ -180,10 +185,9 @@
 
 		isHeaderSaving = true;
 		try {
-			const updated = await libre311.updateService({
+			const updated = await libre311.editService({
 				service_code: selectedService.service_code,
-				service_name: event.detail.serviceName,
-				description: event.detail.description
+				service_name: event.detail.serviceName
 			});
 
 			// Update local state
@@ -244,25 +248,20 @@
 
 		savingAttributes = new Set([...savingAttributes, code]);
 		try {
-			await libre311.updateServiceDefinitionAttribute({
-				code,
-				...data,
-				datatype_description: data.datatypeDescription
+			await libre311.editAttribute({
+				attribute_code: code,
+				service_code: selectedService!.service_code,
+				description: data.description,
+				datatype_description: data.datatypeDescription,
+				required: data.required,
+				values: data.values
 			});
 
-			// Update local state
-			attributes = attributes.map((attr) =>
-				attr.code === code
-					? {
-							...attr,
-							description: data.description,
-							datatype: data.datatype as ServiceDefinitionAttribute['datatype'],
-							required: data.required,
-							datatype_description: data.datatypeDescription,
-							...(data.values ? { values: data.values } : {})
-						}
-					: attr
-			);
+			// Update local state - reload service definition to get updated attributes
+			const definition = await libre311.getServiceDefinition({
+				service_code: selectedService!.service_code
+			});
+			attributes = definition.attributes || [];
 
 			// Clear dirty state for this attribute
 			const newDirty = new Set(dirtyAttributes);
@@ -295,7 +294,10 @@
 
 		deletingAttributes = new Set([...deletingAttributes, attribute.code]);
 		try {
-			await libre311.deleteServiceDefinitionAttribute({ code: attribute.code });
+			await libre311.deleteAttribute({
+				serviceCode: selectedService!.service_code,
+				attributeCode: attribute.code
+			});
 
 			// Remove from local state
 			attributes = attributes.filter((a) => a.code !== attribute.code);
@@ -323,7 +325,7 @@
 	}
 
 	// Service reorder in tree
-	function handleServiceReorder(
+	async function handleServiceReorder(
 		event: CustomEvent<{
 			serviceCode: number;
 			fromGroupId: number;
@@ -331,8 +333,171 @@
 			newIndex: number;
 		}>
 	) {
-		// TODO: Implement service reorder API call
-		console.log('Reorder service:', event.detail);
+		const { serviceCode, fromGroupId, toGroupId, newIndex } = event.detail;
+
+		// Only support reordering within the same group for now
+		if (fromGroupId !== toGroupId) {
+			console.warn('Moving services between groups is not yet supported');
+			return;
+		}
+
+		try {
+			// Get the group's services
+			const group = groups.find((g) => g.id === fromGroupId);
+			if (!group) return;
+
+			// Build the new order
+			const reorderedCodes = group.services
+				.filter((s) => s.service_code !== serviceCode)
+				.map((s) => s.service_code);
+			reorderedCodes.splice(newIndex, 0, serviceCode);
+
+			// Call API to persist order
+			await libre311.updateServicesOrder({
+				group_id: fromGroupId,
+				services: reorderedCodes.map((code, idx) => ({ service_code: code, order_position: idx }))
+			});
+
+			// Update local state
+			groups = groups.map((g) =>
+				g.id === fromGroupId
+					? {
+							...g,
+							services: reorderedCodes.map(
+								(code) => g.services.find((s) => s.service_code === code)!
+							)
+						}
+					: g
+			);
+		} catch (err) {
+			console.error('Failed to reorder service:', err);
+		}
+	}
+
+	// ========== Group Management Handlers ==========
+
+	async function handleCreateGroup() {
+		try {
+			const newGroup = await libre311.createGroup({ name: 'New Group' });
+
+			// Add to local state
+			const groupWithServices: GroupWithServices = {
+				...newGroup,
+				services: [],
+				serviceCount: 0
+			};
+			groups = [...groups, groupWithServices];
+
+			// Expand and select the new group
+			expandedGroupIds = new Set([...expandedGroupIds, newGroup.id]);
+			doSelectGroup(newGroup.id);
+		} catch (err) {
+			console.error('Failed to create group:', err);
+		}
+	}
+
+	function handleGroupDirty(event: CustomEvent<{ isDirty: boolean }>) {
+		isGroupDirty = event.detail.isDirty;
+	}
+
+	async function handleGroupSave(event: CustomEvent<{ name: string }>) {
+		if (!selectedGroup) return;
+
+		isGroupSaving = true;
+		try {
+			const updated = await libre311.editGroup({
+				id: selectedGroup.id,
+				name: event.detail.name
+			});
+
+			// Update local state
+			selectedGroup = { ...selectedGroup, ...updated };
+			groups = groups.map((g) => (g.id === updated.id ? { ...g, name: updated.name } : g));
+			isGroupDirty = false;
+		} catch (err) {
+			console.error('Failed to save group:', err);
+		} finally {
+			isGroupSaving = false;
+		}
+	}
+
+	async function handleGroupDelete() {
+		if (!selectedGroup) return;
+
+		isGroupDeleting = true;
+		try {
+			await libre311.deleteGroup({ group_id: selectedGroup.id });
+
+			// Remove from local state
+			groups = groups.filter((g) => g.id !== selectedGroup!.id);
+
+			// Clear selection
+			selection = { type: null, groupId: null, serviceCode: null };
+			selectedGroup = null;
+		} catch (err) {
+			console.error('Failed to delete group:', err);
+		} finally {
+			isGroupDeleting = false;
+		}
+	}
+
+	// ========== Service Creation Handler ==========
+
+	async function handleAddService(event: CustomEvent<{ groupId: number }>) {
+		const { groupId } = event.detail;
+
+		try {
+			const newService = await libre311.createService({
+				service_name: 'New Service',
+				group_id: groupId
+			});
+
+			// Add to local state
+			groups = groups.map((g) =>
+				g.id === groupId
+					? {
+							...g,
+							services: [...g.services, newService],
+							serviceCount: g.serviceCount + 1
+						}
+					: g
+			);
+
+			// Select the new service
+			await doSelectService(groupId, newService.service_code);
+		} catch (err) {
+			console.error('Failed to create service:', err);
+		}
+	}
+
+	// ========== Attribute Creation Handler ==========
+
+	async function handleAddAttribute() {
+		if (!selectedService) return;
+
+		try {
+			const response = await libre311.createAttribute({
+				service_code: selectedService.service_code,
+				description: 'New question',
+				datatype: 'string',
+				required: false,
+				variable: true,
+				datatype_description: '',
+				order: attributes.length
+			});
+
+			// Get the newly created attribute from the response
+			const newAttribute = response.attributes[response.attributes.length - 1];
+			if (!newAttribute) return;
+
+			// Add to local state
+			attributes = [...attributes, newAttribute];
+
+			// Expand and focus the new attribute
+			expandedAttributeIndex = attributes.length - 1;
+		} catch (err) {
+			console.error('Failed to create attribute:', err);
+		}
 	}
 
 	// Unsaved changes modal handlers
@@ -396,7 +561,26 @@
 			on:selectGroup={handleSelectGroup}
 			on:selectService={handleSelectService}
 			on:reorderService={handleServiceReorder}
+			on:createGroup={handleCreateGroup}
+			on:addService={handleAddService}
 		>
+			<!-- Group Editor Slot -->
+			<svelte:fragment slot="group-editor">
+				{#if selectedGroup}
+					<GroupEditor
+						group={selectedGroup}
+						isSaving={isGroupSaving}
+						isDeleting={isGroupDeleting}
+						canDelete={groups.find((g) => g.id === selectedGroup?.id)?.serviceCount === 0}
+						serviceCount={groups.find((g) => g.id === selectedGroup?.id)?.serviceCount ?? 0}
+						on:save={handleGroupSave}
+						on:delete={handleGroupDelete}
+						on:dirty={handleGroupDirty}
+					/>
+				{/if}
+			</svelte:fragment>
+
+			<!-- Service Editor Slot -->
 			<svelte:fragment slot="service-editor">
 				{#if selectedService}
 					<!-- Service Header Card -->
@@ -408,11 +592,12 @@
 					/>
 
 					<!-- Attributes List -->
-					{#if attributes.length > 0}
-						<div class="mt-6">
-							<h3 class="mb-4 text-sm font-medium text-gray-700">
-								Questions ({attributes.length})
-							</h3>
+					<div class="mt-6">
+						<h3 class="mb-4 text-sm font-medium text-gray-700">
+							Questions ({attributes.length})
+						</h3>
+
+						{#if attributes.length > 0}
 							<AttributeCardList
 								{attributes}
 								expandedIndex={expandedAttributeIndex}
@@ -427,18 +612,25 @@
 								on:dirty={handleAttributeDirty}
 								on:reorder={handleAttributeReorder}
 							/>
-						</div>
-					{:else if !isEditorLoading}
-						<div class="mt-6 rounded-lg border border-dashed border-gray-300 p-8 text-center">
-							<p class="text-sm text-gray-500">No questions defined for this service yet.</p>
-							<button
-								type="button"
-								class="mt-4 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
-							>
-								+ Add Question
-							</button>
-						</div>
-					{/if}
+						{/if}
+
+						<!-- Add Question Card -->
+						<button
+							type="button"
+							class="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-4 text-sm font-medium text-gray-600 hover:border-purple-400 hover:text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+							on:click={handleAddAttribute}
+						>
+							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 4v16m8-8H4"
+								/>
+							</svg>
+							Add question
+						</button>
+					</div>
 				{/if}
 			</svelte:fragment>
 		</SplitPaneLayout>

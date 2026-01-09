@@ -68,7 +68,13 @@
 		serviceDragLeave: void;
 		serviceDrop: { serviceIndex: number };
 		serviceDragEnd: void;
+		addService: void;
 	}>();
+
+	function handleAddService(event: MouseEvent) {
+		event.stopPropagation();
+		dispatch('addService');
+	}
 
 	// Reduced motion preference
 	let prefersReducedMotion = false;
@@ -227,7 +233,7 @@
 	</div>
 
 	<!-- Services List (when expanded) -->
-	{#if isExpanded && services.length > 0}
+	{#if isExpanded}
 		<div
 			role="group"
 			class="ml-6 mt-1 space-y-0.5 border-l border-gray-200 pl-2"
@@ -289,6 +295,24 @@
 					<span class="flex-1 truncate text-sm text-gray-700">{service.service_name}</span>
 				</div>
 			{/each}
+
+			<!-- Add Service Button -->
+			<button
+				type="button"
+				class="flex w-full items-center gap-1 rounded-md px-2 py-1.5 text-sm text-purple-600 hover:bg-purple-50"
+				on:click={handleAddService}
+				aria-label="Add service to {group.name}"
+			>
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 4v16m8-8H4"
+					/>
+				</svg>
+				<span>Add Svc</span>
+			</button>
 		</div>
 	{/if}
 </div>

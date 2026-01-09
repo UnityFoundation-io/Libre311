@@ -74,7 +74,34 @@
 		selectGroup: { groupId: number };
 		selectService: { groupId: number; serviceCode: number };
 		loadService: { serviceCode: number };
+		createGroup: void;
+		addService: { groupId: number };
+		reorderService: {
+			serviceCode: number;
+			fromGroupId: number;
+			toGroupId: number;
+			newIndex: number;
+		};
 	}>();
+
+	function handleCreateGroup() {
+		dispatch('createGroup');
+	}
+
+	function handleAddService(event: CustomEvent<{ groupId: number }>) {
+		dispatch('addService', event.detail);
+	}
+
+	function handleReorderService(
+		event: CustomEvent<{
+			serviceCode: number;
+			fromGroupId: number;
+			toGroupId: number;
+			newIndex: number;
+		}>
+	) {
+		dispatch('reorderService', event.detail);
+	}
 
 	// Resizer state
 	let isResizing = false;
@@ -140,6 +167,9 @@
 			on:toggleGroup={handleToggleGroup}
 			on:selectGroup={handleSelectGroup}
 			on:selectService={handleSelectService}
+			on:createGroup={handleCreateGroup}
+			on:addService={handleAddService}
+			on:reorderService={handleReorderService}
 		/>
 	</div>
 

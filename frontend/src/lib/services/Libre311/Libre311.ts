@@ -527,6 +527,7 @@ export interface Libre311Service extends Open311Service {
 	getGroupList(): Promise<GetGroupListResponse>;
 	createGroup(params: CreateGroupParams): Promise<Group>;
 	editGroup(params: EditGroupParams): Promise<Group>;
+	deleteGroup(params: HasGroupId): Promise<void>;
 	downloadServiceRequests(params: FilteredServiceRequestsParams): Promise<Blob>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
 	updateServicesOrder(params: UpdateServicesOrderParams): Promise<GetServiceListResponse>;
@@ -563,6 +564,8 @@ const ROUTES = {
 	postGroup: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
 	patchGroup: (params: HasJurisdictionId & HasGroupId) =>
+		`/jurisdiction-admin/groups/${params.group_id}?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteGroup: (params: HasJurisdictionId & HasGroupId) =>
 		`/jurisdiction-admin/groups/${params.group_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getGroupList: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
@@ -743,6 +746,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 			);
 
 			return GroupSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	async deleteGroup(params: HasGroupId): Promise<void> {
+		try {
+			await this.axiosInstance.delete<unknown>(
+				ROUTES.deleteGroup({
+					group_id: params.group_id,
+					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+				})
+			);
 		} catch (error) {
 			console.log(error);
 			throw error;
