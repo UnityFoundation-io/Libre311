@@ -45,10 +45,10 @@ export const columns: TableColumn[] = [
 		placement: 'center',
 		class: 'hidden xl:table-cell xl:w-[12%]'
 	},
-    {
-        column: 'removal_suggestions_count',
-        label: 'Removal Suggestions',
-        placement: 'center',
-        class: 'w-[20%] lg:w-[15%] xl:w-[8%]'
-    }
+	{
+		column: 'removal_suggestions_count',
+		label: 'Removal Suggestions',
+		placement: 'center',
+		class: 'w-[20%] lg:w-[15%] xl:w-[8%]'
+	}
 ];

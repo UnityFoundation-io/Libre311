@@ -25,7 +25,7 @@ export type ServiceRequestsContext = {
 	serviceRequestsResponse: Readable<AsyncResult<ServiceRequestsResponse>>;
 	applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL): void;
 	refreshSelectedServiceRequest(updatedServiceRequest: ServiceRequest): void;
-    refresh(): Promise<void>;
+	refresh(): Promise<void>;
 };
 
 export function createServiceRequestsContext(
@@ -117,7 +117,7 @@ export function createServiceRequestsContext(
 		goto(`${url.pathname}?${queryParams.toString()}`);
 	}
 
-    async function refresh() {
+	async function refresh() {
 		const currentPage = get(page);
 		const updatedParams = FilteredServiceRequestsParamsMapper.toRequestParams(
 			currentPage.url.searchParams
@@ -154,7 +154,7 @@ export function createServiceRequestsContext(
 		serviceRequestsResponse,
 		applyServiceRequestParams,
 		refreshSelectedServiceRequest,
-        refresh
+		refresh
 	};
 
 	setContext(key, ctx);

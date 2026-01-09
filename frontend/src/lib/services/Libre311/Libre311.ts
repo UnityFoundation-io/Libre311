@@ -286,12 +286,31 @@ export type HasMetadata<T> = {
 	metadata: T;
 };
 
-export const GetRemovalSuggestionsResponseSchema = z.object({
-	content: z.array(ServiceRequestRemovalSuggestionSchema),
-	metadata: z.object({
-		pagination: PaginationSchema
+export const GetRemovalSuggestionsResponseSchema = z
+	.object({
+		content: z.array(ServiceRequestRemovalSuggestionSchema),
+		pageable: z
+			.object({
+				offset: z.number().optional(),
+				pageNumber: z.number().optional(),
+				pageSize: z.number().optional()
+			})
+			.optional(),
+		totalPages: z.number().optional(),
+		totalSize: z.number().optional()
 	})
-});
+	.transform((data) => ({
+		content: data.content,
+		metadata: {
+			pagination: {
+				offset: data.pageable?.offset ?? 0,
+				pageNumber: data.pageable?.pageNumber ?? 0,
+				size: data.pageable?.pageSize ?? 0,
+				totalPages: data.totalPages ?? 0,
+				totalSize: data.totalSize ?? 0
+			}
+		}
+	}));
 
 export type GetRemovalSuggestionsResponse = z.infer<typeof GetRemovalSuggestionsResponseSchema>;
 
@@ -368,7 +387,7 @@ export const ServiceRequestSchema = z
 		media_url: urlSchema.optional(),
 		selected_values: z.array(SelectedValuesSchema).optional(),
 		priority: ServiceRequestPrioritySchema.optional(),
-        removal_suggestions_count: z.number().optional()
+		removal_suggestions_count: z.number().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -501,8 +520,6 @@ const JurisdictionConfigSchema = z
 
 export type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
 
-
-
 export type ServiceRequestsResponse = {
 	serviceRequests: GetServiceRequestsResponse;
 } & HasMetadata<HasPagination>;
@@ -579,9 +596,9 @@ export interface Libre311Service extends Open311Service {
 	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean>;
 	createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void>;
 	getRemovalSuggestions(
-		params: HasPagination & HasJurisdictionId & { service_request_id?: number }
+		params: HasPagination & { service_request_id?: number }
 	): Promise<GetRemovalSuggestionsResponse>;
-	deleteRemovalSuggestion(params: { id: number } & HasJurisdictionId): Promise<void>;
+	deleteRemovalSuggestion(params: { id: number }): Promise<void>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -723,7 +740,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async getRemovalSuggestions(
-		params: HasPagination & HasJurisdictionId & { service_request_id?: number }
+		params: HasPagination & { service_request_id?: number }
 	): Promise<GetRemovalSuggestionsResponse> {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getRemovalSuggestions({ jurisdiction_id: this.jurisdictionId }),
@@ -735,34 +752,11 @@ export class Libre311ServiceImpl implements Libre311Service {
 				}
 			}
 		);
-		// Note: The backend returns Page<DTO>, so we need to map the response structure if it differs from what we expect.
-		// Micronaut Page serialization: content, pageable, totalPages, totalSize, etc.
-		// We can define a schema for this if we want runtime validation, but for now let's trust the type.
-		// However, we need to extract pagination headers if they are used, or use the body if it's in the body.
-		// In RootController.getServiceRequestsJson, it returns headers.
-		// In JurisdictionAdminController.getRemovalSuggestions, it returns Page object directly as JSON body.
 
-		// Let's assume standard Micronaut Page JSON serialization which puts content in "content" and pagination info in "pageable" or similar fields.
-		// Wait, RootController returns List<DTO> but adds headers for pagination.
-		// But JurisdictionAdminController returns Page<DTO>.
-		// Micronaut's default JSON for Page includes "content", "pageable", "totalSize", "totalPages".
-		const data = res.data as any;
-		const response = {
-			content: data.content,
-			metadata: {
-				pagination: {
-					offset: data.pageable?.offset || 0,
-					pageNumber: data.pageable?.pageNumber || 0,
-					size: data.pageable?.pageSize || 0,
-					totalPages: data.totalPages || 0,
-					totalSize: data.totalSize || 0
-				}
-			}
-		};
-		return GetRemovalSuggestionsResponseSchema.parse(response);
+		return GetRemovalSuggestionsResponseSchema.parse(res.data);
 	}
 
-	async deleteRemovalSuggestion(params: { id: number } & HasJurisdictionId): Promise<void> {
+	async deleteRemovalSuggestion(params: { id: number }): Promise<void> {
 		await this.axiosInstance.delete(
 			ROUTES.deleteRemovalSuggestion({ id: params.id, jurisdiction_id: this.jurisdictionId })
 		);

@@ -4,26 +4,26 @@
 
 	export let open = false;
 	export let serviceRequestId: number;
-    export let handleClose: () => void;
+	export let handleClose: () => void;
 
-    const libre311Service = useLibre311Service();
+	const libre311Service = useLibre311Service();
 
 	let email = '';
 	let name = '';
 	let phone = '';
 	let reason = '';
 	let loading = false;
-    let error = '';
-    let success = false;
+	let error = '';
+	let success = false;
 
 	async function submit() {
-        if (!email || !reason) {
-            error = 'Email and Reason are required.';
-            return;
-        }
+		if (!email || !reason) {
+			error = 'Email and Reason are required.';
+			return;
+		}
 
 		loading = true;
-        error = '';
+		error = '';
 		try {
 			await libre311Service.createRemovalSuggestion({
 				service_request_id: serviceRequestId,
@@ -33,78 +33,81 @@
 				reason
 			});
 			success = true;
-            setTimeout(() => {
-                handleClose();
-                setTimeout(() => {
-                    reset();
-                }, 500); 
-            }, 1500);
+			setTimeout(() => {
+				handleClose();
+				setTimeout(() => {
+					reset();
+				}, 500);
+			}, 1500);
 		} catch (e) {
 			console.error(e);
-            error = 'Failed to submit suggestion.';
+			error = 'Failed to submit suggestion.';
 		} finally {
 			loading = false;
 		}
 	}
 
-    function reset() {
-        email = '';
-        name = '';
-        phone = '';
-        reason = '';
-        error = '';
-        success = false;
-    }
+	function reset() {
+		email = '';
+		name = '';
+		phone = '';
+		reason = '';
+		error = '';
+		success = false;
+	}
 </script>
 
 {#if open}
-    <Portal>
-        <Modal {handleClose}>
-            <Modal.Content slot="content">
-                <Modal.Content.Header slot="header">Suggest Removal</Modal.Content.Header>
-                <Modal.Content.Body slot="body">
-                    {#if success}
-                        <div class="text-green-600 p-4">Suggestion submitted successfully!</div>
-                    {:else}
-                        <div class="flex flex-col gap-4 p-2">
-                            {#if error}
-                                <p class="text-red-500 mb-2">{error}</p>
-                            {/if}
-                            <div class="mb-2">
-                                <Input bind:value={email} type="email" placeholder="your@email.com">
-                                    <Input.Label slot="label">Email *</Input.Label>
-                                </Input>
-                            </div>
-                            <div class="mb-2">
-                                <Input bind:value={name} placeholder="Your Name">
-                                    <Input.Label slot="label">Name</Input.Label>
-                                </Input>
-                            </div>
-                            <div class="mb-2">
-                                <Input bind:value={phone} placeholder="555-555-5555">
-                                    <Input.Label slot="label">Phone</Input.Label>
-                                </Input>
-                            </div>
-                            <div class="mb-2">
-                                <TextArea bind:value={reason} placeholder="Why should this be removed?">
-                                    <TextArea.Label slot="label">Reason *</TextArea.Label>
-                                </TextArea>
-                            </div>
-                        </div>
-                    {/if}
-                </Modal.Content.Body>
-                <Modal.Content.Footer slot="footer">
-                    <div class="flex w-full justify-end gap-2">
-                        {#if !success}
-                            <Button on:click={handleClose} type="ghost">Cancel</Button>
-                            <Button on:click={submit} type="primary" {loading}>Submit</Button>
-                            {:else}
-
-                            <Button on:click={handleClose} type="ghost">Close</Button>
-                        {/if}
-                    </div>
-                </Modal.Content.Footer>
-            </Modal.Content>
-        </Modal>
-    </Portal>
+	<Portal>
+		<Modal {handleClose}>
+			<Modal.Content slot="content">
+				<Modal.Content.Header slot="header">Suggest Removal</Modal.Content.Header>
+				<Modal.Content.Body slot="body">
+					{#if success}
+						<div class="p-4 text-green-600">Suggestion submitted successfully!</div>
+					{:else}
+						<div class="flex flex-col gap-4 p-2">
+							{#if error}
+								<p class="mb-2 text-red-500">{error}</p>
+							{/if}
+							<div class="mb-2">
+								<Input bind:value={email} type="email" placeholder="your@email.com">
+									<Input.Label slot="label">Email *</Input.Label>
+								</Input>
+							</div>
+							<div class="mb-2">
+								<Input bind:value={name} placeholder="Your Name">
+									<Input.Label slot="label">Name</Input.Label>
+								</Input>
+							</div>
+							<div class="mb-2">
+								<Input bind:value={phone} placeholder="555-555-5555">
+									<Input.Label slot="label">Phone</Input.Label>
+								</Input>
+							</div>
+							<div class="mb-2">
+								<TextArea
+									bind:value={reason}
+									name="reason"
+									placeholder="Why should this be removed?"
+								>
+									<TextArea.Label slot="label">Reason *</TextArea.Label>
+								</TextArea>
+							</div>
+						</div>
+					{/if}
+				</Modal.Content.Body>
+				<Modal.Content.Footer slot="footer">
+					<div class="flex w-full justify-end gap-2">
+						{#if !success}
+							<Button on:click={handleClose} type="ghost">Cancel</Button>
+							<Button on:click={submit} type="primary" {loading}>Submit</Button>
+						{:else}
+							<Button on:click={handleClose} type="ghost">Close</Button>
+						{/if}
+					</div>
+				</Modal.Content.Footer>
+			</Modal.Content>
+		</Modal>
+	</Portal>
 {/if}

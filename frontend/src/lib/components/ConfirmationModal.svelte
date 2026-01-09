@@ -6,7 +6,7 @@
 	export let message = 'Are you sure you want to proceed?';
 	export let handleClose: () => void;
 	export let handleConfirm: () => void;
-    export let loading = false;
+	export let loading = false;
 </script>
 
 {#if open}
@@ -18,10 +18,10 @@
 					<p class="p-4">{message}</p>
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
-                    <div class="flex w-full justify-end gap-2">
-					    <Button on:click={handleClose} type="ghost">Cancel</Button>
-					    <Button on:click={handleConfirm} type="primary" {loading}>Confirm</Button>
-                    </div>
+					<div class="flex w-full justify-end gap-2">
+						<Button on:click={handleClose} type="ghost">Cancel</Button>
+						<Button on:click={handleConfirm} type="primary" {loading}>Confirm</Button>
+					</div>
 				</Modal.Content.Footer>
 			</Modal.Content>
 		</Modal>

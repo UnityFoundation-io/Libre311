@@ -14,7 +14,7 @@
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 	import AuthGuard from './AuthGuard.svelte';
 	import ConfirmationModal from './ConfirmationModal.svelte';
-    import RemovalSuggestionsList from './RemovalSuggestionsList.svelte';
+	import RemovalSuggestionsList from './RemovalSuggestionsList.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -84,8 +84,8 @@
 	}
 </script>
 
-<div class="flex flex-col h-full w-full">
-	<Card class="m-2 overflow-y-auto flex-grow">
+<div class="flex h-full w-full flex-col">
+	<Card class="m-2 flex-grow overflow-y-auto">
 		<div class="flex h-full w-full flex-col" slot="content">
 			<h3 class="ml-4 text-base">
 				{#if isUpdateButtonClicked}
@@ -250,7 +250,7 @@
 			{/if}
 		</div>
 	</Card>
-    <RemovalSuggestionsList serviceRequestId={serviceRequest.service_request_id} />
+	<RemovalSuggestionsList serviceRequestId={serviceRequest.service_request_id} />
 </div>
 
 <ConfirmationModal
