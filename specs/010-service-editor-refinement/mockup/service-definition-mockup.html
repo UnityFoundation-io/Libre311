@@ -246,6 +246,36 @@
 			display: block;
 		}
 
+		/* Delete Service Button */
+		.delete-service-btn {
+			opacity: 0;
+			background: transparent;
+			border: none;
+			padding: 4px;
+			cursor: pointer;
+			color: #9e9e9e;
+			border-radius: 4px;
+			transition: all 0.15s;
+			margin-left: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.tree-service:hover .delete-service-btn {
+			opacity: 1;
+		}
+
+		.delete-service-btn:hover {
+			background: #ffebee;
+			color: #d32f2f;
+		}
+
+		.delete-service-btn svg {
+			width: 16px;
+			height: 16px;
+		}
+
 		/* Add Service Button in Tree */
 		.add-service-btn {
 			display: flex;
@@ -1015,16 +1045,25 @@
 							<span class="drag-handle">::</span>
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Pothole Repair</span>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 1, 'Pothole Repair')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<div class="tree-service" data-service-id="2" onclick="selectService(2)">
 							<span class="drag-handle">::</span>
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Broken Streetlight</span>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 2, 'Broken Streetlight')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<div class="tree-service" data-service-id="3" onclick="selectService(3)">
 							<span class="drag-handle">::</span>
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Traffic Signal Issue</span>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 3, 'Traffic Signal Issue')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<button class="add-service-btn" onclick="addService(event, 1)">
 							<span>+</span> Add Service
@@ -1045,11 +1084,17 @@
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Transportation Survey</span>
 							<div class="unsaved-dot visible"></div>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 4, 'Transportation Survey')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<div class="tree-service" data-service-id="5" onclick="selectService(5)">
 							<span class="drag-handle">::</span>
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Accessibility Feedback</span>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 5, 'Accessibility Feedback')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<button class="add-service-btn" onclick="addService(event, 2)">
 							<span>+</span> Add Service
@@ -1069,16 +1114,25 @@
 							<span class="drag-handle">::</span>
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Missed Garbage Collection</span>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 6, 'Missed Garbage Collection')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<div class="tree-service" data-service-id="7" onclick="selectService(7)">
 							<span class="drag-handle">::</span>
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Illegal Dumping</span>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 7, 'Illegal Dumping')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<div class="tree-service" data-service-id="8" onclick="selectService(8)">
 							<span class="drag-handle">::</span>
 							<div class="tree-service-bullet"></div>
 							<span class="tree-service-name">Recycling Issue</span>
+							<button class="delete-service-btn" onclick="confirmDeleteService(event, 8, 'Recycling Issue')" title="Delete service">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+							</button>
 						</div>
 						<button class="add-service-btn" onclick="addService(event, 3)">
 							<span>+</span> Add Service
@@ -1378,12 +1432,27 @@
 		</div>
 	</div>
 
+	<!-- Delete Service Confirmation Modal -->
+	<div class="modal-overlay" id="deleteServiceModal">
+		<div class="modal">
+			<div class="modal-title">Delete Service</div>
+			<div class="modal-message" id="deleteServiceMessage">
+				Are you sure you want to delete this service? This action cannot be undone.
+			</div>
+			<div class="modal-actions">
+				<button class="btn-cancel" onclick="hideDeleteServiceModal()">Cancel</button>
+				<button class="btn-save" style="background: #d32f2f;" onclick="executeDeleteService()">Delete</button>
+			</div>
+		</div>
+	</div>
+
 	<script>
 		// State
 		let isDirty = false;
 		let isHeaderDirty = false;
 		let isGroupDirty = false;
 		let pendingAction = null;
+		let serviceToDelete = null;
 
 		// Service data (would come from API in real implementation)
 		const servicesData = {
@@ -1641,6 +1710,53 @@
 				pendingAction();
 				pendingAction = null;
 			}
+		}
+
+		// Delete Service Modal handling
+		function confirmDeleteService(event, serviceId, serviceName) {
+			event.stopPropagation(); // Prevent selecting the service
+			serviceToDelete = { id: serviceId, name: serviceName };
+			document.getElementById('deleteServiceMessage').textContent =
+				`Are you sure you want to delete the service '${serviceName}'? This action cannot be undone.`;
+			document.getElementById('deleteServiceModal').classList.add('visible');
+		}
+
+		function hideDeleteServiceModal() {
+			document.getElementById('deleteServiceModal').classList.remove('visible');
+			serviceToDelete = null;
+		}
+
+		function executeDeleteService() {
+			if (!serviceToDelete) return;
+
+			// Find and remove the service element
+			const serviceElement = document.querySelector(`.tree-service[data-service-id="${serviceToDelete.id}"]`);
+			if (serviceElement) {
+				const group = serviceElement.closest('.tree-group');
+				serviceElement.remove();
+
+				// Update group count
+				if (group) {
+					const countBadge = group.querySelector('.tree-group-count');
+					const remainingServices = group.querySelectorAll('.tree-service').length;
+					if (countBadge) {
+						countBadge.textContent = remainingServices;
+					}
+				}
+
+				// Clear editor if deleted service was selected
+				const selectedService = document.querySelector('.tree-service.selected');
+				if (!selectedService) {
+					document.getElementById('editorContent').innerHTML = `
+						<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #5f6368;">
+							Select a service or group to edit
+						</div>
+					`;
+				}
+			}
+
+			hideDeleteServiceModal();
+			alert(`Service '${serviceToDelete.name}' has been deleted.`);
 		}
 
 		// Group Save/Cancel

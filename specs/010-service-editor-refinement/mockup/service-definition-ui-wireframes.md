@@ -484,6 +484,39 @@ New Question Card (Expanded):
 - Confirmation dialog appears
 - On confirm, attribute removed with animation
 
+### Delete Service
+
+Services are deleted from the Tree Panel, not from within the Service Editor.
+
+**How to delete a service:**
+1. Locate the service in the Tree Panel (expand the group if needed)
+2. Hover over the service row to reveal the delete icon (trash)
+3. Click the delete icon
+4. Confirmation dialog appears
+5. Click "Delete" to confirm, or "Cancel" to abort
+
+**Delete Service Confirmation Modal:**
+
+```
++------------------------------------------+
+|                                          |
+|  Delete Service                          |
+|                                          |
+|  Are you sure you want to delete the     |
+|  service 'Pothole Repair'? This action   |
+|  cannot be undone.                       |
+|                                          |
+|                    [Cancel]   [Delete]   |
+|                                          |
++------------------------------------------+
+```
+
+**Behavior after deletion:**
+- Service is removed from the Tree Panel
+- Group service count updates
+- If deleted service was selected, selection is cleared
+- Editor Panel shows empty state
+
 ---
 
 ## Complete Example: Transportation Survey
