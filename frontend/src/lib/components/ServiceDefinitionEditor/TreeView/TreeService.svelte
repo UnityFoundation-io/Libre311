@@ -81,7 +81,12 @@
 	{/if}
 
 	<!-- Document Icon -->
-	<svg class="h-4 w-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	<svg
+		class="h-4 w-4 flex-shrink-0 text-gray-400"
+		fill="none"
+		stroke="currentColor"
+		viewBox="0 0 24 24"
+	>
 		<path
 			stroke-linecap="round"
 			stroke-linejoin="round"

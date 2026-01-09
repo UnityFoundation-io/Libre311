@@ -224,9 +224,7 @@ describe('TreePanel', () => {
 
 		// The selected service should have the highlight class
 		const serviceItems = screen.getAllByRole('treeitem', { level: 2 });
-		const selectedItem = serviceItems.find((item) =>
-			item.getAttribute('aria-selected') === 'true'
-		);
+		const selectedItem = serviceItems.find((item) => item.getAttribute('aria-selected') === 'true');
 		expect(selectedItem).toBeInTheDocument();
 	});
 

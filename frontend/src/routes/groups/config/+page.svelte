@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import type { Service, ServiceDefinitionAttribute, Group } from '$lib/services/Libre311/Libre311';
 	import type {
-		Service,
-		ServiceDefinitionAttribute,
-		Group
-	} from '$lib/services/Libre311/Libre311';
-	import type { GroupWithServices, EditorSelection } from '$lib/components/ServiceDefinitionEditor/stores/types';
+		GroupWithServices,
+		EditorSelection
+	} from '$lib/components/ServiceDefinitionEditor/stores/types';
 	import SplitPaneLayout from '$lib/components/ServiceDefinitionEditor/SplitPaneEditor/SplitPaneLayout.svelte';
 	import ServiceHeaderCard from '$lib/components/ServiceDefinitionEditor/ServiceEditor/ServiceHeaderCard.svelte';
 	import AttributeCardList from '$lib/components/ServiceDefinitionEditor/ServiceEditor/AttributeCardList.svelte';
@@ -174,7 +173,9 @@
 		isHeaderDirty = event.detail.isDirty;
 	}
 
-	async function handleHeaderSave(event: CustomEvent<{ serviceName: string; description: string }>) {
+	async function handleHeaderSave(
+		event: CustomEvent<{ serviceName: string; description: string }>
+	) {
 		if (!selectedService) return;
 
 		isHeaderSaving = true;
@@ -213,7 +214,9 @@
 		expandedAttributeIndex = null;
 	}
 
-	function handleAttributeDirty(event: CustomEvent<{ index: number; code: number; isDirty: boolean }>) {
+	function handleAttributeDirty(
+		event: CustomEvent<{ index: number; code: number; isDirty: boolean }>
+	) {
 		const { code, isDirty } = event.detail;
 		const newDirty = new Set(dirtyAttributes);
 		if (isDirty) {
@@ -386,8 +389,8 @@
 			{selectedGroup}
 			{selectedService}
 			{attributes}
-			isTreeLoading={isTreeLoading}
-			isEditorLoading={isEditorLoading}
+			{isTreeLoading}
+			{isEditorLoading}
 			{editorError}
 			on:toggleGroup={handleToggleGroup}
 			on:selectGroup={handleSelectGroup}

@@ -89,7 +89,11 @@
 				event.preventDefault();
 				if (focusedServiceIndex === null && !isGroupExpanded) {
 					handleToggleGroup(currentGroup.id);
-				} else if (focusedServiceIndex === null && isGroupExpanded && currentGroup.services.length > 0) {
+				} else if (
+					focusedServiceIndex === null &&
+					isGroupExpanded &&
+					currentGroup.services.length > 0
+				) {
 					focusedServiceIndex = 0;
 				}
 				break;
@@ -280,13 +284,7 @@
 					fill="none"
 					viewBox="0 0 24 24"
 				>
-					<circle
-						class="opacity-25"
-						cx="12"
-						cy="12"
-						r="10"
-						stroke="currentColor"
-						stroke-width="4"
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 					></circle>
 					<path
 						class="opacity-75"
@@ -309,10 +307,10 @@
 							? selection.serviceCode
 							: null}
 						draggableServices={reorderEnabled}
-						draggedServiceCode={draggedServiceCode}
-						dropTargetGroupId={dropTargetGroupId}
-						dropTargetIndex={dropTargetIndex}
-						dropPosition={dropPosition}
+						{draggedServiceCode}
+						{dropTargetGroupId}
+						{dropTargetIndex}
+						{dropPosition}
 						on:toggle={() => handleToggleGroup(group.id)}
 						on:selectGroup={() => handleSelectGroup(group.id)}
 						on:selectService={(e) => handleSelectService(group.id, e.detail.serviceCode)}

@@ -207,11 +207,7 @@
 	}
 </script>
 
-<div
-	class="space-y-4"
-	role="list"
-	aria-label="Attribute questions"
->
+<div class="space-y-4" role="list" aria-label="Attribute questions">
 	{#each attributes as attribute, index (attribute.code)}
 		<div
 			class="relative {getDropIndicatorClass(index)}"

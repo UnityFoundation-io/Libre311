@@ -36,7 +36,7 @@
 	async function handleAddOption() {
 		const newOption: AttributeValue = {
 			key: crypto.randomUUID(),
-			name: `Option ${values.length + 1}`
+			name: ''
 		};
 		values = [...values, newOption];
 		emitChange();
@@ -46,7 +46,6 @@
 		const newInput = inputRefs[values.length - 1];
 		if (newInput) {
 			newInput.focus();
-			newInput.select();
 		}
 	}
 
@@ -77,68 +76,84 @@
 			});
 		}
 	}
-
-	// Get the indicator character based on type
-	$: indicator = isMultiSelect ? '[ ]' : 'O';
 </script>
 
-<div class="space-y-2">
-	<span class="block text-sm font-medium text-gray-700" id="options-label">Options</span>
+<div class="space-y-4 py-2">
+	{#each values as option, index (option.key)}
+		<div class="flex items-center gap-3">
+			<!-- Type indicator: checkbox for multi-select, circle for single-select -->
+			{#if isMultiSelect}
+				<!-- Checkbox indicator (square with rounded corners) -->
+				<span
+					class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-gray-300"
+					aria-hidden="true"
+				></span>
+			{:else}
+				<!-- Radio indicator (circle) -->
+				<span
+					class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-300"
+					aria-hidden="true"
+				></span>
+			{/if}
 
-	<div class="space-y-2">
-		{#each values as option, index (option.key)}
-			<div class="flex items-center gap-2">
-				<!-- Type indicator -->
-				<span class="w-6 text-center font-mono text-sm text-gray-400" aria-hidden="true">
-					{indicator}
-				</span>
+			<!-- Option input (borderless) -->
+			<input
+				bind:this={inputRefs[index]}
+				type="text"
+				value={option.name}
+				on:input={(e) => handleValueChange(index, e.currentTarget.value)}
+				on:keydown={(e) => handleKeydown(e, index)}
+				class="flex-1 bg-transparent py-1 text-base text-gray-900 placeholder-gray-400 focus:outline-none disabled:text-gray-500"
+				placeholder="Option text"
+				{disabled}
+				aria-label="Option {index + 1}"
+			/>
 
-				<!-- Option input -->
-				<input
-					bind:this={inputRefs[index]}
-					type="text"
-					value={option.name}
-					on:input={(e) => handleValueChange(index, e.currentTarget.value)}
-					on:keydown={(e) => handleKeydown(e, index)}
-					class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 disabled:bg-gray-100"
-					placeholder="Option text"
-					{disabled}
-					aria-label="Option {index + 1}"
-				/>
+			<!-- Delete button (X) -->
+			<button
+				type="button"
+				class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100 {values.length >
+				1
+					? 'hover:opacity-100'
+					: ''}"
+				on:click={() => handleDeleteOption(index)}
+				disabled={disabled || values.length <= 1}
+				aria-label="Delete option {index + 1}"
+				title={values.length <= 1 ? 'Cannot delete the last option' : 'Delete option'}
+			>
+				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			</button>
+		</div>
+	{/each}
 
-				<!-- Delete button -->
-				<button
-					type="button"
-					class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
-					on:click={() => handleDeleteOption(index)}
-					disabled={disabled || values.length <= 1}
-					aria-label="Delete option {index + 1}"
-					title={values.length <= 1 ? 'Cannot delete the last option' : 'Delete option'}
-				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
-			</div>
-		{/each}
-	</div>
-
-	<!-- Add option button -->
+	<!-- Add option button with dashed indicator -->
 	<button
 		type="button"
-		class="flex items-center gap-2 rounded px-2 py-1 text-sm text-purple-600 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+		class="flex items-center gap-3 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 		on:click={handleAddOption}
 		{disabled}
 	>
-		<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-		</svg>
-		Add option
+		{#if isMultiSelect}
+			<!-- Dashed checkbox indicator -->
+			<span
+				class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-dashed border-gray-300"
+				aria-hidden="true"
+			></span>
+		{:else}
+			<!-- Dashed circle indicator -->
+			<span
+				class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-gray-300"
+				aria-hidden="true"
+			></span>
+		{/if}
+		<span class="text-base">Add option</span>
 	</button>
 
 	{#if values.length === 0}
