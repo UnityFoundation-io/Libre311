@@ -188,27 +188,26 @@
 	</div>
 
 	<div class="p-4">
-		<!-- Question Text -->
-		<div class="mb-4">
-			<label for="question-text" class="mb-1 block text-sm font-medium text-gray-700">
-				Question <span class="text-red-500">*</span>
-			</label>
+		<!-- Question Text + Type Selector (same row) -->
+		<div class="mb-4 flex items-center gap-3">
 			<input
 				bind:this={questionInput}
 				id="question-text"
 				type="text"
 				bind:value={description}
-				class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-				class:border-red-300={description.trim().length === 0 &&
-					description !== originalDescription}
-				placeholder="Enter your question"
+				class="min-w-0 flex-1 rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+				class:ring-2={description.trim().length === 0 && description !== originalDescription}
+				class:ring-red-300={description.trim().length === 0 && description !== originalDescription}
+				placeholder="Question"
 				disabled={isSaving}
+				aria-label="Question text"
 			/>
-		</div>
-
-		<!-- Type Selector -->
-		<div class="mb-4">
-			<AttributeTypeSelector value={datatype} disabled={isSaving} on:change={handleTypeChange} />
+			<AttributeTypeSelector
+				value={datatype}
+				disabled={isSaving}
+				compact={true}
+				on:change={handleTypeChange}
+			/>
 		</div>
 
 		<!-- Options List (for list types) -->
