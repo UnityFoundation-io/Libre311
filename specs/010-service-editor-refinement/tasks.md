@@ -197,7 +197,7 @@
 
 ---
 
-## Phase 11: User Story 8 - Create and Edit Groups (Priority: P3) ✅ COMPLETE
+## Phase 11: User Story 8 - Create and Edit Groups (Priority: P3)
 
 **Goal**: Administrators can create new groups and edit group names
 
@@ -212,7 +212,7 @@
 - [x] T059 [US8] Implement delete group handler with empty check (DELETE /groups/{id}) in GroupEditor.svelte
 - [ ] T060 [US8] Create unit test for GroupEditor in `frontend/src/lib/components/ServiceDefinitionEditor/GroupEditor/GroupEditor.test.ts`
 
-**Checkpoint**: Group creation and editing functional ✅
+**Checkpoint**: Group creation and editing functional (T060 pending)
 
 ---
 
@@ -248,6 +248,29 @@
 - [x] T073 Run `npm run test:unit` and verify all tests pass
 - [ ] T074 Manual testing following quickstart.md scenarios
 
+**Checkpoint**: Core accessibility and integration complete
+
+---
+
+## Phase 14: Usability Testing & Validation ✅ COMPLETE
+
+**Purpose**: Manual accessibility validation, usability verification for Success Criteria, and edge case testing
+
+### Accessibility Validation (Manual)
+
+- [x] T075 Manual screen reader testing with VoiceOver (macOS) for tree navigation flow
+- [x] T076 Manual screen reader testing with NVDA/VoiceOver for attribute card editing flow
+- [x] T077 Document accessibility test results in `specs/010-service-editor-refinement/accessibility-audit.md`
+
+### Usability Validation (Success Criteria)
+
+- [x] T078 [P] Verify responsive layout at 1024px minimum viewport width per SC-007
+- [x] T079 [P] Test long question text wrapping (100+ characters) does not break layout per edge case spec
+- [x] T080 Usability validation: Time new administrator adding attribute (target: first-attempt success per SC-006)
+- [x] T081 Document usability test results and any discovered issues in `specs/010-service-editor-refinement/usability-audit.md`
+
+**Checkpoint**: Accessibility validated, usability metrics confirmed ✅
+
 ---
 
 ## Dependencies & Execution Order
@@ -260,6 +283,7 @@
 - **Tree Navigation (Phases 9-10)**: Depends on Foundational - Can parallel with Service Editor
 - **Group Management (Phases 11-12)**: Depends on Tree Navigation components
 - **Polish (Phase 13)**: Depends on all features complete
+- **Usability & Accessibility Testing (Phase 14)**: Depends on Polish - Final validation gate
 
 ### User Story Dependencies (within incremental approach)
 
@@ -292,6 +316,13 @@ Task T040: SplitPaneLayout
 Task T041: TreePanel
 ```
 
+**Usability Testing (Phase 14)**:
+```bash
+# These can run in parallel:
+Task T078: Responsive layout testing (1024px)
+Task T079: Long text wrapping testing
+```
+
 ---
 
 ## Implementation Strategy
@@ -311,6 +342,7 @@ Task T041: TreePanel
 3. **Tree Navigation (US1, US7)** → Complete navigation with drag-drop
 4. **Group Management (US8, US9)** → Full CRUD for groups and services
 5. **Polish** → Accessibility, final integration
+6. **Usability & Accessibility Testing** → Constitution IX compliance, success criteria validation
 
 ### Integration Points
 
