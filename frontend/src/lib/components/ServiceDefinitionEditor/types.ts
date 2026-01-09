@@ -60,12 +60,12 @@ export type CardState = 'collapsed' | 'expanded';
 /**
  * Extended attribute with UI-specific state for editor cards
  */
-export interface AttributeCardState extends ServiceDefinitionAttribute {
+export type AttributeCardState = ServiceDefinitionAttribute & {
 	cardState: CardState;
 	isDirty: boolean;
 	isSaving: boolean;
 	error?: string;
-}
+};
 
 /**
  * Main editor page state
