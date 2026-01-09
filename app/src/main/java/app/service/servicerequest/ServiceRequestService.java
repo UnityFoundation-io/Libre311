@@ -28,6 +28,9 @@ import app.model.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
+import app.model.servicerequest.ServiceRequestRemovalSuggestion;
+import app.model.servicerequest.ServiceRequestRemovalSuggestionCount;
+import app.model.servicerequest.ServiceRequestRemovalSuggestionRepository;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
 import app.recaptcha.ReCaptchaService;
@@ -85,6 +88,7 @@ public class ServiceRequestService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServiceRequestService.class);
     private final ServiceRequestRepository serviceRequestRepository;
+    private final ServiceRequestRemovalSuggestionRepository removalSuggestionRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceDefinitionAttributeRepository attributeRepository;
     private final ReCaptchaService reCaptchaService;
@@ -94,6 +98,7 @@ public class ServiceRequestService {
     LibreGeometryFactory libreGeometryFactory;
 
     public ServiceRequestService(ServiceRequestRepository serviceRequestRepository,
+        ServiceRequestRemovalSuggestionRepository removalSuggestionRepository,
         ServiceRepository serviceRepository,
         ServiceDefinitionAttributeRepository attributeRepository,
         ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
@@ -101,6 +106,7 @@ public class ServiceRequestService {
         JurisdictionBoundaryService jurisdictionBoundaryService,
         LibreGeometryFactory libreGeometryFactory) {
         this.serviceRequestRepository = serviceRequestRepository;
+        this.removalSuggestionRepository = removalSuggestionRepository;
         this.serviceRepository = serviceRepository;
         this.attributeRepository = attributeRepository;
         this.reCaptchaService = reCaptchaService;
@@ -171,6 +177,41 @@ public class ServiceRequestService {
         }
 
         return new PostResponseServiceRequestDTO(serviceRequestRepository.save(serviceRequest));
+    }
+
+    public void createRemovalSuggestion(Long serviceRequestId, String jurisdictionId, PostRequestServiceRequestRemovalSuggestionDTO suggestionDTO) {
+        reCaptchaService.verifyReCaptcha(suggestionDTO.getgRecaptchaResponse());
+        Optional<ServiceRequest> serviceRequestOptional = serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
+        if (serviceRequestOptional.isEmpty()) {
+            throw new InvalidServiceRequestException("Service Request not found.");
+        }
+
+        ServiceRequestRemovalSuggestion suggestion = new ServiceRequestRemovalSuggestion();
+        suggestion.setServiceRequestId(serviceRequestOptional.get().getId());
+        suggestion.setJurisdictionId(jurisdictionId);
+        suggestion.setEmail(suggestionDTO.getEmail());
+        suggestion.setName(suggestionDTO.getName());
+        suggestion.setPhone(suggestionDTO.getPhone());
+        suggestion.setReason(suggestionDTO.getReason());
+
+        removalSuggestionRepository.save(suggestion);
+    }
+
+    public Page<ServiceRequestRemovalSuggestionDTO> getRemovalSuggestions(String jurisdictionId, Pageable pageable) {
+        return removalSuggestionRepository.findAllByJurisdictionId(jurisdictionId, pageable)
+                .map(this::convertToSuggestionDTO);
+    }
+
+    private ServiceRequestRemovalSuggestionDTO convertToSuggestionDTO(ServiceRequestRemovalSuggestion suggestion) {
+        ServiceRequestRemovalSuggestionDTO dto = new ServiceRequestRemovalSuggestionDTO();
+        dto.setId(suggestion.getId());
+        dto.setServiceRequestId(suggestion.getServiceRequestId());
+        dto.setEmail(suggestion.getEmail());
+        dto.setName(suggestion.getName());
+        dto.setPhone(suggestion.getPhone());
+        dto.setReason(suggestion.getReason());
+        dto.setDateCreated(suggestion.getDateCreated());
+        return dto;
     }
 
     private boolean validMediaUrl(String mediaUrl) {
@@ -403,7 +444,20 @@ public class ServiceRequestService {
                 : ServiceRequestService::convertToDTO;
 
 
-        return getServiceRequestPage(requestDTO, jurisdictionId).map(mapper);
+        Page<ServiceRequest> page = getServiceRequestPage(requestDTO, jurisdictionId);
+        Page<ServiceRequestDTO> dtoPage = page.map(mapper);
+
+        if (canViewSensitive && !dtoPage.getContent().isEmpty()) {
+            List<Long> ids = dtoPage.getContent().stream().map(ServiceRequestDTO::getId).collect(Collectors.toList());
+            List<ServiceRequestRemovalSuggestionCount> counts = removalSuggestionRepository.countByServiceRequestIdIn(ids);
+            Map<Long, Long> countMap = counts.stream().collect(Collectors.toMap(ServiceRequestRemovalSuggestionCount::getServiceRequestId, ServiceRequestRemovalSuggestionCount::getCount));
+
+            dtoPage.getContent().forEach(dto -> {
+                dto.setRemovalSuggestionsCount(countMap.getOrDefault(dto.getId(), 0L));
+            });
+        }
+
+        return dtoPage;
     }
 
     private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
@@ -545,6 +599,19 @@ public class ServiceRequestService {
     }
 
     public int delete(Long serviceRequestId, String jurisdictionId) {
-        return serviceRequestRepository.updateDeletedByIdAndJurisdictionIdAndDeletedFalse(serviceRequestId, jurisdictionId, true);
+        removalSuggestionRepository.deleteByServiceRequestIdAndJurisdictionId(serviceRequestId, jurisdictionId);
+        return serviceRequestRepository.delete(serviceRequestId, jurisdictionId);
+    }
+
+    public void deleteRemovalSuggestion(Long id, String jurisdictionId) {
+        Optional<ServiceRequestRemovalSuggestion> suggestionOptional = removalSuggestionRepository.findById(id);
+        if (suggestionOptional.isPresent()) {
+            ServiceRequestRemovalSuggestion suggestion = suggestionOptional.get();
+            if (suggestion.getJurisdictionId().equals(jurisdictionId)) {
+                removalSuggestionRepository.softDelete(id, jurisdictionId);
+                return;
+            }
+        }
+        throw new InvalidServiceRequestException("Removal suggestion not found.");
     }
 }

@@ -16,6 +16,7 @@ package app.model.servicerequest;
 
 import app.model.jurisdiction.Jurisdiction_;
 import app.model.service.Service_;
+import io.micronaut.data.annotation.Query;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
@@ -25,6 +26,7 @@ import io.micronaut.data.repository.PageableRepository;
 import io.micronaut.data.repository.jpa.JpaSpecificationExecutor;
 import io.micronaut.data.repository.jpa.criteria.QuerySpecification;
 import jakarta.transaction.Transactional;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -33,26 +35,12 @@ import java.util.Optional;
 public interface ServiceRequestRepository extends PageableRepository<ServiceRequest, Long>,
         JpaSpecificationExecutor<ServiceRequest> {
 
-    default Page<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId,
-                                                             Pageable pageable) {
-        return findByIdInAndJurisdictionIdAndDeleted(serviceRequestIds, jurisdictionId, false, pageable);
-    }
+    Page<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Pageable pageable);
+    List<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Sort sort);
+    Optional<ServiceRequest> findByIdAndJurisdictionId(Long serviceRequestId, String jurisdictionId);
 
-
-    default List<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Sort sort) {
-        return findByIdInAndJurisdictionIdAndDeleted(serviceRequestIds, jurisdictionId, false, sort);
-    }
-
-
-    default Optional<ServiceRequest> findByIdAndJurisdictionId(Long serviceRequestId, String jurisdictionId) {
-        return findByIdAndJurisdictionIdAndDeleted(serviceRequestId, jurisdictionId, false);
-    }
-
-    Page<ServiceRequest> findByIdInAndJurisdictionIdAndDeleted(List<Long> serviceRequestIds, String jurisdictionId, boolean deleted, Pageable pageable);
-    List<ServiceRequest> findByIdInAndJurisdictionIdAndDeleted(List<Long> serviceRequestIds, String jurisdictionId, boolean deleted, Sort sort);
-    Optional<ServiceRequest> findByIdAndJurisdictionIdAndDeleted(Long serviceRequestId, String jurisdictionId, boolean deleted);
-
-    Integer updateDeletedByIdAndJurisdictionIdAndDeletedFalse(Long id, String jurisdictionId, boolean deleted);
+    @Query("update ServiceRequest sr set sr.deleted = true where sr.id = :id and sr.jurisdiction.id = :jurisdictionId")
+    Integer delete(Long id, String jurisdictionId);
 
     @Transactional
     default Page<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,

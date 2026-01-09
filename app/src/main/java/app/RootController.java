@@ -164,6 +164,19 @@ public class RootController {
         return xmlMapper.writeValueAsString(serviceRequestList);
     }
 
+    @Post(uris = {"/requests/{serviceRequestId}/removal-suggestions{?jurisdiction_id}", "/requests/{serviceRequestId}/removal-suggestions.json{?jurisdiction_id}"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public HttpResponse<?> createServiceRequestRemovalSuggestion(
+            @PathVariable Long serviceRequestId,
+            @Valid @Body PostRequestServiceRequestRemovalSuggestionDTO requestDTO,
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+
+        serviceRequestService.createRemovalSuggestion(serviceRequestId, jurisdiction_id, requestDTO);
+        return HttpResponse.ok();
+    }
+
     @Get(uris = {"/requests{?jurisdiction_id}", "/requests.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
