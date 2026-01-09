@@ -98,41 +98,41 @@
 					></span>
 				{/if}
 
-			<!-- Option input (borderless) -->
-			<input
-				bind:this={inputRefs[index]}
-				type="text"
-				value={option.name}
-				on:input={(e) => handleValueChange(index, e.currentTarget.value)}
-				on:keydown={(e) => handleKeydown(e, index)}
-				class="flex-1 bg-transparent py-1 text-base text-gray-900 placeholder-gray-400 focus:outline-none disabled:text-gray-500"
-				placeholder="Option text"
-				{disabled}
-				aria-label="Option {index + 1}"
-			/>
+				<!-- Option input (borderless) -->
+				<input
+					bind:this={inputRefs[index]}
+					type="text"
+					value={option.name}
+					on:input={(e) => handleValueChange(index, e.currentTarget.value)}
+					on:keydown={(e) => handleKeydown(e, index)}
+					class="flex-1 bg-transparent py-1 text-base text-gray-900 placeholder-gray-400 focus:outline-none disabled:text-gray-500"
+					placeholder="Option text"
+					{disabled}
+					aria-label="Option {index + 1}"
+				/>
 
-			<!-- Delete button (X) -->
-			<button
-				type="button"
-				class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100 {values.length >
-				1
-					? 'hover:opacity-100'
-					: ''}"
-				on:click={() => handleDeleteOption(index)}
-				disabled={disabled || values.length <= 1}
-				aria-label="Delete option {index + 1}"
-				title={values.length <= 1 ? 'Cannot delete the last option' : 'Delete option'}
-			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
-			</button>
-		</div>
+				<!-- Delete button (X) -->
+				<button
+					type="button"
+					class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100 {values.length >
+					1
+						? 'hover:opacity-100'
+						: ''}"
+					on:click={() => handleDeleteOption(index)}
+					disabled={disabled || values.length <= 1}
+					aria-label="Delete option {index + 1}"
+					title={values.length <= 1 ? 'Cannot delete the last option' : 'Delete option'}
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
 		{/each}
 
 		<!-- Add option button with dashed indicator -->

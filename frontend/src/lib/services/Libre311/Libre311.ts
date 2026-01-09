@@ -361,7 +361,8 @@ export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
 // Edit Service - Request Schema
 export const EditServiceParamsSchema = z.object({
 	service_code: z.number(),
-	service_name: z.string()
+	service_name: z.string(),
+	description: z.string().optional()
 });
 
 // Edit Service - Request Type

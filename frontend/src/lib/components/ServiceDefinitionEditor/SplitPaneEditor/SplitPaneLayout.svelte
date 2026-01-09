@@ -181,6 +181,7 @@
 		/>
 	</div>
 
+	<!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
 	<!-- Resizer -->
 	<div
 		class="group relative w-1 flex-shrink-0 cursor-col-resize bg-gray-200 transition-colors hover:bg-purple-400 {isResizing

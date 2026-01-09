@@ -193,7 +193,8 @@
 		try {
 			const updated = await libre311.editService({
 				service_code: selectedService.service_code,
-				service_name: event.detail.serviceName
+				service_name: event.detail.serviceName,
+				description: event.detail.description
 			});
 
 			// Update local state
@@ -497,19 +498,14 @@
 				g.id === serviceToDelete!.groupId
 					? {
 							...g,
-							services: g.services.filter(
-								(s) => s.service_code !== serviceToDelete!.serviceCode
-							),
+							services: g.services.filter((s) => s.service_code !== serviceToDelete!.serviceCode),
 							serviceCount: g.serviceCount - 1
 						}
 					: g
 			);
 
 			// Clear selection if the deleted service was selected
-			if (
-				selection.type === 'service' &&
-				selection.serviceCode === serviceToDelete.serviceCode
-			) {
+			if (selection.type === 'service' && selection.serviceCode === serviceToDelete.serviceCode) {
 				selection = { type: null, groupId: null, serviceCode: null };
 				selectedService = null;
 				serviceAttributes = [];

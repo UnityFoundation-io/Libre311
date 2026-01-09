@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Service, ServiceDefinitionAttribute, Group } from '$lib/services/Libre311/Libre311';
+	import type { Service, Group } from '$lib/services/Libre311/Libre311';
 	import type { EditorSelection } from '../stores/types';
 
 	/**
@@ -17,11 +17,6 @@
 	 * Currently selected service with attributes (if selection.type === 'service')
 	 */
 	export let selectedService: Service | null = null;
-
-	/**
-	 * Attributes for the selected service
-	 */
-	export let attributes: ServiceDefinitionAttribute[] = [];
 
 	/**
 	 * Whether the panel is loading data
