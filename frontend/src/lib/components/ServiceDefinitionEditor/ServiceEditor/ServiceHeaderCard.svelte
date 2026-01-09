@@ -101,7 +101,7 @@
 
 <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
 	<!-- Purple top border indicator -->
-	<div class="h-1 rounded-t-lg bg-purple-600"></div>
+	<div class="h-1 rounded-t-lg bg-blue-600"></div>
 
 	<div class="p-6">
 		<!-- Service Name Field -->
@@ -114,7 +114,7 @@
 				id="service-name"
 				type="text"
 				bind:value={serviceName}
-				class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+				class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 				class:border-red-300={!isValid && serviceName !== originalName}
 				placeholder="Enter service name"
 				disabled={isSaving}
@@ -135,7 +135,7 @@
 				id="service-description"
 				bind:value={description}
 				rows="3"
-				class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+				class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 				placeholder="Enter a description for this service"
 				disabled={isSaving}
 			></textarea>
@@ -145,7 +145,7 @@
 		<div class="flex items-center justify-end gap-3">
 			<button
 				type="button"
-				class="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+				class="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 				on:click={handleCancel}
 				disabled={!isDirty || isSaving}
 			>

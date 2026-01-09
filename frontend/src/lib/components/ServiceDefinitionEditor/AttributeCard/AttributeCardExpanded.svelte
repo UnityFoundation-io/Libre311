@@ -225,7 +225,7 @@
 				id="question-text"
 				type="text"
 				bind:value={description}
-				class="min-w-0 flex-1 rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+				class="min-w-0 flex-1 rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				class:ring-2={description.trim().length === 0 && description !== originalDescription}
 				class:ring-red-300={description.trim().length === 0 && description !== originalDescription}
 				placeholder="Question"
@@ -256,7 +256,7 @@
 		<div class="mb-4">
 			<button
 				type="button"
-				class="flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700"
+				class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
 				on:click={() => (showMoreOptions = !showMoreOptions)}
 			>
 				<svg
@@ -279,7 +279,7 @@
 						id="help-text"
 						type="text"
 						bind:value={datatypeDescription}
-						class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+						class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 						placeholder="Provide additional guidance for this question"
 						disabled={isSaving}
 					/>

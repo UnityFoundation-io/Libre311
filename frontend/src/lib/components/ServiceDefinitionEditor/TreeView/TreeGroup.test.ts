@@ -180,7 +180,7 @@ describe('TreeGroup', () => {
 		});
 
 		const groupHeader = screen.getByRole('button', { name: /infrastructure/i });
-		expect(groupHeader.classList.contains('bg-purple-50')).toBe(true);
+		expect(groupHeader.classList.contains('bg-blue-50')).toBe(true);
 	});
 
 	it('handles keyboard Enter to select group', async () => {

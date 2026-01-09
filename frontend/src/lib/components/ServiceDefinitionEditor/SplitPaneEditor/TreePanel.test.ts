@@ -206,7 +206,7 @@ describe('TreePanel', () => {
 		});
 
 		const group = screen.getByRole('button', { name: /infrastructure/i });
-		expect(group.classList.contains('bg-purple-50')).toBe(true);
+		expect(group.classList.contains('bg-blue-50')).toBe(true);
 	});
 
 	it('shows selection highlight on selected service', () => {

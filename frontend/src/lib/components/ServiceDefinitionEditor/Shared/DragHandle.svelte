@@ -18,7 +18,7 @@
 
 <div
 	class="flex cursor-grab items-center justify-center text-gray-400 hover:text-gray-600 active:cursor-grabbing {isDragging
-		? 'cursor-grabbing text-purple-600'
+		? 'cursor-grabbing text-blue-600'
 		: ''} {className}"
 	role="button"
 	tabindex="0"

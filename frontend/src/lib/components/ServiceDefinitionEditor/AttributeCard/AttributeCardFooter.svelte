@@ -40,7 +40,7 @@
 	<div class="flex items-center gap-2">
 		<button
 			type="button"
-			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
 			on:click={() => dispatch('copy')}
 			disabled={isSaving}
 			aria-label="Copy attribute"
@@ -84,8 +84,8 @@
 				type="button"
 				role="switch"
 				aria-checked={required}
-				class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 {required
-					? 'bg-purple-600'
+				class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {required
+					? 'bg-blue-600'
 					: 'bg-gray-200'}"
 				on:click={handleRequiredToggle}
 				disabled={isSaving}
@@ -103,7 +103,7 @@
 	<div class="flex items-center gap-3">
 		<button
 			type="button"
-			class="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			class="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 			on:click={() => dispatch('cancel')}
 			disabled={!canCancel || isSaving}
 		>

@@ -176,7 +176,7 @@
 	<!-- Group Header -->
 	<div
 		class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {isSelected
-			? 'bg-purple-50 ring-1 ring-purple-500'
+			? 'bg-blue-50 ring-1 ring-blue-500'
 			: ''}"
 		on:click={handleSelectGroup}
 		on:keydown={handleKeydown}
@@ -187,7 +187,7 @@
 		<!-- Expand/Collapse Arrow -->
 		<button
 			type="button"
-			class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+			class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
 			on:click={handleToggle}
 			on:keydown={(e) => e.key === 'Enter' && handleToggle(e)}
 			aria-label={isExpanded ? 'Collapse group' : 'Expand group'}
@@ -250,7 +250,7 @@
 					aria-selected={selectedServiceCode === service.service_code}
 					class="group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {selectedServiceCode ===
 					service.service_code
-						? 'bg-blue-50 ring-1 ring-purple-500'
+						? 'bg-blue-50 ring-1 ring-blue-500'
 						: ''} {draggedServiceCode === service.service_code ? 'opacity-50' : ''}"
 					draggable={draggableServices}
 					on:click={() => handleServiceClick(service.service_code)}
@@ -324,7 +324,7 @@
 			<!-- Add Service Button -->
 			<button
 				type="button"
-				class="flex w-full items-center gap-1 rounded-md px-2 py-1.5 text-sm text-purple-600 hover:bg-purple-50"
+				class="flex w-full items-center gap-1 rounded-md px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50"
 				on:click={handleAddService}
 				aria-label="Add service to {group.name}"
 			>

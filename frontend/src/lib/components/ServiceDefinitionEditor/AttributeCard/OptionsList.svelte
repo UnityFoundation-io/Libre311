@@ -114,7 +114,7 @@
 				<!-- Delete button (X) -->
 				<button
 					type="button"
-					class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100 {values.length >
+					class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100 {values.length >
 					1
 						? 'hover:opacity-100'
 						: ''}"
@@ -138,7 +138,7 @@
 		<!-- Add option button with dashed indicator -->
 		<button
 			type="button"
-			class="flex items-center gap-3 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			class="flex items-center gap-3 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 			on:click={handleAddOption}
 			{disabled}
 		>

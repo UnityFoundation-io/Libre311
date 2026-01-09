@@ -508,7 +508,7 @@
 			if (selection.type === 'service' && selection.serviceCode === serviceToDelete.serviceCode) {
 				selection = { type: null, groupId: null, serviceCode: null };
 				selectedService = null;
-				serviceAttributes = [];
+				attributes = [];
 			}
 		} catch (err) {
 			console.error('Failed to delete service:', err);

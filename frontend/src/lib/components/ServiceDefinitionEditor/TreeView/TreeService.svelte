@@ -65,7 +65,7 @@
 	aria-level={level}
 	aria-selected={isSelected}
 	class="group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {isSelected
-		? 'bg-blue-50 ring-1 ring-purple-500'
+		? 'bg-blue-50 ring-1 ring-blue-500'
 		: ''} {isDragging ? 'opacity-50' : ''}"
 	on:click={handleClick}
 	on:keydown={handleKeydown}

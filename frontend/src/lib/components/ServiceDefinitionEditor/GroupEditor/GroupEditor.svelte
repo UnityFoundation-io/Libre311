@@ -86,7 +86,7 @@
 	<!-- Group Header Card -->
 	<div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
 		<!-- Purple top border -->
-		<div class="h-1 bg-purple-600"></div>
+		<div class="h-1 bg-blue-600"></div>
 
 		<div class="p-6">
 			<h3 class="mb-4 text-lg font-semibold text-gray-900">Edit Group</h3>
@@ -99,7 +99,7 @@
 					type="text"
 					bind:value={editedName}
 					on:keydown={handleKeydown}
-					class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+					class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 					placeholder="Enter group name"
 				/>
 			</div>

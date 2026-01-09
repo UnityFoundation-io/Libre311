@@ -89,7 +89,7 @@
 
 			case 'ArrowUp':
 				event.preventDefault();
-				navigateUp(currentGroup, isGroupExpanded);
+				navigateUp();
 				break;
 
 			case 'ArrowRight':
@@ -164,7 +164,7 @@
 		}
 	}
 
-	function navigateUp(_currentGroup: GroupWithServices, _isGroupExpanded: boolean) {
+	function navigateUp() {
 		if (focusedServiceIndex !== null) {
 			if (focusedServiceIndex > 0) {
 				focusedServiceIndex--;
@@ -271,7 +271,7 @@
 		<h2 class="text-sm font-semibold text-gray-900">Service Groups</h2>
 		<button
 			type="button"
-			class="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-purple-600 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+			class="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
 			on:click={handleCreateGroup}
 			aria-label="Create new group"
 		>
@@ -287,7 +287,7 @@
 		{#if isLoading}
 			<div class="flex items-center justify-center py-8">
 				<svg
-					class="h-6 w-6 animate-spin text-purple-600"
+					class="h-6 w-6 animate-spin text-blue-600"
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"
 					viewBox="0 0 24 24"

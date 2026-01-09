@@ -44,7 +44,7 @@
 		<div class="flex flex-1 items-center justify-center">
 			<div class="text-center">
 				<svg
-					class="mx-auto h-8 w-8 animate-spin text-purple-600"
+					class="mx-auto h-8 w-8 animate-spin text-blue-600"
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"
 					viewBox="0 0 24 24"

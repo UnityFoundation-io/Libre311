@@ -137,7 +137,7 @@
 
 <div
 	class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow {isExpanded
-		? 'ring-2 ring-purple-500'
+		? 'ring-2 ring-blue-500'
 		: ''} {isDragging ? 'opacity-50' : ''}"
 	aria-label="Attribute: {attribute.description}"
 >

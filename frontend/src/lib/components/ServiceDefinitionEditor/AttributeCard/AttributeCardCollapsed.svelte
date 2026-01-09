@@ -53,7 +53,7 @@
 				<span class="text-red-500" aria-label="Required">*</span>
 			{/if}
 			{#if isDirty}
-				<span class="ml-1 text-xs text-orange-500" aria-label="Unsaved changes">(unsaved)</span>
+				<span class="ml-1 text-xs text-amber-600" aria-label="Unsaved changes">(unsaved)</span>
 			{/if}
 		</p>
 
