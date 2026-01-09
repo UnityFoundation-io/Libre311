@@ -91,6 +91,9 @@ micronaut {
         incremental(true)
         annotations("app.*")
     }
+    testResources {
+        enabled = System.getenv("MICRONAUT_TEST_RESOURCES_ENABLED") == "false" ? false : true
+    }
 }
 
 tasks.withType(JavaCompile) {
