@@ -60,8 +60,15 @@
 	// More options expanded state
 	let showMoreOptions = false;
 
-	// Initialize from attribute prop
-	$: if (attribute) {
+	// Track attribute code to detect actual prop changes (H1 fix)
+	let lastAttributeCode: number | null = null;
+
+	// Track previous dirty state to avoid excessive event dispatching (H2 fix)
+	let previousIsDirty = false;
+
+	// Initialize from attribute prop - only when attribute actually changes
+	$: if (attribute && attribute.code !== lastAttributeCode) {
+		lastAttributeCode = attribute.code;
 		initializeForm(attribute);
 	}
 
@@ -90,8 +97,11 @@
 		datatypeDescription !== originalDatatypeDescription ||
 		JSON.stringify(values) !== JSON.stringify(originalValues);
 
-	// Notify parent of dirty changes
-	$: dispatch('dirty', { isDirty });
+	// Notify parent of dirty changes - only when isDirty actually changes (H2 fix)
+	$: if (isDirty !== previousIsDirty) {
+		previousIsDirty = isDirty;
+		dispatch('dirty', { isDirty });
+	}
 
 	// Validation
 	$: isValid = description.trim().length > 0 && (!isList || values.length > 0);
@@ -169,6 +179,10 @@
 
 	let questionInput: HTMLInputElement;
 
+	// Generate unique IDs for inputs (L1 fix)
+	$: questionInputId = `question-text-${attribute?.code ?? 'new'}`;
+	$: helpTextInputId = `help-text-${attribute?.code ?? 'new'}`;
+
 	// Track if a drag operation actually started (mouse moved while down)
 	let dragStarted = false;
 
@@ -199,9 +213,15 @@
 	});
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
-
-<div class="border-t border-gray-200">
+<!-- H3 fix: Attach keyboard handler to container, not window, to avoid global capture -->
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<div
+	class="border-t border-gray-200"
+	on:keydown={handleKeydown}
+	tabindex="-1"
+	role="form"
+	aria-label="Edit attribute"
+>
 	<!-- Drag Handle - click to collapse, drag to reorder -->
 	<div
 		class="flex justify-center border-b border-gray-100 py-2"
@@ -222,7 +242,7 @@
 		<div class="mb-4 flex items-center gap-3">
 			<input
 				bind:this={questionInput}
-				id="question-text"
+				id={questionInputId}
 				type="text"
 				bind:value={description}
 				class="min-w-0 flex-1 rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -272,11 +292,11 @@
 
 			{#if showMoreOptions}
 				<div class="mt-3 rounded-md bg-gray-50 p-3">
-					<label for="help-text" class="mb-1 block text-sm font-medium text-gray-700">
+					<label for={helpTextInputId} class="mb-1 block text-sm font-medium text-gray-700">
 						Help Text
 					</label>
 					<input
-						id="help-text"
+						id={helpTextInputId}
 						type="text"
 						bind:value={datatypeDescription}
 						class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"

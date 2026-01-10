@@ -237,3 +237,334 @@ describe('AttributeCard - Accordion Behavior', () => {
 		expect(result.find((c) => c.id === 2)?.isExpanded).toBe(true);
 	});
 });
+
+/**
+ * H1 Fix Tests: Attribute Code Tracking
+ *
+ * Tests the pattern used to prevent infinite loop from reactive statement
+ * that initializes form state when attribute prop changes.
+ * The fix tracks attribute.code to detect actual prop changes.
+ */
+describe('AttributeCard - H1: Attribute Code Tracking (Infinite Loop Prevention)', () => {
+	interface Attribute {
+		code: number;
+		description: string;
+		datatype: DatatypeUnion;
+		required: boolean;
+	}
+
+	interface FormState {
+		description: string;
+		datatype: DatatypeUnion;
+		required: boolean;
+		lastAttributeCode: number | null;
+	}
+
+	function shouldReinitialize(
+		attribute: Attribute | null,
+		lastAttributeCode: number | null
+	): boolean {
+		return attribute !== null && attribute.code !== lastAttributeCode;
+	}
+
+	function initializeFormWithTracking(attr: Attribute, currentState: FormState): FormState {
+		// Only reinitialize if attribute code changed
+		if (!shouldReinitialize(attr, currentState.lastAttributeCode)) {
+			return currentState;
+		}
+
+		return {
+			description: attr.description,
+			datatype: attr.datatype,
+			required: attr.required,
+			lastAttributeCode: attr.code
+		};
+	}
+
+	it('should initialize form when attribute first provided', () => {
+		const attr: Attribute = {
+			code: 123,
+			description: 'Test question',
+			datatype: 'string',
+			required: false
+		};
+		const initialState: FormState = {
+			description: '',
+			datatype: 'string',
+			required: false,
+			lastAttributeCode: null
+		};
+
+		const result = initializeFormWithTracking(attr, initialState);
+
+		expect(result.description).toBe('Test question');
+		expect(result.lastAttributeCode).toBe(123);
+	});
+
+	it('should not reinitialize when same attribute code', () => {
+		const attr: Attribute = {
+			code: 123,
+			description: 'Updated description', // Different description but same code
+			datatype: 'string',
+			required: false
+		};
+		const currentState: FormState = {
+			description: 'User edited this',
+			datatype: 'text', // User changed this
+			required: true, // User changed this
+			lastAttributeCode: 123 // Same code as attr
+		};
+
+		const result = initializeFormWithTracking(attr, currentState);
+
+		// Should keep user's edits, not overwrite with prop
+		expect(result.description).toBe('User edited this');
+		expect(result.datatype).toBe('text');
+		expect(result.required).toBe(true);
+	});
+
+	it('should reinitialize when attribute code changes (different attribute)', () => {
+		const newAttr: Attribute = {
+			code: 456, // Different code
+			description: 'New question',
+			datatype: 'number',
+			required: true
+		};
+		const currentState: FormState = {
+			description: 'Old question',
+			datatype: 'string',
+			required: false,
+			lastAttributeCode: 123
+		};
+
+		const result = initializeFormWithTracking(newAttr, currentState);
+
+		expect(result.description).toBe('New question');
+		expect(result.datatype).toBe('number');
+		expect(result.lastAttributeCode).toBe(456);
+	});
+
+	it('should not initialize when attribute is null', () => {
+		expect(shouldReinitialize(null, null)).toBe(false);
+		expect(shouldReinitialize(null, 123)).toBe(false);
+	});
+});
+
+/**
+ * H2 Fix Tests: Dirty State Dispatch Optimization
+ *
+ * Tests the pattern used to prevent excessive event dispatching.
+ * The fix tracks previousIsDirty and only dispatches when value changes.
+ */
+describe('AttributeCard - H2: Dirty Dispatch Optimization', () => {
+	interface DirtyTracker {
+		previousIsDirty: boolean;
+		dispatchCount: number;
+	}
+
+	function handleDirtyChange(
+		isDirty: boolean,
+		tracker: DirtyTracker
+	): { tracker: DirtyTracker; dispatched: boolean } {
+		if (isDirty !== tracker.previousIsDirty) {
+			return {
+				tracker: {
+					previousIsDirty: isDirty,
+					dispatchCount: tracker.dispatchCount + 1
+				},
+				dispatched: true
+			};
+		}
+		return { tracker, dispatched: false };
+	}
+
+	it('should dispatch when isDirty changes from false to true', () => {
+		const tracker: DirtyTracker = { previousIsDirty: false, dispatchCount: 0 };
+
+		const result = handleDirtyChange(true, tracker);
+
+		expect(result.dispatched).toBe(true);
+		expect(result.tracker.previousIsDirty).toBe(true);
+		expect(result.tracker.dispatchCount).toBe(1);
+	});
+
+	it('should dispatch when isDirty changes from true to false', () => {
+		const tracker: DirtyTracker = { previousIsDirty: true, dispatchCount: 0 };
+
+		const result = handleDirtyChange(false, tracker);
+
+		expect(result.dispatched).toBe(true);
+		expect(result.tracker.previousIsDirty).toBe(false);
+		expect(result.tracker.dispatchCount).toBe(1);
+	});
+
+	it('should NOT dispatch when isDirty stays false', () => {
+		const tracker: DirtyTracker = { previousIsDirty: false, dispatchCount: 0 };
+
+		const result = handleDirtyChange(false, tracker);
+
+		expect(result.dispatched).toBe(false);
+		expect(result.tracker.dispatchCount).toBe(0);
+	});
+
+	it('should NOT dispatch when isDirty stays true', () => {
+		const tracker: DirtyTracker = { previousIsDirty: true, dispatchCount: 0 };
+
+		const result = handleDirtyChange(true, tracker);
+
+		expect(result.dispatched).toBe(false);
+		expect(result.tracker.dispatchCount).toBe(0);
+	});
+
+	it('should only dispatch once for repeated true values', () => {
+		let tracker: DirtyTracker = { previousIsDirty: false, dispatchCount: 0 };
+
+		// First change to true - should dispatch
+		let result = handleDirtyChange(true, tracker);
+		expect(result.dispatched).toBe(true);
+		tracker = result.tracker;
+
+		// Repeated true values - should NOT dispatch
+		result = handleDirtyChange(true, tracker);
+		expect(result.dispatched).toBe(false);
+
+		result = handleDirtyChange(true, tracker);
+		expect(result.dispatched).toBe(false);
+
+		result = handleDirtyChange(true, tracker);
+		expect(result.dispatched).toBe(false);
+
+		// Total dispatch count should be 1
+		expect(tracker.dispatchCount).toBe(1);
+	});
+
+	it('should dispatch correctly through multiple state transitions', () => {
+		let tracker: DirtyTracker = { previousIsDirty: false, dispatchCount: 0 };
+
+		// false -> true (dispatch)
+		let result = handleDirtyChange(true, tracker);
+		expect(result.dispatched).toBe(true);
+		tracker = result.tracker;
+
+		// true -> true (no dispatch)
+		result = handleDirtyChange(true, tracker);
+		expect(result.dispatched).toBe(false);
+
+		// true -> false (dispatch)
+		result = handleDirtyChange(false, tracker);
+		expect(result.dispatched).toBe(true);
+		tracker = result.tracker;
+
+		// false -> false (no dispatch)
+		result = handleDirtyChange(false, tracker);
+		expect(result.dispatched).toBe(false);
+
+		// false -> true (dispatch)
+		result = handleDirtyChange(true, tracker);
+		expect(result.dispatched).toBe(true);
+		tracker = result.tracker;
+
+		// Total: 3 dispatches (false->true, true->false, false->true)
+		expect(tracker.dispatchCount).toBe(3);
+	});
+});
+
+/**
+ * H3 Fix Tests: Keyboard Handler Scope
+ *
+ * Tests the pattern for scoped keyboard handling (container-level vs global).
+ * The fix attaches keyboard handler to container instead of window.
+ */
+describe('AttributeCard - H3: Keyboard Handler Scope', () => {
+	interface KeyboardEvent {
+		key: string;
+		ctrlKey: boolean;
+		metaKey: boolean;
+		target: { closest: (selector: string) => HTMLElement | null };
+	}
+
+	function shouldHandleKeydown(event: KeyboardEvent, containerRef: HTMLElement | null): boolean {
+		// Only handle if the event target is within our container
+		if (!containerRef) return false;
+		return event.target.closest('.attribute-card-expanded') !== null;
+	}
+
+	it('should handle keydown when target is within container', () => {
+		const container = document.createElement('div');
+		container.className = 'attribute-card-expanded';
+
+		const event: KeyboardEvent = {
+			key: 's',
+			ctrlKey: true,
+			metaKey: false,
+			target: { closest: () => container }
+		};
+
+		expect(shouldHandleKeydown(event, container)).toBe(true);
+	});
+
+	it('should NOT handle keydown when target is outside container', () => {
+		const container = document.createElement('div');
+		container.className = 'attribute-card-expanded';
+
+		const event: KeyboardEvent = {
+			key: 's',
+			ctrlKey: true,
+			metaKey: false,
+			target: { closest: () => null } // Not in our container
+		};
+
+		expect(shouldHandleKeydown(event, container)).toBe(false);
+	});
+
+	it('should NOT handle keydown when container is null', () => {
+		const event: KeyboardEvent = {
+			key: 's',
+			ctrlKey: true,
+			metaKey: false,
+			target: { closest: () => null }
+		};
+
+		expect(shouldHandleKeydown(event, null)).toBe(false);
+	});
+});
+
+/**
+ * L1 Fix Tests: Unique Input IDs
+ *
+ * Tests the pattern for generating unique input IDs based on attribute code.
+ */
+describe('AttributeCard - L1: Unique Input IDs', () => {
+	function generateQuestionInputId(attributeCode: number | undefined): string {
+		return `question-text-${attributeCode ?? 'new'}`;
+	}
+
+	function generateHelpTextInputId(attributeCode: number | undefined): string {
+		return `help-text-${attributeCode ?? 'new'}`;
+	}
+
+	it('should generate unique question input ID with attribute code', () => {
+		expect(generateQuestionInputId(123)).toBe('question-text-123');
+		expect(generateQuestionInputId(456)).toBe('question-text-456');
+	});
+
+	it('should generate unique help text input ID with attribute code', () => {
+		expect(generateHelpTextInputId(123)).toBe('help-text-123');
+		expect(generateHelpTextInputId(456)).toBe('help-text-456');
+	});
+
+	it('should use "new" suffix when attribute code is undefined', () => {
+		expect(generateQuestionInputId(undefined)).toBe('question-text-new');
+		expect(generateHelpTextInputId(undefined)).toBe('help-text-new');
+	});
+
+	it('should generate different IDs for different attributes', () => {
+		const id1 = generateQuestionInputId(100);
+		const id2 = generateQuestionInputId(200);
+		const id3 = generateQuestionInputId(300);
+
+		expect(id1).not.toBe(id2);
+		expect(id2).not.toBe(id3);
+		expect(id1).not.toBe(id3);
+	});
+});

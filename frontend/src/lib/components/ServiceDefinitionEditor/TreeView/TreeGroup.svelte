@@ -121,6 +121,7 @@
 	// ========== Service Drag and Drop Handlers ==========
 
 	function handleServiceDragStart(event: DragEvent, serviceCode: number) {
+		console.log('[DRAG_START] serviceCode:', serviceCode, 'draggableServices:', draggableServices);
 		if (!draggableServices || !event.dataTransfer) return;
 
 		event.dataTransfer.effectAllowed = 'move';
@@ -129,15 +130,32 @@
 	}
 
 	function handleServiceDragOver(event: DragEvent, index: number) {
-		if (!draggableServices || draggedServiceCode === null) return;
+		if (!draggableServices || draggedServiceCode === null) {
+			console.log('[DRAG_OVER] Skipped - draggableServices:', draggableServices, 'draggedServiceCode:', draggedServiceCode);
+			return;
+		}
 
+		console.log('[DRAG_OVER] index:', index);
 		event.preventDefault();
 		event.dataTransfer!.dropEffect = 'move';
 
 		const target = event.currentTarget as HTMLElement;
 		const rect = target.getBoundingClientRect();
-		const midpoint = rect.top + rect.height / 2;
-		const position = event.clientY < midpoint ? 'before' : 'after';
+		const relativeY = event.clientY - rect.top;
+		const percentage = relativeY / rect.height;
+
+		// Use 30% zones at top/bottom for clearer drop targets
+		// Top 30% = before, Bottom 30% = after, Middle 40% = use previous position or default to before
+		let position: 'before' | 'after';
+		if (percentage < 0.3) {
+			position = 'before';
+		} else if (percentage > 0.7) {
+			position = 'after';
+		} else {
+			// In the middle zone, keep current position to reduce flickering
+			// Default to 'before' as it's more intuitive when dropping onto an item
+			position = dropPosition ?? 'before';
+		}
 
 		dispatch('serviceDragOver', {
 			groupId: group.id,
@@ -152,6 +170,7 @@
 	}
 
 	function handleServiceDrop(event: DragEvent, index: number) {
+		console.log('[TreeGroup DROP] index:', index);
 		event.preventDefault();
 		dispatch('serviceDrop', { serviceIndex: index });
 	}
@@ -253,6 +272,7 @@
 						? 'bg-blue-50 ring-1 ring-blue-500'
 						: ''} {draggedServiceCode === service.service_code ? 'opacity-50' : ''}"
 					draggable={draggableServices}
+					on:mousedown={() => console.log('[MOUSEDOWN] on service:', service.service_name)}
 					on:click={() => handleServiceClick(service.service_code)}
 					on:keydown={(e) => handleServiceKeydown(e, service.service_code)}
 					on:dragstart={(e) => handleServiceDragStart(e, service.service_code)}
@@ -343,11 +363,36 @@
 </div>
 
 <style>
-	/* Drop indicator - blue line */
+	/* Drop indicator - prominent blue line with glow effect */
 	.drop-indicator {
-		height: 4px;
+		height: 3px;
 		background: rgb(59 130 246);
 		border-radius: 2px;
-		margin: 2px 0;
+		margin: 4px 0;
+		box-shadow:
+			0 0 0 2px rgba(59, 130, 246, 0.3),
+			0 0 8px rgba(59, 130, 246, 0.4);
+		position: relative;
+	}
+
+	/* Circle indicators at the ends */
+	.drop-indicator::before,
+	.drop-indicator::after {
+		content: '';
+		position: absolute;
+		width: 8px;
+		height: 8px;
+		background: rgb(59 130 246);
+		border-radius: 50%;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.drop-indicator::before {
+		left: -4px;
+	}
+
+	.drop-indicator::after {
+		right: -4px;
 	}
 </style>

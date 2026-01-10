@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { GroupWithServices, EditorSelection } from '../stores/types';
-	import type { Service, ServiceDefinitionAttribute, Group } from '$lib/services/Libre311/Libre311';
+	import type { Service, Group } from '$lib/services/Libre311/Libre311';
 	import TreePanel from './TreePanel.svelte';
 	import EditorPanel from './EditorPanel.svelte';
 
@@ -33,11 +33,6 @@
 	 * Currently selected service (when selection.type === 'service')
 	 */
 	export let selectedService: Service | null = null;
-
-	/**
-	 * Attributes for the selected service
-	 */
-	export let attributes: ServiceDefinitionAttribute[] = [];
 
 	/**
 	 * Whether the tree panel is loading
@@ -218,7 +213,6 @@
 			{selection}
 			{selectedGroup}
 			{selectedService}
-			{attributes}
 			isLoading={isEditorLoading}
 			error={editorError}
 			on:loadService={handleLoadService}

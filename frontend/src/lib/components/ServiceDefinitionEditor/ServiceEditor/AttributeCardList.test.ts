@@ -101,8 +101,9 @@ describe('AttributeCardList', () => {
 			collapseCalled = true;
 		});
 
-		// The expanded card should be visible with Escape key
-		await fireEvent.keyDown(window, { key: 'Escape' });
+		// The expanded card has a form role with keydown handler (H3 fix: container-scoped, not global)
+		const expandedForm = screen.getByRole('form', { name: /edit attribute/i });
+		await fireEvent.keyDown(expandedForm, { key: 'Escape' });
 
 		expect(collapseCalled).toBe(true);
 	});
