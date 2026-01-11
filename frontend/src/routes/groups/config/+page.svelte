@@ -14,9 +14,7 @@
 	import ConfirmDeleteModal from '$lib/components/ServiceDefinitionEditor/Shared/ConfirmDeleteModal.svelte';
 	import {
 		splitPaneStore,
-		hasAnyUnsavedChanges,
-		attemptSelectGroup,
-		attemptSelectService
+		hasAnyUnsavedChanges
 	} from '$lib/components/ServiceDefinitionEditor/stores/editorStore';
 
 	const libre311 = useLibre311Service();
@@ -38,6 +36,16 @@
 
 	// Dirty tracking for cards
 	let dirtyAttributes: Set<number> = new Set();
+	let pendingAttributeValues: Map<
+		number,
+		{
+			description: string;
+			datatype: string;
+			required: boolean;
+			datatypeDescription: string;
+			values?: { key: string; name: string }[];
+		}
+	> = new Map();
 	let savingAttributes: Set<number> = new Set();
 	let deletingAttributes: Set<number> = new Set();
 	let isHeaderDirty = false;
@@ -110,9 +118,10 @@
 	function handleSelectGroup(event: CustomEvent<{ groupId: number }>) {
 		const { groupId } = event.detail;
 
-		// Check for unsaved changes
+		// Check for unsaved changes (both store and local state)
 		if ($hasAnyUnsavedChanges || isHeaderDirty || isGroupDirty || dirtyAttributes.size > 0) {
-			attemptSelectGroup(groupId);
+			// Show modal with callback to complete navigation after user decision
+			splitPaneStore.showUnsavedChangesModal(() => doSelectGroup(groupId));
 			return;
 		}
 
@@ -131,9 +140,10 @@
 	function handleSelectService(event: CustomEvent<{ groupId: number; serviceCode: number }>) {
 		const { groupId, serviceCode } = event.detail;
 
-		// Check for unsaved changes
+		// Check for unsaved changes (both store and local state)
 		if ($hasAnyUnsavedChanges || isHeaderDirty || isGroupDirty || dirtyAttributes.size > 0) {
-			attemptSelectService(groupId, serviceCode);
+			// Show modal with callback to complete navigation after user decision
+			splitPaneStore.showUnsavedChangesModal(() => doSelectService(groupId, serviceCode));
 			return;
 		}
 
@@ -172,6 +182,7 @@
 
 	function clearDirtyState() {
 		dirtyAttributes = new Set();
+		pendingAttributeValues = new Map();
 		savingAttributes = new Set();
 		deletingAttributes = new Set();
 		isHeaderDirty = false;
@@ -226,16 +237,33 @@
 	}
 
 	function handleAttributeDirty(
-		event: CustomEvent<{ index: number; code: number; isDirty: boolean }>
+		event: CustomEvent<{
+			index: number;
+			code: number;
+			isDirty: boolean;
+			pendingValues?: {
+				description: string;
+				datatype: string;
+				required: boolean;
+				datatypeDescription: string;
+				values?: { key: string; name: string }[];
+			};
+		}>
 	) {
-		const { code, isDirty } = event.detail;
+		const { code, isDirty, pendingValues } = event.detail;
 		const newDirty = new Set(dirtyAttributes);
-		if (isDirty) {
+		const newPending = new Map(pendingAttributeValues);
+
+		if (isDirty && pendingValues) {
 			newDirty.add(code);
+			newPending.set(code, pendingValues);
 		} else {
 			newDirty.delete(code);
+			newPending.delete(code);
 		}
+
 		dirtyAttributes = newDirty;
+		pendingAttributeValues = newPending;
 	}
 
 	async function handleAttributeSave(
@@ -555,12 +583,37 @@
 	}
 
 	// Unsaved changes modal handlers
-	function handleUnsavedSave() {
-		// TODO: Save all dirty items then proceed
+	async function handleUnsavedSave() {
 		isSavingBeforeNav = true;
-		// For now, just proceed
-		splitPaneStore.proceedWithNavigation();
-		isSavingBeforeNav = false;
+
+		try {
+			// Save all pending attribute changes
+			if (pendingAttributeValues.size > 0 && selectedService) {
+				const savePromises = Array.from(pendingAttributeValues.entries()).map(
+					async ([code, data]) => {
+						await libre311.editAttribute({
+							attribute_code: code,
+							service_code: selectedService!.service_code,
+							description: data.description,
+							datatype_description: data.datatypeDescription,
+							required: data.required,
+							values: data.values
+						});
+					}
+				);
+				await Promise.all(savePromises);
+			}
+
+			// Clear dirty state and proceed
+			clearDirtyState();
+			splitPaneStore.proceedWithNavigation();
+		} catch (err) {
+			console.error('Failed to save changes:', err);
+			// Still proceed even on error (user can re-edit later)
+			splitPaneStore.proceedWithNavigation();
+		} finally {
+			isSavingBeforeNav = false;
+		}
 	}
 
 	function handleUnsavedDiscard() {

@@ -37,7 +37,16 @@
 		cancel: void;
 		copy: void;
 		delete: void;
-		dirty: { isDirty: boolean };
+		dirty: {
+			isDirty: boolean;
+			pendingValues?: {
+				description: string;
+				datatype: DatatypeUnion;
+				required: boolean;
+				datatypeDescription: string;
+				values?: AttributeValue[];
+			};
+		};
 		collapse: void;
 		dragstart: void;
 		dragend: void;
@@ -98,9 +107,21 @@
 		JSON.stringify(values) !== JSON.stringify(originalValues);
 
 	// Notify parent of dirty changes - only when isDirty actually changes (H2 fix)
+	// Include pending values when dirty so parent can save them
 	$: if (isDirty !== previousIsDirty) {
 		previousIsDirty = isDirty;
-		dispatch('dirty', { isDirty });
+		dispatch('dirty', {
+			isDirty,
+			pendingValues: isDirty
+				? {
+						description: description.trim(),
+						datatype,
+						required,
+						datatypeDescription: datatypeDescription.trim(),
+						values: isList ? values : undefined
+					}
+				: undefined
+		});
 	}
 
 	// Validation

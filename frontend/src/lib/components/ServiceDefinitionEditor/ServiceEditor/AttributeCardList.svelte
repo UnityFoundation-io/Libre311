@@ -55,7 +55,18 @@
 		cancel: { index: number };
 		copy: { index: number; attribute: ServiceDefinitionAttribute; suggestedDescription: string };
 		deleteConfirm: { index: number; attribute: ServiceDefinitionAttribute };
-		dirty: { index: number; code: number; isDirty: boolean };
+		dirty: {
+			index: number;
+			code: number;
+			isDirty: boolean;
+			pendingValues?: {
+				description: string;
+				datatype: DatatypeUnion;
+				required: boolean;
+				datatypeDescription: string;
+				values?: AttributeValue[];
+			};
+		};
 		reorder: { fromIndex: number; toIndex: number };
 	}>();
 
@@ -112,9 +123,26 @@
 		dispatch('deleteConfirm', { index, attribute: attributes[index] });
 	}
 
-	function handleDirtyChange(event: CustomEvent<{ isDirty: boolean }>, index: number) {
+	function handleDirtyChange(
+		event: CustomEvent<{
+			isDirty: boolean;
+			pendingValues?: {
+				description: string;
+				datatype: DatatypeUnion;
+				required: boolean;
+				datatypeDescription: string;
+				values?: AttributeValue[];
+			};
+		}>,
+		index: number
+	) {
 		const attr = attributes[index];
-		dispatch('dirty', { index, code: attr.code, isDirty: event.detail.isDirty });
+		dispatch('dirty', {
+			index,
+			code: attr.code,
+			isDirty: event.detail.isDirty,
+			pendingValues: event.detail.pendingValues
+		});
 	}
 
 	// ========== Drag and Drop Handlers ==========
