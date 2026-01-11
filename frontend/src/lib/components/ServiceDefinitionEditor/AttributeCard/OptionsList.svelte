@@ -29,7 +29,7 @@
 	}
 
 	function handleValueChange(index: number, newName: string) {
-		values[index] = { ...values[index], name: newName };
+		values = values.map((v, i) => (i === index ? { ...v, name: newName } : v));
 		emitChange();
 	}
 

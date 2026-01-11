@@ -11,7 +11,7 @@ Overall, this is a well-structured implementation with good separation of concer
 | Severity | Count | Status |
 |----------|-------|--------|
 | High | 4 | 4 Fixed |
-| Medium | 6 | Pending |
+| Medium | 6 | 1 Fixed, 5 Pending |
 | Low | 5 | 1 Fixed, 4 Pending |
 
 ---
@@ -151,7 +151,7 @@ async function handleAttributeSave(...) {
 
 ### M1. Array Mutation in Reactive Context
 
-- [ ] **Fixed**
+- [x] **Fixed** (2026-01-11) - Changed direct array mutation to use `.map()` for proper reactivity
 
 **File:** `frontend/src/lib/components/ServiceDefinitionEditor/AttributeCard/OptionsList.svelte:31-33`
 
