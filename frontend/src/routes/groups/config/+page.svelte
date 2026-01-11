@@ -14,8 +14,10 @@
 	import ConfirmDeleteModal from '$lib/components/ServiceDefinitionEditor/Shared/ConfirmDeleteModal.svelte';
 	import {
 		splitPaneStore,
-		hasAnyUnsavedChanges
+		hasAnyUnsavedChanges,
+		showSaveError
 	} from '$lib/components/ServiceDefinitionEditor/stores/editorStore';
+	import SaveToast from '$lib/components/ServiceDefinitionEditor/EditorView/SaveToast.svelte';
 
 	const libre311 = useLibre311Service();
 
@@ -222,6 +224,7 @@
 			isHeaderDirty = false;
 		} catch (err) {
 			console.error('Failed to save service header:', err);
+			showSaveError('Failed to save service. Please try again.');
 		} finally {
 			isHeaderSaving = false;
 		}
@@ -304,6 +307,7 @@
 			dirtyAttributes = newDirty;
 		} catch (err) {
 			console.error('Failed to save attribute:', err);
+			showSaveError('Failed to save question. Please try again.');
 		} finally {
 			const newSaving = new Set(savingAttributes);
 			newSaving.delete(code);
@@ -339,6 +343,7 @@
 			expandedAttributeIndex = null;
 		} catch (err) {
 			console.error('Failed to delete attribute:', err);
+			showSaveError('Failed to delete question. Please try again.');
 		} finally {
 			const newDeleting = new Set(deletingAttributes);
 			newDeleting.delete(attribute.code);
@@ -406,6 +411,7 @@
 			);
 		} catch (err) {
 			console.error('Failed to reorder service:', err);
+			showSaveError('Failed to reorder service. Please try again.');
 		}
 	}
 
@@ -428,6 +434,7 @@
 			doSelectGroup(newGroup.id);
 		} catch (err) {
 			console.error('Failed to create group:', err);
+			showSaveError('Failed to create group. Please try again.');
 		}
 	}
 
@@ -451,6 +458,7 @@
 			isGroupDirty = false;
 		} catch (err) {
 			console.error('Failed to save group:', err);
+			showSaveError('Failed to save group. Please try again.');
 		} finally {
 			isGroupSaving = false;
 		}
@@ -471,6 +479,7 @@
 			selectedGroup = null;
 		} catch (err) {
 			console.error('Failed to delete group:', err);
+			showSaveError('Failed to delete group. Please try again.');
 		} finally {
 			isGroupDeleting = false;
 		}
@@ -502,6 +511,7 @@
 			await doSelectService(groupId, newService.service_code);
 		} catch (err) {
 			console.error('Failed to create service:', err);
+			showSaveError('Failed to create service. Please try again.');
 		}
 	}
 
@@ -540,6 +550,7 @@
 			}
 		} catch (err) {
 			console.error('Failed to delete service:', err);
+			showSaveError('Failed to delete service. Please try again.');
 		} finally {
 			isServiceDeleting = false;
 			showDeleteServiceModal = false;
@@ -579,6 +590,7 @@
 			expandedAttributeIndex = attributes.length - 1;
 		} catch (err) {
 			console.error('Failed to create attribute:', err);
+			showSaveError('Failed to create question. Please try again.');
 		}
 	}
 
@@ -609,6 +621,7 @@
 			splitPaneStore.proceedWithNavigation();
 		} catch (err) {
 			console.error('Failed to save changes:', err);
+			showSaveError('Failed to save changes. Your edits may not have been saved.');
 			// Still proceed even on error (user can re-edit later)
 			splitPaneStore.proceedWithNavigation();
 		} finally {
@@ -660,7 +673,6 @@
 			{selection}
 			{selectedGroup}
 			{selectedService}
-			{attributes}
 			{isTreeLoading}
 			{isEditorLoading}
 			{editorError}
@@ -763,3 +775,6 @@
 	on:confirm={handleDeleteServiceConfirm}
 	on:cancel={handleDeleteServiceCancel}
 />
+
+<!-- Save Toast for error/success notifications -->
+<SaveToast />

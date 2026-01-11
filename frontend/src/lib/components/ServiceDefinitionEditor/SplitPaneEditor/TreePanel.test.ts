@@ -53,7 +53,7 @@ describe('TreePanel', () => {
 		render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set()
+				expandedGroupIds: new Set<number>()
 			}
 		});
 
@@ -64,7 +64,7 @@ describe('TreePanel', () => {
 		render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set()
+				expandedGroupIds: new Set<number>()
 			}
 		});
 
@@ -76,7 +76,7 @@ describe('TreePanel', () => {
 		render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set()
+				expandedGroupIds: new Set<number>()
 			}
 		});
 
@@ -88,7 +88,7 @@ describe('TreePanel', () => {
 		render(TreePanel, {
 			props: {
 				groups: [],
-				expandedGroupIds: new Set(),
+				expandedGroupIds: new Set<number>(),
 				isLoading: true
 			}
 		});
@@ -102,7 +102,7 @@ describe('TreePanel', () => {
 		render(TreePanel, {
 			props: {
 				groups: [],
-				expandedGroupIds: new Set(),
+				expandedGroupIds: new Set<number>(),
 				isLoading: false
 			}
 		});
@@ -114,7 +114,7 @@ describe('TreePanel', () => {
 		const { component } = render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set()
+				expandedGroupIds: new Set<number>()
 			}
 		});
 
@@ -133,7 +133,7 @@ describe('TreePanel', () => {
 		const { component } = render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set()
+				expandedGroupIds: new Set<number>()
 			}
 		});
 
@@ -165,7 +165,7 @@ describe('TreePanel', () => {
 		render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set()
+				expandedGroupIds: new Set<number>()
 			}
 		});
 
@@ -196,7 +196,7 @@ describe('TreePanel', () => {
 		render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set(),
+				expandedGroupIds: new Set<number>(),
 				selection: {
 					type: 'group',
 					groupId: 1,
@@ -248,7 +248,7 @@ describe('TreePanel', () => {
 		const { component } = render(TreePanel, {
 			props: {
 				groups: mockGroups,
-				expandedGroupIds: new Set()
+				expandedGroupIds: new Set<number>()
 			}
 		});
 
