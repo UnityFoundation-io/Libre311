@@ -300,7 +300,7 @@ public class ServiceService {
         if (serviceDefinitionAttributeDTO.isVariable() != null) {
             serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
         }
-        if (serviceDefinitionAttributeDTO.getDatatype() != null) {
+        if (serviceDefinitionAttributeDTO.isRequired() != null) {
             serviceDefinitionAttribute.setRequired(serviceDefinitionAttributeDTO.isRequired());
         }
         if (serviceDefinitionAttributeDTO.getDatatype() != null) {
