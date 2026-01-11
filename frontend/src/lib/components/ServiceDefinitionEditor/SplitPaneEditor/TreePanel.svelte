@@ -207,20 +207,25 @@
 		dropPosition = null;
 	}
 
-	function handleServiceDrop(groupId: number, serviceIndex: number) {
+	function handleServiceDrop(groupId: number, _serviceIndex: number) {
 		if (!reorderEnabled || draggedServiceCode === null || draggedFromGroupId === null) {
 			resetDragState();
 			return;
 		}
 
-		console.log('[DROP] serviceIndex:', serviceIndex, 'dropPosition:', dropPosition);
+		// Use dropTargetIndex instead of serviceIndex from the event.
+		// dropTargetIndex and dropPosition are updated together in dragover,
+		// ensuring the calculated position matches the visual indicator.
+		if (dropTargetIndex === null || dropPosition === null) {
+			resetDragState();
+			return;
+		}
 
 		// Calculate final index based on drop position
-		let newIndex = serviceIndex;
+		let newIndex = dropTargetIndex;
 		if (dropPosition === 'after') {
-			newIndex = serviceIndex + 1;
+			newIndex = dropTargetIndex + 1;
 		}
-		console.log('[DROP] newIndex after position adjustment:', newIndex);
 
 		// If dragging within the same group and from before to after, adjust index
 		if (draggedFromGroupId === groupId) {
@@ -228,22 +233,17 @@
 				.find((g) => g.id === draggedFromGroupId)
 				?.services.findIndex((s) => s.service_code === draggedServiceCode);
 
-			console.log('[DROP] fromIndex:', fromIndex, 'draggedServiceCode:', draggedServiceCode);
-
 			if (fromIndex !== undefined && fromIndex !== -1 && fromIndex < newIndex) {
 				newIndex -= 1;
-				console.log('[DROP] Adjusted newIndex (fromIndex < newIndex):', newIndex);
 			}
 
 			// Don't dispatch if dropping at the same position
 			if (fromIndex === newIndex) {
-				console.log('[DROP] Same position - aborting');
 				resetDragState();
 				return;
 			}
 		}
 
-		console.log('[DROP] Final newIndex:', newIndex, 'dispatching reorderService');
 		dispatch('reorderService', {
 			serviceCode: draggedServiceCode,
 			fromGroupId: draggedFromGroupId,
