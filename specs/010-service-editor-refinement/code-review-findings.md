@@ -10,7 +10,7 @@ Overall, this is a well-structured implementation with good separation of concer
 
 | Severity | Count | Status |
 |----------|-------|--------|
-| High | 4 | 3 Fixed, 1 Pending |
+| High | 4 | 4 Fixed |
 | Medium | 6 | Pending |
 | Low | 5 | 1 Fixed, 4 Pending |
 
@@ -110,7 +110,7 @@ Only attach the listener when the component is expanded, and use event bubbling:
 
 ### H4. Missing Error Handling in API Calls
 
-- [ ] **Fixed**
+- [x] **Fixed** (2026-01-10) - Added `showSaveError()` calls to all API error handlers with user-friendly messages via SaveToast component
 
 **File:** `frontend/src/routes/groups/config/+page.svelte:241-283`
 
@@ -471,7 +471,7 @@ if (browser) {
 
 ### Phase 2: User Experience (Partial)
 3. ~~H3 - Global keyboard handler~~ ✓ Fixed
-4. H4 - Missing error handling
+4. ~~H4 - Missing error handling~~ ✓ Fixed
 5. M3 - Incomplete TODO (copy functionality)
 
 ### Phase 3: Code Quality
