@@ -95,6 +95,12 @@
 		originalValues = 'values' in attr ? [...attr.values] : [];
 	}
 
+	// Compare attribute values without JSON.stringify (M2 fix)
+	function areValuesEqual(a: AttributeValue[], b: AttributeValue[]): boolean {
+		if (a.length !== b.length) return false;
+		return a.every((v, i) => v.key === b[i].key && v.name === b[i].name);
+	}
+
 	// Compute if list type
 	$: isList = isListDatatype(datatype);
 
@@ -104,7 +110,7 @@
 		datatype !== originalDatatype ||
 		required !== originalRequired ||
 		datatypeDescription !== originalDatatypeDescription ||
-		JSON.stringify(values) !== JSON.stringify(originalValues);
+		!areValuesEqual(values, originalValues);
 
 	// Notify parent of dirty changes - only when isDirty actually changes (H2 fix)
 	// Include pending values when dirty so parent can save them

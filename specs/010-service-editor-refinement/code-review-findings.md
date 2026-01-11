@@ -11,7 +11,7 @@ Overall, this is a well-structured implementation with good separation of concer
 | Severity | Count | Status |
 |----------|-------|--------|
 | High | 4 | 4 Fixed |
-| Medium | 6 | 1 Fixed, 5 Pending |
+| Medium | 6 | 2 Fixed, 4 Pending |
 | Low | 5 | 1 Fixed, 4 Pending |
 
 ---
@@ -176,7 +176,7 @@ function handleValueChange(index: number, newName: string) {
 
 ### M2. JSON.stringify for Deep Comparison is Fragile
 
-- [ ] **Fixed**
+- [x] **Fixed** (2026-01-11) - Replaced with explicit `areValuesEqual()` function comparing key and name properties
 
 **File:** `frontend/src/lib/components/ServiceDefinitionEditor/AttributeCard/AttributeCardExpanded.svelte:91`
 
