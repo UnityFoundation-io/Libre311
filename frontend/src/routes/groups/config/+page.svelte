@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { Service, ServiceDefinitionAttribute, Group } from '$lib/services/Libre311/Libre311';
 	import type {
@@ -65,6 +65,9 @@
 
 	// Expanded attribute index
 	let expandedAttributeIndex: number | null = null;
+
+	// Ref to AttributeCardList for resetting after save
+	let attributeCardListRef: AttributeCardList;
 
 	// Unsaved changes modal
 	let showUnsavedModal = false;
@@ -282,7 +285,7 @@
 			};
 		}>
 	) {
-		const { code, data } = event.detail;
+		const { index, code, data } = event.detail;
 
 		savingAttributes = new Set([...savingAttributes, code]);
 		try {
@@ -290,6 +293,7 @@
 				attribute_code: code,
 				service_code: selectedService!.service_code,
 				description: data.description,
+				datatype: data.datatype,
 				datatype_description: data.datatypeDescription,
 				required: data.required,
 				values: data.values
@@ -300,6 +304,13 @@
 				service_code: selectedService!.service_code
 			});
 			attributes = definition.attributes || [];
+
+			// Reset the card's internal state to match saved values
+			await tick();
+			const savedAttrIndex = attributes.findIndex((a) => a.code === code);
+			if (savedAttrIndex !== -1 && attributeCardListRef) {
+				attributeCardListRef.resetCardToSaved(savedAttrIndex, attributes[savedAttrIndex]);
+			}
 
 			// Clear dirty state for this attribute
 			const newDirty = new Set(dirtyAttributes);
@@ -607,6 +618,7 @@
 							attribute_code: code,
 							service_code: selectedService!.service_code,
 							description: data.description,
+							datatype: data.datatype,
 							datatype_description: data.datatypeDescription,
 							required: data.required,
 							values: data.values
@@ -719,6 +731,7 @@
 
 						{#if attributes.length > 0}
 							<AttributeCardList
+								bind:this={attributeCardListRef}
 								{attributes}
 								expandedIndex={expandedAttributeIndex}
 								{dirtyAttributes}

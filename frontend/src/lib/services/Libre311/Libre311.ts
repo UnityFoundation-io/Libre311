@@ -398,6 +398,7 @@ export const EditServiceDefinitionAttributeParamsSchema = z.object({
 	attribute_code: z.number(),
 	service_code: z.number(),
 	description: z.string(),
+	datatype: z.string().optional(),
 	datatype_description: z.string(),
 	required: z.boolean(),
 	// order: z.number(),
