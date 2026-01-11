@@ -712,7 +712,18 @@ export class Libre311ServiceImpl implements Libre311Service {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
-		return ServiceDefinitionSchema.parse(res.data);
+		const definition = ServiceDefinitionSchema.parse(res.data);
+
+		// Sort attribute values alphabetically for consistent ordering
+		if (definition.attributes) {
+			definition.attributes.forEach((attr) => {
+				if ('values' in attr && attr.values) {
+					attr.values.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+				}
+			});
+		}
+
+		return definition;
 	}
 
 	async createGroup(params: CreateGroupParams): Promise<Group> {
