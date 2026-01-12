@@ -11,7 +11,7 @@ Overall, this is a well-structured implementation with good separation of concer
 | Severity | Count | Status |
 |----------|-------|--------|
 | Critical | 2 | 2 Fixed |
-| High | 7 | 5 Fixed, 2 Pending |
+| High | 8 | 6 Fixed, 2 Pending |
 | Medium | 10 | 5 Fixed, 5 Pending |
 | Low | 8 | 1 Fixed, 7 Pending |
 
@@ -285,9 +285,9 @@ $: if (isDirty !== previousIsDirty) {
 
 ### H7. Race Condition in EditorPanel
 
-- [ ] **Pending**
+- [x] **Fixed** (2026-01-11) - Added `loadedServiceCode` tracking to prevent duplicate loads and race conditions
 
-**File:** `frontend/src/lib/components/ServiceDefinitionEditor/SplitPaneEditor/EditorPanel.svelte:36-38`
+**File:** `frontend/src/lib/components/ServiceDefinitionEditor/SplitPaneEditor/EditorPanel.svelte:35-51`
 
 ```svelte
 $: if (selection.type === 'service' && selection.serviceCode) {
@@ -302,13 +302,22 @@ $: if (selection.type === 'service' && selection.serviceCode) {
 
 **Impact:** Performance degradation, potential data corruption, unnecessary network requests.
 
-**Suggested Fix:**
+**Fix Applied:**
 ```svelte
 let loadedServiceCode: number | null = null;
 
-$: if (selection.type === 'service' && selection.serviceCode && selection.serviceCode !== loadedServiceCode) {
+$: if (
+    selection.type === 'service' &&
+    selection.serviceCode &&
+    selection.serviceCode !== loadedServiceCode
+) {
     loadedServiceCode = selection.serviceCode;
     dispatch('loadService', { serviceCode: selection.serviceCode });
+}
+
+// Reset when selection type changes away from service
+$: if (selection.type !== 'service') {
+    loadedServiceCode = null;
 }
 ```
 

@@ -32,9 +32,22 @@
 		loadService: { serviceCode: number };
 	}>();
 
-	// Reactive: load service data when selection changes
-	$: if (selection.type === 'service' && selection.serviceCode) {
+	// Track loaded service to prevent duplicate loads and race conditions
+	let loadedServiceCode: number | null = null;
+
+	// Reactive: load service data only when serviceCode actually changes
+	$: if (
+		selection.type === 'service' &&
+		selection.serviceCode &&
+		selection.serviceCode !== loadedServiceCode
+	) {
+		loadedServiceCode = selection.serviceCode;
 		dispatch('loadService', { serviceCode: selection.serviceCode });
+	}
+
+	// Reset loaded service code when selection type changes away from service
+	$: if (selection.type !== 'service') {
+		loadedServiceCode = null;
 	}
 </script>
 
