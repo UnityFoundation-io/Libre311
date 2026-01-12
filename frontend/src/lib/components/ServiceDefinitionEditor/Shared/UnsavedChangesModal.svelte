@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, tick } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 
 	/**
@@ -18,6 +18,39 @@
 		cancel: void;
 	}>();
 
+	// Focus trap state
+	let modalElement: HTMLDivElement;
+	let previouslyFocused: HTMLElement | null = null;
+
+	// Handle open state changes for focus management
+	$: if (open) {
+		handleModalOpen();
+	} else {
+		handleModalClose();
+	}
+
+	async function handleModalOpen() {
+		// Store the currently focused element to restore later
+		previouslyFocused = document.activeElement as HTMLElement;
+
+		// Wait for the modal to render
+		await tick();
+
+		// Focus the first focusable element (Cancel button)
+		const firstFocusable = modalElement?.querySelector<HTMLElement>(
+			'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+		);
+		firstFocusable?.focus();
+	}
+
+	function handleModalClose() {
+		// Restore focus to previously focused element
+		if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+			previouslyFocused.focus();
+			previouslyFocused = null;
+		}
+	}
+
 	function handleSave() {
 		dispatch('save');
 	}
@@ -31,8 +64,37 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
+		if (!open) return;
+
 		if (event.key === 'Escape' && !isSaving) {
 			handleCancel();
+			return;
+		}
+
+		// Focus trap: handle Tab key
+		if (event.key === 'Tab') {
+			const focusableElements = modalElement?.querySelectorAll<HTMLElement>(
+				'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+			);
+
+			if (!focusableElements || focusableElements.length === 0) return;
+
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+
+			if (event.shiftKey) {
+				// Shift+Tab: if on first element, wrap to last
+				if (document.activeElement === firstElement) {
+					event.preventDefault();
+					lastElement.focus();
+				}
+			} else {
+				// Tab: if on last element, wrap to first
+				if (document.activeElement === lastElement) {
+					event.preventDefault();
+					firstElement.focus();
+				}
+			}
 		}
 	}
 
@@ -55,6 +117,7 @@
 	>
 		<!-- Modal -->
 		<div
+			bind:this={modalElement}
 			class="mx-4 w-full max-w-md rounded-lg bg-white shadow-xl"
 			role="alertdialog"
 			aria-modal="true"
