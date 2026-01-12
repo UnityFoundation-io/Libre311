@@ -50,18 +50,29 @@ export interface AutoSaveOptions<T> {
 /**
  * Creates a debounced auto-save function with optimistic updates and error handling
  *
+ * IMPORTANT: To prevent memory leaks, always call `cancel()` in the component's
+ * `onDestroy` lifecycle hook. If a component unmounts while a save is pending,
+ * the callback will still execute, potentially updating unmounted component state.
+ *
  * @example
  * ```typescript
- * const { trigger, cancel, isPending } = createAutoSave({
+ * import { onDestroy } from 'svelte';
+ *
+ * const autoSave = createAutoSave({
  *   saveFn: async () => await api.updateService({ name: newName }),
  *   onSuccess: (result) => console.log('Saved:', result),
  *   successMessage: 'Service name updated'
  * });
  *
+ * // IMPORTANT: Cancel pending saves when component unmounts
+ * onDestroy(() => {
+ *   autoSave.cancel();
+ * });
+ *
  * // Call trigger() whenever the value changes
  * function handleInput(event: Event) {
  *   const value = (event.target as HTMLInputElement).value;
- *   trigger();
+ *   autoSave.trigger();
  * }
  * ```
  */

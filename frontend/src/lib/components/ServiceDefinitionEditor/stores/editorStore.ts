@@ -205,7 +205,33 @@ const initialSplitPaneState: SplitPaneEditorState = {
 };
 
 /**
- * Create a serializable copy of the state for Svelte reactivity
+ * Create a serializable copy of the state for Svelte reactivity.
+ *
+ * IMPORTANT: Svelte's reactivity system cannot detect mutations within Map or Set
+ * objects. To trigger reactive updates, you must always create new Map/Set instances
+ * rather than mutating existing ones.
+ *
+ * This function creates shallow copies of all Map/Set properties. When modifying
+ * state that contains Maps or Sets:
+ * 1. First call cloneState() to get a new state object with new Map/Set instances
+ * 2. Modify the cloned Maps/Sets as needed
+ * 3. Return the new state object from the update function
+ *
+ * Example:
+ * ```typescript
+ * // CORRECT - creates new Set instance
+ * update((state) => {
+ *   const newState = cloneState(state);
+ *   newState.expandedGroupIds.add(groupId);
+ *   return newState;
+ * });
+ *
+ * // WRONG - mutates existing Set, won't trigger reactivity
+ * update((state) => {
+ *   state.expandedGroupIds.add(groupId);
+ *   return state;
+ * });
+ * ```
  */
 function cloneState(state: SplitPaneEditorState): SplitPaneEditorState {
 	return {
