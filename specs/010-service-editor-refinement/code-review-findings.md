@@ -11,7 +11,7 @@ Overall, this is a well-structured implementation with good separation of concer
 | Severity | Count | Status |
 |----------|-------|--------|
 | High | 4 | 4 Fixed |
-| Medium | 6 | 2 Fixed, 4 Pending |
+| Medium | 6 | 5 Fixed, 1 Pending |
 | Low | 5 | 1 Fixed, 4 Pending |
 
 ---
@@ -232,7 +232,7 @@ function handleAttributeCopy(event: ...) {
 
 ### M4. Non-null Assertion Operators
 
-- [ ] **Fixed**
+- [x] **Fixed** (2026-01-11) - Added null guards and captured values before async operations
 
 **File:** `frontend/src/routes/groups/config/+page.svelte:260-261`
 
@@ -259,7 +259,7 @@ async function handleAttributeSave(...) {
 
 ### M5. Memory Leak in autoSave Utility
 
-- [ ] **Fixed**
+- [x] **Fixed** (2026-01-11) - Added comprehensive documentation about `onDestroy` cleanup requirement
 
 **File:** `frontend/src/lib/components/ServiceDefinitionEditor/utils/autoSave.ts:79-176`
 
@@ -293,7 +293,7 @@ onDestroy(() => {
 
 ### M6. Store Uses Map/Set Without Proper Reactivity Documentation
 
-- [ ] **Fixed**
+- [x] **Fixed** (2026-01-11) - Added detailed documentation explaining Map/Set reactivity limitations and correct usage patterns
 
 **File:** `frontend/src/lib/components/ServiceDefinitionEditor/stores/editorStore.ts:210-217`
 
@@ -474,14 +474,14 @@ if (browser) {
 4. ~~H4 - Missing error handling~~ ✓ Fixed
 5. M3 - Incomplete TODO (copy functionality)
 
-### Phase 3: Code Quality
-6. M4 - Non-null assertions
-7. M1 - Array mutation
-8. M2 - JSON.stringify comparison
+### Phase 3: Code Quality ✅ COMPLETE
+6. ~~M4 - Non-null assertions~~ ✓ Fixed
+7. ~~M1 - Array mutation~~ ✓ Fixed
+8. ~~M2 - JSON.stringify comparison~~ ✓ Fixed
 
-### Phase 4: Maintenance & Polish
-9. M5 - Memory leak in autoSave
-10. M6 - Store documentation
+### Phase 4: Maintenance & Polish (Partial)
+9. ~~M5 - Memory leak in autoSave~~ ✓ Fixed
+10. ~~M6 - Store documentation~~ ✓ Fixed
 11. ~~L1~~ ✓ Fixed, L2-L5 - Low severity items
 
 ---
