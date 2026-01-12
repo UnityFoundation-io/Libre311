@@ -55,6 +55,7 @@
 	.side-content {
 		overflow-y: auto;
 		height: 100%;
+		padding-bottom: 1rem;
 	}
 
 	/* tablet and above */
