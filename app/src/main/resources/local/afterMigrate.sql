@@ -36,22 +36,12 @@ VALUES (1, 'stlma', 'Bus Stop', 'For problems with bus stops', 'REALTIME', 1);
 INSERT IGNORE INTO service_definition_attributes (id, attribute_order, datatype, datatype_description, description, required, variable, service_id)
 VALUES (1, 1, 'MULTIVALUELIST', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 1);
 
--- Only insert seed values if no values exist for this attribute (prevents duplicates when user has modified values)
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 1 AS id, 'Unsafe location' AS value_name, 1 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 1) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 2 AS id, 'No sidewalk' AS value_name, 1 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 1) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 3 AS id, 'Sign missing' AS value_name, 1 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 1) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 4 AS id, 'No Shelter' AS value_name, 1 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 1) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 5 AS id, 'Other' AS value_name, 1 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 1) LIMIT 1;
+INSERT IGNORE INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
+VALUES (1, 'Unsafe location', 1),
+       (2, 'No sidewalk', 1),
+       (3, 'Sign missing', 1),
+       (4, 'No Shelter', 1),
+       (5, 'Other', 1);
 
 
 -- Crosswalk Service
@@ -61,22 +51,12 @@ VALUES (2, 'stlma', 'Crosswalk', 'For issues with the crosswalks', 'REALTIME', 1
 INSERT IGNORE INTO service_definition_attributes (id, attribute_order, datatype, datatype_description, description, required, variable, service_id)
 VALUES (2, 1, 'MULTIVALUELIST', 'Please select one or more items.', 'Please select one or more items that best describe the issue. If Other, please elaborate in the Description field below.', true, true, 2);
 
--- Only insert seed values if no values exist for this attribute (prevents duplicates when user has modified values)
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 6 AS id, 'ADA Access' AS value_name, 2 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 2) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 7 AS id, 'Missing' AS value_name, 2 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 2) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 8 AS id, 'Faded or worn paint' AS value_name, 2 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 2) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 9 AS id, 'Drivers failing to yield' AS value_name, 2 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 2) LIMIT 1;
-INSERT INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
-SELECT * FROM (SELECT 10 AS id, 'Other' AS value_name, 2 AS service_definition_attribute_id) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM service_definition_attribute_values WHERE service_definition_attribute_id = 2) LIMIT 1;
+INSERT IGNORE INTO service_definition_attribute_values (id, value_name, service_definition_attribute_id)
+VALUES (6, 'ADA Access', 2),
+       (7, 'Missing', 2),
+       (8, 'Faded or worn paint', 2),
+       (9, 'Drivers failing to yield', 2),
+       (10, 'Other', 2);
 
 
 -- Other Service
