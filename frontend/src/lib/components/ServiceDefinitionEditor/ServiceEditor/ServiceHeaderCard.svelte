@@ -16,7 +16,7 @@
 	const dispatch = createEventDispatcher<{
 		save: { serviceName: string; description: string };
 		cancel: void;
-		dirty: { isDirty: boolean };
+		dirty: { isDirty: boolean; serviceName: string; description: string };
 	}>();
 
 	// Local form state
@@ -42,8 +42,8 @@
 	// Compute dirty state
 	$: isDirty = serviceName !== originalName || description !== originalDescription;
 
-	// Notify parent of dirty state changes
-	$: dispatch('dirty', { isDirty });
+	// Notify parent of dirty state changes (include pending values)
+	$: dispatch('dirty', { isDirty, serviceName, description });
 
 	// Validation
 	$: isValid = serviceName.trim().length > 0;

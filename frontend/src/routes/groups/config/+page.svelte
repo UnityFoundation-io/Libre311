@@ -52,6 +52,7 @@
 	let deletingAttributes: Set<number> = new Set();
 	let isHeaderDirty = false;
 	let isHeaderSaving = false;
+	let pendingHeaderValues: { serviceName: string; description: string } | null = null;
 
 	// Group editing state
 	let isGroupDirty = false;
@@ -192,12 +193,23 @@
 		deletingAttributes = new Set();
 		isHeaderDirty = false;
 		isHeaderSaving = false;
+		pendingHeaderValues = null;
 		splitPaneStore.clearAllDirty();
 	}
 
 	// Header card handlers
-	function handleHeaderDirty(event: CustomEvent<{ isDirty: boolean }>) {
+	function handleHeaderDirty(
+		event: CustomEvent<{ isDirty: boolean; serviceName: string; description: string }>
+	) {
 		isHeaderDirty = event.detail.isDirty;
+		if (event.detail.isDirty) {
+			pendingHeaderValues = {
+				serviceName: event.detail.serviceName,
+				description: event.detail.description
+			};
+		} else {
+			pendingHeaderValues = null;
+		}
 	}
 
 	async function handleHeaderSave(
@@ -639,6 +651,26 @@
 		isSavingBeforeNav = true;
 
 		try {
+			// Save pending header changes (service name/description)
+			if (pendingHeaderValues && selectedService) {
+				const updated = await libre311.editService({
+					service_code: selectedService.service_code,
+					service_name: pendingHeaderValues.serviceName,
+					description: pendingHeaderValues.description
+				});
+
+				// Update local state
+				selectedService = { ...selectedService, ...updated };
+
+				// Update in groups list
+				groups = groups.map((g) => ({
+					...g,
+					services: g.services.map((s) =>
+						s.service_code === updated.service_code ? { ...s, ...updated } : s
+					)
+				}));
+			}
+
 			// Save all pending attribute changes
 			if (pendingAttributeValues.size > 0 && selectedService) {
 				const currentServiceCode = selectedService.service_code;
