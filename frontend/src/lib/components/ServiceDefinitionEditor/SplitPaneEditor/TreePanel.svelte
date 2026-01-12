@@ -207,7 +207,7 @@
 		dropPosition = null;
 	}
 
-	function handleServiceDrop(groupId: number, _serviceIndex: number) {
+	function handleServiceDrop(groupId: number) {
 		if (!reorderEnabled || draggedServiceCode === null || draggedFromGroupId === null) {
 			resetDragState();
 			return;
@@ -333,7 +333,7 @@
 						on:serviceDragStart={(e) => handleServiceDragStart(group.id, e.detail.serviceCode)}
 						on:serviceDragOver={handleServiceDragOver}
 						on:serviceDragLeave={handleServiceDragLeave}
-						on:serviceDrop={(e) => handleServiceDrop(group.id, e.detail.serviceIndex)}
+						on:serviceDrop={() => handleServiceDrop(group.id)}
 						on:serviceDragEnd={handleServiceDragEnd}
 						on:addService={() => dispatch('addService', { groupId: group.id })}
 						on:deleteService={(e) =>

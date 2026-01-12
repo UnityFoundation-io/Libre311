@@ -131,7 +131,12 @@
 
 	function handleServiceDragOver(event: DragEvent, index: number) {
 		if (!draggableServices || draggedServiceCode === null) {
-			console.log('[DRAG_OVER] Skipped - draggableServices:', draggableServices, 'draggedServiceCode:', draggedServiceCode);
+			console.log(
+				'[DRAG_OVER] Skipped - draggableServices:',
+				draggableServices,
+				'draggedServiceCode:',
+				draggedServiceCode
+			);
 			return;
 		}
 

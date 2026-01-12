@@ -290,7 +290,7 @@
 			return;
 		}
 
-		const { index, code, data } = event.detail;
+		const { code, data } = event.detail;
 
 		savingAttributes = new Set([...savingAttributes, code]);
 		try {
@@ -372,7 +372,9 @@
 		}
 	}
 
-	async function handleAttributeReorder(event: CustomEvent<{ fromIndex: number; toIndex: number }>) {
+	async function handleAttributeReorder(
+		event: CustomEvent<{ fromIndex: number; toIndex: number }>
+	) {
 		if (!selectedService) return;
 
 		const { fromIndex, toIndex } = event.detail;
