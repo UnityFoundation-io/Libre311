@@ -47,6 +47,35 @@
 		deleteService: { groupId: number; serviceCode: number; serviceName: string };
 	}>();
 
+	/**
+	 * Handle keyboard-based reordering of services (Alt+Arrow keys)
+	 */
+	function handleKeyboardReorder(
+		event: CustomEvent<{ serviceCode: number; direction: 'up' | 'down' }>
+	) {
+		const { serviceCode, direction } = event.detail;
+
+		// Find the group containing this service
+		const group = groups.find((g) => g.services.some((s) => s.service_code === serviceCode));
+		if (!group) return;
+
+		const currentIndex = group.services.findIndex((s) => s.service_code === serviceCode);
+		if (currentIndex === -1) return;
+
+		// Calculate new index based on direction
+		const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+		// Bounds check
+		if (newIndex < 0 || newIndex >= group.services.length) return;
+
+		dispatch('reorderService', {
+			serviceCode,
+			fromGroupId: group.id,
+			toGroupId: group.id,
+			newIndex
+		});
+	}
+
 	function handleCreateGroup() {
 		dispatch('createGroup');
 	}
@@ -61,6 +90,18 @@
 	// Track focused index for keyboard navigation
 	let focusedGroupIndex = 0;
 	let focusedServiceIndex: number | null = null;
+
+	// Generate unique ID for aria-activedescendant
+	$: activedescendantId = (() => {
+		if (groups.length === 0) return undefined;
+		const group = groups[focusedGroupIndex];
+		if (!group) return undefined;
+
+		if (focusedServiceIndex !== null && group.services[focusedServiceIndex]) {
+			return `tree-service-${group.id}-${group.services[focusedServiceIndex].service_code}`;
+		}
+		return `tree-group-${group.id}`;
+	})();
 
 	function handleToggleGroup(groupId: number) {
 		dispatch('toggleGroup', { groupId });
@@ -313,6 +354,7 @@
 	class="flex h-full flex-col overflow-hidden"
 	role="tree"
 	aria-label="Service groups and services"
+	aria-activedescendant={activedescendantId}
 	tabindex="0"
 	on:keydown={handleKeydown}
 >
@@ -355,7 +397,7 @@
 			<div class="py-8 text-center text-sm text-gray-500">No service groups found</div>
 		{:else}
 			<div class="space-y-1">
-				{#each groups as group (group.id)}
+				{#each groups as group, groupIndex (group.id)}
 					<TreeGroup
 						{group}
 						services={group.services}
@@ -364,6 +406,8 @@
 						selectedServiceCode={selection.type === 'service' && selection.groupId === group.id
 							? selection.serviceCode
 							: null}
+						isFocused={focusedGroupIndex === groupIndex && focusedServiceIndex === null}
+						focusedServiceIndex={focusedGroupIndex === groupIndex ? focusedServiceIndex : null}
 						draggableServices={reorderEnabled}
 						{draggedServiceCode}
 						{dropTargetGroupId}
@@ -384,6 +428,7 @@
 								serviceCode: e.detail.serviceCode,
 								serviceName: e.detail.serviceName
 							})}
+						on:keyboardReorder={handleKeyboardReorder}
 					/>
 				{/each}
 			</div>

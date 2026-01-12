@@ -59,6 +59,16 @@
 	 */
 	export let dropPosition: 'before' | 'after' | null = null;
 
+	/**
+	 * Whether this group has keyboard focus (for visual indicator)
+	 */
+	export let isFocused = false;
+
+	/**
+	 * Index of the service that has keyboard focus within this group (null if none)
+	 */
+	export let focusedServiceIndex: number | null = null;
+
 	const dispatch = createEventDispatcher<{
 		toggle: void;
 		selectGroup: void;
@@ -70,6 +80,7 @@
 		serviceDragEnd: void;
 		addService: void;
 		deleteService: { serviceCode: number; serviceName: string };
+		keyboardReorder: { serviceCode: number; direction: 'up' | 'down' };
 	}>();
 
 	function handleAddService(event: MouseEvent) {
@@ -115,6 +126,17 @@
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			dispatch('selectService', { serviceCode });
+		}
+
+		// Alt+Arrow keys for keyboard reordering
+		if (draggableServices && event.altKey) {
+			if (event.key === 'ArrowUp') {
+				event.preventDefault();
+				dispatch('keyboardReorder', { serviceCode, direction: 'up' });
+			} else if (event.key === 'ArrowDown') {
+				event.preventDefault();
+				dispatch('keyboardReorder', { serviceCode, direction: 'down' });
+			}
 		}
 	}
 
@@ -203,6 +225,7 @@
 </script>
 
 <div
+	id="tree-group-{group.id}"
 	role="treeitem"
 	aria-expanded={isExpanded}
 	aria-level={level}
@@ -213,7 +236,7 @@
 	<div
 		class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {isSelected
 			? 'bg-blue-50 ring-1 ring-blue-500'
-			: ''}"
+			: ''} {isFocused ? 'ring-2 ring-blue-400 ring-offset-1' : ''}"
 		on:click={handleSelectGroup}
 		on:keydown={handleKeydown}
 		tabindex="0"
@@ -271,6 +294,7 @@
 	{#if isExpanded}
 		<div
 			role="group"
+			aria-label="Services in {group.name}"
 			class="ml-6 mt-1 space-y-0.5 border-l border-gray-200 pl-2"
 			transition:slide={{ duration: prefersReducedMotion ? 0 : 150 }}
 		>
@@ -286,13 +310,19 @@
 				{/if}
 
 				<div
+					id="tree-service-{group.id}-{service.service_code}"
 					role="treeitem"
 					aria-level={level + 1}
 					aria-selected={selectedServiceCode === service.service_code}
+					aria-label={draggableServices
+						? `${service.service_name}. Press Alt+Arrow keys to reorder.`
+						: service.service_name}
 					class="group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {selectedServiceCode ===
 					service.service_code
 						? 'bg-blue-50 ring-1 ring-blue-500'
-						: ''} {draggedServiceCode === service.service_code ? 'opacity-50' : ''}"
+						: ''} {draggedServiceCode === service.service_code
+						? 'opacity-50'
+						: ''} {focusedServiceIndex === index ? 'ring-2 ring-blue-400 ring-offset-1' : ''}"
 					draggable={draggableServices}
 					on:click={() => handleServiceClick(service.service_code)}
 					on:keydown={(e) => handleServiceKeydown(e, service.service_code)}
