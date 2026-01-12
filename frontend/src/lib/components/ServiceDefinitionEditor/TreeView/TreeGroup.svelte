@@ -121,7 +121,6 @@
 	// ========== Service Drag and Drop Handlers ==========
 
 	function handleServiceDragStart(event: DragEvent, serviceCode: number) {
-		console.log('[DRAG_START] serviceCode:', serviceCode, 'draggableServices:', draggableServices);
 		if (!draggableServices || !event.dataTransfer) return;
 
 		event.dataTransfer.effectAllowed = 'move';
@@ -130,17 +129,8 @@
 	}
 
 	function handleServiceDragOver(event: DragEvent, index: number) {
-		if (!draggableServices || draggedServiceCode === null) {
-			console.log(
-				'[DRAG_OVER] Skipped - draggableServices:',
-				draggableServices,
-				'draggedServiceCode:',
-				draggedServiceCode
-			);
-			return;
-		}
+		if (!draggableServices || draggedServiceCode === null) return;
 
-		console.log('[DRAG_OVER] index:', index);
 		event.preventDefault();
 		event.dataTransfer!.dropEffect = 'move';
 
@@ -175,13 +165,35 @@
 	}
 
 	function handleServiceDrop(event: DragEvent, index: number) {
-		console.log('[TreeGroup DROP] index:', index);
 		event.preventDefault();
 		dispatch('serviceDrop', { serviceIndex: index });
 	}
 
 	function handleServiceDragEnd() {
 		dispatch('serviceDragEnd');
+	}
+
+	/**
+	 * Handle dragover on the drop indicator element.
+	 * This ensures drops that land directly on the visual indicator are captured.
+	 */
+	function handleIndicatorDragOver(event: DragEvent, index: number, position: 'before' | 'after') {
+		event.preventDefault();
+		event.dataTransfer!.dropEffect = 'move';
+		dispatch('serviceDragOver', {
+			groupId: group.id,
+			serviceIndex: index,
+			position
+		});
+	}
+
+	/**
+	 * Handle drop on the drop indicator element.
+	 * Without this handler, drops landing directly on the blue indicator line would be lost.
+	 */
+	function handleIndicatorDrop(event: DragEvent, index: number) {
+		event.preventDefault();
+		dispatch('serviceDrop', { serviceIndex: index });
 	}
 
 	function handleDeleteService(event: MouseEvent, serviceCode: number, serviceName: string) {
@@ -265,7 +277,12 @@
 			{#each services as service, index (service.service_code)}
 				<!-- Drop indicator BEFORE this service -->
 				{#if dropTargetGroupId === group.id && dropTargetIndex === index && dropPosition === 'before'}
-					<div class="drop-indicator" />
+					<div
+						class="drop-indicator"
+						role="presentation"
+						on:dragover={(e) => handleIndicatorDragOver(e, index, 'before')}
+						on:drop={(e) => handleIndicatorDrop(e, index)}
+					/>
 				{/if}
 
 				<div
@@ -277,7 +294,6 @@
 						? 'bg-blue-50 ring-1 ring-blue-500'
 						: ''} {draggedServiceCode === service.service_code ? 'opacity-50' : ''}"
 					draggable={draggableServices}
-					on:mousedown={() => console.log('[MOUSEDOWN] on service:', service.service_name)}
 					on:click={() => handleServiceClick(service.service_code)}
 					on:keydown={(e) => handleServiceKeydown(e, service.service_code)}
 					on:dragstart={(e) => handleServiceDragStart(e, service.service_code)}
@@ -342,7 +358,12 @@
 
 				<!-- Drop indicator AFTER this service -->
 				{#if dropTargetGroupId === group.id && dropTargetIndex === index && dropPosition === 'after'}
-					<div class="drop-indicator" />
+					<div
+						class="drop-indicator"
+						role="presentation"
+						on:dragover={(e) => handleIndicatorDragOver(e, index, 'after')}
+						on:drop={(e) => handleIndicatorDrop(e, index)}
+					/>
 				{/if}
 			{/each}
 

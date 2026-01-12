@@ -255,6 +255,48 @@
 	}
 
 	function handleServiceDragEnd() {
+		// Perform reorder on dragend instead of waiting for drop event
+		// This is more reliable because dragend always fires, whereas drop
+		// requires precise positioning on the target element
+		if (
+			reorderEnabled &&
+			draggedServiceCode !== null &&
+			draggedFromGroupId !== null &&
+			dropTargetGroupId !== null &&
+			dropTargetIndex !== null &&
+			dropPosition !== null
+		) {
+			// Calculate final index based on drop position
+			let newIndex = dropTargetIndex;
+			if (dropPosition === 'after') {
+				newIndex = dropTargetIndex + 1;
+			}
+
+			// If dragging within the same group and from before to after, adjust index
+			if (draggedFromGroupId === dropTargetGroupId) {
+				const fromIndex = groups
+					.find((g) => g.id === draggedFromGroupId)
+					?.services.findIndex((s) => s.service_code === draggedServiceCode);
+
+				if (fromIndex !== undefined && fromIndex !== -1 && fromIndex < newIndex) {
+					newIndex -= 1;
+				}
+
+				// Don't dispatch if dropping at the same position
+				if (fromIndex === newIndex) {
+					resetDragState();
+					return;
+				}
+			}
+
+			dispatch('reorderService', {
+				serviceCode: draggedServiceCode,
+				fromGroupId: draggedFromGroupId,
+				toGroupId: dropTargetGroupId,
+				newIndex
+			});
+		}
+
 		resetDragState();
 	}
 
