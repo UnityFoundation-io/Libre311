@@ -12,7 +12,7 @@ Overall, this is a well-structured implementation with good separation of concer
 |----------|-------|--------|
 | Critical | 2 | 2 Fixed |
 | High | 8 | 7 Fixed, 1 Pending |
-| Medium | 10 | 5 Fixed, 5 Pending |
+| Medium | 10 | 6 Fixed, 4 Pending |
 | Low | 8 | 1 Fixed, 7 Pending |
 
 ---
@@ -587,7 +587,7 @@ serviceCount={groups.find((g) => g.id === selectedGroup?.id)?.serviceCount ?? 0}
 
 ### M8. Uncontrolled Input Array Growing in OptionsList
 
-- [ ] **Pending**
+- [x] **Fixed** (2026-01-11) - Added inputRefs cleanup in handleDeleteOption
 
 **File:** `frontend/src/lib/components/ServiceDefinitionEditor/AttributeCard/OptionsList.svelte:25`
 
@@ -1014,7 +1014,7 @@ export const prefersReducedMotion = readable(false, (set) => {
 15. ~~M6 - Store documentation~~ ✓ Fixed
 16. M3 - Incomplete TODO (copy functionality)
 17. M7 - Inconsistent null handling
-18. M8 - OptionsList inputRefs cleanup
+18. ~~M8 - OptionsList inputRefs cleanup~~ ✓ Fixed
 19. M9 - DragHandle keyboard accessibility
 20. M10 - Inconsistent error handling patterns
 21. M11 - Svelte-ignore comment

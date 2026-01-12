@@ -53,6 +53,8 @@
 		// Prevent deleting the last option
 		if (values.length <= 1) return;
 
+		// Remove the ref for the deleted option to prevent stale references
+		inputRefs = inputRefs.filter((_, i) => i !== index);
 		values = values.filter((_, i) => i !== index);
 		emitChange();
 	}
