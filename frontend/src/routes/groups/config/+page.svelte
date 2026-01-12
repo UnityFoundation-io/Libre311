@@ -285,13 +285,18 @@
 			};
 		}>
 	) {
+		if (!selectedService) {
+			console.error('Cannot save attribute: no service selected');
+			return;
+		}
+
 		const { index, code, data } = event.detail;
 
 		savingAttributes = new Set([...savingAttributes, code]);
 		try {
 			await libre311.editAttribute({
 				attribute_code: code,
-				service_code: selectedService!.service_code,
+				service_code: selectedService.service_code,
 				description: data.description,
 				datatype: data.datatype,
 				datatype_description: data.datatypeDescription,
@@ -301,7 +306,7 @@
 
 			// Update local state - reload service definition to get updated attributes
 			const definition = await libre311.getServiceDefinition({
-				service_code: selectedService!.service_code
+				service_code: selectedService.service_code
 			});
 			attributes = definition.attributes || [];
 
@@ -340,12 +345,17 @@
 	async function handleAttributeDeleteConfirm(
 		event: CustomEvent<{ index: number; attribute: ServiceDefinitionAttribute }>
 	) {
+		if (!selectedService) {
+			console.error('Cannot delete attribute: no service selected');
+			return;
+		}
+
 		const { attribute } = event.detail;
 
 		deletingAttributes = new Set([...deletingAttributes, attribute.code]);
 		try {
 			await libre311.deleteAttribute({
-				serviceCode: selectedService!.service_code,
+				serviceCode: selectedService.service_code,
 				attributeCode: attribute.code
 			});
 
@@ -362,7 +372,9 @@
 		}
 	}
 
-	function handleAttributeReorder(event: CustomEvent<{ fromIndex: number; toIndex: number }>) {
+	async function handleAttributeReorder(event: CustomEvent<{ fromIndex: number; toIndex: number }>) {
+		if (!selectedService) return;
+
 		const { fromIndex, toIndex } = event.detail;
 
 		// Reorder locally
@@ -371,8 +383,21 @@
 		newAttributes.splice(toIndex, 0, moved);
 		attributes = newAttributes;
 
-		// TODO: Call API to persist order
-		console.log('Reorder attributes:', fromIndex, '->', toIndex);
+		// Persist the new order to the API
+		try {
+			await libre311.updateAttributesOrder({
+				service_code: selectedService.service_code,
+				attributes: newAttributes.map((attr, index) => ({
+					code: attr.code,
+					order: index
+				}))
+			});
+		} catch (err) {
+			console.error('Failed to reorder questions:', err);
+			showSaveError('Failed to save question order. Please try again.');
+			// Reload to restore server state
+			await loadServiceDefinition(selectedService.service_code);
+		}
 	}
 
 	// Service reorder in tree
@@ -414,9 +439,9 @@
 				g.id === fromGroupId
 					? {
 							...g,
-							services: reorderedCodes.map(
-								(code) => g.services.find((s) => s.service_code === code)!
-							)
+							services: reorderedCodes
+								.map((code) => g.services.find((s) => s.service_code === code))
+								.filter((s): s is Service => s !== undefined)
 						}
 					: g
 			);
@@ -478,12 +503,13 @@
 	async function handleGroupDelete() {
 		if (!selectedGroup) return;
 
+		const groupId = selectedGroup.id;
 		isGroupDeleting = true;
 		try {
-			await libre311.deleteGroup({ group_id: selectedGroup.id });
+			await libre311.deleteGroup({ group_id: groupId });
 
 			// Remove from local state
-			groups = groups.filter((g) => g.id !== selectedGroup!.id);
+			groups = groups.filter((g) => g.id !== groupId);
 
 			// Clear selection
 			selection = { type: null, groupId: null, serviceCode: null };
@@ -538,23 +564,24 @@
 	async function handleDeleteServiceConfirm() {
 		if (!serviceToDelete) return;
 
+		const { groupId, serviceCode } = serviceToDelete;
 		isServiceDeleting = true;
 		try {
-			await libre311.deleteService({ service_code: serviceToDelete.serviceCode });
+			await libre311.deleteService({ service_code: serviceCode });
 
 			// Remove from local state
 			groups = groups.map((g) =>
-				g.id === serviceToDelete!.groupId
+				g.id === groupId
 					? {
 							...g,
-							services: g.services.filter((s) => s.service_code !== serviceToDelete!.serviceCode),
+							services: g.services.filter((s) => s.service_code !== serviceCode),
 							serviceCount: g.serviceCount - 1
 						}
 					: g
 			);
 
 			// Clear selection if the deleted service was selected
-			if (selection.type === 'service' && selection.serviceCode === serviceToDelete.serviceCode) {
+			if (selection.type === 'service' && selection.serviceCode === serviceCode) {
 				selection = { type: null, groupId: null, serviceCode: null };
 				selectedService = null;
 				attributes = [];
@@ -612,11 +639,12 @@
 		try {
 			// Save all pending attribute changes
 			if (pendingAttributeValues.size > 0 && selectedService) {
+				const currentServiceCode = selectedService.service_code;
 				const savePromises = Array.from(pendingAttributeValues.entries()).map(
 					async ([code, data]) => {
 						await libre311.editAttribute({
 							attribute_code: code,
-							service_code: selectedService!.service_code,
+							service_code: currentServiceCode,
 							description: data.description,
 							datatype: data.datatype,
 							datatype_description: data.datatypeDescription,
