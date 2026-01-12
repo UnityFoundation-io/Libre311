@@ -72,9 +72,6 @@
 	// Track attribute code to detect actual prop changes (H1 fix)
 	let lastAttributeCode: number | null = null;
 
-	// Track previous dirty state to avoid excessive event dispatching (H2 fix)
-	let previousIsDirty = false;
-
 	// Initialize from attribute prop - only when attribute actually changes
 	$: if (attribute && attribute.code !== lastAttributeCode) {
 		lastAttributeCode = attribute.code;
@@ -112,23 +109,20 @@
 		datatypeDescription !== originalDatatypeDescription ||
 		!areValuesEqual(values, originalValues);
 
-	// Notify parent of dirty changes - only when isDirty actually changes (H2 fix)
-	// Include pending values when dirty so parent can save them
-	$: if (isDirty !== previousIsDirty) {
-		previousIsDirty = isDirty;
-		dispatch('dirty', {
-			isDirty,
-			pendingValues: isDirty
-				? {
-						description: description.trim(),
-						datatype,
-						required,
-						datatypeDescription: datatypeDescription.trim(),
-						values: isList ? values : undefined
-					}
-				: undefined
-		});
-	}
+	// Notify parent of dirty changes - dispatch on every form value change
+	// so parent always has current pending values for save-on-navigate
+	$: dispatch('dirty', {
+		isDirty,
+		pendingValues: isDirty
+			? {
+					description: description.trim(),
+					datatype,
+					required,
+					datatypeDescription: datatypeDescription.trim(),
+					values: isList ? values : undefined
+				}
+			: undefined
+	});
 
 	// Validation
 	$: isValid = description.trim().length > 0 && (!isList || values.length > 0);

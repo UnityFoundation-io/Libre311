@@ -54,7 +54,16 @@
 		copy: { suggestedDescription: string };
 		delete: void;
 		deleteConfirm: void;
-		dirty: { isDirty: boolean };
+		dirty: {
+			isDirty: boolean;
+			pendingValues?: {
+				description: string;
+				datatype: DatatypeUnion;
+				required: boolean;
+				datatypeDescription: string;
+				values?: AttributeValue[];
+			};
+		};
 		dragstart: void;
 		dragend: void;
 	}>();
@@ -72,7 +81,18 @@
 		dispatch('collapse');
 	}
 
-	function handleDirtyChange(event: CustomEvent<{ isDirty: boolean }>) {
+	function handleDirtyChange(
+		event: CustomEvent<{
+			isDirty: boolean;
+			pendingValues?: {
+				description: string;
+				datatype: DatatypeUnion;
+				required: boolean;
+				datatypeDescription: string;
+				values?: AttributeValue[];
+			};
+		}>
+	) {
 		isDirty = event.detail.isDirty;
 		dispatch('dirty', event.detail);
 	}
