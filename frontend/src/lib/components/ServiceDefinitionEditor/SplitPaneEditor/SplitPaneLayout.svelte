@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onDestroy } from 'svelte';
 	import type { GroupWithServices, EditorSelection } from '../stores/types';
 	import type { Service, Group } from '$lib/services/Libre311/Libre311';
 	import TreePanel from './TreePanel.svelte';
@@ -137,6 +137,14 @@
 		document.body.style.cursor = '';
 		document.body.style.userSelect = '';
 	}
+
+	// Cleanup: ensure event listeners are removed if component unmounts during resize
+	onDestroy(() => {
+		document.removeEventListener('mousemove', handleResize);
+		document.removeEventListener('mouseup', stopResize);
+		document.body.style.cursor = '';
+		document.body.style.userSelect = '';
+	});
 
 	function handleToggleGroup(event: CustomEvent<{ groupId: number }>) {
 		dispatch('toggleGroup', event.detail);

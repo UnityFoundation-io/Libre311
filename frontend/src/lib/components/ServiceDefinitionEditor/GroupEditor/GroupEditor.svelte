@@ -39,9 +39,13 @@
 	let editedName = group.name;
 	let showDeleteModal = false;
 
-	// Track dirty state
+	// Track dirty state - only dispatch when value actually changes
+	let previousIsDirty = false;
 	$: isDirty = editedName !== group.name;
-	$: dispatch('dirty', { isDirty });
+	$: if (isDirty !== previousIsDirty) {
+		previousIsDirty = isDirty;
+		dispatch('dirty', { isDirty });
+	}
 
 	// Reset when group changes
 	$: if (group) {

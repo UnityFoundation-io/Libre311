@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { createEventDispatcher, onDestroy } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { saveStatus, clearSaveStatus } from '../stores/editorStore';
 	import type { SaveStatus } from '../types';
@@ -13,6 +13,10 @@
 	 * Whether to show the toast
 	 */
 	export let visible = true;
+
+	const dispatch = createEventDispatcher<{
+		retry: void;
+	}>();
 
 	let dismissTimeout: ReturnType<typeof setTimeout> | null = null;
 	let currentStatus: SaveStatus = { type: 'idle' };
@@ -47,9 +51,7 @@
 	}
 
 	function handleRetry() {
-		// Emit retry event - parent component should handle actual retry logic
-		const event = new CustomEvent('retry');
-		document.dispatchEvent(event);
+		dispatch('retry');
 	}
 
 	$: isVisible = visible && currentStatus.type !== 'idle';
