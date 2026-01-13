@@ -31,22 +31,24 @@
 		"title": "Service Requests"
 	},
 	"serviceRequest": {
+		"request_id":  "Request ID",
 		"description": "Description:",
+		"address": "Address",
 		"detail": "Service Request Detail",
 		"update": "Service Request Update",
 		"create": "Service Request Create",
-		"attributes": "Attributes:",
-		"agency_contact": "Agency Contact:",
-		"agency_contact_email": "Agency Contact Email:",
+		"agency_contact": "Agency Contact",
+		"agency_contact_email": "Agency Contact Email",
 		"agency_name": "agency name",
-		"citizen_contact": "Citizen Contact:",
-		"expected_datetime": "Estimated Fix:",
+		"citizen_contact": "Citizen Contact",
+		"expected_datetime": "Expected Completion",
 		"request_type": "Request Type",
-		"service_notice": "Recommended Solution:",
+		"service_name": "Service Name",
+		"service_notice": "Recommended Solution",
 		"service_notice_placeholder": "proposed service",
-		"status_notes": "Notes:",
-		"status": "Status:",
-		"priority": "Priority:"
+		"status_notes": "Notes",
+		"status": "Status",
+		"priority": "Priority"
 	},
 	"contact": {
 		"header": "Add Contact Information",
