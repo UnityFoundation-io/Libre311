@@ -31,7 +31,7 @@
 		"title": "Service Requests"
 	},
 	"serviceRequest": {
-		"request_id":  "Request ID",
+		"request_id": "Request ID",
 		"description": "Description:",
 		"address": "Address",
 		"detail": "Service Request Detail",
