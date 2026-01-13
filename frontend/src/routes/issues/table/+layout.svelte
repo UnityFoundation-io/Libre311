@@ -277,6 +277,15 @@
 							<Table.Body slot="body">
 								{#each $serviceRequestsRes.value.serviceRequests as item}
 									<Table.Body.Row
+										tabIndex="0"
+										on:keydown={(e) => {
+											if (!(e instanceof KeyboardEvent)) return;
+
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												selectRow(item.service_request_id);
+											}
+										}}
 										id={resolveStyleId(item, $selectedServiceRequestStore)}
 										on:click={() => selectRow(item.service_request_id)}
 									>
