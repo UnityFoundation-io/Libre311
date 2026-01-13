@@ -16,6 +16,7 @@
 	let input: HTMLInputElement;
 	let reuploadInput: HTMLInputElement;
 	let imageData: string | undefined;
+	let filePickerError: string | undefined;
 
 	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
 
@@ -44,8 +45,9 @@
 	}
 
 	function desktopDropFiles(dropFiles: DropResult) {
+		filePickerError = undefined;
 		if (dropFiles.rejected[0]) {
-			console.log('Unsupported file type');
+			filePickerError = messages['photo']['invalid_file_type'];
 		}
 		for (const file of dropFiles.accepted) {
 			dispatchFile(file);
@@ -80,7 +82,6 @@
 
 				<div class="grid w-full grid-rows-3 gap-2">
 					<input
-						type="file"
 						name="photo"
 						id="camera-roll-btn-desktop"
 						accept="image/*"
@@ -125,6 +126,11 @@
 								Drag & Drop your file
 							</FilePicker.Description>
 						</FilePicker>
+						{#if filePickerError}
+							<p class="stwui-input-error mt-2 text-center text-sm text-danger" role="alert">
+								{filePickerError}
+							</p>
+						{/if}
 					</div>
 
 					<Button
