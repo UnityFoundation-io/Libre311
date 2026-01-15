@@ -27,9 +27,9 @@
 	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
 	import L from 'leaflet';
 
-	interface SearchResult<TRawResult = any> {
+	interface AddressSearchResult {
 		label?: string;
-		raw: TRawResult;
+		raw: NominatimRaw;
 	}
 
 	interface NominatimAddress {
@@ -50,7 +50,7 @@
 		type?: string;
 	}
 
-	function formatAddress(result: SearchResult<NominatimRaw>): SearchResult<NominatimRaw> | null {
+	function formatAddress(result: AddressSearchResult): AddressSearchResult | null {
 		const address = result.raw?.address;
 		if (!address) return null;
 
@@ -81,7 +81,7 @@
 		provider,
 		style: 'bar',
 		showMarker: false,
-		resultFormat: ({ result }: { result: SearchResult<NominatimRaw> }) =>
+		resultFormat: ({ result }: { result: AddressSearchResult }) =>
 			formatAddress(result)?.label ?? null
 	});
 
