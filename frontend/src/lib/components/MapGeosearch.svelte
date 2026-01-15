@@ -26,17 +26,59 @@
 	import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
 	import L from 'leaflet';
+	import type { SearchResult } from '../../node_modules/leaflet-geosearch/dist/providers/provider';
+
+	interface NominatimAddress {
+		house_number?: string;
+		road?: string;
+		city?: string;
+		town?: string;
+		village?: string;
+		hamlet?: string;
+		county?: string;
+		state?: string;
+		postcode?: string;
+	}
+
+	interface NominatimRaw {
+		address?: NominatimAddress;
+		class?: string;
+		type?: string;
+	}
+
+	function formatAddress(result: SearchResult<NominatimRaw>): SearchResult<NominatimRaw> | null {
+		const address = result.raw?.address;
+		if (!address) return null;
+
+		const streetNumber = address.house_number;
+		const streetName = address.road;
+		const city =
+			address.city ?? address.town ?? address.village ?? address.hamlet ?? address.county;
+		const state = address.state;
+		const zip = address.postcode;
+
+		if (!streetName) return null;
+
+		result.label = [streetNumber ? `${streetNumber} ${streetName}` : streetName, city, state, zip]
+			.filter(Boolean)
+			.join(', ');
+
+		return result;
+	}
 
 	const map = getContext<{ getMap: () => L.Map }>('map').getMap();
 	const provider = new OpenStreetMapProvider({
 		params: {
+			addressdetails: 1,
 			countrycodes: 'us'
 		}
 	});
 	const control = GeoSearchControl({
 		provider,
 		style: 'bar',
-		showMarker: false
+		showMarker: false,
+		resultFormat: ({ result }: { result: SearchResult<NominatimRaw> }) =>
+			formatAddress(result).label
 	});
 
 	const dispatch = createEventDispatcher<{
