@@ -64,7 +64,7 @@
 		},
 		"phone": {
 			"label": "Phone",
-			"placeholder": "000-000-000"
+			"placeholder": "000-000-0000"
 		},
 		"email": {
 			"label": "Email",
@@ -96,7 +96,8 @@
 		"use_current_image": "Continue With Original Image",
 		"change_image": "Re-Take Photo",
 		"back": "Back",
-		"submit": "Submit"
+		"submit": "Submit",
+		"invalid_file_type": "Invalid File Type"
 	},
 	"serviceDefinitionEditor": {
 		"attributes": {
