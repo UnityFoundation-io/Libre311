@@ -26,7 +26,11 @@
 	import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
 	import L from 'leaflet';
-	import type { SearchResult } from '../../node_modules/leaflet-geosearch/dist/providers/provider';
+
+	interface SearchResult<TRawResult = any> {
+		label?: string;
+		raw: TRawResult;
+	}
 
 	interface NominatimAddress {
 		house_number?: string;
@@ -78,7 +82,7 @@
 		style: 'bar',
 		showMarker: false,
 		resultFormat: ({ result }: { result: SearchResult<NominatimRaw> }) =>
-			formatAddress(result).label
+			formatAddress(result)?.label ?? null
 	});
 
 	const dispatch = createEventDispatcher<{
