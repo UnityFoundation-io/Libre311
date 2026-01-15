@@ -73,7 +73,7 @@
 	const map = getContext<{ getMap: () => L.Map }>('map').getMap();
 	const provider = new OpenStreetMapProvider({
 		params: {
-			addressdetails: 1,
+			addressdetails: true,
 			countrycodes: 'us'
 		}
 	});
