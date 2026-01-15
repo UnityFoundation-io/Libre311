@@ -135,7 +135,7 @@
 				<!-- NAME & EMAIL & PHONE (CITIZEN) -->
 				{#if name}
 					<div class="mb-1">
-						<strong class="text-base">{messages['serviceRequest']['citizen_contact']}</strong>
+						<strong class="text-base">{messages['serviceRequest']['citizen_contact']}:</strong>
 						<p class="text-sm">{name ?? ''}</p>
 						<p class="text-sm">{serviceRequest.email ?? ''}</p>
 						<p class="text-sm">{serviceRequest.phone ?? ''}</p>
@@ -146,7 +146,7 @@
 					<!-- EXPECTED TIMESTAMP -->
 					{#if serviceRequest.expected_datetime}
 						<div class="mb-1 flex flex-col">
-							<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+							<strong class="text-base">{messages['serviceRequest']['expected_datetime']}:</strong>
 							<div class="flex items-center">
 								<p class="text-sm">{toTimeStamp(serviceRequest.expected_datetime) ?? ''}</p>
 							</div>
@@ -156,7 +156,7 @@
 					<!-- PRIORITY -->
 					{#if serviceRequest.priority}
 						<div class="mb-1">
-							<strong class="text-base">{messages['serviceRequest']['priority']}</strong>
+							<strong class="text-base">{messages['serviceRequest']['priority']}:</strong>
 							<p class="text-sm">
 								{serviceRequest.priority.charAt(0).toUpperCase() + serviceRequest.priority.slice(1)}
 							</p>
@@ -166,9 +166,10 @@
 					<!-- AGENCY -->
 					{#if serviceRequest.agency_responsible || serviceRequest.agency_email}
 						<div class="mb-1">
-							<strong class="text-base">{messages['serviceRequest']['agency_contact']}</strong>
+							<strong class="text-base">{messages['serviceRequest']['agency_contact']}:</strong>
 							<p class="text-sm">{serviceRequest.agency_responsible ?? ''}</p>
-							<strong class="text-base">{messages['serviceRequest']['agency_contact_email']}</strong
+							<strong class="text-base"
+								>{messages['serviceRequest']['agency_contact_email']}:</strong
 							>
 							<p class="text-sm">{serviceRequest.agency_email ?? ''}</p>
 						</div>
@@ -177,7 +178,7 @@
 					<!-- SERVICE NOTICE -->
 					{#if serviceRequest.service_notice}
 						<div class="mb-1">
-							<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+							<strong class="text-base">{messages['serviceRequest']['service_notice']}:</strong>
 							<p class="text-sm">{serviceRequest.service_notice}</p>
 						</div>
 					{/if}
@@ -185,7 +186,7 @@
 					<!-- STATUS NOTES -->
 					{#if serviceRequest.status_notes}
 						<div class="mb-1">
-							<h2 class="text-base">{messages['serviceRequest']['status_notes']}</h2>
+							<h2 class="text-base">{messages['serviceRequest']['status_notes']}:</h2>
 							<p class="text-sm">{serviceRequest.status_notes}</p>
 						</div>
 					{/if}
