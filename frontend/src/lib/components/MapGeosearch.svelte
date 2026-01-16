@@ -56,8 +56,7 @@
 
 		const streetNumber = address.house_number;
 		const streetName = address.road;
-		const city =
-			address.city ?? address.town ?? address.village ?? address.hamlet ?? address.county;
+		const city = address.city ?? address.town ?? address.village ?? address.hamlet;
 		const state = address.state;
 		const zip = address.postcode;
 
