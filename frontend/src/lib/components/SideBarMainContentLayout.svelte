@@ -1,44 +1,53 @@
 <script lang="ts">
-	export let sideBarBreakpointActive = true;
+	import { mediaQuery } from '$lib/components/media';
+
+	export let sideBarHidden = false;
+	export let mainContentHidden = false;
+
+	$: layoutContainerClass = `layout-container-${sideBarHidden}-${mainContentHidden}`;
 </script>
 
-<div class="layout-container">
-	<aside class="side-bar h-full" class:collapsable-side-bar={sideBarBreakpointActive}>
+<div class={layoutContainerClass}>
+	<div class="side-bar h-full">
 		<slot name="side-bar" />
-	</aside>
-	<div class="main-content"><slot name="main-content" /></div>
+	</div>
+	<div class="main-content">
+		<slot name="main-content" />
+	</div>
 </div>
 
 <style>
-	.layout-container {
-		grid-template-columns: 100%;
-		height: 100%;
-	}
-	.main-content {
-		flex-grow: 1;
+	.layout-container-false-false {
+		display: grid;
+		grid-template-columns: 400px auto;
 		height: 100%;
 	}
 
-	.collapsable-side-bar {
+	.layout-container-false-true {
+		display: grid;
+		grid-template-columns: auto;
+		height: 100%;
+	}
+
+	.layout-container-true-false {
+		display: grid;
+		grid-template-columns: auto;
+		height: 100%;
+	}
+
+	.layout-container-true-false .side-bar {
+		display: none;
+	}
+
+	.layout-container-false-true .main-content {
 		display: none;
 	}
 
 	.side-bar {
-		position: relative;
-		width: 400px;
-	}
-
-	aside {
 		overflow-y: auto;
 	}
 
-	@media (min-width: 769px) {
-		.layout-container {
-			display: grid;
-			grid-template-columns: 400px auto;
-		}
-		.collapsable-side-bar {
-			display: unset;
-		}
+	.main-content {
+		height: 100%;
 	}
 </style>
