@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { mediaQuery } from '$lib/components/media';
-
 	export let sideBarHidden = false;
 	export let mainContentHidden = false;
 
