@@ -42,7 +42,7 @@
 		display: none;
 	}
 
-	.list-view  {
+	.list-view {
 		overflow-y: auto;
 	}
 </style>
