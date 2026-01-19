@@ -27,16 +27,61 @@
 	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
 	import L from 'leaflet';
 
+	interface AddressSearchResult {
+		label?: string;
+		raw: NominatimRaw;
+	}
+
+	interface NominatimAddress {
+		house_number?: string;
+		road?: string;
+		city?: string;
+		town?: string;
+		village?: string;
+		hamlet?: string;
+		county?: string;
+		state?: string;
+		postcode?: string;
+	}
+
+	interface NominatimRaw {
+		address?: NominatimAddress;
+		class?: string;
+		type?: string;
+	}
+
+	function formatAddress(result: AddressSearchResult): AddressSearchResult | null {
+		const address = result.raw?.address;
+		if (!address) return null;
+
+		const streetNumber = address.house_number;
+		const streetName = address.road;
+		const city = address.city ?? address.town ?? address.village ?? address.hamlet;
+		const state = address.state;
+		const zip = address.postcode;
+
+		if (!streetName) return null;
+
+		result.label = [streetNumber ? `${streetNumber} ${streetName}` : streetName, city, state, zip]
+			.filter(Boolean)
+			.join(', ');
+
+		return result;
+	}
+
 	const map = getContext<{ getMap: () => L.Map }>('map').getMap();
 	const provider = new OpenStreetMapProvider({
 		params: {
+			addressdetails: true,
 			countrycodes: 'us'
 		}
 	});
 	const control = GeoSearchControl({
 		provider,
 		style: 'bar',
-		showMarker: false
+		showMarker: false,
+		resultFormat: ({ result }: { result: AddressSearchResult }) =>
+			formatAddress(result)?.label ?? null
 	});
 
 	const dispatch = createEventDispatcher<{
