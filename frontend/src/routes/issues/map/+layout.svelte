@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
+	import RequestListMap from '$lib/components/RequestListMap.svelte';
 	import {
 		useSelectedServiceRequestStore,
 		useServiceRequestsResponseStore
@@ -94,16 +94,16 @@
 		}
 	}
 
-	let sideBarHidden = false;
-	let mainContentHidden = false;
+	let listHidden = false;
+	let mapHidden = false;
 
 	export let toggleState: MapOrListToggle = MapOrList.Map;
 
 	function handleToggle(toggled: MapOrListToggle) {
 		toggleState = toggled;
 
-		sideBarHidden = toggled === MapOrList.Map;
-		mainContentHidden = toggled === MapOrList.List;
+		listHidden = toggled === MapOrList.Map;
+		mapHidden = toggled === MapOrList.List;
 	}
 
 	const isNarrow = mediaQuery('(max-width: 768px)');
@@ -111,18 +111,18 @@
 	$: {
 		// callback-like behavior
 		if ($isNarrow) {
-			sideBarHidden = true;
-			mainContentHidden = false;
+			listHidden = true;
+			mapHidden = false;
 		} else {
-			sideBarHidden = false;
-			mainContentHidden = false;
+			listHidden = false;
+			mapHidden = false;
 			toggleState = MapOrList.Map;
 		}
 	}
 </script>
 
-<SideBarMainContentLayout {sideBarHidden} {mainContentHidden}>
-	<div slot="side-bar">
+<RequestListMap {listHidden} {mapHidden}>
+	<div slot="list-slot">
 		{#if $serviceRequestsRes.type === 'success'}
 			<Breakpoint>
 				<div slot="is-mobile-or-tablet" class="my-4 flex justify-center">
@@ -169,7 +169,7 @@
 			</div>
 		{/if}
 	</div>
-	<div slot="main-content" class="relative flex h-full">
+	<div slot="map-slot" class="relative flex h-full">
 		<Breakpoint>
 			<div slot="is-mobile-or-tablet" class="absolute left-1/2 top-5 z-[1] -translate-x-1/2">
 				<MapListToggle toggled={toggleState} on:change={(e) => handleToggle(e.detail)} />
@@ -194,4 +194,4 @@
 		</MapComponent>
 		<CreateServiceRequestButton />
 	</div>
-</SideBarMainContentLayout>
+</RequestListMap>
