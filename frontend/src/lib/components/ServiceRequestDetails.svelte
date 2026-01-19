@@ -38,7 +38,7 @@
 				<div class="mb-2 mt-2 flow-root">
 					<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 					<div class="float-right">
-						<Button on:click={() => (showSuggestionModal = true)} size="sm" type="ghost">
+						<Button on:click={() => (showSuggestionModal = true)} size="sm" type="primary">
 							Suggest Removal
 						</Button>
 					</div>

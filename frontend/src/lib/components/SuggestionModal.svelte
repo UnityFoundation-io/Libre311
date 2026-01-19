@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { Button, Modal, Input, TextArea, Portal } from 'stwui';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import {
+		createInput,
+		optionalCoalescePhoneNumberValidator,
+		type FormInputValue
+	} from '$lib/utils/validation';
 
 	export let open = false;
 	export let serviceRequestId: number;
@@ -10,7 +15,7 @@
 
 	let email = '';
 	let name = '';
-	let phone = '';
+	let phone: FormInputValue<string | undefined> = createInput('');
 	let reason = '';
 	let loading = false;
 	let error = '';
@@ -22,6 +27,9 @@
 			return;
 		}
 
+		phone = optionalCoalescePhoneNumberValidator(phone);
+		if (phone.type === 'invalid') return;
+
 		loading = true;
 		error = '';
 		try {
@@ -29,7 +37,7 @@
 				service_request_id: serviceRequestId,
 				email,
 				name,
-				phone,
+				phone: phone.value,
 				reason
 			});
 			success = true;
@@ -47,10 +55,18 @@
 		}
 	}
 
+	function formatPhoneNumber() {
+		if (!phone.value) return;
+		phone.value = phone.value
+			.replace(/\D/g, '') // Remove non-digit characters
+			.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); // Format with hyphens
+		phone = phone;
+	}
+
 	function reset() {
 		email = '';
 		name = '';
-		phone = '';
+		phone = createInput('');
 		reason = '';
 		error = '';
 		success = false;
@@ -81,7 +97,12 @@
 								</Input>
 							</div>
 							<div class="mb-2">
-								<Input bind:value={phone} placeholder="555-555-5555">
+								<Input
+									bind:value={phone.value}
+									placeholder="555-555-5555"
+									error={phone.error}
+									on:input={formatPhoneNumber}
+								>
 									<Input.Label slot="label">Phone</Input.Label>
 								</Input>
 							</div>

@@ -69,7 +69,7 @@
 		<div class="flex h-full w-full flex-col p-2" slot="content">
 			<h3 class="mb-2 text-lg font-bold">Removal Suggestions</h3>
 			<List>
-				{#each suggestions as suggestion}
+				{#each suggestions as suggestion (suggestion.id)}
 					<List.Item>
 						<div class="flex w-full flex-col gap-1">
 							<div class="flex items-start justify-between">
