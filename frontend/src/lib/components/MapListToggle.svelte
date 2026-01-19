@@ -17,13 +17,13 @@
 <div class="toggle">
 	<button
 		class="rounded-l-lg"
-		class:selected={toggled === MapOrList.Map}
-		on:click={() => set(MapOrList.Map)}>Map</button
+		class:selected={toggled === MapOrList.List}
+		on:click={() => set(MapOrList.List)}>List</button
 	>
 	<button
 		class="rounded-r-lg"
-		class:selected={toggled === MapOrList.List}
-		on:click={() => set(MapOrList.List)}>List</button
+		class:selected={toggled === MapOrList.Map}
+		on:click={() => set(MapOrList.Map)}>Map</button
 	>
 </div>
 
