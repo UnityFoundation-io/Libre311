@@ -26,9 +26,6 @@
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
 	import { mapStatusLegendControlFactory } from '$lib/components/MapStatusLegendControl';
 	import { KEYBOARD_PAN_DELTA_COARSE, SELECTION_ZOOM_LEVEL } from '$lib/constants/map';
-	import messages from '$media/messages.json';
-	import ServiceRequestPreview from '$lib/components/ServiceRequestPreview.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
 
 	import { MapOrList, type MapOrListToggle } from '$lib/components/map_or_list_toggle';
 
@@ -37,18 +34,8 @@
 	const serviceRequestsResponseStore = useServiceRequestsResponseStore();
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
-	import { useServiceRequestsContext } from '$lib/context/ServiceRequestsContext';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { mediaQuery } from '$lib/components/media';
-
-	const ctx = useServiceRequestsContext();
-	const serviceRequestsRes = ctx.serviceRequestsResponse;
-
-	let listElement: HTMLElement;
-
-	function scrollToTop() {
-		listElement.scrollIntoView();
-	}
 
 	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
 
