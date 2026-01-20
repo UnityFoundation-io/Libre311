@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SideBarMainContentLayout from '$lib/components/SideBarMainContentLayout.svelte';
+	import RequestListMap from '$lib/components/RequestListMap.svelte';
 	import {
 		useSelectedServiceRequestStore,
 		useServiceRequestsResponseStore
@@ -10,7 +10,6 @@
 	import MapComponent from '$lib/components/MapComponent.svelte';
 	import MapMarkerCircle from '$lib/components/MapMarkerCircle.svelte';
 	import MapMarkerWaypoint from '$lib/components/MapMarkerWaypoint.svelte';
-	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import MapListToggle from '$lib/components/MapListToggle.svelte';
 
 	// Type imports
@@ -28,10 +27,15 @@
 	import { mapStatusLegendControlFactory } from '$lib/components/MapStatusLegendControl';
 	import { KEYBOARD_PAN_DELTA_COARSE, SELECTION_ZOOM_LEVEL } from '$lib/constants/map';
 
+	import { MapOrList, type MapOrListToggle } from '$lib/components/map_or_list_toggle';
+
 	const linkResolver = useLibre311Context().linkResolver;
 	const libre311 = useLibre311Context().service;
 	const serviceRequestsResponseStore = useServiceRequestsResponseStore();
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
+
+	import Breakpoint from '$lib/components/Breakpoint.svelte';
+	import { mediaQuery } from '$lib/components/media';
 
 	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
 
@@ -76,14 +80,47 @@
 			goto(linkResolver.issueDetailsMobile($page.url, serviceRequest.service_request_id));
 		}
 	}
+
+	let listHidden = false;
+	let mapHidden = false;
+
+	export let toggleState: MapOrListToggle = MapOrList.Map;
+
+	function handleToggle(toggled: MapOrListToggle) {
+		toggleState = toggled;
+
+		listHidden = toggled === MapOrList.Map;
+		mapHidden = toggled === MapOrList.List;
+	}
+
+	const isNarrow = mediaQuery('(max-width: 768px)');
+
+	$: {
+		// callback-like behavior
+		if ($isNarrow) {
+			listHidden = true;
+			mapHidden = false;
+		} else {
+			listHidden = false;
+			mapHidden = false;
+			toggleState = MapOrList.Map;
+		}
+	}
 </script>
 
-<SideBarMainContentLayout>
-	<slot slot="side-bar" />
-	<div slot="main-content" class="relative flex h-full">
+<RequestListMap {listHidden} {mapHidden}>
+	<div slot="list-slot">
+		<Breakpoint>
+			<div slot="is-mobile-or-tablet" class="my-4 flex justify-center">
+				<MapListToggle toggled={toggleState} on:change={(e) => handleToggle(e.detail)} />
+			</div>
+		</Breakpoint>
+		<slot />
+	</div>
+	<div slot="map-slot" class="relative flex h-full">
 		<Breakpoint>
 			<div slot="is-mobile-or-tablet" class="absolute left-1/2 top-5 z-[1] -translate-x-1/2">
-				<MapListToggle />
+				<MapListToggle toggled={toggleState} on:change={(e) => handleToggle(e.detail)} />
 			</div>
 		</Breakpoint>
 		<MapComponent
@@ -105,4 +142,4 @@
 		</MapComponent>
 		<CreateServiceRequestButton />
 	</div>
-</SideBarMainContentLayout>
+</RequestListMap>
