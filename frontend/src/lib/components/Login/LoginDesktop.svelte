@@ -75,6 +75,8 @@
 				placeholder={messages['login']['email']['placeholder']}
 				error={emailInput.error}
 				value={emailInput.value}
+				aria-describedby={emailInput.error ? 'email-desktop-error' : undefined}
+				aria-invalid={!!emailInput.error}
 				autocomplete={emailAutocomplete}
 				on:change={(e) => onChange(e, 'email')}
 			>
@@ -92,6 +94,8 @@
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
 				value={passwordInput.value}
+				aria-describedby={passwordInput.error ? 'password-desktop-error' : undefined}
+				aria-invalid={!!passwordInput.error}
 				autocomplete={passwordAutocomplete}
 				on:change={(e) => onChange(e, 'password')}
 			>
