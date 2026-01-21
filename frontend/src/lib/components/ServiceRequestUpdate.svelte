@@ -184,6 +184,8 @@
 			type="email"
 			placeholder={messages['contact']['email']['placeholder']}
 			error={agencyEmailInput.error}
+			aria-describedby={agencyEmailInput.error ? 'email-error' : undefined}
+			aria-invalid={!!agencyEmailInput.error}
 			bind:value={agencyEmailInput.value}
 		>
 			<Input.Label slot="label">
