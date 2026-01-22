@@ -98,12 +98,11 @@
 	$: {
 		// callback-like behavior
 		if ($isNarrow) {
-			listHidden = true;
-			mapHidden = false;
+			listHidden = toggleState === MapOrList.Map;
+			mapHidden = toggleState === MapOrList.List;
 		} else {
 			listHidden = false;
 			mapHidden = false;
-			toggleState = MapOrList.Map;
 		}
 	}
 </script>
