@@ -2,6 +2,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { Service } from '$lib/services/Libre311/Libre311';
 	import SaveButton from '../Shared/SaveButton.svelte';
+	import { handleEditorKeydown } from '../utils/keyboard';
 
 	/**
 	 * The service being edited
@@ -65,18 +66,13 @@
 		dispatch('cancel');
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
-		// Save on Ctrl+S / Cmd+S
-		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-			event.preventDefault();
-			if (canSave) {
-				handleSave();
-			}
-		}
-		// Cancel on Escape
-		if (event.key === 'Escape' && isDirty) {
-			handleCancel();
-		}
+	function onKeydown(event: KeyboardEvent) {
+		handleEditorKeydown(event, {
+			onSave: handleSave,
+			onCancel: handleCancel,
+			canSave,
+			isDirty
+		});
 	}
 
 	/**
@@ -97,7 +93,7 @@
 	});
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window on:keydown={onKeydown} />
 
 <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
 	<!-- Purple top border indicator -->

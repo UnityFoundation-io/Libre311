@@ -9,7 +9,6 @@
 	import AttributeTypeSelector from './AttributeTypeSelector.svelte';
 	import AttributeCardFooter from './AttributeCardFooter.svelte';
 	import OptionsList from './OptionsList.svelte';
-	import DragHandle from '../Shared/DragHandle.svelte';
 
 	/**
 	 * The attribute being edited
@@ -22,9 +21,17 @@
 	export let isSaving = false;
 
 	/**
-	 * Whether the card is being dragged
+	 * Pending values (unsaved changes) to restore if component is re-rendered
 	 */
-	export let isDragging = false;
+	export let pendingValues:
+		| {
+				description: string;
+				datatype: DatatypeUnion;
+				required: boolean;
+				datatypeDescription: string;
+				values?: AttributeValue[];
+		  }
+		| undefined = undefined;
 
 	const dispatch = createEventDispatcher<{
 		save: {
@@ -48,8 +55,6 @@
 			};
 		};
 		collapse: void;
-		dragstart: void;
-		dragend: void;
 	}>();
 
 	// Local form state
@@ -78,18 +83,28 @@
 		initializeForm(attribute);
 	}
 
-	function initializeForm(attr: ServiceDefinitionAttribute) {
-		description = attr.description;
-		datatype = attr.datatype;
-		required = attr.required;
-		datatypeDescription = attr.datatype_description ?? '';
-		values = 'values' in attr ? [...attr.values] : [];
-
+	function initializeForm(attr: ServiceDefinitionAttribute, ignorePending = false) {
+		// Set original values from the attribute prop (source of truth for "saved" state)
 		originalDescription = attr.description;
 		originalDatatype = attr.datatype;
 		originalRequired = attr.required;
 		originalDatatypeDescription = attr.datatype_description ?? '';
 		originalValues = 'values' in attr ? [...attr.values] : [];
+
+		// Initialize current values: prefer pendingValues if available (and not ignored), otherwise use original
+		if (pendingValues && !ignorePending) {
+			description = pendingValues.description;
+			datatype = pendingValues.datatype;
+			required = pendingValues.required;
+			datatypeDescription = pendingValues.datatypeDescription;
+			values = pendingValues.values ? [...pendingValues.values] : [];
+		} else {
+			description = originalDescription;
+			datatype = originalDatatype;
+			required = originalRequired;
+			datatypeDescription = originalDatatypeDescription;
+			values = [...originalValues];
+		}
 	}
 
 	// Compare attribute values without JSON.stringify (M2 fix)
@@ -198,7 +213,7 @@
 	 * Reset form to saved values (called after successful save)
 	 */
 	export function resetToSaved(savedAttr: ServiceDefinitionAttribute) {
-		initializeForm(savedAttr);
+		initializeForm(savedAttr, true);
 	}
 
 	let questionInput: HTMLInputElement;
@@ -206,31 +221,6 @@
 	// Generate unique IDs for inputs (L1 fix)
 	$: questionInputId = `question-text-${attribute?.code ?? 'new'}`;
 	$: helpTextInputId = `help-text-${attribute?.code ?? 'new'}`;
-
-	// Track if a drag operation actually started (mouse moved while down)
-	let dragStarted = false;
-
-	function handleDragHandleMouseDown() {
-		dragStarted = false;
-		dispatch('dragstart');
-	}
-
-	function handleDragHandleMouseUp() {
-		dispatch('dragend');
-	}
-
-	function handleDragHandleClick() {
-		// Only collapse if we didn't actually drag
-		if (!dragStarted) {
-			dispatch('collapse');
-		}
-		dragStarted = false;
-	}
-
-	// Listen for actual drag events to know if dragging occurred
-	function handleActualDragStart() {
-		dragStarted = true;
-	}
 
 	onMount(() => {
 		questionInput?.focus();
@@ -246,20 +236,17 @@
 	role="form"
 	aria-label="Edit attribute"
 >
-	<!-- Drag Handle - click to collapse, drag to reorder -->
-	<div
-		class="flex justify-center border-b border-gray-100 py-2"
-		role="presentation"
-		on:dragstart={handleActualDragStart}
+	<!-- Collapse Handle -->
+	<button
+		type="button"
+		class="flex w-full items-center justify-center border-b border-gray-100 py-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+		aria-label="Click to collapse"
+		on:click={() => dispatch('collapse')}
 	>
-		<DragHandle
-			{isDragging}
-			ariaLabel="Click to collapse, drag to reorder"
-			on:mousedown={handleDragHandleMouseDown}
-			on:mouseup={handleDragHandleMouseUp}
-			on:click={handleDragHandleClick}
-		/>
-	</div>
+		<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+		</svg>
+	</button>
 
 	<div class="p-4">
 		<!-- Question Text + Type Selector (same row) -->

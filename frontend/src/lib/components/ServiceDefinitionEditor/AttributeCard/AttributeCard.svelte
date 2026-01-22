@@ -31,9 +31,17 @@
 	export let isSaving = false;
 
 	/**
-	 * Whether the card is being dragged
+	 * Pending values (unsaved changes) to restore if component is re-rendered
 	 */
-	export let isDragging = false;
+	export let pendingValues:
+		| {
+				description: string;
+				datatype: DatatypeUnion;
+				required: boolean;
+				datatypeDescription: string;
+				values?: AttributeValue[];
+		  }
+		| undefined = undefined;
 
 	/**
 	 * Whether a delete operation is in progress
@@ -158,7 +166,7 @@
 <div
 	class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow {isExpanded
 		? 'ring-2 ring-blue-500'
-		: ''} {isDragging ? 'opacity-50' : ''}"
+		: ''}"
 	aria-label="Attribute: {attribute.description}"
 >
 	{#if isExpanded}
@@ -168,15 +176,13 @@
 				bind:this={expandedComponent}
 				{attribute}
 				{isSaving}
-				{isDragging}
+				{pendingValues}
 				on:save
 				on:cancel
 				on:copy={handleCopy}
 				on:delete={handleDeleteRequest}
 				on:dirty={handleDirtyChange}
 				on:collapse={handleCollapse}
-				on:dragstart
-				on:dragend
 			/>
 		</div>
 	{:else}

@@ -80,13 +80,6 @@
 		dispatch('createGroup');
 	}
 
-	// Drag state for service reordering
-	let draggedServiceCode: number | null = null;
-	let draggedFromGroupId: number | null = null;
-	let dropTargetGroupId: number | null = null;
-	let dropTargetIndex: number | null = null;
-	let dropPosition: 'before' | 'after' | null = null;
-
 	// Track focused index for keyboard navigation
 	let focusedGroupIndex = 0;
 	let focusedServiceIndex: number | null = null;
@@ -222,132 +215,6 @@
 			}
 		}
 	}
-
-	// ========== Service Drag and Drop Handlers ==========
-
-	function handleServiceDragStart(groupId: number, serviceCode: number) {
-		if (!reorderEnabled) return;
-
-		draggedServiceCode = serviceCode;
-		draggedFromGroupId = groupId;
-	}
-
-	function handleServiceDragOver(
-		event: CustomEvent<{ groupId: number; serviceIndex: number; position: 'before' | 'after' }>
-	) {
-		if (!reorderEnabled || draggedServiceCode === null) return;
-
-		dropTargetGroupId = event.detail.groupId;
-		dropTargetIndex = event.detail.serviceIndex;
-		dropPosition = event.detail.position;
-	}
-
-	function handleServiceDragLeave() {
-		dropTargetGroupId = null;
-		dropTargetIndex = null;
-		dropPosition = null;
-	}
-
-	function handleServiceDrop(groupId: number) {
-		if (!reorderEnabled || draggedServiceCode === null || draggedFromGroupId === null) {
-			resetDragState();
-			return;
-		}
-
-		// Use dropTargetIndex instead of serviceIndex from the event.
-		// dropTargetIndex and dropPosition are updated together in dragover,
-		// ensuring the calculated position matches the visual indicator.
-		if (dropTargetIndex === null || dropPosition === null) {
-			resetDragState();
-			return;
-		}
-
-		// Calculate final index based on drop position
-		let newIndex = dropTargetIndex;
-		if (dropPosition === 'after') {
-			newIndex = dropTargetIndex + 1;
-		}
-
-		// If dragging within the same group and from before to after, adjust index
-		if (draggedFromGroupId === groupId) {
-			const fromIndex = groups
-				.find((g) => g.id === draggedFromGroupId)
-				?.services.findIndex((s) => s.service_code === draggedServiceCode);
-
-			if (fromIndex !== undefined && fromIndex !== -1 && fromIndex < newIndex) {
-				newIndex -= 1;
-			}
-
-			// Don't dispatch if dropping at the same position
-			if (fromIndex === newIndex) {
-				resetDragState();
-				return;
-			}
-		}
-
-		dispatch('reorderService', {
-			serviceCode: draggedServiceCode,
-			fromGroupId: draggedFromGroupId,
-			toGroupId: groupId,
-			newIndex
-		});
-
-		resetDragState();
-	}
-
-	function handleServiceDragEnd() {
-		// Perform reorder on dragend instead of waiting for drop event
-		// This is more reliable because dragend always fires, whereas drop
-		// requires precise positioning on the target element
-		if (
-			reorderEnabled &&
-			draggedServiceCode !== null &&
-			draggedFromGroupId !== null &&
-			dropTargetGroupId !== null &&
-			dropTargetIndex !== null &&
-			dropPosition !== null
-		) {
-			// Calculate final index based on drop position
-			let newIndex = dropTargetIndex;
-			if (dropPosition === 'after') {
-				newIndex = dropTargetIndex + 1;
-			}
-
-			// If dragging within the same group and from before to after, adjust index
-			if (draggedFromGroupId === dropTargetGroupId) {
-				const fromIndex = groups
-					.find((g) => g.id === draggedFromGroupId)
-					?.services.findIndex((s) => s.service_code === draggedServiceCode);
-
-				if (fromIndex !== undefined && fromIndex !== -1 && fromIndex < newIndex) {
-					newIndex -= 1;
-				}
-
-				// Don't dispatch if dropping at the same position
-				if (fromIndex === newIndex) {
-					resetDragState();
-					return;
-				}
-			}
-
-			dispatch('reorderService', {
-				serviceCode: draggedServiceCode,
-				fromGroupId: draggedFromGroupId,
-				toGroupId: dropTargetGroupId,
-				newIndex
-			});
-		}
-
-		resetDragState();
-	}
-
-	function resetDragState() {
-		draggedServiceCode = null;
-		draggedFromGroupId = null;
-		dropTargetGroupId = null;
-		dropTargetIndex = null;
-		dropPosition = null;
-	}
 </script>
 
 <div
@@ -409,18 +276,9 @@
 						isFocused={focusedGroupIndex === groupIndex && focusedServiceIndex === null}
 						focusedServiceIndex={focusedGroupIndex === groupIndex ? focusedServiceIndex : null}
 						draggableServices={reorderEnabled}
-						{draggedServiceCode}
-						{dropTargetGroupId}
-						{dropTargetIndex}
-						{dropPosition}
 						on:toggle={() => handleToggleGroup(group.id)}
 						on:selectGroup={() => handleSelectGroup(group.id)}
 						on:selectService={(e) => handleSelectService(group.id, e.detail.serviceCode)}
-						on:serviceDragStart={(e) => handleServiceDragStart(group.id, e.detail.serviceCode)}
-						on:serviceDragOver={handleServiceDragOver}
-						on:serviceDragLeave={handleServiceDragLeave}
-						on:serviceDrop={() => handleServiceDrop(group.id)}
-						on:serviceDragEnd={handleServiceDragEnd}
 						on:addService={() => dispatch('addService', { groupId: group.id })}
 						on:deleteService={(e) =>
 							dispatch('deleteService', {

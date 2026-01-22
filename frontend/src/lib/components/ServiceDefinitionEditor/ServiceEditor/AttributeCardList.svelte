@@ -29,7 +29,21 @@
 	export let savingAttributes: Set<number> = new Set();
 
 	/**
-	 * Whether drag-drop reordering is enabled
+	 * Map of pending attribute values (unsaved changes)
+	 */
+	export let pendingAttributeValues: Map<
+		number,
+		{
+			description: string;
+			datatype: DatatypeUnion;
+			required: boolean;
+			datatypeDescription: string;
+			values?: AttributeValue[];
+		}
+	> = new Map();
+
+	/**
+	 * Whether drag-drop (now arrow button) reordering is enabled
 	 */
 	export let reorderEnabled = true;
 
@@ -69,11 +83,6 @@
 		};
 		reorder: { fromIndex: number; toIndex: number };
 	}>();
-
-	// Drag state
-	let draggedIndex: number | null = null;
-	let dropTargetIndex: number | null = null;
-	let dropPosition: 'before' | 'after' | null = null;
 
 	// Reduced motion preference
 	let prefersReducedMotion = false;
@@ -145,70 +154,16 @@
 		});
 	}
 
-	// ========== Drag and Drop Handlers ==========
-
-	function handleDragStart(event: DragEvent, index: number) {
-		if (!reorderEnabled || !event.dataTransfer) return;
-
-		draggedIndex = index;
-		event.dataTransfer.effectAllowed = 'move';
-		event.dataTransfer.setData('text/plain', String(index));
-	}
-
-	function handleDragOver(event: DragEvent, index: number) {
-		if (!reorderEnabled || draggedIndex === null || draggedIndex === index) return;
-
-		event.preventDefault();
-		event.dataTransfer!.dropEffect = 'move';
-
-		// Determine if dropping before or after
-		const target = event.currentTarget as HTMLElement;
-		const rect = target.getBoundingClientRect();
-		const midpoint = rect.top + rect.height / 2;
-
-		dropTargetIndex = index;
-		dropPosition = event.clientY < midpoint ? 'before' : 'after';
-	}
-
-	function handleDragLeave() {
-		// Don't clear state on dragleave - let dragover and dragend handle it
-		// This prevents flickering when moving between child elements
-	}
-
-	function handleDrop(event: DragEvent, index: number) {
-		event.preventDefault();
-
-		if (draggedIndex === null || draggedIndex === index) {
-			resetDragState();
-			return;
+	function moveUp(index: number) {
+		if (index > 0) {
+			dispatch('reorder', { fromIndex: index, toIndex: index - 1 });
 		}
-
-		// Calculate the final position
-		let toIndex = index;
-		if (dropPosition === 'after') {
-			toIndex = index + 1;
-		}
-
-		// Adjust if dragging from before to after
-		if (draggedIndex < toIndex) {
-			toIndex -= 1;
-		}
-
-		if (draggedIndex !== toIndex) {
-			dispatch('reorder', { fromIndex: draggedIndex, toIndex });
-		}
-
-		resetDragState();
 	}
 
-	function handleDragEnd() {
-		resetDragState();
-	}
-
-	function resetDragState() {
-		draggedIndex = null;
-		dropTargetIndex = null;
-		dropPosition = null;
+	function moveDown(index: number) {
+		if (index < attributes.length - 1) {
+			dispatch('reorder', { fromIndex: index, toIndex: index + 1 });
+		}
 	}
 
 	// Ref to cards for resetting after save
@@ -232,42 +187,56 @@
 <div class="space-y-4" role="list" aria-label="Attribute questions">
 	{#each attributes as attribute, index (attribute.code)}
 		<div
-			class="relative"
+			class="flex items-start gap-2"
 			role="listitem"
-			draggable={reorderEnabled && expandedIndex !== index}
-			on:dragstart={(e) => handleDragStart(e, index)}
-			on:dragover={(e) => handleDragOver(e, index)}
-			on:dragleave={handleDragLeave}
-			on:drop={(e) => handleDrop(e, index)}
-			on:dragend={handleDragEnd}
 			animate:flip={{ duration: prefersReducedMotion ? 0 : 200 }}
 		>
-			<!-- Drop indicator BEFORE this card -->
-			{#if dropTargetIndex === index && dropPosition === 'before'}
-				<div class="drop-indicator" />
+			<!-- Reorder Buttons -->
+			{#if reorderEnabled && attributes.length > 1}
+				<div class="flex flex-col gap-1 pt-1">
+					<button
+						type="button"
+						class="flex h-8 w-8 items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:bg-white"
+						disabled={index === 0}
+						on:click={() => moveUp(index)}
+						aria-label="Move question up"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+						</svg>
+					</button>
+					<button
+						type="button"
+						class="flex h-8 w-8 items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:bg-white"
+						disabled={index === attributes.length - 1}
+						on:click={() => moveDown(index)}
+						aria-label="Move question down"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						</svg>
+					</button>
+				</div>
 			{/if}
 
-			<AttributeCard
-				bind:this={cardRefs[index]}
-				{attribute}
-				isExpanded={expandedIndex === index}
-				isDirty={dirtyAttributes.has(attribute.code)}
-				isSaving={savingAttributes.has(attribute.code)}
-				isDeleting={deletingAttributes.has(attribute.code)}
-				isDragging={draggedIndex === index}
-				on:expand={() => handleExpand(index)}
-				on:collapse={handleCollapse}
-				on:save={(e) => handleSave(e, index)}
-				on:cancel={() => handleCancel(index)}
-				on:copy={(e) => handleCopy(e, index)}
-				on:deleteConfirm={() => handleDeleteConfirm(index)}
-				on:dirty={(e) => handleDirtyChange(e, index)}
-			/>
-
-			<!-- Drop indicator AFTER this card -->
-			{#if dropTargetIndex === index && dropPosition === 'after'}
-				<div class="drop-indicator drop-indicator-after" />
-			{/if}
+			<div class="min-w-0 flex-1">
+				<AttributeCard
+					bind:this={cardRefs[index]}
+					{attribute}
+					isExpanded={expandedIndex === index}
+					isDirty={dirtyAttributes.has(attribute.code)}
+					isSaving={savingAttributes.has(attribute.code)}
+					isDeleting={deletingAttributes.has(attribute.code)}
+					pendingValues={pendingAttributeValues.get(attribute.code)}
+					on:expand={() => handleExpand(index)}
+					on:collapse={handleCollapse}
+					on:save={(e) => handleSave(e, index)}
+					on:cancel={() => handleCancel(index)}
+					on:copy={(e) => handleCopy(e, index)}
+					on:deleteConfirm={() => handleDeleteConfirm(index)}
+					on:dirty={(e) => handleDirtyChange(e, index)}
+				/>
+			</div>
 		</div>
 	{/each}
 </div>

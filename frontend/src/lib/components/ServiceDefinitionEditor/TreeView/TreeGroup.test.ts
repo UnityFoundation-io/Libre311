@@ -276,4 +276,113 @@ describe('TreeGroup', () => {
 		const groupTreeitem = allTreeitems.find((item) => item.getAttribute('aria-level') === '1');
 		expect(groupTreeitem).toHaveAttribute('aria-expanded', 'true');
 	});
+
+	describe('Service Reordering', () => {
+		it('renders up/down buttons when draggableServices is true', () => {
+			render(TreeGroup, {
+				props: {
+					group: mockGroup,
+					services: mockServices,
+					isExpanded: true,
+					draggableServices: true
+				}
+			});
+
+			const upButtons = screen.getAllByLabelText(/move .* up/i);
+			const downButtons = screen.getAllByLabelText(/move .* down/i);
+
+			expect(upButtons).toHaveLength(2);
+			expect(downButtons).toHaveLength(2);
+		});
+
+		it('disables up button for first service', () => {
+			render(TreeGroup, {
+				props: {
+					group: mockGroup,
+					services: mockServices,
+					isExpanded: true,
+					draggableServices: true
+				}
+			});
+
+			const firstUpButton = screen.getByLabelText(`Move ${mockServices[0].service_name} up`);
+			expect(firstUpButton).toBeDisabled();
+
+			const secondUpButton = screen.getByLabelText(`Move ${mockServices[1].service_name} up`);
+			expect(secondUpButton).not.toBeDisabled();
+		});
+
+		it('disables down button for last service', () => {
+			render(TreeGroup, {
+				props: {
+					group: mockGroup,
+					services: mockServices,
+					isExpanded: true,
+					draggableServices: true
+				}
+			});
+
+			const firstDownButton = screen.getByLabelText(`Move ${mockServices[0].service_name} down`);
+			expect(firstDownButton).not.toBeDisabled();
+
+			const lastDownButton = screen.getByLabelText(`Move ${mockServices[1].service_name} down`);
+			expect(lastDownButton).toBeDisabled();
+		});
+
+		it('dispatches keyboardReorder event with correct direction', async () => {
+			const { component } = render(TreeGroup, {
+				props: {
+					group: mockGroup,
+					services: mockServices,
+					isExpanded: true,
+					draggableServices: true
+				}
+			});
+
+			let eventDetail: { serviceCode: number; direction: string } | null = null;
+			component.$on('keyboardReorder', (e) => {
+				eventDetail = e.detail;
+			});
+
+			// Click Down on first item
+			const firstDownButton = screen.getByLabelText(`Move ${mockServices[0].service_name} down`);
+			await fireEvent.click(firstDownButton);
+
+			expect(eventDetail).toEqual({
+				serviceCode: mockServices[0].service_code,
+				direction: 'down'
+			});
+
+			// Click Up on second item
+			const secondUpButton = screen.getByLabelText(`Move ${mockServices[1].service_name} up`);
+			await fireEvent.click(secondUpButton);
+
+			expect(eventDetail).toEqual({
+				serviceCode: mockServices[1].service_code,
+				direction: 'up'
+			});
+		});
+
+		it('prevents row selection when clicking reorder buttons', async () => {
+			const { component } = render(TreeGroup, {
+				props: {
+					group: mockGroup,
+					services: mockServices,
+					isExpanded: true,
+					draggableServices: true
+				}
+			});
+
+			let selectServiceCalled = false;
+			component.$on('selectService', () => {
+				selectServiceCalled = true;
+			});
+
+			// Click Down on first item
+			const firstDownButton = screen.getByLabelText(`Move ${mockServices[0].service_name} down`);
+			await fireEvent.click(firstDownButton);
+
+			expect(selectServiceCalled).toBe(false);
+		});
+	});
 });

@@ -18,6 +18,11 @@
 		showSaveError
 	} from '$lib/components/ServiceDefinitionEditor/stores/editorStore';
 	import SaveToast from '$lib/components/ServiceDefinitionEditor/EditorView/SaveToast.svelte';
+	import {
+		updateDirtySet,
+		updateDirtyState,
+		toggleSetItem
+	} from '$lib/components/ServiceDefinitionEditor/utils/dirtyTracking';
 
 	const libre311 = useLibre311Service();
 
@@ -111,14 +116,7 @@
 
 	// Event handlers
 	function handleToggleGroup(event: CustomEvent<{ groupId: number }>) {
-		const { groupId } = event.detail;
-		const newExpanded = new Set(expandedGroupIds);
-		if (newExpanded.has(groupId)) {
-			newExpanded.delete(groupId);
-		} else {
-			newExpanded.add(groupId);
-		}
-		expandedGroupIds = newExpanded;
+		expandedGroupIds = toggleSetItem(expandedGroupIds, event.detail.groupId);
 	}
 
 	function handleSelectGroup(event: CustomEvent<{ groupId: number }>) {
@@ -269,19 +267,15 @@
 		}>
 	) {
 		const { code, isDirty, pendingValues } = event.detail;
-		const newDirty = new Set(dirtyAttributes);
-		const newPending = new Map(pendingAttributeValues);
-
-		if (isDirty && pendingValues) {
-			newDirty.add(code);
-			newPending.set(code, pendingValues);
-		} else {
-			newDirty.delete(code);
-			newPending.delete(code);
-		}
-
-		dirtyAttributes = newDirty;
-		pendingAttributeValues = newPending;
+		const result = updateDirtyState(
+			dirtyAttributes,
+			pendingAttributeValues,
+			code,
+			isDirty,
+			pendingValues
+		);
+		dirtyAttributes = result.dirtySet;
+		pendingAttributeValues = result.pendingMap;
 	}
 
 	async function handleAttributeSave(
@@ -304,7 +298,7 @@
 
 		const { code, data } = event.detail;
 
-		savingAttributes = new Set([...savingAttributes, code]);
+		savingAttributes = updateDirtySet(savingAttributes, code, true);
 		try {
 			await libre311.editAttribute({
 				attribute_code: code,
@@ -330,16 +324,14 @@
 			}
 
 			// Clear dirty state for this attribute
-			const newDirty = new Set(dirtyAttributes);
-			newDirty.delete(code);
-			dirtyAttributes = newDirty;
+			const result = updateDirtyState(dirtyAttributes, pendingAttributeValues, code, false);
+			dirtyAttributes = result.dirtySet;
+			pendingAttributeValues = result.pendingMap;
 		} catch (err) {
 			console.error('Failed to save attribute:', err);
 			showSaveError('Failed to save question. Please try again.');
 		} finally {
-			const newSaving = new Set(savingAttributes);
-			newSaving.delete(code);
-			savingAttributes = newSaving;
+			savingAttributes = updateDirtySet(savingAttributes, code, false);
 		}
 	}
 
@@ -364,7 +356,7 @@
 
 		const { attribute } = event.detail;
 
-		deletingAttributes = new Set([...deletingAttributes, attribute.code]);
+		deletingAttributes = updateDirtySet(deletingAttributes, attribute.code, true);
 		try {
 			await libre311.deleteAttribute({
 				serviceCode: selectedService.service_code,
@@ -378,9 +370,7 @@
 			console.error('Failed to delete attribute:', err);
 			showSaveError('Failed to delete question. Please try again.');
 		} finally {
-			const newDeleting = new Set(deletingAttributes);
-			newDeleting.delete(attribute.code);
-			deletingAttributes = newDeleting;
+			deletingAttributes = updateDirtySet(deletingAttributes, attribute.code, false);
 		}
 	}
 
@@ -396,6 +386,26 @@
 		const [moved] = newAttributes.splice(fromIndex, 1);
 		newAttributes.splice(toIndex, 0, moved);
 		attributes = newAttributes;
+
+		// Update expanded index if needed
+		if (expandedAttributeIndex !== null) {
+			if (expandedAttributeIndex === fromIndex) {
+				// The expanded item moved
+				expandedAttributeIndex = toIndex;
+			} else if (
+				fromIndex < expandedAttributeIndex &&
+				toIndex >= expandedAttributeIndex
+			) {
+				// Item moved from above to below the expanded item -> expanded shifts up
+				expandedAttributeIndex -= 1;
+			} else if (
+				fromIndex > expandedAttributeIndex &&
+				toIndex <= expandedAttributeIndex
+			) {
+				// Item moved from below to above the expanded item -> expanded shifts down
+				expandedAttributeIndex += 1;
+			}
+		}
 
 		// Persist the new order to the API
 		try {
@@ -719,24 +729,24 @@
 
 <div class="flex h-screen flex-col">
 	<!-- Header -->
-	<header class="border-b border-gray-200 bg-white px-6 py-4">
-		<div class="flex items-center gap-4">
-			<a
-				href="/groups"
-				class="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-				aria-label="Back to Admin"
-			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M10 19l-7-7m0 0l7-7m-7 7h18"
-					/>
-				</svg>
-			</a>
+	<header class="border-b border-gray-200 bg-white px-4 py-4">
+<!--		<div class="flex items-center gap-4">-->
+<!--			<a-->
+<!--				href="/groups"-->
+<!--				class="flex items-center gap-2 text-gray-600 hover:text-gray-900"-->
+<!--				aria-label="Back to Admin"-->
+<!--			>-->
+<!--				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
+<!--					<path-->
+<!--						stroke-linecap="round"-->
+<!--						stroke-linejoin="round"-->
+<!--						stroke-width="2"-->
+<!--						d="M10 19l-7-7m0 0l7-7m-7 7h18"-->
+<!--					/>-->
+<!--				</svg>-->
+<!--			</a>-->
 			<h1 class="text-xl font-semibold text-gray-900">Service Definition Configuration</h1>
-		</div>
+<!--		</div>-->
 	</header>
 
 	<!-- Main Content -->
@@ -799,6 +809,7 @@
 								{dirtyAttributes}
 								{savingAttributes}
 								{deletingAttributes}
+								{pendingAttributeValues}
 								on:expand={handleAttributeExpand}
 								on:collapse={handleAttributeCollapse}
 								on:save={handleAttributeSave}

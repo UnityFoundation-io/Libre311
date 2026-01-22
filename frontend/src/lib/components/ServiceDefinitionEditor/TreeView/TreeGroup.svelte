@@ -2,7 +2,6 @@
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import type { Group, Service } from '$lib/services/Libre311/Libre311';
-	import DragHandle from '../Shared/DragHandle.svelte';
 
 	/**
 	 * The group to display
@@ -35,29 +34,9 @@
 	export let level = 1;
 
 	/**
-	 * Whether services can be dragged for reordering
+	 * Whether services can be reordered
 	 */
 	export let draggableServices = false;
-
-	/**
-	 * Service code currently being dragged (from any group)
-	 */
-	export let draggedServiceCode: number | null = null;
-
-	/**
-	 * Group ID of the current drop target
-	 */
-	export let dropTargetGroupId: number | null = null;
-
-	/**
-	 * Index of the current drop target within the group
-	 */
-	export let dropTargetIndex: number | null = null;
-
-	/**
-	 * Position relative to drop target ('before' or 'after')
-	 */
-	export let dropPosition: 'before' | 'after' | null = null;
 
 	/**
 	 * Whether this group has keyboard focus (for visual indicator)
@@ -73,11 +52,6 @@
 		toggle: void;
 		selectGroup: void;
 		selectService: { serviceCode: number };
-		serviceDragStart: { serviceCode: number };
-		serviceDragOver: { groupId: number; serviceIndex: number; position: 'before' | 'after' };
-		serviceDragLeave: void;
-		serviceDrop: { serviceIndex: number };
-		serviceDragEnd: void;
 		addService: void;
 		deleteService: { serviceCode: number; serviceName: string };
 		keyboardReorder: { serviceCode: number; direction: 'up' | 'down' };
@@ -138,84 +112,6 @@
 				dispatch('keyboardReorder', { serviceCode, direction: 'down' });
 			}
 		}
-	}
-
-	// ========== Service Drag and Drop Handlers ==========
-
-	function handleServiceDragStart(event: DragEvent, serviceCode: number) {
-		if (!draggableServices || !event.dataTransfer) return;
-
-		event.dataTransfer.effectAllowed = 'move';
-		event.dataTransfer.setData('text/plain', String(serviceCode));
-		dispatch('serviceDragStart', { serviceCode });
-	}
-
-	function handleServiceDragOver(event: DragEvent, index: number) {
-		if (!draggableServices || draggedServiceCode === null) return;
-
-		event.preventDefault();
-		event.dataTransfer!.dropEffect = 'move';
-
-		const target = event.currentTarget as HTMLElement;
-		const rect = target.getBoundingClientRect();
-		const relativeY = event.clientY - rect.top;
-		const percentage = relativeY / rect.height;
-
-		// Use 30% zones at top/bottom for clearer drop targets
-		// Top 30% = before, Bottom 30% = after, Middle 40% = use previous position or default to before
-		let position: 'before' | 'after';
-		if (percentage < 0.3) {
-			position = 'before';
-		} else if (percentage > 0.7) {
-			position = 'after';
-		} else {
-			// In the middle zone, keep current position to reduce flickering
-			// Default to 'before' as it's more intuitive when dropping onto an item
-			position = dropPosition ?? 'before';
-		}
-
-		dispatch('serviceDragOver', {
-			groupId: group.id,
-			serviceIndex: index,
-			position
-		});
-	}
-
-	function handleServiceDragLeave() {
-		// Don't dispatch leave on dragleave - let dragover and dragend handle it
-		// This prevents flickering when moving between child elements
-	}
-
-	function handleServiceDrop(event: DragEvent, index: number) {
-		event.preventDefault();
-		dispatch('serviceDrop', { serviceIndex: index });
-	}
-
-	function handleServiceDragEnd() {
-		dispatch('serviceDragEnd');
-	}
-
-	/**
-	 * Handle dragover on the drop indicator element.
-	 * This ensures drops that land directly on the visual indicator are captured.
-	 */
-	function handleIndicatorDragOver(event: DragEvent, index: number, position: 'before' | 'after') {
-		event.preventDefault();
-		event.dataTransfer!.dropEffect = 'move';
-		dispatch('serviceDragOver', {
-			groupId: group.id,
-			serviceIndex: index,
-			position
-		});
-	}
-
-	/**
-	 * Handle drop on the drop indicator element.
-	 * Without this handler, drops landing directly on the blue indicator line would be lost.
-	 */
-	function handleIndicatorDrop(event: DragEvent, index: number) {
-		event.preventDefault();
-		dispatch('serviceDrop', { serviceIndex: index });
 	}
 
 	function handleDeleteService(event: MouseEvent, serviceCode: number, serviceName: string) {
@@ -299,56 +195,22 @@
 			transition:slide={{ duration: prefersReducedMotion ? 0 : 150 }}
 		>
 			{#each services as service, index (service.service_code)}
-				<!-- Drop indicator BEFORE this service -->
-				{#if dropTargetGroupId === group.id && dropTargetIndex === index && dropPosition === 'before'}
-					<div
-						class="drop-indicator"
-						role="presentation"
-						on:dragover={(e) => handleIndicatorDragOver(e, index, 'before')}
-						on:drop={(e) => handleIndicatorDrop(e, index)}
-					/>
-				{/if}
-
 				<div
 					id="tree-service-{group.id}-{service.service_code}"
 					role="treeitem"
 					aria-level={level + 1}
 					aria-selected={selectedServiceCode === service.service_code}
 					aria-label={draggableServices
-						? `${service.service_name}. Press Alt+Arrow keys to reorder.`
+						? `${service.service_name}. Use Up/Down buttons to reorder.`
 						: service.service_name}
-					class="group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {selectedServiceCode ===
+					class="group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-100 {selectedServiceCode ===
 					service.service_code
 						? 'bg-blue-50 ring-1 ring-blue-500'
-						: ''} {draggedServiceCode === service.service_code
-						? 'opacity-50'
 						: ''} {focusedServiceIndex === index ? 'ring-2 ring-blue-400 ring-offset-1' : ''}"
-					draggable={draggableServices}
 					on:click={() => handleServiceClick(service.service_code)}
 					on:keydown={(e) => handleServiceKeydown(e, service.service_code)}
-					on:dragstart={(e) => handleServiceDragStart(e, service.service_code)}
-					on:dragover={(e) => handleServiceDragOver(e, index)}
-					on:dragleave={handleServiceDragLeave}
-					on:drop={(e) => handleServiceDrop(e, index)}
-					on:dragend={handleServiceDragEnd}
 					tabindex="0"
 				>
-					<!-- Drag Handle (visible on hover when draggable) -->
-					{#if draggableServices}
-						<div
-							class="flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100 {draggedServiceCode ===
-							service.service_code
-								? 'opacity-100'
-								: ''}"
-						>
-							<DragHandle
-								class="h-4 w-4"
-								isDragging={draggedServiceCode === service.service_code}
-								ariaLabel="Drag to reorder {service.service_name}"
-							/>
-						</div>
-					{/if}
-
 					<!-- Document Icon -->
 					<svg
 						class="h-4 w-4 flex-shrink-0 text-gray-400"
@@ -367,34 +229,66 @@
 					<!-- Service Name -->
 					<span class="flex-1 truncate text-sm text-gray-700">{service.service_name}</span>
 
-					<!-- Delete Button (visible on hover) -->
-					<button
-						type="button"
-						class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 group-hover:opacity-100"
-						on:click={(e) => handleDeleteService(e, service.service_code, service.service_name)}
-						aria-label="Delete {service.service_name}"
-						title="Delete service"
-					>
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-							/>
-						</svg>
-					</button>
-				</div>
+					<!-- Action Buttons (Up/Down/Trash) -->
+					{#if draggableServices}
+						<div class="flex items-center">
+							<!-- Up Button -->
+							<button
+								type="button"
+								class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-blue-600 focus:bg-gray-200 focus:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500"
+								disabled={index === 0}
+								on:click|stopPropagation={() =>
+									dispatch('keyboardReorder', {
+										serviceCode: service.service_code,
+										direction: 'up'
+									})}
+								on:keydown|stopPropagation={() => {}}
+								aria-label="Move {service.service_name} up"
+							>
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+								</svg>
+							</button>
 
-				<!-- Drop indicator AFTER this service -->
-				{#if dropTargetGroupId === group.id && dropTargetIndex === index && dropPosition === 'after'}
-					<div
-						class="drop-indicator"
-						role="presentation"
-						on:dragover={(e) => handleIndicatorDragOver(e, index, 'after')}
-						on:drop={(e) => handleIndicatorDrop(e, index)}
-					/>
-				{/if}
+							<!-- Down Button -->
+							<button
+								type="button"
+								class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-blue-600 focus:bg-gray-200 focus:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500"
+								disabled={index === services.length - 1}
+								on:click|stopPropagation={() =>
+									dispatch('keyboardReorder', {
+										serviceCode: service.service_code,
+										direction: 'down'
+									})}
+								on:keydown|stopPropagation={() => {}}
+								aria-label="Move {service.service_name} down"
+							>
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+								</svg>
+							</button>
+
+							<!-- Delete Button -->
+							<button
+								type="button"
+								class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-red-50 hover:text-red-600 focus:bg-red-50 focus:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+								on:click={(e) => handleDeleteService(e, service.service_code, service.service_name)}
+								on:keydown|stopPropagation={() => {}}
+								aria-label="Delete {service.service_name}"
+								title="Delete service"
+							>
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+									/>
+								</svg>
+							</button>
+						</div>
+					{/if}
+				</div>
 			{/each}
 
 			<!-- Add Service Button -->
@@ -417,38 +311,3 @@
 		</div>
 	{/if}
 </div>
-
-<style>
-	/* Drop indicator - prominent blue line with glow effect */
-	.drop-indicator {
-		height: 3px;
-		background: rgb(59 130 246);
-		border-radius: 2px;
-		margin: 4px 0;
-		box-shadow:
-			0 0 0 2px rgba(59, 130, 246, 0.3),
-			0 0 8px rgba(59, 130, 246, 0.4);
-		position: relative;
-	}
-
-	/* Circle indicators at the ends */
-	.drop-indicator::before,
-	.drop-indicator::after {
-		content: '';
-		position: absolute;
-		width: 8px;
-		height: 8px;
-		background: rgb(59 130 246);
-		border-radius: 50%;
-		top: 50%;
-		transform: translateY(-50%);
-	}
-
-	.drop-indicator::before {
-		left: -4px;
-	}
-
-	.drop-indicator::after {
-		right: -4px;
-	}
-</style>
