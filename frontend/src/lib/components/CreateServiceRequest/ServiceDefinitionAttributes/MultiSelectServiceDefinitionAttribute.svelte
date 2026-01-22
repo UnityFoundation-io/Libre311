@@ -12,6 +12,17 @@
 	function createSelectOptions(res: MultiSelectServiceDefinitionAttribute): SelectOption[] {
 		return res.values.map((s) => ({ value: s.key, label: s.name }));
 	}
+
+	// Couldn't make stwui do this so runtime it is
+	$: if (input.error) {
+		// runs whenever error becomes truthy
+		const btn = document.querySelector<HTMLButtonElement>('button[aria-labelledby="multiselect"]');
+		if (btn) {
+			btn.setAttribute('aria-describedby', 'multiselect-error');
+			btn.setAttribute('aria-invalid', 'true');
+			btn.setAttribute('error', input.error);
+		}
+	}
 </script>
 
 <Select
