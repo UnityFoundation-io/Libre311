@@ -35,7 +35,9 @@
 	}
 </script>
 
-<div class="flex flex-col gap-4 border-t border-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:py-3">
+<div
+	class="flex flex-col gap-4 border-t border-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:py-3"
+>
 	<!-- Left side: Copy, Delete actions + Required Toggle -->
 	<div class="flex flex-wrap items-center gap-x-4 gap-y-3 sm:gap-2">
 		<div class="flex items-center gap-2">
@@ -102,7 +104,9 @@
 	</div>
 
 	<!-- Right side: Cancel, Save buttons -->
-	<div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-3 sm:border-0 sm:pt-0">
+	<div
+		class="flex items-center justify-end gap-3 border-t border-gray-100 pt-3 sm:border-0 sm:pt-0"
+	>
 		<button
 			type="button"
 			class="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"

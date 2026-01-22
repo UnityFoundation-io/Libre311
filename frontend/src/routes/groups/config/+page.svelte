@@ -4,7 +4,8 @@
 	import type { Service, ServiceDefinitionAttribute, Group } from '$lib/services/Libre311/Libre311';
 	import type {
 		GroupWithServices,
-		EditorSelection
+		EditorSelection,
+		AttributeFormData
 	} from '$lib/components/ServiceDefinitionEditor/stores/types';
 	import SplitPaneLayout from '$lib/components/ServiceDefinitionEditor/SplitPaneEditor/SplitPaneLayout.svelte';
 	import ServiceHeaderCard from '$lib/components/ServiceDefinitionEditor/ServiceEditor/ServiceHeaderCard.svelte';
@@ -43,16 +44,7 @@
 
 	// Dirty tracking for cards
 	let dirtyAttributes: Set<number> = new Set();
-	let pendingAttributeValues: Map<
-		number,
-		{
-			description: string;
-			datatype: string;
-			required: boolean;
-			datatypeDescription: string;
-			values?: { key: string; name: string }[];
-		}
-	> = new Map();
+	let pendingAttributeValues: Map<number, AttributeFormData> = new Map();
 	let savingAttributes: Set<number> = new Set();
 	let deletingAttributes: Set<number> = new Set();
 	let isHeaderDirty = false;
@@ -257,13 +249,7 @@
 			index: number;
 			code: number;
 			isDirty: boolean;
-			pendingValues?: {
-				description: string;
-				datatype: string;
-				required: boolean;
-				datatypeDescription: string;
-				values?: { key: string; name: string }[];
-			};
+			pendingValues?: AttributeFormData;
 		}>
 	) {
 		const { code, isDirty, pendingValues } = event.detail;
@@ -282,13 +268,7 @@
 		event: CustomEvent<{
 			index: number;
 			code: number;
-			data: {
-				description: string;
-				datatype: string;
-				required: boolean;
-				datatypeDescription: string;
-				values?: { key: string; name: string }[];
-			};
+			data: AttributeFormData;
 		}>
 	) {
 		if (!selectedService) {
@@ -392,16 +372,10 @@
 			if (expandedAttributeIndex === fromIndex) {
 				// The expanded item moved
 				expandedAttributeIndex = toIndex;
-			} else if (
-				fromIndex < expandedAttributeIndex &&
-				toIndex >= expandedAttributeIndex
-			) {
+			} else if (fromIndex < expandedAttributeIndex && toIndex >= expandedAttributeIndex) {
 				// Item moved from above to below the expanded item -> expanded shifts up
 				expandedAttributeIndex -= 1;
-			} else if (
-				fromIndex > expandedAttributeIndex &&
-				toIndex <= expandedAttributeIndex
-			) {
+			} else if (fromIndex > expandedAttributeIndex && toIndex <= expandedAttributeIndex) {
 				// Item moved from below to above the expanded item -> expanded shifts down
 				expandedAttributeIndex += 1;
 			}
@@ -730,23 +704,23 @@
 <div class="flex h-full flex-col">
 	<!-- Header -->
 	<header class="border-b border-gray-200 bg-white px-4 py-4">
-<!--		<div class="flex items-center gap-4">-->
-<!--			<a-->
-<!--				href="/groups"-->
-<!--				class="flex items-center gap-2 text-gray-600 hover:text-gray-900"-->
-<!--				aria-label="Back to Admin"-->
-<!--			>-->
-<!--				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
-<!--					<path-->
-<!--						stroke-linecap="round"-->
-<!--						stroke-linejoin="round"-->
-<!--						stroke-width="2"-->
-<!--						d="M10 19l-7-7m0 0l7-7m-7 7h18"-->
-<!--					/>-->
-<!--				</svg>-->
-<!--			</a>-->
-			<h1 class="text-xl font-semibold text-gray-900">Service Definition Configuration</h1>
-<!--		</div>-->
+		<!--		<div class="flex items-center gap-4">-->
+		<!--			<a-->
+		<!--				href="/groups"-->
+		<!--				class="flex items-center gap-2 text-gray-600 hover:text-gray-900"-->
+		<!--				aria-label="Back to Admin"-->
+		<!--			>-->
+		<!--				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
+		<!--					<path-->
+		<!--						stroke-linecap="round"-->
+		<!--						stroke-linejoin="round"-->
+		<!--						stroke-width="2"-->
+		<!--						d="M10 19l-7-7m0 0l7-7m-7 7h18"-->
+		<!--					/>-->
+		<!--				</svg>-->
+		<!--			</a>-->
+		<h1 class="text-xl font-semibold text-gray-900">Service Definition Configuration</h1>
+		<!--		</div>-->
 	</header>
 
 	<!-- Main Content -->

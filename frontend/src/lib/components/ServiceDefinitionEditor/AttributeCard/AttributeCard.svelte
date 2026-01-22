@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type {
-		ServiceDefinitionAttribute,
-		DatatypeUnion,
-		AttributeValue
-	} from '$lib/services/Libre311/Libre311';
+	import type { ServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
+	import type { AttributeFormData } from '../stores/types';
 	import AttributeCardCollapsed from './AttributeCardCollapsed.svelte';
 	import AttributeCardExpanded from './AttributeCardExpanded.svelte';
 	import ConfirmDeleteModal from '../Shared/ConfirmDeleteModal.svelte';
@@ -33,15 +30,7 @@
 	/**
 	 * Pending values (unsaved changes) to restore if component is re-rendered
 	 */
-	export let pendingValues:
-		| {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-		  }
-		| undefined = undefined;
+	export let pendingValues: AttributeFormData | undefined = undefined;
 
 	/**
 	 * Whether a delete operation is in progress
@@ -51,26 +40,14 @@
 	const dispatch = createEventDispatcher<{
 		expand: void;
 		collapse: void;
-		save: {
-			description: string;
-			datatype: DatatypeUnion;
-			required: boolean;
-			datatypeDescription: string;
-			values?: AttributeValue[];
-		};
+		save: AttributeFormData;
 		cancel: void;
 		copy: { suggestedDescription: string };
 		delete: void;
 		deleteConfirm: void;
 		dirty: {
 			isDirty: boolean;
-			pendingValues?: {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-			};
+			pendingValues?: AttributeFormData;
 		};
 		dragstart: void;
 		dragend: void;
@@ -92,13 +69,7 @@
 	function handleDirtyChange(
 		event: CustomEvent<{
 			isDirty: boolean;
-			pendingValues?: {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-			};
+			pendingValues?: AttributeFormData;
 		}>
 	) {
 		isDirty = event.detail.isDirty;

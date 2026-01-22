@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { flip } from 'svelte/animate';
-	import type {
-		ServiceDefinitionAttribute,
-		DatatypeUnion,
-		AttributeValue
-	} from '$lib/services/Libre311/Libre311';
+	import type { ServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
+	import type { AttributeFormData } from '../stores/types';
 	import AttributeCard from '../AttributeCard/AttributeCard.svelte';
 
 	/**
@@ -31,16 +28,7 @@
 	/**
 	 * Map of pending attribute values (unsaved changes)
 	 */
-	export let pendingAttributeValues: Map<
-		number,
-		{
-			description: string;
-			datatype: DatatypeUnion;
-			required: boolean;
-			datatypeDescription: string;
-			values?: AttributeValue[];
-		}
-	> = new Map();
+	export let pendingAttributeValues: Map<number, AttributeFormData> = new Map();
 
 	/**
 	 * Whether drag-drop (now arrow button) reordering is enabled
@@ -58,13 +46,7 @@
 		save: {
 			index: number;
 			code: number;
-			data: {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-			};
+			data: AttributeFormData;
 		};
 		cancel: { index: number };
 		copy: { index: number; attribute: ServiceDefinitionAttribute; suggestedDescription: string };
@@ -73,13 +55,7 @@
 			index: number;
 			code: number;
 			isDirty: boolean;
-			pendingValues?: {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-			};
+			pendingValues?: AttributeFormData;
 		};
 		reorder: { fromIndex: number; toIndex: number };
 	}>();
@@ -98,16 +74,7 @@
 		dispatch('collapse');
 	}
 
-	function handleSave(
-		event: CustomEvent<{
-			description: string;
-			datatype: DatatypeUnion;
-			required: boolean;
-			datatypeDescription: string;
-			values?: AttributeValue[];
-		}>,
-		index: number
-	) {
+	function handleSave(event: CustomEvent<AttributeFormData>, index: number) {
 		const attr = attributes[index];
 		dispatch('save', {
 			index,
@@ -135,13 +102,7 @@
 	function handleDirtyChange(
 		event: CustomEvent<{
 			isDirty: boolean;
-			pendingValues?: {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-			};
+			pendingValues?: AttributeFormData;
 		}>,
 		index: number
 	) {
@@ -203,7 +164,12 @@
 						title="Move question up"
 					>
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 15l7-7 7 7"
+							/>
 						</svg>
 					</button>
 					<button
@@ -215,7 +181,12 @@
 						title="Move question down"
 					>
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -244,16 +215,4 @@
 </div>
 
 <style>
-	/* Drop indicator - blue line */
-	.drop-indicator {
-		height: 4px;
-		background: rgb(59 130 246);
-		border-radius: 2px;
-		margin-bottom: 8px;
-	}
-
-	.drop-indicator-after {
-		margin-bottom: 0;
-		margin-top: 8px;
-	}
 </style>

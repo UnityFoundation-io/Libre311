@@ -5,6 +5,7 @@
 		DatatypeUnion,
 		AttributeValue
 	} from '$lib/services/Libre311/Libre311';
+	import type { AttributeFormData } from '../stores/types';
 	import { isListDatatype } from '../types';
 	import AttributeTypeSelector from './AttributeTypeSelector.svelte';
 	import AttributeCardFooter from './AttributeCardFooter.svelte';
@@ -23,36 +24,16 @@
 	/**
 	 * Pending values (unsaved changes) to restore if component is re-rendered
 	 */
-	export let pendingValues:
-		| {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-		  }
-		| undefined = undefined;
+	export let pendingValues: AttributeFormData | undefined = undefined;
 
 	const dispatch = createEventDispatcher<{
-		save: {
-			description: string;
-			datatype: DatatypeUnion;
-			required: boolean;
-			datatypeDescription: string;
-			values?: AttributeValue[];
-		};
+		save: AttributeFormData;
 		cancel: void;
 		copy: void;
 		delete: void;
 		dirty: {
 			isDirty: boolean;
-			pendingValues?: {
-				description: string;
-				datatype: DatatypeUnion;
-				required: boolean;
-				datatypeDescription: string;
-				values?: AttributeValue[];
-			};
+			pendingValues?: AttributeFormData;
 		};
 		collapse: void;
 	}>();
@@ -164,13 +145,7 @@
 	function handleSave() {
 		if (!canSave) return;
 
-		const data: {
-			description: string;
-			datatype: DatatypeUnion;
-			required: boolean;
-			datatypeDescription: string;
-			values?: AttributeValue[];
-		} = {
+		const data: AttributeFormData = {
 			description: description.trim(),
 			datatype,
 			required,
@@ -260,7 +235,7 @@
 	<!-- Collapse Handle -->
 	<button
 		type="button"
-		class="flex w-full items-center justify-center border-b border-gray-100 py-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+		class="flex w-full items-center justify-center border-b border-gray-100 py-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
 		aria-label="Click to collapse"
 		on:click={() => dispatch('collapse')}
 	>
@@ -278,14 +253,14 @@
 				id={questionInputId}
 				bind:value={description}
 				rows="1"
-				class="min-w-0 flex-none sm:flex-1 overflow-hidden rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full resize-none"
+				class="w-full min-w-0 flex-none resize-none overflow-hidden rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:flex-1"
 				class:ring-2={description.trim().length === 0 && description !== originalDescription}
 				class:ring-red-300={description.trim().length === 0 && description !== originalDescription}
 				placeholder="Question"
 				disabled={isSaving}
 				aria-label="Question text"
 			></textarea>
-			<div class="w-full sm:w-auto sm:mt-0.5">
+			<div class="w-full sm:mt-0.5 sm:w-auto">
 				<AttributeTypeSelector
 					value={datatype}
 					disabled={isSaving}

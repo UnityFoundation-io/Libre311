@@ -84,18 +84,6 @@
 	let focusedGroupIndex = 0;
 	let focusedServiceIndex: number | null = null;
 
-	// Generate unique ID for aria-activedescendant
-	$: activedescendantId = (() => {
-		if (groups.length === 0) return undefined;
-		const group = groups[focusedGroupIndex];
-		if (!group) return undefined;
-
-		if (focusedServiceIndex !== null && group.services[focusedServiceIndex]) {
-			return `tree-service-${group.id}-${group.services[focusedServiceIndex].service_code}`;
-		}
-		return `tree-group-${group.id}`;
-	})();
-
 	function handleToggleGroup(groupId: number) {
 		dispatch('toggleGroup', { groupId });
 	}
@@ -220,6 +208,7 @@
 <div
 	class="flex h-full flex-col overflow-hidden"
 	role="tree"
+	tabindex="-1"
 	aria-label="Service groups and services"
 	on:keydown={handleKeydown}
 >

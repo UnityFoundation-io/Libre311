@@ -1,10 +1,6 @@
-import type {
-	DatatypeUnion,
-	Service,
-	ServiceDefinitionAttribute,
-	Group,
-	AttributeValue
-} from '$lib/services/Libre311/Libre311';
+import type { Service, ServiceDefinitionAttribute, Group } from '$lib/services/Libre311/Libre311';
+import { DatatypeUnionSchema, AttributeValueSchema } from '$lib/services/Libre311/Libre311';
+import { z } from 'zod';
 
 /**
  * Type of item selected in the tree panel
@@ -102,13 +98,15 @@ export interface ServiceHeaderFormData {
 /**
  * Form data for creating/updating an attribute
  */
-export interface AttributeFormData {
-	description: string;
-	datatype: DatatypeUnion;
-	required: boolean;
-	datatypeDescription: string;
-	values?: AttributeValue[];
-}
+export const AttributeFormDataSchema = z.object({
+	description: z.string(),
+	datatype: DatatypeUnionSchema,
+	required: z.boolean(),
+	datatypeDescription: z.string(),
+	values: z.array(AttributeValueSchema).optional()
+});
+
+export type AttributeFormData = z.infer<typeof AttributeFormDataSchema>;
 
 /**
  * Drag operation state
