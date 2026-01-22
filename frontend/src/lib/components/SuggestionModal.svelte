@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Button, Modal, Input, TextArea, Portal } from 'stwui';
+	import messages from '$media/messages.json';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import {
 		createInput,
@@ -99,7 +100,7 @@
 							<div class="mb-2">
 								<Input
 									bind:value={phone.value}
-									placeholder="555-555-5555"
+									placeholder={messages.contact.phone.placeholder}
 									error={phone.error}
 									on:input={formatPhoneNumber}
 								>

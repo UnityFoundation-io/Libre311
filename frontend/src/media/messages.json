@@ -64,7 +64,7 @@
 		},
 		"phone": {
 			"label": "Phone",
-			"placeholder": "000-000-0000"
+			"placeholder": "555-555-5555"
 		},
 		"email": {
 			"label": "Email",
