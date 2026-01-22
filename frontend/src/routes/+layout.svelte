@@ -65,6 +65,7 @@
 				<button
 					aria-label="navigation"
 					type="button"
+					class="rounded-md focus:outline-none focus:ring-2 focus:ring-white"
 					on:click={() => {
 						open = !open;
 					}}

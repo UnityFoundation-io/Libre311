@@ -221,8 +221,6 @@
 	class="flex h-full flex-col overflow-hidden"
 	role="tree"
 	aria-label="Service groups and services"
-	aria-activedescendant={activedescendantId}
-	tabindex="0"
 	on:keydown={handleKeydown}
 >
 	<!-- Panel Header -->
@@ -232,6 +230,7 @@
 			type="button"
 			class="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
 			on:click={handleCreateGroup}
+			on:keydown|stopPropagation
 			aria-label="Create new group"
 		>
 			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

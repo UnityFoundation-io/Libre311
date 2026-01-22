@@ -80,14 +80,17 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
+			event.stopPropagation();
 			dispatch('selectGroup');
 		}
 		if (event.key === 'ArrowRight' && !isExpanded) {
 			event.preventDefault();
+			event.stopPropagation();
 			dispatch('toggle');
 		}
 		if (event.key === 'ArrowLeft' && isExpanded) {
 			event.preventDefault();
+			event.stopPropagation();
 			dispatch('toggle');
 		}
 	}
@@ -99,6 +102,7 @@
 	function handleServiceKeydown(event: KeyboardEvent, serviceCode: number) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
+			event.stopPropagation();
 			dispatch('selectService', { serviceCode });
 		}
 
@@ -244,6 +248,7 @@
 									})}
 								on:keydown|stopPropagation={() => {}}
 								aria-label="Move {service.service_name} up"
+								title="Move up"
 							>
 								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
@@ -262,6 +267,7 @@
 									})}
 								on:keydown|stopPropagation={() => {}}
 								aria-label="Move {service.service_name} down"
+								title="Move down"
 							>
 								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />

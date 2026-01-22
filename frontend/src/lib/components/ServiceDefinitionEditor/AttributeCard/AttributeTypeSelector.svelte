@@ -19,6 +19,11 @@
 	 */
 	export let compact = false;
 
+	/**
+	 * Additional classes for the select element
+	 */
+	export let className = '';
+
 	const dispatch = createEventDispatcher<{
 		change: DatatypeUnion;
 	}>();
@@ -48,7 +53,7 @@
 			{disabled}
 			class="appearance-none bg-white text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 {compact
 				? 'rounded-full border border-gray-300 py-2 pl-4 pr-10 text-base'
-				: 'w-full rounded-md border border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500'}"
+				: 'w-full rounded-md border border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500'} {className}"
 		>
 			{#each ATTRIBUTE_TYPE_OPTIONS as option}
 				<option value={option}>{option}</option>

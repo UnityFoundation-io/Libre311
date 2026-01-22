@@ -216,7 +216,7 @@
 		initializeForm(savedAttr, true);
 	}
 
-	let questionInput: HTMLInputElement;
+	let questionInput: HTMLTextAreaElement;
 
 	// Generate unique IDs for inputs (L1 fix)
 	$: questionInputId = `question-text-${attribute?.code ?? 'new'}`;
@@ -225,6 +225,27 @@
 	onMount(() => {
 		questionInput?.focus();
 	});
+
+	/**
+	 * Svelte action to automatically resize a textarea to fit its content
+	 */
+	function autosize(node: HTMLTextAreaElement) {
+		const onInput = () => {
+			node.style.height = 'auto';
+			node.style.height = node.scrollHeight + 'px';
+		};
+
+		node.addEventListener('input', onInput);
+
+		// Initialize height on next tick to ensure content is rendered
+		setTimeout(onInput, 0);
+
+		return {
+			destroy() {
+				node.removeEventListener('input', onInput);
+			}
+		};
+	}
 </script>
 
 <!-- H3 fix: Attach keyboard handler to container, not window, to avoid global capture -->
@@ -249,26 +270,30 @@
 	</button>
 
 	<div class="p-4">
-		<!-- Question Text + Type Selector (same row) -->
-		<div class="mb-4 flex items-center gap-3">
-			<input
+		<!-- Question Text + Type Selector (same row on desktop, stacked on mobile) -->
+		<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start">
+			<textarea
+				use:autosize
 				bind:this={questionInput}
 				id={questionInputId}
-				type="text"
 				bind:value={description}
-				class="min-w-0 flex-1 rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				rows="1"
+				class="min-w-0 flex-none sm:flex-1 overflow-hidden rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full resize-none"
 				class:ring-2={description.trim().length === 0 && description !== originalDescription}
 				class:ring-red-300={description.trim().length === 0 && description !== originalDescription}
 				placeholder="Question"
 				disabled={isSaving}
 				aria-label="Question text"
-			/>
-			<AttributeTypeSelector
-				value={datatype}
-				disabled={isSaving}
-				compact={true}
-				on:change={handleTypeChange}
-			/>
+			></textarea>
+			<div class="w-full sm:w-auto sm:mt-0.5">
+				<AttributeTypeSelector
+					value={datatype}
+					disabled={isSaving}
+					compact={true}
+					className="w-full sm:w-auto"
+					on:change={handleTypeChange}
+				/>
+			</div>
 		</div>
 
 		<!-- Options List (for list types) -->
@@ -287,7 +312,7 @@
 		<div class="mb-4">
 			<button
 				type="button"
-				class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+				class="flex items-center gap-1 rounded text-sm text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				on:click={() => (showMoreOptions = !showMoreOptions)}
 			>
 				<svg
@@ -306,14 +331,15 @@
 					<label for={helpTextInputId} class="mb-1 block text-sm font-medium text-gray-700">
 						Help Text
 					</label>
-					<input
+					<textarea
+						use:autosize
 						id={helpTextInputId}
-						type="text"
 						bind:value={datatypeDescription}
-						class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+						rows="1"
+						class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 						placeholder="Provide additional guidance for this question"
 						disabled={isSaving}
-					/>
+					></textarea>
 					<p class="mt-1 text-xs text-gray-500">
 						This text will appear below the question to help users understand what to enter.
 					</p>

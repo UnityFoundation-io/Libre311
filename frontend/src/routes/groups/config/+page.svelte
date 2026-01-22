@@ -727,7 +727,7 @@
 	<title>Service Definition Configuration</title>
 </svelte:head>
 
-<div class="flex h-screen flex-col">
+<div class="flex h-full flex-col">
 	<!-- Header -->
 	<header class="border-b border-gray-200 bg-white px-4 py-4">
 <!--		<div class="flex items-center gap-4">-->

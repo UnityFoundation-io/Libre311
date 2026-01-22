@@ -116,10 +116,7 @@
 				<!-- Delete button (X) -->
 				<button
 					type="button"
-					class="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100 {values.length >
-					1
-						? 'hover:opacity-100'
-						: ''}"
+					class="rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:cursor-not-allowed disabled:opacity-30"
 					on:click={() => handleDeleteOption(index)}
 					disabled={disabled || values.length <= 1}
 					aria-label="Delete option {index + 1}"

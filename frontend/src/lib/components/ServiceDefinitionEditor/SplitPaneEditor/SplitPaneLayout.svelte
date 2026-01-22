@@ -163,10 +163,10 @@
 	}
 </script>
 
-<div class="flex h-full overflow-hidden bg-white">
+<div class="flex h-full flex-col overflow-hidden bg-white md:flex-row">
 	<!-- Left Panel (Tree) -->
 	<div
-		class="flex-shrink-0 overflow-hidden border-r border-gray-200"
+		class="left-panel flex-shrink-0 overflow-hidden border-r border-gray-200"
 		style="width: {leftPanelWidth}px"
 	>
 		<TreePanel
@@ -187,7 +187,7 @@
 	<!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
 	<!-- Resizer -->
 	<div
-		class="group relative w-1 flex-shrink-0 cursor-col-resize bg-gray-200 transition-colors hover:bg-blue-400 {isResizing
+		class="resizer group relative w-1 flex-shrink-0 cursor-col-resize bg-gray-200 transition-colors hover:bg-blue-400 {isResizing
 			? 'bg-blue-500'
 			: ''}"
 		on:mousedown={startResize}
@@ -230,3 +230,18 @@
 		</EditorPanel>
 	</div>
 </div>
+
+<style>
+	@media (max-width: 768px) {
+		.left-panel {
+			width: 100% !important;
+			height: 35%;
+			border-right: none !important;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		.resizer {
+			display: none;
+		}
+	}
+</style>

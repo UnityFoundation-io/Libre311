@@ -34,9 +34,11 @@
 </script>
 
 <div
-	class="flex cursor-pointer items-start gap-3 p-4 transition-colors hover:bg-gray-50"
+	class="flex cursor-pointer items-start gap-3 p-4 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
 	role="button"
 	tabindex="0"
+	aria-expanded="false"
+	aria-label="Edit question: {attribute.description}"
 	on:click
 	on:keydown={(e) => {
 		if (e.key === 'Enter' || e.key === ' ') {
