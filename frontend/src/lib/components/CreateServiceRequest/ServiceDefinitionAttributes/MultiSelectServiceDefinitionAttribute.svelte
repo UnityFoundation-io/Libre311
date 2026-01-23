@@ -6,7 +6,8 @@
 	import type { MultiSelectServiceDefinitionAttributeInput } from './shared';
 
 	export let input: MultiSelectServiceDefinitionAttributeInput;
-	export let selectRoot: HTMLElement;
+
+	let selectRoot: HTMLElement | null;
 
 	$: selectOptions = createSelectOptions(input.attribute);
 
@@ -17,7 +18,7 @@
 	// Couldn't make stwui do this so runtime it is
 	$: if (input.error) {
 		// runs whenever error becomes truthy
-		const btn = selectRoot.querySelector<HTMLButtonElement>(
+		const btn = selectRoot?.querySelector<HTMLButtonElement>(
 			'button[aria-labelledby="multiselect"]'
 		);
 		if (btn) {
