@@ -20,6 +20,7 @@ import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.DateCreated;
 import io.micronaut.data.annotation.DateUpdated;
 
+import io.micronaut.data.annotation.Where;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +31,7 @@ import org.locationtech.jts.geom.Point;
 
 @Entity
 @Table(name = "service_requests")
+@Where(value = "@.deleted = false")
 public class ServiceRequest {
 
     @Id

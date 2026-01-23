@@ -89,6 +89,9 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("selected_values")
     private List<ServiceDefinitionAttributeDTO> selectedValues;
 
+    @JsonProperty("removal_suggestions_count")
+    private Long removalSuggestionsCount = 0L;
+
     public ServiceRequestDTO() {
     }
 
@@ -272,5 +275,13 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
 
     public void setSelectedValues(List<ServiceDefinitionAttributeDTO> selectedValues) {
         this.selectedValues = selectedValues;
+    }
+
+    public Long getRemovalSuggestionsCount() {
+        return removalSuggestionsCount;
+    }
+
+    public void setRemovalSuggestionsCount(Long removalSuggestionsCount) {
+        this.removalSuggestionsCount = removalSuggestionsCount;
     }
 }

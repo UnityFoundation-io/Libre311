@@ -5,9 +5,12 @@
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
+	import SuggestionModal from './SuggestionModal.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string | undefined = undefined;
+
+	let showSuggestionModal = false;
 </script>
 
 <div class="flex h-full">
@@ -35,7 +38,9 @@
 				<div class="mb-2 mt-2 flow-root">
 					<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 					<div class="float-right">
-						<!-- <Flag /> -->
+						<Button on:click={() => (showSuggestionModal = true)} size="sm" type="primary">
+							Suggest Removal
+						</Button>
 					</div>
 				</div>
 
@@ -112,6 +117,12 @@
 		</div>
 	</Card>
 </div>
+
+<SuggestionModal
+	bind:open={showSuggestionModal}
+	serviceRequestId={serviceRequest.service_request_id}
+	handleClose={() => (showSuggestionModal = false)}
+/>
 
 <style>
 	h1 {

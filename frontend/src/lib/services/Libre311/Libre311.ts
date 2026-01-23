@@ -237,6 +237,83 @@ export type CreateServiceRequestParams = HasServiceCode &
 		media_url?: string;
 	};
 
+export const CreateRemovalSuggestionParamsSchema = z.object({
+	service_request_id: z.number(),
+	email: z.string().email(),
+	name: z.string().optional(),
+	phone: z.string().optional(),
+	reason: z.string(),
+	g_recaptcha_response: z.string().optional()
+});
+
+export type CreateRemovalSuggestionParams = z.infer<typeof CreateRemovalSuggestionParamsSchema>;
+
+export const ServiceRequestRemovalSuggestionSchema = z.object({
+	id: z.number(),
+	service_request_id: z.number(),
+	email: z.string(),
+	name: z.string().optional(),
+	phone: z.string().optional(),
+	reason: z.string(),
+	date_created: z.string()
+});
+
+export type ServiceRequestRemovalSuggestion = z.infer<typeof ServiceRequestRemovalSuggestionSchema>;
+
+const PaginationSchema = z.object({
+	size: z.number(), // the number of records per page
+	offset: z.number(), // if pageSize = 10 and pageNumber = 5 then offset = 50,
+	pageNumber: z.number(), // the current page number (first page starts at 0)
+	totalPages: z.number(), // the total number of pages
+	totalSize: z.number() // the total number of records
+});
+
+export type Pagination = z.infer<typeof PaginationSchema>;
+
+export const EMPTY_PAGINATION = {
+	size: 0,
+	offset: 0,
+	pageNumber: 0,
+	totalPages: 0,
+	totalSize: 0
+};
+
+export type HasPagination = {
+	pagination: Pagination;
+};
+
+export type HasMetadata<T> = {
+	metadata: T;
+};
+
+export const GetRemovalSuggestionsResponseSchema = z
+	.object({
+		content: z.array(ServiceRequestRemovalSuggestionSchema),
+		pageable: z
+			.object({
+				offset: z.number().optional(),
+				pageNumber: z.number().optional(),
+				pageSize: z.number().optional()
+			})
+			.optional(),
+		totalPages: z.number().optional(),
+		totalSize: z.number().optional()
+	})
+	.transform((data) => ({
+		content: data.content,
+		metadata: {
+			pagination: {
+				offset: data.pageable?.offset ?? 0,
+				pageNumber: data.pageable?.pageNumber ?? 0,
+				size: data.pageable?.pageSize ?? 0,
+				totalPages: data.totalPages ?? 0,
+				totalSize: data.totalSize ?? 0
+			}
+		}
+	}));
+
+export type GetRemovalSuggestionsResponse = z.infer<typeof GetRemovalSuggestionsResponseSchema>;
+
 export const LowServiceRequestPrioritySchema = z.literal('low');
 export const MediumServiceRequestPrioritySchema = z.literal('medium');
 export const HighServiceRequestPrioritySchema = z.literal('high');
@@ -309,7 +386,8 @@ export const ServiceRequestSchema = z
 		long: z.string(),
 		media_url: urlSchema.optional(),
 		selected_values: z.array(SelectedValuesSchema).optional(),
-		priority: ServiceRequestPrioritySchema.optional()
+		priority: ServiceRequestPrioritySchema.optional(),
+		removal_suggestions_count: z.number().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -442,32 +520,6 @@ const JurisdictionConfigSchema = z
 
 export type JurisdictionConfig = z.infer<typeof JurisdictionConfigSchema>;
 
-const PaginationSchema = z.object({
-	size: z.number(), // the number of records per page
-	offset: z.number(), // if pageSize = 10 and pageNumber = 5 then offset = 50,
-	pageNumber: z.number(), // the current page number (first page starts at 0)
-	totalPages: z.number(), // the total number of pages
-	totalSize: z.number() // the total number of records
-});
-
-export type Pagination = z.infer<typeof PaginationSchema>;
-
-export const EMPTY_PAGINATION = {
-	size: 0,
-	offset: 0,
-	pageNumber: 0,
-	totalPages: 0,
-	totalSize: 0
-};
-
-export type HasPagination = {
-	pagination: Pagination;
-};
-
-export type HasMetadata<T> = {
-	metadata: T;
-};
-
 export type ServiceRequestsResponse = {
 	serviceRequests: GetServiceRequestsResponse;
 } & HasMetadata<HasPagination>;
@@ -542,6 +594,11 @@ export interface Libre311Service extends Open311Service {
 	deleteService(params: HasServiceCode): Promise<void>;
 	updateServiceRequest(params: UpdateSensitiveServiceRequestRequest): Promise<ServiceRequest>;
 	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean>;
+	createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void>;
+	getRemovalSuggestions(
+		params: HasPagination & { service_request_id?: number }
+	): Promise<GetRemovalSuggestionsResponse>;
+	deleteRemovalSuggestion(params: { id: number }): Promise<void>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -591,7 +648,13 @@ const ROUTES = {
 	updateAttributesOrder: (params: UpdateAttributesOrderParams & HasJurisdictionId) =>
 		`/jurisdiction-admin/services/${params.service_code}/attributes-order?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteServiceRequest: (params: HasServiceRequestId & HasJurisdictionId) =>
-		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`
+		`/requests/${params.service_request_id}?jurisdiction_id=${params.jurisdiction_id}`,
+	postRemovalSuggestion: (params: HasServiceRequestId & HasJurisdictionId) =>
+		`/requests/${params.service_request_id}/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
+	getRemovalSuggestions: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
+		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -658,6 +721,47 @@ export class Libre311ServiceImpl implements Libre311Service {
 		this.recaptchaService = props.recaptchaService;
 		this.geocodingService = new GeocodingServiceImpl();
 	}
+
+	async createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void> {
+		CreateRemovalSuggestionParamsSchema.parse(params);
+		const paramsWithRecaptcha = await this.recaptchaService.wrapWithRecaptcha(
+			params,
+			'create_removal_suggestion'
+		);
+		try {
+			await this.axiosInstance.post(
+				ROUTES.postRemovalSuggestion({ ...params, jurisdiction_id: this.jurisdictionId }),
+				paramsWithRecaptcha
+			);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	async getRemovalSuggestions(
+		params: HasPagination & { service_request_id?: number }
+	): Promise<GetRemovalSuggestionsResponse> {
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getRemovalSuggestions({ jurisdiction_id: this.jurisdictionId }),
+			{
+				params: {
+					page: params.pagination.pageNumber,
+					size: params.pagination.size,
+					service_request_id: params.service_request_id
+				}
+			}
+		);
+
+		return GetRemovalSuggestionsResponseSchema.parse(res.data);
+	}
+
+	async deleteRemovalSuggestion(params: { id: number }): Promise<void> {
+		await this.axiosInstance.delete(
+			ROUTES.deleteRemovalSuggestion({ id: params.id, jurisdiction_id: this.jurisdictionId })
+		);
+	}
+
 	async deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean> {
 		try {
 			const res = await this.axiosInstance.delete(

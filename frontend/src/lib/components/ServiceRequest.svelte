@@ -13,6 +13,8 @@
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 	import AuthGuard from './AuthGuard.svelte';
+	import ConfirmationModal from './ConfirmationModal.svelte';
+	import RemovalSuggestionsList from './RemovalSuggestionsList.svelte';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -23,6 +25,8 @@
 	export let back: string;
 
 	let isUpdateButtonClicked: boolean = false;
+	let showDeleteModal = false;
+	let isDeleting = false;
 
 	$: if ($page.url) {
 		isUpdateButtonClicked = false;
@@ -35,9 +39,12 @@
 			return `${serviceRequest.first_name ?? ''} ${serviceRequest.last_name ?? ''}`;
 	}
 
-	async function deleteServiceReq() {
-		let confirmed = window.confirm('Are you sure you would like to delete this request?');
-		if (!confirmed) return;
+	function deleteServiceReq() {
+		showDeleteModal = true;
+	}
+
+	async function confirmDelete() {
+		isDeleting = true;
 		try {
 			await libre311.deleteServiceRequest({
 				service_request_id: serviceRequest.service_request_id
@@ -51,6 +58,9 @@
 			goto('/issues/table');
 		} catch (error) {
 			alertError(error);
+		} finally {
+			isDeleting = false;
+			showDeleteModal = false;
 		}
 	}
 
@@ -74,8 +84,8 @@
 	}
 </script>
 
-<div class="flex h-full">
-	<Card class="m-2 w-full overflow-y-auto">
+<div class="flex h-full w-full flex-col">
+	<Card class="m-2 flex-grow overflow-y-auto">
 		<div class="flex h-full w-full flex-col" slot="content">
 			<h3 class="ml-4 text-base">
 				{#if isUpdateButtonClicked}
@@ -240,7 +250,17 @@
 			{/if}
 		</div>
 	</Card>
+	<RemovalSuggestionsList serviceRequestId={serviceRequest.service_request_id} />
 </div>
+
+<ConfirmationModal
+	open={showDeleteModal}
+	title="Delete Service Request"
+	message="Are you sure you would like to delete this request?"
+	handleClose={() => (showDeleteModal = false)}
+	handleConfirm={confirmDelete}
+	loading={isDeleting}
+/>
 
 <style>
 	h1 {

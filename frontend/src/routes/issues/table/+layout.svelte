@@ -269,7 +269,7 @@
 			</div>
 
 			<!-- flex-1 allows the table card to fill remaining vertical space in the layout -->
-			<Card bordered={true} class="m-2 flex-1 overflow-hidden">
+			<Card bordered={true} class="mx-2 mb-2 flex-1 overflow-hidden">
 				<Card.Content slot="content" class="h-full p-0 sm:p-0">
 					<div class="issues-table-override h-full">
 						<Table class="h-full overflow-hidden rounded-md" {columns}>
@@ -337,6 +337,20 @@
 													{toAbbreviatedTimeStamp(item.expected_datetime)}
 												{:else}
 													--
+												{/if}
+											</div>
+										</Table.Body.Row.Cell>
+
+										<Table.Body.Row.Cell column={7}>
+											<div class="flex w-full items-center justify-center">
+												{#if item.removal_suggestions_count && item.removal_suggestions_count > 0}
+													<span
+														class="inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs font-bold leading-none text-red-100"
+													>
+														{item.removal_suggestions_count}
+													</span>
+												{:else}
+													-
 												{/if}
 											</div>
 										</Table.Body.Row.Cell>

@@ -42,6 +42,11 @@ import jakarta.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import app.dto.servicerequest.ServiceRequestRemovalSuggestionDTO;
+import app.model.servicerequest.ServiceRequestRemovalSuggestion;
+import io.micronaut.data.model.Page;
+import io.micronaut.data.model.Pageable;
+
 import static app.security.Permission.*;
 
 @Controller("/api/jurisdiction-admin")
@@ -54,6 +59,23 @@ public class JurisdictionAdminController {
     public JurisdictionAdminController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
+    }
+
+    @Get(uris = { "/requests/removal-suggestions{?jurisdiction_id}", "/requests/removal-suggestions.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_VIEW_SYSTEM, LIBRE311_ADMIN_VIEW_TENANT, LIBRE311_ADMIN_VIEW_SUBTENANT})
+    public Page<ServiceRequestRemovalSuggestionDTO> getRemovalSuggestions(@Valid Pageable pageable,
+            @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return serviceRequestService.getRemovalSuggestions(jurisdiction_id, pageable);
+    }
+
+    @Delete(uris = { "/requests/removal-suggestions/{id}{?jurisdiction_id}", "/requests/removal-suggestions/{id}.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public HttpResponse deleteRemovalSuggestion(Long id,
+                                                @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        serviceRequestService.deleteRemovalSuggestion(id, jurisdiction_id);
+        return HttpResponse.ok();
     }
 
     @Post(uris = { "/services{?jurisdiction_id}", "/services.json{?jurisdiction_id}" })
