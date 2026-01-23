@@ -501,9 +501,6 @@ const JurisdictionConfigSchema = z
 		name: z.string(),
 		bounds: z.array(latLngTupleSchema).min(1),
 		auth_base_url: z.string(),
-		terms_of_use_content: z.string().optional(),
-		privacy_policy_content: z.string().optional(),
-		logo_media_url: z.string().optional(),
 		primary_color: z.string().optional(),
 		primary_hover_color: z.string().optional()
 	})

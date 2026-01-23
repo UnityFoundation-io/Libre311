@@ -64,16 +64,16 @@
 			let contextProviderPropsSuccess =
 				contextProviderProps as AsyncSuccess<Libre311ContextProviderProps>;
 			// Default to shades of gray to show nullness in jurisdiction config
-			document.documentElement.style.setProperty(
-				'--jurisdiction-primary-color',
-				contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig.primary_color ??
-					'0, 0%, 35%'
-			);
-			document.documentElement.style.setProperty(
-				'--jurisdiction-primary-hover-color',
-				contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig
-					.primary_hover_color ?? '0, 0%, 70%'
-			);
+			let primaryColor =
+				contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig.primary_color;
+			if (primaryColor) {
+				document.documentElement.style.setProperty('--primary', primaryColor);
+			}
+			let primaryHoverColor =
+				contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig.primary_hover_color;
+			if (primaryHoverColor) {
+				document.documentElement.style.setProperty('--hover', primaryHoverColor);
+			}
 		}
 	}
 </script>
