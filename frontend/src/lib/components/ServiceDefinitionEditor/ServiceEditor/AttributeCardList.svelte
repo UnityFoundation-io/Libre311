@@ -127,10 +127,7 @@
 		}
 	}
 
-	function handleCardReorder(
-		event: CustomEvent<{ direction: 'up' | 'down' }>,
-		index: number
-	) {
+	function handleCardReorder(event: CustomEvent<{ direction: 'up' | 'down' }>, index: number) {
 		if (event.detail.direction === 'up') {
 			moveUp(index);
 		} else {
