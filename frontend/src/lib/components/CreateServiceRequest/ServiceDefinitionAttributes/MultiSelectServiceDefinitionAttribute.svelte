@@ -6,6 +6,7 @@
 	import type { MultiSelectServiceDefinitionAttributeInput } from './shared';
 
 	export let input: MultiSelectServiceDefinitionAttributeInput;
+	export let selectRoot: HTMLElement;
 
 	$: selectOptions = createSelectOptions(input.attribute);
 
@@ -16,7 +17,9 @@
 	// Couldn't make stwui do this so runtime it is
 	$: if (input.error) {
 		// runs whenever error becomes truthy
-		const btn = document.querySelector<HTMLButtonElement>('button[aria-labelledby="multiselect"]');
+		const btn = selectRoot.querySelector<HTMLButtonElement>(
+			'button[aria-labelledby="multiselect"]'
+		);
 		if (btn) {
 			btn.setAttribute('aria-describedby', 'multiselect-error');
 			btn.setAttribute('aria-invalid', 'true');
@@ -25,24 +28,26 @@
 	}
 </script>
 
-<Select
-	error={input.error}
-	bind:value={input.value}
-	name="multiselect"
-	placeholder={input.attribute.datatype_description ?? undefined}
-	multiple
-	options={selectOptions}
-	class="relative  my-4"
->
-	<Select.Label slot="label">
-		{input.attribute.description}
-		{#if input.attribute.required}
-			<span class="text-red-600">*</span>
-		{/if}
-	</Select.Label>
-	<Select.Options slot="options">
-		{#each selectOptions as option}
-			<Select.Options.Option {option} />
-		{/each}
-	</Select.Options>
-</Select>
+<div bind:this={selectRoot}>
+	<Select
+		error={input.error}
+		bind:value={input.value}
+		name="multiselect"
+		placeholder={input.attribute.datatype_description ?? undefined}
+		multiple
+		options={selectOptions}
+		class="relative  my-4"
+	>
+		<Select.Label slot="label">
+			{input.attribute.description}
+			{#if input.attribute.required}
+				<span class="text-red-600">*</span>
+			{/if}
+		</Select.Label>
+		<Select.Options slot="options">
+			{#each selectOptions as option}
+				<Select.Options.Option {option} />
+			{/each}
+		</Select.Options>
+	</Select>
+</div>
