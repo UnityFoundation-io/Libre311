@@ -51,6 +51,7 @@
 		};
 		dragstart: void;
 		dragend: void;
+		reorder: { direction: 'up' | 'down' };
 	}>();
 
 	// Delete confirmation modal state
@@ -64,6 +65,10 @@
 
 	function handleCollapse() {
 		dispatch('collapse');
+	}
+
+	function handleReorder(event: CustomEvent<{ direction: 'up' | 'down' }>) {
+		dispatch('reorder', event.detail);
 	}
 
 	function handleDirtyChange(
@@ -158,7 +163,12 @@
 		</div>
 	{:else}
 		<!-- Collapsed View -->
-		<AttributeCardCollapsed {attribute} {isDirty} on:click={handleExpand} />
+		<AttributeCardCollapsed
+			{attribute}
+			{isDirty}
+			on:click={handleExpand}
+			on:reorder={handleReorder}
+		/>
 	{/if}
 </div>
 

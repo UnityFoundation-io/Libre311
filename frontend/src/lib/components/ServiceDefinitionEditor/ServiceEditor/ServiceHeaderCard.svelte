@@ -96,7 +96,7 @@
 <svelte:window on:keydown={onKeydown} />
 
 <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
-	<!-- Purple top border indicator -->
+	<!-- Blue top border indicator -->
 	<div class="h-1 rounded-t-lg bg-blue-600"></div>
 
 	<div class="p-6">

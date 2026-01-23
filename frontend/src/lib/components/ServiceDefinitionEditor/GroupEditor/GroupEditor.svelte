@@ -89,7 +89,7 @@
 <div class="space-y-6">
 	<!-- Group Header Card -->
 	<div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-		<!-- Purple top border -->
+		<!-- Blue top border -->
 		<div class="h-1 bg-blue-600"></div>
 
 		<div class="p-6">

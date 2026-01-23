@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import type { ServiceDefinitionAttribute, DatatypeUnion } from '$lib/services/Libre311/Libre311';
 	import { DATATYPE_LABEL_MAP, isListDatatype } from '../types';
 
@@ -11,6 +12,10 @@
 	 * Whether this card has unsaved changes
 	 */
 	export let isDirty = false;
+
+	const dispatch = createEventDispatcher<{
+		reorder: { direction: 'up' | 'down' };
+	}>();
 
 	// Get the display label for the datatype
 	$: typeLabel = DATATYPE_LABEL_MAP[attribute.datatype];
@@ -31,6 +36,22 @@
 		}
 		return '';
 	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			const target = event.currentTarget as HTMLElement;
+			target.click();
+		} else if (event.altKey) {
+			if (event.key === 'ArrowUp') {
+				event.preventDefault();
+				dispatch('reorder', { direction: 'up' });
+			} else if (event.key === 'ArrowDown') {
+				event.preventDefault();
+				dispatch('reorder', { direction: 'down' });
+			}
+		}
+	}
 </script>
 
 <div
@@ -40,12 +61,7 @@
 	aria-expanded="false"
 	aria-label="Edit question: {attribute.description}"
 	on:click
-	on:keydown={(e) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			e.currentTarget.click();
-		}
-	}}
+	on:keydown={handleKeydown}
 >
 	<!-- Question Text -->
 	<div class="min-w-0 flex-1">

@@ -127,6 +127,17 @@
 		}
 	}
 
+	function handleCardReorder(
+		event: CustomEvent<{ direction: 'up' | 'down' }>,
+		index: number
+	) {
+		if (event.detail.direction === 'up') {
+			moveUp(index);
+		} else {
+			moveDown(index);
+		}
+	}
+
 	// Ref to cards for resetting after save
 	let cardRefs: (AttributeCard | null)[] = [];
 
@@ -208,6 +219,7 @@
 					on:copy={(e) => handleCopy(e, index)}
 					on:deleteConfirm={() => handleDeleteConfirm(index)}
 					on:dirty={(e) => handleDirtyChange(e, index)}
+					on:reorder={(e) => handleCardReorder(e, index)}
 				/>
 			</div>
 		</div>
