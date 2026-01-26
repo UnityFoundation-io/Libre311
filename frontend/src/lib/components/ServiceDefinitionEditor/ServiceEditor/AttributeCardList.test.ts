@@ -185,7 +185,7 @@ describe('AttributeCardList', () => {
 		expect(dirtyEvent).toEqual({ code: 1, isDirty: true });
 	});
 
-	it('disables drag when reorderEnabled is false', () => {
+	it('disables reorder buttons when reorderEnabled is false', () => {
 		render(AttributeCardList, {
 			props: {
 				attributes: mockAttributes,
@@ -193,44 +193,46 @@ describe('AttributeCardList', () => {
 			}
 		});
 
-		const listItems = screen.getAllByRole('listitem');
-		listItems.forEach((item) => {
-			expect(item).toHaveAttribute('draggable', 'false');
-		});
+		expect(screen.queryByRole('button', { name: /move question up/i })).not.toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: /move question down/i })).not.toBeInTheDocument();
 	});
 
-	it('enables drag when reorderEnabled is true and card is collapsed', () => {
+	it('renders reorder buttons when reorderEnabled is true', () => {
 		render(AttributeCardList, {
 			props: {
 				attributes: mockAttributes,
-				reorderEnabled: true,
-				expandedIndex: null
+				reorderEnabled: true
 			}
 		});
 
-		const listItems = screen.getAllByRole('listitem');
-		listItems.forEach((item) => {
-			expect(item).toHaveAttribute('draggable', 'true');
-		});
+		const upButtons = screen.getAllByRole('button', { name: /move question up/i });
+		const downButtons = screen.getAllByRole('button', { name: /move question down/i });
+
+		expect(upButtons).toHaveLength(3);
+		expect(downButtons).toHaveLength(3);
 	});
 
-	it('disables drag on expanded card', () => {
+	it('disables first up button and last down button', () => {
 		render(AttributeCardList, {
 			props: {
 				attributes: mockAttributes,
-				reorderEnabled: true,
-				expandedIndex: 1
+				reorderEnabled: true
 			}
 		});
 
-		const listItems = screen.getAllByRole('listitem');
-		// First and third should be draggable, second should not
-		expect(listItems[0]).toHaveAttribute('draggable', 'true');
-		expect(listItems[1]).toHaveAttribute('draggable', 'false');
-		expect(listItems[2]).toHaveAttribute('draggable', 'true');
+		const upButtons = screen.getAllByRole('button', { name: /move question up/i });
+		const downButtons = screen.getAllByRole('button', { name: /move question down/i });
+
+		expect(upButtons[0]).toBeDisabled();
+		expect(upButtons[1]).not.toBeDisabled();
+		expect(upButtons[2]).not.toBeDisabled();
+
+		expect(downButtons[0]).not.toBeDisabled();
+		expect(downButtons[1]).not.toBeDisabled();
+		expect(downButtons[2]).toBeDisabled();
 	});
 
-	it('dispatches reorder event on successful drag and drop', async () => {
+	it('dispatches reorder event when moving item up', async () => {
 		const { component } = render(AttributeCardList, {
 			props: {
 				attributes: mockAttributes,
@@ -243,30 +245,14 @@ describe('AttributeCardList', () => {
 			reorderEvent = e.detail;
 		});
 
-		const listItems = screen.getAllByRole('listitem');
+		// Click up button on second item (index 1)
+		const upButtons = screen.getAllByRole('button', { name: /move question up/i });
+		await fireEvent.click(upButtons[1]);
 
-		// Mock drag and drop
-		const dataTransfer = {
-			effectAllowed: '',
-			dropEffect: '',
-			setData: vi.fn(),
-			getData: vi.fn(() => '0')
-		};
-
-		// Drag first item
-		await fireEvent.dragStart(listItems[0], { dataTransfer });
-
-		// Drop on third item
-		await fireEvent.dragOver(listItems[2], {
-			dataTransfer,
-			clientY: 1000 // After midpoint
-		});
-		await fireEvent.drop(listItems[2], { dataTransfer });
-
-		expect(reorderEvent).toEqual({ fromIndex: 0, toIndex: 2 });
+		expect(reorderEvent).toEqual({ fromIndex: 1, toIndex: 0 });
 	});
 
-	it('does not reorder when dropping on same position', async () => {
+	it('dispatches reorder event when moving item down', async () => {
 		const { component } = render(AttributeCardList, {
 			props: {
 				attributes: mockAttributes,
@@ -274,27 +260,16 @@ describe('AttributeCardList', () => {
 			}
 		});
 
-		let reorderEvent = null;
+		let reorderEvent: { fromIndex: number; toIndex: number } | null = null;
 		component.$on('reorder', (e) => {
 			reorderEvent = e.detail;
 		});
 
-		const listItems = screen.getAllByRole('listitem');
+		// Click down button on first item (index 0)
+		const downButtons = screen.getAllByRole('button', { name: /move question down/i });
+		await fireEvent.click(downButtons[0]);
 
-		const dataTransfer = {
-			effectAllowed: '',
-			dropEffect: '',
-			setData: vi.fn(),
-			getData: vi.fn(() => '1')
-		};
-
-		// Drag second item
-		await fireEvent.dragStart(listItems[1], { dataTransfer });
-
-		// Drop on same item
-		await fireEvent.drop(listItems[1], { dataTransfer });
-
-		expect(reorderEvent).toBeNull();
+		expect(reorderEvent).toEqual({ fromIndex: 0, toIndex: 1 });
 	});
 
 	it('renders empty state when no attributes provided', () => {
