@@ -128,7 +128,7 @@ export const TextServiceDefinitionAttributeSchema = BaseServiceDefinitionAttribu
 
 export type TextServiceDefinitionAttribute = z.infer<typeof TextServiceDefinitionAttributeSchema>;
 
-const AttributeValueSchema = z.object({
+export const AttributeValueSchema = z.object({
 	/**
 	 * The unique identifier associated with an option for singlevaluelist or multivaluelist. This is analogous to the value attribute in an html option tag.
 	 */
@@ -439,7 +439,8 @@ export type CreateServiceResponse = z.infer<typeof CreateServiceResponseSchema>;
 // Edit Service - Request Schema
 export const EditServiceParamsSchema = z.object({
 	service_code: z.number(),
-	service_name: z.string()
+	service_name: z.string(),
+	description: z.string().optional()
 });
 
 // Edit Service - Request Type
@@ -475,6 +476,7 @@ export const EditServiceDefinitionAttributeParamsSchema = z.object({
 	attribute_code: z.number(),
 	service_code: z.number(),
 	description: z.string(),
+	datatype: z.string().optional(),
 	datatype_description: z.string(),
 	required: z.boolean(),
 	// order: z.number(),
@@ -579,6 +581,7 @@ export interface Libre311Service extends Open311Service {
 	getGroupList(): Promise<GetGroupListResponse>;
 	createGroup(params: CreateGroupParams): Promise<Group>;
 	editGroup(params: EditGroupParams): Promise<Group>;
+	deleteGroup(params: HasGroupId): Promise<void>;
 	downloadServiceRequests(params: FilteredServiceRequestsParams): Promise<Blob>;
 	createService(params: CreateServiceParams): Promise<CreateServiceResponse>;
 	updateServicesOrder(params: UpdateServicesOrderParams): Promise<GetServiceListResponse>;
@@ -620,6 +623,8 @@ const ROUTES = {
 	postGroup: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
 	patchGroup: (params: HasJurisdictionId & HasGroupId) =>
+		`/jurisdiction-admin/groups/${params.group_id}?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteGroup: (params: HasJurisdictionId & HasGroupId) =>
 		`/jurisdiction-admin/groups/${params.group_id}?jurisdiction_id=${params.jurisdiction_id}`,
 	getGroupList: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/groups/?jurisdiction_id=${params.jurisdiction_id}`,
@@ -811,7 +816,18 @@ export class Libre311ServiceImpl implements Libre311Service {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
 		);
-		return ServiceDefinitionSchema.parse(res.data);
+		const definition = ServiceDefinitionSchema.parse(res.data);
+
+		// Sort attribute values alphabetically for consistent ordering
+		if (definition.attributes) {
+			definition.attributes.forEach((attr) => {
+				if ('values' in attr && attr.values) {
+					attr.values.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+				}
+			});
+		}
+
+		return definition;
 	}
 
 	async createGroup(params: CreateGroupParams): Promise<Group> {
@@ -847,6 +863,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 			);
 
 			return GroupSchema.parse(res.data);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	async deleteGroup(params: HasGroupId): Promise<void> {
+		try {
+			await this.axiosInstance.delete<unknown>(
+				ROUTES.deleteGroup({
+					group_id: params.group_id,
+					jurisdiction_id: this.jurisdictionConfig.jurisdiction_id
+				})
+			);
 		} catch (error) {
 			console.log(error);
 			throw error;

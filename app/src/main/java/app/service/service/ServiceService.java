@@ -300,7 +300,7 @@ public class ServiceService {
         if (serviceDefinitionAttributeDTO.isVariable() != null) {
             serviceDefinitionAttribute.setVariable(serviceDefinitionAttributeDTO.isVariable());
         }
-        if (serviceDefinitionAttributeDTO.getDatatype() != null) {
+        if (serviceDefinitionAttributeDTO.isRequired() != null) {
             serviceDefinitionAttribute.setRequired(serviceDefinitionAttributeDTO.isRequired());
         }
         if (serviceDefinitionAttributeDTO.getDatatype() != null) {
@@ -318,11 +318,18 @@ public class ServiceService {
 
         var saved = serviceDefinitionAttributeRepository.update(serviceDefinitionAttribute);
 
-        // add new values
+        // Update attribute values if provided
         if (serviceDefinitionAttributeDTO.getValues() != null) {
-            // drop all attribute values
+            // Delete all existing attribute values from database
             attributeValueRepository.deleteAllByServiceDefinitionAttribute(serviceDefinitionAttribute);
 
+            // Clear the in-memory collection to prevent Hibernate from re-inserting
+            // deleted values due to CascadeType.ALL
+            if (saved.getAttributeValues() != null) {
+                saved.getAttributeValues().clear();
+            }
+
+            // Add new values
             serviceDefinitionAttributeDTO.getValues().forEach(attributeValueDTO -> {
                 AttributeValue savedValue = attributeValueRepository.save(new AttributeValue(serviceDefinitionAttribute, attributeValueDTO.getName()));
                 saved.addAttributeValue(savedValue);

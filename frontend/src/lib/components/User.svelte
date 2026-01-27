@@ -47,6 +47,7 @@
 			aria-haspopup="menu"
 			on:click={toggleDropdown}
 			on:keydown={triggerKeydown}
+			class="rounded-full focus:outline-none focus:ring-2 focus:ring-white"
 		>
 			<Avatar initials={$user?.username.charAt(0).toUpperCase()} />
 		</button>

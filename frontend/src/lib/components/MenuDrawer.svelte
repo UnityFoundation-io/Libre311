@@ -72,7 +72,7 @@
 						<Menu.Item
 							key="manager"
 							label="Service Definition Configuration"
-							href="/groups"
+							href="/groups/config"
 							on:click={handleClose}
 						>
 							<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
