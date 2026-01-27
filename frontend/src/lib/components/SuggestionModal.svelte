@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { Button, Modal, Input, TextArea, Portal } from 'stwui';
 	import messages from '$media/messages.json';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
@@ -92,6 +93,9 @@
 	$: if (open) {
 		// when opened clear out input
 		reset();
+		tick().then(() => {
+			emailRoot.querySelector('input')?.focus();
+		});
 	}
 
 	$: setUpAlertRole(email, emailRoot, 'input#suggest-email', 'suggest-email-error');
