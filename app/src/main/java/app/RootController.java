@@ -20,6 +20,7 @@ import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
 import app.dto.servicedefinition.ServiceDefinitionDTO;
+import app.recaptcha.CheckRecaptcha;
 import app.security.RequiresPermissions;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
@@ -143,6 +144,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
+    @CheckRecaptcha
     public List<PostResponseServiceRequestDTO> createServiceRequestJson(HttpRequest<?> request,
                                                                         @Valid @Body PostRequestServiceRequestDTO requestDTO,
                                                                         @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
@@ -154,6 +156,7 @@ public class RootController {
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @ExecuteOn(TaskExecutors.IO)
+    @CheckRecaptcha
     public String createServiceRequestXml(HttpRequest<?> request,
                                           @Valid @Body PostRequestServiceRequestDTO requestDTO,
                                           @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) throws JsonProcessingException {
