@@ -80,7 +80,6 @@ export function setUpAlertRole(
 				if (p) {
 					p.setAttribute('role', 'alert');
 					const error = p.innerHTML;
-					await tick;
 					// zero-width space accumulates on repeated errors forcing screen readers to repeat
 					p.innerHTML = error + '\u200B';
 				}
