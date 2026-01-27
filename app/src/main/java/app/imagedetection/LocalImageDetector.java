@@ -12,23 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.util;
+package app.imagedetection;
 
-import app.service.storage.StorageService;
-import io.micronaut.context.annotation.Replaces;
-import io.micronaut.http.multipart.CompletedFileUpload;
+import io.micronaut.context.annotation.Primary;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.objectstorage.local.LocalStorageOperations;
 import jakarta.inject.Singleton;
 
 @Singleton
-@Replaces(StorageService.class)
-public class MockStorageService extends StorageService {
-
-    public MockStorageService() {
-        super(null, null);
-    }
-
+@Primary
+@Requires(beans = {LocalStorageOperations.class})
+public class LocalImageDetector implements ImageDetector {
     @Override
-    public String upload(CompletedFileUpload file){
-        return "https://storage.googleapis.com/test-bucket/filename.jpg";
+    public void preventExplicitImage(byte[] bytes) {
+        // don't bother
     }
 }
