@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Select } from 'stwui';
-	import { tick } from 'svelte';
 	import type { SelectOption } from 'stwui/types';
 	import type { MultiSelectServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
 
