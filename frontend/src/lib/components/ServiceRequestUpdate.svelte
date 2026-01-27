@@ -12,7 +12,6 @@
 
 	import {
 		createInput,
-		type FormInputValue,
 		optionalCoalesceEmailValidator,
 		optionalCoalesceStringValidator,
 		optionalPriorityValidator,
@@ -22,7 +21,7 @@
 	import { mailIcon } from './Svg/outline/mailIcon';
 	import { user } from './Svg/outline/user';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
-	import { createEventDispatcher, tick } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
 	import {
 		serviceRequestPrioritySelectOptions,

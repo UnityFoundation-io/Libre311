@@ -4,7 +4,6 @@ import {
 } from '$lib/services/Libre311/Libre311';
 import L, { type PointTuple } from 'leaflet';
 import type { SelectOption } from 'stwui/types';
-import type { FormInputValue } from '$lib/utils/validation';
 import { tick } from 'svelte';
 
 export function sleep(ms: number) {
@@ -80,7 +79,7 @@ export function setUpAlertRole(
 				const p = root?.querySelector('p#' + error_id);
 				if (p) {
 					p.setAttribute('role', 'alert');
-					let error = p.innerHTML;
+					const error = p.innerHTML;
 					await tick;
 					// zero-width space accumulates on repeated errors forcing screen readers to repeat
 					p.innerHTML = error + '\u200B';
