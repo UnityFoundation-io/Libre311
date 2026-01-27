@@ -6,6 +6,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { type FormInputValue } from '$lib/utils/validation';
 	import { dispatchEventFunctionFactory, type EventDispatchTypeMap } from './shared';
+	import { setUpAlertRole } from '$lib/utils/functions';
 
 	const dispatch = createEventDispatcher<EventDispatchTypeMap>();
 
@@ -26,6 +27,17 @@
 	const passwordAutocomplete = 'current-password' as any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const emailAutocomplete = 'email' as any;
+
+	let emailRoot: HTMLElement;
+	let passwordRoot: HTMLElement;
+
+	$: setUpAlertRole(emailInput, emailRoot, 'input#email-desktop', 'email-desktop-error');
+	$: setUpAlertRole(
+		passwordInput,
+		passwordRoot,
+		'input#password-desktop',
+		'password-desktop-error'
+	);
 </script>
 
 <div
@@ -66,7 +78,7 @@
 			<h1 class="text-lg">{messages['login']['title']}</h1>
 		</div>
 
-		<div class="m-4">
+		<div bind:this={emailRoot} class="m-4">
 			<Input
 				allowClear
 				id="email-desktop"
@@ -75,8 +87,6 @@
 				placeholder={messages['login']['email']['placeholder']}
 				error={emailInput.error}
 				value={emailInput.value}
-				aria-describedby={emailInput.error ? 'email-desktop-error' : undefined}
-				aria-invalid={!!emailInput.error}
 				autocomplete={emailAutocomplete}
 				on:change={(e) => onChange(e, 'email')}
 			>
@@ -84,7 +94,7 @@
 			</Input>
 		</div>
 
-		<div class="m-4">
+		<div bind:this={passwordRoot} class="m-4">
 			<Input
 				allowClear
 				id="password-desktop"
@@ -94,8 +104,6 @@
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
 				value={passwordInput.value}
-				aria-describedby={passwordInput.error ? 'password-desktop-error' : undefined}
-				aria-invalid={!!passwordInput.error}
 				autocomplete={passwordAutocomplete}
 				on:change={(e) => onChange(e, 'password')}
 			>

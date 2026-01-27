@@ -25,7 +25,8 @@
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
 	import {
 		serviceRequestPrioritySelectOptions,
-		serviceRequestStatusSelectOptions
+		serviceRequestStatusSelectOptions,
+		setUpAlertRole
 	} from '$lib/utils/functions';
 
 	const dispatch = createEventDispatcher<{
@@ -107,6 +108,10 @@
 
 		dispatch('updateServiceRequest', sensitiveServiceRequest);
 	}
+
+	let agencyRoot: HTMLElement;
+
+	$: setUpAlertRole(agencyEmailInput, agencyRoot, 'input#email', 'email-error');
 </script>
 
 <form>
@@ -163,7 +168,7 @@
 	</div>
 
 	<!-- UPDATE AGENCY -->
-	<div class="mb-1">
+	<div bind:this={agencyRoot} class="mb-1">
 		<Input
 			type="text"
 			name="firstName"
@@ -184,8 +189,6 @@
 			type="email"
 			placeholder={messages['contact']['email']['placeholder']}
 			error={agencyEmailInput.error}
-			aria-describedby={agencyEmailInput.error ? 'email-error' : undefined}
-			aria-invalid={!!agencyEmailInput.error}
 			bind:value={agencyEmailInput.value}
 		>
 			<Input.Label slot="label">
