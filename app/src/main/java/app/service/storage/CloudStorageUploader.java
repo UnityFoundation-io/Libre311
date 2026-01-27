@@ -5,6 +5,7 @@ import com.azure.storage.blob.models.BlockBlobItem;
 import com.google.cloud.storage.Blob;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpStatus;
+import io.micronaut.objectstorage.local.LocalStorageOperations;
 import io.micronaut.objectstorage.request.UploadRequest;
 import io.micronaut.objectstorage.response.UploadResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
@@ -31,6 +32,8 @@ public interface CloudStorageUploader {
             actualKind = CloudStorageKind.CLOUD_STORAGE_KIND_AWS;
         } else if (nativeResponse instanceof BlockBlobItem) {
             actualKind = CloudStorageKind.CLOUD_STORAGE_KIND_AZURE;
+        } else if (nativeResponse instanceof LocalStorageOperations) {
+            actualKind = CloudStorageKind.CLOUD_STORAGE_KIND_LOCAL;
         }
         return actualKind;
     }

@@ -31,11 +31,11 @@ import java.util.UUID;
 public class MockStorageService extends StorageService {
 
     public MockStorageService() {
-        super(null, null, null);
+        super(null, null);
     }
 
     @Override
-    public String upload(CompletedFileUpload file, String gRecaptchaResponse){
+    public String upload(CompletedFileUpload file){
         return "https://storage.googleapis.com/test-bucket/filename.jpg";
     }
 }

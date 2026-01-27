@@ -59,7 +59,7 @@ datasources:
 jpa:
   default:
     entity-scan:
-      packages: "app.model"
+      packages: "app"
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
