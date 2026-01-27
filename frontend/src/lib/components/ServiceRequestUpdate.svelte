@@ -12,6 +12,7 @@
 
 	import {
 		createInput,
+		type FormInputValue,
 		optionalCoalesceEmailValidator,
 		optionalCoalesceStringValidator,
 		optionalPriorityValidator,
@@ -21,11 +22,12 @@
 	import { mailIcon } from './Svg/outline/mailIcon';
 	import { user } from './Svg/outline/user';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, tick } from 'svelte';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
 	import {
 		serviceRequestPrioritySelectOptions,
-		serviceRequestStatusSelectOptions
+		serviceRequestStatusSelectOptions,
+		setUpAlertRole
 	} from '$lib/utils/functions';
 
 	const dispatch = createEventDispatcher<{
@@ -107,6 +109,10 @@
 
 		dispatch('updateServiceRequest', sensitiveServiceRequest);
 	}
+
+	let agencyRoot: HTMLElement;
+
+	$: setUpAlertRole(agencyEmailInput, agencyRoot, 'input#email', 'email-error');
 </script>
 
 <form>
@@ -163,7 +169,7 @@
 	</div>
 
 	<!-- UPDATE AGENCY -->
-	<div class="mb-1">
+	<div bind:this={agencyRoot} class="mb-1">
 		<Input
 			type="text"
 			name="firstName"
@@ -184,8 +190,6 @@
 			type="email"
 			placeholder={messages['contact']['email']['placeholder']}
 			error={agencyEmailInput.error}
-			aria-describedby={agencyEmailInput.error ? 'email-error' : undefined}
-			aria-invalid={!!agencyEmailInput.error}
 			bind:value={agencyEmailInput.value}
 		>
 			<Input.Label slot="label">

@@ -4,6 +4,8 @@ import {
 } from '$lib/services/Libre311/Libre311';
 import L, { type PointTuple } from 'leaflet';
 import type { SelectOption } from 'stwui/types';
+import type { FormInputValue } from '$lib/utils/validation';
+import { tick } from 'svelte';
 
 export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,6 +59,35 @@ export function toTimeStamp(timeStamp: Date | string | null | undefined) {
 
 export function toAbbreviatedTimeStamp(timeStamp: Date | string | null | undefined) {
 	return timeStamp ? `${new Date(timeStamp).toLocaleDateString()}` : '';
+}
+
+export function setUpAlertRole(
+	input: { error?: string },
+	root: HTMLElement,
+	selector: string,
+	error_id: string
+) {
+	if (input.error) {
+		// runs whenever error becomes truthy
+		const component = root?.querySelector<HTMLElement>(selector);
+		if (component) {
+			component.setAttribute('aria-describedby', error_id);
+			component.setAttribute('aria-invalid', 'true');
+			component.setAttribute('error', input.error);
+
+			(async () => {
+				await tick();
+				const p = root?.querySelector('p#' + error_id);
+				if (p) {
+					p.setAttribute('role', 'alert');
+					let error = p.innerHTML;
+					await tick;
+					// zero-width space accumulates on repeated errors forcing screen readers to repeat
+					p.innerHTML = error + '\u200B';
+				}
+			})();
+		}
+	}
 }
 
 export const statusToColorMap = {

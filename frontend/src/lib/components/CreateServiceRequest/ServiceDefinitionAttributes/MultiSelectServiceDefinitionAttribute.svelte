@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { Select } from 'stwui';
+	import { tick } from 'svelte';
 	import type { SelectOption } from 'stwui/types';
 	import type { MultiSelectServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
 
 	import type { MultiSelectServiceDefinitionAttributeInput } from './shared';
+	import { setUpAlertRole } from '$lib/utils/functions';
 
 	export let input: MultiSelectServiceDefinitionAttributeInput;
 
-	let selectRoot: HTMLElement | null;
+	let selectRoot: HTMLElement;
 
 	$: selectOptions = createSelectOptions(input.attribute);
 
@@ -16,17 +18,12 @@
 	}
 
 	// Couldn't make stwui do this so runtime it is
-	$: if (input.error) {
-		// runs whenever error becomes truthy
-		const btn = selectRoot?.querySelector<HTMLButtonElement>(
-			'button[aria-labelledby="multiselect"]'
-		);
-		if (btn) {
-			btn.setAttribute('aria-describedby', 'multiselect-error');
-			btn.setAttribute('aria-invalid', 'true');
-			btn.setAttribute('error', input.error);
-		}
-	}
+	$: setUpAlertRole(
+		input,
+		selectRoot,
+		"button[aria-labelledby='multiselect']",
+		'multiselect-error'
+	);
 </script>
 
 <div bind:this={selectRoot}>
