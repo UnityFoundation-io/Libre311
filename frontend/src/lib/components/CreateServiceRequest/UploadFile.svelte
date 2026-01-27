@@ -17,6 +17,7 @@
 	let reuploadInput: HTMLInputElement;
 	let imageData: string | undefined;
 	let filePickerError: string | undefined;
+	let filePickerErrorKey: number = 0;
 
 	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
 
@@ -48,6 +49,7 @@
 		filePickerError = undefined;
 		if (dropFiles.rejected[0]) {
 			filePickerError = messages['photo']['invalid_file_type'];
+			filePickerErrorKey = Date.now();
 		}
 		for (const file of dropFiles.accepted) {
 			dispatchFile(file);
@@ -127,9 +129,11 @@
 							</FilePicker.Description>
 						</FilePicker>
 						{#if filePickerError}
-							<p class="stwui-input-error mt-2 text-center text-sm text-danger" role="alert">
-								{filePickerError}
-							</p>
+							{#key filePickerErrorKey}
+								<p class="stwui-input-error mt-2 text-center text-sm text-danger" role="alert">
+									{filePickerError}
+								</p>
+							{/key}
 						{/if}
 					</div>
 
