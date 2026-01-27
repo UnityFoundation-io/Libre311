@@ -140,7 +140,6 @@ public class ServiceRequestService {
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
-        reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse());
         LOG.debug(serviceRequestDTO.toString());
         double lat = Double.parseDouble(serviceRequestDTO.getLatitude());
         double lng = Double.parseDouble(serviceRequestDTO.getLongitude());
