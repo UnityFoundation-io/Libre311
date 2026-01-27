@@ -5,41 +5,50 @@
 	import {
 		createInput,
 		optionalCoalescePhoneNumberValidator,
-		type FormInputValue
+		type FormInputValue,
+		emailValidator,
+		type InputValidator,
+		inputValidatorFactory
 	} from '$lib/utils/validation';
+	import { setUpAlertRole } from '$lib/utils/functions';
+	import { z } from 'zod';
 
 	export let open = false;
 	export let serviceRequestId: number;
 	export let handleClose: () => void;
 
+	const reasonValidator: InputValidator<string> = inputValidatorFactory(
+		z.string().trim().min(1, 'Reason must be non-empty')
+	);
+
 	const libre311Service = useLibre311Service();
 
-	let email = '';
-	let name = '';
+	let email: FormInputValue<string> = createInput('');
+	let name: FormInputValue<string | undefined> = createInput('');
 	let phone: FormInputValue<string | undefined> = createInput('');
-	let reason = '';
+	let reason: FormInputValue<string> = createInput('');
+	let submitError = '';
+
 	let loading = false;
-	let error = '';
 	let success = false;
 
 	async function submit() {
-		if (!email || !reason) {
-			error = 'Email and Reason are required.';
-			return;
-		}
+		submitError = '';
 
+		email = emailValidator(email);
+		reason = reasonValidator(reason);
 		phone = optionalCoalescePhoneNumberValidator(phone);
-		if (phone.type === 'invalid') return;
+
+		if (email.type === 'invalid' || reason.type === 'invalid' || phone.type === 'invalid') return;
 
 		loading = true;
-		error = '';
 		try {
 			await libre311Service.createRemovalSuggestion({
 				service_request_id: serviceRequestId,
-				email,
-				name,
+				email: email.value,
+				name: name.value,
 				phone: phone.value,
-				reason
+				reason: reason.value
 			});
 			success = true;
 			setTimeout(() => {
@@ -50,7 +59,7 @@
 			}, 1500);
 		} catch (e) {
 			console.error(e);
-			error = 'Failed to submit suggestion.';
+			submitError = 'Failed to submit suggestion.';
 		} finally {
 			loading = false;
 		}
@@ -65,13 +74,29 @@
 	}
 
 	function reset() {
-		email = '';
-		name = '';
-		phone = createInput('');
-		reason = '';
-		error = '';
+		email.value = '';
+		email.error = '';
+		name.value = '';
+		phone.value = '';
+		phone.error = '';
+		reason.value = '';
+		reason.error = '';
+		submitError = '';
 		success = false;
 	}
+
+	let emailRoot: HTMLElement;
+	let reasonRoot: HTMLElement;
+	let phoneRoot: HTMLElement;
+
+	$: if (open) {
+		// when opened clear out input
+		reset();
+	}
+
+	$: setUpAlertRole(email, emailRoot, 'input#suggest-email', 'suggest-email-error');
+	$: setUpAlertRole(reason, reasonRoot, 'textarea#suggest-reason', 'suggest-reason-error');
+	$: setUpAlertRole(phone, phoneRoot, 'input#suggest-phone', 'suggest-phone-error');
 </script>
 
 {#if open}
@@ -84,21 +109,30 @@
 						<div class="p-4 text-green-600">Suggestion submitted successfully!</div>
 					{:else}
 						<div class="flex flex-col gap-4 p-2">
-							{#if error}
-								<p class="mb-2 text-red-500">{error}</p>
+							{#if submitError}
+								<p class="mb-2 text-red-500" role="alert">{submitError}</p>
 							{/if}
-							<div class="mb-2">
-								<Input bind:value={email} type="email" placeholder="your@email.com">
+							<div bind:this={emailRoot} class="mb-2">
+								<Input
+									name="suggest-email"
+									error={email.error}
+									bind:value={email.value}
+									type="email"
+									placeholder="your@email.com"
+								>
 									<Input.Label slot="label">Email *</Input.Label>
 								</Input>
 							</div>
 							<div class="mb-2">
-								<Input bind:value={name} placeholder="Your Name">
+								<Input bind:value={name.value} placeholder="Your Name">
 									<Input.Label slot="label">Name</Input.Label>
 								</Input>
 							</div>
-							<div class="mb-2">
+							<div bind:this={phoneRoot} class="mb-2">
 								<Input
+									name="suggest-phone"
+									inputmode="tel"
+									autocomplete="on"
 									bind:value={phone.value}
 									placeholder={messages.contact.phone.placeholder}
 									error={phone.error}
@@ -107,10 +141,11 @@
 									<Input.Label slot="label">Phone</Input.Label>
 								</Input>
 							</div>
-							<div class="mb-2">
+							<div bind:this={reasonRoot} class="mb-2">
 								<TextArea
-									bind:value={reason}
-									name="reason"
+									name="suggest-reason"
+									bind:value={reason.value}
+									error={reason.error}
 									placeholder="Why should this be removed?"
 								>
 									<TextArea.Label slot="label">Reason *</TextArea.Label>
