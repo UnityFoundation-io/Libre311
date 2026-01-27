@@ -1,4 +1,9 @@
 micronaut:
+  object-storage:
+    local:
+      default:
+        enabled: true
+        path: image-store
   http:
     services:
       auth:
@@ -47,6 +52,9 @@ javamail:
 app:
   service-id: ${LIBRE311_SERVICE_ID:1}
   base-url: ${APP_BASE_URL:http://localhost:3000}
+  image-storage:
+    bucket: images
+    bucket-url-format: http://localhost:7000/%s/
 
 unity:
   auth:
@@ -66,3 +74,6 @@ flyway:
       locations:
         - classpath:db/migration
         - classpath:local
+logger:
+  levels:
+    app: DEBUG
