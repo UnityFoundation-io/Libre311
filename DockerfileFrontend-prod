@@ -1,5 +1,5 @@
 # Build the frontend and serve with nginx
-FROM node:18
+FROM node:24
 
 COPY frontend frontend
 WORKDIR frontend
