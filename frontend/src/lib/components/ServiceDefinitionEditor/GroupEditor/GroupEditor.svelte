@@ -47,9 +47,11 @@
 		dispatch('dirty', { isDirty });
 	}
 
-	// Reset when group changes
-	$: if (group) {
+	// Reset when group changes (but only if it's a different group)
+	let lastGroupId = group.id;
+	$: if (group && group.id !== lastGroupId) {
 		editedName = group.name;
+		lastGroupId = group.id;
 	}
 
 	function handleSave() {
@@ -59,6 +61,14 @@
 
 	function handleCancel() {
 		editedName = group.name;
+	}
+
+	/**
+	 * Reset the form to saved values (called after successful save)
+	 */
+	export function resetToSaved(savedGroup: Group) {
+		editedName = savedGroup.name;
+		lastGroupId = savedGroup.id;
 	}
 
 	function handleDelete() {
