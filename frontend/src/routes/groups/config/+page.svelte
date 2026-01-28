@@ -66,6 +66,8 @@
 
 	// Ref to AttributeCardList for resetting after save
 	let attributeCardListRef: AttributeCardList;
+	let groupEditorRef: GroupEditor;
+	let serviceHeaderCardRef: ServiceHeaderCard;
 
 	// Unsaved changes modal
 	let showUnsavedModal = false;
@@ -225,6 +227,11 @@
 					s.service_code === updated.service_code ? { ...s, ...updated } : s
 				)
 			}));
+
+			await tick();
+			if (serviceHeaderCardRef) {
+				serviceHeaderCardRef.resetToSaved(updated);
+			}
 
 			isHeaderDirty = false;
 		} catch (err) {
@@ -489,6 +496,12 @@
 			// Update local state
 			selectedGroup = { ...selectedGroup, ...updated };
 			groups = groups.map((g) => (g.id === updated.id ? { ...g, name: updated.name } : g));
+
+			await tick();
+			if (groupEditorRef) {
+				groupEditorRef.resetToSaved(updated);
+			}
+
 			isGroupDirty = false;
 		} catch (err) {
 			console.error('Failed to save group:', err);
@@ -746,6 +759,7 @@
 			<svelte:fragment slot="group-editor">
 				{#if selectedGroup}
 					<GroupEditor
+						bind:this={groupEditorRef}
 						group={selectedGroup}
 						isSaving={isGroupSaving}
 						isDeleting={isGroupDeleting}
@@ -763,6 +777,7 @@
 				{#if selectedService}
 					<!-- Service Header Card -->
 					<ServiceHeaderCard
+						bind:this={serviceHeaderCardRef}
 						service={selectedService}
 						isSaving={isHeaderSaving}
 						on:save={handleHeaderSave}
