@@ -17,6 +17,7 @@
 	import { arrowPath } from '../Svg/outline/arrowPath';
 	import type { CreateServiceRequestUIParams } from './shared';
 	import messages from '$media/messages.json';
+	import { setUpAlertRole } from '$lib/utils/functions';
 
 	export let params: Partial<CreateServiceRequestUIParams>;
 
@@ -55,6 +56,7 @@
 	}
 
 	function issueTypeChange(e: Event) {
+		selectError = '';
 		const target = e.target as HTMLSelectElement;
 		selectedServiceCode = Number(target.value);
 		if (serviceList.type == 'success') {
@@ -62,27 +64,36 @@
 			dispatch('serviceSelected', selectedService);
 		}
 	}
+
+	let selectRoot: HTMLElement;
+
+	export let selectError = '';
+
+	$: setUpAlertRole(selectError, selectRoot, 'input#select-1', 'select-1-error');
 </script>
 
 {#if serviceList.type === 'success'}
 	{@const selectOptions = createSelectOptions(serviceList.value)}
-	<Select
-		name="select-1"
-		placeholder={messages['serviceRequest']['request_type']}
-		on:change={issueTypeChange}
-		options={selectOptions}
-		class="relative my-4"
-	>
-		<Select.Label slot="label">
-			<strong class="text-base">{messages['serviceRequest']['request_type']}:</strong>
-		</Select.Label>
+	<div bind:this={selectRoot}>
+		<Select
+			error={selectError}
+			name="select-1"
+			placeholder={messages['serviceRequest']['request_type']}
+			on:change={issueTypeChange}
+			options={selectOptions}
+			class="relative my-4"
+		>
+			<Select.Label slot="label">
+				<strong class="text-base">{messages['serviceRequest']['request_type']}:</strong>
+			</Select.Label>
 
-		<Select.Options slot="options">
-			{#each selectOptions as option}
-				<Select.Options.Option {option} />
-			{/each}
-		</Select.Options>
-	</Select>
+			<Select.Options slot="options">
+				{#each selectOptions as option}
+					<Select.Options.Option {option} />
+				{/each}
+			</Select.Options>
+		</Select>
+	</div>
 {:else if serviceList.type === 'inProgress'}
 	<Select
 		disabled

@@ -1,7 +1,7 @@
 <script lang="ts" context="module"></script>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import { asAsyncSuccess, type AsyncResult } from '$lib/services/http';
 	import { TextArea } from 'stwui';
@@ -55,55 +55,68 @@
 	}
 
 	function validate() {
-		const errMsg = 'This value is required';
-		if (!asyncAttributeInputMap || asyncAttributeInputMap.type !== 'success') return;
+		requestSelectError = ''; // Reset and tick() to repeat error if needed
 
-		let hasError = false;
-		for (const input of asyncAttributeInputMap.value.values()) {
-			if (input.attribute.required) {
-				switch (input.datatype) {
-					case 'multivaluelist':
-					case 'string':
-					case 'text':
-						if (input.value && input.value.length > 0) input.error = '';
-						else {
-							hasError = true;
-							input.error = errMsg;
-						}
-						break;
-					case 'datetime':
-					case 'singlevaluelist':
-					case 'number':
-						if (input.value) input.error = '';
-						else {
-							hasError = true;
-							input.error = errMsg;
-						}
-						break;
-					default:
-						throw Error('Illegal argument, attribute datatype not supported');
-				}
-			} else {
-				input.error = undefined;
+		tick().then(() => {
+			if (!asyncAttributeInputMap) {
+				requestSelectError = 'Request Type is required';
+				return;
 			}
-		}
+			if (asyncAttributeInputMap.type !== 'success') {
+				requestSelectError = 'Failed to retrieve Request Types';
+				return;
+			}
 
-		// if no errors, dispatch
-		if (!hasError) {
-			if (!selectedService) throw Error('Service must be selected');
-			const updatedParams = {
-				attributeMap: asyncAttributeInputMap.value,
-				service: selectedService
-			};
-			dispatch('stepChange', updatedParams);
-		} else {
-			asyncAttributeInputMap = asAsyncSuccess(asyncAttributeInputMap.value);
-		}
+			let hasError = false;
+			const errMsg = 'This value is required';
+			for (const input of asyncAttributeInputMap.value.values()) {
+				if (input.attribute.required) {
+					switch (input.datatype) {
+						case 'multivaluelist':
+						case 'string':
+						case 'text':
+							if (input.value && input.value.length > 0) input.error = '';
+							else {
+								hasError = true;
+								input.error = errMsg;
+							}
+							break;
+						case 'datetime':
+						case 'singlevaluelist':
+						case 'number':
+							if (input.value) input.error = '';
+							else {
+								hasError = true;
+								input.error = errMsg;
+							}
+							break;
+						default:
+							throw Error('Illegal argument, attribute datatype not supported');
+					}
+				} else {
+					input.error = undefined;
+				}
+			}
+
+			// if no errors, dispatch
+			if (!hasError) {
+				if (!selectedService) throw Error('Service must be selected');
+				const updatedParams = {
+					attributeMap: asyncAttributeInputMap.value,
+					service: selectedService
+				};
+				dispatch('stepChange', updatedParams);
+			} else {
+				asyncAttributeInputMap = asAsyncSuccess(asyncAttributeInputMap.value);
+			}
+		});
 	}
 
 	function handleServiceSelected(e: ComponentEvents<SelectARequestCategory>['serviceSelected']) {
 		selectedService = e.detail;
 	}
+
+	export let requestSelectError: string = '';
 
 	onMount(() => {
 		if (params.file) {
@@ -125,7 +138,11 @@
 				<img class="rounded-lg" src={imageData} alt="preview" />
 			</div>
 		{/if}
-		<SelectARequestCategory {params} on:serviceSelected={handleServiceSelected} />
+		<SelectARequestCategory
+			selectError={requestSelectError}
+			{params}
+			on:serviceSelected={handleServiceSelected}
+		/>
 		{#if asyncAttributeInputMap?.type == 'success'}
 			<div>
 				{#each asyncAttributeInputMap.value.values() as input}

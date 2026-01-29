@@ -61,18 +61,19 @@ export function toAbbreviatedTimeStamp(timeStamp: Date | string | null | undefin
 }
 
 export function setUpAlertRole(
-	input: { error?: string },
+	input: { error?: string } | string,
 	root: HTMLElement,
 	selector: string,
 	error_id: string
 ) {
-	if (input.error) {
+	const inputError = typeof input === 'string' ? input : input?.error;
+	if (inputError) {
 		// runs whenever error becomes truthy
 		const component = root?.querySelector<HTMLElement>(selector);
 		if (component) {
 			component.setAttribute('aria-describedby', error_id);
 			component.setAttribute('aria-invalid', 'true');
-			component.setAttribute('error', input.error);
+			component.setAttribute('error', inputError);
 
 			(async () => {
 				await tick();
