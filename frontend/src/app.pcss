@@ -89,10 +89,14 @@ a[role='button']:focus-visible {
 
 .stwui-textarea:focus-visible,
 .stwui-input:focus-visible,
-.stwui-select-display:focus-within, /* Need focus-within and !important for dropdowns */
+.stwui-select-display:focus-within,
 input:focus-visible,
 textarea:focus-visible {
 	@apply border-3;
+}
+
+.leaflet-control-geosearch form:focus-within {
+	border: 3px solid hsl(var(--primary));
 }
 
 /* Ensure focus ring is visible on all interactive elements */
