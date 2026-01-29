@@ -28,8 +28,12 @@
 	let originalName = '';
 	let originalDescription = '';
 
-	// Initialize form values when service prop changes
-	$: if (service) {
+	// Track service code to detect actual prop changes
+	let lastServiceCode: number | null = null;
+
+	// Initialize form values when service prop changes (but only if it's a different service)
+	$: if (service && service.service_code !== lastServiceCode) {
+		lastServiceCode = service.service_code;
 		initializeForm(service);
 	}
 
