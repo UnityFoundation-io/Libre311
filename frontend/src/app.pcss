@@ -79,19 +79,24 @@
 	font-weight: bold;
 }
 
-/* WCAG 2.4.7 Focus Visible - Add visible focus indicators for keyboard navigation */
+/* In case the button being shadowed is --primary color */
 .stwui-button:focus-visible,
-button:focus-visible,
 a[role='button']:focus-visible {
-	outline: 2px solid hsl(var(--primary));
-	outline-offset: 2px;
+	box-shadow:
+		0 0 0 1px hsl(var(--primary-content)),
+		0 0 0 4px hsl(var(--primary));
 }
 
-/* Header elements need contrasting focus color (primary background requires primary-content outline) */
-header button:focus-visible,
-header a:focus-visible {
-	outline: 2px solid hsl(var(--primary-content));
-	outline-offset: 2px;
+.stwui-textarea:focus-visible,
+.stwui-input:focus-visible,
+.stwui-select-display:focus-within,
+input:focus-visible,
+textarea:focus-visible {
+	@apply border-3;
+}
+
+.leaflet-control-geosearch form:focus-within {
+	border: 3px solid hsl(var(--primary));
 }
 
 /* Ensure focus ring is visible on all interactive elements */
