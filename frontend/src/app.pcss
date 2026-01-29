@@ -79,11 +79,12 @@
 	font-weight: bold;
 }
 
+/* In case the button being shadowed is --primary color */
 .stwui-button:focus-visible,
 a[role='button']:focus-visible {
 	box-shadow:
-			0 0 0 1px hsl(var(--primary-content)), /* In case the button being shadowed is --primary color */
-			0 0 0 3px hsl(var(--primary)) !important;
+		0 0 0 1px hsl(var(--primary-content)),
+		0 0 0 4px hsl(var(--primary));
 }
 
 .stwui-textarea:focus-visible,
@@ -91,8 +92,7 @@ a[role='button']:focus-visible {
 .stwui-select-display:focus-within, /* Need focus-within and !important for dropdowns */
 input:focus-visible,
 textarea:focus-visible {
-	box-shadow:
-			0 0 0 2px hsl(var(--primary)) !important;
+	@apply border-3;
 }
 
 /* Ensure focus ring is visible on all interactive elements */
