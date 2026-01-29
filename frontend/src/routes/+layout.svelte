@@ -79,7 +79,9 @@
 		</header>
 		<main>
 			<MenuDrawer {open} handleClose={closeDrawer} />
-			<slot />
+			<section id="slot">
+				<slot />
+			</section>
 		</main>
 	</Libre311ContextProvider>
 {:else if contextProviderProps.type == 'inProgress'}
@@ -102,7 +104,16 @@
 		padding: 0 1rem;
 	}
 	main {
+		display: flex;
 		height: calc(100dvh - var(--header-height));
+		width: 100%;
+		overflow-y: auto; /* slot scrolls */
+		overflow-x: hidden; /* defensive */
+	}
+	section#slot {
+		flex: 1 1 auto; /* fill remaining width */
+		width: 100vw; /* ensure full-width fill */
+		min-width: 0; /* CRITICAL: prevents zoom overflow */
 	}
 	h1 {
 		font-size: clamp(1.5rem, -0.875rem + 8.333333vw, 2.5rem);
