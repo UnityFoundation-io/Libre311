@@ -4,7 +4,7 @@
 	import { Button, Input } from 'stwui';
 	import { type FormInputValue } from '$lib/utils/validation';
 	import { fade, draw } from 'svelte/transition';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onMount, tick } from 'svelte';
 	import { dispatchEventFunctionFactory, type EventDispatchTypeMap } from './shared';
 	import { setUpAlertRole } from '$lib/utils/functions';
 
@@ -33,6 +33,13 @@
 
 	$: setUpAlertRole(emailInput, emailRoot, 'input#email-mobile', 'email-mobile-error');
 	$: setUpAlertRole(passwordInput, passwordRoot, 'input#password-mobile', 'password-mobile-error');
+
+	onMount(() => {
+		tick().then(() => {
+			// tick is done because the browser suggest can be misplaced if otherwise.
+			emailRoot.querySelector('input')?.focus();
+		});
+	});
 </script>
 
 <div class="block items-center justify-center">

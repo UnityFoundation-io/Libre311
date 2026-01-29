@@ -3,7 +3,7 @@
 	import { rocketLaunch } from '$lib/components/Svg/outline/rocket-launch.js';
 	import { Button, Card, Input } from 'stwui';
 	import { fade, draw } from 'svelte/transition';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onMount, tick } from 'svelte';
 	import { type FormInputValue } from '$lib/utils/validation';
 	import { dispatchEventFunctionFactory, type EventDispatchTypeMap } from './shared';
 	import { setUpAlertRole } from '$lib/utils/functions';
@@ -38,6 +38,13 @@
 		'input#password-desktop',
 		'password-desktop-error'
 	);
+
+	onMount(() => {
+		tick().then(() => {
+			// tick is done because the browser suggest can be misplaced if otherwise.
+			emailRoot.querySelector('input')?.focus();
+		});
+	});
 </script>
 
 <div class="block h-full">
