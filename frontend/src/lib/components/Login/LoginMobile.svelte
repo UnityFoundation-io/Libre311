@@ -35,7 +35,7 @@
 	$: setUpAlertRole(passwordInput, passwordRoot, 'input#password-mobile', 'password-mobile-error');
 </script>
 
-<div class="flex h-full w-full items-center justify-center">
+<div class="block items-center justify-center">
 	<div class="w-full flex-col">
 		{#if errorMessage}
 			<div class="flex justify-center bg-red-500 p-2 text-white">
