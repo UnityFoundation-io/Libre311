@@ -60,7 +60,7 @@
 		slot="is-desktop"
 		{emailInput}
 		{passwordInput}
-		{errorMessage}
+		bind:errorMessage
 		on:inputChange={handleChange}
 		on:login={login}
 		on:cancel={cancel}
@@ -69,7 +69,7 @@
 		slot="is-mobile-or-tablet"
 		{emailInput}
 		{passwordInput}
-		{errorMessage}
+		bind:errorMessage
 		on:inputChange={handleChange}
 		on:login={login}
 		on:cancel={cancel}
