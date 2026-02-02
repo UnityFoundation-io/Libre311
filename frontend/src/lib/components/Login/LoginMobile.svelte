@@ -26,15 +26,15 @@
 		}
 	}
 
-	function doSubmit() {
+	async function doSubmit() {
 		// Clearing messages and updating the DOM ensure screen readers repeat errors
 		errorMessage = undefined;
 		emailInput.error = undefined;
 		passwordInput.error = undefined;
 
-		tick().then(() => {
-			onSubmit();
-		});
+		await tick();
+
+		onSubmit();
 	}
 
 	// pass svelte checks
