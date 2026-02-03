@@ -66,6 +66,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -444,7 +445,9 @@ public class ServiceRequestService {
                 : ServiceRequestService::convertToDTO;
 
 
-        Page<ServiceRequest> page = getServiceRequestPage(requestDTO, jurisdictionId);
+        Page<ServiceRequest> page = canViewSensitive
+                ? getAdminServiceRequestPage(requestDTO, jurisdictionId)
+                : getUserServiceRequestPage(requestDTO, jurisdictionId);
         Page<ServiceRequestDTO> dtoPage = page.map(mapper);
 
         if (canViewSensitive && !dtoPage.getContent().isEmpty()) {
@@ -460,7 +463,7 @@ public class ServiceRequestService {
         return dtoPage;
     }
 
-    private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+    private Page<ServiceRequest> getAdminServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
         String serviceRequestIds = requestDTO.getId();
         List<Long> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
@@ -481,6 +484,33 @@ public class ServiceRequestService {
         return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, pageable);
     }
 
+    private Page<ServiceRequest> getUserServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+        String serviceRequestIds = requestDTO.getId();
+        List<Long> serviceCodes = requestDTO.getServiceCodes();
+        List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
+        List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
+        Instant startDate = requestDTO.getStartDate();
+        Instant endDate = requestDTO.getEndDate();
+        Pageable pageable = requestDTO.getPageable();
+
+        if(!pageable.isSorted()) {
+            pageable = pageable.order("dateCreated", Sort.Order.Direction.DESC);
+        }
+
+        if (StringUtils.hasText(serviceRequestIds)) {
+            List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
+            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, pageable);
+        }
+
+        // For regular users, enforce a 7-day lookback if no date range specified
+        if (startDate == null && endDate == null) {
+            endDate = Instant.now();
+            startDate = endDate.minus(7, ChronoUnit.DAYS);
+        }
+
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, pageable);
+    }
+
     public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
         return findServiceRequest(serviceRequestId, jurisdictionId)
                 .map(ServiceRequestService::convertToDTO)
@@ -492,8 +522,8 @@ public class ServiceRequestService {
     }
 
     public StreamedFile getAllServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) throws MalformedURLException {
-
-        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(requestDTO, jurisdictionId).stream()
+        // This method is called from admin-only endpoints, so use admin version without time restrictions
+        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getAdminServiceRequests(requestDTO, jurisdictionId).stream()
                 .map(serviceRequest -> {
                     DownloadServiceRequestDTO dto = new DownloadServiceRequestDTO(serviceRequest);
 
@@ -574,7 +604,7 @@ public class ServiceRequestService {
         return new StreamedFile(tmpFile.toURI().toURL()).attach(now + ".csv");
     }
 
-    private List<ServiceRequest> getServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+    private List<ServiceRequest> getAdminServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
         String serviceRequestIds = requestDTO.getId();
         List<Long> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
@@ -593,6 +623,36 @@ public class ServiceRequestService {
         if (StringUtils.hasText(serviceRequestIds)) {
             List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
             return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, sort);
+        }
+
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
+    }
+
+    private List<ServiceRequest> getUserServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+        String serviceRequestIds = requestDTO.getId();
+        List<Long> serviceCodes = requestDTO.getServiceCodes();
+        List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
+        List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
+        Instant startDate = requestDTO.getStartDate();
+        Instant endDate = requestDTO.getEndDate();
+        Pageable pageable = requestDTO.getPageable();
+
+        Sort sort;
+        if(pageable != null && pageable.isSorted()) {
+            sort = pageable.getSort();
+        } else {
+            sort = Sort.of(new Sort.Order("dateCreated", Sort.Order.Direction.DESC, false));
+        }
+
+        if (StringUtils.hasText(serviceRequestIds)) {
+            List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
+            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, sort);
+        }
+
+        // For regular users, enforce a 7-day lookback if no date range specified
+        if (startDate == null && endDate == null) {
+            endDate = Instant.now();
+            startDate = endDate.minus(7, ChronoUnit.DAYS);
         }
 
         return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
