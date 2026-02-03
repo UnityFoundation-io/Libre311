@@ -69,7 +69,7 @@
 
 	export let selectError = '';
 
-	$: setUpAlertRole(selectError, selectRoot, 'input#select-1', 'select-1-error');
+	$: setUpAlertRole(selectError, selectRoot, 'input#select-request-type', 'select-request-type-error');
 </script>
 
 {#if serviceList.type === 'success'}
@@ -77,7 +77,7 @@
 	<div bind:this={selectRoot}>
 		<Select
 			error={selectError}
-			name="select-1"
+			name="select-request-type"
 			placeholder={messages['serviceRequest']['request_type']}
 			on:change={issueTypeChange}
 			options={selectOptions}
@@ -97,7 +97,7 @@
 {:else if serviceList.type === 'inProgress'}
 	<Select
 		disabled
-		name="select-1"
+		name="select-request-type"
 		placeholder="Loading Request Types..."
 		on:change={issueTypeChange}
 		options={[]}
@@ -109,7 +109,7 @@
 {:else}
 	<Select
 		disabled
-		name="select-1"
+		name="select-request-type"
 		placeholder="Failed to Load Request Types"
 		on:change={issueTypeChange}
 		options={[]}
