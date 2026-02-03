@@ -63,7 +63,6 @@
 		if (cppType == 'success') {
 			let contextProviderPropsSuccess =
 				contextProviderProps as AsyncSuccess<Libre311ContextProviderProps>;
-			// Default to shades of gray to show nullness in jurisdiction config
 			let primaryColor =
 				contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig.primary_color;
 			if (primaryColor) {
