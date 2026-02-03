@@ -114,15 +114,16 @@
 				id="service-name"
 				type="text"
 				bind:value={serviceName}
-				class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-				class:border-red-300={!isValid && serviceName !== originalName}
+				class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+				class:border-danger={!isValid && serviceName !== originalName}
+				class:focus:border-danger={!isValid && serviceName !== originalName}
 				placeholder="Enter service name"
 				disabled={isSaving}
 				aria-required="true"
 				aria-invalid={!isValid && serviceName !== originalName}
 			/>
 			{#if !isValid && serviceName !== originalName}
-				<p class="mt-1 text-sm text-red-600">Service name is required</p>
+				<p class="mt-1 text-sm text-danger" role="alert">Service name is required</p>
 			{/if}
 		</div>
 
@@ -135,7 +136,7 @@
 				id="service-description"
 				bind:value={description}
 				rows="3"
-				class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+				class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none"
 				placeholder="Enter a description for this service"
 				disabled={isSaving}
 			></textarea>

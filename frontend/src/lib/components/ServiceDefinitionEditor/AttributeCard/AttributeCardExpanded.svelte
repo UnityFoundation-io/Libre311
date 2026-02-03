@@ -245,6 +245,9 @@
 	</button>
 
 	<div class="p-4">
+		<label for={questionInputId} class="mb-2 block text-sm font-medium text-gray-700">
+			Question and Answer Type
+		</label>
 		<!-- Question Text + Type Selector (same row on desktop, stacked on mobile) -->
 		<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start">
 			<textarea
@@ -253,9 +256,10 @@
 				id={questionInputId}
 				bind:value={description}
 				rows="1"
-				class="w-full min-w-0 flex-none resize-none overflow-hidden rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:flex-1"
-				class:ring-2={description.trim().length === 0 && description !== originalDescription}
-				class:ring-red-300={description.trim().length === 0 && description !== originalDescription}
+				class="w-full min-w-0 flex-none resize-none overflow-hidden rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none sm:flex-1"
+				class:border-danger={description.trim().length === 0 && description !== originalDescription}
+				class:focus:border-danger={description.trim().length === 0 &&
+					description !== originalDescription}
 				placeholder="Question"
 				disabled={isSaving}
 				aria-label="Question text"

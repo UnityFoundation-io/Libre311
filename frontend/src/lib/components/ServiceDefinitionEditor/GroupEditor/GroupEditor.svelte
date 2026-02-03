@@ -113,9 +113,14 @@
 					type="text"
 					bind:value={editedName}
 					on:keydown={handleKeydown}
-					class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none"
+					class:border-danger={!editedName.trim()}
+					class:focus:border-danger={!editedName.trim()}
 					placeholder="Enter group name"
 				/>
+				{#if !editedName.trim()}
+					<p class="mt-1 text-sm text-danger" role="alert">Group name is required</p>
+				{/if}
 			</div>
 
 			<!-- Action Buttons -->

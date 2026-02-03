@@ -148,9 +148,13 @@
 			type="button"
 			class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
 			on:click={handleToggle}
-			on:keydown={(e) => e.key === 'Enter' && handleToggle(e)}
+			on:keydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					handleToggle(e);
+				}
+			}}
 			aria-label={isExpanded ? 'Collapse group' : 'Expand group'}
-			tabindex="-1"
 		>
 			<svg
 				class="h-4 w-4 transition-transform {isExpanded ? 'rotate-90' : ''}"
