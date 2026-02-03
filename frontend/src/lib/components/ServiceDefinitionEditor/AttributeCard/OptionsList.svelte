@@ -107,7 +107,9 @@
 					value={option.name}
 					on:input={(e) => handleValueChange(index, e.currentTarget.value)}
 					on:keydown={(e) => handleKeydown(e, index)}
-					class="flex-1 bg-transparent py-1 text-base text-gray-900 placeholder-gray-400 focus:outline-none disabled:text-gray-500"
+					class="flex-1 bg-transparent py-1 text-base text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none disabled:text-gray-500"
+					class:border-danger={!option.name.trim()}
+					class:focus:border-danger={!option.name.trim()}
 					placeholder="Option text"
 					{disabled}
 					aria-label="Option {index + 1}"
@@ -116,7 +118,7 @@
 				<!-- Delete button (X) -->
 				<button
 					type="button"
-					class="rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:cursor-not-allowed disabled:opacity-30"
+					class="rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-danger disabled:cursor-not-allowed disabled:opacity-30"
 					on:click={() => handleDeleteOption(index)}
 					disabled={disabled || values.length <= 1}
 					aria-label="Delete option {index + 1}"

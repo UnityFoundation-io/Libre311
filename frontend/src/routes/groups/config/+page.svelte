@@ -285,6 +285,19 @@
 
 		const { code, data } = event.detail;
 
+		if (data.datatype === 'singlevaluelist' || data.datatype === 'multivaluelist') {
+			if (!data.values) {
+				showSaveError(`No values provided for attribute, '${data.description}'`);
+				return;
+			}
+			for (const value of Object.values(data.values)) {
+				if (!value.name || value.name.trim().length == 0) {
+					showSaveError(`Empty value provided for attribute, '${data.description}'`);
+					return;
+				}
+			}
+		}
+
 		savingAttributes = updateDirtySet(savingAttributes, code, true);
 		try {
 			await libre311.editAttribute({

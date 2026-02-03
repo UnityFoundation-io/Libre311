@@ -118,7 +118,7 @@
 			{/if}
 
 			<!-- Message -->
-			<span class="text-sm font-medium">{message}</span>
+			<span class="text-sm font-medium" role="alert">{message}</span>
 
 			<!-- Actions -->
 			{#if isError}
