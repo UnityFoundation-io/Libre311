@@ -69,7 +69,12 @@
 
 	export let selectError = '';
 
-	$: setUpAlertRole(selectError, selectRoot, 'input#select-request-type', 'select-request-type-error');
+	$: setUpAlertRole(
+		selectError,
+		selectRoot,
+		'input#select-request-type',
+		'select-request-type-error'
+	);
 </script>
 
 {#if serviceList.type === 'success'}
