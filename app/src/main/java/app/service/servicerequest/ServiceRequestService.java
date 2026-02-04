@@ -21,6 +21,8 @@ import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.*;
 import app.model.service.AttributeDataType;
 import app.exception.Libre311BaseException;
+import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.servicedefinition.AttributeValue;
@@ -92,6 +94,7 @@ public class ServiceRequestService {
     private final ServiceRequestRemovalSuggestionRepository removalSuggestionRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceDefinitionAttributeRepository attributeRepository;
+    private final JurisdictionRepository jurisdictionRepository;
     private final ReCaptchaService reCaptchaService;
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
@@ -102,6 +105,7 @@ public class ServiceRequestService {
         ServiceRequestRemovalSuggestionRepository removalSuggestionRepository,
         ServiceRepository serviceRepository,
         ServiceDefinitionAttributeRepository attributeRepository,
+        JurisdictionRepository jurisdictionRepository,
         ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
         UnityAuthService unityAuthService,
         JurisdictionBoundaryService jurisdictionBoundaryService,
@@ -110,6 +114,7 @@ public class ServiceRequestService {
         this.removalSuggestionRepository = removalSuggestionRepository;
         this.serviceRepository = serviceRepository;
         this.attributeRepository = attributeRepository;
+        this.jurisdictionRepository = jurisdictionRepository;
         this.reCaptchaService = reCaptchaService;
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
@@ -444,10 +449,13 @@ public class ServiceRequestService {
                 ? ServiceRequestService::convertToSensitiveDTO
                 : ServiceRequestService::convertToDTO;
 
+        // Get the visibility days from jurisdiction config
+        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+        int closedRequestDaysVisible = canViewSensitive
+                ? jurisdiction.getClosedRequestDaysVisibleAdmin()
+                : jurisdiction.getClosedRequestDaysVisibleUser();
 
-        Page<ServiceRequest> page = canViewSensitive
-                ? getAdminServiceRequestPage(requestDTO, jurisdictionId)
-                : getUserServiceRequestPage(requestDTO, jurisdictionId);
+        Page<ServiceRequest> page = getServiceRequestPage(requestDTO, jurisdictionId, closedRequestDaysVisible);
         Page<ServiceRequestDTO> dtoPage = page.map(mapper);
 
         if (canViewSensitive && !dtoPage.getContent().isEmpty()) {
@@ -463,7 +471,7 @@ public class ServiceRequestService {
         return dtoPage;
     }
 
-    private Page<ServiceRequest> getAdminServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+    private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId, int closedRequestDaysVisible) {
         String serviceRequestIds = requestDTO.getId();
         List<Long> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
@@ -481,34 +489,10 @@ public class ServiceRequestService {
             return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, pageable);
         }
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, pageable);
-    }
+        // Calculate the cutoff date for closed requests visibility
+        Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
 
-    private Page<ServiceRequest> getUserServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
-        String serviceRequestIds = requestDTO.getId();
-        List<Long> serviceCodes = requestDTO.getServiceCodes();
-        List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
-        List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
-        Instant startDate = requestDTO.getStartDate();
-        Instant endDate = requestDTO.getEndDate();
-        Pageable pageable = requestDTO.getPageable();
-
-        if(!pageable.isSorted()) {
-            pageable = pageable.order("dateCreated", Sort.Order.Direction.DESC);
-        }
-
-        if (StringUtils.hasText(serviceRequestIds)) {
-            List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
-            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, pageable);
-        }
-
-        // For regular users, enforce a 7-day lookback if no date range specified
-        if (startDate == null && endDate == null) {
-            endDate = Instant.now();
-            startDate = endDate.minus(7, ChronoUnit.DAYS);
-        }
-
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, pageable);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, pageable);
     }
 
     public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
@@ -522,8 +506,11 @@ public class ServiceRequestService {
     }
 
     public StreamedFile getAllServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) throws MalformedURLException {
-        // This method is called from admin-only endpoints, so use admin version without time restrictions
-        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getAdminServiceRequests(requestDTO, jurisdictionId).stream()
+        // This method is called from admin-only endpoints, use admin visibility days
+        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+        int closedRequestDaysVisible = jurisdiction.getClosedRequestDaysVisibleAdmin();
+
+        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(requestDTO, jurisdictionId, closedRequestDaysVisible).stream()
                 .map(serviceRequest -> {
                     DownloadServiceRequestDTO dto = new DownloadServiceRequestDTO(serviceRequest);
 
@@ -604,7 +591,7 @@ public class ServiceRequestService {
         return new StreamedFile(tmpFile.toURI().toURL()).attach(now + ".csv");
     }
 
-    private List<ServiceRequest> getAdminServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+    private List<ServiceRequest> getServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId, int closedRequestDaysVisible) {
         String serviceRequestIds = requestDTO.getId();
         List<Long> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
@@ -625,37 +612,10 @@ public class ServiceRequestService {
             return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, sort);
         }
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
-    }
+        // Calculate the cutoff date for closed requests visibility
+        Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
 
-    private List<ServiceRequest> getUserServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
-        String serviceRequestIds = requestDTO.getId();
-        List<Long> serviceCodes = requestDTO.getServiceCodes();
-        List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
-        List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
-        Instant startDate = requestDTO.getStartDate();
-        Instant endDate = requestDTO.getEndDate();
-        Pageable pageable = requestDTO.getPageable();
-
-        Sort sort;
-        if(pageable != null && pageable.isSorted()) {
-            sort = pageable.getSort();
-        } else {
-            sort = Sort.of(new Sort.Order("dateCreated", Sort.Order.Direction.DESC, false));
-        }
-
-        if (StringUtils.hasText(serviceRequestIds)) {
-            List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
-            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, sort);
-        }
-
-        // For regular users, enforce a 7-day lookback if no date range specified
-        if (startDate == null && endDate == null) {
-            endDate = Instant.now();
-            startDate = endDate.minus(7, ChronoUnit.DAYS);
-        }
-
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, sort);
     }
 
     public int delete(Long serviceRequestId, String jurisdictionId) {
