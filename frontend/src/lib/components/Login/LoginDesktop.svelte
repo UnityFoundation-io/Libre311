@@ -16,10 +16,6 @@
 
 	let visible = false;
 
-	onMount(() => {
-		visible = true;
-	});
-
 	const { onChange, onSubmit, onCancel } = dispatchEventFunctionFactory(dispatch);
 
 	// pass svelte checks
@@ -31,6 +27,25 @@
 	let emailRoot: HTMLElement;
 	let passwordRoot: HTMLElement;
 
+	function passwordEntered(e: CustomEvent<KeyboardEvent>) {
+		const ke = e as unknown as KeyboardEvent;
+		if (ke.key === 'Enter') {
+			ke.preventDefault();
+			doSubmit();
+		}
+	}
+
+	async function doSubmit() {
+		// Clearing messages and updating the DOM ensure screen readers repeat errors
+		errorMessage = undefined;
+		emailInput.error = undefined;
+		passwordInput.error = undefined;
+
+		await tick();
+
+		onSubmit();
+	}
+
 	$: setUpAlertRole(emailInput, emailRoot, 'input#email-desktop', 'email-desktop-error');
 	$: setUpAlertRole(
 		passwordInput,
@@ -40,9 +55,27 @@
 	);
 
 	onMount(() => {
+		visible = true;
+
 		tick().then(() => {
 			// tick is done because the browser suggest can be misplaced if otherwise.
 			emailRoot.querySelector('input')?.focus();
+
+			const toggle = passwordRoot.querySelector(
+				'.stwui-input-password-toggle-wrapper'
+			) as HTMLElement | null;
+			if (toggle) {
+				toggle.setAttribute('tabindex', '0');
+				toggle.setAttribute('role', 'button');
+				toggle.setAttribute('aria-label', 'Toggle password visibility');
+
+				toggle.addEventListener('keydown', (e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						toggle.click();
+					}
+				});
+			}
 		});
 	});
 </script>
@@ -54,7 +87,7 @@
 	>
 		<Card class="sm:w-1/3">
 			{#if errorMessage}
-				<div class="flex justify-center rounded-t-md bg-red-500 p-2 text-white">
+				<div role="alert" class="flex justify-center rounded-t-md bg-red-500 p-2 text-white">
 					<span>{errorMessage}</span>
 				</div>
 			{/if}
@@ -113,6 +146,7 @@
 					error={passwordInput.error}
 					value={passwordInput.value}
 					autocomplete={passwordAutocomplete}
+					on:keydown={passwordEntered}
 					on:change={(e) => onChange(e, 'password')}
 				>
 					<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
@@ -120,7 +154,7 @@
 			</div>
 
 			<div class="m-4 flex gap-2">
-				<Button type="primary" on:click={onSubmit}>
+				<Button type="primary" on:click={doSubmit}>
 					{messages['login']['submit']}
 				</Button>
 				<Button type="default" on:click={onCancel}>

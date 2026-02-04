@@ -16,11 +16,26 @@
 
 	let visible = false;
 
-	onMount(() => {
-		visible = true;
-	});
-
 	const { onChange, onSubmit, onCancel } = dispatchEventFunctionFactory(dispatch);
+
+	function passwordEntered(e: CustomEvent<KeyboardEvent>) {
+		const ke = e as unknown as KeyboardEvent;
+		if (ke.key === 'Enter') {
+			ke.preventDefault();
+			doSubmit();
+		}
+	}
+
+	async function doSubmit() {
+		// Clearing messages and updating the DOM ensure screen readers repeat errors
+		errorMessage = undefined;
+		emailInput.error = undefined;
+		passwordInput.error = undefined;
+
+		await tick();
+
+		onSubmit();
+	}
 
 	// pass svelte checks
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,9 +50,27 @@
 	$: setUpAlertRole(passwordInput, passwordRoot, 'input#password-mobile', 'password-mobile-error');
 
 	onMount(() => {
+		visible = true;
+
 		tick().then(() => {
 			// tick is done because the browser suggest can be misplaced if otherwise.
 			emailRoot.querySelector('input')?.focus();
+
+			const toggle = passwordRoot.querySelector(
+				'.stwui-input-password-toggle-wrapper'
+			) as HTMLElement | null;
+			if (toggle) {
+				toggle.setAttribute('tabindex', '0');
+				toggle.setAttribute('role', 'button');
+				toggle.setAttribute('aria-label', 'Toggle password visibility');
+
+				toggle.addEventListener('keydown', (e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						toggle.click();
+					}
+				});
+			}
 		});
 	});
 </script>
@@ -45,7 +78,7 @@
 <div class="block items-center justify-center">
 	<div class="w-full flex-col">
 		{#if errorMessage}
-			<div class="flex justify-center bg-red-500 p-2 text-white">
+			<div role="alert" class="flex justify-center bg-red-500 p-2 text-white">
 				<span>{errorMessage}</span>
 			</div>
 		{/if}
@@ -104,6 +137,7 @@
 				error={passwordInput.error}
 				value={passwordInput.value}
 				autocomplete={passwordAutocomplete}
+				on:keydown={passwordEntered}
 				on:change={(e) => onChange(e, 'password')}
 			>
 				<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
@@ -111,7 +145,7 @@
 		</div>
 
 		<div class="m-4 flex gap-2">
-			<Button type="primary" on:click={onSubmit}>
+			<Button type="primary" on:click={doSubmit}>
 				{messages['login']['submit']}
 			</Button>
 			<Button type="default" on:click={onCancel}>
