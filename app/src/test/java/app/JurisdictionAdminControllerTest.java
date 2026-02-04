@@ -22,12 +22,7 @@ import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static io.micronaut.http.HttpStatus.NOT_FOUND;
 import static io.micronaut.http.HttpStatus.OK;
 import static io.micronaut.http.HttpStatus.UNAUTHORIZED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import app.dto.group.CreateUpdateGroupDTO;
 import app.dto.group.GroupDTO;
@@ -691,6 +686,22 @@ public class JurisdictionAdminControllerTest  {
         updatedServiceRequestDTO = bodyOptional.get();
         assertNotNull(updatedServiceRequestDTO.getClosedDate());
         assertNotNull(updatedServiceRequestDTO.getExpectedDate());
+
+        // clear expected datetime. Need actual JSON for this
+        request = HttpRequest
+                .PATCH("/jurisdiction-admin/requests/" + postResponseServiceRequestDTO.getId()
+                                + "?jurisdiction_id=fakecity.gov", """
+                                { "expected_datetime": null }
+                                """)
+                .header("Authorization", "Bearer token.text.here");
+
+        response = client.toBlocking().exchange(request, SensitiveServiceRequestDTO.class);
+        assertEquals(HttpStatus.OK, response.status());
+        bodyOptional = response.getBody(SensitiveServiceRequestDTO.class);
+        assertTrue(bodyOptional.isPresent());
+        updatedServiceRequestDTO = bodyOptional.get();
+        assertNotNull(updatedServiceRequestDTO.getClosedDate());
+        assertNull(updatedServiceRequestDTO.getExpectedDate());
     }
 
     @Test

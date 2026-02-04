@@ -8,10 +8,10 @@
 		type ServiceRequestStatus,
 		ServiceRequestStatusSchema
 	} from '$lib/services/Libre311/Libre311';
-	import { calendarIcon } from './Svg/outline/calendarIcon';
 
 	import {
 		createInput,
+		inputValidatorFactory,
 		optionalCoalesceEmailValidator,
 		optionalCoalesceStringValidator,
 		optionalPriorityValidator,
@@ -28,6 +28,7 @@
 		serviceRequestStatusSelectOptions,
 		setUpAlertRole
 	} from '$lib/utils/functions';
+	import { z } from 'zod';
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
@@ -38,8 +39,8 @@
 
 	let statusInput = createInput<ServiceRequestStatus>(serviceRequest.status);
 	let priorityInput = createInput<ServiceRequestPriority | undefined>(serviceRequest.priority);
-	let expectedDateInput = createInput<Date | undefined>(
-		serviceRequest.expected_datetime ? new Date(serviceRequest.expected_datetime) : undefined
+	let expectedDateInput = createInput<string | undefined>(
+		serviceRequest.expected_datetime?.slice(0, 10)
 	);
 	let agencyNameInput = createInput<string | undefined>(serviceRequest.agency_responsible);
 	let agencyEmailInput = createInput<string | undefined>(serviceRequest.agency_email);
@@ -55,10 +56,8 @@
 		userChangedText(serviceNoticeInput.value, serviceRequest.service_notice) ||
 		userChangedText(statusNotesInput.value, serviceRequest.status_notes);
 
-	function userChangedDate(expectedDateInputValue: Date | undefined) {
-		const currentDate = serviceRequest.expected_datetime;
-		const expectedDate = expectedDateInputValue?.toISOString().replace(/\.\d+/g, '');
-		return currentDate != expectedDate;
+	function userChangedDate(expectedDateInputValue: String | undefined) {
+		return serviceRequest.expected_datetime != expectedDateInputValue;
 	}
 
 	function userChangedText(expectedText: string | undefined, currentText: string | undefined) {
@@ -79,7 +78,18 @@
 		priorityInput.value = ServiceRequestPrioritySchema.parse(target.value);
 	}
 
+	export const dateValidator = inputValidatorFactory(
+		z.union([
+			z.literal(''),
+			z
+				.string()
+				.regex(/^\d{4}-\d{2}-\d{2}$/)
+				.optional()
+		])
+	);
+
 	async function updateServiceRequest(s: ServiceRequest) {
+		expectedDateInput = dateValidator(expectedDateInput);
 		statusInput = statusValidator(statusInput);
 		priorityInput = optionalPriorityValidator(priorityInput);
 		agencyNameInput = optionalCoalesceStringValidator(agencyNameInput);
@@ -87,19 +97,25 @@
 		serviceNoticeInput = optionalCoalesceStringValidator(serviceNoticeInput);
 		statusNotesInput = optionalCoalesceStringValidator(statusNotesInput);
 
+		if (expectedDateInput.type == 'invalid') return;
 		if (statusInput.type == 'invalid') return;
 		if (priorityInput.type == 'invalid') return;
-		if (expectedDateInput.type == 'invalid') return;
 		if (agencyNameInput.type == 'invalid') return;
 		if (agencyEmailInput.type == 'invalid') return;
 		if (serviceNoticeInput.type == 'invalid') return;
 		if (statusNotesInput.type == 'invalid') return;
 
+		let localDateString: string | null = null; // Null will clear in the backend
+		if (expectedDateInput.value) {
+			const [y, m, d] = expectedDateInput.value.split('-').map(Number);
+			localDateString = new Date(y, m - 1, d).toISOString();
+		}
+
 		const sensitiveServiceRequest: UpdateSensitiveServiceRequestRequest = {
 			...s,
 			status: statusInput.value,
 			priority: priorityInput.value,
-			expected_datetime: expectedDateInput.value?.toISOString(),
+			expected_datetime: localDateString,
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,
 			service_notice: serviceNoticeInput.value,
@@ -116,114 +132,129 @@
 
 <form>
 	<!-- UPDATE EXPECTED TIMESTAMP -->
-	<DatePicker name="datetime" bind:value={expectedDateInput.value}>
-		<DatePicker.Label slot="label">
-			<strong class="text-base">
-				{messages['serviceRequest']['expected_datetime']}
-			</strong>
-		</DatePicker.Label>
-		<DatePicker.Leading slot="leading" data={calendarIcon} />
-	</DatePicker>
-
-	<!-- UPDATE STATUS -->
 	<div class="mb-1">
-		<Select
-			name="select-status"
-			placeholder={serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1)}
-			options={serviceRequestStatusSelectOptions}
-			on:change={updateStatus}
-		>
-			<Select.Label slot="label">
-				<strong class="text-base">{messages['serviceRequest']['status']}</strong>
-			</Select.Label>
-			<Select.Options slot="options">
-				{#each serviceRequestStatusSelectOptions as option}
-					<Select.Options.Option {option} />
-				{/each}
-			</Select.Options>
-		</Select>
-	</div>
+		<label class="block py-2 text-sm font-medium">
+			<strong class="text-base">{messages['serviceRequest']['expected_datetime']}</strong>
+			<div class="mt-1 flex gap-2">
+				<input
+					type="date"
+					name="expected-completion"
+					bind:value={expectedDateInput.value}
+					class="block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none"
+				/>
+				<button
+					type="button"
+					class="stwui-button m-2 focus:outline-none"
+					on:click={() => (expectedDateInput.value = '')}>Clear</button
+				>
+			</div>
+		</label>
+		{#if expectedDateInput.error}
+			<p id="expected-completion-error" class="mt-1 text-sm text-danger">
+				{expectedDateInput.error}
+			</p>
+		{/if}
 
-	<!-- UPDATE PRIORITY -->
-	<div class="mb-1">
-		<Select
-			name="select-priority"
-			placeholder={serviceRequest.priority
-				? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
-				: '--'}
-			options={serviceRequestPrioritySelectOptions}
-			on:change={updatePriority}
-		>
-			<Select.Label slot="label">
-				<strong class="text-base">
-					{messages['serviceRequest']['priority']}
-				</strong>
-			</Select.Label>
-			<Select.Options slot="options">
-				{#each serviceRequestPrioritySelectOptions as option}
-					<Select.Options.Option {option} />
-				{/each}
-			</Select.Options>
-		</Select>
-	</div>
+		<!-- UPDATE STATUS -->
+		<div class="mb-1">
+			<Select
+				name="select-status"
+				placeholder={serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1)}
+				options={serviceRequestStatusSelectOptions}
+				on:change={updateStatus}
+			>
+				<Select.Label slot="label">
+					<strong class="text-base">{messages['serviceRequest']['status']}</strong>
+				</Select.Label>
+				<Select.Options slot="options">
+					{#each serviceRequestStatusSelectOptions as option}
+						<Select.Options.Option {option} />
+					{/each}
+				</Select.Options>
+			</Select>
+		</div>
 
-	<!-- UPDATE AGENCY -->
-	<div bind:this={agencyRoot} class="mb-1">
-		<Input
-			type="text"
-			name="firstName"
-			placeholder={messages['serviceRequest']['agency_name']}
-			error={agencyNameInput.error}
-			bind:value={agencyNameInput.value}
-		>
-			<Input.Label slot="label">
-				<strong class="text-base">
-					{messages['serviceRequest']['agency_contact']}
-				</strong>
-			</Input.Label>
-			<Input.Leading slot="leading" data={user} />
-		</Input>
+		<!-- UPDATE PRIORITY -->
+		<div class="mb-1">
+			<Select
+				name="select-priority"
+				placeholder={serviceRequest.priority
+					? `${serviceRequest.priority.charAt(0).toUpperCase()}${serviceRequest.priority.slice(1)}`
+					: '--'}
+				options={serviceRequestPrioritySelectOptions}
+				on:change={updatePriority}
+			>
+				<Select.Label slot="label">
+					<strong class="text-base">
+						{messages['serviceRequest']['priority']}
+					</strong>
+				</Select.Label>
+				<Select.Options slot="options">
+					{#each serviceRequestPrioritySelectOptions as option}
+						<Select.Options.Option {option} />
+					{/each}
+				</Select.Options>
+			</Select>
+		</div>
 
-		<Input
-			name="email"
-			type="email"
-			placeholder={messages['contact']['email']['placeholder']}
-			error={agencyEmailInput.error}
-			bind:value={agencyEmailInput.value}
-		>
-			<Input.Label slot="label">
-				<strong class="text-base">
-					{messages['serviceRequest']['agency_contact_email']}
-				</strong>
-			</Input.Label>
-			<Input.Leading slot="leading" data={mailIcon} />
-		</Input>
-	</div>
+		<!-- UPDATE AGENCY -->
+		<div bind:this={agencyRoot} class="mb-1">
+			<Input
+				type="text"
+				name="firstName"
+				placeholder={messages['serviceRequest']['agency_name']}
+				error={agencyNameInput.error}
+				bind:value={agencyNameInput.value}
+			>
+				<Input.Label slot="label">
+					<strong class="text-base">
+						{messages['serviceRequest']['agency_contact']}
+					</strong>
+				</Input.Label>
+				<Input.Leading slot="leading" data={user} />
+			</Input>
 
-	<!-- UPDATE SERVICE NOTICE -->
-	<div class="mb-1">
-		<Input
-			type="text"
-			name="firstName"
-			placeholder={messages['serviceRequest']['service_notice_placeholder']}
-			bind:value={serviceNoticeInput.value}
-		>
-			<Input.Label slot="label">
-				<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
-			</Input.Label>
-			<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
-		</Input>
-	</div>
+			<Input
+				name="email"
+				type="email"
+				placeholder={messages['contact']['email']['placeholder']}
+				error={agencyEmailInput.error}
+				bind:value={agencyEmailInput.value}
+			>
+				<Input.Label slot="label">
+					<strong class="text-base">
+						{messages['serviceRequest']['agency_contact_email']}
+					</strong>
+				</Input.Label>
+				<Input.Leading slot="leading" data={mailIcon} />
+			</Input>
+		</div>
 
-	<!-- UPDATE STATUS NOTES -->
-	<div class="mb-1 flex flex-col">
-		<strong class="text-base">{messages['serviceRequest']['status_notes']}</strong>
-		<TextArea
-			bind:value={statusNotesInput.value}
-			name="comments"
-			placeholder="notes"
-			class="relative"
-		/>
+		<!-- UPDATE SERVICE NOTICE -->
+		<div class="mb-1">
+			<Input
+				type="text"
+				name="firstName"
+				placeholder={messages['serviceRequest']['service_notice_placeholder']}
+				bind:value={serviceNoticeInput.value}
+			>
+				<Input.Label slot="label">
+					<strong class="text-base">{messages['serviceRequest']['service_notice']}</strong>
+				</Input.Label>
+				<Input.Leading slot="leading" data={wrenchScrewDriverIcon} />
+			</Input>
+		</div>
+
+		<!-- UPDATE STATUS NOTES -->
+		<div class="mb-1 flex flex-col">
+			<strong class="text-base">{messages['serviceRequest']['status_notes']}</strong>
+			<TextArea
+				bind:value={statusNotesInput.value}
+				name="comments"
+				placeholder="notes"
+				class="relative"
+			/>
+		</div>
 	</div>
 </form>
 
