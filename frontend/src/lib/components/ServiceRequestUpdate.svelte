@@ -1,6 +1,6 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
-	import { Button, DatePicker, Input, Select, TextArea } from 'stwui';
+	import { Button, Input, Select, TextArea } from 'stwui';
 	import {
 		ServiceRequestPrioritySchema,
 		type ServiceRequest,
