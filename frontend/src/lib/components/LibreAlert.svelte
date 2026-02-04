@@ -36,7 +36,12 @@
 			{description}
 		</Alert.Description>
 
-		<Button on:click={() => dispatch('close')} class="ml-3" slot="extra" type="ghost">Close</Button>
+		<Button
+			on:click={() => dispatch('close')}
+			class="ml-3 whitespace-nowrap"
+			slot="extra"
+			type="ghost">Close</Button
+		>
 	</Alert>
 </div>
 
@@ -48,5 +53,10 @@
 		transform: translate(-50%, -50%);
 		margin: 0 auto;
 		min-width: 15rem;
+		max-width: 100vw;
+
+		/* wrap long words */
+		overflow-wrap: break-word; /* standard */
+		word-break: break-word;
 	}
 </style>
