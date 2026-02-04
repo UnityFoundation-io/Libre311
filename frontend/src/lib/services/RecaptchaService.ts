@@ -46,7 +46,10 @@ export function recaptchaServiceFactory(
 	mode: Mode,
 	props: RecaptchaServiceProps
 ): RecaptchaService {
-	return mode === 'test' ? new MockRecaptchaService() : new RecaptchaServiceImpl(props);
+	if (mode === 'test' || (mode === 'development' && !props.recaptchaKey)) {
+		return new MockRecaptchaService();
+	}
+	return new RecaptchaServiceImpl(props);
 }
 
 export async function loadRecaptchaProps(mode: Mode): Promise<RecaptchaServiceProps> {
@@ -59,8 +62,6 @@ export async function loadRecaptchaProps(mode: Mode): Promise<RecaptchaServicePr
 		if (mode == 'production') {
 			const res = await axios.get<string>('/recaptcha/recaptcha-key');
 			recaptchaKey = res.data;
-		} else if (mode == 'development') {
-			throw new Error('VITE_GOOGLE_RECAPTCHA_KEY env variable must be set');
 		}
 	}
 
