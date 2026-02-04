@@ -21,6 +21,8 @@ import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.dto.servicerequest.*;
 import app.model.service.AttributeDataType;
 import app.exception.Libre311BaseException;
+import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.JurisdictionRepository;
 import app.model.service.Service;
 import app.model.service.ServiceRepository;
 import app.model.servicedefinition.AttributeValue;
@@ -66,6 +68,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -91,6 +94,7 @@ public class ServiceRequestService {
     private final ServiceRequestRemovalSuggestionRepository removalSuggestionRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceDefinitionAttributeRepository attributeRepository;
+    private final JurisdictionRepository jurisdictionRepository;
     private final ReCaptchaService reCaptchaService;
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
@@ -101,6 +105,7 @@ public class ServiceRequestService {
         ServiceRequestRemovalSuggestionRepository removalSuggestionRepository,
         ServiceRepository serviceRepository,
         ServiceDefinitionAttributeRepository attributeRepository,
+        JurisdictionRepository jurisdictionRepository,
         ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
         UnityAuthService unityAuthService,
         JurisdictionBoundaryService jurisdictionBoundaryService,
@@ -109,6 +114,7 @@ public class ServiceRequestService {
         this.removalSuggestionRepository = removalSuggestionRepository;
         this.serviceRepository = serviceRepository;
         this.attributeRepository = attributeRepository;
+        this.jurisdictionRepository = jurisdictionRepository;
         this.reCaptchaService = reCaptchaService;
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
@@ -443,8 +449,13 @@ public class ServiceRequestService {
                 ? ServiceRequestService::convertToSensitiveDTO
                 : ServiceRequestService::convertToDTO;
 
+        // Get the visibility days from jurisdiction config
+        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+        int closedRequestDaysVisible = canViewSensitive
+                ? jurisdiction.getClosedRequestDaysVisibleAdmin()
+                : jurisdiction.getClosedRequestDaysVisibleUser();
 
-        Page<ServiceRequest> page = getServiceRequestPage(requestDTO, jurisdictionId);
+        Page<ServiceRequest> page = getServiceRequestPage(requestDTO, jurisdictionId, closedRequestDaysVisible);
         Page<ServiceRequestDTO> dtoPage = page.map(mapper);
 
         if (canViewSensitive && !dtoPage.getContent().isEmpty()) {
@@ -460,7 +471,7 @@ public class ServiceRequestService {
         return dtoPage;
     }
 
-    private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+    private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId, int closedRequestDaysVisible) {
         String serviceRequestIds = requestDTO.getId();
         List<Long> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
@@ -478,7 +489,10 @@ public class ServiceRequestService {
             return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, pageable);
         }
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, pageable);
+        // Calculate the cutoff date for closed requests visibility
+        Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
+
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, pageable);
     }
 
     public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
@@ -492,8 +506,11 @@ public class ServiceRequestService {
     }
 
     public StreamedFile getAllServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) throws MalformedURLException {
+        // This method is called from admin-only endpoints, use admin visibility days
+        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+        int closedRequestDaysVisible = jurisdiction.getClosedRequestDaysVisibleAdmin();
 
-        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(requestDTO, jurisdictionId).stream()
+        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(requestDTO, jurisdictionId, closedRequestDaysVisible).stream()
                 .map(serviceRequest -> {
                     DownloadServiceRequestDTO dto = new DownloadServiceRequestDTO(serviceRequest);
 
@@ -574,7 +591,7 @@ public class ServiceRequestService {
         return new StreamedFile(tmpFile.toURI().toURL()).attach(now + ".csv");
     }
 
-    private List<ServiceRequest> getServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+    private List<ServiceRequest> getServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId, int closedRequestDaysVisible) {
         String serviceRequestIds = requestDTO.getId();
         List<Long> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
@@ -595,7 +612,10 @@ public class ServiceRequestService {
             return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, sort);
         }
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
+        // Calculate the cutoff date for closed requests visibility
+        Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
+
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, sort);
     }
 
     public int delete(Long serviceRequestId, String jurisdictionId) {
