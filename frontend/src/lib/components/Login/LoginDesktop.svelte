@@ -146,7 +146,7 @@
 					error={passwordInput.error}
 					value={passwordInput.value}
 					autocomplete={passwordAutocomplete}
-					on:keydown={passwordEntered}
+					on:keyup={passwordEntered}
 					on:change={(e) => onChange(e, 'password')}
 				>
 					<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
