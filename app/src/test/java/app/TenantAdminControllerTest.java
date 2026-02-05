@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.*;
@@ -87,6 +88,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("jorge.town");
         createJurisdictionDTO.setName("City of Jorgetown");
+        createJurisdictionDTO.setRemoteHostNames(Set.of("foo", "bar"));
 
         Double[][] bound = {
                 {-90.30025693587594, 38.68777201455936},
@@ -102,6 +104,12 @@ public class TenantAdminControllerTest {
 
         HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
         assertEquals(OK, response.getStatus());
+
+        assertTrue(response.getBody().isPresent());
+
+        JurisdictionDTO body = response.getBody().get();
+        assertEquals(2, body.getRemoteHosts().size());
+        assertTrue(body.getRemoteHosts().containsAll(List.of("foo", "bar")));
     }
 
     @Test

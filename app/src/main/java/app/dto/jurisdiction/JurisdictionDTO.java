@@ -16,11 +16,15 @@ package app.dto.jurisdiction;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionBoundary;
+import app.model.jurisdiction.RemoteHost;
 import app.service.geometry.LibreGeometryFactory;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import io.micronaut.core.annotation.Introspected;
 import org.locationtech.jts.geom.Polygon;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Introspected
 public class JurisdictionDTO {
@@ -52,6 +56,9 @@ public class JurisdictionDTO {
     @JsonProperty("privacy_policy_content")
     private String privacyPolicyContent;
 
+    @JsonProperty("remote_hosts")
+    private Set<String> remoteHosts;
+
     private Double[][] bounds;
 
     public JurisdictionDTO() {
@@ -71,17 +78,11 @@ public class JurisdictionDTO {
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
         this.termsOfUseContent = jurisdiction.getTermsOfUseContent();
         this.privacyPolicyContent = jurisdiction.getPrivacyPolicyContent();
+        setRemoteHosts(jurisdiction.getRemoteHosts().stream().map(RemoteHost::getName).collect(Collectors.toSet()));
     }
 
     public JurisdictionDTO(Jurisdiction jurisdiction, JurisdictionBoundary boundary) {
-        this.jurisdictionId = jurisdiction.getId();
-        this.name = jurisdiction.getName();
-        this.tenantId = jurisdiction.getTenantId();
-        this.primaryColor = jurisdiction.getPrimaryColor();
-        this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
-        this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
-        this.termsOfUseContent = jurisdiction.getTermsOfUseContent();
-        this.privacyPolicyContent = jurisdiction.getPrivacyPolicyContent();
+        this(jurisdiction);
         setBounds(boundary.getBoundary());
     }
 
@@ -152,6 +153,14 @@ public class JurisdictionDTO {
     @JsonSetter
     public void setBounds(Double[][] bounds) {
         this.bounds = bounds;
+    }
+
+    public Set<String> getRemoteHosts() {
+        return remoteHosts;
+    }
+
+    public void setRemoteHosts(Set<String> remoteHosts) {
+        this.remoteHosts = remoteHosts;
     }
 
     public String getTermsOfUseContent() {
