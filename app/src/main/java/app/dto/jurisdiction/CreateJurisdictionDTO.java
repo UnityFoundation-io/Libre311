@@ -21,6 +21,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Introspected
 public class CreateJurisdictionDTO {
 
@@ -55,6 +58,9 @@ public class CreateJurisdictionDTO {
     @NotEmpty
     @Size(min = 4)
     private Double[][] bounds;
+
+    @JsonProperty("remote_hosts")
+    private Set<String> remoteHosts = new HashSet<>();
 
     public CreateJurisdictionDTO() {
     }
@@ -121,5 +127,13 @@ public class CreateJurisdictionDTO {
 
     public void setPrivacyPolicyContent(String privacyPolicyContent) {
         this.privacyPolicyContent = privacyPolicyContent;
+    }
+
+    public Set<String> getRemoteHostNames() {
+        return remoteHosts;
+    }
+
+    public void setRemoteHostNames(Set<String> remoteHosts) {
+        this.remoteHosts = remoteHosts;
     }
 }
