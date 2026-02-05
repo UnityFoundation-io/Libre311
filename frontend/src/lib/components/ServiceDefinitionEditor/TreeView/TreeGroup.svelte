@@ -326,7 +326,7 @@
 						d="M12 4v16m8-8H4"
 					/>
 				</svg>
-				<span>Add Svc</span>
+				<span>Add Service</span>
 			</button>
 		</div>
 	{/if}
