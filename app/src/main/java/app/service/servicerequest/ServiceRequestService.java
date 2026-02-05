@@ -506,11 +506,8 @@ public class ServiceRequestService {
     }
 
     public StreamedFile getAllServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) throws MalformedURLException {
-        // This method is called from admin-only endpoints, use admin visibility days
-        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
-        int closedRequestDaysVisible = jurisdiction.getClosedRequestDaysVisibleAdmin();
-
-        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequests(requestDTO, jurisdictionId, closedRequestDaysVisible).stream()
+        // CSV export should not filter closed requests - export all data
+        List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequestsUnfiltered(requestDTO, jurisdictionId).stream()
                 .map(serviceRequest -> {
                     DownloadServiceRequestDTO dto = new DownloadServiceRequestDTO(serviceRequest);
 
@@ -616,6 +613,31 @@ public class ServiceRequestService {
         Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
 
         return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, sort);
+    }
+
+    private List<ServiceRequest> getServiceRequestsUnfiltered(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
+        String serviceRequestIds = requestDTO.getId();
+        List<Long> serviceCodes = requestDTO.getServiceCodes();
+        List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
+        List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
+        Instant startDate = requestDTO.getStartDate();
+        Instant endDate = requestDTO.getEndDate();
+        Pageable pageable = requestDTO.getPageable();
+
+        Sort sort;
+        if(pageable != null && pageable.isSorted()) {
+            sort = pageable.getSort();
+        } else {
+            sort = Sort.of(new Sort.Order("dateCreated", Sort.Order.Direction.DESC, false));
+        }
+
+        if (StringUtils.hasText(serviceRequestIds)) {
+            List<Long> requestIds = Arrays.stream(serviceRequestIds.split(",")).map(String::trim).map(Long::valueOf).collect(Collectors.toList());
+            return serviceRequestRepository.findByIdInAndJurisdictionId(requestIds, jurisdictionId, sort);
+        }
+
+        // No closed request filtering for CSV export
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
     }
 
     public int delete(Long serviceRequestId, String jurisdictionId) {
