@@ -56,7 +56,7 @@
 		userChangedText(serviceNoticeInput.value, serviceRequest.service_notice) ||
 		userChangedText(statusNotesInput.value, serviceRequest.status_notes);
 
-	function userChangedDate(expectedDateInputValue: String | undefined) {
+	function userChangedDate(expectedDateInputValue: string | undefined) {
 		return serviceRequest.expected_datetime != expectedDateInputValue;
 	}
 
