@@ -17,11 +17,14 @@ package app.dto.servicerequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+import org.openapitools.jackson.nullable.JsonNullable;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +52,8 @@ public class PatchServiceRequestDTO {
 
     @JsonProperty("expected_datetime")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Instant expectedDate;
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private JsonNullable<Instant> expectedDate;
 
     @JsonProperty("closed_datetime")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -106,11 +110,11 @@ public class PatchServiceRequestDTO {
         this.agencyResponsible = agencyResponsible;
     }
 
-    public Instant getExpected_date() {
+    public JsonNullable<Instant> getExpected_date() {
         return expectedDate;
     }
 
-    public void setExpectedDate(Instant expectedDate) {
+    public void setExpectedDate(JsonNullable<Instant> expectedDate) {
         this.expectedDate = expectedDate;
     }
 

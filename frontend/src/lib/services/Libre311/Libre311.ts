@@ -378,7 +378,7 @@ export const ServiceRequestSchema = z
 		service_notice: z.string().optional(),
 		requested_datetime: z.string(),
 		updated_datetime: z.string(),
-		expected_datetime: z.string().optional(),
+		expected_datetime: z.string().nullable().optional(),
 		address: z.string(),
 		address_id: z.number().optional(),
 		zipcode: z.string().optional(),

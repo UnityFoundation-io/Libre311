@@ -402,7 +402,7 @@ public class ServiceRequestService {
             serviceRequest.setAgencyResponsible(serviceRequestDTO.getAgency_responsible());
         }
         if (serviceRequestDTO.getExpected_date() != null) {
-            serviceRequest.setExpectedDate(serviceRequestDTO.getExpected_date());
+            serviceRequest.setExpectedDate(serviceRequestDTO.getExpected_date().orElse(null));
         }
         if (serviceRequestDTO.getClosed_date() != null) {
             serviceRequest.setClosedDate(serviceRequestDTO.getClosed_date());

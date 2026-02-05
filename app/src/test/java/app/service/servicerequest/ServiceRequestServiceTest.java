@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -221,11 +222,23 @@ class ServiceRequestServiceTest {
         ServiceRequest serviceRequest = createTestServiceRequest();
         PatchServiceRequestDTO patchDTO = new PatchServiceRequestDTO();
         Instant expectedDate = Instant.parse("2024-12-31T23:59:59Z");
-        patchDTO.setExpectedDate(expectedDate);
+        patchDTO.setExpectedDate(JsonNullable.of(expectedDate));
 
         ServiceRequestService.applyPatch(patchDTO, serviceRequest);
 
         assertEquals(expectedDate, serviceRequest.getExpectedDate());
+    }
+
+    @Test
+    void applyPatch_shouldClearExpectedDate() {
+        ServiceRequest serviceRequest = createTestServiceRequest();
+        serviceRequest.setExpectedDate(Instant.parse("2024-12-31T23:59:59Z"));
+        PatchServiceRequestDTO patchDTO = new PatchServiceRequestDTO();
+        patchDTO.setExpectedDate(JsonNullable.of(null));
+
+        ServiceRequestService.applyPatch(patchDTO, serviceRequest);
+
+        assertNull(serviceRequest.getExpectedDate()); // Should clear existing value
     }
 
     @Test

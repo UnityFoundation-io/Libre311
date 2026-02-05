@@ -40,6 +40,7 @@ dependencies {
     runtimeOnly("org.yaml:snakeyaml")
     implementation("io.micronaut.validation:micronaut-validation")
     implementation("io.swagger.core.v3:swagger-annotations")
+    implementation("org.openapitools:jackson-databind-nullable:0.2.8")
 
     implementation("io.micronaut.xml:micronaut-jackson-xml")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
