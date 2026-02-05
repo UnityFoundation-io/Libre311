@@ -30,9 +30,11 @@
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
 	import messages from '$media/messages.json';
+	import * as turf from '@turf/turf';
 
 	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
+	const alertError = useLibre311Context().alertError;
 
 	let params: Partial<CreateServiceRequestUIParams> = {};
 	let centerPos: PointTuple = getStartingCenterPos();
@@ -66,6 +68,14 @@
 	}
 
 	async function confirmLocation() {
+		const turfPoint = turf.point([centerPos[0], centerPos[1]]);
+		const boundsPoly = turf.polygon([libre311.getJurisdictionConfig().bounds]);
+
+		if (!turf.booleanPointInPolygon(turfPoint, boundsPoly)) {
+			alertError(new Error('Location is outside of jurisdiction boundaries.'));
+			return;
+		}
+
 		params.lat = String(centerPos[0]);
 		params.long = String(centerPos[1]);
 		loadingLocation = true;
