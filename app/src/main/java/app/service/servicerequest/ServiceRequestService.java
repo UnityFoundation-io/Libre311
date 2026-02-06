@@ -41,7 +41,6 @@ import app.service.jurisdiction.JurisdictionBoundaryService;
 import app.service.storage.StorageUrlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
@@ -197,9 +196,9 @@ public class ServiceRequestService {
         removalSuggestionRepository.save(suggestion);
     }
 
-    public Page<ServiceRequestRemovalSuggestionDTO> getRemovalSuggestions(String jurisdictionId, Pageable pageable) {
-        return removalSuggestionRepository.findAllByJurisdictionId(jurisdictionId, pageable)
-                .map(this::convertToSuggestionDTO);
+    public List<ServiceRequestRemovalSuggestionDTO> getRemovalSuggestions(String jurisdictionId, Long serviceRequestId) {
+        return removalSuggestionRepository.findAllByJurisdictionIdAndServiceRequestId(jurisdictionId, serviceRequestId)
+                .stream().map(this::convertToSuggestionDTO).toList();
     }
 
     private ServiceRequestRemovalSuggestionDTO convertToSuggestionDTO(ServiceRequestRemovalSuggestion suggestion) {
