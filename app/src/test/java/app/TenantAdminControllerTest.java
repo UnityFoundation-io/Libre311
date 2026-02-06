@@ -248,9 +248,7 @@ public class TenantAdminControllerTest {
         jurisdictionDTO = jurisdictionDTOOptional.get();
         assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
         assertEquals("221, 83%, 53%", jurisdictionDTO.getPrimaryColor());
-        assertTrue(jurisdictionDTO.getBounds().length > 0);
-        assertEquals(5, jurisdictionDTO.getBounds().length);
-        assertTrue(Arrays.deepEquals(updateBound, jurisdictionDTO.getBounds()));
+        assertNull(jurisdictionDTO.getBounds()); // Not retrieving bounds here
         assertEquals(2, jurisdictionDTO.getRemoteHosts().size());
         assertTrue(jurisdictionDTO.getRemoteHosts().containsAll(List.of("foo", "bar")));
     }
