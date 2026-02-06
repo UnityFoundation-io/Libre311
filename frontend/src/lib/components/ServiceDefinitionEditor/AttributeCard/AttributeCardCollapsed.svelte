@@ -99,9 +99,9 @@
 	</div>
 
 	<!-- Expand Icon -->
-	<div class="flex-shrink-0 text-gray-400">
+	<button class="flex-shrink-0 text-gray-400" aria-label="Click to expand" title="Click to expand">
 		<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 		</svg>
-	</div>
+	</button>
 </div>

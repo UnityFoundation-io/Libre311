@@ -81,7 +81,9 @@
 
 /* In case the button being shadowed is --primary color */
 .stwui-button:focus-visible,
+button:focus-visible,
 a[role='button']:focus-visible {
+	outline: none;
 	box-shadow:
 		0 0 0 1px hsl(var(--primary-content)),
 		0 0 0 4px hsl(var(--primary));
