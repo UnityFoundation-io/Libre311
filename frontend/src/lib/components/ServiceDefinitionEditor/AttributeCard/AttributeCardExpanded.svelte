@@ -237,6 +237,7 @@
 		type="button"
 		class="flex w-full items-center justify-center border-b border-gray-100 py-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
 		aria-label="Click to collapse"
+		title="Click to collapse"
 		on:click={() => dispatch('collapse')}
 	>
 		<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,33 +246,41 @@
 	</button>
 
 	<div class="p-4">
-		<label for={questionInputId} class="mb-2 block text-sm font-medium text-gray-700">
-			Question and Answer Type
-		</label>
 		<!-- Question Text + Type Selector (same row on desktop, stacked on mobile) -->
-		<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start">
-			<textarea
-				use:autosize
-				bind:this={questionInput}
-				id={questionInputId}
-				bind:value={description}
-				rows="1"
-				class="w-full min-w-0 flex-none resize-none overflow-hidden rounded-lg border-0 bg-gray-100 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none sm:flex-1"
-				class:border-danger={description.trim().length === 0 && description !== originalDescription}
-				class:focus:border-danger={description.trim().length === 0 &&
-					description !== originalDescription}
-				placeholder="Question"
-				disabled={isSaving}
-				aria-label="Question text"
-			></textarea>
-			<div class="w-full sm:mt-0.5 sm:w-auto">
-				<AttributeTypeSelector
-					value={datatype}
+		<div class="mb-1 flex flex-col gap-3 sm:flex-row sm:items-start">
+			<div class="flex-1 flex-col gap-2">
+				<label for={description} class="mb-1 block text-sm font-medium text-gray-700">
+					Question
+				</label>
+				<textarea
+					use:autosize
+					bind:this={questionInput}
+					id={questionInputId}
+					bind:value={description}
+					rows="1"
+					class="w-full min-w-0 flex-none resize-none overflow-hidden rounded-lg border-0 bg-gray-100 px-4 py-2 text-base text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none sm:flex-1"
+					class:border-danger={description.trim().length === 0 &&
+						description !== originalDescription}
+					class:focus:border-danger={description.trim().length === 0 &&
+						description !== originalDescription}
+					placeholder="Question"
 					disabled={isSaving}
-					compact={true}
-					className="w-full sm:w-auto"
-					on:change={handleTypeChange}
-				/>
+					aria-label="Question text"
+				></textarea>
+				{#if description.trim().length === 0 && description !== originalDescription}
+					<p class="mt-1 text-sm text-danger" role="alert">Question is required</p>
+				{/if}
+			</div>
+			<div class="flex flex-col gap-2">
+				<div>
+					<AttributeTypeSelector
+						value={datatype}
+						disabled={isSaving}
+						compact={false}
+						className="w-full"
+						on:change={handleTypeChange}
+					/>
+				</div>
 			</div>
 		</div>
 
