@@ -286,8 +286,7 @@ export type HasMetadata<T> = {
 	metadata: T;
 };
 
-export const GetRemovalSuggestionsResponseSchema = z
-	.array(ServiceRequestRemovalSuggestionSchema);
+export const GetRemovalSuggestionsResponseSchema = z.array(ServiceRequestRemovalSuggestionSchema);
 
 export type GetRemovalSuggestionsResponse = z.infer<typeof GetRemovalSuggestionsResponseSchema>;
 
@@ -724,7 +723,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 			ROUTES.getRemovalSuggestions({ jurisdiction_id: this.jurisdictionId }),
 			{
 				params: {
-                    service_request_id
+					service_request_id
 				}
 			}
 		);

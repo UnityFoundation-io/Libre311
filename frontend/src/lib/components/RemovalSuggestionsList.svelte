@@ -50,7 +50,6 @@
 	}
 
 	$: fetchSuggestions(serviceRequestId);
-
 </script>
 
 {#if suggestions.length > 0}
