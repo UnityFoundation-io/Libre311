@@ -18,11 +18,7 @@ import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
 import app.exception.Libre311BaseException;
-import app.model.jurisdiction.Jurisdiction;
-import app.model.jurisdiction.JurisdictionBoundary;
-import app.model.jurisdiction.JurisdictionBoundaryEntity;
-import app.model.jurisdiction.JurisdictionBoundaryRepository;
-import app.model.jurisdiction.JurisdictionRepository;
+import app.model.jurisdiction.*;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpStatus;
 import jakarta.inject.Singleton;
@@ -30,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class JurisdictionService {
@@ -152,8 +149,6 @@ public class JurisdictionService {
         return jurisdictionDTO;
     }
 
-
-
     private void applyPatch(PatchJurisdictionDTO jurisdictionDTO, Jurisdiction jurisdiction) {
         if (jurisdictionDTO.getName() != null) {
             jurisdiction.setName(jurisdictionDTO.getName());
@@ -178,4 +173,28 @@ public class JurisdictionService {
             );
         }
     }
+
+    public JurisdictionDTO setJurisdictionRemoteHosts(String jurisdictionId, Set<String> remoteHosts) {
+        Optional<Jurisdiction> jurisdictionOptional = jurisdictionRepository.findById(jurisdictionId);
+
+        if (jurisdictionOptional.isEmpty()){
+            throw JurisdictionNotFoundException.noJurisdictionForId(jurisdictionId);
+        }
+
+        var jurisdiction = jurisdictionOptional.get();
+
+        jurisdiction.setRemoteHosts(remoteHosts.stream().map(
+                hostname -> {
+                    var remoteHost = new RemoteHost();
+                    remoteHost.setName(hostname);
+                    remoteHost.setJurisdiction(jurisdiction);
+                    return remoteHost;
+                }).collect(Collectors.toSet())
+        );
+
+        jurisdictionRepository.update(jurisdiction);
+
+        return new JurisdictionDTO(jurisdiction);
+    }
+
 }

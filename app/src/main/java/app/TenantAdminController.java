@@ -25,6 +25,9 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import jakarta.annotation.Nullable;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+
+import java.util.Set;
 
 import static app.security.Permission.*;
 
@@ -43,6 +46,15 @@ public class TenantAdminController {
     public JurisdictionDTO createJurisdictionJson(@Valid @Body CreateJurisdictionDTO requestDTO,
                                                    @Nullable @QueryValue("tenant_id") Long tenant_id) {
         return jurisdictionService.createJurisdiction(requestDTO, tenant_id);
+    }
+
+    @Post(uris = {"/jurisdictions/{jurisdictionId}/remote_hosts{?tenant_id}", "/jurisdictions.json/{jurisdictionId}/remote_hosts{?tenant_id}"})
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT})
+    public JurisdictionDTO createJurisdictionRemoteHostsJson(String jurisdictionId,
+                                                             @Body Set<@NotBlank String> remoteHosts,
+                                                             @Nullable @QueryValue("tenant_id") Long tenant_id) {
+        return jurisdictionService.setJurisdictionRemoteHosts(jurisdictionId, remoteHosts);
     }
 
     @Patch(uris = {"/jurisdictions/{jurisdictionId}{?tenant_id}", "/jurisdictions/{jurisdictionId}.json{?tenant_id}"})
