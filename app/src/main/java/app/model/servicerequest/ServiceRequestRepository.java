@@ -51,7 +51,18 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
                                            Instant startDate, Instant endDate, Pageable pageable) {
 
         QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
-                status, priority, startDate, endDate);
+                status, priority, startDate, endDate, null);
+
+        return findAll(specification, pageable);
+    }
+
+    @Transactional
+    default Page<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
+                                           List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
+                                           Instant startDate, Instant endDate, Instant closedRequestCutoffDate, Pageable pageable) {
+
+        QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
+                status, priority, startDate, endDate, closedRequestCutoffDate);
 
         return findAll(specification, pageable);
     }
@@ -62,7 +73,18 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
                                            Instant startDate, Instant endDate, Sort sort) {
 
         QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
-                status, priority, startDate, endDate);
+                status, priority, startDate, endDate, null);
+
+        return findAll(specification, sort);
+    }
+
+    @Transactional
+    default List<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
+                                           List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
+                                           Instant startDate, Instant endDate, Instant closedRequestCutoffDate, Sort sort) {
+
+        QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
+                status, priority, startDate, endDate, closedRequestCutoffDate);
 
         return findAll(specification, sort);
     }
@@ -71,7 +93,8 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
                                                                                      List<Long> serviceCodes,
                                                                                      List<ServiceRequestStatus> status,
                                                                                      List<ServiceRequestPriority> priority,
-                                                                                     Instant startDate, Instant endDate) {
+                                                                                     Instant startDate, Instant endDate,
+                                                                                     Instant closedRequestCutoffDate) {
         QuerySpecification<ServiceRequest> specification =
                 (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(ServiceRequest_.jurisdiction).get(Jurisdiction_.id), jurisdictionId);
 
@@ -95,6 +118,11 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
             specification = specification.and(Specifications.createdDateAfter(startDate));
         } else if (endDate != null) {
             specification = specification.and(Specifications.createdDateBefore(endDate));
+        }
+
+        // Apply date filter only to closed requests if cutoff date is specified
+        if (closedRequestCutoffDate != null) {
+            specification = specification.and(Specifications.closedRequestsAfterDate(closedRequestCutoffDate));
         }
 
         return specification;
@@ -133,6 +161,20 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
 
         public static QuerySpecification<ServiceRequest> createdDateBefore(Instant instant) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get(ServiceRequest_.dateCreated), instant);
+        }
+
+        /**
+         * Filter that applies date restriction only to CLOSED requests.
+         * Non-closed requests are always visible; closed requests must be created after the cutoff date.
+         */
+        public static QuerySpecification<ServiceRequest> closedRequestsAfterDate(Instant cutoffDate) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.or(
+                    criteriaBuilder.notEqual(root.get(ServiceRequest_.status), ServiceRequestStatus.CLOSED),
+                    criteriaBuilder.and(
+                            criteriaBuilder.equal(root.get(ServiceRequest_.status), ServiceRequestStatus.CLOSED),
+                            criteriaBuilder.greaterThanOrEqualTo(root.get(ServiceRequest_.dateCreated), cutoffDate)
+                    )
+            );
         }
     }
 }
