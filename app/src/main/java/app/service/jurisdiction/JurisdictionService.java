@@ -121,14 +121,6 @@ public class JurisdictionService {
                 ? requestDTO.getPrivacyPolicyContent()
                 : null
         );
-        jurisdiction.setRemoteHosts(requestDTO.getRemoteHostNames().stream().map(
-                hostname -> {
-                    var remoteHost = new RemoteHost();
-                    remoteHost.setName(hostname);
-                    remoteHost.setJurisdiction(jurisdiction);
-                    return remoteHost;
-                }).collect(Collectors.toSet())
-        );
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
         JurisdictionBoundary savedBoundary = jurisdictionBoundaryService.saveBoundary(
@@ -181,4 +173,28 @@ public class JurisdictionService {
             );
         }
     }
+
+    public JurisdictionDTO setJurisdictionRemoteHosts(String jurisdictionId, Set<String> remoteHosts) {
+        Optional<Jurisdiction> jurisdictionOptional = jurisdictionRepository.findById(jurisdictionId);
+
+        if (jurisdictionOptional.isEmpty()){
+            throw JurisdictionNotFoundException.noJurisdictionForId(jurisdictionId);
+        }
+
+        var jurisdiction = jurisdictionOptional.get();
+
+        jurisdiction.setRemoteHosts(remoteHosts.stream().map(
+                hostname -> {
+                    var remoteHost = new RemoteHost();
+                    remoteHost.setName(hostname);
+                    remoteHost.setJurisdiction(jurisdiction);
+                    return remoteHost;
+                }).collect(Collectors.toSet())
+        );
+
+        jurisdictionRepository.update(jurisdiction);
+
+        return new JurisdictionDTO(jurisdiction);
+    }
+
 }
