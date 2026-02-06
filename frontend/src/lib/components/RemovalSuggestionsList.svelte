@@ -17,19 +17,9 @@
 	let suggestionIdToDelete: number | null = null;
 	let isDeleting = false;
 
-	async function fetchSuggestions() {
+	async function fetchSuggestions(id: number) {
 		try {
-			const res = await libre311Service.getRemovalSuggestions({
-				pagination: {
-					pageNumber: 0,
-					size: 100, // Fetch enough to show all likely suggestions for one request
-					offset: 0,
-					totalPages: 0,
-					totalSize: 0
-				},
-				service_request_id: serviceRequestId
-			});
-			suggestions = res.content;
+			suggestions = await libre311Service.getRemovalSuggestions(id);
 		} catch (e) {
 			console.error('Failed to fetch removal suggestions', e);
 		}
@@ -59,9 +49,8 @@
 		}
 	}
 
-	onMount(() => {
-		fetchSuggestions();
-	});
+	$: fetchSuggestions(serviceRequestId);
+
 </script>
 
 {#if suggestions.length > 0}

@@ -64,9 +64,9 @@ public class JurisdictionAdminController {
     @Get(uris = { "/requests/removal-suggestions{?jurisdiction_id}", "/requests/removal-suggestions.json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
     @RequiresPermissions({LIBRE311_ADMIN_VIEW_SYSTEM, LIBRE311_ADMIN_VIEW_TENANT, LIBRE311_ADMIN_VIEW_SUBTENANT})
-    public Page<ServiceRequestRemovalSuggestionDTO> getRemovalSuggestions(@Valid Pageable pageable,
+    public List<ServiceRequestRemovalSuggestionDTO> getRemovalSuggestions(@QueryValue("service_request_id") Long serviceRequestId,
             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
-        return serviceRequestService.getRemovalSuggestions(jurisdiction_id, pageable);
+        return serviceRequestService.getRemovalSuggestions(jurisdiction_id, serviceRequestId);
     }
 
     @Delete(uris = { "/requests/removal-suggestions/{id}{?jurisdiction_id}", "/requests/removal-suggestions/{id}.json{?jurisdiction_id}" })

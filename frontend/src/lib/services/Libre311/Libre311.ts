@@ -287,30 +287,7 @@ export type HasMetadata<T> = {
 };
 
 export const GetRemovalSuggestionsResponseSchema = z
-	.object({
-		content: z.array(ServiceRequestRemovalSuggestionSchema),
-		pageable: z
-			.object({
-				offset: z.number().optional(),
-				pageNumber: z.number().optional(),
-				pageSize: z.number().optional()
-			})
-			.optional(),
-		totalPages: z.number().optional(),
-		totalSize: z.number().optional()
-	})
-	.transform((data) => ({
-		content: data.content,
-		metadata: {
-			pagination: {
-				offset: data.pageable?.offset ?? 0,
-				pageNumber: data.pageable?.pageNumber ?? 0,
-				size: data.pageable?.pageSize ?? 0,
-				totalPages: data.totalPages ?? 0,
-				totalSize: data.totalSize ?? 0
-			}
-		}
-	}));
+	.array(ServiceRequestRemovalSuggestionSchema);
 
 export type GetRemovalSuggestionsResponse = z.infer<typeof GetRemovalSuggestionsResponseSchema>;
 
@@ -598,9 +575,7 @@ export interface Libre311Service extends Open311Service {
 	updateServiceRequest(params: UpdateSensitiveServiceRequestRequest): Promise<ServiceRequest>;
 	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean>;
 	createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void>;
-	getRemovalSuggestions(
-		params: HasPagination & { service_request_id?: number }
-	): Promise<GetRemovalSuggestionsResponse>;
+	getRemovalSuggestions(service_request_id: number): Promise<GetRemovalSuggestionsResponse>;
 	deleteRemovalSuggestion(params: { id: number }): Promise<void>;
 }
 
@@ -744,16 +719,12 @@ export class Libre311ServiceImpl implements Libre311Service {
 		}
 	}
 
-	async getRemovalSuggestions(
-		params: HasPagination & { service_request_id?: number }
-	): Promise<GetRemovalSuggestionsResponse> {
+	async getRemovalSuggestions(service_request_id: number): Promise<GetRemovalSuggestionsResponse> {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getRemovalSuggestions({ jurisdiction_id: this.jurisdictionId }),
 			{
 				params: {
-					page: params.pagination.pageNumber,
-					size: params.pagination.size,
-					service_request_id: params.service_request_id
+                    service_request_id
 				}
 			}
 		);
