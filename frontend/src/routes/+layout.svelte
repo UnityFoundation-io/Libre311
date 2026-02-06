@@ -13,7 +13,8 @@
 		asAsyncFailure,
 		asAsyncSuccess,
 		ASYNC_IN_PROGRESS,
-		type AsyncResult
+		type AsyncResult,
+		type AsyncSuccess
 	} from '$lib/services/http';
 	import { getJurisdictionConfig } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
@@ -56,6 +57,24 @@
 	}
 
 	initLibre311ContextProps();
+
+	$: {
+		let cppType = contextProviderProps.type;
+		if (cppType == 'success') {
+			let contextProviderPropsSuccess =
+				contextProviderProps as AsyncSuccess<Libre311ContextProviderProps>;
+			let primaryColor =
+				contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig.primary_color;
+			if (primaryColor) {
+				document.documentElement.style.setProperty('--primary', primaryColor);
+			}
+			let primaryHoverColor =
+				contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig.primary_hover_color;
+			if (primaryHoverColor) {
+				document.documentElement.style.setProperty('--hover', primaryHoverColor);
+			}
+		}
+	}
 </script>
 
 {#if contextProviderProps.type == 'success'}
