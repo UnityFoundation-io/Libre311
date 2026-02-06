@@ -88,7 +88,6 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("jorge.town");
         createJurisdictionDTO.setName("City of Jorgetown");
-        createJurisdictionDTO.setRemoteHostNames(Set.of("foo", "bar"));
 
         Double[][] bound = {
                 {-90.30025693587594, 38.68777201455936},
@@ -104,12 +103,6 @@ public class TenantAdminControllerTest {
 
         HttpResponse<JurisdictionDTO> response = client.toBlocking().exchange(request, JurisdictionDTO.class);
         assertEquals(OK, response.getStatus());
-
-        assertTrue(response.getBody().isPresent());
-
-        JurisdictionDTO body = response.getBody().get();
-        assertEquals(2, body.getRemoteHosts().size());
-        assertTrue(body.getRemoteHosts().containsAll(List.of("foo", "bar")));
     }
 
     @Test
@@ -160,6 +153,32 @@ public class TenantAdminControllerTest {
             client.toBlocking().exchange(request, JurisdictionDTO.class);
         });
         assertEquals(BAD_REQUEST, exception.getStatus());
+    }
+
+    @Test
+    public void cantUpdateRemoteHostsBadAuth() {
+        setAuthHasPermissionResponse(true, "systemAdmin@test.io", null, List.of("LIBRE311_ADMIN_EDIT-SUBTENANT"));
+        // Can set remote hosts
+        HttpRequest<?> request = HttpRequest.POST("/jurisdictions/neverland/remote_hosts?tenant_id=1", Set.of("foo", "bar"))
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
+    public void cantUpdateRemoteHostsOnNonExistentJurisdiction() {
+        setAuthHasPermissionResponse(true, "systemAdmin@test.io", null, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+        // Can set remote hosts
+        HttpRequest<?> request = HttpRequest.POST("/jurisdictions/neverland/remote_hosts?tenant_id=1", Set.of("foo", "bar"))
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(NOT_FOUND, exception.getStatus());
     }
 
     @Test
@@ -217,6 +236,23 @@ public class TenantAdminControllerTest {
         assertTrue(jurisdictionDTO.getBounds().length > 0);
         assertEquals(5, jurisdictionDTO.getBounds().length);
         assertTrue(Arrays.deepEquals(updateBound, jurisdictionDTO.getBounds()));
+
+        // Can set remote hosts
+        request = HttpRequest.POST("/jurisdictions/ogdenville.city/remote_hosts?tenant_id=1", Set.of("foo", "bar"))
+                .header("Authorization", "Bearer token.text.here");
+
+        response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+        jurisdictionDTOOptional = response.getBody(JurisdictionDTO.class);
+        assertTrue(jurisdictionDTOOptional.isPresent());
+        jurisdictionDTO = jurisdictionDTOOptional.get();
+        assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
+        assertEquals("221, 83%, 53%", jurisdictionDTO.getPrimaryColor());
+        assertTrue(jurisdictionDTO.getBounds().length > 0);
+        assertEquals(5, jurisdictionDTO.getBounds().length);
+        assertTrue(Arrays.deepEquals(updateBound, jurisdictionDTO.getBounds()));
+        assertEquals(2, jurisdictionDTO.getRemoteHosts().size());
+        assertTrue(jurisdictionDTO.getRemoteHosts().containsAll(List.of("foo", "bar")));
     }
 
     @Test
