@@ -39,6 +39,7 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     Page<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Pageable pageable);
     List<ServiceRequest> findByIdInAndJurisdictionId(List<Long> serviceRequestIds, String jurisdictionId, Sort sort);
     Optional<ServiceRequest> findByIdAndJurisdictionId(Long serviceRequestId, String jurisdictionId);
+    Optional<ServiceRequest> findByClientRequestIdAndJurisdictionId(String clientRequestId, String jurisdictionId);
 
     @Query("update ServiceRequest sr set sr.deleted = true where sr.id = :id and sr.jurisdiction.id = :jurisdictionId and sr.deleted = false")
     Integer delete(Long id, String jurisdictionId);

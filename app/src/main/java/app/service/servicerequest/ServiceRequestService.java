@@ -136,6 +136,17 @@ public class ServiceRequestService {
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
         reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse());
         LOG.debug(serviceRequestDTO.toString());
+
+        // Idempotency check: if a client_request_id is provided and already exists, return the existing request
+        String clientRequestId = serviceRequestDTO.getClientRequestId();
+        if (clientRequestId != null && !clientRequestId.isBlank()) {
+            Optional<ServiceRequest> existing = serviceRequestRepository.findByClientRequestIdAndJurisdictionId(clientRequestId, jurisdictionId);
+            if (existing.isPresent()) {
+                LOG.info("Duplicate client_request_id detected: {}. Returning existing service request.", clientRequestId);
+                return new PostResponseServiceRequestDTO(existing.get());
+            }
+        }
+
         double lat = Double.parseDouble(serviceRequestDTO.getLatitude());
         double lng = Double.parseDouble(serviceRequestDTO.getLongitude());
         if (!jurisdictionBoundaryService.existsInJurisdiction(jurisdictionId, lat, lng)){
@@ -364,6 +375,7 @@ public class ServiceRequestService {
         serviceRequest.setPhone(serviceRequestDTO.getPhone());
         serviceRequest.setDescription(serviceRequestDTO.getDescription());
         serviceRequest.setMediaUrl(serviceRequestDTO.getMediaUrl());
+        serviceRequest.setClientRequestId(serviceRequestDTO.getClientRequestId());
         return serviceRequest;
     }
 

@@ -26,6 +26,10 @@ import {
 } from '$lib/services/Libre311/types/ServerErrors';
 import { isAxiosError } from 'axios';
 import { UserPermissionsResolverImpl } from '$lib/services/UserPermissionsResolver';
+import { createNetworkStatus, type NetworkStatus } from '$lib/services/NetworkStatus';
+import { createOfflineQueue, type OfflineQueue } from '$lib/services/OfflineQueue';
+import { createBackgroundSync } from '$lib/services/BackgroundSync';
+import { OfflineAwareLibre311Service } from '$lib/services/Libre311/OfflineAwareLibre311Service';
 
 const libre311CtxKey = Symbol();
 
@@ -38,6 +42,8 @@ export type Libre311Context = {
 	mode: Mode;
 	user: Readable<UserInfo>;
 	alertError: (unknown: unknown) => void;
+	networkStatus: NetworkStatus;
+	offlineQueue: OfflineQueue;
 } & Libre311Alert;
 
 export type Libre311ContextProviderProps = {
@@ -58,7 +64,35 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		...props.unityAuthServiceProps
 	});
 	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
-	const libre311Service = libre311Factory({ ...props.libreServiceProps, recaptchaService });
+	const baseLibre311Service = libre311Factory({ ...props.libreServiceProps, recaptchaService });
+
+	const networkStatus = createNetworkStatus();
+	const offlineQueue = createOfflineQueue();
+	const libre311Service = new OfflineAwareLibre311Service(
+		baseLibre311Service,
+		networkStatus,
+		offlineQueue
+	);
+
+	const backgroundSync = createBackgroundSync(
+		baseLibre311Service,
+		offlineQueue,
+		props
+	);
+
+	// Trigger sync when coming back online
+	networkStatus.isOnline.subscribe((online) => {
+		if (online) {
+			backgroundSync.syncAll();
+		} else {
+			props.alert({
+				type: 'warn',
+				title: 'Offline',
+				description: 'You are offline. Requests will be queued and submitted when connectivity returns.'
+			});
+		}
+	});
+
 	libre311Service.setAuthInfo(unityAuthService.getLoginData());
 	const user: Writable<UserInfo> = writable(unityAuthService.getLoginData());
 	unityAuthService.subscribe('login', (args) => user.set(args));
@@ -109,7 +143,9 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		linkResolver,
 		unityAuthService,
 		user,
-		alertError
+		alertError,
+		networkStatus,
+		offlineQueue
 	};
 	setContext(libre311CtxKey, ctx);
 	return ctx;

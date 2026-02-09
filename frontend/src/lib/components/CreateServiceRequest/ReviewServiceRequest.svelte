@@ -46,15 +46,31 @@
 			}
 			params.media_url = mediaUrl;
 
-			await libre311.createServiceRequest(toCreateServiceRequestParams(params));
+			const createParams = toCreateServiceRequestParams(params);
+			createParams._serviceName = params.service.service_name;
+			if (params.file) {
+				createParams._photoFile = params.file;
+			}
+
+			const response = await libre311.createServiceRequest(createParams);
 
 			submittingServiceRequest = false;
 
-			alert({
-				type: 'success',
-				title: 'Success',
-				description: 'Your service request has been created'
-			});
+			if (response.service_request_id === -1) {
+				// Queued for offline sync
+				alert({
+					type: 'info',
+					title: 'Saved Offline',
+					description:
+						'Your request has been saved and will be submitted when connectivity returns.'
+				});
+			} else {
+				alert({
+					type: 'success',
+					title: 'Success',
+					description: 'Your service request has been created'
+				});
+			}
 			goto('/issues/map');
 		} catch (error) {
 			alertError(error);

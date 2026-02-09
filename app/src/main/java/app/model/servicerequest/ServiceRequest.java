@@ -130,6 +130,10 @@ public class ServiceRequest {
 
     private boolean deleted;
 
+    @Nullable
+    @Column(name = "client_request_id", unique = true, length = 36)
+    private String clientRequestId;
+
     public ServiceRequest() {
     }
 
@@ -376,6 +380,15 @@ public class ServiceRequest {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Nullable
+    public String getClientRequestId() {
+        return clientRequestId;
+    }
+
+    public void setClientRequestId(@Nullable String clientRequestId) {
+        this.clientRequestId = clientRequestId;
     }
 
 }
