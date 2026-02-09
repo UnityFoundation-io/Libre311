@@ -11,7 +11,8 @@ export interface BackgroundSync {
 export function createBackgroundSync(
 	libre311Service: Libre311Service,
 	offlineQueue: OfflineQueue,
-	alertStore: Libre311Alert
+	alertStore: Libre311Alert,
+	onSyncComplete?: () => void
 ): BackgroundSync {
 	let syncing = false;
 
@@ -81,6 +82,7 @@ export function createBackgroundSync(
 					title: 'Sync Complete',
 					description: `${successCount} queued request${successCount > 1 ? 's' : ''} submitted successfully.`
 				});
+				onSyncComplete?.();
 			}
 
 			if (failCount > 0) {

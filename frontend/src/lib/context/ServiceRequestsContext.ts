@@ -53,7 +53,8 @@ function pendingToServiceRequest(entry: PendingRequest): ServiceRequest {
 export function createServiceRequestsContext(
 	libreService: Libre311Service,
 	page: Readable<Page<Record<string, string>, string | null>>,
-	offlineQueue?: OfflineQueue
+	offlineQueue?: OfflineQueue,
+	syncSignal?: Readable<number>
 ): ServiceRequestsContext {
 	// consider type as Maybe<AsyncRequest<ServiceRequest>> that would cover all possible states
 	const selectedServiceRequest = writable<Maybe<ServiceRequest>>();
@@ -142,6 +143,18 @@ export function createServiceRequestsContext(
 			await handleMapPageNav(page);
 		}
 	});
+
+	// Auto-refresh after background sync completes
+	if (syncSignal) {
+		let initial = true;
+		syncSignal.subscribe(() => {
+			if (initial) {
+				initial = false;
+				return;
+			}
+			refresh();
+		});
+	}
 
 	function applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL) {
 		const queryParams = FilteredServiceRequestsParamsMapper.toURLSearchParams(params);

@@ -44,6 +44,7 @@ export type Libre311Context = {
 	alertError: (unknown: unknown) => void;
 	networkStatus: NetworkStatus;
 	offlineQueue: OfflineQueue;
+	syncSignal: Readable<number>;
 } & Libre311Alert;
 
 export type Libre311ContextProviderProps = {
@@ -74,10 +75,12 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		offlineQueue
 	);
 
+	const syncSignal = writable(0);
 	const backgroundSync = createBackgroundSync(
 		baseLibre311Service,
 		offlineQueue,
-		props
+		props,
+		() => syncSignal.update((n) => n + 1)
 	);
 
 	// Trigger sync when coming back online
@@ -145,7 +148,8 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		user,
 		alertError,
 		networkStatus,
-		offlineQueue
+		offlineQueue,
+		syncSignal
 	};
 	setContext(libre311CtxKey, ctx);
 	return ctx;
