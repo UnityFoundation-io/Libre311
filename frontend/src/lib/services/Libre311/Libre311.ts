@@ -235,6 +235,11 @@ export type CreateServiceRequestParams = HasServiceCode &
 		attributes: AttributeResponse[];
 		description?: string;
 		media_url?: string;
+		client_request_id?: string;
+		/** Internal: used by offline queue to store service name for display */
+		_serviceName?: string;
+		/** Internal: used by offline queue to store photo blob for deferred upload */
+		_photoFile?: File;
 	};
 
 export const CreateRemovalSuggestionParamsSchema = z.object({
@@ -369,7 +374,10 @@ export const ServiceRequestSchema = z
 	.merge(HasServiceCodeSchema)
 	.merge(ContactInformationSchema);
 
-export type ServiceRequest = z.infer<typeof ServiceRequestSchema>;
+export type ServiceRequest = z.infer<typeof ServiceRequestSchema> & {
+	_isPending?: boolean;
+	_clientRequestId?: string;
+};
 
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
@@ -659,6 +667,8 @@ function toURLSearchParams<T extends CreateServiceRequestParams>(params: T) {
 	const urlSearchParams = new URLSearchParams();
 	for (const [k, v] of Object.entries(params)) {
 		if (!v) continue;
+		// Skip internal fields (prefixed with _) that shouldn't be sent to the server
+		if (k.startsWith('_')) continue;
 		if (Array.isArray(v)) {
 			const resultMap = v.reduce((resultMap, attrRes) => {
 				const resArr: string[] = resultMap.get(attrRes.code) ?? [];

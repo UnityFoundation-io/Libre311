@@ -4,6 +4,7 @@
 	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
+	import PendingSyncBadge from './PendingSyncBadge.svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let detailsLink: string;
@@ -13,9 +14,17 @@
 	<div class="mx-4 my-2" slot="content">
 		<div class="flow-root">
 			<h2 class="float-left text-base tracking-wide">
-				#{serviceRequest.service_request_id}
+				{#if serviceRequest._isPending}
+					Pending
+				{:else}
+					#{serviceRequest.service_request_id}
+				{/if}
 			</h2>
-			<ServiceRequestStatusBadge class="float-right text-sm" status={serviceRequest.status} />
+			{#if serviceRequest._isPending}
+				<PendingSyncBadge class="float-right text-sm" />
+			{:else}
+				<ServiceRequestStatusBadge class="float-right text-sm" status={serviceRequest.status} />
+			{/if}
 		</div>
 
 		<p class="my-1 text-sm font-extralight">{toTimeStamp(serviceRequest.requested_datetime)}</p>
