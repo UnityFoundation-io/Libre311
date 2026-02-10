@@ -16,7 +16,7 @@
 	const maxFileSize = 8 * 1024 * 1024; // Files > 8MB will be resized
 	const resizeMaxWidth = 4032; // Resized images will be cropped to fit within this width and height
 	const resizeMaxHeight = 3024;
-	const resizeQuality = 0.9; //
+	const resizeQuality = 0.9;
 	const resizeFormat = 'image/jpeg';
 
 	let input: HTMLInputElement;
