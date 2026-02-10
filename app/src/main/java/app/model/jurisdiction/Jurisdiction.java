@@ -57,6 +57,12 @@ public class Jurisdiction {
     @Column(columnDefinition = "TEXT")
     private String privacyPolicyContent;
 
+    // Number of days closed service requests remain visible to regular users (default 7)
+    private Integer closedRequestDaysVisibleUser = 7;
+
+    // Number of days closed service requests remain visible to admins (default 90)
+    private Integer closedRequestDaysVisibleAdmin = 90;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
@@ -169,6 +175,22 @@ public class Jurisdiction {
 
     public void setPrivacyPolicyContent(String privacyPolicyContent) {
         this.privacyPolicyContent = privacyPolicyContent;
+    }
+
+    public Integer getClosedRequestDaysVisibleUser() {
+        return closedRequestDaysVisibleUser;
+    }
+
+    public void setClosedRequestDaysVisibleUser(Integer closedRequestDaysVisibleUser) {
+        this.closedRequestDaysVisibleUser = closedRequestDaysVisibleUser;
+    }
+
+    public Integer getClosedRequestDaysVisibleAdmin() {
+        return closedRequestDaysVisibleAdmin;
+    }
+
+    public void setClosedRequestDaysVisibleAdmin(Integer closedRequestDaysVisibleAdmin) {
+        this.closedRequestDaysVisibleAdmin = closedRequestDaysVisibleAdmin;
     }
 
 }
