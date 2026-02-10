@@ -13,11 +13,17 @@
 	import Camera from '../Svg/outline/Camera.svelte';
 	import Upload from '../Svg/outline/Upload.svelte';
 
+	const maxFileSize = 8 * 1024 * 1024; // Files > 8MB will be resized
+	const resizeMaxWidth = 4032; // Resized images will be cropped to fit within this width and height
+	const resizeMaxHeight = 3024;
+	const resizeQuality = 0.9; //
+	const resizeFormat = 'image/jpeg';
+
 	let input: HTMLInputElement;
 	let reuploadInput: HTMLInputElement;
 	let imageData: string | undefined;
-	let filePickerError: string | undefined;
-	let filePickerErrorKey: number = 0;
+	let fileUploadError: string | undefined;
+	let fileUploadErrorKey: number = 0;
 
 	export let params: Readonly<Partial<CreateServiceRequestUIParams>>;
 
@@ -29,31 +35,104 @@
 		return s.slice(s.indexOf('/') + 1);
 	});
 
+	function validateImage(file: File): boolean {
+		return file.size <= maxFileSize;
+	}
+
+	function resizeImage(file: File): Promise<File> {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			const url = URL.createObjectURL(file);
+
+			img.onload = () => {
+				URL.revokeObjectURL(url);
+
+				let { width, height } = img;
+
+				const scale = Math.min(resizeMaxWidth / width, resizeMaxHeight / height, 1);
+
+				width *= scale;
+				height *= scale;
+
+				const canvas = document.createElement('canvas');
+				canvas.width = width;
+				canvas.height = height;
+
+				const ctx = canvas.getContext('2d');
+				if (!ctx) return reject();
+
+				ctx.drawImage(img, 0, 0, width, height);
+
+				canvas.toBlob(
+					(blob) => {
+						if (!blob) return reject();
+						resolve(new File([blob], file.name, { type: resizeFormat }));
+					},
+					resizeFormat,
+					resizeQuality
+				);
+			};
+
+			img.onerror = reject;
+			img.src = url;
+		});
+	}
+
+	async function attemptResize(fileToResize: File | undefined) {
+		if (!fileToResize) return;
+
+		try {
+			return await resizeImage(fileToResize);
+		} catch (error) {
+			fileUploadError = messages['photo']['invalid_file_type'];
+			fileUploadErrorKey = Date.now();
+		}
+	}
+
+	async function dispatchValidImage(imageFile: File) {
+		if (!validateImage(imageFile)) {
+			const resized = await attemptResize(imageFile);
+			if (!resized) return;
+
+			dispatchFile(resized);
+		} else {
+			fileUploadError = undefined;
+			dispatchFile(imageFile);
+		}
+	}
+
 	async function handleDesktopImageInput() {
-		if (input.files && input.files.length < 2) dispatchFile(input.files[0]);
+		if (input.files && input.files.length < 2) {
+			fileUploadError = undefined;
+			await dispatchValidImage(input.files[0]);
+		}
 	}
 
 	async function handleMobileImageInput(e: Event) {
 		const input = e.target as HTMLInputElement;
 
 		if (input.files) {
-			dispatchFile(input.files?.[0]);
+			fileUploadError = undefined;
+			await dispatchValidImage(input.files[0]);
 		}
 	}
 
 	async function reuploadImage() {
-		if (reuploadInput.files && reuploadInput.files.length < 2) dispatchFile(reuploadInput.files[0]);
+		if (reuploadInput.files && reuploadInput.files.length < 2) {
+			fileUploadError = undefined;
+			await dispatchValidImage(reuploadInput.files[0]);
+		}
 	}
 
-	function desktopDropFiles(dropFiles: DropResult) {
-		filePickerError = undefined;
-		if (dropFiles.rejected[0]) {
-			filePickerError = messages['photo']['invalid_file_type'];
-			filePickerErrorKey = Date.now();
-		}
-		for (const file of dropFiles.accepted) {
-			dispatchFile(file);
-			return; // Only upload single file
+	async function desktopDropFiles(dropFiles: DropResult) {
+		if (dropFiles.accepted && dropFiles.accepted.length > 0) {
+			fileUploadError = undefined;
+			dispatchFile(dropFiles.accepted[0]);
+		} else if (dropFiles.rejected && dropFiles.rejected.length > 0) {
+			fileUploadError = undefined;
+			const resized = await attemptResize(dropFiles.rejected[0]);
+			if (!resized) return;
+			dispatchFile(resized);
 		}
 	}
 
@@ -84,6 +163,7 @@
 
 				<div class="grid w-full grid-rows-3 gap-2">
 					<input
+						type="file"
 						name="photo"
 						id="camera-roll-btn-desktop"
 						accept="image/*"
@@ -95,6 +175,13 @@
 						<div class="flex items-center justify-center">
 							<Camera />
 							<span class="ml-2">{messages['photo']['change_image']}</span>
+						</div>
+					</label>
+
+					<label for="re-upload-image-button">
+						<div class="flex items-center justify-center">
+							<Upload />
+							<span class="ml-2">{messages['photo']['upload']}</span>
 						</div>
 					</label>
 
@@ -119,7 +206,7 @@
 			{:else}
 				<div class="items-center justify-center">
 					<div class="mb-4">
-						<FilePicker onDrop={desktopDropFiles} {allowedExtensions}>
+						<FilePicker {maxFileSize} onDrop={desktopDropFiles} {allowedExtensions}>
 							<FilePicker.Icon slot="icon" data={uploadIcon} />
 							<FilePicker.Title slot="title">
 								{messages['photo']['upload']}
@@ -128,10 +215,10 @@
 								Drag & Drop your file
 							</FilePicker.Description>
 						</FilePicker>
-						{#if filePickerError}
-							{#key filePickerErrorKey}
+						{#if fileUploadError}
+							{#key fileUploadErrorKey}
 								<p class="stwui-input-error mt-2 text-center text-sm text-danger" role="alert">
-									{filePickerError}
+									{fileUploadError}
 								</p>
 							{/key}
 						{/if}
@@ -201,6 +288,14 @@
 						</div>
 					</label>
 
+					{#if fileUploadError}
+						{#key fileUploadErrorKey}
+							<p class="stwui-input-error mt-2 text-center text-sm text-danger" role="alert">
+								{fileUploadError}
+							</p>
+						{/key}
+					{/if}
+
 					<Button
 						class="w-full"
 						type="ghost"
@@ -255,6 +350,14 @@
 							<span class="ml-2">{messages['photo']['upload']}</span>
 						</div>
 					</label>
+
+					{#if fileUploadError}
+						{#key fileUploadErrorKey}
+							<p class="stwui-input-error mt-2 text-center text-sm text-danger" role="alert">
+								{fileUploadError}
+							</p>
+						{/key}
+					{/if}
 
 					<Button
 						class="w-full"
