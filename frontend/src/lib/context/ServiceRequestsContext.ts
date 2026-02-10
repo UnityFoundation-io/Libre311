@@ -29,9 +29,11 @@ export type ServiceRequestsContext = {
 	refresh(): Promise<void>;
 };
 
+let pendingIdCounter = -1;
+
 function pendingToServiceRequest(entry: PendingRequest): ServiceRequest {
 	return {
-		service_request_id: -1,
+		service_request_id: pendingIdCounter--,
 		service_code: entry.params.service_code,
 		status: 'open',
 		service_name: entry.serviceName || 'Pending Request',
