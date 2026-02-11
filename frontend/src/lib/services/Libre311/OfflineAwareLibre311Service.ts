@@ -17,7 +17,6 @@ import type {
 	GetServiceListResponse,
 	Group,
 	HasGroupId,
-
 	HasServiceCode,
 	HasServiceRequestId,
 	JurisdictionConfig,
@@ -175,9 +174,7 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 		return this.wrapped.createRemovalSuggestion(params);
 	}
 
-	getRemovalSuggestions(
-		service_request_id: number
-	): Promise<GetRemovalSuggestionsResponse> {
+	getRemovalSuggestions(service_request_id: number): Promise<GetRemovalSuggestionsResponse> {
 		return this.wrapped.getRemovalSuggestions(service_request_id);
 	}
 
