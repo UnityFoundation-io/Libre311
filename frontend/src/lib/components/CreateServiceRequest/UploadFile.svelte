@@ -102,7 +102,7 @@
 	}
 
 	async function handleDesktopImageInput() {
-		if (input.files && input.files.length < 2) {
+		if (input.files && input.files.length > 0) {
 			fileUploadError = undefined;
 			await dispatchValidImage(input.files[0]);
 		}
@@ -111,14 +111,14 @@
 	async function handleMobileImageInput(e: Event) {
 		const input = e.target as HTMLInputElement;
 
-		if (input.files) {
+		if (input.files && input.files.length > 0) {
 			fileUploadError = undefined;
 			await dispatchValidImage(input.files[0]);
 		}
 	}
 
 	async function reuploadImage() {
-		if (reuploadInput.files && reuploadInput.files.length < 2) {
+		if (reuploadInput.files && reuploadInput.files.length > 0) {
 			fileUploadError = undefined;
 			await dispatchValidImage(reuploadInput.files[0]);
 		}
