@@ -167,9 +167,7 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 		return this.wrapped.updateServiceRequest(params);
 	}
 
-	deleteServiceRequest(
-		params: DeleteServiceRequestRequest
-	): Promise<boolean> {
+	deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean> {
 		return this.wrapped.deleteServiceRequest(params);
 	}
 

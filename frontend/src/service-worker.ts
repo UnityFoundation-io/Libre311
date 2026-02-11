@@ -25,28 +25,35 @@ sw.addEventListener('install', (event) => {
 
 sw.addEventListener('activate', (event) => {
 	event.waitUntil(
-		caches.keys().then((keys) => {
-			return Promise.all(
-				keys
-					.filter((key) => key.startsWith('app-cache-') && key !== APP_CACHE)
-					.map((key) => caches.delete(key))
-			);
-		}).then(() => sw.clients.claim())
+		caches
+			.keys()
+			.then((keys) => {
+				return Promise.all(
+					keys
+						.filter((key) => key.startsWith('app-cache-') && key !== APP_CACHE)
+						.map((key) => caches.delete(key))
+				);
+			})
+			.then(() => sw.clients.claim())
 	);
 });
 
 function isTileRequest(url: URL): boolean {
-	return url.hostname.includes('basemaps.cartocdn.com') ||
-		url.hostname.includes('tile.openstreetmap.org');
+	return (
+		url.hostname.includes('basemaps.cartocdn.com') ||
+		url.hostname.includes('tile.openstreetmap.org')
+	);
 }
 
 function isApiRequest(url: URL): boolean {
-	return url.pathname.startsWith('/api/') ||
+	return (
+		url.pathname.startsWith('/api/') ||
 		url.pathname.startsWith('/requests') ||
 		url.pathname.startsWith('/services') ||
 		url.pathname.startsWith('/config') ||
 		url.pathname.startsWith('/image') ||
-		url.pathname.startsWith('/jurisdiction-admin');
+		url.pathname.startsWith('/jurisdiction-admin')
+	);
 }
 
 async function trimCache(cacheName: string, maxItems: number) {

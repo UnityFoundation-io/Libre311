@@ -76,11 +76,8 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	);
 
 	const syncSignal = writable(0);
-	const backgroundSync = createBackgroundSync(
-		baseLibre311Service,
-		offlineQueue,
-		props,
-		() => syncSignal.update((n) => n + 1)
+	const backgroundSync = createBackgroundSync(baseLibre311Service, offlineQueue, props, () =>
+		syncSignal.update((n) => n + 1)
 	);
 
 	// Trigger sync when coming back online
@@ -91,7 +88,8 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 			props.alert({
 				type: 'warn',
 				title: 'Offline',
-				description: 'You are offline. Requests will be queued and submitted when connectivity returns.'
+				description:
+					'You are offline. Requests will be queued and submitted when connectivity returns.'
 			});
 		}
 	});

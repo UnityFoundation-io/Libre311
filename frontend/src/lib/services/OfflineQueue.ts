@@ -14,11 +14,7 @@ const STORE_NAME = 'pending_requests';
 const DB_VERSION = 1;
 
 export interface OfflineQueue {
-	enqueue(
-		params: CreateServiceRequestParams,
-		serviceName: string,
-		photo?: Blob
-	): Promise<string>;
+	enqueue(params: CreateServiceRequestParams, serviceName: string, photo?: Blob): Promise<string>;
 	getAll(): Promise<PendingRequest[]>;
 	remove(clientRequestId: string): Promise<void>;
 	incrementAttempts(clientRequestId: string): Promise<void>;

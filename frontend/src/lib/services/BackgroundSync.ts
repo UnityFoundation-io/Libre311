@@ -30,7 +30,8 @@ export function createBackgroundSync(
 
 			// Clear offline placeholder media_url if present
 			const existingMediaUrl = entry.params.media_url;
-			const finalMediaUrl = mediaUrl ?? (existingMediaUrl === 'offline://pending' ? undefined : existingMediaUrl);
+			const finalMediaUrl =
+				mediaUrl ?? (existingMediaUrl === 'offline://pending' ? undefined : existingMediaUrl);
 
 			const params = {
 				...entry.params,
