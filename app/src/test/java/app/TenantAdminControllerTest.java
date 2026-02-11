@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static app.util.MockAuthenticationFetcher.DEFAULT_MOCK_AUTHENTICATION;
 import static io.micronaut.http.HttpStatus.*;
@@ -155,6 +156,32 @@ public class TenantAdminControllerTest {
     }
 
     @Test
+    public void cantUpdateRemoteHostsBadAuth() {
+        setAuthHasPermissionResponse(true, "systemAdmin@test.io", null, List.of("LIBRE311_ADMIN_EDIT-SUBTENANT"));
+        // Can set remote hosts
+        HttpRequest<?> request = HttpRequest.POST("/jurisdictions/neverland/remote_hosts?tenant_id=1", Set.of("foo", "bar"))
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
+    public void cantUpdateRemoteHostsOnNonExistentJurisdiction() {
+        setAuthHasPermissionResponse(true, "systemAdmin@test.io", null, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
+        // Can set remote hosts
+        HttpRequest<?> request = HttpRequest.POST("/jurisdictions/neverland/remote_hosts?tenant_id=1", Set.of("foo", "bar"))
+                .header("Authorization", "Bearer token.text.here");
+
+        HttpClientResponseException exception = assertThrowsExactly(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, JurisdictionDTO.class);
+        });
+        assertEquals(NOT_FOUND, exception.getStatus());
+    }
+
+    @Test
     public void canUpdateAJurisdiction() {
         setAuthHasPermissionResponse(true, "systemAdmin@test.io", null, List.of("LIBRE311_ADMIN_EDIT-SYSTEM"));
 
@@ -209,6 +236,21 @@ public class TenantAdminControllerTest {
         assertTrue(jurisdictionDTO.getBounds().length > 0);
         assertEquals(5, jurisdictionDTO.getBounds().length);
         assertTrue(Arrays.deepEquals(updateBound, jurisdictionDTO.getBounds()));
+
+        // Can set remote hosts
+        request = HttpRequest.POST("/jurisdictions/ogdenville.city/remote_hosts?tenant_id=1", Set.of("foo", "bar"))
+                .header("Authorization", "Bearer token.text.here");
+
+        response = client.toBlocking().exchange(request, JurisdictionDTO.class);
+        assertEquals(OK, response.getStatus());
+        jurisdictionDTOOptional = response.getBody(JurisdictionDTO.class);
+        assertTrue(jurisdictionDTOOptional.isPresent());
+        jurisdictionDTO = jurisdictionDTOOptional.get();
+        assertEquals("Ogdenville - America's Barley Basket", jurisdictionDTO.getName());
+        assertEquals("221, 83%, 53%", jurisdictionDTO.getPrimaryColor());
+        assertNull(jurisdictionDTO.getBounds()); // Not retrieving bounds here
+        assertEquals(2, jurisdictionDTO.getRemoteHosts().size());
+        assertTrue(jurisdictionDTO.getRemoteHosts().containsAll(List.of("foo", "bar")));
     }
 
     @Test
