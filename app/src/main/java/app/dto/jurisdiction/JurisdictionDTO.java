@@ -16,7 +16,6 @@ package app.dto.jurisdiction;
 
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionBoundary;
-import app.model.jurisdiction.RemoteHost;
 import app.service.geometry.LibreGeometryFactory;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -24,7 +23,6 @@ import io.micronaut.core.annotation.Introspected;
 import org.locationtech.jts.geom.Polygon;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Introspected
 public class JurisdictionDTO {
@@ -78,7 +76,6 @@ public class JurisdictionDTO {
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
         this.termsOfUseContent = jurisdiction.getTermsOfUseContent();
         this.privacyPolicyContent = jurisdiction.getPrivacyPolicyContent();
-        setRemoteHosts(jurisdiction.getRemoteHosts().stream().map(RemoteHost::getName).collect(Collectors.toSet()));
     }
 
     public JurisdictionDTO(Jurisdiction jurisdiction, JurisdictionBoundary boundary) {
