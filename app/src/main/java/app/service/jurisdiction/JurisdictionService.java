@@ -17,6 +17,7 @@ package app.service.jurisdiction;
 import app.dto.jurisdiction.CreateJurisdictionDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
 import app.dto.jurisdiction.PatchJurisdictionDTO;
+import app.dto.jurisdiction.UpdatePolicyContentDTO;
 import app.exception.Libre311BaseException;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionBoundary;
@@ -29,6 +30,7 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.transaction.Transactional;
 import java.util.*;
 
 @Singleton
@@ -114,22 +116,34 @@ public class JurisdictionService {
         jurisdiction.setPrimaryColor(requestDTO.getPrimaryColor());
         jurisdiction.setPrimaryHoverColor(requestDTO.getPrimaryHoverColor());
         jurisdiction.setLogoMediaUrl(requestDTO.getLogoMediaUrl());
-        jurisdiction.setTermsOfUseContent(
-            requestDTO.getTermsOfUseContent() != null && !requestDTO.getTermsOfUseContent().isEmpty()
-                ? requestDTO.getTermsOfUseContent()
-                : null
-        );
-        jurisdiction.setPrivacyPolicyContent(
-            requestDTO.getPrivacyPolicyContent() != null && !requestDTO.getPrivacyPolicyContent().isEmpty()
-                ? requestDTO.getPrivacyPolicyContent()
-                : null
-        );
+        jurisdiction.setTermsOfUseContent(emptyToNull(requestDTO.getTermsOfUseContent()));
+        jurisdiction.setPrivacyPolicyContent(emptyToNull(requestDTO.getPrivacyPolicyContent()));
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
         JurisdictionBoundary savedBoundary = jurisdictionBoundaryService.saveBoundary(
             savedJurisdiction, requestDTO.getBounds());
 
         return new JurisdictionDTO(savedJurisdiction, savedBoundary);
+    }
+
+    @Transactional
+    public JurisdictionDTO updatePolicyContent(String jurisdictionId, UpdatePolicyContentDTO requestDTO) {
+        Optional<Jurisdiction> jurisdictionOptional = jurisdictionRepository.findById(jurisdictionId);
+
+        if (jurisdictionOptional.isEmpty()) {
+            throw JurisdictionNotFoundException.noJurisdictionForId(jurisdictionId);
+        }
+
+        Jurisdiction jurisdiction = jurisdictionOptional.get();
+
+        // PUT semantics: always set both fields.
+        // null or empty string clears the field (default content will be served).
+        jurisdiction.setTermsOfUseContent(emptyToNull(requestDTO.getTermsOfUseContent()));
+        jurisdiction.setPrivacyPolicyContent(emptyToNull(requestDTO.getPrivacyPolicyContent()));
+
+        JurisdictionDTO jurisdictionDTO = new JurisdictionDTO(jurisdictionRepository.update(jurisdiction));
+        applyDefaultPolicyContent(jurisdictionDTO);
+        return jurisdictionDTO;
     }
 
     public JurisdictionDTO updateJurisdiction(String jurisdictionId, PatchJurisdictionDTO requestDTO) {
@@ -154,6 +168,10 @@ public class JurisdictionService {
 
 
 
+    private static String emptyToNull(String value) {
+        return value != null && !value.isEmpty() ? value : null;
+    }
+
     private void applyPatch(PatchJurisdictionDTO jurisdictionDTO, Jurisdiction jurisdiction) {
         if (jurisdictionDTO.getName() != null) {
             jurisdiction.setName(jurisdictionDTO.getName());
@@ -168,14 +186,10 @@ public class JurisdictionService {
             jurisdiction.setLogoMediaUrl(jurisdictionDTO.getLogoMediaUrl());
         }
         if (jurisdictionDTO.getTermsOfUseContent() != null) {
-            jurisdiction.setTermsOfUseContent(
-                jurisdictionDTO.getTermsOfUseContent().isEmpty() ? null : jurisdictionDTO.getTermsOfUseContent()
-            );
+            jurisdiction.setTermsOfUseContent(emptyToNull(jurisdictionDTO.getTermsOfUseContent()));
         }
         if (jurisdictionDTO.getPrivacyPolicyContent() != null) {
-            jurisdiction.setPrivacyPolicyContent(
-                jurisdictionDTO.getPrivacyPolicyContent().isEmpty() ? null : jurisdictionDTO.getPrivacyPolicyContent()
-            );
+            jurisdiction.setPrivacyPolicyContent(emptyToNull(jurisdictionDTO.getPrivacyPolicyContent()));
         }
     }
 }

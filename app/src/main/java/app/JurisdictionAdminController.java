@@ -16,6 +16,8 @@ package app;
 
 import app.dto.group.GroupDTO;
 import app.dto.group.CreateUpdateGroupDTO;
+import app.dto.jurisdiction.JurisdictionDTO;
+import app.dto.jurisdiction.UpdatePolicyContentDTO;
 import app.dto.service.CreateServiceDTO;
 import app.dto.service.PatchServiceOrderPositionDTO;
 import app.dto.service.ServiceDTO;
@@ -28,6 +30,7 @@ import app.dto.servicerequest.PatchServiceRequestDTO;
 import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.security.RequiresPermissions;
+import app.service.jurisdiction.JurisdictionService;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import io.micronaut.http.HttpResponse;
@@ -53,12 +56,24 @@ import static app.security.Permission.*;
 @Tag(name = "Jurisdiction")
 public class JurisdictionAdminController {
 
+    private final JurisdictionService jurisdictionService;
     private final ServiceService serviceService;
     private final ServiceRequestService serviceRequestService;
 
-    public JurisdictionAdminController(ServiceService serviceService, ServiceRequestService serviceRequestService) {
+    public JurisdictionAdminController(JurisdictionService jurisdictionService,
+                                       ServiceService serviceService,
+                                       ServiceRequestService serviceRequestService) {
+        this.jurisdictionService = jurisdictionService;
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
+    }
+
+    @Put(uris = { "/policy-content{?jurisdiction_id}", "/policy-content.json{?jurisdiction_id}" })
+    @ExecuteOn(TaskExecutors.IO)
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
+    public JurisdictionDTO updatePolicyContent(@Valid @Body UpdatePolicyContentDTO requestDTO,
+                                               @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return jurisdictionService.updatePolicyContent(jurisdiction_id, requestDTO);
     }
 
     @Get(uris = { "/requests/removal-suggestions{?jurisdiction_id}", "/requests/removal-suggestions.json{?jurisdiction_id}" })
