@@ -500,7 +500,9 @@ const JurisdictionConfigSchema = z
 	.object({
 		name: z.string(),
 		bounds: z.array(latLngTupleSchema).min(1),
-		auth_base_url: z.string()
+		auth_base_url: z.string(),
+		primary_color: z.string().optional(),
+		primary_hover_color: z.string().optional()
 	})
 	.merge(HasJurisdictionIdSchema);
 

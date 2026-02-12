@@ -8,7 +8,7 @@ type AsyncInProgress = {
 	type: 'inProgress';
 };
 
-type AsyncSuccess<TResult> = {
+export type AsyncSuccess<TResult> = {
 	type: 'success';
 	value: TResult;
 };
