@@ -24,5 +24,5 @@ import java.util.Map;
 public interface ReCaptchaClient {
 
     @Post(produces = MediaType.APPLICATION_FORM_URLENCODED)
-    Map verifyReCaptcha(String secret, String response);
+    Map<Object, Object> verifyReCaptcha(String secret, String response);
 }

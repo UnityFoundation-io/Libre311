@@ -47,7 +47,7 @@ public class ReCaptchaService {
 
     public void verifyReCaptcha(String response) {
         LOG.debug("Verifying recaptcha, response: {}", response);
-        Map map = client.verifyReCaptcha(this.secret, response);
+        Map<Object, Object> map = client.verifyReCaptcha(this.secret, response);
         Boolean success = (Boolean) map.get("success");
         if (!success){
             throw new RecaptchaVerificationFailed();
