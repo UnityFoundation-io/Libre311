@@ -17,6 +17,7 @@ import type { Maybe } from '$lib/utils/types';
 import type { Page } from '@sveltejs/kit';
 import { getContext, setContext } from 'svelte';
 import { writable, type Readable, get } from 'svelte/store';
+import type { OfflineQueue, PendingRequest } from '$lib/services/OfflineQueue';
 
 const key = Symbol();
 
@@ -28,9 +29,34 @@ export type ServiceRequestsContext = {
 	refresh(): Promise<void>;
 };
 
+let pendingIdCounter = -1;
+
+function pendingToServiceRequest(entry: PendingRequest): ServiceRequest {
+	return {
+		service_request_id: pendingIdCounter--,
+		service_code: entry.params.service_code,
+		status: 'open',
+		service_name: entry.serviceName || 'Pending Request',
+		address: entry.params.address_string,
+		lat: entry.params.lat,
+		long: entry.params.long,
+		requested_datetime: new Date(entry.enqueuedAt).toISOString(),
+		updated_datetime: new Date(entry.enqueuedAt).toISOString(),
+		description: entry.params.description,
+		first_name: entry.params.first_name,
+		last_name: entry.params.last_name,
+		email: entry.params.email,
+		phone: entry.params.phone,
+		_isPending: true,
+		_clientRequestId: entry.clientRequestId
+	};
+}
+
 export function createServiceRequestsContext(
 	libreService: Libre311Service,
-	page: Readable<Page<Record<string, string>, string | null>>
+	page: Readable<Page<Record<string, string>, string | null>>,
+	offlineQueue?: OfflineQueue,
+	syncSignal?: Readable<number>
 ): ServiceRequestsContext {
 	// consider type as Maybe<AsyncRequest<ServiceRequest>> that would cover all possible states
 	const selectedServiceRequest = writable<Maybe<ServiceRequest>>();
@@ -95,6 +121,14 @@ export function createServiceRequestsContext(
 				page.url.searchParams
 			);
 			const res = await libreService.getServiceRequests(updatedParams);
+
+			// Prepend pending offline requests
+			if (offlineQueue) {
+				const pending = await offlineQueue.getAll();
+				const pendingServiceRequests = pending.map(pendingToServiceRequest);
+				res.serviceRequests = [...pendingServiceRequests, ...res.serviceRequests];
+			}
+
 			serviceRequestsResponse.set(asAsyncSuccess(res));
 		} catch (error) {
 			serviceRequestsResponse.set({
@@ -112,6 +146,18 @@ export function createServiceRequestsContext(
 		}
 	});
 
+	// Auto-refresh after background sync completes
+	if (syncSignal) {
+		let initial = true;
+		syncSignal.subscribe(() => {
+			if (initial) {
+				initial = false;
+				return;
+			}
+			refresh();
+		});
+	}
+
 	function applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL) {
 		const queryParams = FilteredServiceRequestsParamsMapper.toURLSearchParams(params);
 		goto(`${url.pathname}?${queryParams.toString()}`);
@@ -124,6 +170,14 @@ export function createServiceRequestsContext(
 		);
 		try {
 			const res = await libreService.getServiceRequests(updatedParams);
+
+			// Prepend pending offline requests
+			if (offlineQueue) {
+				const pending = await offlineQueue.getAll();
+				const pendingServiceRequests = pending.map(pendingToServiceRequest);
+				res.serviceRequests = [...pendingServiceRequests, ...res.serviceRequests];
+			}
+
 			serviceRequestsResponse.set(asAsyncSuccess(res));
 		} catch (error) {
 			serviceRequestsResponse.set(asAsyncFailure(error));

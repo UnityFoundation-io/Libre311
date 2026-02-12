@@ -85,6 +85,10 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("media_url")
     private String mediaUrl;
 
+    @Nullable
+    @JsonProperty("client_request_id")
+    private String clientRequestId;
+
     @NotBlank
     @JsonProperty("g_recaptcha_response")
     private String gRecaptchaResponse;
@@ -215,6 +219,15 @@ public class PostRequestServiceRequestDTO {
         this.gRecaptchaResponse = gRecaptchaResponse;
     }
 
+    @Nullable
+    public String getClientRequestId() {
+        return clientRequestId;
+    }
+
+    public void setClientRequestId(@Nullable String clientRequestId) {
+        this.clientRequestId = clientRequestId;
+    }
+
     public Map<String, String> getAttributes() {
         return attributes;
     }
@@ -256,6 +269,7 @@ public class PostRequestServiceRequestDTO {
                 ", phone='" + phone + '\'' +
                 ", description='" + description + '\'' +
                 ", mediaUrl='" + mediaUrl + '\'' +
+                ", clientRequestId='" + clientRequestId + '\'' +
                 ", gRecaptchaResponse='" + gRecaptchaResponse + '\'' +
                 ", attributes=" + attributes +
                 '}';

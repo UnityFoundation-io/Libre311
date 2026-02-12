@@ -33,8 +33,10 @@
 	import * as turf from '@turf/turf';
 
 	const libre311 = useLibre311Service();
-	const linkResolver = useLibre311Context().linkResolver;
-	const alertError = useLibre311Context().alertError;
+	const libre311Context = useLibre311Context();
+	const linkResolver = libre311Context.linkResolver;
+	const alertError = libre311Context.alertError;
+	const isOnline = libre311Context.networkStatus.isOnline;
 
 	let params: Partial<CreateServiceRequestUIParams> = {};
 	let centerPos: PointTuple = getStartingCenterPos();
@@ -133,7 +135,7 @@
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
 			<MapMarker latLng={centerPos} options={{ icon }} />
-			{#if step == CreateServiceRequestSteps.LOCATION}
+			{#if step == CreateServiceRequestSteps.LOCATION && $isOnline}
 				<MapGeosearch on:geosearch={handleGeosearch} />
 			{/if}
 		</MapComponent>
