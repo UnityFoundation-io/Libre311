@@ -194,7 +194,10 @@ public class JurisdictionService {
 
         jurisdictionRepository.update(jurisdiction);
 
-        return new JurisdictionDTO(jurisdiction);
+        var jurisdictionDTO = new JurisdictionDTO(jurisdiction);
+        jurisdictionDTO.setRemoteHosts(remoteHosts);
+
+        return jurisdictionDTO;
     }
 
 }
