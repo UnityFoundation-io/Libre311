@@ -15,7 +15,6 @@
 package app.service.storage;
 
 import app.exception.Libre311BaseException;
-import app.recaptcha.ReCaptchaService;
 import app.imagedetection.ImageDetector;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
@@ -46,22 +45,18 @@ public class StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StorageService.class);
     private final CloudStorageUploader cloudStorageUploader;
-    private final ReCaptchaService reCaptchaService;
     private final ImageDetector imageDetector;
 
     private final Set<MediaType> supportedMediaTypes = Set.of(MediaType.IMAGE_PNG_TYPE,
         MediaType.IMAGE_JPEG_TYPE, MediaType.IMAGE_WEBP_TYPE);
 
     public StorageService(CloudStorageUploader cloudStorageUploader,
-                          ReCaptchaService reCaptchaService,
                           ImageDetector imageDetector) {
         this.cloudStorageUploader = cloudStorageUploader;
-        this.reCaptchaService = reCaptchaService;
         this.imageDetector = imageDetector;
     }
 
-    public String upload(CompletedFileUpload file, String gRecaptchaResponse) {
-        reCaptchaService.verifyReCaptcha(gRecaptchaResponse);
+    public String upload(CompletedFileUpload file) {
         MediaType mediaType = file.getContentType().orElseThrow(UnsupportedMediaTypeException::new);
         if (!supportedMediaTypes.contains(mediaType)) {
             throw new UnsupportedMediaTypeException(mediaType);

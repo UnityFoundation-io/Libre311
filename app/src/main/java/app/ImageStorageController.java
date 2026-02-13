@@ -14,6 +14,7 @@
 
 package app;
 
+import app.recaptcha.CheckRecaptcha;
 import app.service.storage.StorageService;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Consumes;
@@ -41,8 +42,10 @@ public class ImageStorageController {
     @Post
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ExecuteOn(TaskExecutors.IO)
+    @CheckRecaptcha
     public String upload(@Part("file") CompletedFileUpload file,
-        @Part("g_recaptcha_response") String gRecaptchaResponse) {
-        return storageService.upload(file, gRecaptchaResponse);
+        @Part("g_recaptcha_response") String gRecaptchaResponse // TODO: figure out how to not have unused var
+    ) {
+        return storageService.upload(file);
     }
 }

@@ -1,0 +1,52 @@
+services:
+  libre311-imageserv:
+    image: nginx:alpine
+    container_name: libre311-imageserv
+    ports:
+      - "7000:80"
+    volumes:
+      # We only mount the image store now. No config file mount needed.
+      - ./image-store:/usr/share/nginx/html/images:ro
+    restart: unless-stopped
+    # We override the command to create the config file on the fly
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat <<'EOF' > /etc/nginx/conf.d/default.conf
+        map $$http_origin $$cors_origin {
+            default "";
+            "http://localhost:3000"          $$http_origin;
+            "localhost:3000"                 $$http_origin;
+            "http://127.0.0.1:3000"          $$http_origin;
+            "http://libre311-ui:3000"        $$http_origin;
+            "http://libre311-ui-dev:3000"    $$http_origin;
+        }
+        
+        server {
+            listen 80;
+            server_name localhost;
+        
+            location /images/ {
+                root /usr/share/nginx/html;
+                autoindex on;
+        
+                add_header 'Access-Control-Allow-Origin' $$cors_origin always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
+                add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+        
+                if ($$request_method = 'OPTIONS') {
+                    add_header 'Access-Control-Allow-Origin' $$cors_origin always;
+                    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                    add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
+                    add_header 'Access-Control-Max-Age' 1728000;
+                    add_header 'Content-Type' 'text/plain; charset=utf-8';
+                    add_header 'Content-Length' 0;
+                    return 204;
+                }
+            }
+        }
+        EOF
+        # After writing the file, start Nginx
+        nginx -g 'daemon off;'
