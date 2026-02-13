@@ -188,7 +188,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("ogdenville.city");
         createJurisdictionDTO.setName("City of Ogdenville");
-        createJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
+        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
 
         Double[][] bound = {
                 {-90.30025693587594, 38.68777201455936},
@@ -260,7 +260,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("ogdenville.town");
         createJurisdictionDTO.setName("City of Ogdenville");
-        createJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
+        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
 
         // first and last are not the same
         Double[][] bound = {
@@ -288,7 +288,7 @@ public class TenantAdminControllerTest {
         CreateJurisdictionDTO createJurisdictionDTO = new CreateJurisdictionDTO();
         createJurisdictionDTO.setJurisdictionId("springfield.city");
         createJurisdictionDTO.setName("City of Springfield");
-        createJurisdictionDTO.setPrimaryColor("221, 83%, 53%");
+        createJurisdictionDTO.setPrimaryColor("221 83% 53%");
 
         // not tuples
         Double[][] bound = {
