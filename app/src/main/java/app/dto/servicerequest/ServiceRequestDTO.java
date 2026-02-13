@@ -92,6 +92,9 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("removal_suggestions_count")
     private Long removalSuggestionsCount = 0L;
 
+    @JsonProperty("project_id")
+    private Long projectId;
+
     public ServiceRequestDTO() {
     }
 
@@ -116,6 +119,17 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         if (serviceRequest.getJurisdiction() != null) {
             this.jurisdictionId = serviceRequest.getJurisdiction().getId();
         }
+        if (serviceRequest.getProject() != null) {
+            this.projectId = serviceRequest.getProject().getId();
+        }
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public Long getId() {

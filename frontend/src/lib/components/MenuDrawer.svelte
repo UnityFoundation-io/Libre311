@@ -78,6 +78,14 @@
 						>
 							<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
 						</Menu.Item>
+						<Menu.Item
+							key="projects"
+							label="Project Management"
+							href="/projects"
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
+						</Menu.Item>
 					</AuthGuard>
 					<AuthGuard
 						requires={[

@@ -3,6 +3,7 @@
 	import Bars3 from '$lib/components/Svg/Bars3.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
 	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
+	import { createJurisdictionContext } from '$lib/context/JurisdictionContext';
 	import SomethingWentWrong from '$lib/components/SomethingWentWrong.svelte';
 	import '../../node_modules/leaflet-geosearch/dist/geosearch.css';
 	import '../app.pcss';
@@ -79,6 +80,7 @@
 
 {#if contextProviderProps.type == 'success'}
 	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
+		{@const jurisdictionContext = createJurisdictionContext()}
 		<header class="flex items-center justify-center">
 			<div class="flex gap-4">
 				<button
