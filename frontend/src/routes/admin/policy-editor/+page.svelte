@@ -122,6 +122,35 @@
 		activeTab = tab;
 	}
 
+	// File upload
+	let fileInput: HTMLInputElement;
+
+	function handleUploadClick() {
+		fileInput.click();
+	}
+
+	function handleFileSelected(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			const content = e.target?.result as string;
+			if (activeTab === 'privacy') {
+				privacyContent = content;
+				privacyEditorRef?.reset(content);
+			} else {
+				termsContent = content;
+				termsEditorRef?.reset(content);
+			}
+		};
+		reader.readAsText(file);
+
+		// Reset so the same file can be re-selected
+		input.value = '';
+	}
+
 	// Warn on browser navigation (refresh, close tab)
 	function handleBeforeUnload(e: BeforeUnloadEvent) {
 		if (isDirty) {
@@ -213,8 +242,29 @@
 			</nav>
 		</div>
 
+		<!-- Upload button -->
+		<div class="mt-4">
+			<input
+				bind:this={fileInput}
+				type="file"
+				accept=".md,.markdown,.txt"
+				class="hidden"
+				on:change={handleFileSelected}
+			/>
+			<button
+				type="button"
+				class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+				on:click={handleUploadClick}
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+				</svg>
+				Upload File
+			</button>
+		</div>
+
 		<!-- Editor panels -->
-		<div class="mt-6">
+		<div class="mt-4">
 			<div class:hidden={activeTab !== 'privacy'}>
 				<MarkdownEditor
 					bind:this={privacyEditorRef}
@@ -243,11 +293,13 @@
 			>
 				Cancel
 			</button>
-			<SaveButton
-				disabled={!isDirty}
-				{isSaving}
-				on:click={handleSave}
-			/>
+			<span title={!isDirty ? 'Make changes to enable saving' : ''}>
+				<SaveButton
+					disabled={!isDirty}
+					{isSaving}
+					on:click={handleSave}
+				/>
+			</span>
 		</div>
 	{/if}
 </div>
