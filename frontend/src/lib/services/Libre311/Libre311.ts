@@ -545,6 +545,13 @@ export const LibrePermissionsSchema = z.union([
 
 export type LibrePermissions = z.infer<typeof LibrePermissionsSchema>;
 
+export const UpdatePolicyContentParamsSchema = z.object({
+	terms_of_use_content: z.string().nullish(),
+	privacy_policy_content: z.string().nullish()
+});
+
+export type UpdatePolicyContentParams = z.infer<typeof UpdatePolicyContentParamsSchema>;
+
 type DeleteAttributeParams = {
 	serviceCode: number;
 	attributeCode: number;
@@ -586,6 +593,7 @@ export interface Libre311Service extends Open311Service {
 	createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void>;
 	getRemovalSuggestions(service_request_id: number): Promise<GetRemovalSuggestionsResponse>;
 	deleteRemovalSuggestion(params: { id: number }): Promise<void>;
+	updatePolicyContent(params: UpdatePolicyContentParams): Promise<void>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -643,7 +651,9 @@ const ROUTES = {
 	getRemovalSuggestions: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
-		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`
+		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
+	putPolicyContent: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/policy-content?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -747,6 +757,19 @@ export class Libre311ServiceImpl implements Libre311Service {
 		await this.axiosInstance.delete(
 			ROUTES.deleteRemovalSuggestion({ id: params.id, jurisdiction_id: this.jurisdictionId })
 		);
+	}
+
+	async updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
+		UpdatePolicyContentParamsSchema.parse(params);
+		try {
+			await this.axiosInstance.put(
+				ROUTES.putPolicyContent({ jurisdiction_id: this.jurisdictionId }),
+				params
+			);
+		} catch (error) {
+			console.log(error);
+			throw error;
+		}
 	}
 
 	async deleteServiceRequest(params: DeleteServiceRequestRequest): Promise<boolean> {
