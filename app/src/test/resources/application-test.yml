@@ -37,8 +37,6 @@ datasources:
   default:
     driver-class-name: com.mysql.cj.jdbc.Driver
     db-type: mysql
-    username: root
-    password: test
 
 test-resources:
   containers:
