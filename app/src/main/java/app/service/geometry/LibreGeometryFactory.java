@@ -30,7 +30,13 @@ public class LibreGeometryFactory extends GeometryFactory {
      * @return a Polygon with no holes
      */
     public Polygon createPolygon(Double[][] coordinates) {
-        Coordinate[] exteriorCoords = Arrays.stream(coordinates)
+        Double[][] closedCoordinates = coordinates;
+        if (coordinates.length > 0 && !Arrays.equals(coordinates[0], coordinates[coordinates.length - 1])) {
+            closedCoordinates = Arrays.copyOf(coordinates, coordinates.length + 1);
+            closedCoordinates[closedCoordinates.length - 1] = coordinates[0];
+        }
+
+        Coordinate[] exteriorCoords = Arrays.stream(closedCoordinates)
             .map(LibreGeometryFactory::mapToCoordinate)
             .toArray(Coordinate[]::new);
 

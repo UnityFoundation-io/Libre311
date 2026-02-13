@@ -368,7 +368,8 @@ export const ServiceRequestSchema = z
 		media_url: urlSchema.optional(),
 		selected_values: z.array(SelectedValuesSchema).optional(),
 		priority: ServiceRequestPrioritySchema.optional(),
-		removal_suggestions_count: z.number().optional()
+		removal_suggestions_count: z.number().optional(),
+		project_id: z.number().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -381,6 +382,8 @@ export type ServiceRequest = z.infer<typeof ServiceRequestSchema> & {
 
 export const GetServiceRequestsResponseSchema = z.array(ServiceRequestSchema);
 export type GetServiceRequestsResponse = z.infer<typeof GetServiceRequestsResponseSchema>;
+
+
 
 // ***************** Create Group ***************** //
 export const CreateGroupParamsSchema = z.object({ name: z.string() });
@@ -496,6 +499,37 @@ export type FilteredServiceRequestsParams =
 
 const latLngTupleSchema = z.tuple([z.number(), z.number()]);
 
+// ***************** Projects ***************** //
+export const ProjectSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    description: z.string().optional(),
+    bounds: z.array(latLngTupleSchema).min(4),
+    start_date: z.string(),
+    end_date: z.string(),
+    jurisdiction_id: z.string()
+});
+export type Project = z.infer<typeof ProjectSchema>;
+
+export const CreateProjectParamsSchema = z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    bounds: z.array(latLngTupleSchema).min(4),
+    start_date: z.string(),
+    end_date: z.string()
+});
+export type CreateProjectParams = z.infer<typeof CreateProjectParamsSchema>;
+
+export const UpdateProjectParamsSchema = z.object({
+    id: z.number(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    bounds: z.array(latLngTupleSchema).min(4).optional(),
+    start_date: z.string().optional(),
+    end_date: z.string().optional()
+});
+export type UpdateProjectParams = z.infer<typeof UpdateProjectParamsSchema>;
+
 const JurisdictionConfigSchema = z
 	.object({
 		name: z.string(),
@@ -586,6 +620,10 @@ export interface Libre311Service extends Open311Service {
 	createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void>;
 	getRemovalSuggestions(service_request_id: number): Promise<GetRemovalSuggestionsResponse>;
 	deleteRemovalSuggestion(params: { id: number }): Promise<void>;
+	getProjects(): Promise<Project[]>;
+	createProject(params: CreateProjectParams): Promise<Project>;
+	updateProject(params: UpdateProjectParams): Promise<Project>;
+	deleteProject(id: number): Promise<void>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -643,7 +681,15 @@ const ROUTES = {
 	getRemovalSuggestions: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
-		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`
+		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
+	getProjects: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
+	postProject: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
+	patchProject: (id: number, params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteProject: (id: number, params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -746,6 +792,36 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async deleteRemovalSuggestion(params: { id: number }): Promise<void> {
 		await this.axiosInstance.delete(
 			ROUTES.deleteRemovalSuggestion({ id: params.id, jurisdiction_id: this.jurisdictionId })
+		);
+	}
+
+	async getProjects(): Promise<Project[]> {
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getProjects({ jurisdiction_id: this.jurisdictionId })
+		);
+		return z.array(ProjectSchema).parse(res.data);
+	}
+
+	async createProject(params: CreateProjectParams): Promise<Project> {
+		const res = await this.axiosInstance.post<unknown>(
+			ROUTES.postProject({ jurisdiction_id: this.jurisdictionId }),
+			params
+		);
+		return ProjectSchema.parse(res.data);
+	}
+
+	async updateProject(params: UpdateProjectParams): Promise<Project> {
+		const { id, ...rest } = params;
+		const res = await this.axiosInstance.patch<unknown>(
+			ROUTES.patchProject(id, { jurisdiction_id: this.jurisdictionId }),
+			rest
+		);
+		return ProjectSchema.parse(res.data);
+	}
+
+	async deleteProject(id: number): Promise<void> {
+		await this.axiosInstance.delete(
+			ROUTES.deleteProject(id, { jurisdiction_id: this.jurisdictionId })
 		);
 	}
 

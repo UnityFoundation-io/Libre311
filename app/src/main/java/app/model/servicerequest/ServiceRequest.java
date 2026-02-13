@@ -46,6 +46,10 @@ public class ServiceRequest {
     @JoinColumn(name = "jurisdiction_id")
     private Jurisdiction jurisdiction;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private app.model.project.Project project;
+
     @Nullable
     @Column(columnDefinition = "TEXT")
     private String attributesJson;
@@ -151,6 +155,14 @@ public class ServiceRequest {
 
     public void setJurisdiction(Jurisdiction jurisdiction) {
         this.jurisdiction = jurisdiction;
+    }
+
+    public app.model.project.Project getProject() {
+        return project;
+    }
+
+    public void setProject(app.model.project.Project project) {
+        this.project = project;
     }
 
     @Nullable
