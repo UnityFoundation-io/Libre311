@@ -67,6 +67,8 @@ dependencies {
         }
     } // TODO: add postgres at least
 
+    testImplementation "com.github.docker-java:docker-java:3.3.1"
+    testImplementation "com.github.docker-java:docker-java-transport-okhttp:3.3.1"
 }
 
 application {
