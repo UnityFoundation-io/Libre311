@@ -13,9 +13,9 @@
 // limitations under the License.
 
 plugins {
-    id("io.micronaut.application") version "4.6.1"
+    id("io.micronaut.application") version "4.6.2"
     id("com.gradleup.shadow") version "8.3.9"
-    id("io.micronaut.test-resources") version "4.6.1"
+    id("io.micronaut.test-resources") version "4.6.2"
 }
 
 version = "0.1"
