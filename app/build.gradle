@@ -13,9 +13,9 @@
 // limitations under the License.
 
 plugins {
-    id("io.micronaut.application") version "4.6.2"
+    id("io.micronaut.application") version "4.6.1"
     id("com.gradleup.shadow") version "8.3.9"
-    id("io.micronaut.test-resources") version "4.6.2"
+    id("io.micronaut.test-resources") version "4.6.1"
 }
 
 version = "0.1"
@@ -67,8 +67,6 @@ dependencies {
         }
     } // TODO: add postgres at least
 
-    testImplementation "com.github.docker-java:docker-java:3.3.1"
-    testImplementation "com.github.docker-java:docker-java-transport-okhttp:3.3.1"
 }
 
 application {
