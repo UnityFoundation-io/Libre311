@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Button, Modal, Portal } from 'stwui';
+	import { tick } from 'svelte';
 
 	export let open = false;
 	export let title = 'Confirm Action';
@@ -7,6 +8,13 @@
 	export let handleClose: () => void;
 	export let handleConfirm: () => void;
 	export let loading = false;
+
+	$: if (open) {
+		tick().then(() => {
+			const cancelButton = document.querySelector<HTMLElement>("button[id='cancel_dismiss']");
+			cancelButton?.focus();
+		});
+	}
 </script>
 
 {#if open}
@@ -19,7 +27,7 @@
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
 					<div class="flex w-full justify-end gap-2">
-						<Button on:click={handleClose} type="ghost">Cancel</Button>
+						<Button id="cancel_dismiss" on:click={handleClose} type="ghost">Cancel</Button>
 						<Button on:click={handleConfirm} type="primary" {loading}>Confirm</Button>
 					</div>
 				</Modal.Content.Footer>
