@@ -502,7 +502,8 @@ const JurisdictionConfigSchema = z
 		bounds: z.array(latLngTupleSchema).min(1),
 		auth_base_url: z.string(),
 		primary_color: z.string().optional(),
-		primary_hover_color: z.string().optional()
+		primary_hover_color: z.string().optional(),
+		tenant_id: z.number()
 	})
 	.merge(HasJurisdictionIdSchema);
 
@@ -652,8 +653,8 @@ const ROUTES = {
 		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
 		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
-	putPolicyContent: (params: HasJurisdictionId) =>
-		`/jurisdiction-admin/policy-content?jurisdiction_id=${params.jurisdiction_id}`
+	patchJurisdictionPolicyAndTerms: (params: HasJurisdictionId, tenant_id: number) =>
+		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -761,9 +762,13 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	async updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
 		UpdatePolicyContentParamsSchema.parse(params);
+		(params as any).name = this.jurisdictionConfig.name;
 		try {
-			await this.axiosInstance.put(
-				ROUTES.putPolicyContent({ jurisdiction_id: this.jurisdictionId }),
+			await this.axiosInstance.patch(
+				ROUTES.patchJurisdictionPolicyAndTerms(
+					{ jurisdiction_id: this.jurisdictionId },
+					this.jurisdictionConfig.tenant_id
+				),
 				params
 			);
 		} catch (error) {

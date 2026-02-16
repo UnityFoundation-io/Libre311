@@ -24,7 +24,8 @@ import type {
 	Service,
 	ServiceDefinition,
 	ServiceRequest,
-	ServiceRequestsResponse
+	ServiceRequestsResponse,
+	UpdatePolicyContentParams
 } from './Libre311';
 import type { DeleteServiceRequestRequest } from './types/DeleteServiceRequestRequest';
 import type { ReverseGeocodeResponse } from '../geocoding';
@@ -180,5 +181,9 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 
 	deleteRemovalSuggestion(params: { id: number }): Promise<void> {
 		return this.wrapped.deleteRemovalSuggestion(params);
+	}
+
+	updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
+		return this.wrapped.updatePolicyContent(params);
 	}
 }
