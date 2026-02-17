@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import {onMount, tick} from 'svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
@@ -41,9 +41,14 @@
 	let privacyEditorRef: MarkdownEditor;
 	let termsEditorRef: MarkdownEditor;
 
+	let closePreviewButton: HTMLElement;
+
 	$: privacyDirty = privacyContent !== originalPrivacy;
 	$: termsDirty = termsContent !== originalTerms;
 	$: isDirty = privacyDirty || termsDirty;
+	$: if (showPreview) {
+		tick().then(() => closePreviewButton?.focus())
+	}
 
 	onMount(async () => {
 		await loadContent();
@@ -98,7 +103,8 @@
 
 			alert({
 				type: 'success',
-				title: 'Change saved.'
+				title: 'Change saved.',
+				description: 'Your changes have been saved successfully.'
 			});
 		} catch (err) {
 			alertError(err);
@@ -124,7 +130,7 @@
 	}
 
 	// Preview modal
-	let showPreview = false;
+	$: showPreview = false;
 	$: previewContent = activeTab === 'privacy' ? privacyContent : termsContent;
 	$: previewTitle = activeTab === 'privacy' ? 'Privacy Policy' : 'Terms of Use';
 
@@ -333,6 +339,7 @@
 			<div class="flex items-center justify-between border-b px-6 py-4">
 				<h2 class="text-lg font-semibold text-gray-900">Preview: {previewTitle}</h2>
 				<button
+					bind:this={closePreviewButton}
 					type="button"
 					class="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 					on:click={() => (showPreview = false)}
