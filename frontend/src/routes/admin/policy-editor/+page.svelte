@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {onMount, tick} from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
@@ -47,7 +47,7 @@
 	$: termsDirty = termsContent !== originalTerms;
 	$: isDirty = privacyDirty || termsDirty;
 	$: if (showPreview) {
-		tick().then(() => closePreviewButton?.focus())
+		tick().then(() => closePreviewButton?.focus());
 	}
 
 	onMount(async () => {
@@ -233,7 +233,10 @@
 				>
 					Privacy Policy
 					{#if privacyDirty}
-						<span class="ml-1 inline-block h-2 w-2 rounded-full bg-orange-400" title="Unsaved changes"></span>
+						<span
+							class="ml-1 inline-block h-2 w-2 rounded-full bg-orange-400"
+							title="Unsaved changes"
+						></span>
 					{/if}
 				</button>
 				<button
@@ -248,7 +251,10 @@
 				>
 					Terms of Use
 					{#if termsDirty}
-						<span class="ml-1 inline-block h-2 w-2 rounded-full bg-orange-400" title="Unsaved changes"></span>
+						<span
+							class="ml-1 inline-block h-2 w-2 rounded-full bg-orange-400"
+							title="Unsaved changes"
+						></span>
 					{/if}
 				</button>
 			</nav>
@@ -268,8 +274,19 @@
 				class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 				on:click={handleUploadClick}
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+					class="h-4 w-4"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+					/>
 				</svg>
 				Upload File
 			</button>
@@ -278,9 +295,24 @@
 				class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 				on:click={() => (showPreview = true)}
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+					class="h-4 w-4"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+					/>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+					/>
 				</svg>
 				Preview
 			</button>
@@ -317,11 +349,7 @@
 				Cancel
 			</button>
 			<span title={!isDirty ? 'Make changes to enable saving' : ''}>
-				<SaveButton
-					disabled={!isDirty}
-					{isSaving}
-					on:click={handleSave}
-				/>
+				<SaveButton disabled={!isDirty} {isSaving} on:click={handleSave} />
 			</span>
 		</div>
 	{/if}
@@ -334,7 +362,9 @@
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 		on:click|self={() => (showPreview = false)}
 	>
-		<div class="relative mx-4 flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-xl">
+		<div
+			class="relative mx-4 flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-xl"
+		>
 			<!-- Modal header -->
 			<div class="flex items-center justify-between border-b px-6 py-4">
 				<h2 class="text-lg font-semibold text-gray-900">Preview: {previewTitle}</h2>
@@ -344,7 +374,14 @@
 					class="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 					on:click={() => (showPreview = false)}
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+						class="h-5 w-5"
+					>
 						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
 					</svg>
 				</button>
