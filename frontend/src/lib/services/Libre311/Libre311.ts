@@ -762,7 +762,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 	async updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
 		UpdatePolicyContentParamsSchema.parse(params);
-		(params as any).name = this.jurisdictionConfig.name;
+		// @ts-expect-error The endpoint requiring name should be hidden from upstream
+		(params as unknown).name = this.jurisdictionConfig.name;
 		try {
 			await this.axiosInstance.patch(
 				ROUTES.patchJurisdictionPolicyAndTerms(
