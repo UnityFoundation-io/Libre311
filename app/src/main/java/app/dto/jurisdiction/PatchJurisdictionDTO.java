@@ -28,13 +28,13 @@ public class PatchJurisdictionDTO {
     private String name;
 
     @JsonProperty("primary_color")
-    @Pattern(regexp = "^\\d{1,3},\\s*\\d{1,3}%,\\s*\\d{1,3}%$",
-             message = "Must be valid HSL format: hue,saturation%,lightness%")
+    @Pattern(regexp = "^\\d{1,3}\\s\\d{1,3}%\\s\\d{1,3}%$",
+             message = "Must be valid HSL format: hue saturation% lightness%")
     private String primaryColor;
 
     @JsonProperty("primary_hover_color")
-    @Pattern(regexp = "^\\d{1,3},\\s*\\d{1,3}%,\\s*\\d{1,3}%$",
-             message = "Must be valid HSL format: hue,saturation%,lightness%")
+    @Pattern(regexp = "^\\d{1,3}\\s\\d{1,3}%\\s\\d{1,3}%$",
+             message = "Must be valid HSL format: hue saturation% lightness%")
     private String primaryHoverColor;
 
     @JsonProperty("logo_media_url")

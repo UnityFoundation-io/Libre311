@@ -47,6 +47,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.2.1'
+      - name: Ensure Docker Client Version
+        run: echo "api.version=1.44" > "$HOME/.docker-java.properties"
       - name: Execute Gradle build
         run: gradle build
       - name: Publish Test Report
