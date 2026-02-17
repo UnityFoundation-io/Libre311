@@ -84,7 +84,7 @@
 
 	<ConfirmationModal
 		open={showConfirmationModal}
-		title="Dismiss Suggestion"
+		title="Dismiss Removal Suggestion"
 		message="Are you sure you want to dismiss this removal suggestion?"
 		handleClose={() => (showConfirmationModal = false)}
 		handleConfirm={confirmDismiss}
