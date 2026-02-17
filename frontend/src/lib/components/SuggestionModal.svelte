@@ -3,6 +3,7 @@
 	import { Button, Modal, Input, TextArea, Portal } from 'stwui';
 	import messages from '$media/messages.json';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import {
 		createInput,
 		optionalCoalescePhoneNumberValidator,
@@ -15,6 +16,7 @@
 	import { z } from 'zod';
 
 	export let open = false;
+	export let success = false;
 	export let serviceRequestId: number;
 	export let handleClose: () => void;
 
@@ -23,6 +25,7 @@
 	);
 
 	const libre311Service = useLibre311Service();
+	const lib311Alert = useLibre311Context().alert;
 
 	let email: FormInputValue<string> = createInput('');
 	let name: FormInputValue<string | undefined> = createInput('');
@@ -31,7 +34,6 @@
 	let submitError = '';
 
 	let loading = false;
-	let success = false;
 
 	async function submit() {
 		submitError = '';
@@ -52,12 +54,12 @@
 				reason: reason.value
 			});
 			success = true;
-			setTimeout(() => {
-				handleClose();
-				setTimeout(() => {
-					reset();
-				}, 500);
-			}, 1500);
+			lib311Alert({
+				type: 'success',
+				title: 'Suggestion Submitted',
+				description: 'Your suggestion for removal has been submitted successfully.'
+			});
+			handleClose();
 		} catch (e) {
 			console.error(e);
 			submitError = 'Failed to submit suggestion.';
