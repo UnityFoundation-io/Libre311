@@ -11,7 +11,7 @@
 
 	$: if (open) {
 		tick().then(() => {
-			const cancelButton = document.querySelector<HTMLElement>("button[id='cancel_dismiss']");
+			const cancelButton = document.getElementById("cancel_dismiss");
 			cancelButton?.focus();
 		});
 	}
