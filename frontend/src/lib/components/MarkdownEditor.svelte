@@ -15,7 +15,6 @@
 	onMount(async () => {
 		const [{ default: EasyMDE }] = await Promise.all([
 			import('easymde'),
-			// @ts-expect-error - CSS import for side effects
 			import('easymde/dist/easymde.min.css')
 		]);
 
