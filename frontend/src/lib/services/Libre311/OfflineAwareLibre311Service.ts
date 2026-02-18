@@ -34,11 +34,17 @@ import type { NetworkStatus } from '../NetworkStatus';
 import type { OfflineQueue } from '../OfflineQueue';
 
 export class OfflineAwareLibre311Service implements Libre311Service {
+	_cachedServiceListResponse?: Promise<GetServiceListResponse>;
+
 	constructor(
 		private wrapped: Libre311Service,
 		private networkStatus: NetworkStatus,
 		private offlineQueue: OfflineQueue
-	) {}
+	) {
+		if (networkStatus.online) {
+			this._cachedServiceListResponse = wrapped.getServiceList();
+		}
+	}
 
 	async createServiceRequest(
 		params: CreateServiceRequestParams
@@ -87,7 +93,10 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 	}
 
 	getServiceList(): Promise<GetServiceListResponse> {
-		return this.wrapped.getServiceList();
+		if (this.networkStatus.online) {
+			this._cachedServiceListResponse = this.wrapped.getServiceList();
+		}
+		return this._cachedServiceListResponse ?? Promise.reject('No cached service list');
 	}
 
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition> {
