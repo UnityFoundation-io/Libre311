@@ -45,13 +45,14 @@ export function getStatusIconDataUrl(
 	const color = statusToColorMap[status];
 	const iconPath = iconPaths[status];
 
-	const backgroundCircle = `<circle cx="20" cy="20" r="18" fill="${color}"/>`;
+	const whiteCircle = `<circle cx="20" cy="20" r="18" fill="none" stroke="white" stroke-width="6"/>`;
+	const backgroundCircle = `<circle cx="20" cy="20" r="18" fill="${color}" stroke="black" stroke-width="2"/>`;
 
 	// For open status, just show the colored circle
 	// For other statuses, overlay the white icon centered in the viewBox
-	const whiteIcon = iconPath ? `<g transform="translate(4,4)" fill="white">${iconPath}</g>` : '';
+	const whiteIcon = iconPath ? `<g transform="translate(4,4)" fill="white" stroke="black">${iconPath}</g>` : '';
 
-	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${backgroundCircle}${whiteIcon}</svg>`;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 43 43" width="${size}" height="${size}">${whiteCircle}${backgroundCircle}${whiteIcon}</svg>`;
 
 	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
@@ -74,6 +75,7 @@ export function getWaypointIconDataUrl(
 ): string {
 	const color = statusToColorMap[status];
 	const width = size * 0.75;
-	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32" width="${width}" height="${size}"><path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 20 12 20s12-12.8 12-20c0-6.6-5.4-12-12-12z" fill="${color}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;
+	const path = "M12 0C5.4 0 0 5.4 0 12c0 7.2 12 20 12 20s12-12.8 12-20c0-6.6-5.4-12-12-12z";
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 0 32 34" width="${width}" height="${size}"><path d="${path}" fill="none" stroke="white" stroke-width="6"/><path d="${path}" fill="${color}" stroke="black" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;
 	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
