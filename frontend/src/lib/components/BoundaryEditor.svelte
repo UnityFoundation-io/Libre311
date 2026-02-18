@@ -5,8 +5,8 @@
 	import 'leaflet-draw/dist/leaflet.draw.css';
 	import * as turf from '@turf/turf';
 
-	export let bounds: L.LatLngExpression[][] = [];
-	export let constraintBounds: L.LatLngExpression[][] = [];
+	export let bounds: L.LatLngExpression[] = [];
+	export let constraintBounds: L.LatLngExpression[] = [];
 
 	const dispatch = createEventDispatcher();
 	const mapContext = getContext<{ getMap: () => L.Map } | undefined>('map');
@@ -80,27 +80,29 @@
 
 	function initializeExistingBounds() {
 		if (bounds && bounds.length > 0) {
-			const polygon = L.polygon(bounds as L.LatLngExpression[]);
+			const polygon = L.polygon(bounds);
 			if (validateAndStore(polygon)) {
 				drawnItems.addLayer(polygon);
 			}
 		}
 	}
 
-	function handleDrawEvent(e: L.Draw.CreatedEvent | L.Draw.EditedEvent) {
+	function handleDrawEvent(e: L.LeafletEvent) {
 		let layer: L.Polygon;
 
 		if (e.type === 'draw:created') {
-			layer = e.layer as L.Polygon;
-		} else {
+			layer = (e as L.DrawEvents.Created).layer as L.Polygon;
+		} else if (e.type === 'draw:edited') {
 			// For edits, we only handle one layer at a time for simplicity
-			const layers = (e as L.Draw.EditedEvent).layers;
+			const layers = (e as L.DrawEvents.Edited).layers;
 			const editedLayer = layers.getLayers()[0];
 			if (editedLayer instanceof L.Polygon) {
 				layer = editedLayer;
 			} else {
 				return;
 			}
+		} else {
+			return;
 		}
 
 		if (validateAndStore(layer)) {
@@ -132,7 +134,7 @@
 
 		// Ensure the new polygon is valid
 		const cleanPolygon = turf.cleanCoords(newPolygonGeoJSON);
-		
+
 		if (turf.booleanWithin(cleanPolygon, jurisdictionGeoJSON)) {
 			lastValidLayer = L.polygon(layer.getLatLngs()); // Store a copy
 			return true;

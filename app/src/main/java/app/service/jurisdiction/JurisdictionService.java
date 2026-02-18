@@ -121,6 +121,9 @@ public class JurisdictionService {
                 ? requestDTO.getPrivacyPolicyContent()
                 : null
         );
+        if (requestDTO.getProjectFeature() != null) {
+            jurisdiction.setProjectFeature(requestDTO.getProjectFeature());
+        }
 
         Jurisdiction savedJurisdiction = jurisdictionRepository.save(jurisdiction);
         JurisdictionBoundary savedBoundary = jurisdictionBoundaryService.saveBoundary(
@@ -171,6 +174,15 @@ public class JurisdictionService {
             jurisdiction.setPrivacyPolicyContent(
                 jurisdictionDTO.getPrivacyPolicyContent().isEmpty() ? null : jurisdictionDTO.getPrivacyPolicyContent()
             );
+        }
+        if (jurisdictionDTO.getProjectFeature() != null) {
+            jurisdiction.setProjectFeature(jurisdictionDTO.getProjectFeature());
+        }
+        if (jurisdictionDTO.getClosedRequestDaysVisibleUser() != null) {
+            jurisdiction.setClosedRequestDaysVisibleUser(jurisdictionDTO.getClosedRequestDaysVisibleUser());
+        }
+        if (jurisdictionDTO.getClosedRequestDaysVisibleAdmin() != null) {
+            jurisdiction.setClosedRequestDaysVisibleAdmin(jurisdictionDTO.getClosedRequestDaysVisibleAdmin());
         }
     }
 

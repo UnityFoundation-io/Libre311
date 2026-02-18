@@ -52,6 +52,9 @@ public class CreateJurisdictionDTO {
     @Size(max = 50000, message = "Privacy policy content must not exceed 50000 characters")
     private String privacyPolicyContent;
 
+    @JsonProperty("project_feature")
+    private app.model.jurisdiction.ProjectFeature projectFeature;
+
     @NotEmpty
     @Size(min = 4)
     private Double[][] bounds;
@@ -121,5 +124,13 @@ public class CreateJurisdictionDTO {
 
     public void setPrivacyPolicyContent(String privacyPolicyContent) {
         this.privacyPolicyContent = privacyPolicyContent;
+    }
+
+    public app.model.jurisdiction.ProjectFeature getProjectFeature() {
+        return projectFeature;
+    }
+
+    public void setProjectFeature(app.model.jurisdiction.ProjectFeature projectFeature) {
+        this.projectFeature = projectFeature;
     }
 }

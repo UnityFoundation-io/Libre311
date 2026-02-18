@@ -21,6 +21,10 @@ import type {
 	HasServiceRequestId,
 	JurisdictionConfig,
 	Libre311Service,
+	Project,
+	CreateProjectParams,
+	UpdateProjectParams,
+	UpdateJurisdictionParams,
 	Service,
 	ServiceDefinition,
 	ServiceRequest,
@@ -189,5 +193,25 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 
 	deleteRemovalSuggestion(params: { id: number }): Promise<void> {
 		return this.wrapped.deleteRemovalSuggestion(params);
+	}
+
+	getProjects(): Promise<Project[]> {
+		return this.wrapped.getProjects();
+	}
+
+	createProject(params: CreateProjectParams): Promise<Project> {
+		return this.wrapped.createProject(params);
+	}
+
+	updateProject(params: UpdateProjectParams): Promise<Project> {
+		return this.wrapped.updateProject(params);
+	}
+
+	deleteProject(id: number): Promise<void> {
+		return this.wrapped.deleteProject(id);
+	}
+
+	updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig> {
+		return this.wrapped.updateJurisdiction(params);
 	}
 }
