@@ -155,6 +155,7 @@
 				}
 			}}
 			aria-label={isExpanded ? 'Collapse group' : 'Expand group'}
+			title={isExpanded ? 'Collapse group' : 'Expand group'}
 		>
 			<svg
 				class="h-4 w-4 transition-transform {isExpanded ? 'rotate-90' : ''}"
