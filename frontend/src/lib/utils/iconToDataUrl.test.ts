@@ -37,7 +37,7 @@ describe('getStatusIconDataUrl', () => {
 			const decoded = decodeURIComponent(result.replace('data:image/svg+xml,', ''));
 			expect(decoded).toContain('<svg');
 			expect(decoded).toContain('</svg>');
-			expect(decoded).toContain('viewBox="0 0 40 40"');
+			expect(decoded).toContain('viewBox="-2 -2 43 43"');
 		});
 	}
 });
@@ -67,7 +67,7 @@ describe('getWaypointIconDataUrl', () => {
 			const decoded = decodeURIComponent(result.replace('data:image/svg+xml,', ''));
 			expect(decoded).toContain('<svg');
 			expect(decoded).toContain('</svg>');
-			expect(decoded).toContain('viewBox="0 0 24 32"');
+			expect(decoded).toContain('viewBox="-4 0 32 34"');
 		});
 	}
 });
