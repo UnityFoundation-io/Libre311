@@ -181,8 +181,15 @@ public class ServiceRequestService {
         Service service = serviceByServiceCodeOptional.get();
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
 
-        projectService.findProjectForLocationAndTime(serviceRequest.getLocation(), Instant.now(), jurisdictionId)
-                .ifPresent(serviceRequest::setProject);
+        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+        if (jurisdiction.getProjectFeature() != app.model.jurisdiction.ProjectFeature.DISABLED) {
+            Optional<app.model.project.Project> project = projectService.findProjectForLocationAndTime(serviceRequest.getLocation(), Instant.now(), jurisdictionId);
+            if (project.isPresent()) {
+                serviceRequest.setProject(project.get());
+            } else if (jurisdiction.getProjectFeature() == app.model.jurisdiction.ProjectFeature.REQUIRED) {
+                throw new InvalidServiceRequestException("The service request does not fall within any active project boundaries, and a project is required for this jurisdiction.");
+            }
+        }
 
         List<ServiceDefinitionAttribute> serviceDefinitionAttributes = attributeRepository.findAllByServiceId(service.getId());
         if (!serviceDefinitionAttributes.isEmpty()) {

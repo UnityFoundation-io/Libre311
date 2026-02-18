@@ -80,6 +80,7 @@
 
 {#if contextProviderProps.type == 'success'}
 	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
+		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 		{@const jurisdictionContext = createJurisdictionContext()}
 		<header class="flex items-center justify-center">
 			<div class="flex gap-4">

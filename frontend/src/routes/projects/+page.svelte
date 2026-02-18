@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
-	import type { Project } from '$lib/services/Libre311/Libre311';
+	import type { CreateProjectParams, Project } from '$lib/services/Libre311/Libre311';
 	import { Button, Card, Input, Table, Modal, Portal } from 'stwui';
 	import { plusCircleIcon } from '$lib/components/Svg/outline/plusCircleIcon';
 	import { pencilIcon } from '$lib/components/Svg/outline/pencilIcon';
@@ -9,15 +11,21 @@
 	import MapComponent from '$lib/components/MapComponent.svelte';
 	import BoundaryEditor from '$lib/components/BoundaryEditor.svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+	import type { TableColumn } from 'stwui/types';
 
 	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
+	const linkResolver = useLibre311Context().linkResolver;
 
-	const columns = [
-		{ label: 'Name', class: 'w-1/3' },
-		{ label: 'Start Date', class: 'w-1/4' },
-		{ label: 'End Date', class: 'w-1/4' },
-		{ label: 'Actions', class: 'w-1/6' }
+	$: if (browser && $jurisdiction.project_feature === 'DISABLED') {
+		goto(linkResolver.issuesTable(new URL(window.location.href)));
+	}
+
+	const columns: TableColumn[] = [
+		{ column: 'name', label: 'Name', class: 'w-1/3', placement: 'left' },
+		{ column: 'start_date', label: 'Start Date', class: 'w-1/4', placement: 'left' },
+		{ column: 'end_date', label: 'End Date', class: 'w-1/4', placement: 'left' },
+		{ column: 'actions', label: 'Actions', class: 'w-1/6', placement: 'center' }
 	];
 
 	let projects: Project[] = [];
@@ -95,13 +103,13 @@
 	async function saveProject() {
 		isSaving = true;
 		try {
-			const params = {
-				name: currentProject.name,
+			const params: CreateProjectParams = {
+				name: currentProject.name!,
 				description: currentProject.description,
-				bounds: currentProject.bounds,
+				bounds: currentProject.bounds!,
 				start_date: new Date(currentProject.start_date!).toISOString(),
 				end_date: new Date(currentProject.end_date!).toISOString()
-			} as any;
+			};
 
 			if (isEditing) {
 				await libre311.updateProject({ id: currentProject.id!, ...params });
@@ -147,7 +155,7 @@
 </svelte:head>
 
 <div class="p-6">
-	<div class="flex justify-between items-center mb-6">
+	<div class="mb-6 flex items-center justify-between">
 		<h1 class="text-2xl font-bold">Project Management</h1>
 		<Button variant="primary" on:click={openCreateModal}>
 			<Button.Leading data={plusCircleIcon} slot="leading" />
@@ -163,10 +171,10 @@
 				<p>No projects found.</p>
 			{:else}
 				<Table {columns}>
-					<Table.Header slot="header" />
+					<Table.Header slot="header" orderBy="name" />
 					<Table.Body slot="body">
 						{#each projects as project}
-							<Table.Body.Row>
+							<Table.Body.Row id={project.id.toString()}>
 								<Table.Body.Row.Cell column={0}>{project.name}</Table.Body.Row.Cell>
 								<Table.Body.Row.Cell column={1}
 									>{new Date(project.start_date).toLocaleString()}</Table.Body.Row.Cell
@@ -202,7 +210,7 @@
 				</Modal.Content.Header>
 				<Modal.Content.Body slot="body">
 					<div class="flex flex-col gap-4 p-4">
-						<div class="flex flex-col md:flex-row gap-4">
+						<div class="flex flex-col gap-4 md:flex-row">
 							<div class="flex-1">
 								<Input bind:value={currentProject.name}>
 									<Input.Label slot="label">Name</Input.Label>
@@ -214,22 +222,30 @@
 								</Input>
 							</div>
 						</div>
-						<div class="flex flex-col md:flex-row gap-4">
+						<div class="flex flex-col gap-4 md:flex-row">
 							<div class="flex-1">
-								<Input type="datetime-local" bind:value={currentProject.start_date}>
-									<Input.Label slot="label">Start Date</Input.Label>
-								</Input>
+								<label class="mb-1 block text-sm font-medium" for="start_date">Start Date</label>
+								<input
+									id="start_date"
+									type="datetime-local"
+									class="w-full rounded-md border border-gray-300 p-2"
+									bind:value={currentProject.start_date}
+								/>
 							</div>
 							<div class="flex-1">
-								<Input type="datetime-local" bind:value={currentProject.end_date}>
-									<Input.Label slot="label">End Date</Input.Label>
-								</Input>
+								<label class="mb-1 block text-sm font-medium" for="end_date">End Date</label>
+								<input
+									id="end_date"
+									type="datetime-local"
+									class="w-full rounded-md border border-gray-300 p-2"
+									bind:value={currentProject.end_date}
+								/>
 							</div>
 						</div>
 						<div class="h-96 w-full">
 							<MapComponent bounds={$jurisdiction.bounds}>
 								<BoundaryEditor
-									bounds={currentProject.bounds}
+									bounds={currentProject.bounds ?? []}
 									constraintBounds={$jurisdiction.bounds}
 									on:update={handleBoundsUpdate}
 								/>

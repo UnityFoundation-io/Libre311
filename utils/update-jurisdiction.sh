@@ -54,6 +54,10 @@ usage() {
   echo "  -p, --privacy-policy <file>    Update privacy policy from markdown file"
   echo "  -t, --terms-of-use <file>      Update terms of use from markdown file"
   echo "  -b, --bounds-file <file>       Update bounds from JSON file"
+  echo "  -f, --project-feature <mode>   Update project feature mode (DISABLED, OPTIONAL, REQUIRED)"
+  echo "  -r, --remote-hosts <hosts>     Update remote hosts (comma-separated list)"
+  echo "  -u, --visibility-user <days>   Days closed requests are visible to regular users"
+  echo "  -a, --visibility-admin <days>  Days closed requests are visible to admins"
   echo ""
   echo "  -o, --output <format>          Output format: json (default), quiet, table"
   echo "  -d, --dry-run                  Preview changes without making them"
@@ -175,6 +179,9 @@ update_values=()
 bounds_file=""
 privacy_policy_file=""
 terms_of_use_file=""
+remote_hosts=""
+visibility_user=""
+visibility_admin=""
 VERBOSE=false
 DRY_RUN=false
 SKIP_CONFIRM=false
@@ -219,6 +226,27 @@ while [ $# -gt 0 ]; do
     -b|--bounds-file)
       require_arg "$1" "$2"
       bounds_file="$2"
+      shift 2
+      ;;
+    -f|--project-feature)
+      require_arg "$1" "$2"
+      update_keys+=("project_feature")
+      update_values+=("$2")
+      shift 2
+      ;;
+    -r|--remote-hosts)
+      require_arg "$1" "$2"
+      remote_hosts="$2"
+      shift 2
+      ;;
+    -u|--visibility-user)
+      require_arg "$1" "$2"
+      visibility_user="$2"
+      shift 2
+      ;;
+    -a|--visibility-admin)
+      require_arg "$1" "$2"
+      visibility_admin="$2"
       shift 2
       ;;
     -o|--output)
@@ -268,7 +296,8 @@ done
 # Require at least one update option
 # NOTE: Query mode (GET) is disabled - see TODO at top of file
 if [ ${#update_keys[@]} -eq 0 ] && [ -z "$bounds_file" ] && \
-   [ -z "$privacy_policy_file" ] && [ -z "$terms_of_use_file" ]; then
+   [ -z "$privacy_policy_file" ] && [ -z "$terms_of_use_file" ] && \
+   [ -z "$remote_hosts" ] && [ -z "$visibility_user" ] && [ -z "$visibility_admin" ]; then
   error "At least one update option is required.\nQuery mode is not yet supported (backend GET endpoint missing).\nRun '$0 --help' for usage information." $EXIT_USAGE
 fi
 
@@ -297,7 +326,16 @@ for i in "${!update_keys[@]}"; do
   key="${update_keys[$i]}"
   value="${update_values[$i]}"
   payload=$(echo "$payload" | jq --arg k "$key" --arg v "$value" '. + {($k): $v}')
-  done
+done
+
+# Add numeric fields
+if [ -n "$visibility_user" ]; then
+  payload=$(echo "$payload" | jq --argjson v "$visibility_user" '. + {closed_request_days_visible_user: $v}')
+fi
+
+if [ -n "$visibility_admin" ]; then
+  payload=$(echo "$payload" | jq --argjson v "$visibility_admin" '. + {closed_request_days_visible_admin: $v}')
+fi
 
 # Add privacy policy content if provided
 if [ -n "$privacy_policy_file" ]; then
@@ -400,18 +438,49 @@ print_table() {
 }
 
 if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+  [ "$OUTPUT_FORMAT" != "quiet" ] && success "[OK] Jurisdiction updated successfully (HTTP $http_code)"
+
+  # Update remote hosts if provided
+  if [ -n "$remote_hosts" ]; then
+    hosts_json=$(echo "$remote_hosts" | jq -R 'split(",") | map(select(length > 0))')
+    
+    if [ "$DRY_RUN" = true ]; then
+      info "Dry run - would update remote hosts to: $remote_hosts"
+    else
+      [ "$OUTPUT_FORMAT" != "quiet" ] && info "Updating remote hosts..."
+      if [ "$VERBOSE" = true ]; then
+        rh_response=$(curl -v -w "\n%{http_code}" -X POST \
+          "${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}/remote_hosts?tenant_id=${TENANT_ID}" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${AUTH_TOKEN}" \
+          -d "$hosts_json" 2>&1)
+      else
+        rh_response=$(curl -s -w "\n%{http_code}" -X POST \
+          "${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}/remote_hosts?tenant_id=${TENANT_ID}" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${AUTH_TOKEN}" \
+          -d "$hosts_json")
+      fi
+      
+      rh_http_code=$(echo "$rh_response" | tail -n1)
+      if [ "$rh_http_code" -ge 200 ] && [ "$rh_http_code" -lt 300 ]; then
+        [ "$OUTPUT_FORMAT" != "quiet" ] && success "[OK] Remote hosts updated successfully"
+      else
+        error "HTTP $rh_http_code - Failed to update remote hosts" $EXIT_API_ERROR
+      fi
+    fi
+  fi
+
   case "$OUTPUT_FORMAT" in
     quiet)
       # Just exit successfully
       ;;
     json)
-      success "[OK] Jurisdiction updated successfully (HTTP $http_code)"
       echo ""
       echo "Updated jurisdiction:"
       echo "$body" | jq .
       ;;
     table)
-      success "[OK] Jurisdiction updated successfully (HTTP $http_code)"
       echo ""
       print_table "$body"
       ;;

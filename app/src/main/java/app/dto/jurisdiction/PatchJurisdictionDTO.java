@@ -51,6 +51,15 @@ public class PatchJurisdictionDTO {
     @Size(max = 50000, message = "Privacy policy content must not exceed 50000 characters")
     private String privacyPolicyContent;
 
+    @JsonProperty("project_feature")
+    private app.model.jurisdiction.ProjectFeature projectFeature;
+
+    @JsonProperty("closed_request_days_visible_user")
+    private Integer closedRequestDaysVisibleUser;
+
+    @JsonProperty("closed_request_days_visible_admin")
+    private Integer closedRequestDaysVisibleAdmin;
+
     public PatchJurisdictionDTO() {
     }
 
@@ -108,5 +117,29 @@ public class PatchJurisdictionDTO {
 
     public void setPrivacyPolicyContent(String privacyPolicyContent) {
         this.privacyPolicyContent = privacyPolicyContent;
+    }
+
+    public app.model.jurisdiction.ProjectFeature getProjectFeature() {
+        return projectFeature;
+    }
+
+    public void setProjectFeature(app.model.jurisdiction.ProjectFeature projectFeature) {
+        this.projectFeature = projectFeature;
+    }
+
+    public Integer getClosedRequestDaysVisibleUser() {
+        return closedRequestDaysVisibleUser;
+    }
+
+    public void setClosedRequestDaysVisibleUser(Integer closedRequestDaysVisibleUser) {
+        this.closedRequestDaysVisibleUser = closedRequestDaysVisibleUser;
+    }
+
+    public Integer getClosedRequestDaysVisibleAdmin() {
+        return closedRequestDaysVisibleAdmin;
+    }
+
+    public void setClosedRequestDaysVisibleAdmin(Integer closedRequestDaysVisibleAdmin) {
+        this.closedRequestDaysVisibleAdmin = closedRequestDaysVisibleAdmin;
     }
 }
