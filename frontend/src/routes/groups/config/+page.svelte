@@ -16,7 +16,8 @@
 	import {
 		splitPaneStore,
 		hasAnyUnsavedChanges,
-		showSaveError
+		showSaveError,
+		showSaveSuccess
 	} from '$lib/components/ServiceDefinitionEditor/stores/editorStore';
 	import SaveToast from '$lib/components/ServiceDefinitionEditor/EditorView/SaveToast.svelte';
 	import {
@@ -327,9 +328,11 @@
 			const result = updateDirtyState(dirtyAttributes, pendingAttributeValues, code, false);
 			dirtyAttributes = result.dirtySet;
 			pendingAttributeValues = result.pendingMap;
+
+			showSaveSuccess(`Question "${data.description}" saved successfully.`);
 		} catch (err) {
 			console.error('Failed to save attribute:', err);
-			showSaveError('Failed to save question. Please try again.');
+			showSaveError(`Failed to save question "${data.description}". Please try again.`);
 		} finally {
 			savingAttributes = updateDirtySet(savingAttributes, code, false);
 		}

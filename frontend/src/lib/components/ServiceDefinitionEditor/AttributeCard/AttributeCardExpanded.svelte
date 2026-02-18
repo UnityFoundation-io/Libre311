@@ -160,6 +160,7 @@
 		}
 
 		dispatch('save', data);
+		dispatch('collapse');
 	}
 
 	function handleCancel() {
