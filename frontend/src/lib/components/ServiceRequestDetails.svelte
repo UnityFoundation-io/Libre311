@@ -11,6 +11,12 @@
 	export let back: string | undefined = undefined;
 
 	let showSuggestionModal = false;
+	let suggestionSubmitted = false;
+	let suggestionButtonText = 'Suggest Removal';
+
+	$: if (suggestionSubmitted) {
+		suggestionButtonText = 'Removal was Suggested';
+	}
 </script>
 
 <div class="flex h-full">
@@ -39,7 +45,7 @@
 					<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 					<div class="float-right">
 						<Button on:click={() => (showSuggestionModal = true)} size="sm" type="primary">
-							Suggest Removal
+							{suggestionButtonText}
 						</Button>
 					</div>
 				</div>
@@ -120,6 +126,7 @@
 
 <SuggestionModal
 	bind:open={showSuggestionModal}
+	bind:success={suggestionSubmitted}
 	serviceRequestId={serviceRequest.service_request_id}
 	handleClose={() => (showSuggestionModal = false)}
 />
