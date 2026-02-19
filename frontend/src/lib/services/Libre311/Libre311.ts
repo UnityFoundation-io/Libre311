@@ -653,7 +653,7 @@ const ROUTES = {
 		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
 		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
-	patchJurisdictionPolicyAndTerms: (params: HasJurisdictionId, tenant_id: number) =>
+	patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
 		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`
 };
 
@@ -766,7 +766,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 		(params as unknown).name = this.jurisdictionConfig.name;
 		try {
 			await this.axiosInstance.patch(
-				ROUTES.patchJurisdictionPolicyAndTerms(
+				ROUTES.patchJurisdiction(
 					{ jurisdiction_id: this.jurisdictionId },
 					this.jurisdictionConfig.tenant_id
 				),
