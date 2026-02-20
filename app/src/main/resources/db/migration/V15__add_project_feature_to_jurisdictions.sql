@@ -1,0 +1,1 @@
+ALTER TABLE jurisdictions ADD COLUMN project_feature VARCHAR(50) NOT NULL DEFAULT 'DISABLED';

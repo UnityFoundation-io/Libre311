@@ -1,3 +1,5 @@
+import com.github.gradle.node.npm.task.NpmTask
+
 // Copyright 2023 Libre311 Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +16,42 @@
 
 plugins {
     id "com.github.node-gradle.node" version "3.1.0"
+    id "base"
 }
 
 npm_run {
     args = ['dev']
 }
 
-task run {
+tasks.register('run') {
     dependsOn 'npm_run'
-}
-
-task build {
-    dependsOn (['npm_install', 'npm_run_build'])
 }
 
 npm_run_build {
     args = ['--production']
+    dependsOn 'npmInstall'
 }
+
+assemble.dependsOn 'npm_run_build'
+
+tasks.register('npmFormat', NpmTask) {
+    args = ['run', 'format']
+//    dependsOn 'npmInstall'
+}
+
+tasks.register('npmLint', NpmTask) {
+    args = ['run', 'lint']
+    dependsOn 'npmFormat'
+}
+
+tasks.register('npmCheck', NpmTask) {
+    args = ['run', 'check']
+    dependsOn 'npmLint'
+}
+
+tasks.register('npmTestUnit', NpmTask) {
+    args = ['run', 'test:unit']
+    dependsOn 'npmCheck'
+}
+
+check.dependsOn 'npmTestUnit'

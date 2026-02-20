@@ -97,6 +97,7 @@ public class ServiceRequestService {
     private final ReCaptchaService reCaptchaService;
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
+    private final app.service.project.ProjectService projectService;
     JurisdictionBoundaryService jurisdictionBoundaryService;
     LibreGeometryFactory libreGeometryFactory;
 
@@ -107,6 +108,7 @@ public class ServiceRequestService {
         JurisdictionRepository jurisdictionRepository,
         ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
         UnityAuthService unityAuthService,
+        app.service.project.ProjectService projectService,
         JurisdictionBoundaryService jurisdictionBoundaryService,
         LibreGeometryFactory libreGeometryFactory) {
         this.serviceRequestRepository = serviceRequestRepository;
@@ -117,6 +119,7 @@ public class ServiceRequestService {
         this.reCaptchaService = reCaptchaService;
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
+        this.projectService = projectService;
         this.jurisdictionBoundaryService = jurisdictionBoundaryService;
         this.libreGeometryFactory = libreGeometryFactory;
     }
@@ -177,6 +180,17 @@ public class ServiceRequestService {
         // validate if additional attributes are required
         Service service = serviceByServiceCodeOptional.get();
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
+
+        Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+        if (jurisdiction.getProjectFeature() != app.model.jurisdiction.ProjectFeature.DISABLED) {
+            Optional<app.model.project.Project> project = projectService.findProjectForLocationAndTime(serviceRequest.getLocation(), Instant.now(), jurisdictionId);
+            if (project.isPresent()) {
+                serviceRequest.setProject(project.get());
+            } else if (jurisdiction.getProjectFeature() == app.model.jurisdiction.ProjectFeature.REQUIRED) {
+                throw new InvalidServiceRequestException("The service request does not fall within any active project boundaries, and a project is required for this jurisdiction.");
+            }
+        }
+
         List<ServiceDefinitionAttribute> serviceDefinitionAttributes = attributeRepository.findAllByServiceId(service.getId());
         if (!serviceDefinitionAttributes.isEmpty()) {
             List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(serviceRequestDTO.getAttributes(), serviceDefinitionAttributes);

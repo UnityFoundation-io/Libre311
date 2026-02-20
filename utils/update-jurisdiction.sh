@@ -36,24 +36,29 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 usage() {
-  echo "Usage: $0 <jurisdiction_id> <options>"
+  echo "Usage: $0 <jurisdiction_id> [options]"
   echo ""
-  echo "Update an existing jurisdiction's configuration."
+  echo "Update an existing jurisdiction or create a new one."
   echo ""
   echo "Arguments:"
-  echo "  jurisdiction_id              The string identifier of the jurisdiction to update"
+  echo "  jurisdiction_id              The string identifier of the jurisdiction"
   echo "                               (e.g., 'stlma', 'lomocomo'). This is NOT a numeric ID."
   echo "                               Use the jurisdiction_id from the jurisdictions table."
   echo ""
   echo "Options:"
-  echo "  -n, --name <name>              Update the display name (REQUIRED for all updates)"
-  echo "  -c, --primary-color <color>    Update primary color (HSL format: 'H S% L%')"
+  echo "  -X, --create                 Create a new jurisdiction instead of updating"
+  echo "  -n, --name <name>            Display name (REQUIRED for all requests)"
+  echo "  -c, --primary-color <color>    Primary color (HSL format: 'H S% L%')"
   echo "  -C, --primary-hover-color <color>"
-  echo "                                 Update hover color (HSL format: 'H S% L%')"
-  echo "  -l, --logo-url <url>           Update logo URL"
-  echo "  -p, --privacy-policy <file>    Update privacy policy from markdown file"
-  echo "  -t, --terms-of-use <file>      Update terms of use from markdown file"
-  echo "  -b, --bounds-file <file>       Update bounds from JSON file"
+  echo "                                 Hover color (HSL format: 'H S% L%')"
+  echo "  -l, --logo-url <url>           Logo URL"
+  echo "  -p, --privacy-policy <file>    Privacy policy from markdown file"
+  echo "  -t, --terms-of-use <file>      Terms of use from markdown file"
+  echo "  -b, --bounds-file <file>       Bounds from JSON file (REQUIRED for create)"
+  echo "  -f, --project-feature <mode>   Project feature mode (DISABLED, OPTIONAL, REQUIRED)"
+  echo "  -r, --remote-hosts <hosts>     Remote hosts (comma-separated list)"
+  echo "  -u, --visibility-user <days>   Days closed requests are visible to regular users"
+  echo "  -a, --visibility-admin <days>  Days closed requests are visible to admins"
   echo ""
   echo "  -o, --output <format>          Output format: json (default), quiet, table"
   echo "  -d, --dry-run                  Preview changes without making them"
@@ -80,6 +85,7 @@ usage() {
   echo "  See utils/.libre311rc.example for a template."
   echo ""
   echo "Examples:"
+  echo "  $0 stlma -X -n 'St Louis' -b bounds.json  # Create new jurisdiction"
   echo "  $0 stlma -n 'St Louis Metropolitan Area'  # Update name"
   echo "  $0 stlma -n 'STLMA' --primary-color '221 83% 53%' --primary-hover-color '221 83% 45%'"
   echo "  $0 stlma --name 'New Name' --logo-url 'https://example.com/logo.png'"
@@ -175,13 +181,21 @@ update_values=()
 bounds_file=""
 privacy_policy_file=""
 terms_of_use_file=""
+remote_hosts=""
+visibility_user=""
+visibility_admin=""
 VERBOSE=false
 DRY_RUN=false
 SKIP_CONFIRM=false
+IS_CREATE=false
 OUTPUT_FORMAT="json"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    -X|--create)
+      IS_CREATE=true
+      shift
+      ;;
     -n|--name)
       require_arg "$1" "$2"
       update_keys+=("name")
@@ -219,6 +233,27 @@ while [ $# -gt 0 ]; do
     -b|--bounds-file)
       require_arg "$1" "$2"
       bounds_file="$2"
+      shift 2
+      ;;
+    -f|--project-feature)
+      require_arg "$1" "$2"
+      update_keys+=("project_feature")
+      update_values+=("$2")
+      shift 2
+      ;;
+    -r|--remote-hosts)
+      require_arg "$1" "$2"
+      remote_hosts="$2"
+      shift 2
+      ;;
+    -u|--visibility-user)
+      require_arg "$1" "$2"
+      visibility_user="$2"
+      shift 2
+      ;;
+    -a|--visibility-admin)
+      require_arg "$1" "$2"
+      visibility_admin="$2"
       shift 2
       ;;
     -o|--output)
@@ -268,11 +303,12 @@ done
 # Require at least one update option
 # NOTE: Query mode (GET) is disabled - see TODO at top of file
 if [ ${#update_keys[@]} -eq 0 ] && [ -z "$bounds_file" ] && \
-   [ -z "$privacy_policy_file" ] && [ -z "$terms_of_use_file" ]; then
+   [ -z "$privacy_policy_file" ] && [ -z "$terms_of_use_file" ] && \
+   [ -z "$remote_hosts" ] && [ -z "$visibility_user" ] && [ -z "$visibility_admin" ]; then
   error "At least one update option is required.\nQuery mode is not yet supported (backend GET endpoint missing).\nRun '$0 --help' for usage information." $EXIT_USAGE
 fi
 
-# Check if name is provided (required by backend for all PATCH requests)
+# Check if name is provided (required by backend for all requests)
 name_provided=false
 for key in "${update_keys[@]}"; do
   if [ "$key" = "name" ]; then
@@ -282,7 +318,12 @@ for key in "${update_keys[@]}"; do
 done
 
 if [ "$name_provided" = false ]; then
-  error "The --name option is required for all updates (backend validation requirement).\nExample: $0 $jurisdiction_id --name 'Jurisdiction Name' --bounds-file bounds.json" $EXIT_USAGE
+  error "The --name option is required for all requests (backend validation requirement).\nExample: $0 $jurisdiction_id --name 'Jurisdiction Name' --bounds-file bounds.json" $EXIT_USAGE
+fi
+
+# Check if bounds are provided for creation
+if [ "$IS_CREATE" = true ] && [ -z "$bounds_file" ]; then
+  error "The --bounds-file option is required when creating a new jurisdiction." $EXIT_USAGE
 fi
 
 # Get AUTH_TOKEN - either from environment or interactively (skip for dry-run without token)
@@ -293,11 +334,25 @@ fi
 # Build JSON payload
 payload="{}"
 
+# Add jurisdiction_id if creating
+if [ "$IS_CREATE" = true ]; then
+  payload=$(echo "$payload" | jq --arg id "$jurisdiction_id" '. + {jurisdiction_id: $id}')
+fi
+
 for i in "${!update_keys[@]}"; do
   key="${update_keys[$i]}"
   value="${update_values[$i]}"
   payload=$(echo "$payload" | jq --arg k "$key" --arg v "$value" '. + {($k): $v}')
-  done
+done
+
+# Add numeric fields
+if [ -n "$visibility_user" ]; then
+  payload=$(echo "$payload" | jq --argjson v "$visibility_user" '. + {closed_request_days_visible_user: $v}')
+fi
+
+if [ -n "$visibility_admin" ]; then
+  payload=$(echo "$payload" | jq --argjson v "$visibility_admin" '. + {closed_request_days_visible_admin: $v}')
+fi
 
 # Add privacy policy content if provided
 if [ -n "$privacy_policy_file" ]; then
@@ -333,16 +388,31 @@ if [ -n "$bounds_file" ]; then
   payload=$(echo "$payload" | jq --argjson bounds "$bounds" '. + {bounds: $bounds}')
 fi
 
-[ "$OUTPUT_FORMAT" != "quiet" ] && info "Updating jurisdiction: $jurisdiction_id"
+action_desc="Updating"
+if [ "$IS_CREATE" = true ]; then
+  action_desc="Creating"
+fi
+
+[ "$OUTPUT_FORMAT" != "quiet" ] && info "$action_desc jurisdiction: $jurisdiction_id"
 [ "$OUTPUT_FORMAT" != "quiet" ] && info "Payload: $(echo "$payload" | jq -c .)"
 
 # Debug output with masked token
 if [ -n "$AUTH_TOKEN" ]; then
   debug "AUTH_TOKEN (masked): ${AUTH_TOKEN:0:10}...${AUTH_TOKEN: -10}"
 fi
+
+# Set API URL and method
+API_METHOD="PATCH"
+API_URL="${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}?tenant_id=${TENANT_ID}"
+
+if [ "$IS_CREATE" = true ]; then
+  API_METHOD="POST"
+  API_URL="${API_BASE_URL}/api/tenant-admin/jurisdictions?tenant_id=${TENANT_ID}"
+fi
+
 debug "API_BASE_URL: ${API_BASE_URL}"
 debug "TENANT_ID: ${TENANT_ID}"
-debug "Full URL: ${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}?tenant_id=${TENANT_ID}"
+debug "Full URL: ${API_URL}"
 
 # Handle dry-run mode
 if [ "$DRY_RUN" = true ]; then
@@ -351,7 +421,7 @@ if [ "$DRY_RUN" = true ]; then
   fi
   info "Dry run - no changes will be made"
   echo ""
-  echo "Would send PATCH to: ${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}?tenant_id=${TENANT_ID}"
+  echo "Would send $API_METHOD to: $API_URL"
   echo ""
   echo "Payload:"
   echo "$payload" | jq .
@@ -361,7 +431,7 @@ fi
 # Confirmation prompt for updates (unless --yes or quiet mode)
 if [ "$SKIP_CONFIRM" = false ] && [ "$OUTPUT_FORMAT" != "quiet" ]; then
   echo ""
-  read -p "Update jurisdiction '$jurisdiction_id'? [y/N] " confirm
+  read -p "$action_desc jurisdiction '$jurisdiction_id'? [y/N] " confirm
   if [[ ! "$confirm" =~ ^[Yy] ]]; then
     info "Cancelled."
     exit $EXIT_SUCCESS
@@ -370,17 +440,17 @@ fi
 
 [ "$OUTPUT_FORMAT" != "quiet" ] && echo ""
 
-# Make API call (PATCH to update jurisdiction)
+# Make API call
 if [ "$VERBOSE" = true ]; then
-  debug "Making PATCH API call with verbose output..."
-  response=$(curl -v -w "\n%{http_code}" -X PATCH \
-    "${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}?tenant_id=${TENANT_ID}" \
+  debug "Making $API_METHOD API call with verbose output..."
+  response=$(curl -v -w "\n%{http_code}" -X "$API_METHOD" \
+    "$API_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${AUTH_TOKEN}" \
     -d "$payload" 2>&1)
 else
-  response=$(curl -s -w "\n%{http_code}" -X PATCH \
-    "${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}?tenant_id=${TENANT_ID}" \
+  response=$(curl -s -w "\n%{http_code}" -X "$API_METHOD" \
+    "$API_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${AUTH_TOKEN}" \
     -d "$payload")
@@ -400,23 +470,54 @@ print_table() {
 }
 
 if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+  [ "$OUTPUT_FORMAT" != "quiet" ] && success "[OK] Jurisdiction ${action_desc,,} successfully (HTTP $http_code)"
+
+  # Update remote hosts if provided
+  if [ -n "$remote_hosts" ]; then
+    hosts_json=$(echo "$remote_hosts" | jq -R 'split(",") | map(select(length > 0))')
+    
+    if [ "$DRY_RUN" = true ]; then
+      info "Dry run - would update remote hosts to: $remote_hosts"
+    else
+      [ "$OUTPUT_FORMAT" != "quiet" ] && info "Updating remote hosts..."
+      if [ "$VERBOSE" = true ]; then
+        rh_response=$(curl -v -w "\n%{http_code}" -X POST \
+          "${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}/remote_hosts?tenant_id=${TENANT_ID}" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${AUTH_TOKEN}" \
+          -d "$hosts_json" 2>&1)
+      else
+        rh_response=$(curl -s -w "\n%{http_code}" -X POST \
+          "${API_BASE_URL}/api/tenant-admin/jurisdictions/${jurisdiction_id}/remote_hosts?tenant_id=${TENANT_ID}" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${AUTH_TOKEN}" \
+          -d "$hosts_json")
+      fi
+      
+      rh_http_code=$(echo "$rh_response" | tail -n1)
+      if [ "$rh_http_code" -ge 200 ] && [ "$rh_http_code" -lt 300 ]; then
+        [ "$OUTPUT_FORMAT" != "quiet" ] && success "[OK] Remote hosts updated successfully"
+      else
+        error "HTTP $rh_http_code - Failed to update remote hosts" $EXIT_API_ERROR
+      fi
+    fi
+  fi
+
   case "$OUTPUT_FORMAT" in
     quiet)
       # Just exit successfully
       ;;
     json)
-      success "[OK] Jurisdiction updated successfully (HTTP $http_code)"
       echo ""
-      echo "Updated jurisdiction:"
+      echo "${action_desc} jurisdiction:"
       echo "$body" | jq .
       ;;
     table)
-      success "[OK] Jurisdiction updated successfully (HTTP $http_code)"
       echo ""
       print_table "$body"
       ;;
   esac
   exit $EXIT_SUCCESS
 else
-  error "HTTP $http_code - Failed to update jurisdiction\n$(echo "$body" | jq . 2>/dev/null || echo "$body")" $EXIT_API_ERROR
+  error "HTTP $http_code - Failed to ${action_desc,,} jurisdiction\n$(echo "$body" | jq . 2>/dev/null || echo "$body")" $EXIT_API_ERROR
 fi
