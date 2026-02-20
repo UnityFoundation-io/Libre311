@@ -30,6 +30,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     Optional<Project> findByIdAndJurisdictionId(Long id, String jurisdictionId);
 
-    @Query("FROM Project p WHERE p.jurisdiction.id = :jurisdictionId AND p.startDate <= :time AND p.endDate >= :time AND contains(p.boundary, :location) = true")
+    @Query("FROM Project p WHERE p.jurisdiction.id = :jurisdictionId AND p.startDate <= :time AND p.endDate >= :time AND intersects(p.boundary, :location) = true")
     Optional<Project> findProjectForLocationAndTime(String jurisdictionId, Point location, Instant time);
 }
