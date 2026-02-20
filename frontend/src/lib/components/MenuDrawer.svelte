@@ -6,6 +6,7 @@
 
 	import { mapIcon } from './Svg/outline/mapIcon';
 	import { pencilIcon } from './Svg/outline/pencilIcon';
+	import { documentTextIcon } from './Svg/outline/documentTextIcon';
 	import { tableIcon } from './Svg/outline/tableIcon';
 	import { plusCircleIcon } from './Svg/outline/plusCircleIcon';
 	import { user } from './Svg/outline/user';
@@ -76,6 +77,22 @@
 							on:click={handleClose}
 						>
 							<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
+						</Menu.Item>
+					</AuthGuard>
+					<AuthGuard
+						requires={[
+							'LIBRE311_ADMIN_EDIT-SYSTEM',
+							'LIBRE311_ADMIN_EDIT-TENANT',
+							'LIBRE311_ADMIN_EDIT-SUBTENANT'
+						]}
+					>
+						<Menu.Item
+							key="policy-editor"
+							label="Privacy Policy/T&C Editor"
+							href="/admin/policy-editor"
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={documentTextIcon} fill="none" />
 						</Menu.Item>
 					</AuthGuard>
 					<AuthGuard requires="is-anonymous">
