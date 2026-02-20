@@ -22,7 +22,7 @@ micronaut:
       enabled: true
       configurations:
         all:
-          allowedOriginsRegex: '^http(|s):\/\/([A-Za-z0-9]+\.)?localhost:3000$'
+          allowedOriginsRegex: '^http(|s):\/\/([A-Za-z0-9\-]+\.)?localhost:3000$'
           allowedOrigins:
             - http://127.0.0.1:3000
             - http://libre311-ui:3000
