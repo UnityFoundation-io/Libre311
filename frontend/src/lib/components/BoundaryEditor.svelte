@@ -44,7 +44,7 @@
 		drawControl = new L.Control.Draw({
 			draw: {
 				polygon: {
-					allowIntersection: false,
+					allowIntersection: true,
 					showArea: true
 				},
 				polyline: false,
@@ -105,14 +105,15 @@
 			return;
 		}
 
-		if (validateAndStore(layer)) {
+		const validation = validateAndStore(layer);
+		if (validation.isValid) {
 			if (e.type === 'draw:created') {
 				drawnItems.clearLayers();
 				drawnItems.addLayer(layer);
 			}
 			updateBounds(layer);
 		} else {
-			alert('Project boundary must be completely within the jurisdiction boundary.');
+			alert(validation.error);
 			// Revert the visual change
 			if (e.type === 'draw:created') {
 				layer.remove(); // remove the invalid new shape
@@ -126,10 +127,23 @@
 		}
 	}
 
-	function validateAndStore(layer: L.Polygon): boolean {
-		if (!constraintLayer) return true; // No constraint to validate against
-
+	function validateAndStore(layer: L.Polygon): { isValid: boolean; error?: string } {
 		const newPolygonGeoJSON = layer.toGeoJSON();
+
+		// Check for self-intersection (figure-8s)
+		const kinks = turf.kinks(newPolygonGeoJSON);
+		if (kinks.features.length > 0) {
+			return {
+				isValid: false,
+				error: 'Project boundary cannot cross itself (figure-8 shapes are not allowed).'
+			};
+		}
+
+		if (!constraintLayer) {
+			lastValidLayer = L.polygon(layer.getLatLngs());
+			return { isValid: true };
+		}
+
 		const jurisdictionGeoJSON = constraintLayer.toGeoJSON();
 
 		// Ensure the new polygon is valid
@@ -137,9 +151,13 @@
 
 		if (turf.booleanWithin(cleanPolygon, jurisdictionGeoJSON)) {
 			lastValidLayer = L.polygon(layer.getLatLngs()); // Store a copy
-			return true;
+			return { isValid: true };
 		}
-		return false;
+
+		return {
+			isValid: false,
+			error: 'Project boundary must be completely within the jurisdiction boundary.'
+		};
 	}
 
 	function updateBounds(layer: L.Polygon) {
