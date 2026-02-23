@@ -102,8 +102,7 @@
 	function isCreateServiceRequestUIParams(
 		partial: Partial<CreateServiceRequestUIParams>
 	): partial is CreateServiceRequestUIParams {
-		if (partial?.address_string && partial?.attributeMap && partial?.service) return true;
-		return false;
+		return !!(partial?.address_string && partial?.attributeMap && partial?.service);
 	}
 
 	// Redirect user because they navigated to an invalid step
@@ -115,9 +114,9 @@
 <CreateServiceRequestLayout {step}>
 	<div slot="side-bar" class="mx-4 h-full">
 		<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
-		{#if step == CreateServiceRequestSteps.LOCATION}
+		{#if step === CreateServiceRequestSteps.LOCATION}
 			<SelectLocation loading={loadingLocation} on:confirmLocation={confirmLocation} />
-		{:else if step == CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
+		{:else if step === CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
 			<ReviewServiceRequest {params} />
 		{:else}
 			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
@@ -129,13 +128,13 @@
 			descriptionLocation="bottom"
 			keyboardPanDelta={KEYBOARD_PAN_DELTA_FINE}
 			controlFactories={[mapCenterControlFactory]}
-			disabled={step != 0}
+			disabled={step !== 0}
 			locateOpts={{ setView: true, enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
-			<MapMarker latLng={centerPos} options={{ icon }} />
-			{#if step == CreateServiceRequestSteps.LOCATION && $isOnline}
+			<MapMarker latLng={centerPos} options={{ icon, keyboard: false }} />
+			{#if step === CreateServiceRequestSteps.LOCATION && $isOnline}
 				<MapGeosearch on:geosearch={handleGeosearch} />
 			{/if}
 		</MapComponent>
