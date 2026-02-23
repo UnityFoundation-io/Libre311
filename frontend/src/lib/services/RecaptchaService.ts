@@ -46,10 +46,7 @@ export function recaptchaServiceFactory(
 	mode: Mode,
 	props: RecaptchaServiceProps
 ): RecaptchaService {
-	if (mode === 'test' || (mode === 'development' && !props.recaptchaKey)) {
-		return new MockRecaptchaService();
-	}
-	return new RecaptchaServiceImpl(props);
+	return mode === 'test' ? new MockRecaptchaService() : new RecaptchaServiceImpl(props);
 }
 
 export async function loadRecaptchaProps(mode: Mode): Promise<RecaptchaServiceProps> {
