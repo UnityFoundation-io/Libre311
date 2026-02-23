@@ -703,6 +703,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 		'image/jpeg',
 		'image/webp'
 	];
+	private cachedServiceListResponse?: Promise<GetServiceListResponse>;
+	private cachedServiceDefinitions?: Map<ServiceCode, Promise<ServiceDefinition>>;
 
 	public constructor(props: Libre311ServiceProps) {
 		Libre311ServicePropsSchema.parse(props);
@@ -711,6 +713,8 @@ export class Libre311ServiceImpl implements Libre311Service {
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
 		this.recaptchaService = props.recaptchaService;
 		this.geocodingService = new GeocodingServiceImpl();
+
+		this.cachedServiceListResponse = this.getServiceList();
 	}
 
 	async createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void> {
@@ -787,21 +791,49 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async getServiceList(): Promise<GetServiceListResponse> {
-		const res = await this.axiosInstance.get<unknown>(
-			ROUTES.getServiceList({ jurisdiction_id: this.jurisdictionId })
-		);
+		try {
+			const res = await this.axiosInstance.get<unknown>(
+				ROUTES.getServiceList({ jurisdiction_id: this.jurisdictionId })
+			);
 
-		return GetServiceListResponseSchema.parse(res.data);
+			const parsedResponse = GetServiceListResponseSchema.parse(res.data);
+			this.cachedServiceListResponse = Promise.resolve(parsedResponse);
+
+			this.cachedServiceDefinitions = new Map<ServiceCode, Promise<ServiceDefinition>>(
+				parsedResponse.map((service) => [service.service_code, this.getServiceDefinition(service)])
+			);
+		} catch (error) {
+			console.log(error);
+		}
+		if (this.cachedServiceListResponse) {
+			return this.cachedServiceListResponse;
+		} else {
+			throw new Error('Failed to get service list');
+		}
 	}
 
 	async getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition> {
-		const res = await this.axiosInstance.get<unknown>(
-			ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
-		);
-		const definition = ServiceDefinitionSchema.parse(res.data);
+		try {
+			const res = await this.axiosInstance.get<unknown>(
+				ROUTES.getServiceDefinition({ ...params, ...{ jurisdiction_id: this.jurisdictionId } })
+			);
+
+			if (!this.cachedServiceDefinitions) {
+				this.cachedServiceDefinitions = new Map<ServiceCode, Promise<ServiceDefinition>>();
+			}
+
+			this.cachedServiceDefinitions?.set(
+				params.service_code,
+				Promise.resolve(ServiceDefinitionSchema.parse(res.data))
+			);
+		} catch (error) {
+			console.log(error);
+		}
+
+		const definition = await this.cachedServiceDefinitions?.get(params.service_code);
 
 		// Sort attribute values alphabetically for consistent ordering
-		if (definition.attributes) {
+		if (definition?.attributes) {
 			definition.attributes.forEach((attr) => {
 				if ('values' in attr && attr.values) {
 					attr.values.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
@@ -809,7 +841,11 @@ export class Libre311ServiceImpl implements Libre311Service {
 			});
 		}
 
-		return definition;
+		if (definition) {
+			return definition;
+		} else {
+			throw new Error('Failed to get service definition');
+		}
 	}
 
 	async createGroup(params: CreateGroupParams): Promise<Group> {

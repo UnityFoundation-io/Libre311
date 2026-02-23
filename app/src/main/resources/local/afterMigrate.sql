@@ -8,13 +8,15 @@ VALUES ('stlma', 'St. Louis Metro Area', 1);
 
 -- Add jurisdiction boundary (POLYGON fn
 INSERT INTO jurisdiction_boundary (boundary, jurisdiction_id)
-VALUES (ST_GeomFromText('POLYGON((
+SELECT ST_GeomFromText('POLYGON((
         38.88908245157475 -90.82207996696539,
         38.28511105115126 -90.32668241294714,
         38.73098601356233 -89.86006757704696,
         39.04413540068816 -90.36058752072049,
         38.88908245157475 -90.82207996696539))', 4326),
-        'stlma');
+        'stlma' WHERE NOT EXISTS (
+            SELECT 1 FROM jurisdiction_boundary where jurisdiction_id = 'stlma'
+        );
 
 
 -- map the host to the jurisdiction
@@ -75,13 +77,15 @@ VALUES ('lomocomo', 'LoMoCoMo', 1);
 
 -- Add jurisdiction boundary for lomocomo (same as stlma for now)
 INSERT IGNORE INTO jurisdiction_boundary (boundary, jurisdiction_id)
-VALUES (ST_GeomFromText('POLYGON((
+SELECT ST_GeomFromText('POLYGON((
         38.88908245157475 -90.82207996696539,
         38.28511105115126 -90.32668241294714,
         38.73098601356233 -89.86006757704696,
         39.04413540068816 -90.36058752072049,
         38.88908245157475 -90.82207996696539))', 4326),
-        'lomocomo');
+        'lomocomo' WHERE NOT EXISTS (
+    SELECT 1 FROM jurisdiction_boundary where jurisdiction_id = 'lomocomo'
+    );
 
 -- ============================================
 -- Remote Host Mappings for .localhost subdomains
