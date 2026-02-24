@@ -32,7 +32,7 @@
 	},
 	"serviceRequest": {
 		"request_id": "Request ID",
-		"description": "Description:",
+		"description": "Description",
 		"address": "Address",
 		"detail": "Service Request Detail",
 		"update": "Service Request Update",
