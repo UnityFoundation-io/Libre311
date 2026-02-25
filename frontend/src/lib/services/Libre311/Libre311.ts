@@ -714,8 +714,8 @@ const ROUTES = {
 	deleteProject: (id: number, params: HasJurisdictionId) =>
 		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
 	patchJurisdiction2: (jurisdictionId: string) => `/tenant-admin/jurisdictions/${jurisdictionId}`,
-    patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
-        `/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`
+	patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
+		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
