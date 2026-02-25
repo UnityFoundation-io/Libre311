@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
@@ -42,6 +41,8 @@
 		bounds: []
 	};
 
+	loadProjects();
+
 	/**
 	 * Converts a date object or string into the format required by a datetime-local input,
 	 * which is `YYYY-MM-DDTHH:MM`.
@@ -55,10 +56,6 @@
 		date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
 		return date.toISOString().slice(0, 16);
 	}
-
-	onMount(async () => {
-		await loadProjects();
-	});
 
 	async function loadProjects() {
 		isLoading = true;
