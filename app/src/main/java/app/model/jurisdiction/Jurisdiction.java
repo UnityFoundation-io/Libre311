@@ -61,6 +61,10 @@ public class Jurisdiction {
     // Number of days closed service requests remain visible to admins (default 90)
     private Integer closedRequestDaysVisibleAdmin = 90;
 
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private ProjectFeature projectFeature = ProjectFeature.DISABLED;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
@@ -189,6 +193,14 @@ public class Jurisdiction {
 
     public void setClosedRequestDaysVisibleAdmin(Integer closedRequestDaysVisibleAdmin) {
         this.closedRequestDaysVisibleAdmin = closedRequestDaysVisibleAdmin;
+    }
+
+    public ProjectFeature getProjectFeature() {
+        return projectFeature;
+    }
+
+    public void setProjectFeature(ProjectFeature projectFeature) {
+        this.projectFeature = projectFeature;
     }
 
 }

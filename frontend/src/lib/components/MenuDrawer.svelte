@@ -11,12 +11,14 @@
 	import { plusCircleIcon } from './Svg/outline/plusCircleIcon';
 	import { user } from './Svg/outline/user';
 	import AuthGuard from './AuthGuard.svelte';
+	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 
 	export let open: boolean;
 
 	export let handleClose: () => void;
 
 	const linkResolver = useLibre311Context().linkResolver;
+	const jurisdiction = useJurisdiction();
 </script>
 
 <Portal>
@@ -78,6 +80,16 @@
 						>
 							<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
 						</Menu.Item>
+						{#if $jurisdiction.project_feature && $jurisdiction.project_feature !== 'DISABLED'}
+							<Menu.Item
+								key="projects"
+								label="Project Management"
+								href="/projects"
+								on:click={handleClose}
+							>
+								<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
+							</Menu.Item>
+						{/if}
 					</AuthGuard>
 					<AuthGuard
 						requires={[

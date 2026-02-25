@@ -57,6 +57,15 @@ public class JurisdictionDTO {
     @JsonProperty("remote_hosts")
     private Set<String> remoteHosts;
 
+    @JsonProperty("project_feature")
+    private app.model.jurisdiction.ProjectFeature projectFeature;
+
+    @JsonProperty("closed_request_days_visible_user")
+    private Integer closedRequestDaysVisibleUser;
+
+    @JsonProperty("closed_request_days_visible_admin")
+    private Integer closedRequestDaysVisibleAdmin;
+
     private Double[][] bounds;
 
     public JurisdictionDTO() {
@@ -76,6 +85,9 @@ public class JurisdictionDTO {
         this.logoMediaUrl = jurisdiction.getLogoMediaUrl();
         this.termsOfUseContent = jurisdiction.getTermsOfUseContent();
         this.privacyPolicyContent = jurisdiction.getPrivacyPolicyContent();
+        this.projectFeature = jurisdiction.getProjectFeature();
+        this.closedRequestDaysVisibleUser = jurisdiction.getClosedRequestDaysVisibleUser();
+        this.closedRequestDaysVisibleAdmin = jurisdiction.getClosedRequestDaysVisibleAdmin();
     }
 
     public JurisdictionDTO(Jurisdiction jurisdiction, JurisdictionBoundary boundary) {
@@ -174,5 +186,29 @@ public class JurisdictionDTO {
 
     public void setPrivacyPolicyContent(String privacyPolicyContent) {
         this.privacyPolicyContent = privacyPolicyContent;
+    }
+
+    public app.model.jurisdiction.ProjectFeature getProjectFeature() {
+        return projectFeature;
+    }
+
+    public void setProjectFeature(app.model.jurisdiction.ProjectFeature projectFeature) {
+        this.projectFeature = projectFeature;
+    }
+
+    public Integer getClosedRequestDaysVisibleUser() {
+        return closedRequestDaysVisibleUser;
+    }
+
+    public void setClosedRequestDaysVisibleUser(Integer closedRequestDaysVisibleUser) {
+        this.closedRequestDaysVisibleUser = closedRequestDaysVisibleUser;
+    }
+
+    public Integer getClosedRequestDaysVisibleAdmin() {
+        return closedRequestDaysVisibleAdmin;
+    }
+
+    public void setClosedRequestDaysVisibleAdmin(Integer closedRequestDaysVisibleAdmin) {
+        this.closedRequestDaysVisibleAdmin = closedRequestDaysVisibleAdmin;
     }
 }

@@ -21,12 +21,12 @@ micronaut:
     cors:
       enabled: true
       configurations:
-        allowedOrigins:
-          - http://localhost:3000
-          - localhost:3000
-          - http://127.0.0.1:3000
-          - http://libre311-ui:3000
-          - http://libre311-ui-dev:3000
+        all:
+          allowedOriginsRegex: '^http(|s):\/\/([A-Za-z0-9\-]+\.)?localhost:3000$'
+          allowedOrigins:
+            - http://127.0.0.1:3000
+            - http://libre311-ui:3000
+            - http://libre311-ui-dev:3000
     port: 8080
 ---
 app:

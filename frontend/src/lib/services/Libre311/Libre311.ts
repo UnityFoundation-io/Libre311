@@ -368,7 +368,8 @@ export const ServiceRequestSchema = z
 		media_url: urlSchema.optional(),
 		selected_values: z.array(SelectedValuesSchema).optional(),
 		priority: ServiceRequestPrioritySchema.optional(),
-		removal_suggestions_count: z.number().optional()
+		removal_suggestions_count: z.number().optional(),
+		project_id: z.number().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -496,6 +497,51 @@ export type FilteredServiceRequestsParams =
 
 const latLngTupleSchema = z.tuple([z.number(), z.number()]);
 
+// ***************** Projects ***************** //
+export const ProjectFeatureSchema = z.enum(['DISABLED', 'OPTIONAL', 'REQUIRED']);
+export type ProjectFeature = z.infer<typeof ProjectFeatureSchema>;
+
+export const ProjectSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	description: z.string().optional(),
+	bounds: z.array(latLngTupleSchema).min(4),
+	start_date: z.string(),
+	end_date: z.string(),
+	jurisdiction_id: z.string()
+});
+export type Project = z.infer<typeof ProjectSchema>;
+
+export const CreateProjectParamsSchema = z.object({
+	name: z.string(),
+	description: z.string().optional(),
+	bounds: z.array(latLngTupleSchema).min(4),
+	start_date: z.string(),
+	end_date: z.string()
+});
+export type CreateProjectParams = z.infer<typeof CreateProjectParamsSchema>;
+
+export const UpdateProjectParamsSchema = z.object({
+	id: z.number(),
+	name: z.string().optional(),
+	description: z.string().optional(),
+	bounds: z.array(latLngTupleSchema).min(4).optional(),
+	start_date: z.string().optional(),
+	end_date: z.string().optional()
+});
+export type UpdateProjectParams = z.infer<typeof UpdateProjectParamsSchema>;
+
+export type UpdateJurisdictionParams = {
+	name?: string;
+	primary_color?: string;
+	primary_hover_color?: string;
+	logo_media_url?: string;
+	bounds?: number[][][];
+	terms_of_use_content?: string;
+	privacy_policy_content?: string;
+	project_feature?: ProjectFeature;
+};
+
 const JurisdictionConfigSchema = z
 	.object({
 		name: z.string(),
@@ -503,6 +549,7 @@ const JurisdictionConfigSchema = z
 		auth_base_url: z.string(),
 		primary_color: z.string().optional(),
 		primary_hover_color: z.string().optional(),
+		project_feature: ProjectFeatureSchema.optional().default('DISABLED'),
 		tenant_id: z.number()
 	})
 	.merge(HasJurisdictionIdSchema);
@@ -594,6 +641,11 @@ export interface Libre311Service extends Open311Service {
 	createRemovalSuggestion(params: CreateRemovalSuggestionParams): Promise<void>;
 	getRemovalSuggestions(service_request_id: number): Promise<GetRemovalSuggestionsResponse>;
 	deleteRemovalSuggestion(params: { id: number }): Promise<void>;
+	getProjects(): Promise<Project[]>;
+	createProject(params: CreateProjectParams): Promise<Project>;
+	updateProject(params: UpdateProjectParams): Promise<Project>;
+	deleteProject(id: number): Promise<void>;
+	updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig>;
 	updatePolicyContent(params: UpdatePolicyContentParams): Promise<void>;
 }
 
@@ -653,6 +705,15 @@ const ROUTES = {
 		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
 		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
+	getProjects: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
+	postProject: (params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
+	patchProject: (id: number, params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
+	deleteProject: (id: number, params: HasJurisdictionId) =>
+		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
+	patchJurisdiction2: (jurisdictionId: string) => `/tenant-admin/jurisdictions/${jurisdictionId}`,
 	patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
 		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`
 };
@@ -762,6 +823,44 @@ export class Libre311ServiceImpl implements Libre311Service {
 		await this.axiosInstance.delete(
 			ROUTES.deleteRemovalSuggestion({ id: params.id, jurisdiction_id: this.jurisdictionId })
 		);
+	}
+
+	async getProjects(): Promise<Project[]> {
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getProjects({ jurisdiction_id: this.jurisdictionId })
+		);
+		return z.array(ProjectSchema).parse(res.data);
+	}
+
+	async createProject(params: CreateProjectParams): Promise<Project> {
+		const res = await this.axiosInstance.post<unknown>(
+			ROUTES.postProject({ jurisdiction_id: this.jurisdictionId }),
+			params
+		);
+		return ProjectSchema.parse(res.data);
+	}
+
+	async updateProject(params: UpdateProjectParams): Promise<Project> {
+		const { id, ...rest } = params;
+		const res = await this.axiosInstance.patch<unknown>(
+			ROUTES.patchProject(id, { jurisdiction_id: this.jurisdictionId }),
+			rest
+		);
+		return ProjectSchema.parse(res.data);
+	}
+
+	async deleteProject(id: number): Promise<void> {
+		await this.axiosInstance.delete(
+			ROUTES.deleteProject(id, { jurisdiction_id: this.jurisdictionId })
+		);
+	}
+
+	async updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig> {
+		const res = await this.axiosInstance.patch<unknown>(
+			ROUTES.patchJurisdiction2(this.jurisdictionId),
+			params
+		);
+		return JurisdictionConfigSchema.parse(res.data);
 	}
 
 	async updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
