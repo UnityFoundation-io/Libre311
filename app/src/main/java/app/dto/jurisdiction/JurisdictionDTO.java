@@ -29,6 +29,9 @@ public class JurisdictionDTO {
 
     private String name;
 
+    @JsonProperty("abbreviated_name")
+    private String abbreviatedName;
+
     @JsonProperty("jurisdiction_id")
     private String jurisdictionId;
 
@@ -79,6 +82,7 @@ public class JurisdictionDTO {
     public JurisdictionDTO(Jurisdiction jurisdiction) {
         this.jurisdictionId = jurisdiction.getId();
         this.name = jurisdiction.getName();
+        this.abbreviatedName = jurisdiction.getAbbreviatedName();
         this.tenantId = jurisdiction.getTenantId();
         this.primaryColor = jurisdiction.getPrimaryColor();
         this.primaryHoverColor = jurisdiction.getPrimaryHoverColor();
@@ -117,6 +121,14 @@ public class JurisdictionDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAbbreviatedName() {
+        return abbreviatedName;
+    }
+
+    public void setAbbreviatedName(String abbreviatedName) {
+        this.abbreviatedName = abbreviatedName;
     }
 
     public String getPrimaryColor() {

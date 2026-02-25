@@ -108,6 +108,7 @@ public class JurisdictionService {
 
         Jurisdiction jurisdiction = new Jurisdiction(requestDTO.getJurisdictionId(), tenantId);
         jurisdiction.setName(requestDTO.getName());
+        jurisdiction.setAbbreviatedName(requestDTO.getAbbreviatedName());
         jurisdiction.setPrimaryColor(requestDTO.getPrimaryColor());
         jurisdiction.setPrimaryHoverColor(requestDTO.getPrimaryHoverColor());
         jurisdiction.setLogoMediaUrl(requestDTO.getLogoMediaUrl());
@@ -155,6 +156,9 @@ public class JurisdictionService {
     private void applyPatch(PatchJurisdictionDTO jurisdictionDTO, Jurisdiction jurisdiction) {
         if (jurisdictionDTO.getName() != null) {
             jurisdiction.setName(jurisdictionDTO.getName());
+        }
+        if (jurisdictionDTO.getAbbreviatedName() != null) {
+            jurisdiction.setAbbreviatedName(jurisdictionDTO.getAbbreviatedName());
         }
         if (jurisdictionDTO.getPrimaryColor() != null) {
             jurisdiction.setPrimaryColor(jurisdictionDTO.getPrimaryColor());
