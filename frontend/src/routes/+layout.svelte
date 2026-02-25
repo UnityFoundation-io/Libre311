@@ -18,7 +18,7 @@
 		type AsyncSuccess
 	} from '$lib/services/http';
 	import { onDestroy } from 'svelte';
-	import { getJurisdictionConfig } from '$lib/services/Libre311/Libre311';
+	import { getJurisdictionConfig, type JurisdictionConfig } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { loadRecaptchaProps } from '$lib/services/RecaptchaService';
 	import User from '$lib/components/User.svelte';
@@ -78,6 +78,8 @@
 		if (observer && fullH1El) observer.disconnect();
 	});
 
+	let jurisdictionConfig: JurisdictionConfig;
+
 	$: {
 		let cppType = contextProviderProps.type;
 		if (cppType == 'success') {
@@ -93,6 +95,7 @@
 			if (primaryHoverColor) {
 				document.documentElement.style.setProperty('--hover', primaryHoverColor);
 			}
+			jurisdictionConfig = contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig;
 		}
 	}
 
@@ -118,13 +121,13 @@
 				<div class="relative w-full">
 					<!-- Visible heading (controls layout height) -->
 					<h1>
-						{useAbbrev && libre311Context.service.getJurisdictionConfig().abbreviated_name
-							? libre311Context.service.getJurisdictionConfig().abbreviated_name
-							: libre311Context.service.getJurisdictionConfig().name}
+						{useAbbrev && jurisdictionConfig.abbreviated_name
+							? jurisdictionConfig.abbreviated_name
+							: jurisdictionConfig.name}
 					</h1>
 					<!-- Hidden measurement element to determine when to wrap -->
 					<h1 bind:this={fullH1El} class="absolute left-0 top-0 w-full whitespace-normal opacity-0">
-						{libre311Context.service.getJurisdictionConfig().name}
+						{jurisdictionConfig.name}
 					</h1>
 				</div>
 			</div>
