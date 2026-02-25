@@ -93,7 +93,7 @@ usage() {
   echo "  $0 stlma --name 'New Name' --logo-url 'https://example.com/logo.png'"
   echo "  $0 stlma -n 'STLMA' --privacy-policy privacy.md --terms-of-use terms.md"
   echo "  $0 stlma -n 'STLMA' --bounds-file bounds.json"
-  echo "  $0 stlma --  'Test' --dry-run          # Preview without updating"
+  echo "  $0 stlma --name 'Test' --dry-run          # Preview without updating"
   echo "  $0 stlma --name 'Test' -y                 # Update without confirmation"
   echo ""
   echo "Exit codes:"
