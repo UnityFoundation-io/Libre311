@@ -48,6 +48,8 @@ usage() {
   echo "Options:"
   echo "  -X, --create                 Create a new jurisdiction instead of updating"
   echo "  -n, --name <name>            Display name (REQUIRED for all requests)"
+  echo "  -e, --abbreviated-name <name>  Optional abbreviated name if name can't displayed without wrapping."
+  echo "                                 Using <name> = \"\" will effectively unset the value"
   echo "  -c, --primary-color <color>    Primary color (HSL format: 'H S% L%')"
   echo "  -C, --primary-hover-color <color>"
   echo "                                 Hover color (HSL format: 'H S% L%')"
@@ -91,7 +93,7 @@ usage() {
   echo "  $0 stlma --name 'New Name' --logo-url 'https://example.com/logo.png'"
   echo "  $0 stlma -n 'STLMA' --privacy-policy privacy.md --terms-of-use terms.md"
   echo "  $0 stlma -n 'STLMA' --bounds-file bounds.json"
-  echo "  $0 stlma --name 'Test' --dry-run          # Preview without updating"
+  echo "  $0 stlma --  'Test' --dry-run          # Preview without updating"
   echo "  $0 stlma --name 'Test' -y                 # Update without confirmation"
   echo ""
   echo "Exit codes:"
@@ -199,6 +201,11 @@ while [ $# -gt 0 ]; do
     -n|--name)
       require_arg "$1" "$2"
       update_keys+=("name")
+      update_values+=("$2")
+      shift 2
+      ;;
+    -e|--abbreviated-name)
+      update_keys+=("abbreviated_name")
       update_values+=("$2")
       shift 2
       ;;
