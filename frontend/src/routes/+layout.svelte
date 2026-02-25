@@ -18,7 +18,7 @@
 		type AsyncSuccess
 	} from '$lib/services/http';
 	import { onDestroy } from 'svelte';
-	import { getJurisdictionConfig, type JurisdictionConfig } from '$lib/services/Libre311/Libre311';
+	import { getJurisdictionConfig } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { loadRecaptchaProps } from '$lib/services/RecaptchaService';
 	import User from '$lib/components/User.svelte';
