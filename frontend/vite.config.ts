@@ -21,7 +21,7 @@ export default defineConfig({
 			'leaflet',
 			'leaflet-geosearch',
 			'google-libphonenumber',
-			'marked',
+			'carta-md',
 			'dompurify'
 		]
 	}
