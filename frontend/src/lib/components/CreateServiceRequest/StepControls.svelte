@@ -9,7 +9,7 @@
 	const linkResolver = useLibre311Context().linkResolver;
 </script>
 
-<div class="py-2 flex items-center justify-between">
+<div class="flex items-center justify-between py-2">
 	<Button href={linkResolver.createIssuePagePrevious($page.url)}>
 		{messages['contact']['button']['back']}
 	</Button>
