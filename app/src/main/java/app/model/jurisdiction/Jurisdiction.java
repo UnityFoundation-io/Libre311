@@ -16,6 +16,7 @@ package app.model.jurisdiction;
 
 import app.model.service.Service;
 import app.model.servicerequest.ServiceRequest;
+import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -34,6 +35,11 @@ public class Jurisdiction {
 
     @Nullable
     private String name;
+
+    @Nullable
+    @Size(max = 8)
+    @Column(length = 8)
+    private String abbreviatedName;
 
     @NotNull
     private Long tenantId;
@@ -121,6 +127,13 @@ public class Jurisdiction {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAbbreviatedName() {
+        return abbreviatedName;
+    }
+    public void setAbbreviatedName(String abbreviatedName) {
+        this.abbreviatedName = abbreviatedName;
     }
 
     public Set<RemoteHost> getRemoteHosts() {

@@ -17,7 +17,8 @@
 		type AsyncResult,
 		type AsyncSuccess
 	} from '$lib/services/http';
-	import { getJurisdictionConfig } from '$lib/services/Libre311/Libre311';
+	import { onDestroy } from 'svelte';
+	import { getJurisdictionConfig, type JurisdictionConfig } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { loadRecaptchaProps } from '$lib/services/RecaptchaService';
 	import User from '$lib/components/User.svelte';
@@ -59,6 +60,26 @@
 
 	initLibre311ContextProps();
 
+	let fullH1El: HTMLElement;
+	let observer: ResizeObserver;
+	let useAbbrev = false;
+
+	function trySetupH1Resize() {
+		if (fullH1El && !observer) {
+			observer = new ResizeObserver(() => {
+				useAbbrev = fullH1El.clientHeight > parseFloat(getComputedStyle(fullH1El).lineHeight) + 1;
+			});
+			observer.observe(fullH1El);
+		}
+	}
+
+	// Cleanup
+	onDestroy(() => {
+		if (observer && fullH1El) observer.disconnect();
+	});
+
+	let jurisdictionConfig: JurisdictionConfig;
+
 	$: {
 		let cppType = contextProviderProps.type;
 		if (cppType == 'success') {
@@ -74,16 +95,19 @@
 			if (primaryHoverColor) {
 				document.documentElement.style.setProperty('--hover', primaryHoverColor);
 			}
+			jurisdictionConfig = contextProviderPropsSuccess.value.libreServiceProps.jurisdictionConfig;
 		}
 	}
+
+	$: if (fullH1El) trySetupH1Resize();
 </script>
 
-{#if contextProviderProps.type == 'success'}
-	<Libre311ContextProvider props={contextProviderProps.value} let:libre311Context>
+{#if contextProviderProps.type === 'success'}
+	<Libre311ContextProvider props={contextProviderProps.value}>
 		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 		{@const jurisdictionContext = createJurisdictionContext()}
 		<header class="flex items-center justify-center">
-			<div class="flex gap-4">
+			<div class="flex w-full gap-4">
 				<button
 					aria-label="navigation"
 					type="button"
@@ -94,7 +118,18 @@
 				>
 					<Bars3 />
 				</button>
-				<h1>{libre311Context.service.getJurisdictionConfig().name}</h1>
+				<div class="relative w-full">
+					<!-- Visible heading (controls layout height) -->
+					<h1>
+						{useAbbrev && jurisdictionConfig.abbreviated_name
+							? jurisdictionConfig.abbreviated_name
+							: jurisdictionConfig.name}
+					</h1>
+					<!-- Hidden measurement element to determine when to wrap -->
+					<h1 bind:this={fullH1El} class="absolute left-0 top-0 w-full whitespace-normal opacity-0">
+						{jurisdictionConfig.name}
+					</h1>
+				</div>
 			</div>
 
 			<User />
@@ -106,7 +141,7 @@
 			</section>
 		</main>
 	</Libre311ContextProvider>
-{:else if contextProviderProps.type == 'inProgress'}
+{:else if contextProviderProps.type === 'inProgress'}
 	<SplashLoading />
 {:else}
 	<SomethingWentWrong />

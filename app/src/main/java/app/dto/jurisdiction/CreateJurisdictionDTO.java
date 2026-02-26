@@ -27,6 +27,10 @@ public class CreateJurisdictionDTO {
     @NotEmpty
     private String name;
 
+    @JsonProperty("abbreviated_name")
+    @Size(max = 8)
+    private String abbreviatedName;
+
     @NotEmpty
     @JsonProperty("jurisdiction_id")
     private String jurisdictionId;
@@ -76,6 +80,14 @@ public class CreateJurisdictionDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAbbreviatedName() {
+        return abbreviatedName;
+    }
+
+    public void setAbbreviatedName(String abbreviatedName) {
+        this.abbreviatedName = abbreviatedName;
     }
 
     public String getPrimaryColor() {

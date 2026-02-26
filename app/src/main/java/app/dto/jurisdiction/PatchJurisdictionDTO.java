@@ -27,6 +27,10 @@ public class PatchJurisdictionDTO {
     @NotEmpty
     private String name;
 
+    @JsonProperty("abbreviated_name")
+    @Size(max = 8)
+    private String abbreviatedName;
+
     @JsonProperty("primary_color")
     @Pattern(regexp = "^\\d{1,3}\\s\\d{1,3}%\\s\\d{1,3}%$",
              message = "Must be valid HSL format: hue saturation% lightness%")
@@ -69,6 +73,14 @@ public class PatchJurisdictionDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAbbreviatedName() {
+        return abbreviatedName;
+    }
+
+    public void setAbbreviatedName(String abbreviatedName) {
+        this.abbreviatedName = abbreviatedName;
     }
 
     public String getPrimaryColor() {

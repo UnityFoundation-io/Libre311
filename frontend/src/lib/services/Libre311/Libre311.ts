@@ -545,6 +545,7 @@ export type UpdateJurisdictionParams = {
 const JurisdictionConfigSchema = z
 	.object({
 		name: z.string(),
+		abbreviated_name: z.string().max(8).optional(),
 		bounds: z.array(latLngTupleSchema).min(1),
 		auth_base_url: z.string(),
 		primary_color: z.string().optional(),
