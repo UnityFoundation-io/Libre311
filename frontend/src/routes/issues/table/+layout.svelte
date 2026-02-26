@@ -166,9 +166,9 @@
 		<div slot="table" class="relative flex h-full flex-col text-center">
 			<h3 class="text-base">Service Requests</h3>
 			<div
-				class="m-3 flex items-center justify-between rounded-md border-t-[1px] border-border shadow-md"
+				class="m-1 flex items-center justify-between rounded-md border-t-[1px] border-border shadow-md"
 			>
-				<div class="m-3">
+				<div class="m-1">
 					<Pagination
 						pagination={$serviceRequestsRes.value.metadata.pagination}
 						nextPage={linkResolver.nextIssuesPage(
@@ -182,7 +182,7 @@
 					/>
 				</div>
 				<div class="flex items-center">
-					<div class="m-3 flex items-center">
+					<div class="m-1 flex items-center">
 						{#if !isSearchFiltersOpen}
 							<div transition:slide|local={{ duration: 500 }}>
 								<Input class="w-36" placeholder="#Request ID" on:change={handleSearchInput}>
@@ -269,7 +269,7 @@
 			</div>
 
 			<!-- flex-1 allows the table card to fill remaining vertical space in the layout -->
-			<Card bordered={true} class="mx-2 mb-2 flex-1 overflow-hidden">
+			<Card bordered={true} class="mx-2 mb-1 flex-1 overflow-hidden">
 				<Card.Content slot="content" class="h-full p-0 sm:p-0">
 					<div class="issues-table-override h-full">
 						<Table class="h-full overflow-hidden rounded-md" {columns}>
@@ -345,7 +345,7 @@
 											<div class="flex w-full items-center justify-center">
 												{#if item.removal_suggestions_count && item.removal_suggestions_count > 0}
 													<span
-														class="inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs font-bold leading-none text-red-100"
+														class="inline-flex items-center justify-center rounded-full bg-red-600 px-2 pb-1 text-xs font-bold leading-none text-red-100"
 													>
 														{item.removal_suggestions_count}
 													</span>
@@ -359,7 +359,7 @@
 							</Table.Body>
 
 							<Table.Footer slot="footer">
-								<div class="m-2 flex justify-end">
+								<div class="m-0 flex justify-end">
 									<Button on:click={handleDownloadCsv}>
 										Download CSV
 										<Button.Trailing data={arrowDownTray} slot="trailing" />

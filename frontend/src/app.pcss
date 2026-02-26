@@ -37,13 +37,14 @@
 /* Map Status Legend Control */
 .map-status-legend {
 	background-color: white;
-	padding: 6px 10px;
+	padding: 5px 8px;
 	border-radius: 4px;
 	border: 2px solid rgba(0, 0, 0, 0.2);
 	background-clip: padding-box;
 	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
 	user-select: none;
 	margin-bottom: 4px;
+	transform: translateY(-35px) translateX(5px);
 }
 
 .map-status-legend-item {
@@ -77,6 +78,10 @@
 	line-height: 1.2;
 	color: #333;
 	font-weight: bold;
+}
+
+div#table-body {
+	height: calc(100vh - 100px) !important;
 }
 
 /* In case the button being shadowed is --primary color */

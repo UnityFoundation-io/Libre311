@@ -149,7 +149,7 @@
 
 <style>
 	:global(:root) {
-		--header-height: 4rem;
+		--header-height: 3.2rem;
 	}
 	header {
 		height: var(--header-height);
