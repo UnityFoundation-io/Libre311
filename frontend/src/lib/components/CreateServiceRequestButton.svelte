@@ -5,7 +5,7 @@
 </script>
 
 <div class="absolute bottom-5 left-1/2 z-[1] -translate-x-1/2">
-	<Button type="primary" href={'/issue/create'}>
+	<Button type="primary" href={'/issue/create'} class="whitespace-nowrap">
 		<div slot="leading">
 			<PlusCircleIcon />
 		</div>

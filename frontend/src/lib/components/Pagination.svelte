@@ -24,7 +24,7 @@
 	<span aria-live="polite" aria-atomic="true"
 		>{lowerBound} - {upperBound} of {pagination?.totalSize}</span
 	>
-	<span class="ml-1">
+	<span class="ml-1 whitespace-nowrap">
 		<Button
 			href={prevPage}
 			type={prevPage ? 'text' : 'ghost'}
