@@ -6,6 +6,8 @@
 	import SelectedValues from './SelectedValues.svelte';
 	import ServiceRequestStatusBadge from './ServiceRequestStatusBadge.svelte';
 	import SuggestionModal from './SuggestionModal.svelte';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import { onMount } from 'svelte';
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string | undefined = undefined;
@@ -17,6 +19,18 @@
 	$: if (suggestionSubmitted) {
 		suggestionButtonText = 'Removal was Suggested';
 	}
+
+	const libre311Context = useLibre311Context();
+
+	let isOnline = false;
+
+	onMount(() => {
+		const unsubscribe = libre311Context.networkStatus.isOnline.subscribe((online) => {
+			isOnline = online;
+		});
+
+		return unsubscribe;
+	});
 </script>
 
 <div class="flex h-full">
@@ -44,7 +58,13 @@
 				<div class="mb-2 mt-2 flow-root">
 					<h1 class="float-left text-lg">{serviceRequest.service_name}</h1>
 					<div class="float-right">
-						<Button on:click={() => (showSuggestionModal = true)} size="sm" type="primary">
+						<Button
+							disabled={!isOnline}
+							title={isOnline ? 'Suggest Removal of this Service Request' : 'Disabled when Offline'}
+							on:click={() => (showSuggestionModal = true)}
+							size="sm"
+							type="primary"
+						>
 							{suggestionButtonText}
 						</Button>
 					</div>

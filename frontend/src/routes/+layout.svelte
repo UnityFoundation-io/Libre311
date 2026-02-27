@@ -107,7 +107,7 @@
 		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 		{@const jurisdictionContext = createJurisdictionContext()}
 		<header class="flex items-center justify-center">
-			<div class="flex w-full gap-4">
+			<div class="mb-2 flex w-full gap-4">
 				<button
 					aria-label="navigation"
 					type="button"
