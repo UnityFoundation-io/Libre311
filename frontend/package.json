@@ -59,7 +59,7 @@
 		"@turf/turf": "^7.3.3",
 		"@types/geojson": "^7946.0.13",
 		"@types/leaflet": "^1.9.8",
-		"axios": "^1.12.0",
+		"axios": "^1.13.5",
 		"carbon-icons-svelte": "^13.7.0",
 		"carta-md": "^3.6.1",
 		"dompurify": "^3.3.1",
