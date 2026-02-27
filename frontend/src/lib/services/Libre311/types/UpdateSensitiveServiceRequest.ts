@@ -6,7 +6,8 @@ export const UpdateSensitiveServiceRequestSchema = z
 	.object({
 		agency_email: EmailSchema.optional(),
 		service_notice: z.string().nullish(),
-		priority: z.string().nullish()
+		priority: z.string().nullish(),
+		project_id: z.number().nullish()
 	})
 	.merge(ServiceRequestSchema);
 

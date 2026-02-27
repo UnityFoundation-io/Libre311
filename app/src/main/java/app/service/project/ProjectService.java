@@ -80,6 +80,7 @@ public class ProjectService {
         if (dto.getBounds() != null) project.setBoundary(geometryFactory.createPolygon(dto.getBounds()));
         if (dto.getStartDate() != null) project.setStartDate(dto.getStartDate());
         if (dto.getEndDate() != null) project.setEndDate(dto.getEndDate());
+        if (dto.getClosedDate() != null) project.setClosedDate(dto.getClosedDate());
 
         return new ProjectDTO(projectRepository.update(project));
     }

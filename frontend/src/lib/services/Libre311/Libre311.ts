@@ -508,6 +508,8 @@ export const ProjectSchema = z.object({
 	bounds: z.array(latLngTupleSchema).min(4),
 	start_date: z.string(),
 	end_date: z.string(),
+	closed_date: z.string().optional().nullable(),
+	status: z.enum(['OPEN', 'CLOSED']),
 	jurisdiction_id: z.string()
 });
 export type Project = z.infer<typeof ProjectSchema>;
@@ -527,7 +529,8 @@ export const UpdateProjectParamsSchema = z.object({
 	description: z.string().optional(),
 	bounds: z.array(latLngTupleSchema).min(4).optional(),
 	start_date: z.string().optional(),
-	end_date: z.string().optional()
+	end_date: z.string().optional(),
+	closed_date: z.string().optional().nullable()
 });
 export type UpdateProjectParams = z.infer<typeof UpdateProjectParamsSchema>;
 

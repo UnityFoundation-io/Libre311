@@ -22,9 +22,10 @@
 	}
 
 	const columns: TableColumn[] = [
-		{ column: 'name', label: 'Name', class: 'w-1/3', placement: 'left' },
-		{ column: 'start_date', label: 'Start Date', class: 'w-1/4', placement: 'left' },
-		{ column: 'end_date', label: 'End Date', class: 'w-1/4', placement: 'left' },
+		{ column: 'name', label: 'Name', class: 'w-1/4', placement: 'left' },
+		{ column: 'start_date', label: 'Start Date', class: 'w-1/5', placement: 'left' },
+		{ column: 'end_date', label: 'End Date', class: 'w-1/5', placement: 'left' },
+		{ column: 'status', label: 'Status', class: 'w-1/5', placement: 'left' },
 		{ column: 'actions', label: 'Actions', class: 'w-1/6', placement: 'center' }
 	];
 
@@ -98,6 +99,25 @@
 
 	function handleClose() {
 		isModalOpen = false;
+	}
+
+	async function closeProject() {
+		if (confirm('Are you sure you want to close this project? This will mark the study as concluded.')) {
+			isSaving = true;
+			try {
+				await libre311.updateProject({
+					id: currentProject.id!,
+					closed_date: new Date().toISOString()
+				});
+				isModalOpen = false;
+				await loadProjects();
+			} catch (error) {
+				console.error('Failed to close project:', error);
+				alert('Failed to close project');
+			} finally {
+				isSaving = false;
+			}
+		}
 	}
 
 	async function saveProject() {
@@ -183,6 +203,16 @@
 									>{new Date(project.end_date).toLocaleString()}</Table.Body.Row.Cell
 								>
 								<Table.Body.Row.Cell column={3}>
+									<div
+										class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {project.status ===
+										'OPEN'
+											? 'bg-green-100 text-green-800'
+											: 'bg-red-100 text-red-800'}"
+									>
+										{project.status}
+									</div>
+								</Table.Body.Row.Cell>
+								<Table.Body.Row.Cell column={4}>
 									<div class="flex gap-2">
 										<Button variant="ghost" on:click={() => openEditModal(project)}>
 											<Button.Icon data={pencilIcon} slot="icon" />
@@ -254,9 +284,18 @@
 					</div>
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
-					<div class="flex w-full justify-end gap-2">
-						<Button on:click={handleClose}>Cancel</Button>
-						<Button variant="primary" on:click={saveProject} loading={isSaving}>Save</Button>
+					<div class="flex w-full items-center justify-between">
+						<div>
+							{#if isEditing && currentProject.status === 'OPEN'}
+								<Button variant="danger" on:click={closeProject} loading={isSaving}>
+									Close Project
+								</Button>
+							{/if}
+						</div>
+						<div class="flex gap-2">
+							<Button on:click={handleClose}>Cancel</Button>
+							<Button variant="primary" on:click={saveProject} loading={isSaving}>Save</Button>
+						</div>
 					</div>
 				</Modal.Content.Footer>
 			</Modal.Content>

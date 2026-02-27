@@ -36,6 +36,9 @@ public class UpdateProjectDTO {
     @JsonProperty("end_date")
     private Instant endDate;
 
+    @JsonProperty("closed_date")
+    private Instant closedDate;
+
     public UpdateProjectDTO() {
     }
 
@@ -77,5 +80,13 @@ public class UpdateProjectDTO {
 
     public void setEndDate(Instant endDate) {
         this.endDate = endDate;
+    }
+
+    public Instant getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(Instant closedDate) {
+        this.closedDate = closedDate;
     }
 }
