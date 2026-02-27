@@ -143,7 +143,6 @@ public class ServiceRequestService {
     }
 
     public PostResponseServiceRequestDTO createServiceRequest(HttpRequest<?> request, PostRequestServiceRequestDTO serviceRequestDTO, String jurisdictionId) {
-        reCaptchaService.verifyReCaptcha(serviceRequestDTO.getgRecaptchaResponse());
         LOG.debug(serviceRequestDTO.toString());
 
         // Idempotency check: if a client_request_id is provided and already exists, return the existing request

@@ -14,12 +14,12 @@
 
 package app.dto.servicerequest;
 
+import app.recaptcha.RecaptchaRequest;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 @Introspected
-public class PostRequestServiceRequestDTO {
+public class PostRequestServiceRequestDTO implements RecaptchaRequest {
    private static final Logger LOG = LoggerFactory.getLogger(PostRequestServiceRequestDTO.class);
 
 

@@ -14,28 +14,21 @@
 
 package app.util;
 
-import app.dto.storage.PhotoUploadDTO;
 import app.service.storage.StorageService;
 import io.micronaut.context.annotation.Replaces;
-import io.micronaut.http.MediaType;
 import io.micronaut.http.multipart.CompletedFileUpload;
-import io.micronaut.objectstorage.request.UploadRequest;
 import jakarta.inject.Singleton;
-
-import jakarta.validation.Valid;
-import java.util.Base64;
-import java.util.UUID;
 
 @Singleton
 @Replaces(StorageService.class)
 public class MockStorageService extends StorageService {
 
     public MockStorageService() {
-        super(null, null, null);
+        super(null, null);
     }
 
     @Override
-    public String upload(CompletedFileUpload file, String gRecaptchaResponse){
+    public String upload(CompletedFileUpload file){
         return "https://storage.googleapis.com/test-bucket/filename.jpg";
     }
 }

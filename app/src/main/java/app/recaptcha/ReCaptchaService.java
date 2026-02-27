@@ -19,11 +19,15 @@ import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpStatus;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 @Singleton
 public class ReCaptchaService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ReCaptchaService.class);
 
     @Inject
     ReCaptchaClient client;
@@ -37,11 +41,17 @@ public class ReCaptchaService {
         }
     }
 
+    public void verifyReCaptcha(RecaptchaRequest recaptchaRequest){
+        verifyReCaptcha(recaptchaRequest.getgRecaptchaResponse());
+    }
+
     public void verifyReCaptcha(String response) {
-        Map map = client.verifyReCaptcha(this.secret, response);
+        LOG.debug("Verifying recaptcha, response: {}", response);
+        Map<Object, Object> map = client.verifyReCaptcha(this.secret, response);
         Boolean success = (Boolean) map.get("success");
         if (!success){
             throw new RecaptchaVerificationFailed();
         }
+        LOG.debug("recaptcha verified, response: {}", response);
     }
 }
