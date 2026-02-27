@@ -18,7 +18,7 @@
 		"@playwright/test": "^1.56.1",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-static": "^3.0.1",
-		"@sveltejs/kit": "^2.4.3",
+		"@sveltejs/kit": "^2.53.3",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/svelte": "^5.3.1",
