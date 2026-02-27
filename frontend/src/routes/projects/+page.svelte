@@ -12,6 +12,7 @@
 	import BoundaryEditor from '$lib/components/BoundaryEditor.svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import type { TableColumn } from 'stwui/types';
+	import AuthGuard from '$lib/components/AuthGuard.svelte';
 
 	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
@@ -170,66 +171,74 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Project Management</title>
-</svelte:head>
+<AuthGuard
+	requires={[
+		'LIBRE311_ADMIN_VIEW-TENANT',
+		'LIBRE311_ADMIN_VIEW-SYSTEM',
+		'LIBRE311_ADMIN_VIEW-SUBTENANT'
+	]}
+>
+	<div class="p-6">
+		<div class="mb-6 flex items-center justify-between">
+			<h1 class="text-2xl font-bold">Project Administration</h1>
+			<Button variant="primary" on:click={openCreateModal}>
+				<Button.Leading data={plusCircleIcon} slot="leading" />
+				Create Project
+			</Button>
+		</div>
 
-<div class="p-6">
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Project Management</h1>
-		<Button variant="primary" on:click={openCreateModal}>
-			<Button.Leading data={plusCircleIcon} slot="leading" />
-			Create Project
-		</Button>
-	</div>
-
-	<Card>
-		<Card.Content slot="content">
-			{#if isLoading}
-				<p>Loading projects...</p>
-			{:else if projects.length === 0}
-				<p>No projects found.</p>
-			{:else}
-				<Table {columns}>
-					<Table.Header slot="header" orderBy="name" />
-					<Table.Body slot="body">
-						{#each projects as project}
-							<Table.Body.Row id={project.id.toString()}>
-								<Table.Body.Row.Cell column={0}>{project.name}</Table.Body.Row.Cell>
-								<Table.Body.Row.Cell column={1}
-									>{new Date(project.start_date).toLocaleString()}</Table.Body.Row.Cell
-								>
-								<Table.Body.Row.Cell column={2}
-									>{new Date(project.end_date).toLocaleString()}</Table.Body.Row.Cell
-								>
-								<Table.Body.Row.Cell column={3}>
-									<div
-										class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {project.status ===
-										'OPEN'
-											? 'bg-green-100 text-green-800'
-											: 'bg-red-100 text-red-800'}"
+		<Card>
+			<Card.Content slot="content">
+				{#if isLoading}
+					<p>Loading projects...</p>
+				{:else if projects.length === 0}
+					<p>No projects found.</p>
+				{:else}
+					<Table {columns}>
+						<Table.Header slot="header" orderBy="name" />
+						<Table.Body slot="body">
+							{#each projects as project}
+								<Table.Body.Row id={project.id.toString()}>
+									<Table.Body.Row.Cell column={0}>
+										<a href="/projects/{project.id}" class="text-primary hover:underline"
+											>{project.name}</a
+										>
+									</Table.Body.Row.Cell>
+									<Table.Body.Row.Cell column={1}
+										>{new Date(project.start_date).toLocaleString()}</Table.Body.Row.Cell
 									>
-										{project.status}
-									</div>
-								</Table.Body.Row.Cell>
-								<Table.Body.Row.Cell column={4}>
-									<div class="flex gap-2">
-										<Button variant="ghost" on:click={() => openEditModal(project)}>
-											<Button.Icon data={pencilIcon} slot="icon" />
-										</Button>
-										<Button variant="ghost" on:click={() => deleteProject(project.id)}>
-											<Button.Icon data={trashIcon} slot="icon" />
-										</Button>
-									</div>
-								</Table.Body.Row.Cell>
-							</Table.Body.Row>
-						{/each}
-					</Table.Body>
-				</Table>
-			{/if}
-		</Card.Content>
-	</Card>
-</div>
+									<Table.Body.Row.Cell column={2}
+										>{new Date(project.end_date).toLocaleString()}</Table.Body.Row.Cell
+									>
+									<Table.Body.Row.Cell column={3}>
+										<div
+											class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {project.status ===
+											'OPEN'
+												? 'bg-green-100 text-green-800'
+												: 'bg-red-100 text-red-800'}"
+										>
+											{project.status}
+										</div>
+									</Table.Body.Row.Cell>
+									<Table.Body.Row.Cell column={4}>
+										<div class="flex gap-2">
+											<Button variant="ghost" on:click={() => openEditModal(project)}>
+												<Button.Icon data={pencilIcon} slot="icon" />
+											</Button>
+											<Button variant="ghost" on:click={() => deleteProject(project.id)}>
+												<Button.Icon data={trashIcon} slot="icon" />
+											</Button>
+										</div>
+									</Table.Body.Row.Cell>
+								</Table.Body.Row>
+							{/each}
+						</Table.Body>
+					</Table>
+				{/if}
+			</Card.Content>
+		</Card>
+	</div>
+</AuthGuard>
 
 {#if isModalOpen}
 	<Portal>
