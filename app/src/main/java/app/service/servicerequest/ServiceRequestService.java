@@ -98,6 +98,7 @@ public class ServiceRequestService {
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
     private final app.service.project.ProjectService projectService;
+    private final app.model.project.ProjectRepository projectRepository;
     JurisdictionBoundaryService jurisdictionBoundaryService;
     LibreGeometryFactory libreGeometryFactory;
 
@@ -109,6 +110,7 @@ public class ServiceRequestService {
         ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
         UnityAuthService unityAuthService,
         app.service.project.ProjectService projectService,
+        app.model.project.ProjectRepository projectRepository,
         JurisdictionBoundaryService jurisdictionBoundaryService,
         LibreGeometryFactory libreGeometryFactory) {
         this.serviceRequestRepository = serviceRequestRepository;
@@ -120,6 +122,7 @@ public class ServiceRequestService {
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
         this.projectService = projectService;
+        this.projectRepository = projectRepository;
         this.jurisdictionBoundaryService = jurisdictionBoundaryService;
         this.libreGeometryFactory = libreGeometryFactory;
     }
@@ -409,6 +412,16 @@ public class ServiceRequestService {
 
         ServiceRequest serviceRequest = serviceRequestOptional.get();
         applyPatch(serviceRequestDTO, serviceRequest);
+
+        if (serviceRequestDTO.getProjectId() != null) {
+            if (serviceRequestDTO.getProjectId() == -1L) {
+                serviceRequest.setProject(null);
+            } else {
+                app.model.project.Project project = projectRepository.findByIdAndJurisdictionId(serviceRequestDTO.getProjectId(), jurisdictionId)
+                        .orElseThrow(() -> new app.exception.Libre311BaseException("Project not found", io.micronaut.http.HttpStatus.NOT_FOUND));
+                serviceRequest.setProject(project);
+            }
+        }
 
         return convertToSensitiveDTO(serviceRequestRepository.update(serviceRequest));
     }

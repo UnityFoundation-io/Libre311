@@ -48,6 +48,9 @@ public class Project {
     @NotNull
     private Instant endDate;
 
+    @Nullable
+    private Instant closedDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jurisdiction_id", nullable = false)
     private Jurisdiction jurisdiction;
@@ -108,6 +111,22 @@ public class Project {
 
     public void setEndDate(Instant endDate) {
         this.endDate = endDate;
+    }
+
+    @Nullable
+    public Instant getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(@Nullable Instant closedDate) {
+        this.closedDate = closedDate;
+    }
+
+    public ProjectStatus getStatus() {
+        if (closedDate != null || Instant.now().isAfter(endDate)) {
+            return ProjectStatus.CLOSED;
+        }
+        return ProjectStatus.OPEN;
     }
 
     public Jurisdiction getJurisdiction() {

@@ -6,7 +6,8 @@
 		type ServiceRequest,
 		type ServiceRequestPriority,
 		type ServiceRequestStatus,
-		ServiceRequestStatusSchema
+		ServiceRequestStatusSchema,
+		type Project
 	} from '$lib/services/Libre311/Libre311';
 
 	import {
@@ -21,7 +22,7 @@
 	import { mailIcon } from './Svg/outline/mailIcon';
 	import { user } from './Svg/outline/user';
 	import type { UpdateSensitiveServiceRequestRequest } from '$lib/services/Libre311/types/UpdateSensitiveServiceRequest';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import ServiceRequestButtonsContainer from './ServiceRequestButtonsContainer.svelte';
 	import {
 		serviceRequestPrioritySelectOptions,
@@ -29,6 +30,11 @@
 		setUpAlertRole
 	} from '$lib/utils/functions';
 	import { z } from 'zod';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+
+	const libre311 = useLibre311Service();
+	const jurisdiction = useJurisdiction();
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
@@ -46,6 +52,25 @@
 	let agencyEmailInput = createInput<string | undefined>(serviceRequest.agency_email);
 	let serviceNoticeInput = createInput<string | undefined>(serviceRequest.service_notice);
 	let statusNotesInput = createInput<string | undefined>(serviceRequest.status_notes);
+	let projectIdInput = createInput<number | undefined>(serviceRequest.project_id);
+
+	let projects: Project[] = [];
+
+	onMount(async () => {
+		try {
+			projects = await libre311.getProjects();
+		} catch (error) {
+			console.error('Failed to load projects:', error);
+		}
+	});
+
+	$: projectOptions = [
+		{ label: 'None', value: '-1' },
+		...projects.map((p) => ({
+			label: `${p.name} (${p.status})`,
+			value: p.id.toString()
+		}))
+	];
 
 	$: hasUserInput =
 		statusInput.value != serviceRequest.status ||
@@ -54,7 +79,8 @@
 		userChangedText(agencyNameInput.value, serviceRequest.agency_responsible) ||
 		userChangedText(agencyEmailInput.value, serviceRequest.agency_email) ||
 		userChangedText(serviceNoticeInput.value, serviceRequest.service_notice) ||
-		userChangedText(statusNotesInput.value, serviceRequest.status_notes);
+		userChangedText(statusNotesInput.value, serviceRequest.status_notes) ||
+		projectIdInput.value != serviceRequest.project_id;
 
 	function userChangedDate(expectedDateInputValue: string | undefined) {
 		return serviceRequest.expected_datetime != expectedDateInputValue;
@@ -76,6 +102,11 @@
 	function updatePriority(e: Event) {
 		const target = e.target as HTMLInputElement;
 		priorityInput.value = ServiceRequestPrioritySchema.parse(target.value);
+	}
+
+	function updateProject(e: Event) {
+		const target = e.target as HTMLInputElement;
+		projectIdInput.value = parseInt(target.value);
 	}
 
 	export const dateValidator = inputValidatorFactory(
@@ -119,7 +150,8 @@
 			agency_responsible: agencyNameInput.value,
 			agency_email: agencyEmailInput.value,
 			service_notice: serviceNoticeInput.value,
-			status_notes: statusNotesInput.value
+			status_notes: statusNotesInput.value,
+			project_id: projectIdInput.value
 		};
 
 		dispatch('updateServiceRequest', sensitiveServiceRequest);
@@ -196,6 +228,27 @@
 				</Select.Options>
 			</Select>
 		</div>
+
+		<!-- UPDATE PROJECT -->
+		{#if $jurisdiction.project_feature !== 'DISABLED'}
+			<div class="mb-1">
+				<Select
+					name="select-project"
+					placeholder={projects.find((p) => p.id === serviceRequest.project_id)?.name ?? 'None'}
+					options={projectOptions}
+					on:change={updateProject}
+				>
+					<Select.Label slot="label">
+						<strong class="text-base">Project</strong>
+					</Select.Label>
+					<Select.Options slot="options">
+						{#each projectOptions as option}
+							<Select.Options.Option {option} />
+						{/each}
+					</Select.Options>
+				</Select>
+			</div>
+		{/if}
 
 		<!-- UPDATE AGENCY -->
 		<div bind:this={agencyRoot} class="mb-1">
