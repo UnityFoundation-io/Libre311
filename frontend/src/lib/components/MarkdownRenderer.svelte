@@ -1,37 +1,32 @@
 <script lang="ts">
-	import { marked } from 'marked';
+	import { Carta, CartaViewer } from 'carta-md';
 	import DOMPurify from 'dompurify';
 
 	export let markdown: string;
 	let className: string = '';
 	export { className as class };
 
-	let html = '';
-
-	// Configure marked options
-	marked.setOptions({
-		breaks: true, // GFM line breaks
-		gfm: true // GitHub Flavored Markdown
+	const carta = new Carta({
+		sanitizer: DOMPurify.sanitize
 	});
-
-	// Render markdown to HTML and sanitize to prevent XSS
-	$: {
-		try {
-			const rawHtml = marked.parse(markdown, { async: false });
-			html = DOMPurify.sanitize(rawHtml);
-		} catch (error) {
-			console.error('Error parsing markdown:', error);
-			html = '<p>Error rendering content</p>';
-		}
-	}
 </script>
 
 <div class="markdown-renderer {className}">
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	{@html html}
+	{#key markdown}
+		<CartaViewer {carta} value={markdown} />
+	{/key}
 </div>
 
 <style lang="postcss">
+	/* Required for consistent code rendering */
+	:global(.carta-font-code) {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+			'Courier New', monospace;
+		font-size: 0.875rem;
+		line-height: 1.5;
+		letter-spacing: normal;
+	}
+
 	/* Basic markdown styling using Tailwind @apply */
 	.markdown-renderer :global(h1) {
 		@apply mb-4 mt-6 text-3xl font-bold;
