@@ -15,8 +15,9 @@
 	import { arrowDownTray } from '$lib/components/Svg/outline/arrowDownTray';
 	import { saveAs } from 'file-saver';
 	import { FilteredServiceRequestsParamsMapper } from '$lib/services/Libre311/FilteredServiceRequestsParamsMapper';
-	import { columns } from '../../issues/table/table'; // Reusing columns from issues table
+	import { columns } from '../../../issues/table/table'; // Adjusted path for (view) group
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
+	import { pencilIcon } from '$lib/components/Svg/outline/pencilIcon';
 
 	const libre311 = useLibre311Service();
 	const linkResolver = useLibre311Context().linkResolver;
@@ -25,7 +26,9 @@
 	let isLoading = true;
 
 	// Create a new ServiceRequestsContext for this project view
-	const ctx = createServiceRequestsContext(libre311, page);
+	const ctx = createServiceRequestsContext(libre311, page, undefined, undefined, {
+		project_id: Number($page.params.project_id)
+	});
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 
@@ -51,6 +54,7 @@
 	async function handleDownloadCsv() {
 		const serviceRequestsBlob = await libre311.downloadServiceRequests({
 			...FilteredServiceRequestsParamsMapper.toRequestParams($page.url.searchParams),
+			project_id: Number($page.params.project_id)
 		});
 		saveAs(serviceRequestsBlob, `project-${$page.params.project_id}-requests.csv`);
 	}
@@ -68,8 +72,14 @@
 	<div class="flex h-full flex-col">
 		{#if project}
 			<div class="bg-white p-4 shadow-sm border-b">
-				<div class="flex items-center gap-2 mb-2">
-					<a href="/projects" class="text-sm text-primary hover:underline">← All Projects</a>
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-2 mb-2">
+						<a href="/projects" class="text-sm text-primary hover:underline">← All Projects</a>
+					</div>
+					<Button variant="ghost" on:click={() => goto(`/projects/${project.id}/edit`)}>
+						<Button.Leading data={pencilIcon} slot="leading" />
+						Edit Project
+					</Button>
 				</div>
 				<h1 class="text-2xl font-bold">{project.name}</h1>
 				<p class="text-sm text-gray-600">{project.description ?? ''}</p>
@@ -105,7 +115,7 @@
 									<Table class="h-full overflow-hidden rounded-md" {columns}>
 										<Table.Header slot="header" />
 										<Table.Body slot="body">
-											{#each $serviceRequestsRes.value.serviceRequests.filter(r => r.project_id === Number($page.params.project_id)) as item}
+											{#each $serviceRequestsRes.value.serviceRequests as item}
 												<Table.Body.Row
 													tabIndex="0"
 													id={resolveStyleId(item, $selectedServiceRequestStore)}
