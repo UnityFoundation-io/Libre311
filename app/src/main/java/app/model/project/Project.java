@@ -55,6 +55,9 @@ public class Project {
     @JoinColumn(name = "jurisdiction_id", nullable = false)
     private Jurisdiction jurisdiction;
 
+    @org.hibernate.annotations.Formula("(select count(*) from service_requests sr where sr.project_id = id)")
+    private int requestCount;
+
     @DateCreated
     private Instant dateCreated;
 
@@ -135,6 +138,10 @@ public class Project {
 
     public void setJurisdiction(Jurisdiction jurisdiction) {
         this.jurisdiction = jurisdiction;
+    }
+
+    public int getRequestCount() {
+        return requestCount;
     }
 
     public Instant getDateCreated() {

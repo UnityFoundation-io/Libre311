@@ -52,6 +52,10 @@ public class GetServiceRequestsDTO {
     @QueryValue(value = "priority")
     private List<ServiceRequestPriority> priorities;
 
+    @Nullable
+    @QueryValue(value = "project_id")
+    private Long projectId;
+
     @Valid
     private Pageable pageable;
 
@@ -117,5 +121,14 @@ public class GetServiceRequestsDTO {
 
     public void setPriorities(@Nullable List<ServiceRequestPriority> priorities) {
         this.priorities = priorities;
+    }
+
+    @Nullable
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(@Nullable Long projectId) {
+        this.projectId = projectId;
     }
 }

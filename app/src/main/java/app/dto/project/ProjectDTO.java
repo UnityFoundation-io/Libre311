@@ -52,6 +52,9 @@ public class ProjectDTO {
     @JsonProperty("jurisdiction_id")
     private String jurisdictionId;
 
+    @JsonProperty("request_count")
+    private int requestCount;
+
     public ProjectDTO() {
     }
 
@@ -67,6 +70,7 @@ public class ProjectDTO {
         if (project.getJurisdiction() != null) {
             this.jurisdictionId = project.getJurisdiction().getId();
         }
+        this.requestCount = project.getRequestCount();
     }
 
     public Long getId() {
@@ -140,5 +144,13 @@ public class ProjectDTO {
 
     public void setJurisdictionId(String jurisdictionId) {
         this.jurisdictionId = jurisdictionId;
+    }
+
+    public int getRequestCount() {
+        return requestCount;
+    }
+
+    public void setRequestCount(int requestCount) {
+        this.requestCount = requestCount;
     }
 }

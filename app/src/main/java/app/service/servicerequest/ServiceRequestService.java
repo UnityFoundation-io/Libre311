@@ -516,6 +516,7 @@ public class ServiceRequestService {
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
+        Long projectId = requestDTO.getProjectId();
         Pageable pageable = requestDTO.getPageable();
 
         if(!pageable.isSorted()) {
@@ -530,7 +531,7 @@ public class ServiceRequestService {
         // Calculate the cutoff date for closed requests visibility
         Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, pageable);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, closedRequestCutoffDate, pageable);
     }
 
     public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
@@ -633,6 +634,7 @@ public class ServiceRequestService {
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
+        Long projectId = requestDTO.getProjectId();
         Pageable pageable = requestDTO.getPageable();
 
         Sort sort;
@@ -650,7 +652,7 @@ public class ServiceRequestService {
         // Calculate the cutoff date for closed requests visibility
         Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, sort);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, closedRequestCutoffDate, sort);
     }
 
     private List<ServiceRequest> getServiceRequestsUnfiltered(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
@@ -660,6 +662,7 @@ public class ServiceRequestService {
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
+        Long projectId = requestDTO.getProjectId();
         Pageable pageable = requestDTO.getPageable();
 
         Sort sort;
@@ -675,7 +678,7 @@ public class ServiceRequestService {
         }
 
         // No closed request filtering for CSV export
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, sort);
     }
 
     public int delete(Long serviceRequestId, String jurisdictionId) {
