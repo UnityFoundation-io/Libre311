@@ -48,6 +48,7 @@ public class ProjectService {
         this.geometryFactory = geometryFactory;
     }
 
+    @Transactional
     public List<ProjectDTO> getProjects(String jurisdictionId) {
         return projectRepository.findAllByJurisdictionId(jurisdictionId).stream()
                 .map(ProjectDTO::new)
@@ -80,15 +81,9 @@ public class ProjectService {
         if (dto.getBounds() != null) project.setBoundary(geometryFactory.createPolygon(dto.getBounds()));
         if (dto.getStartDate() != null) project.setStartDate(dto.getStartDate());
         if (dto.getEndDate() != null) project.setEndDate(dto.getEndDate());
+        if (dto.getClosedDate() != null) project.setClosedDate(dto.getClosedDate());
 
         return new ProjectDTO(projectRepository.update(project));
-    }
-
-    @Transactional
-    public void deleteProject(Long id, String jurisdictionId) {
-        Project project = projectRepository.findByIdAndJurisdictionId(id, jurisdictionId)
-                .orElseThrow(() -> new Libre311BaseException("Project not found", HttpStatus.NOT_FOUND));
-        projectRepository.delete(project);
     }
 
     public Optional<Project> findProjectForLocationAndTime(Point location, Instant time, String jurisdictionId) {

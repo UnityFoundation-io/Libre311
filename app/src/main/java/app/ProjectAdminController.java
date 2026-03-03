@@ -63,12 +63,4 @@ public class ProjectAdminController {
                              @Nullable @QueryValue("jurisdiction_id") String jurisdictionId) {
         return projectService.updateProject(id, requestDTO, jurisdictionId);
     }
-
-    @Delete(uris = { "/{id}{?jurisdiction_id}", "/{id}.json{?jurisdiction_id}" })
-    @ExecuteOn(TaskExecutors.IO)
-    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
-    public HttpResponse<?> delete(Long id, @Nullable @QueryValue("jurisdiction_id") String jurisdictionId) {
-        projectService.deleteProject(id, jurisdictionId);
-        return HttpResponse.ok();
-    }
 }

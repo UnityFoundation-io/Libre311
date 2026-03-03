@@ -59,6 +59,9 @@ public class PatchServiceRequestDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant closedDate;
 
+    @JsonProperty("project_id")
+    private Long projectId;
+
 
     public PatchServiceRequestDTO() {}
 
@@ -124,6 +127,14 @@ public class PatchServiceRequestDTO {
 
     public void setClosedDate(Instant closedDate) {
         this.closedDate = closedDate;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     // see https://github.com/micronaut-projects/micronaut-core/issues/1853

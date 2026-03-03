@@ -493,6 +493,7 @@ export type FilteredServiceRequestsParams =
 			endDate?: string;
 			status?: ServiceRequestStatus[];
 			pageNumber?: number;
+			project_id?: number;
 	  };
 
 const latLngTupleSchema = z.tuple([z.number(), z.number()]);
@@ -508,7 +509,10 @@ export const ProjectSchema = z.object({
 	bounds: z.array(latLngTupleSchema).min(4),
 	start_date: z.string(),
 	end_date: z.string(),
-	jurisdiction_id: z.string()
+	closed_date: z.string().optional().nullable(),
+	status: z.enum(['OPEN', 'CLOSED']),
+	jurisdiction_id: z.string(),
+	request_count: z.number().optional()
 });
 export type Project = z.infer<typeof ProjectSchema>;
 
@@ -527,7 +531,8 @@ export const UpdateProjectParamsSchema = z.object({
 	description: z.string().optional(),
 	bounds: z.array(latLngTupleSchema).min(4).optional(),
 	start_date: z.string().optional(),
-	end_date: z.string().optional()
+	end_date: z.string().optional(),
+	closed_date: z.string().optional().nullable()
 });
 export type UpdateProjectParams = z.infer<typeof UpdateProjectParamsSchema>;
 
@@ -645,7 +650,6 @@ export interface Libre311Service extends Open311Service {
 	getProjects(): Promise<Project[]>;
 	createProject(params: CreateProjectParams): Promise<Project>;
 	updateProject(params: UpdateProjectParams): Promise<Project>;
-	deleteProject(id: number): Promise<void>;
 	updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig>;
 	updatePolicyContent(params: UpdatePolicyContentParams): Promise<void>;
 }
@@ -711,8 +715,6 @@ const ROUTES = {
 	postProject: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
 	patchProject: (id: number, params: HasJurisdictionId) =>
-		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
-	deleteProject: (id: number, params: HasJurisdictionId) =>
 		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
 	patchJurisdiction2: (jurisdictionId: string) => `/tenant-admin/jurisdictions/${jurisdictionId}`,
 	patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
@@ -848,12 +850,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 			rest
 		);
 		return ProjectSchema.parse(res.data);
-	}
-
-	async deleteProject(id: number): Promise<void> {
-		await this.axiosInstance.delete(
-			ROUTES.deleteProject(id, { jurisdiction_id: this.jurisdictionId })
-		);
 	}
 
 	async updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig> {

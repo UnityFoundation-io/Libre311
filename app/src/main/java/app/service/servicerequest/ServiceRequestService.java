@@ -98,6 +98,7 @@ public class ServiceRequestService {
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
     private final app.service.project.ProjectService projectService;
+    private final app.model.project.ProjectRepository projectRepository;
     JurisdictionBoundaryService jurisdictionBoundaryService;
     LibreGeometryFactory libreGeometryFactory;
 
@@ -109,6 +110,7 @@ public class ServiceRequestService {
         ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
         UnityAuthService unityAuthService,
         app.service.project.ProjectService projectService,
+        app.model.project.ProjectRepository projectRepository,
         JurisdictionBoundaryService jurisdictionBoundaryService,
         LibreGeometryFactory libreGeometryFactory) {
         this.serviceRequestRepository = serviceRequestRepository;
@@ -120,6 +122,7 @@ public class ServiceRequestService {
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
         this.projectService = projectService;
+        this.projectRepository = projectRepository;
         this.jurisdictionBoundaryService = jurisdictionBoundaryService;
         this.libreGeometryFactory = libreGeometryFactory;
     }
@@ -410,6 +413,16 @@ public class ServiceRequestService {
         ServiceRequest serviceRequest = serviceRequestOptional.get();
         applyPatch(serviceRequestDTO, serviceRequest);
 
+        if (serviceRequestDTO.getProjectId() != null) {
+            if (serviceRequestDTO.getProjectId() == -1L) {
+                serviceRequest.setProject(null);
+            } else {
+                app.model.project.Project project = projectRepository.findByIdAndJurisdictionId(serviceRequestDTO.getProjectId(), jurisdictionId)
+                        .orElseThrow(() -> new app.exception.Libre311BaseException("Project not found", io.micronaut.http.HttpStatus.NOT_FOUND));
+                serviceRequest.setProject(project);
+            }
+        }
+
         return convertToSensitiveDTO(serviceRequestRepository.update(serviceRequest));
     }
 
@@ -503,6 +516,7 @@ public class ServiceRequestService {
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
+        Long projectId = requestDTO.getProjectId();
         Pageable pageable = requestDTO.getPageable();
 
         if(!pageable.isSorted()) {
@@ -517,7 +531,7 @@ public class ServiceRequestService {
         // Calculate the cutoff date for closed requests visibility
         Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, pageable);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, closedRequestCutoffDate, pageable);
     }
 
     public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
@@ -620,6 +634,7 @@ public class ServiceRequestService {
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
+        Long projectId = requestDTO.getProjectId();
         Pageable pageable = requestDTO.getPageable();
 
         Sort sort;
@@ -637,7 +652,7 @@ public class ServiceRequestService {
         // Calculate the cutoff date for closed requests visibility
         Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
 
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, sort);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, closedRequestCutoffDate, sort);
     }
 
     private List<ServiceRequest> getServiceRequestsUnfiltered(GetServiceRequestsDTO requestDTO, String jurisdictionId) {
@@ -647,6 +662,7 @@ public class ServiceRequestService {
         List<ServiceRequestPriority> priorities = requestDTO.getPriorities();
         Instant startDate = requestDTO.getStartDate();
         Instant endDate = requestDTO.getEndDate();
+        Long projectId = requestDTO.getProjectId();
         Pageable pageable = requestDTO.getPageable();
 
         Sort sort;
@@ -662,7 +678,7 @@ public class ServiceRequestService {
         }
 
         // No closed request filtering for CSV export
-        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, sort);
+        return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, sort);
     }
 
     public int delete(Long serviceRequestId, String jurisdictionId) {

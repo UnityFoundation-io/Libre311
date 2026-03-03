@@ -1,7 +1,7 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { Button, Card } from 'stwui';
-	import type { ServiceRequest } from '$lib/services/Libre311/Libre311';
+	import type { ServiceRequest, Project } from '$lib/services/Libre311/Libre311';
 	import { toTimeStamp } from '$lib/utils/functions';
 	import SelectedValues from './SelectedValues.svelte';
 	import ServiceRequestUpdate from './ServiceRequestUpdate.svelte';
@@ -15,11 +15,14 @@
 	import AuthGuard from './AuthGuard.svelte';
 	import ConfirmationModal from './ConfirmationModal.svelte';
 	import RemovalSuggestionsList from './RemovalSuggestionsList.svelte';
+	import { onMount } from 'svelte';
+	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
 	const alert = useLibre311Context().alert;
 	const { refreshSelectedServiceRequest } = useServiceRequestsContext();
+	const jurisdiction = useJurisdiction();
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -27,12 +30,23 @@
 	let isUpdateButtonClicked: boolean = false;
 	let showDeleteModal = false;
 	let isDeleting = false;
+	let projects: Project[] = [];
 
 	$: if ($page.url) {
 		isUpdateButtonClicked = false;
 	}
 
 	$: name = createName(serviceRequest);
+
+	onMount(async () => {
+		try {
+			projects = await libre311.getProjects();
+		} catch (error) {
+			console.error('Failed to load projects:', error);
+		}
+	});
+
+	$: project = projects.find((p) => p.id === serviceRequest.project_id);
 
 	function createName(serviceRequest: UpdateSensitiveServiceRequestRequest) {
 		if (serviceRequest.first_name || serviceRequest.last_name)
@@ -169,6 +183,16 @@
 							<strong class="text-base">{messages['serviceRequest']['priority']}:</strong>
 							<p class="text-sm">
 								{serviceRequest.priority.charAt(0).toUpperCase() + serviceRequest.priority.slice(1)}
+							</p>
+						</div>
+					{/if}
+
+					<!-- PROJECT -->
+					{#if $jurisdiction.project_feature !== 'DISABLED' && project}
+						<div class="mb-1">
+							<strong class="text-base">Project:</strong>
+							<p class="text-sm">
+								{project.name} ({project.status})
 							</p>
 						</div>
 					{/if}

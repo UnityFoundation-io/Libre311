@@ -60,6 +60,14 @@ export function toAbbreviatedTimeStamp(timeStamp: Date | string | null | undefin
 	return timeStamp ? `${new Date(timeStamp).toLocaleDateString()}` : '';
 }
 
+export function toDatetimeLocal(dateValue: Date | string | null | undefined): string {
+	if (!dateValue) return '';
+	const date = new Date(dateValue);
+	// Adjust for timezone offset to display local time in the input
+	date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+	return date.toISOString().slice(0, 16);
+}
+
 export function setUpAlertRole(
 	input: { error?: string } | string,
 	root: HTMLElement,

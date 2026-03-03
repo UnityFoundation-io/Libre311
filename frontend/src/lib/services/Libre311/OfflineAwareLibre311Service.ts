@@ -199,10 +199,6 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 		return this.wrapped.updateProject(params);
 	}
 
-	deleteProject(id: number): Promise<void> {
-		return this.wrapped.deleteProject(id);
-	}
-
 	updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig> {
 		return this.wrapped.updateJurisdiction(params);
 	}

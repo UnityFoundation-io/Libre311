@@ -49,10 +49,10 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     @Transactional
     default Page<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
-                                           Instant startDate, Instant endDate, Pageable pageable) {
+                                           Instant startDate, Instant endDate, Long projectId, Pageable pageable) {
 
         QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
-                status, priority, startDate, endDate, null);
+                status, priority, startDate, endDate, projectId, null);
 
         return findAll(specification, pageable);
     }
@@ -60,10 +60,10 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     @Transactional
     default Page<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
-                                           Instant startDate, Instant endDate, Instant closedRequestCutoffDate, Pageable pageable) {
+                                           Instant startDate, Instant endDate, Long projectId, Instant closedRequestCutoffDate, Pageable pageable) {
 
         QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
-                status, priority, startDate, endDate, closedRequestCutoffDate);
+                status, priority, startDate, endDate, projectId, closedRequestCutoffDate);
 
         return findAll(specification, pageable);
     }
@@ -71,10 +71,10 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     @Transactional
     default List<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
-                                           Instant startDate, Instant endDate, Sort sort) {
+                                           Instant startDate, Instant endDate, Long projectId, Sort sort) {
 
         QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
-                status, priority, startDate, endDate, null);
+                status, priority, startDate, endDate, projectId, null);
 
         return findAll(specification, sort);
     }
@@ -82,10 +82,10 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     @Transactional
     default List<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
-                                           Instant startDate, Instant endDate, Instant closedRequestCutoffDate, Sort sort) {
+                                           Instant startDate, Instant endDate, Long projectId, Instant closedRequestCutoffDate, Sort sort) {
 
         QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
-                status, priority, startDate, endDate, closedRequestCutoffDate);
+                status, priority, startDate, endDate, projectId, closedRequestCutoffDate);
 
         return findAll(specification, sort);
     }
@@ -95,6 +95,7 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
                                                                                      List<ServiceRequestStatus> status,
                                                                                      List<ServiceRequestPriority> priority,
                                                                                      Instant startDate, Instant endDate,
+                                                                                     Long projectId,
                                                                                      Instant closedRequestCutoffDate) {
         QuerySpecification<ServiceRequest> specification =
                 (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(ServiceRequest_.jurisdiction).get(Jurisdiction_.id), jurisdictionId);
@@ -119,6 +120,10 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
             specification = specification.and(Specifications.createdDateAfter(startDate));
         } else if (endDate != null) {
             specification = specification.and(Specifications.createdDateBefore(endDate));
+        }
+
+        if (projectId != null) {
+            specification = specification.and(Specifications.projectIdEqual(projectId));
         }
 
         // Apply date filter only to closed requests if cutoff date is specified
@@ -162,6 +167,11 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
 
         public static QuerySpecification<ServiceRequest> createdDateBefore(Instant instant) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get(ServiceRequest_.dateCreated), instant);
+        }
+
+        // projectId
+        public static QuerySpecification<ServiceRequest> projectIdEqual(Long projectId) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(ServiceRequest_.project).get("id"), projectId);
         }
 
         /**

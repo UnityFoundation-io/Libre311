@@ -18,6 +18,7 @@ export class FilteredServiceRequestsParamsMapper {
 			params.serviceCode && queryParams.append('service_code', params.serviceCode?.join(','));
 			params.startDate && queryParams.append('start_date', params.startDate);
 			params.endDate && queryParams.append('end_date', params.endDate);
+			params.project_id && queryParams.append('project_id', params.project_id.toString());
 		}
 		return queryParams;
 	}
@@ -48,6 +49,8 @@ export class FilteredServiceRequestsParamsMapper {
 		if (searchParams.get('status'))
 			params.status =
 				searchParams.get('status')?.split(',').filter(isServiceRequestStatus) ?? undefined;
+
+		if (searchParams.get('project_id')) params.project_id = Number(searchParams.get('project_id'));
 
 		return params;
 	}

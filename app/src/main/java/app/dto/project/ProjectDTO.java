@@ -15,6 +15,7 @@
 package app.dto.project;
 
 import app.model.project.Project;
+import app.model.project.ProjectStatus;
 import app.service.geometry.LibreGeometryFactory;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,8 +43,17 @@ public class ProjectDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant endDate;
 
+    @JsonProperty("closed_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Instant closedDate;
+
+    private ProjectStatus status;
+
     @JsonProperty("jurisdiction_id")
     private String jurisdictionId;
+
+    @JsonProperty("request_count")
+    private int requestCount;
 
     public ProjectDTO() {
     }
@@ -55,9 +65,12 @@ public class ProjectDTO {
         this.bounds = LibreGeometryFactory.getCoordinatesFrom(project.getBoundary());
         this.startDate = project.getStartDate();
         this.endDate = project.getEndDate();
+        this.closedDate = project.getClosedDate();
+        this.status = project.getStatus();
         if (project.getJurisdiction() != null) {
             this.jurisdictionId = project.getJurisdiction().getId();
         }
+        this.requestCount = project.getRequestCount();
     }
 
     public Long getId() {
@@ -109,11 +122,35 @@ public class ProjectDTO {
         this.endDate = endDate;
     }
 
+    public Instant getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(Instant closedDate) {
+        this.closedDate = closedDate;
+    }
+
+    public ProjectStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProjectStatus status) {
+        this.status = status;
+    }
+
     public String getJurisdictionId() {
         return jurisdictionId;
     }
 
     public void setJurisdictionId(String jurisdictionId) {
         this.jurisdictionId = jurisdictionId;
+    }
+
+    public int getRequestCount() {
+        return requestCount;
+    }
+
+    public void setRequestCount(int requestCount) {
+        this.requestCount = requestCount;
     }
 }

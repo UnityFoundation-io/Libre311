@@ -48,9 +48,15 @@ public class Project {
     @NotNull
     private Instant endDate;
 
+    @Nullable
+    private Instant closedDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jurisdiction_id", nullable = false)
     private Jurisdiction jurisdiction;
+
+    @org.hibernate.annotations.Formula("(select count(*) from service_requests sr where sr.project_id = id)")
+    private int requestCount;
 
     @DateCreated
     private Instant dateCreated;
@@ -110,12 +116,32 @@ public class Project {
         this.endDate = endDate;
     }
 
+    @Nullable
+    public Instant getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(@Nullable Instant closedDate) {
+        this.closedDate = closedDate;
+    }
+
+    public ProjectStatus getStatus() {
+        if (closedDate != null || Instant.now().isAfter(endDate)) {
+            return ProjectStatus.CLOSED;
+        }
+        return ProjectStatus.OPEN;
+    }
+
     public Jurisdiction getJurisdiction() {
         return jurisdiction;
     }
 
     public void setJurisdiction(Jurisdiction jurisdiction) {
         this.jurisdiction = jurisdiction;
+    }
+
+    public int getRequestCount() {
+        return requestCount;
     }
 
     public Instant getDateCreated() {

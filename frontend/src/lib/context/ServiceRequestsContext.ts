@@ -56,7 +56,8 @@ export function createServiceRequestsContext(
 	libreService: Libre311Service,
 	page: Readable<Page<Record<string, string>, string | null>>,
 	offlineQueue?: OfflineQueue,
-	syncSignal?: Readable<number>
+	syncSignal?: Readable<number>,
+	defaultParams: FilteredServiceRequestsParams = {}
 ): ServiceRequestsContext {
 	// consider type as Maybe<AsyncRequest<ServiceRequest>> that would cover all possible states
 	const selectedServiceRequest = writable<Maybe<ServiceRequest>>();
@@ -78,9 +79,10 @@ export function createServiceRequestsContext(
 			// User navigated directly to a detail page (e.g., page refresh)
 			// Fetch filtered service requests to populate the table, then select the specific one
 			try {
-				const updatedParams = FilteredServiceRequestsParamsMapper.toRequestParams(
-					page.url.searchParams
-				);
+				const updatedParams = {
+					...FilteredServiceRequestsParamsMapper.toRequestParams(page.url.searchParams),
+					...defaultParams
+				};
 				const res = await libreService.getServiceRequests(updatedParams);
 				serviceRequestsResponse.set(asAsyncSuccess(res));
 
@@ -117,9 +119,10 @@ export function createServiceRequestsContext(
 	async function handleMapPageNav(page: Page<Record<string, string>, string | null>) {
 		try {
 			selectedServiceRequest.set(undefined);
-			const updatedParams = FilteredServiceRequestsParamsMapper.toRequestParams(
-				page.url.searchParams
-			);
+			const updatedParams = {
+				...FilteredServiceRequestsParamsMapper.toRequestParams(page.url.searchParams),
+				...defaultParams
+			};
 			const res = await libreService.getServiceRequests(updatedParams);
 
 			// Prepend pending offline requests
@@ -141,7 +144,7 @@ export function createServiceRequestsContext(
 	page.subscribe(async (page: Page<Record<string, string>, string | null>) => {
 		if (page.route.id?.endsWith('[issue_id]')) {
 			await handleIssueDetailsPageNav(page);
-		} else if (page.route.id?.startsWith('/issues')) {
+		} else if (page.route.id?.startsWith('/issues') || page.route.id?.startsWith('/projects')) {
 			await handleMapPageNav(page);
 		}
 	});
@@ -165,9 +168,10 @@ export function createServiceRequestsContext(
 
 	async function refresh() {
 		const currentPage = get(page);
-		const updatedParams = FilteredServiceRequestsParamsMapper.toRequestParams(
-			currentPage.url.searchParams
-		);
+		const updatedParams = {
+			...FilteredServiceRequestsParamsMapper.toRequestParams(currentPage.url.searchParams),
+			...defaultParams
+		};
 		try {
 			const res = await libreService.getServiceRequests(updatedParams);
 
