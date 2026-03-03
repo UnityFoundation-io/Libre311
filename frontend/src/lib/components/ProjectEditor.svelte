@@ -1,16 +1,15 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { CreateProjectParams, Project } from '$lib/services/Libre311/Libre311';
 	import { Button, Input } from 'stwui';
 	import MapComponent from '$lib/components/MapComponent.svelte';
 	import BoundaryEditor from '$lib/components/BoundaryEditor.svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+	import { toDatetimeLocal } from '$lib/utils/functions';
 
 	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
-	const linkResolver = useLibre311Context().linkResolver;
 
 	export let project: Project | undefined = undefined;
 
@@ -22,24 +21,19 @@
 				...project,
 				start_date: toDatetimeLocal(project.start_date),
 				end_date: toDatetimeLocal(project.end_date)
-		  }
+			}
 		: {
 				name: '',
 				description: '',
 				start_date: toDatetimeLocal(new Date()),
 				end_date: toDatetimeLocal(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
 				bounds: []
-		  };
-
-	function toDatetimeLocal(dateValue: Date | string): string {
-		if (!dateValue) return '';
-		const date = new Date(dateValue);
-		date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-		return date.toISOString().slice(0, 16);
-	}
+			};
 
 	async function closeProject() {
-		if (confirm('Are you sure you want to close this project? This will mark the study as concluded.')) {
+		if (
+			confirm('Are you sure you want to close this project? This will mark the study as concluded.')
+		) {
 			isSaving = true;
 			try {
 				await libre311.updateProject({
@@ -129,7 +123,7 @@
 				/>
 			</div>
 		</div>
-		<div class="h-96 w-full rounded-md border overflow-hidden">
+		<div class="h-96 w-full overflow-hidden rounded-md border">
 			<MapComponent bounds={$jurisdiction.bounds}>
 				<BoundaryEditor
 					bounds={currentProject.bounds ?? []}
@@ -143,9 +137,7 @@
 	<div class="flex w-full items-center justify-between border-t pt-4">
 		<div>
 			{#if isEditing && project?.status === 'OPEN'}
-				<Button variant="danger" on:click={closeProject} loading={isSaving}>
-					Close Project
-				</Button>
+				<Button variant="danger" on:click={closeProject} loading={isSaving}>Close Project</Button>
 			{/if}
 		</div>
 		<div class="flex gap-2">

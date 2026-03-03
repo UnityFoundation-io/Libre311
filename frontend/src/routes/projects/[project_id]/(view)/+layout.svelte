@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Service } from '$lib/context/Libre311Context';
 	import type { Project, ServiceRequest } from '$lib/services/Libre311/Libre311';
 	import {
 		createServiceRequestsContext,
-		useSelectedServiceRequestStore,
+		useSelectedServiceRequestStore
 	} from '$lib/context/ServiceRequestsContext';
 	import TableWithDetailPane from '$lib/components/TableWithDetailPane.svelte';
 	import { Card, Table, Button } from 'stwui';
@@ -20,10 +20,8 @@
 	import { pencilIcon } from '$lib/components/Svg/outline/pencilIcon';
 
 	const libre311 = useLibre311Service();
-	const linkResolver = useLibre311Context().linkResolver;
 
 	let project: Project | undefined;
-	let isLoading = true;
 
 	// Create a new ServiceRequestsContext for this project view
 	const ctx = createServiceRequestsContext(libre311, page, undefined, undefined, {
@@ -39,7 +37,7 @@
 		} catch (error) {
 			console.error('Failed to load project:', error);
 		} finally {
-			isLoading = false;
+			// project loaded
 		}
 	});
 
@@ -71,12 +69,12 @@
 >
 	<div class="flex h-full flex-col">
 		{#if project}
-			<div class="bg-white p-4 shadow-sm border-b">
+			<div class="border-b bg-white p-4 shadow-sm">
 				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-2 mb-2">
+					<div class="mb-2 flex items-center gap-2">
 						<a href="/projects" class="text-sm text-primary hover:underline">← All Projects</a>
 					</div>
-					<Button variant="ghost" on:click={() => goto(`/projects/${project.id}/edit`)}>
+					<Button variant="ghost" on:click={() => goto(`/projects/${project?.id}/edit`)}>
 						<Button.Leading data={pencilIcon} slot="leading" />
 						Edit Project
 					</Button>
@@ -84,9 +82,7 @@
 				<h1 class="text-2xl font-bold">{project.name}</h1>
 				<p class="text-sm text-gray-600">{project.description ?? ''}</p>
 				<div class="mt-2 flex gap-4 text-xs">
-					<span
-						><strong>Start:</strong> {new Date(project.start_date).toLocaleDateString()}</span
-					>
+					<span><strong>Start:</strong> {new Date(project.start_date).toLocaleDateString()}</span>
 					<span><strong>End:</strong> {new Date(project.end_date).toLocaleDateString()}</span>
 					<span
 						><strong>Status:</strong>
@@ -113,7 +109,7 @@
 							<Card.Content slot="content" class="h-full p-0 sm:p-0">
 								<div class="issues-table-override h-full overflow-y-auto">
 									<Table class="h-full overflow-hidden rounded-md" {columns}>
-										<Table.Header slot="header" />
+										<Table.Header slot="header" orderBy="requested_datetime" />
 										<Table.Body slot="body">
 											{#each $serviceRequestsRes.value.serviceRequests as item}
 												<Table.Body.Row

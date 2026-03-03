@@ -76,12 +76,12 @@
 									>{project.name}</a
 								>
 							</Table.Body.Row.Cell>
-							<Table.Body.Row.Cell column={1}
-								>{new Date(project.start_date).toLocaleString()}</Table.Body.Row.Cell
-							>
-							<Table.Body.Row.Cell column={2}
-								>{new Date(project.end_date).toLocaleString()}</Table.Body.Row.Cell
-							>
+							<Table.Body.Row.Cell column={1}>
+								{new Date(project.start_date).toLocaleString()}
+							</Table.Body.Row.Cell>
+							<Table.Body.Row.Cell column={2}>
+								{new Date(project.end_date).toLocaleString()}
+							</Table.Body.Row.Cell>
 							<Table.Body.Row.Cell column={3}>
 								<div
 									class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {project.status ===
