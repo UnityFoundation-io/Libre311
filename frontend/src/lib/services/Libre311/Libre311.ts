@@ -7,6 +7,7 @@ import type { UnityAuthLoginResponse } from '../UnityAuth/UnityAuth';
 import { FilteredServiceRequestsParamsMapper } from './FilteredServiceRequestsParamsMapper';
 import type { DeleteServiceRequestRequest } from '$lib/services/Libre311/types/DeleteServiceRequestRequest';
 import { GeocodingServiceImpl, type ReverseGeocodeResponse } from '../geocoding';
+import { getFormattedAddress } from '$lib/services/geocoding';
 
 const JurisdictionIdSchema = z.string();
 const HasJurisdictionIdSchema = z.object({
@@ -1131,6 +1132,15 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
+		const lat = parseFloat(params.lat);
+		const long = parseFloat(params.long);
+		try {
+			const revGeocodeResponse = await this.reverseGeocode([lat, long]);
+			params.address_string = getFormattedAddress(revGeocodeResponse);
+		} catch {
+			params.address_string = `Location: ${lat.toFixed(6)}, ${long.toFixed(6)}`;
+		}
+
 		const paramsWithRecapta = await this.recaptchaService.wrapWithRecaptcha(
 			params,
 			'create_service_request'

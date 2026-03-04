@@ -3,8 +3,6 @@
 	import CancelButton from './CancelButton.svelte';
 	import { Button } from 'stwui';
 
-	export let loading: boolean | undefined = undefined;
-
 	const dispatch = createEventDispatcher<{
 		confirmLocation: undefined;
 	}>();
@@ -13,9 +11,7 @@
 <div class="flex h-full w-full items-center justify-center">
 	<div class="grid grid-rows-2 gap-3">
 		<h4>Select the location of the Request</h4>
-		<Button {loading} type="primary" on:click={() => dispatch('confirmLocation')}
-			>Confirm Location</Button
-		>
+		<Button type="primary" on:click={() => dispatch('confirmLocation')}>Confirm Location</Button>
 		<CancelButton />
 	</div>
 	<div class="absolute inset-x-0 bottom-0 bg-gray-100 text-xs">
