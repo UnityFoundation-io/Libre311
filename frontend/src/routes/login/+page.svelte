@@ -1,8 +1,6 @@
 <script lang="ts">
-	import Breakpoint from '$lib/components/Breakpoint.svelte';
-	import LoginDesktop from '$lib/components/Login/LoginDesktop.svelte';
+	import Login from '$lib/components/Login/Login.svelte';
 	import type { EventDispatchTypeMap } from '$lib/components/Login/shared';
-	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator, passwordValidator } from '$lib/utils/validation';
 	import { useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
@@ -55,23 +53,11 @@
 	}
 </script>
 
-<Breakpoint>
-	<LoginDesktop
-		slot="is-desktop"
-		{emailInput}
-		{passwordInput}
-		bind:errorMessage
-		on:inputChange={handleChange}
-		on:login={login}
-		on:cancel={cancel}
-	/>
-	<LoginMobile
-		slot="is-mobile-or-tablet"
-		{emailInput}
-		{passwordInput}
-		bind:errorMessage
-		on:inputChange={handleChange}
-		on:login={login}
-		on:cancel={cancel}
-	/>
-</Breakpoint>
+<Login
+	{emailInput}
+	{passwordInput}
+	bind:errorMessage
+	on:inputChange={handleChange}
+	on:login={login}
+	on:cancel={cancel}
+/>

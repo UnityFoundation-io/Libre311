@@ -30,7 +30,7 @@ export type UnityAuthLoginResponse = z.infer<typeof UnityAuthLoginResponseSchema
 
 export type UnityAuthEventMap = {
 	login: CompleteLoginResponse;
-	logout: void;
+	logout: { reason?: 'expired' } | undefined;
 };
 const CompleteLoginResponseSchema = UnityAuthLoginResponseSchema.merge(
 	UserPermissionsSuccessResponseSchema
@@ -41,7 +41,7 @@ export type CompleteLoginResponse = z.infer<typeof CompleteLoginResponseSchema>;
 export type UnityAuthService = BaseObservable<UnityAuthEventMap> & {
 	login(email: string, password: string): Promise<CompleteLoginResponse>;
 	getLoginData(): CompleteLoginResponse | undefined;
-	logout(): void;
+	logout(reason?: 'expired'): void;
 };
 
 // Auth Implementation
@@ -58,8 +58,17 @@ export class UnityAuthServiceImpl
 		UnityAuthServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
 
+		this.axiosInstance.interceptors.response.use(
+			(response) => response,
+			(error) => {
+				if (axios.isAxiosError(error) && error.response?.status === 401) {
+					this.logout('expired');
+				}
+				return Promise.reject(error);
+			}
+		);
+
 		this.loginData = this.retrieveLoginData();
-		this.publish('logout', undefined);
 
 		this.userPermissionsResolver = props.userPermissionsResolver;
 	}
@@ -91,9 +100,9 @@ export class UnityAuthServiceImpl
 		return completeLoginRes;
 	}
 
-	logout() {
+	logout(reason?: 'expired') {
 		sessionStorage.removeItem(this.loginDataKey);
-		this.publish('logout', undefined);
+		this.publish('logout', { reason });
 	}
 
 	private retrieveLoginData(): CompleteLoginResponse | undefined {

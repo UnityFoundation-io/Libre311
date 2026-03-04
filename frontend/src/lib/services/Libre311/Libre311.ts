@@ -661,6 +661,7 @@ const Libre311ServicePropsSchema = z.object({
 
 export type Libre311ServiceProps = z.infer<typeof Libre311ServicePropsSchema> & {
 	recaptchaService: RecaptchaService;
+	onUnauthorized?: (reason?: 'expired') => void;
 };
 
 const ROUTES = {
@@ -784,6 +785,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 	public constructor(props: Libre311ServiceProps) {
 		Libre311ServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
+
+		this.axiosInstance.interceptors.response.use(
+			(response) => response,
+			(error) => {
+				if (axios.isAxiosError(error) && error.response?.status === 401) {
+					props.onUnauthorized?.('expired');
+				}
+				return Promise.reject(error);
+			}
+		);
+
 		this.jurisdictionConfig = props.jurisdictionConfig;
 		this.jurisdictionId = props.jurisdictionConfig.jurisdiction_id;
 		this.recaptchaService = props.recaptchaService;

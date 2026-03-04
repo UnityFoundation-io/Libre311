@@ -1,10 +1,10 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { rocketLaunch } from '$lib/components/Svg/outline/rocket-launch.js';
-	import { Button, Input } from 'stwui';
-	import { type FormInputValue } from '$lib/utils/validation';
+	import { Button, Card, Input } from 'stwui';
 	import { fade, draw } from 'svelte/transition';
 	import { createEventDispatcher, onMount, tick } from 'svelte';
+	import { type FormInputValue } from '$lib/utils/validation';
 	import { dispatchEventFunctionFactory, type EventDispatchTypeMap } from './shared';
 	import { setUpAlertRole } from '$lib/utils/functions';
 
@@ -17,6 +17,15 @@
 	let visible = false;
 
 	const { onChange, onSubmit, onCancel } = dispatchEventFunctionFactory(dispatch);
+
+	// pass svelte checks
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const passwordAutocomplete = 'current-password' as any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const emailAutocomplete = 'username' as any;
+
+	let emailRoot: HTMLElement;
+	let passwordRoot: HTMLElement;
 
 	function passwordEntered(e: CustomEvent<KeyboardEvent>) {
 		const ke = e as unknown as KeyboardEvent;
@@ -37,23 +46,13 @@
 		onSubmit();
 	}
 
-	// pass svelte checks
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const passwordAutocomplete = 'current-password' as any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const emailAutocomplete = 'email' as any;
-
-	let emailRoot: HTMLElement;
-	let passwordRoot: HTMLElement;
-
-	$: setUpAlertRole(emailInput, emailRoot, 'input#email-mobile', 'email-mobile-error');
-	$: setUpAlertRole(passwordInput, passwordRoot, 'input#password-mobile', 'password-mobile-error');
+	$: setUpAlertRole(emailInput, emailRoot, 'input#email-input', 'email-error');
+	$: setUpAlertRole(passwordInput, passwordRoot, 'input#password-input', 'password-error');
 
 	onMount(() => {
 		visible = true;
 
 		tick().then(() => {
-			// tick is done because the browser suggest can be misplaced if otherwise.
 			emailRoot.querySelector('input')?.focus();
 
 			const toggle = passwordRoot.querySelector(
@@ -75,10 +74,10 @@
 	});
 </script>
 
-<div class="block items-center justify-center">
-	<div class="w-full flex-col">
+<div class="min-h-full w-full sm:flex sm:items-center sm:justify-center sm:bg-primary">
+	<Card class="w-full border-none shadow-none sm:w-1/3 sm:max-w-md sm:border-solid sm:shadow-md">
 		{#if errorMessage}
-			<div role="alert" class="flex justify-center bg-red-500 p-2 text-white">
+			<div role="alert" class="flex justify-center bg-red-500 p-2 text-white sm:rounded-t-md">
 				<span>{errorMessage}</span>
 			</div>
 		{/if}
@@ -110,12 +109,13 @@
 
 			<h1 class="text-lg">{messages['login']['title']}</h1>
 		</div>
+
 		<div bind:this={emailRoot} class="m-4">
 			<Input
 				allowClear
-				id="email-mobile"
+				id="email-input"
 				type="email"
-				name="email-mobile"
+				name="username"
 				placeholder={messages['login']['email']['placeholder']}
 				error={emailInput.error}
 				value={emailInput.value}
@@ -129,9 +129,9 @@
 		<div bind:this={passwordRoot} class="m-4">
 			<Input
 				allowClear
-				id="password-mobile"
+				id="password-input"
 				type="password"
-				name="password-mobile"
+				name="password"
 				showPasswordToggle={true}
 				placeholder={messages['login']['password']['placeholder']}
 				error={passwordInput.error}
@@ -154,7 +154,6 @@
 		</div>
 
 		<div class="m-4">
-			<!-- disbling the warning until we have valid link for this -->
 			<!-- eslint-disable-next-line svelte/valid-compile -->
 			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
 				>{messages['login']['forgot_password']}</a
@@ -162,16 +161,19 @@
 		</div>
 
 		<div class="m-4">
-			<!-- disbling the warning until we have valid link for this -->
 			<!-- eslint-disable-next-line svelte/valid-compile -->
 			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
 				>{messages['login']['create_account']}</a
 			>
 		</div>
-	</div>
+	</Card>
 </div>
 
 <style>
+	:global(.sm\:bg-primary) {
+		background-color: hsl(var(--primary));
+	}
+
 	a {
 		text-decoration: underline;
 		color: hsl(var(--secondary-content));
