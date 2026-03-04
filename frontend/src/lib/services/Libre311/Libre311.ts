@@ -790,7 +790,9 @@ export class Libre311ServiceImpl implements Libre311Service {
 			(response) => response,
 			(error) => {
 				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					props.onUnauthorized?.('expired');
+					if (error.config?.headers?.['Authorization']) {
+						props.onUnauthorized?.('expired');
+					}
 				}
 				return Promise.reject(error);
 			}
@@ -1235,13 +1237,16 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void {
+		if (this.authTokenInterceptorId !== -1) {
+			this.axiosInstance.interceptors.request.eject(this.authTokenInterceptorId);
+			this.authTokenInterceptorId = -1;
+		}
+
 		if (authInfo) {
 			this.authTokenInterceptorId = this.axiosInstance.interceptors.request.use(function (config) {
 				config.headers['Authorization'] = `Bearer ${authInfo.access_token}`;
 				return config;
 			});
-		} else {
-			this.axiosInstance.interceptors.request.eject(this.authTokenInterceptorId);
 		}
 	}
 }

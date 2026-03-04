@@ -103,15 +103,54 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	libre311Service.setAuthInfo(unityAuthService.getLoginData());
 	const sessionExpired = writable(false);
 	const user: Writable<UserInfo> = writable(unityAuthService.getLoginData());
+
+	let expirationTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function scheduleExpiration() {
+		if (expirationTimer) clearTimeout(expirationTimer);
+		const expiration = unityAuthService.getLoginDataExpiration();
+		if (expiration) {
+			const delay = expiration - Date.now() - 1000; // Fire 1s early to be proactive
+			if (delay > 0) {
+				expirationTimer = setTimeout(() => {
+					unityAuthService.logout('expired');
+				}, delay);
+			} else {
+				unityAuthService.logout('expired');
+			}
+		}
+	}
+
+	// Bootstrap check
+	if (typeof window !== 'undefined') {
+		const isProtectedRoute =
+			window.location.pathname.startsWith('/admin') ||
+			window.location.pathname.startsWith('/groups') ||
+			window.location.pathname.startsWith('/projects') ||
+			window.location.pathname.startsWith('/policies') ||
+			window.location.pathname === '/issue/create';
+
+		if (!unityAuthService.getLoginData() && isProtectedRoute) {
+			goto('/');
+		} else if (unityAuthService.getLoginData()) {
+			scheduleExpiration();
+		}
+	}
+
 	unityAuthService.subscribe('login', (args) => {
 		user.set(args);
 		libre311Service.setAuthInfo(args);
+		scheduleExpiration();
 	});
 	unityAuthService.subscribe('logout', (args) => {
-		libre311Service.setAuthInfo(undefined);
+		if (expirationTimer) {
+			clearTimeout(expirationTimer);
+			expirationTimer = undefined;
+		}
 		if (args?.reason === 'expired') {
 			sessionExpired.set(true);
 		} else {
+			libre311Service.setAuthInfo(undefined);
 			user.set(undefined);
 			if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
 				goto('/login');
@@ -122,6 +161,9 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	function alertError(unknown: unknown) {
 		console.error(unknown);
 		if (isAxiosError(unknown)) {
+			if (unknown.response?.status === 401) {
+				return;
+			}
 			if (isLibre311ServerErrorResponse(unknown.response?.data)) {
 				const libre311ServerError = unknown.response.data;
 				props.alert({
