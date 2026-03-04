@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.recaptcha;
+package app.imagedetection;
 
-import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.Post;
-import io.micronaut.http.client.annotation.Client;
+import io.micronaut.context.annotation.Primary;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.objectstorage.local.LocalStorageOperations;
+import jakarta.inject.Singleton;
 
-import java.util.Map;
-
-@Client("https://www.google.com/recaptcha/api/siteverify")
-public interface ReCaptchaClient {
-
-    @Post(produces = MediaType.APPLICATION_FORM_URLENCODED)
-    Map<Object, Object> verifyReCaptcha(String secret, String response);
+@Singleton
+@Primary
+@Requires(beans = {LocalStorageOperations.class})
+public class LocalImageDetector implements ImageDetector {
+    @Override
+    public void preventExplicitImage(byte[] bytes) {
+        // don't bother
+    }
 }
