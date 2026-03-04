@@ -1,56 +1,69 @@
 <script lang="ts">
-	import { Button, Input, Portal } from 'stwui';
+	import { Portal } from 'stwui';
 	import messages from '$media/messages.json';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { tick } from 'svelte';
 	import { isAxiosError } from 'axios';
+	import LoginForm from './Login/LoginForm.svelte';
+	import { createInput, emailValidator, passwordValidator } from '$lib/utils/validation';
 
 	const { unityAuthService, sessionExpired, user } = useLibre311Context();
 
-	let email = '';
-	let password = '';
+	let emailInput = createInput('');
+	let passwordInput = createInput('');
 	let errorMessage: string | undefined;
 	let loading = false;
+	let loginForm: LoginForm;
 
 	async function handleLogin() {
-		loading = true;
-		errorMessage = undefined;
-		try {
-			const previousUsername = $user?.username;
-			const newLoginData = await unityAuthService.login(email, password);
+		emailInput = emailValidator(emailInput);
+		passwordInput = passwordValidator(passwordInput);
 
-			if (previousUsername && newLoginData.username !== previousUsername) {
-				window.location.reload();
-				return;
-			}
+		if (emailInput.type === 'valid' && passwordInput.type === 'valid') {
+			loading = true;
+			errorMessage = undefined;
+			try {
+				const previousUsername = $user?.username;
+				const newLoginData = await unityAuthService.login(emailInput.value, passwordInput.value);
 
-			$sessionExpired = false;
-			email = '';
-			password = '';
-		} catch (e: unknown) {
-			console.error(e);
-			if (isAxiosError(e)) {
-				errorMessage = e.response?.data?.message || e.message;
-			} else if (e instanceof Error) {
-				errorMessage = e.message;
-			} else {
-				errorMessage = 'Login failed';
+				if (previousUsername && newLoginData.username !== previousUsername) {
+					window.location.reload();
+					return;
+				}
+
+				$sessionExpired = false;
+				emailInput = createInput('');
+				passwordInput = createInput('');
+			} catch (e: unknown) {
+				console.error(e);
+				if (isAxiosError(e)) {
+					errorMessage = e.response?.data?.message || e.message;
+				} else if (e instanceof Error) {
+					errorMessage = e.message;
+				} else {
+					errorMessage = 'Login failed';
+				}
+			} finally {
+				loading = false;
 			}
-		} finally {
-			loading = false;
 		}
 	}
 
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			handleLogin();
+	function handleInputChange(
+		e: CustomEvent<{ type: 'email' | 'password'; value: string | undefined }>
+	) {
+		if (e.detail.type === 'email') {
+			emailInput.value = e.detail.value;
+			emailInput = emailInput;
+		} else {
+			passwordInput.value = e.detail.value;
+			passwordInput = passwordInput;
 		}
 	}
 
 	$: if ($sessionExpired) {
 		tick().then(() => {
-			const emailInput = document.getElementById('session-expiry-email');
-			emailInput?.querySelector('input')?.focus();
+			loginForm.focus();
 		});
 	}
 </script>
@@ -87,64 +100,16 @@
 						</p>
 					</header>
 
-					{#if errorMessage}
-						<div
-							role="alert"
-							class="flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-5 w-5 shrink-0"
-								viewBox="0 0 20 20"
-								fill="currentColor"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-									clip-rule="evenodd"
-								/>
-							</svg>
-							{errorMessage}
-						</div>
-					{/if}
-
-					<div class="flex flex-col gap-5">
-						<Input
-							id="session-expiry-email"
-							type="email"
-							name="username"
-							autocomplete="username"
-							placeholder={messages['login']['email']['placeholder']}
-							bind:value={email}
-							on:keydown={handleKeydown}
-						>
-							<Input.Label slot="label">{messages['login']['email']['label']}</Input.Label>
-						</Input>
-
-						<Input
-							id="session-expiry-password"
-							type="password"
-							name="password"
-							autocomplete="current-password"
-							showPasswordToggle
-							placeholder={messages['login']['password']['placeholder']}
-							bind:value={password}
-							on:keydown={handleKeydown}
-						>
-							<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
-						</Input>
-					</div>
-
-					<footer class="mt-2">
-						<Button
-							on:click={handleLogin}
-							type="primary"
-							{loading}
-							class="h-12 w-full rounded-xl text-lg font-semibold transition-all active:scale-[0.98]"
-						>
-							{messages['login']['submit']}
-						</Button>
-					</footer>
+					<LoginForm
+						bind:this={loginForm}
+						{emailInput}
+						{passwordInput}
+						{errorMessage}
+						{loading}
+						showCancel={false}
+						on:inputChange={handleInputChange}
+						on:login={handleLogin}
+					/>
 				</div>
 			</div>
 		</div>

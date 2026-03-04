@@ -15,6 +15,7 @@
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
 	let errorMessage: string | undefined;
+	let loading = false;
 
 	function handleChange(e: CustomEvent<EventDispatchTypeMap['inputChange']>) {
 		if (e.detail.type == 'email') {
@@ -35,6 +36,7 @@
 		passwordInput = passwordValidator(passwordInput);
 
 		if (emailInput.type === 'valid' && passwordInput.type === 'valid') {
+			loading = true;
 			try {
 				await authService.login(emailInput.value, passwordInput.value);
 
@@ -48,6 +50,8 @@
 				} else {
 					errorMessage = new String(error).toString();
 				}
+			} finally {
+				loading = false;
 			}
 		}
 	}
@@ -57,6 +61,7 @@
 	{emailInput}
 	{passwordInput}
 	bind:errorMessage
+	{loading}
 	on:inputChange={handleChange}
 	on:login={login}
 	on:cancel={cancel}

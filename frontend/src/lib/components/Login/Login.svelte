@@ -1,87 +1,28 @@
 <script lang="ts">
 	import messages from '$media/messages.json';
 	import { rocketLaunch } from '$lib/components/Svg/outline/rocket-launch.js';
-	import { Button, Card, Input } from 'stwui';
+	import { Card } from 'stwui';
 	import { fade, draw } from 'svelte/transition';
-	import { createEventDispatcher, onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import { type FormInputValue } from '$lib/utils/validation';
-	import { dispatchEventFunctionFactory, type EventDispatchTypeMap } from './shared';
-	import { setUpAlertRole } from '$lib/utils/functions';
-
-	const dispatch = createEventDispatcher<EventDispatchTypeMap>();
+	import LoginForm from './LoginForm.svelte';
 
 	export let emailInput: FormInputValue<string | undefined>;
 	export let passwordInput: FormInputValue<string | undefined>;
 	export let errorMessage: string | undefined;
+	export let loading = false;
 
 	let visible = false;
-
-	const { onChange, onSubmit, onCancel } = dispatchEventFunctionFactory(dispatch);
-
-	// pass svelte checks
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const passwordAutocomplete = 'current-password' as any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const emailAutocomplete = 'username' as any;
-
-	let emailRoot: HTMLElement;
-	let passwordRoot: HTMLElement;
-
-	function passwordEntered(e: CustomEvent<KeyboardEvent>) {
-		const ke = e as unknown as KeyboardEvent;
-		if (ke.key === 'Enter') {
-			ke.preventDefault();
-			doSubmit();
-		}
-	}
-
-	async function doSubmit() {
-		// Clearing messages and updating the DOM ensure screen readers repeat errors
-		errorMessage = undefined;
-		emailInput.error = undefined;
-		passwordInput.error = undefined;
-
-		await tick();
-
-		onSubmit();
-	}
-
-	$: setUpAlertRole(emailInput, emailRoot, 'input#email-input', 'email-error');
-	$: setUpAlertRole(passwordInput, passwordRoot, 'input#password-input', 'password-error');
+	let loginForm: LoginForm;
 
 	onMount(() => {
 		visible = true;
-
-		tick().then(() => {
-			emailRoot.querySelector('input')?.focus();
-
-			const toggle = passwordRoot.querySelector(
-				'.stwui-input-password-toggle-wrapper'
-			) as HTMLElement | null;
-			if (toggle) {
-				toggle.setAttribute('tabindex', '0');
-				toggle.setAttribute('role', 'button');
-				toggle.setAttribute('aria-label', 'Toggle password visibility');
-
-				toggle.addEventListener('keydown', (e) => {
-					if (e.key === 'Enter' || e.key === ' ') {
-						e.preventDefault();
-						toggle.click();
-					}
-				});
-			}
-		});
+		loginForm.focus();
 	});
 </script>
 
 <div class="min-h-full w-full sm:flex sm:items-center sm:justify-center sm:bg-primary">
 	<Card class="w-full border-none shadow-none sm:w-1/3 sm:max-w-md sm:border-solid sm:shadow-md">
-		{#if errorMessage}
-			<div role="alert" class="flex justify-center bg-red-500 p-2 text-white sm:rounded-t-md">
-				<span>{errorMessage}</span>
-			</div>
-		{/if}
-
 		<div class="m-4 flex flex-col items-center justify-center">
 			{#if visible}
 				<div class="size-28">
@@ -110,47 +51,17 @@
 			<h1 class="text-lg">{messages['login']['title']}</h1>
 		</div>
 
-		<div bind:this={emailRoot} class="m-4">
-			<Input
-				allowClear
-				id="email-input"
-				type="email"
-				name="username"
-				placeholder={messages['login']['email']['placeholder']}
-				error={emailInput.error}
-				value={emailInput.value}
-				autocomplete={emailAutocomplete}
-				on:change={(e) => onChange(e, 'email')}
-			>
-				<Input.Label slot="label">{messages['login']['email']['label']}</Input.Label>
-			</Input>
-		</div>
-
-		<div bind:this={passwordRoot} class="m-4">
-			<Input
-				allowClear
-				id="password-input"
-				type="password"
-				name="password"
-				showPasswordToggle={true}
-				placeholder={messages['login']['password']['placeholder']}
-				error={passwordInput.error}
-				value={passwordInput.value}
-				autocomplete={passwordAutocomplete}
-				on:keyup={passwordEntered}
-				on:change={(e) => onChange(e, 'password')}
-			>
-				<Input.Label slot="label">{messages['login']['password']['label']}</Input.Label>
-			</Input>
-		</div>
-
-		<div class="m-4 flex gap-2">
-			<Button type="primary" on:click={doSubmit}>
-				{messages['login']['submit']}
-			</Button>
-			<Button type="default" on:click={onCancel}>
-				{messages['login']['cancel']}
-			</Button>
+		<div class="m-4">
+			<LoginForm
+				bind:this={loginForm}
+				{emailInput}
+				{passwordInput}
+				{errorMessage}
+				{loading}
+				on:inputChange
+				on:login
+				on:cancel
+			/>
 		</div>
 
 		<div class="m-4">
