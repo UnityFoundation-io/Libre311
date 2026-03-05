@@ -30,7 +30,7 @@ export type UnityAuthLoginResponse = z.infer<typeof UnityAuthLoginResponseSchema
 
 export type UnityAuthEventMap = {
 	login: CompleteLoginResponse;
-	logout: void;
+	logout: { reason?: 'expired' } | undefined;
 };
 const CompleteLoginResponseSchema = UnityAuthLoginResponseSchema.merge(
 	UserPermissionsSuccessResponseSchema
@@ -41,7 +41,8 @@ export type CompleteLoginResponse = z.infer<typeof CompleteLoginResponseSchema>;
 export type UnityAuthService = BaseObservable<UnityAuthEventMap> & {
 	login(email: string, password: string): Promise<CompleteLoginResponse>;
 	getLoginData(): CompleteLoginResponse | undefined;
-	logout(): void;
+	getLoginDataExpiration(): number | undefined;
+	logout(reason?: 'expired'): void;
 };
 
 // Auth Implementation
@@ -58,8 +59,19 @@ export class UnityAuthServiceImpl
 		UnityAuthServicePropsSchema.parse(props);
 		this.axiosInstance = axios.create({ baseURL: props.baseURL });
 
+		this.axiosInstance.interceptors.response.use(
+			(response) => response,
+			(error) => {
+				if (axios.isAxiosError(error) && error.response?.status === 401) {
+					if (error.config?.headers?.['Authorization']) {
+						this.logout('expired');
+					}
+				}
+				return Promise.reject(error);
+			}
+		);
+
 		this.loginData = this.retrieveLoginData();
-		this.publish('logout', undefined);
 
 		this.userPermissionsResolver = props.userPermissionsResolver;
 	}
@@ -70,6 +82,13 @@ export class UnityAuthServiceImpl
 
 	getLoginData(): CompleteLoginResponse | undefined {
 		return this.loginData;
+	}
+
+	getLoginDataExpiration(): number | undefined {
+		if (this.loginData) {
+			return this.getTokenExpiration(this.loginData.access_token);
+		}
+		return undefined;
 	}
 
 	async login(email: string, password: string): Promise<CompleteLoginResponse> {
@@ -86,14 +105,40 @@ export class UnityAuthServiceImpl
 		}
 		const completeLoginRes: CompleteLoginResponse = { ...loginRes, ...permissionsRes };
 
+		this.loginData = completeLoginRes;
 		this.publish('login', completeLoginRes);
 		sessionStorage.setItem(this.loginDataKey, JSON.stringify(completeLoginRes));
 		return completeLoginRes;
 	}
 
-	logout() {
+	logout(reason?: 'expired') {
 		sessionStorage.removeItem(this.loginDataKey);
-		this.publish('logout', undefined);
+		this.publish('logout', { reason });
+	}
+
+	private getTokenExpiration(token: string): number | undefined {
+		try {
+			const base64Url = token.split('.')[1];
+			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const jsonPayload = decodeURIComponent(
+				atob(base64)
+					.split('')
+					.map(function (c) {
+						return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+					})
+					.join('')
+			);
+
+			const payload = JSON.parse(jsonPayload);
+			return payload.exp ? payload.exp * 1000 : undefined;
+		} catch (e) {
+			return undefined;
+		}
+	}
+
+	private isTokenExpired(token: string, offsetMs: number = 0): boolean {
+		const expiration = this.getTokenExpiration(token);
+		return expiration ? expiration < Date.now() + offsetMs : true;
 	}
 
 	private retrieveLoginData(): CompleteLoginResponse | undefined {
@@ -103,7 +148,18 @@ export class UnityAuthServiceImpl
 			return;
 		}
 
-		return CompleteLoginResponseSchema.parse(JSON.parse(loginInfo));
+		try {
+			const loginData = CompleteLoginResponseSchema.parse(JSON.parse(loginInfo));
+			// Use a 10s grace period on bootstrap to avoid immediate session expiration modal
+			if (this.isTokenExpired(loginData.access_token, 10000)) {
+				sessionStorage.removeItem(this.loginDataKey);
+				return;
+			}
+			return loginData;
+		} catch (e) {
+			sessionStorage.removeItem(this.loginDataKey);
+			return;
+		}
 	}
 }
 

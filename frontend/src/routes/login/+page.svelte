@@ -1,8 +1,6 @@
 <script lang="ts">
-	import Breakpoint from '$lib/components/Breakpoint.svelte';
-	import LoginDesktop from '$lib/components/Login/LoginDesktop.svelte';
+	import Login from '$lib/components/Login/Login.svelte';
 	import type { EventDispatchTypeMap } from '$lib/components/Login/shared';
-	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator, passwordValidator } from '$lib/utils/validation';
 	import { useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
@@ -17,6 +15,7 @@
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
 	let errorMessage: string | undefined;
+	let loading = false;
 
 	function handleChange(e: CustomEvent<EventDispatchTypeMap['inputChange']>) {
 		if (e.detail.type == 'email') {
@@ -37,6 +36,7 @@
 		passwordInput = passwordValidator(passwordInput);
 
 		if (emailInput.type === 'valid' && passwordInput.type === 'valid') {
+			loading = true;
 			try {
 				await authService.login(emailInput.value, passwordInput.value);
 
@@ -50,28 +50,19 @@
 				} else {
 					errorMessage = new String(error).toString();
 				}
+			} finally {
+				loading = false;
 			}
 		}
 	}
 </script>
 
-<Breakpoint>
-	<LoginDesktop
-		slot="is-desktop"
-		{emailInput}
-		{passwordInput}
-		bind:errorMessage
-		on:inputChange={handleChange}
-		on:login={login}
-		on:cancel={cancel}
-	/>
-	<LoginMobile
-		slot="is-mobile-or-tablet"
-		{emailInput}
-		{passwordInput}
-		bind:errorMessage
-		on:inputChange={handleChange}
-		on:login={login}
-		on:cancel={cancel}
-	/>
-</Breakpoint>
+<Login
+	{emailInput}
+	{passwordInput}
+	bind:errorMessage
+	{loading}
+	on:inputChange={handleChange}
+	on:login={login}
+	on:cancel={cancel}
+/>

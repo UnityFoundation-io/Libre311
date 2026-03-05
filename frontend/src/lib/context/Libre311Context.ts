@@ -30,6 +30,7 @@ import { createNetworkStatus, type NetworkStatus } from '$lib/services/NetworkSt
 import { createOfflineQueue, type OfflineQueue } from '$lib/services/OfflineQueue';
 import { createBackgroundSync } from '$lib/services/BackgroundSync';
 import { OfflineAwareLibre311Service } from '$lib/services/Libre311/OfflineAwareLibre311Service';
+import { goto } from '$app/navigation';
 
 const libre311CtxKey = Symbol();
 
@@ -45,6 +46,7 @@ export type Libre311Context = {
 	networkStatus: NetworkStatus;
 	offlineQueue: OfflineQueue;
 	syncSignal: Readable<number>;
+	sessionExpired: Writable<boolean>;
 } & Libre311Alert;
 
 export type Libre311ContextProviderProps = {
@@ -65,7 +67,11 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		...props.unityAuthServiceProps
 	});
 	const recaptchaService = recaptchaServiceFactory(props.mode, props.recaptchaServiceProps);
-	const baseLibre311Service = libre311Factory({ ...props.libreServiceProps, recaptchaService });
+	const baseLibre311Service = libre311Factory({
+		...props.libreServiceProps,
+		recaptchaService,
+		onUnauthorized: (reason) => unityAuthService.logout(reason)
+	});
 
 	const networkStatus = createNetworkStatus();
 	const offlineQueue = createOfflineQueue();
@@ -95,15 +101,69 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	});
 
 	libre311Service.setAuthInfo(unityAuthService.getLoginData());
+	const sessionExpired = writable(false);
 	const user: Writable<UserInfo> = writable(unityAuthService.getLoginData());
-	unityAuthService.subscribe('login', (args) => user.set(args));
-	unityAuthService.subscribe('login', (args) => libre311Service.setAuthInfo(args));
-	unityAuthService.subscribe('logout', () => libre311Service.setAuthInfo(undefined));
-	unityAuthService.subscribe('logout', () => user.set(undefined));
+
+	let expirationTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function scheduleExpiration() {
+		if (expirationTimer) clearTimeout(expirationTimer);
+		const expiration = unityAuthService.getLoginDataExpiration();
+		if (expiration) {
+			const delay = expiration - Date.now() - 1000; // Fire 1s early to be proactive
+			if (delay > 0) {
+				expirationTimer = setTimeout(() => {
+					unityAuthService.logout('expired');
+				}, delay);
+			} else {
+				unityAuthService.logout('expired');
+			}
+		}
+	}
+
+	// Bootstrap check
+	if (typeof window !== 'undefined') {
+		const isProtectedRoute =
+			window.location.pathname.startsWith('/admin') ||
+			window.location.pathname.startsWith('/groups') ||
+			window.location.pathname.startsWith('/projects') ||
+			window.location.pathname.startsWith('/policies') ||
+			window.location.pathname === '/issue/create';
+
+		if (!unityAuthService.getLoginData() && isProtectedRoute) {
+			goto('/');
+		} else if (unityAuthService.getLoginData()) {
+			scheduleExpiration();
+		}
+	}
+
+	unityAuthService.subscribe('login', (args) => {
+		user.set(args);
+		libre311Service.setAuthInfo(args);
+		scheduleExpiration();
+	});
+	unityAuthService.subscribe('logout', (args) => {
+		if (expirationTimer) {
+			clearTimeout(expirationTimer);
+			expirationTimer = undefined;
+		}
+		if (args?.reason === 'expired') {
+			sessionExpired.set(true);
+		} else {
+			libre311Service.setAuthInfo(undefined);
+			user.set(undefined);
+			if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+				goto('/login');
+			}
+		}
+	});
 
 	function alertError(unknown: unknown) {
 		console.error(unknown);
 		if (isAxiosError(unknown)) {
+			if (unknown.response?.status === 401) {
+				return;
+			}
 			if (isLibre311ServerErrorResponse(unknown.response?.data)) {
 				const libre311ServerError = unknown.response.data;
 				props.alert({
@@ -147,7 +207,8 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		alertError,
 		networkStatus,
 		offlineQueue,
-		syncSignal
+		syncSignal,
+		sessionExpired
 	};
 	setContext(libre311CtxKey, ctx);
 	return ctx;

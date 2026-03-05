@@ -2,6 +2,7 @@
 	import LibreAlert from '$lib/components/LibreAlert.svelte';
 	import { createAlertStore } from './Libre311AlertStore';
 	import { createLibre311Context, type Libre311ContextProviderProps } from './Libre311Context';
+	import SessionExpiredModal from '$lib/components/SessionExpiredModal.svelte';
 	export let props: Libre311ContextProviderProps;
 
 	const alertStore = createAlertStore();
@@ -17,6 +18,8 @@
 </svelte:head>
 
 <slot {libre311Context} />
+
+<SessionExpiredModal />
 
 {#if $currentAlert}
 	<LibreAlert

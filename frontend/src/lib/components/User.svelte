@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Avatar, Dropdown } from 'stwui';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
-	import { goto } from '$app/navigation';
 
 	const unityAuthService = useLibre311Context().unityAuthService;
 	const libre311Context = useLibre311Context();
@@ -16,7 +15,6 @@
 	function logout() {
 		isUserDropdownVisible = false;
 		unityAuthService.logout();
-		goto('/');
 	}
 
 	function logoutKeydown(e: CustomEvent) {
