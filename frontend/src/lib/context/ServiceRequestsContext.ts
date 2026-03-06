@@ -4,7 +4,8 @@ import {
 	type Libre311Service,
 	type ServiceRequest,
 	type ServiceRequestsResponse,
-	type FilteredServiceRequestsParams
+	type FilteredServiceRequestsParams,
+	type Project
 } from '$lib/services/Libre311/Libre311';
 import {
 	asAsyncFailure,
@@ -18,12 +19,14 @@ import type { Page } from '@sveltejs/kit';
 import { getContext, setContext } from 'svelte';
 import { writable, type Readable, get } from 'svelte/store';
 import type { OfflineQueue, PendingRequest } from '$lib/services/OfflineQueue';
+import { useLibre311Context } from './Libre311Context';
 
 const key = Symbol();
 
 export type ServiceRequestsContext = {
 	selectedServiceRequest: Readable<Maybe<ServiceRequest>>;
 	serviceRequestsResponse: Readable<AsyncResult<ServiceRequestsResponse>>;
+	selectedProjectSlug: Readable<Maybe<string>>;
 	applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL): void;
 	refreshSelectedServiceRequest(updatedServiceRequest: ServiceRequest): void;
 	refresh(): Promise<void>;
@@ -62,9 +65,11 @@ export function createServiceRequestsContext(
 	// consider type as Maybe<AsyncRequest<ServiceRequest>> that would cover all possible states
 	const selectedServiceRequest = writable<Maybe<ServiceRequest>>();
 	const serviceRequestsResponse = writable<AsyncResult<ServiceRequestsResponse>>(ASYNC_IN_PROGRESS);
+	const selectedProjectSlug = writable<Maybe<string>>();
 
 	// state updates to be done when a user navigates to /issues/map/[issue_id]
 	async function handleIssueDetailsPageNav(page: Page<Record<string, string>, string | null>) {
+		selectedProjectSlug.set(undefined);
 		const serviceRequestsStoreVal = get(serviceRequestsResponse);
 		// data has already been loaded, update our selectedServiceRequest to the value
 		if (serviceRequestsStoreVal.type === 'success') {
@@ -117,6 +122,11 @@ export function createServiceRequestsContext(
 
 	// state updates for when  user navigates to /issues/map
 	async function handleMapPageNav(page: Page<Record<string, string>, string | null>) {
+		if (page.params.project_slug) {
+			selectedProjectSlug.set(page.params.project_slug);
+		} else {
+			selectedProjectSlug.set(undefined);
+		}
 		try {
 			selectedServiceRequest.set(undefined);
 			const updatedParams = {
@@ -210,6 +220,7 @@ export function createServiceRequestsContext(
 	const ctx: ServiceRequestsContext = {
 		selectedServiceRequest,
 		serviceRequestsResponse,
+		selectedProjectSlug,
 		applyServiceRequestParams,
 		refreshSelectedServiceRequest,
 		refresh
@@ -230,4 +241,12 @@ export function useSelectedServiceRequestStore(): ServiceRequestsContext['select
 
 export function useServiceRequestsResponseStore(): ServiceRequestsContext['serviceRequestsResponse'] {
 	return useServiceRequestsContext().serviceRequestsResponse;
+}
+
+export function useProjectsStore(): Readable<Project[]> {
+	return useLibre311Context().projects;
+}
+
+export function useSelectedProjectSlugStore(): ServiceRequestsContext['selectedProjectSlug'] {
+	return useServiceRequestsContext().selectedProjectSlug;
 }

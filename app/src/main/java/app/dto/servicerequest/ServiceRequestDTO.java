@@ -17,6 +17,7 @@ package app.dto.servicerequest;
 import app.dto.servicedefinition.ServiceDefinitionAttributeDTO;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestStatus;
+import app.service.project.ProjectService;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
@@ -95,6 +96,12 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
     @JsonProperty("project_id")
     private Long projectId;
 
+    @JsonProperty("project_name")
+    private String projectName;
+
+    @JsonProperty("project_slug")
+    private String projectSlug;
+
     public ServiceRequestDTO() {
     }
 
@@ -121,7 +128,25 @@ public class ServiceRequestDTO implements ServiceRequestResponseDTO {
         }
         if (serviceRequest.getProject() != null) {
             this.projectId = serviceRequest.getProject().getId();
+            this.projectName = serviceRequest.getProject().getName();
+            this.projectSlug = ProjectService.toSlug(serviceRequest.getProject().getName());
         }
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public String getProjectSlug() {
+        return projectSlug;
+    }
+
+    public void setProjectSlug(String projectSlug) {
+        this.projectSlug = projectSlug;
     }
 
     public Long getProjectId() {

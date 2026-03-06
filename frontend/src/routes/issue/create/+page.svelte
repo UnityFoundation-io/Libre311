@@ -6,12 +6,13 @@
 	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
 
 	import WaypointOpen from '$lib/assets/waypoint-open.png';
-	import type { CreateServiceRequestParams } from '$lib/services/Libre311/Libre311';
+	import type { CreateServiceRequestParams, Project } from '$lib/services/Libre311/Libre311';
 	import { iconPositionOpts } from '$lib/utils/functions';
 
 	import L, { type PointTuple } from 'leaflet';
 	import MapMarker from '$lib/components/MapMarker.svelte';
 	import MapBoundaryPolygon from '$lib/components/MapBoundaryPolygon.svelte';
+	import ProjectBoundary from '$lib/components/ProjectBoundary.svelte';
 	import { KEYBOARD_PAN_DELTA_FINE } from '$lib/constants/map';
 	import type { ComponentType } from 'svelte';
 	import {
@@ -22,6 +23,8 @@
 	import MapGeosearch from '$lib/components/MapGeosearch.svelte';
 	import type { ComponentEvents } from 'svelte';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { useProjectsStore } from '$lib/context/ServiceRequestsContext';
+	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
@@ -36,8 +39,33 @@
 	const linkResolver = libre311Context.linkResolver;
 	const alertError = libre311Context.alertError;
 	const isOnline = libre311Context.networkStatus.isOnline;
+	const projectsStore = useProjectsStore();
+	const jurisdictionStore = useJurisdiction();
 
 	let params: Partial<CreateServiceRequestUIParams> = {};
+	let project: Project | undefined;
+
+	$: {
+		const projectSlug = $page.url.searchParams.get('project_slug');
+		if (projectSlug && !params.project_slug) {
+			params.project_slug = projectSlug;
+			fetchProject(projectSlug);
+		}
+	}
+
+	async function fetchProject(slug: string) {
+		try {
+			project = await libre311.getProject(slug);
+			if (project) {
+				params.project_id = project.id;
+				const bounds = L.latLngBounds(project.bounds as L.LatLngTuple[]);
+				centerPos = [bounds.getCenter().lat, bounds.getCenter().lng];
+			}
+		} catch (e) {
+			console.error('Failed to fetch project', e);
+		}
+	}
+
 	let centerPos: PointTuple = getStartingCenterPos();
 
 	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
@@ -123,6 +151,11 @@
 			on:boundsChanged={boundsChanged}
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
+			{#if $jurisdictionStore.project_feature && $jurisdictionStore.project_feature !== 'DISABLED'}
+				{#each $projectsStore.filter((p) => p.status === 'OPEN') as project (project.id)}
+					<ProjectBoundary {project} />
+				{/each}
+			{/if}
 			<MapMarker latLng={centerPos} options={{ icon, keyboard: false }} />
 			{#if step === CreateServiceRequestSteps.LOCATION && $isOnline}
 				<MapGeosearch on:geosearch={handleGeosearch} />

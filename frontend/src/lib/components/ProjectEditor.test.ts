@@ -57,6 +57,7 @@ describe('ProjectEditor', () => {
 		const project: Project = {
 			id: 1,
 			name: 'Existing Project',
+			slug: 'existing-project',
 			description: 'Description',
 			start_date: '2023-01-01T00:00:00Z',
 			end_date: '2023-01-31T00:00:00Z',

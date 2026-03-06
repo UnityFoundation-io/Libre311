@@ -27,6 +27,8 @@ export type CreateServiceRequestUIParams = ContactInformation & {
 	media_url?: string;
 	service: Service;
 	file?: File;
+	project_id?: number;
+	project_slug?: string;
 };
 
 function isEmptyArrayOrUndefined(thing: string | number | Date | string[] | undefined) {

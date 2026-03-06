@@ -1,7 +1,8 @@
 import {
 	libre311Factory,
 	type Libre311Service,
-	type Libre311ServiceProps
+	type Libre311ServiceProps,
+	type Project
 } from '$lib/services/Libre311/Libre311';
 import {
 	unityAuthServiceFactory,
@@ -41,6 +42,7 @@ export type Libre311Context = {
 	unityAuthService: UnityAuthService;
 	mode: Mode;
 	user: Readable<UserInfo>;
+	projects: Readable<Project[]>;
 	alertError: (unknown: unknown) => void;
 	networkStatus: NetworkStatus;
 	offlineQueue: OfflineQueue;
@@ -79,6 +81,19 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 	const backgroundSync = createBackgroundSync(baseLibre311Service, offlineQueue, props, () =>
 		syncSignal.update((n) => n + 1)
 	);
+
+	const projects = writable<Project[]>([]);
+
+	async function fetchProjects() {
+		try {
+			const res = await libre311Service.getProjects();
+			projects.set(res);
+		} catch (e) {
+			console.error('Failed to fetch projects', e);
+		}
+	}
+
+	fetchProjects();
 
 	// Trigger sync when coming back online
 	networkStatus.isOnline.subscribe((online) => {
@@ -144,6 +159,7 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		linkResolver,
 		unityAuthService,
 		user,
+		projects,
 		alertError,
 		networkStatus,
 		offlineQueue,

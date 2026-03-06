@@ -237,8 +237,8 @@ export type CreateServiceRequestParams = HasServiceCode &
 		description?: string;
 		media_url?: string;
 		client_request_id?: string;
-		/** Internal: used by offline queue to store service name for display */
-		_serviceName?: string;
+		project_id?: number;
+		/** Internal: used by offline queue to store service name for display */ _serviceName?: string;
 		/** Internal: used by offline queue to store photo blob for deferred upload */
 		_photoFile?: File;
 	};
@@ -370,7 +370,9 @@ export const ServiceRequestSchema = z
 		selected_values: z.array(SelectedValuesSchema).optional(),
 		priority: ServiceRequestPrioritySchema.optional(),
 		removal_suggestions_count: z.number().optional(),
-		project_id: z.number().optional()
+		project_id: z.number().optional(),
+		project_name: z.string().optional(),
+		project_slug: z.string().optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)
@@ -506,6 +508,7 @@ export type ProjectFeature = z.infer<typeof ProjectFeatureSchema>;
 export const ProjectSchema = z.object({
 	id: z.number(),
 	name: z.string(),
+	slug: z.string(),
 	description: z.string().optional(),
 	bounds: z.array(latLngTupleSchema).min(4),
 	start_date: z.string(),
@@ -649,6 +652,8 @@ export interface Libre311Service extends Open311Service {
 	getRemovalSuggestions(service_request_id: number): Promise<GetRemovalSuggestionsResponse>;
 	deleteRemovalSuggestion(params: { id: number }): Promise<void>;
 	getProjects(): Promise<Project[]>;
+	getProject(slug: string): Promise<Project>;
+	getProjectsAdmin(): Promise<Project[]>;
 	createProject(params: CreateProjectParams): Promise<Project>;
 	updateProject(params: UpdateProjectParams): Promise<Project>;
 	updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig>;
@@ -711,7 +716,10 @@ const ROUTES = {
 		`/jurisdiction-admin/requests/removal-suggestions?jurisdiction_id=${params.jurisdiction_id}`,
 	deleteRemovalSuggestion: (params: { id: number } & HasJurisdictionId) =>
 		`/jurisdiction-admin/requests/removal-suggestions/${params.id}?jurisdiction_id=${params.jurisdiction_id}`,
-	getProjects: (params: HasJurisdictionId) =>
+	getProjects: (params: HasJurisdictionId) => `/projects?jurisdiction_id=${params.jurisdiction_id}`,
+	getProject: (slug: string, params: HasJurisdictionId) =>
+		`/projects/${slug}?jurisdiction_id=${params.jurisdiction_id}`,
+	getProjectsAdmin: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
 	postProject: (params: HasJurisdictionId) =>
 		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
@@ -832,6 +840,20 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async getProjects(): Promise<Project[]> {
 		const res = await this.axiosInstance.get<unknown>(
 			ROUTES.getProjects({ jurisdiction_id: this.jurisdictionId })
+		);
+		return z.array(ProjectSchema).parse(res.data);
+	}
+
+	async getProject(slug: string): Promise<Project> {
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getProject(slug, { jurisdiction_id: this.jurisdictionId })
+		);
+		return ProjectSchema.parse(res.data);
+	}
+
+	async getProjectsAdmin(): Promise<Project[]> {
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getProjectsAdmin({ jurisdiction_id: this.jurisdictionId })
 		);
 		return z.array(ProjectSchema).parse(res.data);
 	}

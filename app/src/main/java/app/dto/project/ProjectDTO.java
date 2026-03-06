@@ -55,12 +55,15 @@ public class ProjectDTO {
     @JsonProperty("request_count")
     private int requestCount;
 
+    private String slug;
+
     public ProjectDTO() {
     }
 
     public ProjectDTO(Project project) {
         this.id = project.getId();
         this.name = project.getName();
+        this.slug = project.getSlug();
         this.description = project.getDescription();
         this.bounds = LibreGeometryFactory.getCoordinatesFrom(project.getBoundary());
         this.startDate = project.getStartDate();
@@ -152,5 +155,13 @@ public class ProjectDTO {
 
     public void setRequestCount(int requestCount) {
         this.requestCount = requestCount;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 }

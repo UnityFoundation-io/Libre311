@@ -191,4 +191,25 @@ public class ProjectFeatureTest {
         assertTrue(savedRequest.isPresent());
         assertNull(savedRequest.get().getProject(), "Project should not be set if feature is DISABLED");
     }
+
+    @Test
+    void testCreateServiceRequest_ManualProjectId() {
+        jurisdiction.setProjectFeature(ProjectFeature.OPTIONAL);
+        jurisdictionRepository.update(jurisdiction);
+        Project project = createProject();
+
+        PostRequestServiceRequestDTO dto = new PostRequestServiceRequestDTO(service.getId());
+        dto.setLatitude("50.0"); // Outside project bounds
+        dto.setLongitude("50.0");
+        dto.setgRecaptchaResponse("dummy");
+        dto.setProjectId(project.getId()); // Manual override
+
+        PostResponseServiceRequestDTO response = serviceRequestService.createServiceRequest(HttpRequest.POST("/", ""), dto, jurisdiction.getId());
+
+        assertNotNull(response);
+        Optional<ServiceRequest> savedRequest = serviceRequestRepository.findById(response.getId());
+        assertTrue(savedRequest.isPresent());
+        assertNotNull(savedRequest.get().getProject());
+        assertEquals(project.getId(), savedRequest.get().getProject().getId());
+    }
 }

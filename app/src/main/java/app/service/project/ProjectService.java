@@ -56,9 +56,36 @@ public class ProjectService {
     }
 
     @Transactional
+    public List<ProjectDTO> getOpenProjects(String jurisdictionId) {
+        return projectRepository.findOpenProjectsByJurisdictionId(jurisdictionId).stream()
+                .map(ProjectDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public static String toSlug(String name) {
+        return name.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "-");
+    }
+
+    @Transactional
+    public Optional<ProjectDTO> getProjectBySlug(String slug, String jurisdictionId) {
+        return projectRepository.findBySlugAndJurisdictionId(slug, jurisdictionId)
+                .map(ProjectDTO::new);
+    }
+
+    @Transactional
     public ProjectDTO createProject(CreateProjectDTO dto, String jurisdictionId) {
         Jurisdiction jurisdiction = jurisdictionRepository.findById(jurisdictionId)
                 .orElseThrow(() -> new Libre311BaseException("Jurisdiction not found", HttpStatus.NOT_FOUND));
+
+        // Uniqueness check: name must be unique during the project's duration
+        boolean exists = projectRepository.findAllByJurisdictionId(jurisdictionId).stream()
+                .anyMatch(p -> p.getName().equalsIgnoreCase(dto.getName()) &&
+                        !(dto.getEndDate().isBefore(p.getStartDate()) || dto.getStartDate().isAfter(p.getEndDate())));
+        if (exists) {
+            throw new Libre311BaseException("A project with this name already exists during the specified duration", HttpStatus.BAD_REQUEST);
+        }
 
         Project project = new Project();
         project.setName(dto.getName());
@@ -76,7 +103,27 @@ public class ProjectService {
         Project project = projectRepository.findByIdAndJurisdictionId(id, jurisdictionId)
                 .orElseThrow(() -> new Libre311BaseException("Project not found", HttpStatus.NOT_FOUND));
 
-        if (dto.getName() != null) project.setName(dto.getName());
+        if (dto.getName() != null && !dto.getName().equalsIgnoreCase(project.getName())) {
+            Instant start = dto.getStartDate() != null ? dto.getStartDate() : project.getStartDate();
+            Instant end = dto.getEndDate() != null ? dto.getEndDate() : project.getEndDate();
+            boolean exists = projectRepository.findAllByJurisdictionId(jurisdictionId).stream()
+                    .anyMatch(p -> !p.getId().equals(id) && p.getName().equalsIgnoreCase(dto.getName()) &&
+                            !(end.isBefore(p.getStartDate()) || start.isAfter(p.getEndDate())));
+            if (exists) {
+                throw new Libre311BaseException("A project with this name already exists during the specified duration", HttpStatus.BAD_REQUEST);
+            }
+            project.setName(dto.getName());
+        } else if (dto.getStartDate() != null || dto.getEndDate() != null) {
+            Instant start = dto.getStartDate() != null ? dto.getStartDate() : project.getStartDate();
+            Instant end = dto.getEndDate() != null ? dto.getEndDate() : project.getEndDate();
+            boolean exists = projectRepository.findAllByJurisdictionId(jurisdictionId).stream()
+                    .anyMatch(p -> !p.getId().equals(id) && p.getName().equalsIgnoreCase(project.getName()) &&
+                            !(end.isBefore(p.getStartDate()) || start.isAfter(p.getEndDate())));
+            if (exists) {
+                throw new Libre311BaseException("Changing the duration would cause a naming conflict with another project", HttpStatus.BAD_REQUEST);
+            }
+        }
+
         if (dto.getDescription() != null) project.setDescription(dto.getDescription());
         if (dto.getBounds() != null) project.setBoundary(geometryFactory.createPolygon(dto.getBounds()));
         if (dto.getStartDate() != null) project.setStartDate(dto.getStartDate());

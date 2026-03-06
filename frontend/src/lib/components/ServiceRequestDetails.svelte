@@ -74,6 +74,24 @@
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
 
+				{#if serviceRequest.project_name}
+					<div class="mb-2">
+						<strong class="text-base">{messages['project']['title'] ?? 'Project'}</strong>
+						<p class="text-sm">
+							{#if serviceRequest.project_slug}
+								<a
+									href={`/issues/map/project/${serviceRequest.project_slug}`}
+									class="text-primary hover:underline"
+								>
+									{serviceRequest.project_name}
+								</a>
+							{:else}
+								{serviceRequest.project_name}
+							{/if}
+						</p>
+					</div>
+				{/if}
+
 				{#if serviceRequest.selected_values}
 					<div class="mb-1">
 						<SelectedValues selectedValues={serviceRequest.selected_values} />

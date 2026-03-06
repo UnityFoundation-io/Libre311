@@ -89,6 +89,9 @@ public class PostRequestServiceRequestDTO {
     @JsonProperty("client_request_id")
     private String clientRequestId;
 
+    @JsonProperty("project_id")
+    private Long projectId;
+
     @NotBlank
     @JsonProperty("g_recaptcha_response")
     private String gRecaptchaResponse;
@@ -226,6 +229,14 @@ public class PostRequestServiceRequestDTO {
 
     public void setClientRequestId(@Nullable String clientRequestId) {
         this.clientRequestId = clientRequestId;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public Map<String, String> getAttributes() {

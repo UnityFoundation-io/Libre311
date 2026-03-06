@@ -2,7 +2,9 @@
 	import RequestListMap from '$lib/components/RequestListMap.svelte';
 	import {
 		useSelectedServiceRequestStore,
-		useServiceRequestsResponseStore
+		useServiceRequestsResponseStore,
+		useProjectsStore,
+		useSelectedProjectSlugStore
 	} from '$lib/context/ServiceRequestsContext';
 
 	// Map imports
@@ -11,11 +13,16 @@
 	import MapMarkerCircle from '$lib/components/MapMarkerCircle.svelte';
 	import MapMarkerWaypoint from '$lib/components/MapMarkerWaypoint.svelte';
 	import MapListToggle from '$lib/components/MapListToggle.svelte';
+	import ProjectBoundary from '$lib/components/ProjectBoundary.svelte';
 
 	// Type imports
 	import type { LatLngTuple } from 'leaflet';
 	import type { Maybe } from '$lib/utils/types';
-	import type { ServiceRequest, ServiceRequestsResponse } from '$lib/services/Libre311/Libre311';
+	import {
+		type ServiceRequest,
+		type ServiceRequestsResponse,
+		type Project
+	} from '$lib/services/Libre311/Libre311';
 	import type { AsyncResult } from '$lib/services/http';
 
 	import { goto } from '$app/navigation';
@@ -33,11 +40,32 @@
 	const libre311 = useLibre311Context().service;
 	const serviceRequestsResponseStore = useServiceRequestsResponseStore();
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
+	const projectsStore = useProjectsStore();
+	const selectedProjectSlugStore = useSelectedProjectSlugStore();
 
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { mediaQuery } from '$lib/components/media';
+	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 
-	$: mapBounds = createMapBounds($serviceRequestsResponseStore);
+	const jurisdiction = useJurisdiction();
+
+	$: projectBounds = createProjectBounds($projectsStore, $selectedProjectSlugStore);
+
+	$: mapBounds =
+		$selectedProjectSlugStore && projectBounds
+			? projectBounds
+			: createMapBounds($serviceRequestsResponseStore);
+
+	function createProjectBounds(
+		projects: Project[],
+		projectSlug: Maybe<string>
+	): L.LatLngBounds | undefined {
+		if (!projectSlug) return undefined;
+		const project = projects.find((p) => p.slug === projectSlug);
+		if (!project) return undefined;
+		// project.bounds is [lat, lng][]
+		return L.latLngBounds(project.bounds as L.LatLngTuple[]);
+	}
 
 	// Compute flyTo target when a service request is selected
 	// Note: lat/long are strings from the API, convert to numbers for Leaflet
@@ -129,6 +157,11 @@
 			bounds={mapBounds}
 			{flyToTarget}
 		>
+			{#if $jurisdiction.project_feature && $jurisdiction.project_feature !== 'DISABLED'}
+				{#each $projectsStore.filter((p) => p.status === 'OPEN') as project (project.id)}
+					<ProjectBoundary {project} />
+				{/each}
+			{/if}
 			{#if $serviceRequestsResponseStore.type === 'success'}
 				{#each $serviceRequestsResponseStore.value.serviceRequests as req (req.service_request_id)}
 					{#if isSelected(req, $selectedServiceRequestStore)}
@@ -139,6 +172,6 @@
 				{/each}
 			{/if}
 		</MapComponent>
-		<CreateServiceRequestButton />
+		<CreateServiceRequestButton projectSlug={$selectedProjectSlugStore} />
 	</div>
 </RequestListMap>
