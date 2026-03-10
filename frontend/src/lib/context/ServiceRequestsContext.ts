@@ -58,6 +58,7 @@ function pendingToServiceRequest(entry: PendingRequest): ServiceRequest {
 export function createServiceRequestsContext(
 	libreService: Libre311Service,
 	page: Readable<Page<Record<string, string>, string | null>>,
+	projects: Readable<Project[]>,
 	offlineQueue?: OfflineQueue,
 	syncSignal?: Readable<number>,
 	defaultParams: FilteredServiceRequestsParams = {}
@@ -66,6 +67,12 @@ export function createServiceRequestsContext(
 	const selectedServiceRequest = writable<Maybe<ServiceRequest>>();
 	const serviceRequestsResponse = writable<AsyncResult<ServiceRequestsResponse>>(ASYNC_IN_PROGRESS);
 	const selectedProjectSlug = writable<Maybe<string>>();
+
+	function resolveProjectId(slug: string | undefined): number | undefined {
+		if (!slug) return undefined;
+		const allProjects = get(projects);
+		return allProjects.find((p) => p.slug === slug)?.id;
+	}
 
 	// state updates to be done when a user navigates to /issues/map/[issue_id]
 	async function handleIssueDetailsPageNav(page: Page<Record<string, string>, string | null>) {
@@ -127,12 +134,26 @@ export function createServiceRequestsContext(
 		} else {
 			selectedProjectSlug.set(undefined);
 		}
+
+		// Wait for projects to be loaded if we are in project mode
+		if (page.params.project_slug && get(projects).length === 0) {
+			return;
+		}
+
 		try {
 			selectedServiceRequest.set(undefined);
 			const updatedParams = {
 				...FilteredServiceRequestsParamsMapper.toRequestParams(page.url.searchParams),
 				...defaultParams
 			};
+
+			if (page.params.project_slug && !Array.isArray(updatedParams)) {
+				const projectId = resolveProjectId(page.params.project_slug);
+				if (projectId) {
+					updatedParams.project_id = projectId;
+				}
+			}
+
 			const res = await libreService.getServiceRequests(updatedParams);
 
 			// Prepend pending offline requests
@@ -159,6 +180,13 @@ export function createServiceRequestsContext(
 		}
 	});
 
+	projects.subscribe(() => {
+		const currentPage = get(page);
+		if (currentPage.params.project_slug) {
+			handleMapPageNav(currentPage);
+		}
+	});
+
 	// Auto-refresh after background sync completes
 	if (syncSignal) {
 		let initial = true;
@@ -182,6 +210,14 @@ export function createServiceRequestsContext(
 			...FilteredServiceRequestsParamsMapper.toRequestParams(currentPage.url.searchParams),
 			...defaultParams
 		};
+
+		if (currentPage.params.project_slug && !Array.isArray(updatedParams)) {
+			const projectId = resolveProjectId(currentPage.params.project_slug);
+			if (projectId) {
+				updatedParams.project_id = projectId;
+			}
+		}
+
 		try {
 			const res = await libreService.getServiceRequests(updatedParams);
 

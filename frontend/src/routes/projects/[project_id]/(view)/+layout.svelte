@@ -18,13 +18,15 @@
 	import { columns } from '../../../issues/table/table'; // Adjusted path for (view) group
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import { pencilIcon } from '$lib/components/Svg/outline/pencilIcon';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 
 	const libre311 = useLibre311Service();
+	const { projects } = useLibre311Context();
 
 	let project: Project | undefined;
 
 	// Create a new ServiceRequestsContext for this project view
-	const ctx = createServiceRequestsContext(libre311, page, undefined, undefined, {
+	const ctx = createServiceRequestsContext(libre311, page, projects, undefined, undefined, {
 		project_id: Number($page.params.project_id)
 	});
 	const serviceRequestsRes = ctx.serviceRequestsResponse;

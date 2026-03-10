@@ -55,6 +55,7 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.server.types.files.StreamedFile;
 import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 
 import java.util.function.Function;
 import jakarta.annotation.Nullable;
@@ -240,6 +241,7 @@ public class ServiceRequestService {
         removalSuggestionRepository.save(suggestion);
     }
 
+    @Transactional
     public List<ServiceRequestRemovalSuggestionDTO> getRemovalSuggestions(String jurisdictionId, Long serviceRequestId) {
         return removalSuggestionRepository.findAllByJurisdictionIdAndServiceRequestId(jurisdictionId, serviceRequestId)
                 .stream().map(this::convertToSuggestionDTO).toList();
@@ -483,6 +485,7 @@ public class ServiceRequestService {
         return serviceRequestDTO;
     }
 
+    @Transactional
     public Page<ServiceRequestDTO> findAll(GetServiceRequestsDTO requestDTO, String jurisdictionId,
             @Nullable String authorization) {
 
@@ -544,6 +547,7 @@ public class ServiceRequestService {
         return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, closedRequestCutoffDate, pageable);
     }
 
+    @Transactional
     public ServiceRequestDTO getServiceRequest(Long serviceRequestId, String jurisdictionId) {
         return findServiceRequest(serviceRequestId, jurisdictionId)
                 .map(ServiceRequestService::convertToDTO)
@@ -554,6 +558,7 @@ public class ServiceRequestService {
         return serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
     }
 
+    @Transactional
     public StreamedFile getAllServiceRequests(GetServiceRequestsDTO requestDTO, String jurisdictionId) throws MalformedURLException {
         // CSV export should not filter closed requests - export all data
         List<DownloadServiceRequestDTO> downloadServiceRequestDTOS = getServiceRequestsUnfiltered(requestDTO, jurisdictionId).stream()

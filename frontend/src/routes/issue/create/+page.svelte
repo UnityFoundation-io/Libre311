@@ -26,7 +26,7 @@
 	import { useProjectsStore } from '$lib/context/ServiceRequestsContext';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
-	import { Button } from 'stwui';
+	import { Button, Alert } from 'stwui';
 	import { page } from '$app/stores';
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
@@ -43,30 +43,27 @@
 	const jurisdictionStore = useJurisdiction();
 
 	let params: Partial<CreateServiceRequestUIParams> = {};
-	let project: Project | undefined;
+	$: project = $projectsStore.find((p) => p.slug === $page.url.searchParams.get('project_slug'));
 
-	$: {
-		const projectSlug = $page.url.searchParams.get('project_slug');
-		if (projectSlug && !params.project_slug) {
-			params.project_slug = projectSlug;
-			fetchProject(projectSlug);
-		}
-	}
-
-	async function fetchProject(slug: string) {
-		try {
-			project = await libre311.getProject(slug);
-			if (project) {
-				params.project_id = project.id;
-				const bounds = L.latLngBounds(project.bounds as L.LatLngTuple[]);
-				centerPos = [bounds.getCenter().lat, bounds.getCenter().lng];
-			}
-		} catch (e) {
-			console.error('Failed to fetch project', e);
-		}
+	$: if (project) {
+		params.project_id = project.id;
+		params.project_slug = project.slug;
 	}
 
 	let centerPos: PointTuple = getStartingCenterPos();
+
+	$: mapBounds = createCreationMapBounds($projectsStore, project);
+
+	function createCreationMapBounds(
+		projects: Project[],
+		selectedProject: Project | undefined
+	): L.LatLngTuple[] {
+		if (selectedProject) {
+			return selectedProject.bounds as L.LatLngTuple[];
+		}
+
+		return libre311.getJurisdictionConfig().bounds;
+	}
 
 	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
 
@@ -130,7 +127,13 @@
 </script>
 
 <CreateServiceRequestLayout {step}>
-	<div slot="side-bar" class="mx-4 h-full">
+	<div slot="side-bar" class="h-full">
+		{#if project}
+			<div class="mb-4 border-b-2 border-info bg-info/10 px-4 py-2">
+				<div class="text-sm font-bold text-info">Project Mode: {project.name}</div>
+				<div class="text-xs text-info/80">Submitting a request for this specific project.</div>
+			</div>
+		{/if}
 		<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
 		{#if step === CreateServiceRequestSteps.LOCATION}
 			<SelectLocation on:confirmLocation={confirmLocation} />
@@ -147,6 +150,7 @@
 			keyboardPanDelta={KEYBOARD_PAN_DELTA_FINE}
 			controlFactories={[mapCenterControlFactory]}
 			disabled={step !== 0}
+			bounds={mapBounds}
 			locateOpts={{ setView: true, enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
 		>

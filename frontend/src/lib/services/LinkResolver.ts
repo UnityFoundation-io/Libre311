@@ -3,6 +3,7 @@ import type { Pagination, ServiceRequestId } from './Libre311/Libre311';
 
 export class LinkResolver {
 	private createIssueLink(basePath: string, url: URL): string {
+
 		if (!url.pathname.startsWith('/issues' || url.searchParams.size === 0)) return basePath;
 		return basePath + '?' + url.searchParams.toString();
 	}
@@ -44,6 +45,10 @@ export class LinkResolver {
 	}
 
 	issuesMap(url: URL) {
+		if (window.location.search.includes("project_slug")) {
+			return this.createIssueLink('/issues/map/project/' + URL.parse(window.location.toString())?.searchParams.get("project_slug"),url);
+
+		}
 		return this.createIssueLink('/issues/map', url);
 	}
 

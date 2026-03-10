@@ -13,6 +13,15 @@
 	onMount(() => {
 		marker = L.marker(latLng, options).addTo(map);
 		marker.addEventListener('click', (e) => dispatch('click', e));
+
+		const element = marker.getElement();
+		if (element) {
+			element.addEventListener('focus', () => {
+				if (marker) {
+					map.setView(marker.getLatLng(), map.getZoom());
+				}
+			});
+		}
 	});
 
 	onDestroy(() => {

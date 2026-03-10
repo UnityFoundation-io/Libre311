@@ -43,12 +43,15 @@
 	const projectsStore = useProjectsStore();
 	const selectedProjectSlugStore = useSelectedProjectSlugStore();
 
+	import { getContext } from 'svelte';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { mediaQuery } from '$lib/components/media';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+	import { Alert } from 'stwui';
 
 	const jurisdiction = useJurisdiction();
 
+	$: project = $projectsStore.find((p) => p.slug === $selectedProjectSlugStore);
 	$: projectBounds = createProjectBounds($projectsStore, $selectedProjectSlugStore);
 
 	$: mapBounds =
@@ -56,15 +59,20 @@
 			? projectBounds
 			: createMapBounds($serviceRequestsResponseStore);
 
+	$: if ($selectedProjectSlugStore && projectBounds) {
+		// We want to set min zoom after initial fit
+		// This is tricky because MapComponent handles fitBounds
+		// For now we'll just use a reasonable default or let Leaflet handle it
+	}
+
 	function createProjectBounds(
 		projects: Project[],
-		projectSlug: Maybe<string>
-	): L.LatLngBounds | undefined {
-		if (!projectSlug) return undefined;
-		const project = projects.find((p) => p.slug === projectSlug);
+		project_slug: Maybe<string>
+	): LatLngTuple[] | undefined {
+		if (!project_slug) return undefined;
+		const project = projects.find((p) => p.slug === project_slug);
 		if (!project) return undefined;
-		// project.bounds is [lat, lng][]
-		return L.latLngBounds(project.bounds as L.LatLngTuple[]);
+		return project.bounds as LatLngTuple[];
 	}
 
 	// Compute flyTo target when a service request is selected
@@ -86,19 +94,17 @@
 		return serviceRequest.service_request_id === selectedServiceRequest?.service_request_id;
 	}
 
-	function createMapBounds(res: AsyncResult<ServiceRequestsResponse>) {
+	function createMapBounds(res: AsyncResult<ServiceRequestsResponse>): LatLngTuple[] {
 		if (
 			res.type !== 'success' ||
 			(res.type === 'success' && res.value.serviceRequests.length === 0)
 		) {
-			return L.latLngBounds(libre311.getJurisdictionConfig().bounds);
+			return libre311.getJurisdictionConfig().bounds;
 		}
 		// Note: lat/long are strings from the API, convert to numbers for Leaflet
-		let latLngs: LatLngTuple[] = res.value.serviceRequests.map((req) => [
-			Number(req.lat),
-			Number(req.long)
-		]);
-		return L.latLngBounds(latLngs);
+		return res.value.serviceRequests.map(
+			(req) => [Number(req.lat), Number(req.long)] as LatLngTuple
+		);
 	}
 
 	function handleMarkerClick(serviceRequest: ServiceRequest) {
@@ -137,6 +143,12 @@
 
 <RequestListMap {listHidden} {mapHidden}>
 	<div slot="list-slot">
+		{#if project}
+			<div class="border-b-2 border-info bg-info/10 px-4 py-2">
+				<div class="text-sm font-bold text-info">Project Mode: {project.name}</div>
+				<div class="text-xs text-info/80">Viewing issues for this specific project.</div>
+			</div>
+		{/if}
 		<Breakpoint>
 			<div slot="is-mobile-or-tablet" class="my-4 flex justify-center">
 				<MapListToggle toggled={toggleState} on:change={(e) => handleToggle(e.detail)} />
