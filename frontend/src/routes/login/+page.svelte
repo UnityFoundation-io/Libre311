@@ -4,8 +4,9 @@
 	import type { EventDispatchTypeMap } from '$lib/components/Login/shared';
 	import LoginMobile from '$lib/components/Login/LoginMobile.svelte';
 	import { createInput, emailValidator, passwordValidator } from '$lib/utils/validation';
-	import { useUnityAuthService } from '$lib/context/Libre311Context';
+	import { useLibre311Context, useUnityAuthService } from '$lib/context/Libre311Context';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import {
 		checkHasMessage,
 		isHateoasErrorResponse
@@ -13,6 +14,7 @@
 	import { isAxiosError } from 'axios';
 
 	const authService = useUnityAuthService();
+	const linkResolver = useLibre311Context().linkResolver;
 
 	let emailInput = createInput('');
 	let passwordInput = createInput('');
@@ -40,7 +42,7 @@
 			try {
 				await authService.login(emailInput.value, passwordInput.value);
 
-				goto('/issues/table');
+				goto(linkResolver.issuesTable($page.url));
 			} catch (error: unknown) {
 				if (isAxiosError(error) && isHateoasErrorResponse(error.response?.data)) {
 					const hateoasError = error.response.data;

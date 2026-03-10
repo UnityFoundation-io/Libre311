@@ -10,8 +10,10 @@
 	import { tableIcon } from './Svg/outline/tableIcon';
 	import { plusCircleIcon } from './Svg/outline/plusCircleIcon';
 	import { user } from './Svg/outline/user';
+	import {xMark} from './Svg/outline/XMark.svelte';
 	import AuthGuard from './AuthGuard.svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+	import { useSelectedProjectSlugStore } from '$lib/context/ServiceRequestsContext';
 
 	export let open: boolean;
 
@@ -19,6 +21,7 @@
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const jurisdiction = useJurisdiction();
+	const selectedProjectSlug = useSelectedProjectSlugStore();
 </script>
 
 <Portal>
@@ -36,7 +39,7 @@
 					<Menu.Item
 						key="create"
 						label="Create Service Request"
-						href="/issue/create"
+						href={linkResolver.issueCreate($page.url)}
 						on:click={handleClose}
 					>
 						<Menu.Item.Icon slot="icon" data={plusCircleIcon} fill="none" />
@@ -65,6 +68,16 @@
 					>
 						<Menu.Item.Icon slot="icon" data={mapIcon} fill="none" />
 					</Menu.Item>
+					{#if $selectedProjectSlug}
+						<Menu.Item
+							key="exit-project"
+							label="Exit Project Mode"
+							href="/issues/map"
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={xMark} fill="none" />
+						</Menu.Item>
+					{/if}
 					<AuthGuard
 						requires={[
 							'LIBRE311_ADMIN_EDIT-SYSTEM',

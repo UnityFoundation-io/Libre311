@@ -23,6 +23,7 @@
 	const alert = useLibre311Context().alert;
 	const { refreshSelectedServiceRequest } = useServiceRequestsContext();
 	const jurisdiction = useJurisdiction();
+	const linkResolver = useLibre311Context().linkResolver;
 
 	export let serviceRequest: ServiceRequest;
 	export let back: string;
@@ -69,7 +70,7 @@
 				title: 'Success',
 				description: 'Service request has been deleted'
 			});
-			goto('/issues/table');
+			goto(linkResolver.issuesTable($page.url));
 		} catch (error) {
 			alertError(error);
 		} finally {

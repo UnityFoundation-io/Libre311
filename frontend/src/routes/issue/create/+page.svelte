@@ -129,11 +129,12 @@
 <CreateServiceRequestLayout {step}>
 	<div slot="side-bar" class="h-full">
 		{#if project}
-			<div class="mb-4 border-b-2 border-info bg-info/10 px-4 py-2">
-				<div class="text-sm font-bold text-info">Project Mode: {project.name}</div>
-				<div class="text-xs text-info/80">Submitting a request for this specific project.</div>
+			<div class="absolute w-full mb-4 border-b-2 border-info bg-info/10 px-4 py-2">
+				<div class="text-sm font-bold">Project Mode: {project.name}</div>
+				<div class="text-xs">Submitting a request for this specific project.</div>
 			</div>
 		{/if}
+        <div class="mx-4 pt-16 pb-2 h-full">
 		<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
 		{#if step === CreateServiceRequestSteps.LOCATION}
 			<SelectLocation on:confirmLocation={confirmLocation} />
@@ -142,6 +143,7 @@
 		{:else}
 			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
 		{/if}
+        </div>
 	</div>
 	<div slot="main-content" class="relative h-full">
 		<MapComponent
@@ -157,7 +159,7 @@
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
 			{#if $jurisdictionStore.project_feature && $jurisdictionStore.project_feature !== 'DISABLED'}
 				{#each $projectsStore.filter((p) => p.status === 'OPEN') as project (project.id)}
-					<ProjectBoundary {project} />
+					<ProjectBoundary {project} interactive={false} />
 				{/each}
 			{/if}
 			<MapMarker latLng={centerPos} options={{ icon, keyboard: false }} />

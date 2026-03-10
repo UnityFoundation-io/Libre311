@@ -76,7 +76,12 @@ export function createServiceRequestsContext(
 
 	// state updates to be done when a user navigates to /issues/map/[issue_id]
 	async function handleIssueDetailsPageNav(page: Page<Record<string, string>, string | null>) {
-		selectedProjectSlug.set(undefined);
+		const projectSlug = page.url.searchParams.get('project_slug');
+		if (projectSlug) {
+			selectedProjectSlug.set(projectSlug);
+		} else {
+			selectedProjectSlug.set(undefined);
+		}
 		const serviceRequestsStoreVal = get(serviceRequestsResponse);
 		// data has already been loaded, update our selectedServiceRequest to the value
 		if (serviceRequestsStoreVal.type === 'success') {
@@ -129,14 +134,15 @@ export function createServiceRequestsContext(
 
 	// state updates for when  user navigates to /issues/map
 	async function handleMapPageNav(page: Page<Record<string, string>, string | null>) {
-		if (page.params.project_slug) {
-			selectedProjectSlug.set(page.params.project_slug);
+		const projectSlug = page.params.project_slug || page.url.searchParams.get('project_slug');
+		if (projectSlug) {
+			selectedProjectSlug.set(projectSlug);
 		} else {
 			selectedProjectSlug.set(undefined);
 		}
 
 		// Wait for projects to be loaded if we are in project mode
-		if (page.params.project_slug && get(projects).length === 0) {
+		if (projectSlug && get(projects).length === 0) {
 			return;
 		}
 
@@ -147,8 +153,8 @@ export function createServiceRequestsContext(
 				...defaultParams
 			};
 
-			if (page.params.project_slug && !Array.isArray(updatedParams)) {
-				const projectId = resolveProjectId(page.params.project_slug);
+			if (projectSlug && !Array.isArray(updatedParams)) {
+				const projectId = resolveProjectId(projectSlug);
 				if (projectId) {
 					updatedParams.project_id = projectId;
 				}
@@ -182,7 +188,9 @@ export function createServiceRequestsContext(
 
 	projects.subscribe(() => {
 		const currentPage = get(page);
-		if (currentPage.params.project_slug) {
+		const projectSlug =
+			currentPage.params.project_slug || currentPage.url.searchParams.get('project_slug');
+		if (projectSlug) {
 			handleMapPageNav(currentPage);
 		}
 	});
@@ -206,13 +214,15 @@ export function createServiceRequestsContext(
 
 	async function refresh() {
 		const currentPage = get(page);
+		const projectSlug =
+			currentPage.params.project_slug || currentPage.url.searchParams.get('project_slug');
 		const updatedParams = {
 			...FilteredServiceRequestsParamsMapper.toRequestParams(currentPage.url.searchParams),
 			...defaultParams
 		};
 
-		if (currentPage.params.project_slug && !Array.isArray(updatedParams)) {
-			const projectId = resolveProjectId(currentPage.params.project_slug);
+		if (projectSlug && !Array.isArray(updatedParams)) {
+			const projectId = resolveProjectId(projectSlug);
 			if (projectId) {
 				updatedParams.project_id = projectId;
 			}
