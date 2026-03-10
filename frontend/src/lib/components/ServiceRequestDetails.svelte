@@ -78,16 +78,16 @@
 					<div class="mb-2">
 						<strong class="text-base">{messages['project']['title'] ?? 'Project'}</strong>
 						<p class="text-sm">
-							{#if serviceRequest.project_slug}
-								<a
-									href={`/issues/map/project/${serviceRequest.project_slug}`}
-									class="text-primary hover:underline"
-								>
-									{serviceRequest.project_name}
-								</a>
-							{:else}
+							<!--{#if serviceRequest.project_slug}-->
+							<!--	<a-->
+							<!--		href={`/issues/map/project/${serviceRequest.project_slug}`}-->
+							<!--		class="text-primary hover:underline"-->
+							<!--	>-->
+							<!--		{serviceRequest.project_name}-->
+							<!--	</a>-->
+							<!--{:else}-->
 								{serviceRequest.project_name}
-							{/if}
+							<!--{/if}-->
 						</p>
 					</div>
 				{/if}
