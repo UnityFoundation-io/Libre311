@@ -35,6 +35,9 @@ public class Project {
     @NotNull
     private String name;
 
+    @Column(insertable = false, updatable = false)
+    private String slug;
+
     @Nullable
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -81,6 +84,14 @@ public class Project {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
     @Nullable

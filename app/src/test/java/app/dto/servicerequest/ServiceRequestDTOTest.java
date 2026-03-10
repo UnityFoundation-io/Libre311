@@ -46,5 +46,7 @@ class ServiceRequestDTOTest {
 
         assertEquals(200L, dto.getId());
         assertEquals(100L, dto.getProjectId());
+        assertEquals("Test Project", dto.getProjectName());
+        assertEquals("test-project", dto.getProjectSlug());
     }
 }

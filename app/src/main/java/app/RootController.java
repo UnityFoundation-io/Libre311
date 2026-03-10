@@ -16,6 +16,7 @@ package app;
 
 import app.dto.discovery.DiscoveryDTO;
 import app.dto.jurisdiction.JurisdictionDTO;
+import app.dto.project.ProjectDTO;
 import app.dto.service.ServiceDTO;
 import app.dto.service.ServiceList;
 import app.dto.servicerequest.*;
@@ -23,6 +24,7 @@ import app.dto.servicedefinition.ServiceDefinitionDTO;
 import app.security.RequiresPermissions;
 import app.service.discovery.DiscoveryEndpointService;
 import app.service.jurisdiction.JurisdictionService;
+import app.service.project.ProjectService;
 import app.service.service.ServiceService;
 import app.service.servicerequest.ServiceRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -64,13 +66,16 @@ public class RootController {
     private final ServiceRequestService serviceRequestService;
     private final DiscoveryEndpointService discoveryEndpointService;
     private final JurisdictionService jurisdictionService;
+    private final ProjectService projectService;
 
     public RootController(ServiceService serviceService, ServiceRequestService serviceRequestService,
-                          DiscoveryEndpointService discoveryEndpointService, JurisdictionService jurisdictionService) {
+                          DiscoveryEndpointService discoveryEndpointService, JurisdictionService jurisdictionService,
+                          ProjectService projectService) {
         this.serviceService = serviceService;
         this.serviceRequestService = serviceRequestService;
         this.jurisdictionService = jurisdictionService;
         this.discoveryEndpointService = discoveryEndpointService;
+        this.projectService = projectService;
     }
 
     @Get(uris = {"/discovery", "/discovery.json"})
@@ -258,6 +263,22 @@ public class RootController {
     public HttpResponse<?> deleteServiceRequest(@PathVariable("service_request_id") Long serviceRequestId, @Nullable @QueryValue("jurisdiction_id") String jurisdictionId){
         serviceRequestService.delete(serviceRequestId, jurisdictionId);
         return HttpResponse.status(HttpStatus.NO_CONTENT);
+    }
+
+    @Get(uris = {"/projects{?jurisdiction_id}", "/projects.json{?jurisdiction_id}"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public HttpResponse<List<ProjectDTO>> getProjectsJson(@Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return HttpResponse.ok(projectService.getOpenProjects(jurisdiction_id));
+    }
+
+    @Get(uris = {"/projects/{slug}{?jurisdiction_id}", "/projects/{slug}.json{?jurisdiction_id}"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public HttpResponse<ProjectDTO> getProjectJson(@PathVariable("slug") String slug, @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+        return projectService.getProjectBySlug(slug, jurisdiction_id)
+                .map(HttpResponse::ok)
+                .orElse(HttpResponse.notFound());
     }
 
     @Get(value =  "/config")

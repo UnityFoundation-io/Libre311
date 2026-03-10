@@ -29,7 +29,7 @@ import reactor.core.scheduler.Schedulers;
 import java.util.List;
 import java.util.Map;
 
-@Filter(value = {"/api/services/**", "/api/requests/**", "/api/jurisdiction-admin/**"})
+@Filter(value = {"/api/services/**", "/api/requests/**", "/api/projects/**", "/api/jurisdiction-admin/**"})
 public class JurisdictionValidationFilter implements HttpServerFilter {
 
     private static final Map<String, String> BAD_REQUEST_ERROR = Map.of(

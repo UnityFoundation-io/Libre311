@@ -16,6 +16,8 @@
 	export let bounds: L.LatLngBoundsExpression | undefined = undefined;
 	export let center: L.LatLngExpression | undefined = undefined;
 	export let zoom: number | undefined = undefined;
+	export let minZoom: number | undefined = undefined;
+	export let maxBounds: L.LatLngBoundsExpression | undefined = undefined;
 	export let disabled: boolean = false;
 	export let controlFactories: Array<ControlFactory> = [];
 	export let controlOps: L.ControlOptions = { position: 'topleft' };
@@ -34,10 +36,9 @@
 
 	onMount(() => {
 		map = L.map(mapElement, { keyboardPanDelta });
-		map.addEventListener('moveend', () => {
+		map.on('moveend', () => {
 			dispatch('boundsChanged', map.getBounds());
 		});
-		map.addEventListener('drag', () => dispatch('boundsChanged', map.getBounds()));
 		map.on('locationfound', function (e) {
 			map.setView(e.latlng, 16);
 		});
@@ -81,23 +82,68 @@
 		}
 	}
 
-	// Handle map view initialization and updates
-	// flyToTarget takes precedence when set (e.g., when a marker is selected)
+	let lastBoundsStr: string | undefined = undefined;
+	let lastCenterStr: string | undefined = undefined;
+	let lastZoom: number | undefined = undefined;
+	let lastMaxBoundsStr: string | undefined = undefined;
+	let locateApplied = false;
+
+	$: if (map && minZoom !== undefined) {
+		map.setMinZoom(minZoom);
+	}
+
 	$: if (map) {
-		if (flyToTarget) {
+		const currentMaxBoundsStr = maxBounds
+			? Array.isArray(maxBounds)
+				? JSON.stringify(maxBounds)
+				: (maxBounds as L.LatLngBounds).toBBoxString()
+			: undefined;
+
+		if (currentMaxBoundsStr !== lastMaxBoundsStr) {
+			if (maxBounds) {
+				map.setMaxBounds(maxBounds);
+			} else {
+				// @ts-expect-error Leaflet types don't officially support null but it works to clear bounds
+				map.setMaxBounds(null);
+			}
+			lastMaxBoundsStr = currentMaxBoundsStr;
+		}
+	}
+
+	$: if (map && flyToTarget) {
+		const currentFlyToStr = JSON.stringify(flyToTarget);
+		if (currentFlyToStr !== lastFlyToStr) {
 			// flyTo requires an existing view; use setView for initial positioning
 			if (map.getZoom() === undefined) {
 				map.setView(flyToTarget.latLng, flyToTarget.zoom);
 			} else {
 				map.flyTo(flyToTarget.latLng, flyToTarget.zoom, flyToOptions);
 			}
-		} else if (bounds) {
-			map.fitBounds(bounds);
-		} else if (center && zoom) {
-			map.setView(center, zoom);
-		} else if (locateOpts) {
-			map.locate(locateOpts);
+			lastFlyToStr = currentFlyToStr;
 		}
+	}
+	let lastFlyToStr: string | undefined = undefined;
+
+	$: if (map && bounds && !flyToTarget) {
+		const currentBoundsStr = JSON.stringify(bounds);
+		if (currentBoundsStr !== lastBoundsStr) {
+			map.fitBounds(bounds);
+			lastBoundsStr = currentBoundsStr;
+		}
+	}
+
+	$: if (map && center && zoom && !bounds && !flyToTarget) {
+		const currentCenterStr = JSON.stringify(center);
+		if (currentCenterStr !== lastCenterStr || zoom !== lastZoom) {
+			map.setView(center, zoom);
+			lastCenterStr = currentCenterStr;
+			lastZoom = zoom;
+		}
+	}
+
+	$: if (map && locateOpts && !locateApplied && !bounds && !center && !flyToTarget) {
+		map.locate(locateOpts);
+		locateApplied = true;
 	}
 </script>
 

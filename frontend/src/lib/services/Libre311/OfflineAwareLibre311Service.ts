@@ -187,8 +187,28 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 		return this.wrapped.deleteRemovalSuggestion(params);
 	}
 
-	getProjects(): Promise<Project[]> {
-		return this.wrapped.getProjects();
+	private readonly PROJECTS_CACHE_KEY = 'libre311_projects_cache';
+
+	async getProjects(): Promise<Project[]> {
+		if (this.networkStatus.online) {
+			try {
+				const res = await this.wrapped.getProjects();
+				localStorage.setItem(this.PROJECTS_CACHE_KEY, JSON.stringify(res));
+				return res;
+			} catch (e) {
+				console.error('Failed to fetch projects, falling back to cache', e);
+			}
+		}
+		const cached = localStorage.getItem(this.PROJECTS_CACHE_KEY);
+		return cached ? JSON.parse(cached) : [];
+	}
+
+	getProject(slug: string): Promise<Project> {
+		return this.wrapped.getProject(slug);
+	}
+
+	getProjectsAdmin(): Promise<Project[]> {
+		return this.wrapped.getProjectsAdmin();
 	}
 
 	createProject(params: CreateProjectParams): Promise<Project> {

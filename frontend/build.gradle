@@ -36,12 +36,10 @@ assemble.dependsOn 'npm_run_build'
 
 tasks.register('npmFormat', NpmTask) {
     args = ['run', 'format']
-//    dependsOn 'npmInstall'
 }
 
 tasks.register('npmLint', NpmTask) {
     args = ['run', 'lint']
-    dependsOn 'npmFormat'
 }
 
 tasks.register('npmCheck', NpmTask) {

@@ -3,6 +3,7 @@
 	import Bars3 from '$lib/components/Svg/Bars3.svelte';
 	import { type Libre311ContextProviderProps } from '$lib/context/Libre311Context';
 	import Libre311ContextProvider from '$lib/context/Libre311ContextProvider.svelte';
+	import ServiceRequestsContextProvider from '$lib/context/ServiceRequestsContextProvider.svelte';
 	import { createJurisdictionContext } from '$lib/context/JurisdictionContext';
 	import SomethingWentWrong from '$lib/components/SomethingWentWrong.svelte';
 	import '../../node_modules/leaflet-geosearch/dist/geosearch.css';
@@ -134,12 +135,14 @@
 
 			<User />
 		</header>
-		<main>
-			<MenuDrawer {open} handleClose={closeDrawer} />
-			<section id="slot">
-				<slot />
-			</section>
-		</main>
+		<ServiceRequestsContextProvider>
+			<main>
+				<MenuDrawer {open} handleClose={closeDrawer} />
+				<section id="slot">
+					<slot />
+				</section>
+			</main>
+		</ServiceRequestsContextProvider>
 	</Libre311ContextProvider>
 {:else if contextProviderProps.type === 'inProgress'}
 	<SplashLoading />

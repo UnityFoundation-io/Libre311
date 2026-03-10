@@ -4,7 +4,8 @@ import {
 	type Libre311Service,
 	type ServiceRequest,
 	type ServiceRequestsResponse,
-	type FilteredServiceRequestsParams
+	type FilteredServiceRequestsParams,
+	type Project
 } from '$lib/services/Libre311/Libre311';
 import {
 	asAsyncFailure,
@@ -18,12 +19,14 @@ import type { Page } from '@sveltejs/kit';
 import { getContext, setContext } from 'svelte';
 import { writable, type Readable, get } from 'svelte/store';
 import type { OfflineQueue, PendingRequest } from '$lib/services/OfflineQueue';
+import { useLibre311Context } from './Libre311Context';
 
 const key = Symbol();
 
 export type ServiceRequestsContext = {
 	selectedServiceRequest: Readable<Maybe<ServiceRequest>>;
 	serviceRequestsResponse: Readable<AsyncResult<ServiceRequestsResponse>>;
+	selectedProjectSlug: Readable<Maybe<string>>;
 	applyServiceRequestParams(params: FilteredServiceRequestsParams, url: URL): void;
 	refreshSelectedServiceRequest(updatedServiceRequest: ServiceRequest): void;
 	refresh(): Promise<void>;
@@ -55,6 +58,7 @@ function pendingToServiceRequest(entry: PendingRequest): ServiceRequest {
 export function createServiceRequestsContext(
 	libreService: Libre311Service,
 	page: Readable<Page<Record<string, string>, string | null>>,
+	projects: Readable<Project[]>,
 	offlineQueue?: OfflineQueue,
 	syncSignal?: Readable<number>,
 	defaultParams: FilteredServiceRequestsParams = {}
@@ -62,9 +66,22 @@ export function createServiceRequestsContext(
 	// consider type as Maybe<AsyncRequest<ServiceRequest>> that would cover all possible states
 	const selectedServiceRequest = writable<Maybe<ServiceRequest>>();
 	const serviceRequestsResponse = writable<AsyncResult<ServiceRequestsResponse>>(ASYNC_IN_PROGRESS);
+	const selectedProjectSlug = writable<Maybe<string>>();
+
+	function resolveProjectId(slug: string | undefined): number | undefined {
+		if (!slug) return undefined;
+		const allProjects = get(projects);
+		return allProjects.find((p) => p.slug === slug)?.id;
+	}
 
 	// state updates to be done when a user navigates to /issues/map/[issue_id]
 	async function handleIssueDetailsPageNav(page: Page<Record<string, string>, string | null>) {
+		const projectSlug = page.url.searchParams.get('project_slug');
+		if (projectSlug) {
+			selectedProjectSlug.set(projectSlug);
+		} else {
+			selectedProjectSlug.set(undefined);
+		}
 		const serviceRequestsStoreVal = get(serviceRequestsResponse);
 		// data has already been loaded, update our selectedServiceRequest to the value
 		if (serviceRequestsStoreVal.type === 'success') {
@@ -117,12 +134,32 @@ export function createServiceRequestsContext(
 
 	// state updates for when  user navigates to /issues/map
 	async function handleMapPageNav(page: Page<Record<string, string>, string | null>) {
+		const projectSlug = page.params.project_slug || page.url.searchParams.get('project_slug');
+		if (projectSlug) {
+			selectedProjectSlug.set(projectSlug);
+		} else {
+			selectedProjectSlug.set(undefined);
+		}
+
+		// Wait for projects to be loaded if we are in project mode
+		if (projectSlug && get(projects).length === 0) {
+			return;
+		}
+
 		try {
 			selectedServiceRequest.set(undefined);
 			const updatedParams = {
 				...FilteredServiceRequestsParamsMapper.toRequestParams(page.url.searchParams),
 				...defaultParams
 			};
+
+			if (projectSlug && !Array.isArray(updatedParams)) {
+				const projectId = resolveProjectId(projectSlug);
+				if (projectId) {
+					updatedParams.project_id = projectId;
+				}
+			}
+
 			const res = await libreService.getServiceRequests(updatedParams);
 
 			// Prepend pending offline requests
@@ -149,6 +186,15 @@ export function createServiceRequestsContext(
 		}
 	});
 
+	projects.subscribe(() => {
+		const currentPage = get(page);
+		const projectSlug =
+			currentPage.params.project_slug || currentPage.url.searchParams.get('project_slug');
+		if (projectSlug) {
+			handleMapPageNav(currentPage);
+		}
+	});
+
 	// Auto-refresh after background sync completes
 	if (syncSignal) {
 		let initial = true;
@@ -168,10 +214,20 @@ export function createServiceRequestsContext(
 
 	async function refresh() {
 		const currentPage = get(page);
+		const projectSlug =
+			currentPage.params.project_slug || currentPage.url.searchParams.get('project_slug');
 		const updatedParams = {
 			...FilteredServiceRequestsParamsMapper.toRequestParams(currentPage.url.searchParams),
 			...defaultParams
 		};
+
+		if (projectSlug && !Array.isArray(updatedParams)) {
+			const projectId = resolveProjectId(projectSlug);
+			if (projectId) {
+				updatedParams.project_id = projectId;
+			}
+		}
+
 		try {
 			const res = await libreService.getServiceRequests(updatedParams);
 
@@ -210,6 +266,7 @@ export function createServiceRequestsContext(
 	const ctx: ServiceRequestsContext = {
 		selectedServiceRequest,
 		serviceRequestsResponse,
+		selectedProjectSlug,
 		applyServiceRequestParams,
 		refreshSelectedServiceRequest,
 		refresh
@@ -230,4 +287,12 @@ export function useSelectedServiceRequestStore(): ServiceRequestsContext['select
 
 export function useServiceRequestsResponseStore(): ServiceRequestsContext['serviceRequestsResponse'] {
 	return useServiceRequestsContext().serviceRequestsResponse;
+}
+
+export function useProjectsStore(): Readable<Project[]> {
+	return useLibre311Context().projects;
+}
+
+export function useSelectedProjectSlugStore(): ServiceRequestsContext['selectedProjectSlug'] {
+	return useServiceRequestsContext().selectedProjectSlug;
 }

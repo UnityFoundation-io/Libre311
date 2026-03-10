@@ -28,7 +28,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findAllByJurisdictionId(String jurisdictionId);
 
+    @Query(value = "SELECT * FROM open_projects WHERE jurisdiction_id = :jurisdictionId", nativeQuery = true)
+    List<Project> findOpenProjectsByJurisdictionId(String jurisdictionId);
+
     Optional<Project> findByIdAndJurisdictionId(Long id, String jurisdictionId);
+
+    Optional<Project> findByNameAndJurisdictionId(String name, String jurisdictionId);
+
+    Optional<Project> findBySlugAndJurisdictionId(String slug, String jurisdictionId);
 
     @Query("FROM Project p WHERE p.jurisdiction.id = :jurisdictionId AND p.startDate <= :time AND p.endDate >= :time AND intersects(p.boundary, :location) = true")
     Optional<Project> findProjectForLocationAndTime(String jurisdictionId, Point location, Instant time);

@@ -23,6 +23,7 @@ import app.dto.servicerequest.SensitiveServiceRequestDTO;
 import app.dto.servicerequest.ServiceRequestDTO;
 import app.model.jurisdiction.Jurisdiction;
 import app.model.jurisdiction.JurisdictionRepository;
+import app.model.project.ProjectRepository;
 
 import app.model.jurisdiction.RemoteHost;
 import app.model.service.AttributeDataType;
@@ -102,6 +103,9 @@ public class RootControllerTest {
 
     @Inject
     ServiceRequestRepository serviceRequestRepository;
+
+    @Inject
+    ProjectRepository projectRepository;
 
     @Inject
     MockUnityAuthClient mockUnityAuthClient;

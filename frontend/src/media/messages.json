@@ -50,6 +50,9 @@
 		"status": "Status",
 		"priority": "Priority"
 	},
+	"project": {
+		"title": "Project"
+	},
 	"contact": {
 		"header": "Add Contact Information",
 		"body": "We will only use the provided information to follow up on your request and will not use it for any other purposes",
