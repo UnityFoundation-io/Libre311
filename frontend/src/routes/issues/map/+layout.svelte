@@ -8,7 +8,6 @@
 	} from '$lib/context/ServiceRequestsContext';
 
 	// Map imports
-	import L from 'leaflet';
 	import MapComponent from '$lib/components/MapComponent.svelte';
 	import MapMarkerCircle from '$lib/components/MapMarkerCircle.svelte';
 	import MapMarkerWaypoint from '$lib/components/MapMarkerWaypoint.svelte';
@@ -43,11 +42,9 @@
 	const projectsStore = useProjectsStore();
 	const selectedProjectSlugStore = useSelectedProjectSlugStore();
 
-	import { getContext } from 'svelte';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { mediaQuery } from '$lib/components/media';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
-	import { Alert } from 'stwui';
 
 	const jurisdiction = useJurisdiction();
 
@@ -145,8 +142,8 @@
 	<div slot="list-slot">
 		{#if project}
 			<div class="border-b-2 border-info bg-info/10 px-4 py-2">
-				<div class="text-sm font-bold ">Project Mode: {project.name}</div>
-				<div class="text-xs ">Viewing issues for this specific project.</div>
+				<div class="text-sm font-bold">Project Mode: {project.name}</div>
+				<div class="text-xs">Viewing issues for this specific project.</div>
 			</div>
 		{/if}
 		<Breakpoint>

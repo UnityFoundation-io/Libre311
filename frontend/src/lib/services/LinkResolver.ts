@@ -26,7 +26,7 @@ export class LinkResolver {
 			return new URLSearchParams(window.location.search).get('project_slug') ?? undefined;
 		}
 		// 3. Check pathname (e.g., /issues/map/project/my-project)
-		const projectMatch = url.pathname.match(/\/project\/([^\/]+)/);
+		const projectMatch = url.pathname.match(/\/project\/([^/]+)/);
 		if (projectMatch) {
 			return projectMatch[1];
 		}

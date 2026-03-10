@@ -86,7 +86,7 @@
 							<!--		{serviceRequest.project_name}-->
 							<!--	</a>-->
 							<!--{:else}-->
-								{serviceRequest.project_name}
+							{serviceRequest.project_name}
 							<!--{/if}-->
 						</p>
 					</div>

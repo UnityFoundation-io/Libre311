@@ -8,14 +8,14 @@
 	}>();
 </script>
 
-<div class="flex h-full w-full items-center justify-between flex-col">
+<div class="flex h-full w-full flex-col items-center justify-between">
 	<div></div>
 	<div class="grid grid-rows-2 gap-3">
 		<h4>Select the location of the Request</h4>
 		<Button type="primary" on:click={() => dispatch('confirmLocation')}>Confirm Location</Button>
 		<CancelButton />
 	</div>
-	<div class=" bg-gray-100 text-xs w-full">
+	<div class=" w-full bg-gray-100 text-xs">
 		This site is protected by reCAPTCHA and the Google.
 		<a class="text-[#2563eb]" href="https://policies.google.com/privacy">Privacy Policy</a> and
 		<a class="text-[#2563eb]" href="https://policies.google.com/terms">Terms of Service</a> apply.

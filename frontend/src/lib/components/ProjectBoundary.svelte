@@ -19,6 +19,32 @@
 	const linkResolver = useLibre311Context().linkResolver;
 	const selectedProjectSlugStore = useSelectedProjectSlugStore();
 
+	function getPopupContent() {
+		const activeSlug = get(selectedProjectSlugStore);
+		const isActive = activeSlug === project.slug;
+
+		return `
+					<div class="p-2 max-w-xs" role="dialog" aria-labelledby="project-name-${project.id}">
+						<h3 id="project-name-${project.id}" class="text-lg font-bold mb-1">${project.name}</h3>
+						${project.description ? `<p class="text-sm">${project.description}</p>` : ''}
+						<p class="text-xs text-gray-500 mt-2">Status: ${project.status}</p>
+						${
+							isActive
+								? `
+							<div class="mt-4 w-full bg-info/10 text-info py-2 px-4 rounded-md text-sm font-bold border border-info/20 text-center">
+								Currently Active Project
+							</div>
+						`
+								: `
+							<button id="enter-project-${project.id}" class="mt-4 w-full bg-primary text-primary-content py-2 px-4 rounded-md text-sm font-bold hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+								Enter Project Mode
+							</button>
+						`
+						}
+					</div>
+				`;
+	}
+
 	onMount(() => {
 		if (!mapContext) {
 			console.warn('ProjectBoundary: must be used within a MapComponent');
@@ -81,32 +107,6 @@
 				}
 			});
 
-			function getPopupContent() {
-				const activeSlug = get(selectedProjectSlugStore);
-				const isActive = activeSlug === project.slug;
-
-				return `
-					<div class="p-2 max-w-xs" role="dialog" aria-labelledby="project-name-${project.id}">
-						<h3 id="project-name-${project.id}" class="text-lg font-bold mb-1">${project.name}</h3>
-						${project.description ? `<p class="text-sm">${project.description}</p>` : ''}
-						<p class="text-xs text-gray-500 mt-2">Status: ${project.status}</p>
-						${
-							isActive
-								? `
-							<div class="mt-4 w-full bg-info/10 text-info py-2 px-4 rounded-md text-sm font-bold border border-info/20 text-center">
-								Currently Active Project
-							</div>
-						`
-								: `
-							<button id="enter-project-${project.id}" class="mt-4 w-full bg-primary text-primary-content py-2 px-4 rounded-md text-sm font-bold hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-								Enter Project Mode
-							</button>
-						`
-						}
-					</div>
-				`;
-			}
-
 			polygon.bindPopup(getPopupContent, {
 				closeButton: true,
 				autoPan: true
@@ -115,7 +115,9 @@
 			polygon.on('popupopen', (e: L.PopupEvent) => {
 				const container = e.popup.getElement();
 				if (container) {
-					const enterButton = container.querySelector(`#enter-project-${project.id}`) as HTMLElement;
+					const enterButton = container.querySelector(
+						`#enter-project-${project.id}`
+					) as HTMLElement;
 					if (enterButton) {
 						enterButton.addEventListener('click', () => {
 							const url = new URL(window.location.href);
@@ -128,7 +130,9 @@
 					if (openedViaKeyboard && enterButton) {
 						enterButton.focus();
 					} else {
-						const closeButton = container.querySelector('.leaflet-popup-close-button') as HTMLElement;
+						const closeButton = container.querySelector(
+							'.leaflet-popup-close-button'
+						) as HTMLElement;
 						if (closeButton) {
 							closeButton.focus();
 						}

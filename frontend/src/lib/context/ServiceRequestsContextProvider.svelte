@@ -5,13 +5,7 @@
 
 	const libreService = useLibre311Service();
 	const { offlineQueue, syncSignal, projects } = useLibre311Context();
-	const serviceRequestsContext = createServiceRequestsContext(
-		libreService,
-		page,
-		projects,
-		offlineQueue,
-		syncSignal
-	);
+	createServiceRequestsContext(libreService, page, projects, offlineQueue, syncSignal);
 </script>
 
 <slot />

@@ -33,15 +33,10 @@
 
 	let map: L.Map;
 	let mapElement: HTMLElement;
-	let isInteracting = false;
 
 	onMount(() => {
 		map = L.map(mapElement, { keyboardPanDelta });
-		map.on('movestart', () => {
-			isInteracting = true;
-		});
 		map.on('moveend', () => {
-			isInteracting = false;
 			dispatch('boundsChanged', map.getBounds());
 		});
 		map.on('locationfound', function (e) {
@@ -108,7 +103,7 @@
 			if (maxBounds) {
 				map.setMaxBounds(maxBounds);
 			} else {
-				// @ts-ignore
+				// @ts-expect-error Leaflet types don't officially support null but it works to clear bounds
 				map.setMaxBounds(null);
 			}
 			lastMaxBoundsStr = currentMaxBoundsStr;

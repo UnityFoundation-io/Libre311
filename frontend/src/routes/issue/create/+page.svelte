@@ -26,7 +26,7 @@
 	import { useProjectsStore } from '$lib/context/ServiceRequestsContext';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
-	import { Button, Alert } from 'stwui';
+	import { Button } from 'stwui';
 	import { page } from '$app/stores';
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
@@ -129,21 +129,21 @@
 <CreateServiceRequestLayout {step}>
 	<div slot="side-bar" class="h-full">
 		{#if project}
-			<div class="absolute w-full mb-4 border-b-2 border-info bg-info/10 px-4 py-2">
+			<div class="absolute mb-4 w-full border-b-2 border-info bg-info/10 px-4 py-2">
 				<div class="text-sm font-bold">Project Mode: {project.name}</div>
 				<div class="text-xs">Submitting a request for this specific project.</div>
 			</div>
 		{/if}
-        <div class="mx-4 pt-16 pb-2 h-full">
-		<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
-		{#if step === CreateServiceRequestSteps.LOCATION}
-			<SelectLocation on:confirmLocation={confirmLocation} />
-		{:else if step === CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
-			<ReviewServiceRequest {params} />
-		{:else}
-			<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
-		{/if}
-        </div>
+		<div class="mx-4 h-full pb-2 pt-16">
+			<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
+			{#if step === CreateServiceRequestSteps.LOCATION}
+				<SelectLocation on:confirmLocation={confirmLocation} />
+			{:else if step === CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
+				<ReviewServiceRequest {params} />
+			{:else}
+				<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
+			{/if}
+		</div>
 	</div>
 	<div slot="main-content" class="relative h-full">
 		<MapComponent

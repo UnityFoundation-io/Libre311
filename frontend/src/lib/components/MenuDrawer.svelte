@@ -10,7 +10,7 @@
 	import { tableIcon } from './Svg/outline/tableIcon';
 	import { plusCircleIcon } from './Svg/outline/plusCircleIcon';
 	import { user } from './Svg/outline/user';
-	import {xMark} from './Svg/outline/XMark.svelte';
+	import { xMark } from './Svg/outline/XMark.svelte';
 	import AuthGuard from './AuthGuard.svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import { useSelectedProjectSlugStore } from '$lib/context/ServiceRequestsContext';
