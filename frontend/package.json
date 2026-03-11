@@ -62,7 +62,7 @@
 		"axios": "^1.12.0",
 		"carbon-icons-svelte": "^13.7.0",
 		"carta-md": "^3.6.1",
-		"dompurify": "^3.3.1",
+		"dompurify": "^3.3.2",
 		"file-saver": "^2.0.5",
 		"google-libphonenumber": "^3.2.34",
 		"leaflet": "^1.9.4",
