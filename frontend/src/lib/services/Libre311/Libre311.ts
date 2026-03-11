@@ -508,7 +508,7 @@ export type ProjectFeature = z.infer<typeof ProjectFeatureSchema>;
 export const ProjectSchema = z.object({
 	id: z.number(),
 	name: z.string(),
-	slug: z.string(),
+	slug: z.string().optional(),
 	description: z.string().optional(),
 	bounds: z.array(latLngTupleSchema).min(4),
 	start_date: z.string(),
