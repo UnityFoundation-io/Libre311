@@ -121,7 +121,7 @@
 					if (enterButton) {
 						enterButton.addEventListener('click', () => {
 							const url = new URL(window.location.href);
-							url.searchParams.set('project_slug', project.slug);
+							url.searchParams.set('project_slug', project.slug || '');
 							goto(linkResolver.issuesMap(url));
 							polygon?.closePopup();
 						});
