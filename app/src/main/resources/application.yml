@@ -53,6 +53,23 @@ micronaut:
   data:
     pageable:
       size-parameter-name: page_size
+  email:
+    javamail:
+      session:
+        properties:
+          mail:
+            smtp:
+              host: ${SMTP_HOST}
+              port: ${SMTP_PORT:587}
+              auth: ${SMTP_AUTH:true}
+              starttls:
+                enable: ${SMTP_STARTTLS:true}
+        authenticator:
+          username: ${SMTP_USERNAME}
+          password: ${SMTP_PASSWORD}
+    from:
+      email: ${EMAIL_FROM_ADDRESS:noreply@libre311.test}
+      name: ${EMAIL_FROM_NAME:Libre311}
 datasources:
   default:
     db-type: ${LIBRE311_DB_TYPE}

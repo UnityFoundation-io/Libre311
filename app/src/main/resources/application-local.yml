@@ -28,6 +28,17 @@ micronaut:
             - http://libre311-ui:3000
             - http://libre311-ui-dev:3000
     port: 8080
+  email:
+    javamail:
+      session:
+        properties:
+          mail:
+            smtp:
+              host: ${SMTP_HOST:localhost}
+              port: ${SMTP_PORT:1025}
+    from:
+      email: ${EMAIL_FROM_ADDRESS:noreply@libre311.test}
+      name: ${EMAIL_FROM_NAME:Libre311}
 ---
 app:
   service-id: ${LIBRE311_SERVICE_ID:1}

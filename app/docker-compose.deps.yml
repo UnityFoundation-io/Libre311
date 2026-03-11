@@ -21,6 +21,15 @@ services:
     ports:
       - "23306:3306"
 
+  local-mail-relay:
+    image: mailhog/mailhog
+    container_name: local-mail-relay
+    networks:
+      - unity-network
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # UI
+
 networks:
   default:
     name: unity-network

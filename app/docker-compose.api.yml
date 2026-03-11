@@ -4,7 +4,7 @@ services:
     networks:
       - unity-network
     extends:
-      file: docker-compose.db.yml
+      file: docker-compose.deps.yml
       service: libre311-db
 
   libre311-api:

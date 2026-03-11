@@ -4,7 +4,7 @@ services:
       - unity-network
     container_name: libre311-db
     extends:
-      file: app/docker-compose.db.yml
+      file: app/docker-compose.deps.yml
       service: libre311-db
 
   libre311-api:
@@ -17,6 +17,19 @@ services:
     depends_on:
       libre311-db:
         condition: service_healthy
+      local-mail-relay:
+        condition: service_started
+    environment:
+      SMTP_HOST: local-mail-relay
+      SMTP_PORT: 1025
+
+  local-mail-relay:
+    container_name: local-mail-relay
+    networks:
+      - unity-network
+    extends:
+      file: app/docker-compose.deps.yml
+      service: local-mail-relay
 
   libre311-ui-dev:
     container_name: libre311-ui-dev
