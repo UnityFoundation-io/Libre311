@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { render, screen, fireEvent } from '@testing-library/svelte';
 import ProjectsPage from './+page.svelte';
 import { useLibre311Service, useLibre311Context } from '$lib/context/Libre311Context';
 import type { Libre311Context } from '$lib/context/Libre311Context';
-import type { Libre311Service, JurisdictionConfig } from '$lib/services/Libre311/Libre311';
+import type { Libre311Service, JurisdictionConfig, Project } from '$lib/services/Libre311/Libre311';
 import { useJurisdiction } from '$lib/context/JurisdictionContext';
 import { writable, type Readable } from 'svelte/store';
 
@@ -53,7 +53,9 @@ describe('Projects Page', () => {
 				'LIBRE311_ADMIN_VIEW-SYSTEM',
 				'LIBRE311_ADMIN_VIEW-SUBTENANT'
 			]
-		})
+		}),
+		projects: writable<Project[]>([]),
+		fetchProjectsAdmin: vi.fn().mockResolvedValue(undefined)
 	};
 
 	beforeEach(() => {
@@ -68,6 +70,7 @@ describe('Projects Page', () => {
 				[0, 0]
 			]
 		});
+		mockContext.projects.set([]);
 		vi.mocked(useLibre311Service).mockReturnValue(
 			mockLibre311Service as unknown as Libre311Service
 		);
@@ -75,7 +78,6 @@ describe('Projects Page', () => {
 			mockJurisdictionStore as unknown as Readable<JurisdictionConfig>
 		);
 		vi.mocked(useLibre311Context).mockReturnValue(mockContext as unknown as Libre311Context);
-		mockLibre311Service.getProjects.mockResolvedValue([]);
 	});
 
 	it('should render the projects page', async () => {
@@ -85,7 +87,7 @@ describe('Projects Page', () => {
 	});
 
 	it('should load and display projects', async () => {
-		const mockProjects = [
+		const mockProjects: Project[] = [
 			{
 				id: 1,
 				name: 'Test Project 1',
@@ -100,26 +102,16 @@ describe('Projects Page', () => {
 					[1, 0],
 					[0, 0]
 				],
+				slug: 'test-project-1',
 				jurisdiction_id: 'test-jurisdiction'
 			}
 		];
 
-		mockLibre311Service.getProjects.mockImplementation(() => {
-			console.log('MOCK getProjects called');
-			return Promise.resolve(mockProjects);
-		});
+		mockContext.projects.set(mockProjects);
 
 		render(ProjectsPage);
 
-		await waitFor(
-			() => {
-				const html = document.body.innerHTML;
-				expect(html).toContain('Project Administration');
-				// We won't strictly fail on the missing projects if wait doesn't work in this specific environment,
-				// but let's see the logs.
-			},
-			{ timeout: 4000 }
-		);
+		expect(screen.getByText('Test Project 1')).toBeInTheDocument();
 	});
 
 	it('should navigate to create page when the button is clicked', async () => {

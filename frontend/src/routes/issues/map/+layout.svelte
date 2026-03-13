@@ -27,7 +27,7 @@
 	import { goto } from '$app/navigation';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
-	import { matchesDesktopMedia, shouldShowProject } from '$lib/utils/functions';
+	import { matchesDesktopMedia } from '$lib/utils/functions';
 	import CreateServiceRequestButton from '$lib/components/CreateServiceRequestButton.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
 	import { mapStatusLegendControlFactory } from '$lib/components/MapStatusLegendControl';
@@ -37,7 +37,6 @@
 
 	const linkResolver = useLibre311Context().linkResolver;
 	const libre311 = useLibre311Context().service;
-	const { user } = useLibre311Context();
 	const serviceRequestsResponseStore = useServiceRequestsResponseStore();
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 	const projectsStore = useProjectsStore();
@@ -48,14 +47,6 @@
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 
 	const jurisdiction = useJurisdiction();
-
-	$: isAdmin = !!$user?.permissions.some((p) =>
-		[
-			'LIBRE311_ADMIN_VIEW-SYSTEM',
-			'LIBRE311_ADMIN_VIEW-TENANT',
-			'LIBRE311_ADMIN_VIEW-SUBTENANT'
-		].includes(p)
-	);
 
 	$: project = $projectsStore.find((p) => p.slug === $selectedProjectSlugStore);
 	$: projectBounds = createProjectBounds($projectsStore, $selectedProjectSlugStore);

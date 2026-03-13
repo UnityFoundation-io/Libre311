@@ -3,10 +3,9 @@
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import type { Project } from '$lib/services/Libre311/Libre311';
 
-	const libre311 = useLibre311Service();
 	const { projects: allProjectsStore, fetchProjectsAdmin } = useLibre311Context();
 	let project: Project | undefined;
 	let isLoading = true;

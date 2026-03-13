@@ -6,8 +6,7 @@
 		type ServiceRequest,
 		type ServiceRequestPriority,
 		type ServiceRequestStatus,
-		ServiceRequestStatusSchema,
-		type Project
+		ServiceRequestStatusSchema
 	} from '$lib/services/Libre311/Libre311';
 
 	import {
@@ -30,11 +29,10 @@
 		setUpAlertRole
 	} from '$lib/utils/functions';
 	import { z } from 'zod';
-	import { useLibre311Service, useLibre311Context } from '$lib/context/Libre311Context';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import { shouldShowProject } from '$lib/utils/functions';
 
-	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
 	const { projects: allProjectsStore, user: userStore, fetchProjectsAdmin } = useLibre311Context();
 

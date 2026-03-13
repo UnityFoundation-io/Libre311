@@ -2,8 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
-	import type { Project } from '$lib/services/Libre311/Libre311';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { Button, Table } from 'stwui';
 	import { plusCircleIcon } from '$lib/components/Svg/outline/plusCircleIcon';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
@@ -11,9 +10,13 @@
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import { shouldShowProject } from '$lib/utils/functions';
 
-	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
-	const { projects: allProjectsStore, user, linkResolver, fetchProjectsAdmin } = useLibre311Context();
+	const {
+		projects: allProjectsStore,
+		user,
+		linkResolver,
+		fetchProjectsAdmin
+	} = useLibre311Context();
 
 	$: if (browser && $jurisdiction.project_feature === 'DISABLED') {
 		goto(linkResolver.issuesTable(new URL(window.location.href)));

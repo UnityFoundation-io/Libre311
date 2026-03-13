@@ -14,7 +14,12 @@ vi.mock('$lib/context/Libre311Context', () => ({
 	useLibre311Service: vi.fn(),
 	useLibre311Context: vi.fn(() => ({
 		alertError: vi.fn(),
-		alert: vi.fn()
+		alert: vi.fn(),
+		projects: writable([]),
+		fetchProjectsAdmin: vi.fn().mockResolvedValue(undefined),
+		user: writable({
+			permissions: []
+		})
 	}))
 }));
 
