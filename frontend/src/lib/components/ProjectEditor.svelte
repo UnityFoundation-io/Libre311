@@ -7,9 +7,12 @@
 	import BoundaryEditor from '$lib/components/BoundaryEditor.svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import { toDatetimeLocal } from '$lib/utils/functions';
+	import { arrowPath } from '$lib/components/Svg/outline/arrowPath';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 
 	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
+	const { fetchProjectsAdmin } = useLibre311Context();
 
 	export let project: Project | undefined = undefined;
 
@@ -40,6 +43,7 @@
 					id: project!.id,
 					closed_date: new Date().toISOString()
 				});
+				await fetchProjectsAdmin();
 				goto('/projects');
 			} catch (error) {
 				console.error('Failed to close project:', error);
@@ -47,6 +51,23 @@
 			} finally {
 				isSaving = false;
 			}
+		}
+	}
+
+	async function reopenProject() {
+		isSaving = true;
+		try {
+			await libre311.updateProject({
+				id: project!.id,
+				closed_date: null
+			});
+			await fetchProjectsAdmin();
+			goto(`/projects/${project!.id}`);
+		} catch (error) {
+			console.error('Failed to reopen project:', error);
+			alert('Failed to reopen project');
+		} finally {
+			isSaving = false;
 		}
 	}
 
@@ -83,14 +104,17 @@
 	function handleBoundsUpdate(event: CustomEvent<[]>) {
 		currentProject.bounds = event.detail;
 	}
+
+	$: canReopen =
+		isEditing && project?.status === 'CLOSED' && new Date(project.end_date) > new Date();
 </script>
 
-<div class="flex flex-col gap-4 p-6">
+<div class="flex h-full flex-col gap-4 p-6">
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-bold">{isEditing ? 'Edit Project' : 'Create Project'}</h1>
 	</div>
 
-	<div class="flex flex-col gap-4">
+	<div class="flex flex-grow flex-col gap-4">
 		<div class="flex flex-col gap-4 md:flex-row">
 			<div class="flex-1">
 				<Input bind:value={currentProject.name}>
@@ -123,7 +147,7 @@
 				/>
 			</div>
 		</div>
-		<div class="h-96 w-full overflow-hidden rounded-md border">
+		<div class="w-full flex-grow overflow-hidden rounded-md border">
 			<MapComponent bounds={$jurisdiction.bounds}>
 				<BoundaryEditor
 					bounds={currentProject.bounds ?? []}
@@ -138,6 +162,12 @@
 		<div>
 			{#if isEditing && project?.status === 'OPEN'}
 				<Button variant="danger" on:click={closeProject} loading={isSaving}>Close Project</Button>
+			{/if}
+			{#if canReopen}
+				<Button variant="ghost" on:click={reopenProject} loading={isSaving}>
+					<Button.Leading data={arrowPath} slot="leading" />
+					Reopen Project
+				</Button>
 			{/if}
 		</div>
 		<div class="flex gap-2">

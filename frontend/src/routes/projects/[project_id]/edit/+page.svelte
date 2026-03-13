@@ -38,7 +38,9 @@
 			<p>Loading project details...</p>
 		</div>
 	{:else if project}
-		<ProjectEditor {project} />
+		<div class="h-full text-left">
+			<ProjectEditor {project} />
+		</div>
 	{:else}
 		<div class="flex h-full items-center justify-center p-8 text-red-600">
 			<p>Project not found.</p>
