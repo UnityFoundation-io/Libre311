@@ -23,6 +23,7 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -134,12 +135,29 @@ public class ProjectStatusTest {
         assertEquals(ProjectStatus.OPEN, project.getStatus());
 
         UpdateProjectDTO updateDTO = new UpdateProjectDTO();
-        updateDTO.setClosedDate(now);
+        updateDTO.setClosedDate(JsonNullable.of(now));
 
         ProjectDTO updated = projectService.updateProject(project.getId(), updateDTO, jurisdiction.getId());
         
         assertNotNull(updated.getClosedDate());
         assertEquals(ProjectStatus.CLOSED, updated.getStatus());
+    }
+
+    @Test
+    void testUpdateProject_ReopenProject() {
+        Instant now = Instant.now();
+        Project project = createProject(now.minus(1, ChronoUnit.DAYS), now.plus(1, ChronoUnit.DAYS));
+        project.setClosedDate(now);
+        projectRepository.update(project);
+        assertEquals(ProjectStatus.CLOSED, project.getStatus());
+
+        UpdateProjectDTO updateDTO = new UpdateProjectDTO();
+        updateDTO.setClosedDate(JsonNullable.of(null));
+
+        ProjectDTO updated = projectService.updateProject(project.getId(), updateDTO, jurisdiction.getId());
+
+        assertNull(updated.getClosedDate());
+        assertEquals(ProjectStatus.OPEN, updated.getStatus());
     }
 
     @Test
