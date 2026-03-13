@@ -22,10 +22,13 @@ services:
       - "23306:3306"
 
   local-mail-relay:
-    image: mailhog/mailhog
+    image: axllent/mailpit
     container_name: local-mail-relay
     networks:
       - unity-network
+    environment:
+      MP_SMTP_AUTH: "unity:password"
+    command: ["--smtp-auth-allow-insecure"]
     ports:
       - "1025:1025" # SMTP
       - "8025:8025" # UI

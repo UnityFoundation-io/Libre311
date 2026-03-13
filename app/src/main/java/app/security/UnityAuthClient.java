@@ -14,6 +14,9 @@
 
 package app.security;
 
+import app.dto.auth.GenerateTokenRequest;
+import app.dto.auth.GenerateTokenResponse;
+import app.dto.auth.ResetPasswordRequest;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
@@ -34,4 +37,12 @@ public interface UnityAuthClient {
     HttpResponse<UserPermissionsResponse> getUserPermissions(
         @Body UnityAuthUserPermissionsRequest requestDTO,
         @Header("Authorization") String authorizationHeader);
+
+    @Post("/password-reset/generate")
+    HttpResponse<GenerateTokenResponse> generateToken(
+            @Body GenerateTokenRequest request,
+            @Header("X-Unity-Auth-Internal") String internalToken);
+
+    @Post("/password-reset/reset")
+    HttpResponse<?> resetPassword(@Body ResetPasswordRequest request);
 }

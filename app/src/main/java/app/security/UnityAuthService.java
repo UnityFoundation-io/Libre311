@@ -56,6 +56,14 @@ public class UnityAuthService {
         this.jurisdictionUserRepository = jurisdictionUserRepository;
     }
 
+    public HttpResponse<app.dto.auth.GenerateTokenResponse> generateToken(app.dto.auth.GenerateTokenRequest request, String internalToken) {
+        return client.generateToken(request, internalToken);
+    }
+
+    public HttpResponse<?> resetPassword(app.dto.auth.ResetPasswordRequest request) {
+        return client.resetPassword(request);
+    }
+
     public HttpResponse<UserPermissionsResponse> getUserPermissions(
         @PathVariable String jurisdictionId, String authorization) {
         Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
