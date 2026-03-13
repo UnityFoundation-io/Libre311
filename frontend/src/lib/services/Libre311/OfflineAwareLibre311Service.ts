@@ -252,4 +252,12 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 	updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
 		return this.wrapped.updatePolicyContent(params);
 	}
+
+	forgotPassword(email: string): Promise<void> {
+		return this.wrapped.forgotPassword(email);
+	}
+
+	resetPassword(token: string, password: string): Promise<void> {
+		return this.wrapped.resetPassword(token, password);
+	}
 }

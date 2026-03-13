@@ -7,6 +7,7 @@ export type EventDispatchTypeMap = {
 	};
 	login: undefined;
 	cancel: undefined;
+	forgotPassword: { email: string };
 };
 
 function dispatchInputChangeFactory(dispatch: EventDispatcher<EventDispatchTypeMap>) {
@@ -20,6 +21,7 @@ export function dispatchEventFunctionFactory(dispatch: EventDispatcher<EventDisp
 	return {
 		onChange: dispatchInputChangeFactory(dispatch),
 		onSubmit: () => dispatch('login'),
-		onCancel: () => dispatch('cancel')
+		onCancel: () => dispatch('cancel'),
+		onForgotPassword: (email: string) => dispatch('forgotPassword', { email })
 	};
 }
