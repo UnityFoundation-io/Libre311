@@ -2,21 +2,29 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
-	import type { Project } from '$lib/services/Libre311/Libre311';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { Button, Table } from 'stwui';
 	import { plusCircleIcon } from '$lib/components/Svg/outline/plusCircleIcon';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import type { TableColumn } from 'stwui/types';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
+	import { shouldShowProject } from '$lib/utils/functions';
 
-	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
-	const linkResolver = useLibre311Context().linkResolver;
+	const {
+		projects: allProjectsStore,
+		user,
+		linkResolver,
+		fetchProjectsAdmin
+	} = useLibre311Context();
 
 	$: if (browser && $jurisdiction.project_feature === 'DISABLED') {
 		goto(linkResolver.issuesTable(new URL(window.location.href)));
 	}
+
+	onMount(async () => {
+		await fetchProjectsAdmin();
+	});
 
 	const columns: TableColumn[] = [
 		{ column: 'name', label: 'Name', class: 'w-1/4', placement: 'left' },
@@ -26,23 +34,20 @@
 		{ column: 'request_count', label: 'Requests', class: 'w-1/6', placement: 'left' }
 	];
 
-	let projects: Project[] = [];
-	let isLoading = true;
+	let showAllClosed = false;
 
-	onMount(async () => {
-		await loadProjects();
+	$: isAdmin = !!$user?.permissions.some((p) =>
+		[
+			'LIBRE311_ADMIN_VIEW-SYSTEM',
+			'LIBRE311_ADMIN_VIEW-TENANT',
+			'LIBRE311_ADMIN_VIEW-SUBTENANT'
+		].includes(p)
+	);
+
+	$: projects = $allProjectsStore.filter((project) => {
+		if (showAllClosed) return true;
+		return shouldShowProject(project, isAdmin);
 	});
-
-	async function loadProjects() {
-		isLoading = true;
-		try {
-			projects = await libre311.getProjects();
-		} catch (error) {
-			console.error('Failed to load projects:', error);
-		} finally {
-			isLoading = false;
-		}
-	}
 </script>
 
 <AuthGuard
@@ -55,15 +60,33 @@
 	<div class="p-6">
 		<div class="mb-6 flex items-center justify-between">
 			<h1 class="text-2xl font-bold">Project Administration</h1>
-			<Button variant="primary" on:click={() => goto('/projects/create')}>
-				<Button.Leading data={plusCircleIcon} slot="leading" />
-				Create Project
-			</Button>
+			<div class="flex items-center gap-4">
+				<label class="flex cursor-pointer items-center gap-2">
+					<span class="text-sm text-gray-600">Show All Closed</span>
+					<button
+						type="button"
+						role="switch"
+						aria-checked={showAllClosed}
+						class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {showAllClosed
+							? 'bg-blue-600'
+							: 'bg-gray-200'}"
+						on:click={() => (showAllClosed = !showAllClosed)}
+					>
+						<span
+							class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {showAllClosed
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						></span>
+					</button>
+				</label>
+				<Button variant="primary" on:click={() => goto('/projects/create')}>
+					<Button.Leading data={plusCircleIcon} slot="leading" />
+					Create Project
+				</Button>
+			</div>
 		</div>
 
-		{#if isLoading}
-			<p>Loading projects...</p>
-		{:else if projects.length === 0}
+		{#if projects.length === 0}
 			<p>No projects found.</p>
 		{:else}
 			<Table {columns}>

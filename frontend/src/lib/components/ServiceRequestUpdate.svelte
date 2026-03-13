@@ -6,8 +6,7 @@
 		type ServiceRequest,
 		type ServiceRequestPriority,
 		type ServiceRequestStatus,
-		ServiceRequestStatusSchema,
-		type Project
+		ServiceRequestStatusSchema
 	} from '$lib/services/Libre311/Libre311';
 
 	import {
@@ -30,11 +29,12 @@
 		setUpAlertRole
 	} from '$lib/utils/functions';
 	import { z } from 'zod';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+	import { shouldShowProject } from '$lib/utils/functions';
 
-	const libre311 = useLibre311Service();
 	const jurisdiction = useJurisdiction();
+	const { projects: allProjectsStore, user: userStore, fetchProjectsAdmin } = useLibre311Context();
 
 	const dispatch = createEventDispatcher<{
 		updateServiceRequest: UpdateSensitiveServiceRequestRequest;
@@ -54,15 +54,23 @@
 	let statusNotesInput = createInput<string | undefined>(serviceRequest.status_notes);
 	let projectIdInput = createInput<number | undefined>(serviceRequest.project_id);
 
-	let projects: Project[] = [];
+	$: isAdmin = !!$userStore?.permissions.some((p) =>
+		[
+			'LIBRE311_ADMIN_VIEW-SYSTEM',
+			'LIBRE311_ADMIN_VIEW-TENANT',
+			'LIBRE311_ADMIN_VIEW-SUBTENANT'
+		].includes(p)
+	);
 
 	onMount(async () => {
-		try {
-			projects = await libre311.getProjects();
-		} catch (error) {
-			console.error('Failed to load projects:', error);
+		if (isAdmin) {
+			await fetchProjectsAdmin();
 		}
 	});
+
+	$: projects = $allProjectsStore.filter(
+		(p) => shouldShowProject(p, isAdmin) || p.id === serviceRequest.project_id
+	);
 
 	$: projectOptions = [
 		{ label: 'None', value: '-1' },

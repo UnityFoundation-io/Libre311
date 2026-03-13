@@ -37,6 +37,7 @@
 	const libre311 = useLibre311Service();
 	const libre311Context = useLibre311Context();
 	const linkResolver = libre311Context.linkResolver;
+
 	const alertError = libre311Context.alertError;
 	const isOnline = libre311Context.networkStatus.isOnline;
 	const projectsStore = useProjectsStore();

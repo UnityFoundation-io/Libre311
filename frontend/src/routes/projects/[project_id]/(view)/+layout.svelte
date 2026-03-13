@@ -21,12 +21,12 @@
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 
 	const libre311 = useLibre311Service();
-	const { projects } = useLibre311Context();
+	const { projects: allProjectsStore, fetchProjectsAdmin } = useLibre311Context();
 
 	let project: Project | undefined;
 
 	// Create a new ServiceRequestsContext for this project view
-	const ctx = createServiceRequestsContext(libre311, page, projects, undefined, undefined, {
+	const ctx = createServiceRequestsContext(libre311, page, allProjectsStore, undefined, undefined, {
 		project_id: Number($page.params.project_id)
 	});
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
@@ -34,8 +34,8 @@
 
 	onMount(async () => {
 		try {
-			const projects = await libre311.getProjects();
-			project = projects.find((p) => p.id === Number($page.params.project_id));
+			await fetchProjectsAdmin();
+			project = $allProjectsStore.find((p) => p.id === Number($page.params.project_id));
 		} catch (error) {
 			console.error('Failed to load project:', error);
 		} finally {

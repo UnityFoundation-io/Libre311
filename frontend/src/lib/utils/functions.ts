@@ -1,10 +1,24 @@
 import {
 	serviceRequestPriorityArray,
-	serviceRequestStatusArray
+	serviceRequestStatusArray,
+	type Project
 } from '$lib/services/Libre311/Libre311';
 import L, { type PointTuple } from 'leaflet';
 import type { SelectOption } from 'stwui/types';
 import { tick } from 'svelte';
+
+export function shouldShowProject(project: Project, isAdmin: boolean) {
+	if (project.status === 'OPEN') return true;
+	if (!isAdmin) return false;
+
+	const closeDate = project.closed_date
+		? new Date(project.closed_date)
+		: new Date(project.end_date);
+	const ninetyDaysAgo = new Date();
+	ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+	return closeDate >= ninetyDaysAgo;
+}
 
 export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));

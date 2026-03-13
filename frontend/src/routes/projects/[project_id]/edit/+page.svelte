@@ -3,17 +3,17 @@
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import type { Project } from '$lib/services/Libre311/Libre311';
 
-	const libre311 = useLibre311Service();
+	const { projects: allProjectsStore, fetchProjectsAdmin } = useLibre311Context();
 	let project: Project | undefined;
 	let isLoading = true;
 
 	onMount(async () => {
 		try {
-			const projects = await libre311.getProjects();
-			project = projects.find((p) => p.id === Number($page.params.project_id));
+			await fetchProjectsAdmin();
+			project = $allProjectsStore.find((p) => p.id === Number($page.params.project_id));
 		} catch (error) {
 			console.error('Failed to load project:', error);
 		} finally {
