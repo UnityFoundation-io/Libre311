@@ -44,6 +44,7 @@ export type Libre311Context = {
 	mode: Mode;
 	user: Readable<UserInfo>;
 	projects: Readable<Project[]>;
+	fetchProjectsAdmin: () => Promise<void>;
 	alertError: (unknown: unknown) => void;
 	networkStatus: NetworkStatus;
 	offlineQueue: OfflineQueue;
@@ -96,6 +97,15 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 			projects.set(res);
 		} catch (e) {
 			console.error('Failed to fetch projects', e);
+		}
+	}
+
+	async function fetchProjectsAdmin() {
+		try {
+			const res = await libre311Service.getProjectsAdmin();
+			projects.set(res);
+		} catch (e) {
+			console.error('Failed to fetch admin projects', e);
 		}
 	}
 
@@ -156,6 +166,7 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		user.set(args);
 		libre311Service.setAuthInfo(args);
 		scheduleExpiration();
+		fetchProjects();
 	});
 	unityAuthService.subscribe('logout', (args) => {
 		if (expirationTimer) {
@@ -171,6 +182,7 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 				goto('/login');
 			}
 		}
+		fetchProjects();
 	});
 
 	function alertError(unknown: unknown) {
@@ -220,6 +232,7 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		unityAuthService,
 		user,
 		projects,
+		fetchProjectsAdmin,
 		alertError,
 		networkStatus,
 		offlineQueue,

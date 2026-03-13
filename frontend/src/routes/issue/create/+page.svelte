@@ -26,6 +26,7 @@
 	import { useProjectsStore } from '$lib/context/ServiceRequestsContext';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
+	import { shouldShowProject } from '$lib/utils/functions';
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
@@ -36,7 +37,16 @@
 
 	const libre311 = useLibre311Service();
 	const libre311Context = useLibre311Context();
+	const { user } = useLibre311Context();
 	const linkResolver = libre311Context.linkResolver;
+
+	$: isAdmin = !!$user?.permissions.some((p) =>
+		[
+			'LIBRE311_ADMIN_VIEW-SYSTEM',
+			'LIBRE311_ADMIN_VIEW-TENANT',
+			'LIBRE311_ADMIN_VIEW-SUBTENANT'
+		].includes(p)
+	);
 	const alertError = libre311Context.alertError;
 	const isOnline = libre311Context.networkStatus.isOnline;
 	const projectsStore = useProjectsStore();
