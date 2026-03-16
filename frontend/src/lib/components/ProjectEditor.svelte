@@ -5,6 +5,7 @@
 	import { Button, Input } from 'stwui';
 	import MapComponent from '$lib/components/MapComponent.svelte';
 	import BoundaryEditor from '$lib/components/BoundaryEditor.svelte';
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import { toDatetimeLocal } from '$lib/utils/functions';
 	import { arrowPath } from '$lib/components/Svg/outline/arrowPath';
@@ -18,6 +19,7 @@
 
 	let isEditing = !!project;
 	let isSaving = false;
+	let showCloseModal = false;
 
 	let currentProject: Partial<Project> = project
 		? {
@@ -34,23 +36,20 @@
 			};
 
 	async function closeProject() {
-		if (
-			confirm('Are you sure you want to close this project? This will mark the study as concluded.')
-		) {
-			isSaving = true;
-			try {
-				await libre311.updateProject({
-					id: project!.id,
-					closed_date: new Date().toISOString()
-				});
-				await fetchProjectsAdmin();
-				goto('/projects');
-			} catch (error) {
-				console.error('Failed to close project:', error);
-				alert('Failed to close project');
-			} finally {
-				isSaving = false;
-			}
+		isSaving = true;
+		try {
+			await libre311.updateProject({
+				id: project!.id,
+				closed_date: new Date().toISOString()
+			});
+			await fetchProjectsAdmin();
+			showCloseModal = false;
+			goto('/projects');
+		} catch (error) {
+			console.error('Failed to close project:', error);
+			alert('Failed to close project');
+		} finally {
+			isSaving = false;
 		}
 	}
 
@@ -161,7 +160,9 @@
 	<div class="flex w-full items-center justify-between border-t pt-4">
 		<div>
 			{#if isEditing && project?.status === 'OPEN'}
-				<Button variant="danger" on:click={closeProject} loading={isSaving}>Close Project</Button>
+				<Button variant="danger" on:click={() => (showCloseModal = true)} loading={isSaving}>
+					Close Project
+				</Button>
 			{/if}
 			{#if canReopen}
 				<Button variant="ghost" on:click={reopenProject} loading={isSaving}>
@@ -176,3 +177,13 @@
 		</div>
 	</div>
 </div>
+
+<ConfirmationModal
+	open={showCloseModal}
+	title="Close Project"
+	message="Are you sure you want to close this project? This will mark the study as concluded."
+	confirmationLabel="Yes, this project has concluded"
+	loading={isSaving}
+	handleClose={() => (showCloseModal = false)}
+	handleConfirm={closeProject}
+/>

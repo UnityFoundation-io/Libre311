@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
+	import type { Project } from '$lib/services/Libre311/Libre311';
 	import { Button, Table } from 'stwui';
 	import { plusCircleIcon } from '$lib/components/Svg/outline/plusCircleIcon';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
@@ -53,13 +54,16 @@
 	});
 
 	$: totalPages = Math.ceil(filteredProjects.length / pageSize);
-	$: paginatedProjects = filteredProjects.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+	$: paginatedProjects = filteredProjects.slice(
+		(currentPage - 1) * pageSize,
+		currentPage * pageSize
+	);
 
 	function getClosedDate(project: Project) {
 		if (project.status === 'CLOSED') {
 			return project.closed_date || project.end_date;
 		}
-		return null;
+		return undefined;
 	}
 </script>
 
@@ -123,7 +127,10 @@
 							</Table.Body.Row.Cell>
 							<Table.Body.Row.Cell column={3}>
 								{#if getClosedDate(project)}
-									{new Date(getClosedDate(project)).toLocaleDateString()}
+									{@const closedDate = getClosedDate(project)}
+									{#if closedDate}
+										{new Date(closedDate).toLocaleDateString()}
+									{/if}
 								{:else}
 									-
 								{/if}

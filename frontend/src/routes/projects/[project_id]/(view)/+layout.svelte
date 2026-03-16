@@ -9,6 +9,7 @@
 	} from '$lib/context/ServiceRequestsContext';
 	import TableWithDetailPane from '$lib/components/TableWithDetailPane.svelte';
 	import { Card, Table, Button } from 'stwui';
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
 	import { goto } from '$app/navigation';
 	import ServiceRequestStatusBadge from '$lib/components/ServiceRequestStatusBadge.svelte';
 	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
@@ -25,6 +26,8 @@
 	const { projects: allProjectsStore, fetchProjectsAdmin } = useLibre311Context();
 
 	let project: Project | undefined;
+	let showCloseModal = false;
+	let isClosing = false;
 
 	// Create a new ServiceRequestsContext for this project view
 	const ctx = createServiceRequestsContext(libre311, page, allProjectsStore, undefined, undefined, {
@@ -65,7 +68,6 @@
 		try {
 			await libre311.updateProject({
 				id: project.id,
-				status: 'OPEN',
 				closed_date: null
 			});
 			await fetchProjectsAdmin();
@@ -77,20 +79,20 @@
 
 	async function handleClose() {
 		if (!project) return;
-		if (
-			confirm('Are you sure you want to close this project? This will mark the study as concluded.')
-		) {
-			try {
-				await libre311.updateProject({
-					id: project.id,
-					closed_date: new Date().toISOString()
-				});
-				await fetchProjectsAdmin();
-				project = $allProjectsStore.find((p) => p.id === Number($page.params.project_id));
-			} catch (error) {
-				console.error('Failed to close project:', error);
-				alert('Failed to close project');
-			}
+		isClosing = true;
+		try {
+			await libre311.updateProject({
+				id: project.id,
+				closed_date: new Date().toISOString()
+			});
+			await fetchProjectsAdmin();
+			project = $allProjectsStore.find((p) => p.id === Number($page.params.project_id));
+			showCloseModal = false;
+		} catch (error) {
+			console.error('Failed to close project:', error);
+			alert('Failed to close project');
+		} finally {
+			isClosing = false;
 		}
 	}
 
@@ -100,11 +102,10 @@
 		if (p.status === 'CLOSED') {
 			return p.closed_date || p.end_date;
 		}
-		return null;
+		return undefined;
 	}
 
-	$: canReopen =
-		project && project.status === 'CLOSED' && new Date(project.end_date) > new Date();
+	$: canReopen = project && project.status === 'CLOSED' && new Date(project.end_date) > new Date();
 
 	$: canClose = project && project.status === 'OPEN';
 </script>
@@ -131,7 +132,9 @@
 							</Button>
 						{/if}
 						{#if canClose}
-							<Button variant="danger" on:click={handleClose}>Close Project</Button>
+							<Button variant="danger" on:click={() => (showCloseModal = true)}
+								>Close Project</Button
+							>
 						{/if}
 						<Button variant="ghost" on:click={() => goto(`/projects/${project?.id}/edit`)}>
 							<Button.Leading data={pencilIcon} slot="leading" />
@@ -145,10 +148,13 @@
 					<span><strong>Start:</strong> {new Date(project.start_date).toLocaleDateString()}</span>
 					<span><strong>End:</strong> {new Date(project.end_date).toLocaleDateString()}</span>
 					{#if getClosedDate(project)}
-						<span
-							><strong>Closed Date:</strong>
-							{new Date(getClosedDate(project)).toLocaleDateString()}</span
-						>
+						{@const closedDate = getClosedDate(project)}
+						{#if closedDate}
+							<span
+								><strong>Closed Date:</strong>
+								{new Date(closedDate).toLocaleDateString()}</span
+							>
+						{/if}
 					{/if}
 					<span
 						><strong>Status:</strong>
@@ -274,6 +280,16 @@
 		</div>
 	</div>
 </AuthGuard>
+
+<ConfirmationModal
+	open={showCloseModal}
+	title="Close Project"
+	message="Are you sure you want to close this project? This will mark the study as concluded."
+	confirmationLabel="Yes, this project has concluded"
+	loading={isClosing}
+	handleClose={() => (showCloseModal = false)}
+	handleConfirm={handleClose}
+/>
 
 <style>
 	.issues-table-override :global(#selected) {
