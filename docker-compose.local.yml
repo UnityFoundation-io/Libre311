@@ -22,6 +22,8 @@ services:
     environment:
       SMTP_HOST: local-mail-relay
       SMTP_PORT: 1025
+      SMTP_USERNAME: unity
+      SMTP_PASSWORD: password
 
   local-mail-relay:
     container_name: local-mail-relay
