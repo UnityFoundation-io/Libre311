@@ -9,6 +9,7 @@
 	} from '$lib/context/ServiceRequestsContext';
 	import TableWithDetailPane from '$lib/components/TableWithDetailPane.svelte';
 	import { Card, Table, Button } from 'stwui';
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
 	import { goto } from '$app/navigation';
 	import ServiceRequestStatusBadge from '$lib/components/ServiceRequestStatusBadge.svelte';
 	import { toAbbreviatedTimeStamp } from '$lib/utils/functions';
@@ -18,12 +19,15 @@
 	import { columns } from '../../../issues/table/table'; // Adjusted path for (view) group
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import { pencilIcon } from '$lib/components/Svg/outline/pencilIcon';
+	import { arrowPath } from '$lib/components/Svg/outline/arrowPath';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 
 	const libre311 = useLibre311Service();
 	const { projects: allProjectsStore, fetchProjectsAdmin } = useLibre311Context();
 
 	let project: Project | undefined;
+	let showCloseModal = false;
+	let isClosing = false;
 
 	// Create a new ServiceRequestsContext for this project view
 	const ctx = createServiceRequestsContext(libre311, page, allProjectsStore, undefined, undefined, {
@@ -59,7 +63,51 @@
 		saveAs(serviceRequestsBlob, `project-${$page.params.project_id}-requests.csv`);
 	}
 
+	async function handleReopen() {
+		if (!project) return;
+		try {
+			await libre311.updateProject({
+				id: project.id,
+				closed_date: null
+			});
+			await fetchProjectsAdmin();
+			project = $allProjectsStore.find((p) => p.id === Number($page.params.project_id));
+		} catch (error) {
+			console.error('Failed to reopen project:', error);
+		}
+	}
+
+	async function handleClose() {
+		if (!project) return;
+		isClosing = true;
+		try {
+			await libre311.updateProject({
+				id: project.id,
+				closed_date: new Date().toISOString()
+			});
+			await fetchProjectsAdmin();
+			project = $allProjectsStore.find((p) => p.id === Number($page.params.project_id));
+			showCloseModal = false;
+		} catch (error) {
+			console.error('Failed to close project:', error);
+			alert('Failed to close project');
+		} finally {
+			isClosing = false;
+		}
+	}
+
 	$: detailPaneOpen = Boolean($page.params.issue_id);
+
+	function getClosedDate(p: Project) {
+		if (p.status === 'CLOSED') {
+			return p.closed_date || p.end_date;
+		}
+		return undefined;
+	}
+
+	$: canReopen = project && project.status === 'CLOSED' && new Date(project.end_date) > new Date();
+
+	$: canClose = project && project.status === 'OPEN';
 </script>
 
 <AuthGuard
@@ -76,16 +124,38 @@
 					<div class="mb-2 flex items-center gap-2">
 						<a href="/projects" class="text-sm text-primary hover:underline">← All Projects</a>
 					</div>
-					<Button variant="ghost" on:click={() => goto(`/projects/${project?.id}/edit`)}>
-						<Button.Leading data={pencilIcon} slot="leading" />
-						Edit Project
-					</Button>
+					<div class="flex gap-2">
+						{#if canReopen}
+							<Button variant="ghost" on:click={handleReopen}>
+								<Button.Leading data={arrowPath} slot="leading" />
+								Reopen Project
+							</Button>
+						{/if}
+						{#if canClose}
+							<Button variant="danger" on:click={() => (showCloseModal = true)}
+								>Close Project</Button
+							>
+						{/if}
+						<Button variant="ghost" on:click={() => goto(`/projects/${project?.id}/edit`)}>
+							<Button.Leading data={pencilIcon} slot="leading" />
+							Edit Project
+						</Button>
+					</div>
 				</div>
 				<h1 class="text-2xl font-bold">{project.name}</h1>
 				<p class="text-sm text-gray-600">{project.description ?? ''}</p>
-				<div class="mt-2 flex gap-4 text-xs">
+				<div class="mt-2 flex flex-wrap gap-4 text-xs">
 					<span><strong>Start:</strong> {new Date(project.start_date).toLocaleDateString()}</span>
 					<span><strong>End:</strong> {new Date(project.end_date).toLocaleDateString()}</span>
+					{#if getClosedDate(project)}
+						{@const closedDate = getClosedDate(project)}
+						{#if closedDate}
+							<span
+								><strong>Closed Date:</strong>
+								{new Date(closedDate).toLocaleDateString()}</span
+							>
+						{/if}
+					{/if}
 					<span
 						><strong>Status:</strong>
 						<span
@@ -210,6 +280,16 @@
 		</div>
 	</div>
 </AuthGuard>
+
+<ConfirmationModal
+	open={showCloseModal}
+	title="Close Project"
+	message="Are you sure you want to close this project? This will mark the study as concluded."
+	confirmationLabel="Yes, this project has concluded"
+	loading={isClosing}
+	handleClose={() => (showCloseModal = false)}
+	handleConfirm={handleClose}
+/>
 
 <style>
 	.issues-table-override :global(#selected) {

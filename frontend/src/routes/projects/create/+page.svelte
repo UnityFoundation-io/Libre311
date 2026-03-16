@@ -14,5 +14,7 @@
 		'LIBRE311_ADMIN_EDIT-SUBTENANT'
 	]}
 >
-	<ProjectEditor />
+	<div class="h-full">
+		<ProjectEditor />
+	</div>
 </AuthGuard>

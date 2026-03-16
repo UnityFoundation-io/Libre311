@@ -14,10 +14,13 @@
 
 package app.dto.project;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.core.annotation.Introspected;
 
 import jakarta.validation.constraints.Size;
+import org.openapitools.jackson.nullable.JsonNullable;
+
 import java.time.Instant;
 
 @Introspected
@@ -37,7 +40,8 @@ public class UpdateProjectDTO {
     private Instant endDate;
 
     @JsonProperty("closed_date")
-    private Instant closedDate;
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private JsonNullable<Instant> closedDate = JsonNullable.undefined();
 
     public UpdateProjectDTO() {
     }
@@ -82,11 +86,11 @@ public class UpdateProjectDTO {
         this.endDate = endDate;
     }
 
-    public Instant getClosedDate() {
+    public JsonNullable<Instant> getClosedDate() {
         return closedDate;
     }
 
-    public void setClosedDate(Instant closedDate) {
+    public void setClosedDate(JsonNullable<Instant> closedDate) {
         this.closedDate = closedDate;
     }
 }
