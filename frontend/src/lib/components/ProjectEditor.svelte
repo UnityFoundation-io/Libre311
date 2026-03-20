@@ -108,7 +108,7 @@
 		isEditing && project?.status === 'CLOSED' && new Date(project.end_date) > new Date();
 </script>
 
-<div class="flex h-full flex-col gap-4 p-6">
+<div class="flex h-full min-h-96 flex-col gap-4 p-6">
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-bold">{isEditing ? 'Edit Project' : 'Create Project'}</h1>
 	</div>
@@ -146,7 +146,7 @@
 				/>
 			</div>
 		</div>
-		<div class="w-full flex-grow overflow-hidden rounded-md border">
+		<div class="min-h-64 w-full flex-grow overflow-hidden rounded-md border">
 			<MapComponent bounds={$jurisdiction.bounds}>
 				<BoundaryEditor
 					bounds={currentProject.bounds ?? []}
