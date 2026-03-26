@@ -9,7 +9,11 @@ import type { Libre311Service, JurisdictionConfig, Project } from '$lib/services
 vi.mock('$lib/context/Libre311Context', () => ({
 	useLibre311Service: vi.fn(),
 	useLibre311Context: vi.fn(() => ({
-		linkResolver: {}
+		linkResolver: {},
+		fetchProjectsAdmin: vi.fn(),
+		projects: {
+			subscribe: vi.fn(() => () => {})
+		}
 	}))
 }));
 
@@ -85,5 +89,42 @@ describe('ProjectEditor', () => {
 
 		const saveButton = screen.getByText('Save Project');
 		expect(saveButton).toBeInTheDocument();
+	});
+
+	it('should show reopen confirmation modal when Reopen Project is clicked', async () => {
+		const project: Project = {
+			id: 1,
+			name: 'Closed Project',
+			slug: 'closed-project',
+			description: 'Description',
+			start_date: '2023-01-01T00:00:00Z',
+			end_date: '2099-01-31T00:00:00Z', // Future date so canReopen is true
+			status: 'CLOSED',
+			bounds: [
+				[0, 0],
+				[0, 1],
+				[1, 1],
+				[1, 0],
+				[0, 0]
+			],
+			jurisdiction_id: 'test'
+		};
+		render(ProjectEditor, { props: { project } });
+
+		const reopenButton = screen.getByText('Reopen Project');
+		await fireEvent.click(reopenButton);
+
+		expect(await screen.findByText(/Are you sure you want to reopen this project\?/)).toBeInTheDocument();
+		
+		const checkbox = screen.getByLabelText('Yes, reopen this project');
+		await fireEvent.click(checkbox);
+		
+		const confirmButton = screen.getByText('Confirm');
+		await fireEvent.click(confirmButton);
+		
+		expect(mockLibre311Service.updateProject).toHaveBeenCalledWith({
+			id: 1,
+			closed_date: null
+		});
 	});
 });

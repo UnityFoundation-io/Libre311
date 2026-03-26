@@ -20,6 +20,7 @@
 	let isEditing = !!project;
 	let isSaving = false;
 	let showCloseModal = false;
+	let showReopenModal = false;
 
 	let currentProject: Partial<Project> = project
 		? {
@@ -61,6 +62,7 @@
 				closed_date: null
 			});
 			await fetchProjectsAdmin();
+			showReopenModal = false;
 			goto(`/projects/${project!.id}`);
 		} catch (error) {
 			console.error('Failed to reopen project:', error);
@@ -165,7 +167,7 @@
 				</Button>
 			{/if}
 			{#if canReopen}
-				<Button variant="ghost" on:click={reopenProject} loading={isSaving}>
+				<Button variant="ghost" on:click={() => (showReopenModal = true)} loading={isSaving}>
 					<Button.Leading data={arrowPath} slot="leading" />
 					Reopen Project
 				</Button>
@@ -186,4 +188,14 @@
 	loading={isSaving}
 	handleClose={() => (showCloseModal = false)}
 	handleConfirm={closeProject}
+/>
+
+<ConfirmationModal
+	open={showReopenModal}
+	title="Reopen Project"
+	message="Are you sure you want to reopen this project? This will resume the study."
+	confirmationLabel="Yes, reopen this project"
+	loading={isSaving}
+	handleClose={() => (showReopenModal = false)}
+	handleConfirm={reopenProject}
 />
