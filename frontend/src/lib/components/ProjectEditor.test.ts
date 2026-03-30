@@ -114,14 +114,16 @@ describe('ProjectEditor', () => {
 		const reopenButton = screen.getByText('Reopen Project');
 		await fireEvent.click(reopenButton);
 
-		expect(await screen.findByText(/Are you sure you want to reopen this project\?/)).toBeInTheDocument();
-		
+		expect(
+			await screen.findByText(/Are you sure you want to reopen this project\?/)
+		).toBeInTheDocument();
+
 		const checkbox = screen.getByLabelText('Yes, reopen this project');
 		await fireEvent.click(checkbox);
-		
+
 		const confirmButton = screen.getByText('Confirm');
 		await fireEvent.click(confirmButton);
-		
+
 		expect(mockLibre311Service.updateProject).toHaveBeenCalledWith({
 			id: 1,
 			closed_date: null

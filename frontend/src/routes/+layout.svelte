@@ -127,7 +127,10 @@
 							: jurisdictionConfig.name}
 					</h1>
 					<!-- Hidden measurement element to determine when to wrap -->
-					<h1 bind:this={fullH1El} class="absolute left-0 top-0 w-full whitespace-nowrap overflow-hidden opacity-0">
+					<h1
+						bind:this={fullH1El}
+						class="absolute left-0 top-0 w-full overflow-hidden whitespace-nowrap opacity-0"
+					>
 						{jurisdictionConfig.name}
 					</h1>
 				</div>

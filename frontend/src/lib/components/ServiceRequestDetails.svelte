@@ -61,7 +61,9 @@
 						<Button
 							disabled={!isOnline}
 							class="disabled:cursor-not-allowed"
-							title={isOnline ? 'Suggest Removal of this Service Request' : 'Unavailable while offline'}
+							title={isOnline
+								? 'Suggest Removal of this Service Request'
+								: 'Unavailable while offline'}
 							ariaLabel={!isOnline ? 'Suggest Removal, unavailable while offline' : undefined}
 							on:click={() => (showSuggestionModal = true)}
 							size="sm"

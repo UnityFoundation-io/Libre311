@@ -101,7 +101,9 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 
 	private readonly SERVICE_REQUESTS_CACHE_KEY = 'libre311_service_requests_cache';
 
-	async getServiceRequests(params: FilteredServiceRequestsParams): Promise<ServiceRequestsResponse> {
+	async getServiceRequests(
+		params: FilteredServiceRequestsParams
+	): Promise<ServiceRequestsResponse> {
 		if (this.networkStatus.online) {
 			try {
 				const res = await this.wrapped.getServiceRequests(params);
