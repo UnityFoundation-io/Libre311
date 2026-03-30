@@ -27,7 +27,9 @@
 
 	let project: Project | undefined;
 	let showCloseModal = false;
+	let showReopenModal = false;
 	let isClosing = false;
+	let isReopening = false;
 
 	// Create a new ServiceRequestsContext for this project view
 	const ctx = createServiceRequestsContext(libre311, page, allProjectsStore, undefined, undefined, {
@@ -65,6 +67,7 @@
 
 	async function handleReopen() {
 		if (!project) return;
+		isReopening = true;
 		try {
 			await libre311.updateProject({
 				id: project.id,
@@ -72,8 +75,11 @@
 			});
 			await fetchProjectsAdmin();
 			project = $allProjectsStore.find((p) => p.id === Number($page.params.project_id));
+			showReopenModal = false;
 		} catch (error) {
 			console.error('Failed to reopen project:', error);
+		} finally {
+			isReopening = false;
 		}
 	}
 
@@ -126,7 +132,7 @@
 					</div>
 					<div class="flex gap-2">
 						{#if canReopen}
-							<Button variant="ghost" on:click={handleReopen}>
+							<Button variant="ghost" on:click={() => (showReopenModal = true)}>
 								<Button.Leading data={arrowPath} slot="leading" />
 								Reopen Project
 							</Button>
@@ -289,6 +295,16 @@
 	loading={isClosing}
 	handleClose={() => (showCloseModal = false)}
 	handleConfirm={handleClose}
+/>
+
+<ConfirmationModal
+	open={showReopenModal}
+	title="Reopen Project"
+	message="Are you sure you want to reopen this project? This will resume the study."
+	confirmationLabel="Yes, reopen this project"
+	loading={isReopening}
+	handleClose={() => (showReopenModal = false)}
+	handleConfirm={handleReopen}
 />
 
 <style>

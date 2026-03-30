@@ -68,7 +68,7 @@
 	function trySetupH1Resize() {
 		if (fullH1El && !observer) {
 			observer = new ResizeObserver(() => {
-				useAbbrev = fullH1El.clientHeight > parseFloat(getComputedStyle(fullH1El).lineHeight) + 1;
+				useAbbrev = fullH1El.scrollWidth > fullH1El.clientWidth || fullH1El.clientWidth < 250;
 			});
 			observer.observe(fullH1El);
 		}
@@ -127,7 +127,10 @@
 							: jurisdictionConfig.name}
 					</h1>
 					<!-- Hidden measurement element to determine when to wrap -->
-					<h1 bind:this={fullH1El} class="absolute left-0 top-0 w-full whitespace-normal opacity-0">
+					<h1
+						bind:this={fullH1El}
+						class="absolute left-0 top-0 w-full overflow-hidden whitespace-nowrap opacity-0"
+					>
 						{jurisdictionConfig.name}
 					</h1>
 				</div>

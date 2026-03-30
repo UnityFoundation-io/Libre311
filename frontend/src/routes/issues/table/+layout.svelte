@@ -373,7 +373,9 @@
 		</div>
 	</TableWithDetailPane>
 {:else if $serviceRequestsRes.type === 'failure'}
-	{JSON.stringify($serviceRequestsRes, null, 2)}
+	<div class="flex h-full items-center justify-center p-4 text-center">
+		<p class="text-base">Unable to load service requests. Please check your connection.</p>
+	</div>
 {/if}
 
 <style>
