@@ -115,9 +115,8 @@
 
 	// Preload detail route modules while online so navigation works offline
 	onMount(() => {
-		preloadCode('/issues/map/0', '/issues/list/0').catch(() => {
-			// Ignore — best-effort preload
-		});
+		preloadCode('/issues/map/0').catch(() => {});
+		preloadCode('/issues/list/0').catch(() => {});
 	});
 
 	let listHidden = false;
