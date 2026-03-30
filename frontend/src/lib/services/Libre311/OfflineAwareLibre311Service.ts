@@ -99,8 +99,32 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 		return this.wrapped.getServiceDefinition(params);
 	}
 
-	getServiceRequests(params: FilteredServiceRequestsParams): Promise<ServiceRequestsResponse> {
-		return this.wrapped.getServiceRequests(params);
+	private readonly SERVICE_REQUESTS_CACHE_KEY = 'libre311_service_requests_cache';
+
+	async getServiceRequests(params: FilteredServiceRequestsParams): Promise<ServiceRequestsResponse> {
+		if (this.networkStatus.online) {
+			try {
+				const res = await this.wrapped.getServiceRequests(params);
+				try {
+					localStorage.setItem(this.SERVICE_REQUESTS_CACHE_KEY, JSON.stringify(res));
+				} catch {
+					// Ignore storage errors (e.g. private browsing, quota exceeded)
+				}
+				return res;
+			} catch (networkError) {
+				// Network failed even though reported online — fall back to cache
+				const cached = localStorage.getItem(this.SERVICE_REQUESTS_CACHE_KEY);
+				if (cached) {
+					return JSON.parse(cached);
+				}
+				throw networkError;
+			}
+		}
+		const cached = localStorage.getItem(this.SERVICE_REQUESTS_CACHE_KEY);
+		if (cached) {
+			return JSON.parse(cached);
+		}
+		throw new Error('No cached service requests available offline');
 	}
 
 	getServiceRequest(params: HasServiceRequestId): Promise<ServiceRequest> {

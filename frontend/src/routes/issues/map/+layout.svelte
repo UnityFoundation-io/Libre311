@@ -24,7 +24,8 @@
 	} from '$lib/services/Libre311/Libre311';
 	import type { AsyncResult } from '$lib/services/http';
 
-	import { goto } from '$app/navigation';
+	import { goto, preloadCode } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { page } from '$app/stores';
 	import { matchesDesktopMedia } from '$lib/utils/functions';
@@ -111,6 +112,13 @@
 			goto(linkResolver.issueDetailsMobile($page.url, serviceRequest.service_request_id));
 		}
 	}
+
+	// Preload detail route modules while online so navigation works offline
+	onMount(() => {
+		preloadCode('/issues/map/0', '/issues/list/0').catch(() => {
+			// Ignore — best-effort preload
+		});
+	});
 
 	let listHidden = false;
 	let mapHidden = false;
