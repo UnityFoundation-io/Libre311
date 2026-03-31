@@ -44,5 +44,6 @@ public interface UnityAuthClient {
             @Header("X-Unity-Auth-Internal") String internalToken);
 
     @Post("/password-reset/reset")
-    HttpResponse<?> resetPassword(@Body ResetPasswordRequest request);
+    HttpResponse<?> resetPassword(@Body ResetPasswordRequest request,
+                                  @Header("X-Unity-Auth-Internal") String internalToken);
 }

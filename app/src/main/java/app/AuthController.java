@@ -60,7 +60,7 @@ public class AuthController {
 
     @Post("/reset-password")
     public HttpResponse<?> resetPassword(@Body @Valid ResetPasswordRequest request) {
-        return authService.resetPassword(request);
+        return authService.resetPassword(request, internalToken);
     }
 
     private void sendResetEmail(String email, String token, HttpRequest<?> httpRequest) {

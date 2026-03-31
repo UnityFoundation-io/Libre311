@@ -60,8 +60,8 @@ public class UnityAuthService {
         return client.generateToken(request, internalToken);
     }
 
-    public HttpResponse<?> resetPassword(app.dto.auth.ResetPasswordRequest request) {
-        return client.resetPassword(request);
+    public HttpResponse<?> resetPassword(app.dto.auth.ResetPasswordRequest request, String internalToken) {
+        return client.resetPassword(request, internalToken);
     }
 
     public HttpResponse<UserPermissionsResponse> getUserPermissions(

@@ -65,7 +65,7 @@ public class AuthControllerTest {
     @Test
     void testResetPassword() {
         reset(authService, emailService);
-        when(authService.resetPassword(any()))
+        when(authService.resetPassword(any(), any()))
                 .thenReturn(HttpResponse.ok());
 
         HttpResponse<?> response = client.toBlocking().exchange(
@@ -73,6 +73,6 @@ public class AuthControllerTest {
         );
 
         assertEquals(HttpStatus.OK, response.getStatus());
-        verify(authService).resetPassword(any());
+        verify(authService).resetPassword(any(), any());
     }
 }
