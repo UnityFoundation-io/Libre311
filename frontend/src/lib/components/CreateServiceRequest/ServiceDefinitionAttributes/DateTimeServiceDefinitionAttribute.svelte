@@ -14,7 +14,12 @@
 	showTime
 	class="relative  my-4"
 >
-	<DatePicker.Label slot="label">{attribute.description}</DatePicker.Label>
+	<DatePicker.Label slot="label">
+		{attribute.description}
+		{#if attribute.required}
+			<span class="text-red-600">*</span>
+		{/if}
+	</DatePicker.Label>
 	<!-- TODO: Data Prop -->
 	<DatePicker.Trailing slot="trailing" />
 </DatePicker>
