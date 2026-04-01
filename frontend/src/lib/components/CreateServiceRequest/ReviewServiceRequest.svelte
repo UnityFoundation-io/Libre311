@@ -10,6 +10,7 @@
 	import StepControls from './StepControls.svelte';
 	import { toCreateServiceRequestParams, type CreateServiceRequestUIParams } from './shared';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
+	import { createEventDispatcher } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ServiceRequestStatusBadge from '../ServiceRequestStatusBadge.svelte';
@@ -19,6 +20,7 @@
 	const alertError = useLibre311Context().alertError;
 	const alert = useLibre311Context().alert;
 	const linkResolver = useLibre311Context().linkResolver;
+	const dispatch = createEventDispatcher<{ submitted: void }>();
 
 	export let params: CreateServiceRequestUIParams;
 
@@ -73,6 +75,7 @@
 					description: 'Your service request has been created'
 				});
 			}
+			dispatch('submitted');
 			goto(linkResolver.issuesMap($page.url));
 		} catch (error) {
 			alertError(error);
