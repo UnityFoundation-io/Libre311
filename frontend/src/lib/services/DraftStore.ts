@@ -12,7 +12,7 @@ type StoredDraft = {
 	lat?: string;
 	long?: string;
 	address_string?: string;
-	attributeMapEntries?: [string, ServiceDefinitionAttributeInputUnion][];
+	attributeMapEntries?: [number, ServiceDefinitionAttributeInputUnion][];
 	description?: string;
 	photoBlob?: Blob;
 	service?: CreateServiceRequestUIParams['service'];
