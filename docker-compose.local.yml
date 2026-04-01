@@ -19,6 +19,8 @@ services:
         condition: service_healthy
       local-mail-relay:
         condition: service_started
+      libre311-imageserv:
+        condition: service_started
     environment:
       SMTP_HOST: local-mail-relay
       SMTP_PORT: 1025
@@ -32,6 +34,14 @@ services:
     extends:
       file: app/docker-compose.deps.yml
       service: local-mail-relay
+
+  libre311-imageserv:
+    container_name: libre311-imageserv
+    networks:
+      - unity-network
+    extends:
+      file: app/docker-compose.deps.yml
+      service: libre311-imageserv
 
   libre311-ui-dev:
     container_name: libre311-ui-dev
