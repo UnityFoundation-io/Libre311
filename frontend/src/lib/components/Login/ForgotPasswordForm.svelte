@@ -54,9 +54,7 @@
 				<Input.Label slot="label">Email</Input.Label>
 			</Input>
 
-			<Button type="primary" htmlType="submit" {loading} class="w-full">
-				Send Reset Link
-			</Button>
+			<Button type="primary" htmlType="submit" {loading} class="w-full">Send Reset Link</Button>
 		</form>
 	</div>
 

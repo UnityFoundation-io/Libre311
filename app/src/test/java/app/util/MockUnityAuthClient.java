@@ -49,7 +49,7 @@ public class MockUnityAuthClient implements UnityAuthClient {
     }
 
     @Override
-    public HttpResponse<?> resetPassword(ResetPasswordRequest request) {
+    public HttpResponse<?> resetPassword(ResetPasswordRequest request, String internalToken) {
         return HttpResponse.notFound();
     }
 

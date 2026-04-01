@@ -4,8 +4,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { Card, Button, Input, Alert } from 'stwui';
-	import messages from '$media/messages.json';
-
 	const authService = useLibre311Service();
 	const token = $page.url.searchParams.get('token');
 
@@ -21,7 +19,7 @@
 
 		passwordInput = passwordValidator(passwordInput);
 		if (passwordInput.value !== confirmPasswordInput.value) {
-			confirmPasswordInput.type = 'error';
+			confirmPasswordInput.type = 'invalid';
 			confirmPasswordInput.error = 'Passwords do not match';
 		} else {
 			confirmPasswordInput.type = 'valid';
@@ -95,9 +93,7 @@
 						<Input.Label slot="label">Confirm New Password</Input.Label>
 					</Input>
 
-					<Button type="primary" htmlType="submit" {loading} class="w-full">
-						Reset Password
-					</Button>
+					<Button type="primary" htmlType="submit" {loading} class="w-full">Reset Password</Button>
 				</form>
 			{/if}
 		</div>

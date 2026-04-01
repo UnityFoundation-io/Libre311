@@ -15,6 +15,7 @@
 package app.dto.servicerequest;
 
 import app.recaptcha.RecaptchaRequest;
+import io.micronaut.core.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
