@@ -32,7 +32,7 @@
 			return '[ ]'; // Checkbox indicator for multiple choice
 		}
 		if (datatype === 'singlevaluelist') {
-			return 'O'; // Circle indicator for dropdown
+			return 'O'; // Circle indicator for single choice
 		}
 		return '';
 	}

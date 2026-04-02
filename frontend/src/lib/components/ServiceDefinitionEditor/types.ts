@@ -12,7 +12,7 @@ export type AttributeTypeLabel =
 	| 'Short answer'
 	| 'Paragraph'
 	| 'Multiple choice'
-	| 'Dropdown'
+	| 'Single choice'
 	| 'Number'
 	| 'Date';
 
@@ -23,7 +23,7 @@ export const DATATYPE_MAP: Record<AttributeTypeLabel, DatatypeUnion> = {
 	'Short answer': 'string',
 	Paragraph: 'text',
 	'Multiple choice': 'multivaluelist',
-	Dropdown: 'singlevaluelist',
+	'Single choice': 'singlevaluelist',
 	Number: 'number',
 	Date: 'datetime'
 };
@@ -35,7 +35,7 @@ export const DATATYPE_LABEL_MAP: Record<DatatypeUnion, AttributeTypeLabel> = {
 	string: 'Short answer',
 	text: 'Paragraph',
 	multivaluelist: 'Multiple choice',
-	singlevaluelist: 'Dropdown',
+	singlevaluelist: 'Single choice',
 	number: 'Number',
 	datetime: 'Date'
 };
@@ -47,7 +47,7 @@ export const ATTRIBUTE_TYPE_OPTIONS: AttributeTypeLabel[] = [
 	'Short answer',
 	'Paragraph',
 	'Multiple choice',
-	'Dropdown',
+	'Single choice',
 	'Number',
 	'Date'
 ];

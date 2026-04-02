@@ -994,15 +994,6 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 		const definition = await this.cachedServiceDefinitions?.get(params.service_code);
 
-		// Sort attribute values alphabetically for consistent ordering
-		if (definition?.attributes) {
-			definition.attributes.forEach((attr) => {
-				if ('values' in attr && attr.values) {
-					attr.values.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-				}
-			});
-		}
-
 		if (definition) {
 			return definition;
 		} else {
