@@ -41,6 +41,7 @@
 		hamlet?: string;
 		county?: string;
 		state?: string;
+		'ISO3166-2-lvl4'?: string;
 		postcode?: string;
 	}
 
@@ -57,14 +58,16 @@
 		const streetNumber = address.house_number;
 		const streetName = address.road;
 		const city = address.city ?? address.town ?? address.village ?? address.hamlet;
-		const state = address.state;
+		const stateCode = address['ISO3166-2-lvl4']?.split('-')[1];
+		const state = stateCode ?? address.state;
 		const zip = address.postcode;
 
 		if (!streetName) return null;
 
-		result.label = [streetNumber ? `${streetNumber} ${streetName}` : streetName, city, state, zip]
-			.filter(Boolean)
-			.join(', ');
+		const street = streetNumber ? `${streetNumber} ${streetName}` : streetName;
+		const cityLine = [city, [state, zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+
+		result.label = [street, cityLine].filter(Boolean).join(', ');
 
 		return result;
 	}
@@ -92,6 +95,10 @@
 		map.addControl(control);
 		map.on('geosearch/showlocation', (e) => {
 			if (isGeosearchShowLocationEvent(e)) {
+				const formatted = formatAddress(e.location as unknown as AddressSearchResult);
+				if (formatted?.label) {
+					e.location.label = formatted.label;
+				}
 				dispatch('geosearch', e);
 			} else {
 				throw new Error('leaflet-geosearch API Change');
