@@ -151,9 +151,7 @@ export function createLibre311Context(props: Libre311ContextProviderProps & Libr
 		const isProtectedRoute =
 			window.location.pathname.startsWith('/admin') ||
 			window.location.pathname.startsWith('/groups') ||
-			window.location.pathname.startsWith('/projects') ||
-			window.location.pathname.startsWith('/policies') ||
-			window.location.pathname === '/issue/create';
+			window.location.pathname.startsWith('/projects');
 
 		if (!unityAuthService.getLoginData() && isProtectedRoute) {
 			goto('/');

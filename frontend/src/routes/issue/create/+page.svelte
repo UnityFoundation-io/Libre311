@@ -20,6 +20,8 @@
 		type CreateServiceRequestUIParams
 	} from '$lib/components/CreateServiceRequest/shared';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { createDraftStore } from '$lib/services/DraftStore';
 	import MapGeosearch from '$lib/components/MapGeosearch.svelte';
 	import type { ComponentEvents } from 'svelte';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
@@ -37,6 +39,8 @@
 	const libre311 = useLibre311Service();
 	const libre311Context = useLibre311Context();
 	const linkResolver = libre311Context.linkResolver;
+	const draftStore = createDraftStore();
+	let draftLoaded = false;
 
 	const alertError = libre311Context.alertError;
 	const isOnline = libre311Context.networkStatus.isOnline;
@@ -121,10 +125,26 @@
 		return !!(partial?.address_string && partial?.attributeMap && partial?.service);
 	}
 
-	// Redirect user because they navigated to an invalid step
-	$: if (step == CreateServiceRequestSteps.REVIEW && !isCreateServiceRequestUIParams(params)) {
-		goto('/issue/create');
-	}
+	onMount(async () => {
+		const draft = await draftStore.load();
+		if (draft) {
+			params = { ...params, ...draft.params };
+			if (draft.params.lat && draft.params.long) {
+				centerPos = [Number(draft.params.lat), Number(draft.params.long)];
+			}
+			if (draft.step > CreateServiceRequestSteps.LOCATION) {
+				const searchParams = new URLSearchParams($page.url.searchParams);
+				searchParams.set('step', String(draft.step));
+				if (draft.params.project_slug) {
+					searchParams.set('project_slug', draft.params.project_slug);
+				}
+				await goto(`/issue/create?${searchParams.toString()}`);
+			}
+		}
+		draftLoaded = true;
+	});
+
+	$: if (draftLoaded && params.lat) draftStore.save(step, params);
 </script>
 
 <CreateServiceRequestLayout {step}>
@@ -140,7 +160,7 @@
 			{#if step === CreateServiceRequestSteps.LOCATION}
 				<SelectLocation on:confirmLocation={confirmLocation} />
 			{:else if step === CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
-				<ReviewServiceRequest {params} />
+				<ReviewServiceRequest {params} on:submitted={() => draftStore.clear()} />
 			{:else}
 				<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
 			{/if}
