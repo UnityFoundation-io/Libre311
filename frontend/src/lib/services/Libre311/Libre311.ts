@@ -1159,13 +1159,18 @@ export class Libre311ServiceImpl implements Libre311Service {
 	async createServiceRequest(
 		params: CreateServiceRequestParams
 	): Promise<CreateServiceRequestResponse> {
-		const lat = parseFloat(params.lat);
-		const long = parseFloat(params.long);
-		try {
-			const revGeocodeResponse = await this.reverseGeocode([lat, long]);
-			params.address_string = getFormattedAddress(revGeocodeResponse);
-		} catch {
-			params.address_string = `Location: ${lat.toFixed(6)}, ${long.toFixed(6)}`;
+		// Only geocode here when the address is still a placeholder — this handles offline-queued
+		// requests that couldn't geocode at confirm time. Online submissions have already geocoded
+		// in confirmLocation() and will have a real address_string.
+		if (!params.address_string || params.address_string.startsWith('Location: ')) {
+			const lat = parseFloat(params.lat);
+			const long = parseFloat(params.long);
+			try {
+				const revGeocodeResponse = await this.reverseGeocode([lat, long]);
+				params.address_string = getFormattedAddress(revGeocodeResponse);
+			} catch {
+				params.address_string = `Location: ${lat.toFixed(6)}, ${long.toFixed(6)}`;
+			}
 		}
 
 		const paramsWithRecapta = await this.recaptchaService.wrapWithRecaptcha(
