@@ -24,8 +24,8 @@ describe('AttributeCard - Type Label Mapping', () => {
 		expect(DATATYPE_LABEL_MAP['multivaluelist']).toBe('Multiple choice');
 	});
 
-	it('should map singlevaluelist to Dropdown', () => {
-		expect(DATATYPE_LABEL_MAP['singlevaluelist']).toBe('Dropdown');
+	it('should map singlevaluelist to Single choice', () => {
+		expect(DATATYPE_LABEL_MAP['singlevaluelist']).toBe('Single choice');
 	});
 
 	it('should map number datatype to Number', () => {

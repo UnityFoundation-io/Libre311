@@ -153,10 +153,7 @@
 		};
 
 		if (isList) {
-			// Sort options alphabetically by name for consistent ordering
-			data.values = [...values].sort((a, b) =>
-				a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-			);
+			data.values = [...values];
 		}
 
 		dispatch('save', data);

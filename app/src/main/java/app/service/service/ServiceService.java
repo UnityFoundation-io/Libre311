@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.transaction.Transactional;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -269,6 +270,7 @@ public class ServiceService {
                 Set<AttributeValue> attributeValues = serviceDefinitionAttributeEntity.getAttributeValues();
                 if (attributeValues != null) {
                     serviceDefinitionAttributeDTO.setValues(attributeValues.stream()
+                            .sorted(Comparator.comparingLong(AttributeValue::getId))
                             .map(attributeValueEntity -> new AttributeValueDTO(
                                     attributeValueEntity.getId().toString(),
                                     attributeValueEntity.getValueName()))
