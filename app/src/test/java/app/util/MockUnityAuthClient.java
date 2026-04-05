@@ -14,6 +14,9 @@
 
 package app.util;
 
+import app.dto.auth.GenerateTokenRequest;
+import app.dto.auth.GenerateTokenResponse;
+import app.dto.auth.ResetPasswordRequest;
 import app.security.HasPermissionRequest;
 import app.security.HasPermissionResponse;
 import app.security.UnityAuthClient;
@@ -38,6 +41,16 @@ public class MockUnityAuthClient implements UnityAuthClient {
     public HttpResponse<UserPermissionsResponse> getUserPermissions(
         UnityAuthUserPermissionsRequest requestDTO, String authorizationHeader) {
         return userPermissionsResponse;
+    }
+
+    @Override
+    public HttpResponse<GenerateTokenResponse> generateToken(GenerateTokenRequest request, String internalToken) {
+        return HttpResponse.notFound();
+    }
+
+    @Override
+    public HttpResponse<?> resetPassword(ResetPasswordRequest request, String internalToken) {
+        return HttpResponse.notFound();
     }
 
     public HttpResponse<HasPermissionResponse> getResponse() {

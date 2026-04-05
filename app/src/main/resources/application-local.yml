@@ -1,5 +1,9 @@
----
 micronaut:
+  object-storage:
+    local:
+      default:
+        enabled: true
+        path: image-store
   http:
     services:
       auth:
@@ -28,9 +32,33 @@ micronaut:
             - http://libre311-ui:3000
             - http://libre311-ui-dev:3000
     port: 8080
+  email:
+    from:
+      email: ${EMAIL_FROM_ADDRESS:noreply@libre311.test}
+      name: ${EMAIL_FROM_NAME:Libre311}
+
+javamail:
+  enabled: true
+  properties:
+    mail:
+      smtp:
+        host: ${SMTP_HOST:localhost}
+        port: ${SMTP_PORT:1025}
+        auth: true
+  authentication:
+    username: ${SMTP_USERNAME:unity}
+    password: ${SMTP_PASSWORD:password}
 ---
 app:
   service-id: ${LIBRE311_SERVICE_ID:1}
+  base-url: ${APP_BASE_URL:http://localhost:3000}
+  image-storage:
+    bucket: images
+    bucket-url-format: http://localhost:7000/%s/
+
+unity:
+  auth:
+    internal-token: ${UNITY_AUTH_INTERNAL_TOKEN:unity-internal-secret}
 
 datasources:
   default:
@@ -46,3 +74,6 @@ flyway:
       locations:
         - classpath:db/migration
         - classpath:local
+logger:
+  levels:
+    app: DEBUG

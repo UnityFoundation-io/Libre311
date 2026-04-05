@@ -658,6 +658,8 @@ export interface Libre311Service extends Open311Service {
 	updateProject(params: UpdateProjectParams): Promise<Project>;
 	updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig>;
 	updatePolicyContent(params: UpdatePolicyContentParams): Promise<void>;
+	forgotPassword(email: string): Promise<void>;
+	resetPassword(token: string, password: string): Promise<void>;
 }
 
 const Libre311ServicePropsSchema = z.object({
@@ -728,7 +730,9 @@ const ROUTES = {
 		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
 	patchJurisdiction2: (jurisdictionId: string) => `/tenant-admin/jurisdictions/${jurisdictionId}`,
 	patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
-		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`
+		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`,
+	postForgotPassword: '/forgot-password',
+	postResetPassword: '/reset-password'
 };
 
 export async function getJurisdictionConfig(baseURL: string): Promise<JurisdictionConfig> {
@@ -1257,6 +1261,17 @@ export class Libre311ServiceImpl implements Libre311Service {
 
 		const res = await this.axiosInstance.post<unknown>('/image', formData);
 		return urlSchema.parse(res.data);
+	}
+
+	async forgotPassword(email: string): Promise<void> {
+		await this.axiosInstance.post(ROUTES.postForgotPassword, { email });
+	}
+
+	async resetPassword(token: string, password: string): Promise<void> {
+		await this.axiosInstance.post(ROUTES.postResetPassword, {
+			token,
+			newPassword: password
+		});
 	}
 
 	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void {

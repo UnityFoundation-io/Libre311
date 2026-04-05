@@ -53,13 +53,32 @@ micronaut:
   data:
     pageable:
       size-parameter-name: page_size
+  email:
+    from:
+      email: ${EMAIL_FROM_ADDRESS:noreply@libre311.test}
+      name: ${EMAIL_FROM_NAME:Libre311}
+
+javamail:
+  enabled: true
+  properties:
+    mail:
+      smtp:
+        host: ${SMTP_HOST}
+        port: ${SMTP_PORT:587}
+        auth: ${SMTP_AUTH:true}
+        starttls:
+          enable: ${SMTP_STARTTLS:true}
+  authentication:
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+
 datasources:
   default:
     db-type: ${LIBRE311_DB_TYPE}
 jpa:
   default:
     entity-scan:
-      packages: "app.model"
+      packages: "app"
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -74,8 +93,14 @@ netty:
   default:
     allocator:
       max-order: 3
+
+unity:
+  auth:
+    internal-token: ${UNITY_AUTH_INTERNAL_TOKEN}
 app:
   service-id: ${LIBRE311_SERVICE_ID}
+  base-url: ${APP_BASE_URL}
+
   discovery:
     changeset: ${LIBRE311_DISCOVERY_CHANGESET_DATETIME:`2012-09-14T08:00:00-07:00`}
     contact: ${LIBRE311_DISCOVERY_CONTACT_MESSAGE:`Contact admin@test.test for assistance`}

@@ -33,6 +33,7 @@ dependencies {
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
     annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
     compileOnly("org.hibernate:hibernate-jpamodelgen:6.6.32.Final")
+    implementation("io.micronaut.email:micronaut-email")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
@@ -48,14 +49,20 @@ dependencies {
     implementation("io.micronaut.objectstorage:micronaut-object-storage-gcp")
     implementation("io.micronaut.objectstorage:micronaut-object-storage-aws")
     implementation("io.micronaut.objectstorage:micronaut-object-storage-azure")
+    implementation("io.micronaut.objectstorage:micronaut-object-storage-local")
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.flyway:micronaut-flyway")
+    implementation("io.micronaut.email:micronaut-email-javamail")
+    implementation("jakarta.mail:jakarta.mail-api:2.1.3")
+    runtimeOnly("org.eclipse.angus:angus-mail:2.0.3")
 
     implementation('com.google.cloud:google-cloud-vision:3.35.0')
     // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html
     implementation('org.hibernate:hibernate-spatial:6.6.32.Final')
     implementation("org.apache.commons:commons-csv:1.10.0")
+
+    testImplementation("org.mockito:mockito-core")
 
     String databaseSelection = System.getenv("LIBRE311_DATABASE_TYPE") ?: "mysql"
     Boolean cloudDb = Boolean.parseBoolean(System.getenv("LIBRE311_CLOUD_DB"))
