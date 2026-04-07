@@ -65,8 +65,7 @@
 		</div>
 
 		<div class="m-4">
-			<!-- eslint-disable-next-line svelte/valid-compile -->
-			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
+			<a class="inline-block min-h-[24px] text-sm" href="/forgot-password"
 				>{messages['login']['forgot_password']}</a
 			>
 		</div>

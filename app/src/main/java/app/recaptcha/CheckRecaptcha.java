@@ -14,15 +14,18 @@
 
 package app.recaptcha;
 
-import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.Post;
-import io.micronaut.http.client.annotation.Client;
+import io.micronaut.aop.Around;
 
-import java.util.Map;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-@Client("https://www.google.com/recaptcha/api/siteverify")
-public interface ReCaptchaClient {
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    @Post(produces = MediaType.APPLICATION_FORM_URLENCODED)
-    Map<Object, Object> verifyReCaptcha(String secret, String response);
+@Documented
+@Retention(RUNTIME) // (1)
+@Target(METHOD) // (2)
+@Around
+public @interface CheckRecaptcha {
 }
