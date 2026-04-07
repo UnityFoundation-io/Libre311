@@ -3,6 +3,8 @@ package app;
 import app.dto.auth.GenerateTokenRequest;
 import app.dto.auth.GenerateTokenResponse;
 import app.dto.auth.ResetPasswordRequest;
+import app.model.jurisdiction.Jurisdiction;
+import app.model.jurisdiction.JurisdictionRepository;
 import app.security.UnityAuthService;
 import app.service.email.EmailService;
 import io.micronaut.context.annotation.Property;
@@ -16,6 +18,8 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.email.Email;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,9 +50,19 @@ public class AuthControllerTest {
         return mock(EmailService.class);
     }
 
+    @Inject
+    JurisdictionRepository jurisdictionRepository;
+
+    @MockBean(JurisdictionRepository.class)
+    JurisdictionRepository jurisdictionRepository() {
+        return mock(JurisdictionRepository.class);
+    }
+
     @Test
     void testForgotPassword() {
-        reset(authService, emailService);
+        reset(authService, emailService, jurisdictionRepository);
+        when(jurisdictionRepository.findByRemoteHostsNameEquals("my-ui.test"))
+                .thenReturn(Optional.of(new Jurisdiction()));
         when(authService.generateToken(any(), any()))
                 .thenReturn(HttpResponse.ok(new GenerateTokenResponse("test-token")));
 
