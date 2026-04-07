@@ -58,7 +58,7 @@ app:
 
 unity:
   auth:
-    internal-token: ${UNITY_AUTH_INTERNAL_TOKEN:unity-internal-secret}
+    internal-token: unity-internal-secret
 
 datasources:
   default:
