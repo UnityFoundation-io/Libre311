@@ -17,6 +17,7 @@
 	import RemovalSuggestionsList from './RemovalSuggestionsList.svelte';
 	import { onMount } from 'svelte';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+	import { Modal, Portal } from 'stwui';
 
 	const libre311 = useLibre311Service();
 	const alertError = useLibre311Context().alertError;
@@ -31,6 +32,9 @@
 	let isUpdateButtonClicked: boolean = false;
 	let showDeleteModal = false;
 	let isDeleting = false;
+	let isValidating = false;
+	let showValidateModal = false;
+	let showValidationInfoModal = false;
 	let projects: Project[] = [];
 
 	$: if ($page.url) {
@@ -76,6 +80,23 @@
 		} finally {
 			isDeleting = false;
 			showDeleteModal = false;
+		}
+	}
+
+	async function manuallyValidate() {
+		isValidating = true;
+		try {
+			const updatedRequest = await libre311.updateServiceRequest({
+				...serviceRequest,
+				attribute_validation: 'APPROVED'
+			});
+			refreshSelectedServiceRequest(updatedRequest);
+			showValidateModal = false;
+			alert({ type: 'success', title: 'Success', description: 'Request marked as validated' });
+		} catch (error) {
+			alertError(error);
+		} finally {
+			isValidating = false;
 		}
 	}
 
@@ -142,6 +163,25 @@
 				<div class="mb-2">
 					<p class="text-sm">{serviceRequest.address}</p>
 				</div>
+
+				<!-- ATTRIBUTE VALIDATION WARNING -->
+				{#if serviceRequest.attribute_validation === 'NEEDS_REVIEW'}
+					<div class="mb-2 flex items-center gap-2 rounded bg-yellow-100 px-3 py-2 text-sm text-yellow-800">
+						<span class="flex-1">Questions / answers were unable to validate.</span>
+						<button
+							class="rounded-full p-0.5 hover:bg-yellow-200"
+							title="Why might this happen?"
+							on:click={() => (showValidationInfoModal = true)}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+								<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+							</svg>
+						</button>
+						<Button type="default" on:click={() => (showValidateModal = true)}>
+							Manually Validate
+						</Button>
+					</div>
+				{/if}
 
 				{#if serviceRequest.selected_values}
 					<div class="mb-1">
@@ -286,6 +326,45 @@
 	handleConfirm={confirmDelete}
 	loading={isDeleting}
 />
+
+<ConfirmationModal
+	open={showValidateModal}
+	title="Manually Validate Request"
+	message="Mark this request as manually reviewed. Staff are responsible for verifying the submitted questions and answers are accurate."
+	confirmationLabel="I have reviewed the questions / answers on this request"
+	cancelLabel="Cancel"
+	confirmLabel="Validate"
+	loading={isValidating}
+	handleClose={() => (showValidateModal = false)}
+	handleConfirm={manuallyValidate}
+/>
+
+{#if showValidationInfoModal}
+	<Portal>
+		<Modal handleClose={() => (showValidationInfoModal = false)}>
+			<Modal.Content slot="content">
+				<Modal.Content.Header slot="header">Why can't we validate?</Modal.Content.Header>
+				<Modal.Content.Body slot="body">
+					<p class="p-4 text-sm">
+						This request was submitted with a set of questions and answers that no longer match the
+						current service definition. This can happen when a request is drafted or submitted while
+						offline, and the service questions are changed by an admin before the request syncs — or
+						when a draft is resumed after the service definition has been updated.
+					</p>
+					<p class="p-4 pt-0 text-sm">
+						Please review the submitted details manually and use <strong>Manually Validate</strong> to
+						mark the request as reviewed.
+					</p>
+				</Modal.Content.Body>
+				<Modal.Content.Footer slot="footer">
+					<div class="flex justify-end">
+						<Button on:click={() => (showValidationInfoModal = false)} type="primary">Close</Button>
+					</div>
+				</Modal.Content.Footer>
+			</Modal.Content>
+		</Modal>
+	</Portal>
+{/if}
 
 <style>
 	h1 {

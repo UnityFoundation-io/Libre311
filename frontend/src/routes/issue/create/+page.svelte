@@ -242,6 +242,7 @@
 	message="We found a saved draft. Would you like to continue where you left off?"
 	cancelLabel="No, Start Over"
 	confirmLabel="Yes, Resume"
+	cancelType="default"
 	handleClose={handleRestoreDecline}
 	handleConfirm={handleRestoreConfirm}
 />

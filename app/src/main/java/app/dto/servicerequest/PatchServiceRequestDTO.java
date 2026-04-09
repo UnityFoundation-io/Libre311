@@ -14,6 +14,7 @@
 
 package app.dto.servicerequest;
 
+import app.model.servicerequest.AttributeValidationStatus;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -62,6 +63,8 @@ public class PatchServiceRequestDTO {
     @JsonProperty("project_id")
     private Long projectId;
 
+    @JsonProperty("attribute_validation")
+    private AttributeValidationStatus attributeValidation;
 
     public PatchServiceRequestDTO() {}
 
@@ -135,6 +138,14 @@ public class PatchServiceRequestDTO {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public AttributeValidationStatus getAttributeValidation() {
+        return attributeValidation;
+    }
+
+    public void setAttributeValidation(AttributeValidationStatus attributeValidation) {
+        this.attributeValidation = attributeValidation;
     }
 
     // see https://github.com/micronaut-projects/micronaut-core/issues/1853

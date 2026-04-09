@@ -14,6 +14,7 @@
 
 package app.dto.servicerequest;
 
+import app.model.servicerequest.AttributeValidationStatus;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,6 +50,9 @@ public class SensitiveServiceRequestDTO extends ServiceRequestDTO {
 
     private String phone;
 
+    @JsonProperty("attribute_validation")
+    private AttributeValidationStatus attributeValidation;
+
     public SensitiveServiceRequestDTO() {
     }
 
@@ -63,6 +67,7 @@ public class SensitiveServiceRequestDTO extends ServiceRequestDTO {
         this.firstName = serviceRequest.getFirstName();
         this.lastName = serviceRequest.getLastName();
         this.phone = serviceRequest.getPhone();
+        this.attributeValidation = serviceRequest.getAttributeValidation();
     }
 
     public String getStatusNotes() {
@@ -135,6 +140,14 @@ public class SensitiveServiceRequestDTO extends ServiceRequestDTO {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public AttributeValidationStatus getAttributeValidation() {
+        return attributeValidation;
+    }
+
+    public void setAttributeValidation(AttributeValidationStatus attributeValidation) {
+        this.attributeValidation = attributeValidation;
     }
 
     // see https://github.com/micronaut-projects/micronaut-core/issues/1853

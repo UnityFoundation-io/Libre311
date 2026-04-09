@@ -372,7 +372,8 @@ export const ServiceRequestSchema = z
 		removal_suggestions_count: z.number().optional(),
 		project_id: z.number().optional(),
 		project_name: z.string().optional(),
-		project_slug: z.string().optional()
+		project_slug: z.string().optional(),
+		attribute_validation: z.enum(['VALIDATED', 'NEEDS_REVIEW', 'APPROVED']).optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)

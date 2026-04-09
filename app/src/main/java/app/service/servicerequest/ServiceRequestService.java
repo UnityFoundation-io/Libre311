@@ -31,6 +31,7 @@ import app.model.service.ServiceRepository;
 import app.model.servicedefinition.AttributeValue;
 import app.model.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
+import app.model.servicerequest.AttributeValidationStatus;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRemovalSuggestion;
@@ -208,7 +209,8 @@ public class ServiceRequestService {
         if (!serviceDefinitionAttributes.isEmpty()) {
             List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(serviceRequestDTO.getAttributes(), serviceDefinitionAttributes);
             if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
-                throw new InvalidServiceRequestException("Submitted Service Request does not contain required attribute values.");
+                LOG.warn("Service request is missing required attribute values — flagging for review.");
+                serviceRequest.setAttributeValidation(AttributeValidationStatus.NEEDS_REVIEW);
             }
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -464,6 +466,9 @@ public class ServiceRequestService {
         }
         if (serviceRequestDTO.getStatus_notes() != null) {
             serviceRequest.setStatusNotes(serviceRequestDTO.getStatus_notes());
+        }
+        if (serviceRequestDTO.getAttributeValidation() != null) {
+            serviceRequest.setAttributeValidation(serviceRequestDTO.getAttributeValidation());
         }
     }
 

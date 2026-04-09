@@ -138,6 +138,9 @@ public class ServiceRequest {
     @Column(name = "client_request_id", unique = true, length = 36)
     private String clientRequestId;
 
+    @Enumerated(EnumType.STRING)
+    private AttributeValidationStatus attributeValidation = AttributeValidationStatus.VALIDATED;
+
     public ServiceRequest() {
     }
 
@@ -401,6 +404,14 @@ public class ServiceRequest {
 
     public void setClientRequestId(@Nullable String clientRequestId) {
         this.clientRequestId = clientRequestId;
+    }
+
+    public AttributeValidationStatus getAttributeValidation() {
+        return attributeValidation;
+    }
+
+    public void setAttributeValidation(AttributeValidationStatus attributeValidation) {
+        this.attributeValidation = attributeValidation;
     }
 
 }
