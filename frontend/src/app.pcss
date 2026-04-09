@@ -108,6 +108,11 @@ textarea:focus-visible {
 	border: 3px solid hsl(var(--primary));
 }
 
+/* Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */
+.leaflet-control-geosearch form input {
+	font-size: 16px;
+}
+
 /* Ensure focus ring is visible on all interactive elements */
 [tabindex]:focus-visible:not([tabindex='-1']) {
 	outline: 2px solid hsl(var(--primary));
