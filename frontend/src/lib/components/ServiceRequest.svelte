@@ -178,7 +178,7 @@
 							</svg>
 						</button>
 						<Button type="default" on:click={() => (showValidateModal = true)}>
-							Manually Validate
+							Validate
 						</Button>
 					</div>
 				{/if}
@@ -330,7 +330,7 @@
 <ConfirmationModal
 	open={showValidateModal}
 	title="Manually Validate Request"
-	message="Mark this request as manually reviewed. Staff are responsible for verifying the submitted questions and answers are accurate."
+	message="Mark this request as reviewed. Staff are responsible for verifying the submitted questions and answers are accurate."
 	confirmationLabel="I have reviewed the questions / answers on this request"
 	cancelLabel="Cancel"
 	confirmLabel="Validate"
@@ -345,16 +345,22 @@
 			<Modal.Content slot="content">
 				<Modal.Content.Header slot="header">Why can't we validate?</Modal.Content.Header>
 				<Modal.Content.Body slot="body">
-					<p class="p-4 text-sm">
-						This request was submitted with a set of questions and answers that no longer match the
-						current service definition. This can happen when a request is drafted or submitted while
-						offline, and the service questions are changed by an admin before the request syncs — or
-						when a draft is resumed after the service definition has been updated.
-					</p>
-					<p class="p-4 pt-0 text-sm">
-						Please review the submitted details manually and use <strong>Manually Validate</strong> to
-						mark the request as reviewed.
-					</p>
+					<div class="p-4 text-sm">
+						<p class="mb-3">
+							The questions and answers on this request no longer match the current service
+							definition. Common causes:
+						</p>
+						<ul class="mb-3 list-inside list-disc space-y-1">
+							<li>The request was drafted, then service questions were changed before it was submitted.</li>
+							<li>The request was submitted while offline and synced after the service definition changed.</li>
+						</ul>
+						<p class="font-medium">What to do:</p>
+						<ol class="mt-1 list-inside list-decimal space-y-1">
+							<li>Review the submitted answers below.</li>
+							<li>Confirm they are accurate and complete enough to action.</li>
+							<li>Click <strong>Validate</strong> and check the confirmation box.</li>
+						</ol>
+					</div>
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
 					<div class="flex justify-end">
