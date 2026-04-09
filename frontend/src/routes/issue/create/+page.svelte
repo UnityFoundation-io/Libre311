@@ -33,6 +33,7 @@
 	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
 	import messages from '$media/messages.json';
 	import * as turf from '@turf/turf';
 
@@ -41,6 +42,8 @@
 	const linkResolver = libre311Context.linkResolver;
 	const draftStore = createDraftStore();
 	let draftLoaded = false;
+	let showRestoreModal = false;
+	let pendingDraft: Awaited<ReturnType<typeof draftStore.load>> = null;
 
 	const alertError = libre311Context.alertError;
 	const isOnline = libre311Context.networkStatus.isOnline;
@@ -134,23 +137,47 @@
 		return !!(partial?.address_string && partial?.attributeMap && partial?.service);
 	}
 
+	async function applyDraft() {
+		if (!pendingDraft) return;
+		params = { ...params, ...pendingDraft.params };
+		if (pendingDraft.params.lat && pendingDraft.params.long) {
+			centerPos = [Number(pendingDraft.params.lat), Number(pendingDraft.params.long)];
+		}
+		if (pendingDraft.step > CreateServiceRequestSteps.LOCATION) {
+			const searchParams = new URLSearchParams($page.url.searchParams);
+			searchParams.set('step', String(pendingDraft.step));
+			if (pendingDraft.params.project_slug) {
+				searchParams.set('project_slug', pendingDraft.params.project_slug);
+			}
+			await goto(`/issue/create?${searchParams.toString()}`);
+		}
+	}
+
+	async function handleRestoreConfirm() {
+		showRestoreModal = false;
+		await applyDraft();
+		pendingDraft = null;
+		draftLoaded = true;
+	}
+
+	async function handleRestoreDecline() {
+		showRestoreModal = false;
+		await draftStore.clear();
+		pendingDraft = null;
+		const searchParams = new URLSearchParams($page.url.searchParams);
+		searchParams.set('step', '0');
+		await goto(`/issue/create?${searchParams.toString()}`);
+		draftLoaded = true;
+	}
+
 	onMount(async () => {
 		const draft = await draftStore.load();
 		if (draft) {
-			params = { ...params, ...draft.params };
-			if (draft.params.lat && draft.params.long) {
-				centerPos = [Number(draft.params.lat), Number(draft.params.long)];
-			}
-			if (draft.step > CreateServiceRequestSteps.LOCATION) {
-				const searchParams = new URLSearchParams($page.url.searchParams);
-				searchParams.set('step', String(draft.step));
-				if (draft.params.project_slug) {
-					searchParams.set('project_slug', draft.params.project_slug);
-				}
-				await goto(`/issue/create?${searchParams.toString()}`);
-			}
+			pendingDraft = draft;
+			showRestoreModal = true;
+		} else {
+			draftLoaded = true;
 		}
-		draftLoaded = true;
 	});
 
 	$: if (draftLoaded && params.lat) draftStore.save(step, params);
@@ -208,3 +235,13 @@
 		</Breakpoint>
 	</div>
 </CreateServiceRequestLayout>
+
+<ConfirmationModal
+	open={showRestoreModal}
+	title="Resume Previous Request?"
+	message="We found a saved draft. Would you like to continue where you left off?"
+	cancelLabel="No, Start Over"
+	confirmLabel="Yes, Resume"
+	handleClose={handleRestoreDecline}
+	handleConfirm={handleRestoreConfirm}
+/>

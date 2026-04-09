@@ -9,6 +9,8 @@
 	export let handleConfirm: () => void;
 	export let loading = false;
 	export let confirmationLabel: string | undefined = undefined;
+	export let cancelLabel = 'Cancel';
+	export let confirmLabel = 'Confirm';
 
 	let confirmed = !confirmationLabel;
 
@@ -43,12 +45,12 @@
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
 					<div class="flex w-full justify-end gap-2">
-						<Button id="cancel_dismiss" on:click={handleClose} type="ghost">Cancel</Button>
+						<Button id="cancel_dismiss" on:click={handleClose} type="ghost">{cancelLabel}</Button>
 						<Button
 							on:click={handleConfirm}
 							variant="primary"
 							{loading}
-							disabled={!confirmed || loading}>Confirm</Button
+							disabled={!confirmed || loading}>{confirmLabel}</Button
 						>
 					</div>
 				</Modal.Content.Footer>
