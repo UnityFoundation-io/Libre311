@@ -59,7 +59,7 @@ describe('getFormattedAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(getFormattedAddress(result)).toBe('100, St. Louis, Missouri 63101');
+		expect(getFormattedAddress(result)).toBe(result.displayName);
 	});
 
 	it('handles missing city', () => {
@@ -119,7 +119,7 @@ describe('getFormattedAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(getFormattedAddress(result)).toBe('St. Louis');
+		expect(getFormattedAddress(result)).toBe(result.displayName);
 	});
 
 	it('handles state and postalCode only', () => {
@@ -134,7 +134,7 @@ describe('getFormattedAddress', () => {
 			country: null,
 			countryCode: null
 		});
-		expect(getFormattedAddress(result)).toBe('Missouri 63101');
+		expect(getFormattedAddress(result)).toBe(result.displayName);
 	});
 
 	it('falls back to displayName when all address fields are null', () => {

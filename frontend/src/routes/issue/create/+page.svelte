@@ -48,6 +48,7 @@
 	const jurisdictionStore = useJurisdiction();
 
 	let params: Partial<CreateServiceRequestUIParams> = {};
+	let geosearchJustFired = false;
 	$: project = $projectsStore.find((p) => p.slug === $page.url.searchParams.get('project_slug'));
 
 	$: if (project) {
@@ -95,6 +96,11 @@
 	function boundsChanged(e: CustomEvent<L.LatLngBounds>) {
 		const center = e.detail.getCenter();
 		centerPos = [center.lat, center.lng];
+		if (geosearchJustFired) {
+			geosearchJustFired = false;
+		} else {
+			params.address_string = undefined;
+		}
 	}
 
 	async function confirmLocation() {
@@ -108,13 +114,16 @@
 
 		params.lat = String(centerPos[0]);
 		params.long = String(centerPos[1]);
-		params.address_string = `Location: ${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
+		if (!params.address_string || params.address_string.startsWith('Location: ')) {
+			params.address_string = `Location: ${centerPos[0].toFixed(6)}, ${centerPos[1].toFixed(6)}`;
+		}
 
 		await goto(linkResolver.createIssuePageNext($page.url));
 	}
 
 	function handleGeosearch(e: ComponentEvents<MapGeosearch>['geosearch']) {
 		const location = e.detail.location;
+		geosearchJustFired = true;
 		centerPos = [location.y, location.x];
 		params.address_string = location.label;
 	}

@@ -58,6 +58,9 @@ export function formatAddress(address: GeocodeAddress | null | undefined): strin
  * Falls back to displayName if address formatting fails.
  */
 export function getFormattedAddress(result: ReverseGeocodeResponse): string {
+	if (!result.address?.street) {
+		return result.displayName;
+	}
 	const formatted = formatAddress(result.address);
 	return formatted || result.displayName;
 }
