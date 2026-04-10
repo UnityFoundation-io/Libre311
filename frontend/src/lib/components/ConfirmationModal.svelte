@@ -46,7 +46,9 @@
 				</Modal.Content.Body>
 				<Modal.Content.Footer slot="footer">
 					<div class="flex w-full justify-end gap-2">
-						<Button id="cancel_dismiss" on:click={handleClose} type={cancelType}>{cancelLabel}</Button>
+						<Button id="cancel_dismiss" on:click={handleClose} type={cancelType}
+							>{cancelLabel}</Button
+						>
 						<Button
 							on:click={handleConfirm}
 							type="primary"
