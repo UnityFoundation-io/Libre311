@@ -42,6 +42,7 @@
 	const linkResolver = libre311Context.linkResolver;
 	const draftStore = createDraftStore();
 	let draftLoaded = false;
+	let maxStep = 0;
 	let showRestoreModal = false;
 	let pendingDraft: Awaited<ReturnType<typeof draftStore.load>> = null;
 
@@ -139,13 +140,14 @@
 
 	async function applyDraft() {
 		if (!pendingDraft) return;
+		maxStep = pendingDraft.step;
 		params = { ...params, ...pendingDraft.params };
 		if (pendingDraft.params.lat && pendingDraft.params.long) {
 			centerPos = [Number(pendingDraft.params.lat), Number(pendingDraft.params.long)];
 		}
-		if (pendingDraft.step > CreateServiceRequestSteps.LOCATION) {
+		if (maxStep > CreateServiceRequestSteps.LOCATION) {
 			const searchParams = new URLSearchParams($page.url.searchParams);
-			searchParams.set('step', String(pendingDraft.step));
+			searchParams.set('step', String(maxStep));
 			if (pendingDraft.params.project_slug) {
 				searchParams.set('project_slug', pendingDraft.params.project_slug);
 			}
@@ -158,6 +160,11 @@
 		await applyDraft();
 		pendingDraft = null;
 		draftLoaded = true;
+	}
+
+	async function clearDraftAndCancel() {
+		await draftStore.clear();
+		await goto(linkResolver.issuesMap($page.url));
 	}
 
 	async function handleRestoreDecline() {
@@ -180,7 +187,8 @@
 		}
 	});
 
-	$: if (draftLoaded && params.lat) draftStore.save(step, params);
+	$: if (step > maxStep) maxStep = step;
+	$: if (draftLoaded && params.lat) draftStore.save(maxStep, params);
 </script>
 
 <CreateServiceRequestLayout {step}>
@@ -194,7 +202,7 @@
 		<div class="mx-4 h-full pb-2 pt-16">
 			<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
 			{#if step === CreateServiceRequestSteps.LOCATION}
-				<SelectLocation on:confirmLocation={confirmLocation} />
+				<SelectLocation on:confirmLocation={confirmLocation} on:cancel={clearDraftAndCancel} />
 			{:else if step === CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
 				<ReviewServiceRequest {params} on:submitted={() => draftStore.clear()} />
 			{:else}
@@ -229,7 +237,7 @@
 				class="display absolute inset-x-0 bottom-6 flex justify-center gap-2"
 				slot="is-mobile-or-tablet"
 			>
-				<Button type="primary" href={linkResolver.issuesMap($page.url)}>Cancel</Button>
+				<Button type="primary" on:click={clearDraftAndCancel}>Cancel</Button>
 				<Button on:click={confirmLocation} type="primary">Select Location</Button>
 			</div>
 		</Breakpoint>

@@ -5,6 +5,7 @@
 
 	const dispatch = createEventDispatcher<{
 		confirmLocation: undefined;
+		cancel: undefined;
 	}>();
 </script>
 
@@ -13,7 +14,7 @@
 	<div class="grid grid-rows-2 gap-3">
 		<h4>Select the location of the Request</h4>
 		<Button type="primary" on:click={() => dispatch('confirmLocation')}>Confirm Location</Button>
-		<CancelButton />
+		<CancelButton on:cancel={() => dispatch('cancel')} />
 	</div>
 	<div class=" w-full bg-gray-100 text-xs">
 		This site is protected by reCAPTCHA and the Google.
