@@ -657,7 +657,7 @@ export interface Libre311Service extends Open311Service {
 	getProjectsAdmin(): Promise<Project[]>;
 	createProject(params: CreateProjectParams): Promise<Project>;
 	updateProject(params: UpdateProjectParams): Promise<Project>;
-	updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig>;
+	updateJurisdiction(params: UpdateJurisdictionParams): Promise<void>;
 	updatePolicyContent(params: UpdatePolicyContentParams): Promise<void>;
 	forgotPassword(email: string): Promise<void>;
 	resetPassword(token: string, password: string): Promise<void>;
@@ -729,7 +729,7 @@ const ROUTES = {
 		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
 	patchProject: (id: number, params: HasJurisdictionId) =>
 		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
-	patchJurisdiction2: (jurisdictionId: string) => `/tenant-admin/jurisdictions/${jurisdictionId}`,
+	patchJurisdiction2: (jurisdictionId: string) => `/tenant-admin/jurisdictions/${jurisdictionId}?jurisdiction_id=${jurisdictionId}`,
 	patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
 		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`,
 	postForgotPassword: '/forgot-password',
@@ -894,12 +894,11 @@ export class Libre311ServiceImpl implements Libre311Service {
 		return ProjectSchema.parse(res.data);
 	}
 
-	async updateJurisdiction(params: UpdateJurisdictionParams): Promise<JurisdictionConfig> {
-		const res = await this.axiosInstance.patch<unknown>(
+	async updateJurisdiction(params: UpdateJurisdictionParams): Promise<void> {
+		await this.axiosInstance.patch<unknown>(
 			ROUTES.patchJurisdiction2(this.jurisdictionId),
 			params
 		);
-		return JurisdictionConfigSchema.parse(res.data);
 	}
 
 	async updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
