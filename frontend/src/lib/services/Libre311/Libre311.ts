@@ -213,7 +213,6 @@ export type GetServiceListResponse = z.infer<typeof GetServiceListResponseSchema
 
 // user response values from  ServiceDefinitionAttributeSchema.
 // attribute[code1]=value1
-// todo consider adding AttributeValue[name] so that ui can reflect the values later on
 export type AttributeResponse = { code: ServiceDefinitionAttribute['code']; value: string };
 // todo will likely need the recaptcha value here
 
@@ -234,6 +233,7 @@ export type CreateServiceRequestParams = HasServiceCode &
 		long: string;
 		address_string: string;
 		attributes: AttributeResponse[];
+		attribute_snapshot?: string;
 		description?: string;
 		media_url?: string;
 		client_request_id?: string;
@@ -372,7 +372,8 @@ export const ServiceRequestSchema = z
 		removal_suggestions_count: z.number().optional(),
 		project_id: z.number().optional(),
 		project_name: z.string().optional(),
-		project_slug: z.string().optional()
+		project_slug: z.string().optional(),
+		attribute_validation: z.enum(['VALIDATED', 'NEEDS_REVIEW', 'APPROVED']).optional()
 	})
 	.merge(HasServiceRequestIdSchema)
 	.merge(HasServiceCodeSchema)

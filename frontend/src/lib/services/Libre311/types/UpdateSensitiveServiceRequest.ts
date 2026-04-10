@@ -7,7 +7,8 @@ export const UpdateSensitiveServiceRequestSchema = z
 		agency_email: EmailSchema.optional(),
 		service_notice: z.string().nullish(),
 		priority: z.string().nullish(),
-		project_id: z.number().nullish()
+		project_id: z.number().nullish(),
+		attribute_validation: z.enum(['VALIDATED', 'NEEDS_REVIEW', 'APPROVED']).optional()
 	})
 	.merge(ServiceRequestSchema);
 

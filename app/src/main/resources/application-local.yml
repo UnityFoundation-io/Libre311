@@ -37,6 +37,11 @@ micronaut:
       email: ${EMAIL_FROM_ADDRESS:noreply@libre311.test}
       name: ${EMAIL_FROM_NAME:Libre311}
 
+app:
+  recaptcha:
+    enabled: false
+    secret: disabled
+
 javamail:
   enabled: true
   properties:

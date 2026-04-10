@@ -16,6 +16,7 @@ package app.recaptcha;
 
 import app.exception.Libre311BaseException;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.http.HttpStatus;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -29,11 +30,15 @@ public class ReCaptchaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReCaptchaService.class);
 
-    @Inject
-    ReCaptchaClient client;
+    private final ReCaptchaClient client;
+    private final boolean recaptchaEnabled;
+    private final String secret;
 
-    @Property(name = "app.recaptcha.secret")
-    protected String secret;
+    public ReCaptchaService(ReCaptchaClient client, @Value("${app.recaptcha.secret}") String secret, @Value("${app.recaptcha.enabled}") boolean recaptchaEnabled) {
+        this.client = client;
+        this.secret = secret;
+        this.recaptchaEnabled = recaptchaEnabled;
+    }
 
     static class RecaptchaVerificationFailed extends Libre311BaseException {
         public RecaptchaVerificationFailed() {
@@ -46,6 +51,7 @@ public class ReCaptchaService {
     }
 
     public void verifyReCaptcha(String response) {
+        if (!recaptchaEnabled) return;
         LOG.debug("Verifying recaptcha, response: {}", response);
         Map<Object, Object> map = client.verifyReCaptcha(this.secret, response);
         Boolean success = (Boolean) map.get("success");

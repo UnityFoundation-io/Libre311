@@ -124,7 +124,8 @@ app:
     bucket-url-format: "https://storage.googleapis.com/%s/"
     bucket:  ${STORAGE_BUCKET_ID:`your-client-id-here.apps.googleusercontent.com`}
   recaptcha:
-    secret: ${RECAPTCHA_SECRET:`recaptchaSecret`}
+    enabled: true
+    secret: ${RECAPTCHA_SECRET}
 
 libre311:
   geocoding:

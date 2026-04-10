@@ -16,6 +16,7 @@ package app.dto.servicerequest;
 
 import app.recaptcha.RecaptchaRequest;
 import io.micronaut.core.annotation.Nullable;
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -99,6 +100,9 @@ public class PostRequestServiceRequestDTO implements RecaptchaRequest {
 
     @JsonIgnore
     private Map<String, String> attributes = new HashMap<>();
+    @JsonProperty("attribute_snapshot")
+    @Schema(hidden = true)
+    private String attributeSnapshot;
     private static final java.util.regex.Pattern ATTRIBUTE_PATTERN = java.util.regex.Pattern.compile("attribute\\[([^]]+)]");
     public PostRequestServiceRequestDTO(Long serviceCode) {
         this.serviceCode = serviceCode;
@@ -244,6 +248,14 @@ public class PostRequestServiceRequestDTO implements RecaptchaRequest {
         return attributes;
     }
 
+    public String getAttributeSnapshot() {
+        return attributeSnapshot;
+    }
+
+    public void setAttributeSnapshot(String attributeSnapshot) {
+        this.attributeSnapshot = attributeSnapshot;
+    }
+
     @JsonAnySetter
     public void processDynamicField(String key, Object value) {
         if (value instanceof Map<?, ?> valueMap) { // id = {attribute: value}
@@ -253,7 +265,7 @@ public class PostRequestServiceRequestDTO implements RecaptchaRequest {
                 attributes.put("attribute[" + key + "]", innerValue.toString());
             }
         }
-        else if (value != null) { // attribute[id] = value
+        else if (value != null) {
             Matcher matcher = ATTRIBUTE_PATTERN.matcher(key);
             LOG.debug("Processing dynamic field: {}, value = {}", key, value);
             if (matcher.matches()) {

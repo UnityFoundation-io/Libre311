@@ -12,18 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package app.util;
+package app.model.servicerequest;
 
-import app.recaptcha.ReCaptchaService;
-import io.micronaut.context.annotation.Replaces;
-import jakarta.inject.Singleton;
-
-@Singleton
-@Replaces(ReCaptchaService.class)
-public class MockReCaptchaService extends ReCaptchaService {
-
-    public MockReCaptchaService() {}
-
-    public void verifyReCaptcha(String response) {
-    }
+public enum AttributeValidationStatus {
+    VALIDATED,
+    NEEDS_REVIEW,
+    APPROVED
 }

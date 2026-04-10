@@ -37,6 +37,7 @@ import app.model.servicedefinition.AttributeValue;
 import app.model.servicedefinition.AttributeValueRepository;
 import app.model.servicedefinition.ServiceDefinitionAttribute;
 import app.model.servicedefinition.ServiceDefinitionAttributeRepository;
+import app.model.servicerequest.AttributeValidationStatus;
 import app.model.servicerequest.ServiceRequest;
 import app.model.servicerequest.ServiceRequestPriority;
 import app.model.servicerequest.ServiceRequestRepository;
@@ -413,6 +414,29 @@ public class RootControllerTest {
             createServiceRequest(sidewalkService.getId(), "12345 Fairway", Map.of(), "city.gov");
         });
         assertEquals(BAD_REQUEST, thrown.getStatus());
+    }
+
+    @Test
+    public void createServiceRequestWithStaleAttributesFlagsForReview() {
+        setAuthHasPermissionSuccessResponse(true, List.of(Permission.LIBRE311_REQUEST_VIEW_TENANT));
+
+        // Simulate a stale draft: the required attribute code no longer exists in the service definition,
+        // but the frontend sent a snapshot of what was filled in at draft time.
+        String snapshot = "[{\"code\":" + sidewalkMultiValueAttr.getId() +
+            ",\"variable\":true,\"datatype\":\"multivaluelist\",\"required\":true," +
+            "\"description\":\"Test question\",\"order\":1," +
+            "\"values\":[{\"key\":\"999\",\"name\":\"Too narrow\"}]}]";
+
+        createServiceRequest(sidewalkService.getId(), "12345 Fairway",
+            Map.of("attribute_snapshot", snapshot),
+            "city.gov");
+
+        var req = HttpRequest.GET("/requests?jurisdiction_id=city.gov").bearerAuth("eyekljdsl");
+        HttpResponse<List<SensitiveServiceRequestDTO>> response = client.toBlocking().exchange(req,
+            Argument.listOf(SensitiveServiceRequestDTO.class));
+        assertEquals(HttpStatus.OK, response.status());
+        assertEquals(AttributeValidationStatus.NEEDS_REVIEW,
+            response.getBody().orElseThrow().get(0).getAttributeValidation());
     }
 
     @Test

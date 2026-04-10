@@ -1,5 +1,6 @@
 package app.dto.servicerequest;
 
+import app.recaptcha.RecaptchaRequest;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
 import jakarta.validation.constraints.Email;
@@ -8,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Introspected
-public class PostRequestServiceRequestRemovalSuggestionDTO {
+public class PostRequestServiceRequestRemovalSuggestionDTO implements RecaptchaRequest {
 
     @NotNull
     @Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")

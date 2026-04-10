@@ -45,11 +45,15 @@
 	import ServiceRequestStatusBadge from '$lib/components/ServiceRequestStatusBadge.svelte';
 	import { FilteredServiceRequestsParamsMapper } from '$lib/services/Libre311/FilteredServiceRequestsParamsMapper';
 
-	const linkResolver = useLibre311Context().linkResolver;
+	const { linkResolver, user } = useLibre311Context();
 	const selectedServiceRequestStore = useSelectedServiceRequestStore();
 	const ctx = useServiceRequestsContext();
 	const libre311 = useLibre311Service();
 	const serviceRequestsRes = ctx.serviceRequestsResponse;
+
+	onMount(() => {
+		if (!$user) goto('/login');
+	});
 
 	let serviceList: AsyncResult<GetServiceListResponse> = ASYNC_IN_PROGRESS;
 	let selectedServicePriority: ServiceRequestPriority[];
