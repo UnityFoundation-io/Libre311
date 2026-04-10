@@ -409,10 +409,27 @@ public class RootControllerTest {
     }
 
     @Test
-    public void createServiceRequestWithoutRequiredAttributesFlagsForReview() {
+    public void cannotCreateServiceRequestWithoutRequiredAttributes() {
+        HttpClientResponseException thrown = assertThrows(HttpClientResponseException.class, () -> {
+            createServiceRequest(sidewalkService.getId(), "12345 Fairway", Map.of(), "city.gov");
+        });
+        assertEquals(BAD_REQUEST, thrown.getStatus());
+    }
+
+    @Test
+    public void createServiceRequestWithStaleAttributesFlagsForReview() {
         setAuthHasPermissionSuccessResponse(true, List.of(Permission.LIBRE311_REQUEST_VIEW_TENANT));
 
-        createServiceRequest(sidewalkService.getId(), "12345 Fairway", Map.of(), "city.gov");
+        // Simulate a stale draft: the required attribute code no longer exists in the service definition,
+        // but the frontend sent a snapshot of what was filled in at draft time.
+        String snapshot = "[{\"code\":" + sidewalkMultiValueAttr.getId() +
+            ",\"variable\":true,\"datatype\":\"multivaluelist\",\"required\":true," +
+            "\"description\":\"Test question\",\"order\":1," +
+            "\"values\":[{\"key\":\"999\",\"name\":\"Too narrow\"}]}]";
+
+        createServiceRequest(sidewalkService.getId(), "12345 Fairway",
+            Map.of("attribute_snapshot", snapshot),
+            "city.gov");
 
         var req = HttpRequest.GET("/requests?jurisdiction_id=city.gov").bearerAuth("eyekljdsl");
         HttpResponse<List<SensitiveServiceRequestDTO>> response = client.toBlocking().exchange(req,

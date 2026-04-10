@@ -49,4 +49,11 @@ class ServiceRequestDTOTest {
         assertEquals("Test Project", dto.getProjectName());
         assertEquals("test-project", dto.getProjectSlug());
     }
+
+    @Test
+    void testProcessDynamicFieldCapturesAttributes() {
+        PostRequestServiceRequestDTO dto = new PostRequestServiceRequestDTO(1L);
+        dto.processDynamicField("attribute[123]", "456");
+        assertEquals("456", dto.getAttributes().get("attribute[123]"));
+    }
 }

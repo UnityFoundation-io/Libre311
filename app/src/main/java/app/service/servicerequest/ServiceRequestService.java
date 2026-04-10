@@ -204,17 +204,24 @@ public class ServiceRequestService {
 
         List<ServiceDefinitionAttribute> serviceDefinitionAttributes = attributeRepository.findAllByServiceId(service.getId());
         if (!serviceDefinitionAttributes.isEmpty()) {
-            List<ServiceDefinitionAttributeDTO> requestAttributes = buildUserResponseAttributesFromRequest(serviceRequestDTO.getAttributes(), serviceDefinitionAttributes);
-            if (!requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, requestAttributes)) {
-                LOG.warn("Service request is missing required attribute values — flagging for review.");
+            List<ServiceDefinitionAttributeDTO> snapshot = parseAttributeSnapshot(serviceRequestDTO.getAttributeSnapshot());
+            AttributeBuildResult buildResult = buildUserResponseAttributesFromRequest(serviceRequestDTO.getAttributes(), snapshot, serviceDefinitionAttributes);
+            boolean validationFailed = !requestAttributesHasAllRequiredServiceDefinitionAttributes(serviceDefinitionAttributes, buildResult.attributes());
+            boolean needsReview = validationFailed || buildResult.staleFallbackUsed();
+            if (needsReview) {
+                if (snapshot.isEmpty()) {
+                    throw new InvalidServiceRequestException("Submitted Service Request does not contain required attribute values.");
+                }
+                LOG.warn("Service request attributes could not be fully validated against the current definition — flagging for review.");
                 serviceRequest.setAttributeValidation(AttributeValidationStatus.NEEDS_REVIEW);
-            }
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                serviceRequest.setAttributesJson(objectMapper.writeValueAsString(requestAttributes));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                serviceRequest.setAttributesJson(serviceRequestDTO.getAttributeSnapshot());
+            } else {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    serviceRequest.setAttributesJson(objectMapper.writeValueAsString(buildResult.attributes()));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
@@ -277,118 +284,130 @@ public class ServiceRequestService {
         return requestCodes.containsAll(requiredCodes);
     }
 
-    private List<ServiceDefinitionAttributeDTO> buildUserResponseAttributesFromRequest(Map<String, String> dtoAttributes, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
+    private record AttributeBuildResult(List<ServiceDefinitionAttributeDTO> attributes, boolean staleFallbackUsed) {}
 
-        Optional<Map<String, String>> body = Optional.ofNullable(dtoAttributes);
-        LOG.debug("Request body: {}", body);
+    private AttributeBuildResult buildUserResponseAttributesFromRequest(Map<String, String> dtoAttributes, List<ServiceDefinitionAttributeDTO> snapshot, List<ServiceDefinitionAttribute> serviceDefinitionAttributes) {
+        Map<Long, Map<String, String>> snapshotNameLookup = buildSnapshotNameLookup(snapshot);
+
         List<ServiceDefinitionAttributeDTO> attributes = new ArrayList<>();
-        if (body.isPresent()) {
-            body.get().forEach((k, v) -> {
-                if (v != null && v.trim().isEmpty()) {
-                    return;
+        boolean[] staleFallbackUsed = {false};
+
+        LOG.debug("Request body: {}", dtoAttributes);
+        if (dtoAttributes != null) {
+            dtoAttributes.forEach((k, v) -> {
+                if (v != null && v.trim().isEmpty()) return;
+                if (!k.startsWith("attribute[")) return;
+
+                String attributeCodeStr = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
+                Long attributeCode;
+                try {
+                    attributeCode = Long.parseLong(attributeCodeStr);
+                } catch (NumberFormatException nfe) {
+                    throw new InvalidServiceRequestException("Code should be an Integer.");
                 }
-                if (k.startsWith("attribute[")) {
-                    String attributeCodeStr = k.substring(k.indexOf("[") + 1, k.indexOf("]"));
-                    Long attributeCode;
-                    try {
-                        attributeCode = Long.parseLong(attributeCodeStr);
-                    } catch (NumberFormatException nfe) {
-                        throw new InvalidServiceRequestException("Code should be an Integer.");
-                    }
 
-                    // search for attribute by code in serviceDefinitionAttributes
-                    Optional<ServiceDefinitionAttribute> serviceDefinitionAttributeOptional = serviceDefinitionAttributes.stream()
-                            .filter(serviceDefinitionAttribute -> serviceDefinitionAttribute.getId().equals(attributeCode))
-                            .findFirst();
+                Optional<ServiceDefinitionAttribute> sdaOptional = serviceDefinitionAttributes.stream()
+                        .filter(a -> a.getId().equals(attributeCode))
+                        .findFirst();
+                if (sdaOptional.isEmpty()) return;
 
-                    // if attribute in request does not exist in db, then ignore
-                    if (serviceDefinitionAttributeOptional.isEmpty()) {
-                        return;
-                    }
-                    ServiceDefinitionAttribute serviceDefinitionAttribute = serviceDefinitionAttributeOptional.get();
-
-                    // validate the value if necessary (number and dates)
-                    if (v != null && !validValueType(v, serviceDefinitionAttribute.getDatatype())) {
-                        String errorMsg = String.format("Provided value for attribute with code %s is invalid", attributeCode);
-                        LOG.error(errorMsg);
-                        throw new RuntimeException(errorMsg);
-                    }
-
-                    ServiceDefinitionAttributeDTO sda = new ServiceDefinitionAttributeDTO();
-                    sda.setId(attributeCode);
-                    sda.setAttributeOrder(serviceDefinitionAttribute.getAttributeOrder());
-                    sda.setRequired(serviceDefinitionAttribute.isRequired());
-                    sda.setVariable(serviceDefinitionAttribute.isVariable());
-                    sda.setDatatype(serviceDefinitionAttribute.getDatatype());
-                    sda.setDescription(serviceDefinitionAttribute.getDescription());
-
-                    List<AttributeValueDTO> values = new ArrayList<>();
-
-                    if (serviceDefinitionAttribute.getDatatype() == AttributeDataType.SINGLEVALUELIST ||
-                            serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST) {
-
-                        Set<AttributeValue> attributeValues = serviceDefinitionAttribute.getAttributeValues();
-                        if (attributeValues != null) {
-                            if (v.contains(",") && serviceDefinitionAttribute.getDatatype() == AttributeDataType.MULTIVALUELIST){
-                                String[] attrResKeys = v.split(",");
-                                for (String attrResKey : attrResKeys) {
-                                    values.add(new AttributeValueDTO(attrResKey, getAttributeValueName(attrResKey, attributeValues)));
-                                }
-                            }
-                            else {
-                                values.add(new AttributeValueDTO(v, getAttributeValueName(v, attributeValues)));
-                            }
-                        }
-                    } else {
-                        // we need a way to capture the user's response. We will do so by adding an attribute value where
-                        // the key is the code and the value is the user's response.
-                        values.add(new AttributeValueDTO(String.valueOf(attributeCode), v));
-                    }
-
-                    sda.setValues(values);
-                    attributes.add(sda);
+                ServiceDefinitionAttribute sda = sdaOptional.get();
+                if (v != null && !validValueType(v, sda.getDatatype())) {
+                    String errorMsg = String.format("Provided value for attribute with code %s is invalid", attributeCode);
+                    LOG.error(errorMsg);
+                    throw new RuntimeException(errorMsg);
                 }
+
+                attributes.add(buildAttributeDTO(attributeCode, v, sda, snapshotNameLookup, staleFallbackUsed));
             });
         }
 
-        return attributes;
+        return new AttributeBuildResult(attributes, staleFallbackUsed[0]);
     }
 
-    private boolean validValueType(Object v, AttributeDataType datatype) {
+    private Map<Long, Map<String, String>> buildSnapshotNameLookup(List<ServiceDefinitionAttributeDTO> snapshot) {
+        return snapshot.stream()
+                .filter(s -> s.getId() != null && s.getValues() != null)
+                .collect(Collectors.toMap(
+                        ServiceDefinitionAttributeDTO::getId,
+                        s -> s.getValues().stream()
+                                .filter(v -> v.getKey() != null && v.getName() != null)
+                                .collect(Collectors.toMap(AttributeValueDTO::getKey, AttributeValueDTO::getName, (a, b) -> a))
+                ));
+    }
 
-        if (datatype == AttributeDataType.NUMBER || datatype == AttributeDataType.DATETIME){
-            String value = (String) v;
+    private ServiceDefinitionAttributeDTO buildAttributeDTO(Long attributeCode, String value, ServiceDefinitionAttribute sda, Map<Long, Map<String, String>> snapshotNameLookup, boolean[] staleFallbackUsed) {
+        ServiceDefinitionAttributeDTO dto = new ServiceDefinitionAttributeDTO();
+        dto.setId(attributeCode);
+        dto.setAttributeOrder(sda.getAttributeOrder());
+        dto.setRequired(sda.isRequired());
+        dto.setVariable(sda.isVariable());
+        dto.setDatatype(sda.getDatatype());
+        dto.setDescription(sda.getDescription());
+        dto.setValues(buildAttributeValues(attributeCode, value, sda, snapshotNameLookup, staleFallbackUsed));
+        return dto;
+    }
 
-            if (datatype == AttributeDataType.NUMBER) {
-                try {
-                    Integer.parseInt(value);
-                } catch (NumberFormatException nfe) {
-                    return false;
-                }
-            } else {
-                try {
-                    Instant.parse(value);
-                } catch (DateTimeParseException dtpe) {
-                    return false;
+    private List<AttributeValueDTO> buildAttributeValues(Long attributeCode, String value, ServiceDefinitionAttribute sda, Map<Long, Map<String, String>> snapshotNameLookup, boolean[] staleFallbackUsed) {
+        List<AttributeValueDTO> values = new ArrayList<>();
+
+        if (sda.getDatatype() == AttributeDataType.SINGLEVALUELIST ||
+                sda.getDatatype() == AttributeDataType.MULTIVALUELIST) {
+            Set<AttributeValue> attributeValues = sda.getAttributeValues();
+            if (attributeValues != null && !attributeValues.isEmpty()) {
+                Map<String, String> codeNameLookup = snapshotNameLookup.getOrDefault(attributeCode, Map.of());
+                if (value.contains(",") && sda.getDatatype() == AttributeDataType.MULTIVALUELIST) {
+                    for (String key : value.split(",")) {
+                        Optional<String> dbName = getAttributeValueName(key, attributeValues);
+                        if (dbName.isEmpty()) staleFallbackUsed[0] = true;
+                        values.add(new AttributeValueDTO(key, dbName.orElse(codeNameLookup.getOrDefault(key, key))));
+                    }
+                } else {
+                    Optional<String> dbName = getAttributeValueName(value, attributeValues);
+                    if (dbName.isEmpty()) staleFallbackUsed[0] = true;
+                    values.add(new AttributeValueDTO(value, dbName.orElse(codeNameLookup.getOrDefault(value, value))));
                 }
             }
-
-            return true;
+        } else {
+            values.add(new AttributeValueDTO(String.valueOf(attributeCode), value));
         }
 
+        return values;
+    }
+
+    private boolean validValueType(String value, AttributeDataType datatype) {
+        if (datatype == AttributeDataType.NUMBER) {
+            try {
+                Integer.parseInt(value);
+            } catch (NumberFormatException nfe) {
+                return false;
+            }
+        } else if (datatype == AttributeDataType.DATETIME) {
+            try {
+                Instant.parse(value);
+            } catch (DateTimeParseException dtpe) {
+                return false;
+            }
+        }
         return true;
     }
 
-    private String getAttributeValueName(String valueKey, Set<AttributeValue> attributeValues) {
-        String valueName = null;
-        Optional<AttributeValue> attributeValueOptional = attributeValues.stream()
-                .filter(attributeValue -> attributeValue.getId().toString().equals(valueKey)).findFirst();
-
-        if (attributeValueOptional.isPresent()) {
-            valueName = attributeValueOptional.get().getValueName();
+    private List<ServiceDefinitionAttributeDTO> parseAttributeSnapshot(String snapshot) {
+        if (snapshot == null || snapshot.isBlank()) return List.of();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return Arrays.asList(mapper.readValue(snapshot, ServiceDefinitionAttributeDTO[].class));
+        } catch (JsonProcessingException e) {
+            LOG.warn("Failed to parse attribute snapshot: {}", e.getMessage());
+            return List.of();
         }
+    }
 
-        return valueName;
+    private Optional<String> getAttributeValueName(String valueKey, Set<AttributeValue> attributeValues) {
+        return attributeValues.stream()
+                .filter(attributeValue -> attributeValue.getId().toString().equals(valueKey))
+                .findFirst()
+                .map(AttributeValue::getValueName);
     }
 
     private ServiceRequest transformDtoToServiceRequest(PostRequestServiceRequestDTO serviceRequestDTO, Service service) {
