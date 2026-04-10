@@ -39,7 +39,6 @@ import app.model.servicerequest.ServiceRequestRemovalSuggestionCount;
 import app.model.servicerequest.ServiceRequestRemovalSuggestionRepository;
 import app.model.servicerequest.ServiceRequestRepository;
 import app.model.servicerequest.ServiceRequestStatus;
-import app.recaptcha.ReCaptchaService;
 import app.security.Permission;
 import app.security.UnityAuthService;
 import app.service.geometry.LibreGeometryFactory;
@@ -100,7 +99,6 @@ public class ServiceRequestService {
     private final ServiceRepository serviceRepository;
     private final ServiceDefinitionAttributeRepository attributeRepository;
     private final JurisdictionRepository jurisdictionRepository;
-    private final ReCaptchaService reCaptchaService;
     private final StorageUrlUtil storageUrlUtil;
     private final UnityAuthService unityAuthService;
     private final ProjectService projectService;
@@ -113,7 +111,7 @@ public class ServiceRequestService {
         ServiceRepository serviceRepository,
         ServiceDefinitionAttributeRepository attributeRepository,
         JurisdictionRepository jurisdictionRepository,
-        ReCaptchaService reCaptchaService, StorageUrlUtil storageUrlUtil,
+        StorageUrlUtil storageUrlUtil,
         UnityAuthService unityAuthService,
         ProjectService projectService,
         ProjectRepository projectRepository,
@@ -124,7 +122,6 @@ public class ServiceRequestService {
         this.serviceRepository = serviceRepository;
         this.attributeRepository = attributeRepository;
         this.jurisdictionRepository = jurisdictionRepository;
-        this.reCaptchaService = reCaptchaService;
         this.storageUrlUtil = storageUrlUtil;
         this.unityAuthService = unityAuthService;
         this.projectService = projectService;
@@ -225,7 +222,6 @@ public class ServiceRequestService {
     }
 
     public void createRemovalSuggestion(Long serviceRequestId, String jurisdictionId, PostRequestServiceRequestRemovalSuggestionDTO suggestionDTO) {
-        reCaptchaService.verifyReCaptcha(suggestionDTO.getgRecaptchaResponse());
         Optional<ServiceRequest> serviceRequestOptional = serviceRequestRepository.findByIdAndJurisdictionId(serviceRequestId, jurisdictionId);
         if (serviceRequestOptional.isEmpty()) {
             throw new InvalidServiceRequestException("Service Request not found.");

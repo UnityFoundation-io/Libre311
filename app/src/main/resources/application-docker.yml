@@ -41,6 +41,9 @@ micronaut:
 ---
 app:
   service-id: ${LIBRE311_SERVICE_ID:1}
+  recaptcha:
+    enabled: false
+    secret: disabled
 
 datasources:
   default:

@@ -17,7 +17,6 @@ package app;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import app.util.MockReCaptchaService;
 import app.util.MockStorageService;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -39,9 +38,6 @@ public class ImageStorageControllerTest {
     @Inject
     @Client("/api")
     HttpClient client;
-
-    @Inject
-    MockReCaptchaService mockReCaptchaService;
 
     @Inject
     MockStorageService mockStorageService;

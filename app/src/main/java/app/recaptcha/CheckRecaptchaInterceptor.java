@@ -17,6 +17,7 @@ package app.recaptcha;
 import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.core.annotation.Nullable;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
@@ -30,35 +31,39 @@ public class CheckRecaptchaInterceptor implements MethodInterceptor<Object, Obje
     private static final Logger LOG = LoggerFactory.getLogger(CheckRecaptchaInterceptor.class);
 
     private final ReCaptchaService reCaptchaService;
+    private final boolean recaptchaEnabled;
 
-    public CheckRecaptchaInterceptor(ReCaptchaService reCaptchaService) {
+    public CheckRecaptchaInterceptor(ReCaptchaService reCaptchaService, @Value("${app.recaptcha.enabled}") boolean recaptchaEnabled) {
         this.reCaptchaService = reCaptchaService;
+        this.recaptchaEnabled = recaptchaEnabled;
     }
 
     @Override
     public @Nullable Object intercept(MethodInvocationContext<Object, Object> context) {
-        LOG.debug("Intercepted call, looking for recaptcha class");
-        Optional<?> recaptchaParam = context.getParameters()
-                .values()
-                .stream()
-                .filter(entry -> entry.getValue() instanceof RecaptchaRequest)
-                .map(entry -> entry.getValue())
-                .findFirst();
-        if (recaptchaParam.isPresent()) {
-            reCaptchaService.verifyReCaptcha((RecaptchaRequest)recaptchaParam.get());
-        } else {
-            LOG.debug("No recaptcha class found, looking for recaptcha string");
-            var string = context.getParameters()
-                    .entrySet()
+        if (recaptchaEnabled) {
+            LOG.debug("Intercepted call, looking for recaptcha class");
+            Optional<?> recaptchaParam = context.getParameters()
+                    .values()
                     .stream()
-                    .filter(entry -> entry.getKey().equals("gRecaptchaResponse"))
-                    .map(entry -> entry.getValue())
+                    .filter(entry -> entry.getValue() instanceof RecaptchaRequest)
                     .map(entry -> entry.getValue())
                     .findFirst();
-            if (string.isPresent()){
-                reCaptchaService.verifyReCaptcha((String)string.get());
+            if (recaptchaParam.isPresent()) {
+                reCaptchaService.verifyReCaptcha((RecaptchaRequest) recaptchaParam.get());
             } else {
-                LOG.debug("No recaptcha info found");
+                LOG.debug("No recaptcha class found, looking for recaptcha string");
+                var string = context.getParameters()
+                        .entrySet()
+                        .stream()
+                        .filter(entry -> entry.getKey().equals("gRecaptchaResponse"))
+                        .map(entry -> entry.getValue())
+                        .map(entry -> entry.getValue())
+                        .findFirst();
+                if (string.isPresent()) {
+                    reCaptchaService.verifyReCaptcha((String) string.get());
+                } else {
+                    LOG.debug("No recaptcha info found");
+                }
             }
         }
         return context.proceed();

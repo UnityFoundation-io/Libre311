@@ -176,6 +176,7 @@ public class RootController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
+    @CheckRecaptcha
     public HttpResponse<?> createServiceRequestRemovalSuggestion(
             @PathVariable Long serviceRequestId,
             @Valid @Body PostRequestServiceRequestRemovalSuggestionDTO requestDTO,

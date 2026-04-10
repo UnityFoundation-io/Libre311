@@ -1,5 +1,8 @@
 app:
   service-id: 1
+  recaptcha:
+    enabled: false
+    secret: disabled
 ---
 micronaut:
   http:
