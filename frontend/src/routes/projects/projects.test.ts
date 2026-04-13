@@ -5,7 +5,7 @@ import { useLibre311Service, useLibre311Context } from '$lib/context/Libre311Con
 import type { Libre311Context } from '$lib/context/Libre311Context';
 import type { Libre311Service, JurisdictionConfig, Project } from '$lib/services/Libre311/Libre311';
 import { useJurisdiction } from '$lib/context/JurisdictionContext';
-import { writable, type Readable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 // Mock the services and contexts
 vi.mock('$lib/context/Libre311Context', () => ({
@@ -33,7 +33,7 @@ describe('Projects Page', () => {
 	};
 
 	const mockJurisdictionStore = writable({
-		project_feature: 'ENABLED',
+		project_feature: 'OPTIONAL',
 		bounds: [
 			[0, 0],
 			[0, 1],
@@ -41,7 +41,7 @@ describe('Projects Page', () => {
 			[1, 0],
 			[0, 0]
 		]
-	});
+	} as JurisdictionConfig);
 
 	const mockContext = {
 		linkResolver: {
@@ -61,7 +61,7 @@ describe('Projects Page', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockJurisdictionStore.set({
-			project_feature: 'ENABLED',
+			project_feature: 'OPTIONAL',
 			bounds: [
 				[0, 0],
 				[0, 1],
@@ -69,14 +69,12 @@ describe('Projects Page', () => {
 				[1, 0],
 				[0, 0]
 			]
-		});
+		} as JurisdictionConfig);
 		mockContext.projects.set([]);
 		vi.mocked(useLibre311Service).mockReturnValue(
 			mockLibre311Service as unknown as Libre311Service
 		);
-		vi.mocked(useJurisdiction).mockReturnValue(
-			mockJurisdictionStore as unknown as Readable<JurisdictionConfig>
-		);
+		vi.mocked(useJurisdiction).mockReturnValue(mockJurisdictionStore);
 		vi.mocked(useLibre311Context).mockReturnValue(mockContext as unknown as Libre311Context);
 	});
 
@@ -124,7 +122,10 @@ describe('Projects Page', () => {
 	});
 
 	it('should redirect if project feature is DISABLED', async () => {
-		mockJurisdictionStore.set({ project_feature: 'DISABLED', bounds: [] });
+		mockJurisdictionStore.set({
+			project_feature: 'DISABLED',
+			bounds: []
+		} as unknown as JurisdictionConfig);
 		render(ProjectsPage);
 
 		const { goto } = await import('$app/navigation');

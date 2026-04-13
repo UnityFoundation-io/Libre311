@@ -24,7 +24,8 @@
 		{
 			value: 'DISABLED',
 			label: 'Disabled',
-			description: 'Projects are not available. Service requests cannot be associated with a project.'
+			description:
+				'Projects are not available. Service requests cannot be associated with a project.'
 		},
 		{
 			value: 'OPTIONAL',
@@ -69,7 +70,7 @@
 	<title>System Administration</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto px-4 py-6">
+<div class="mx-auto max-w-2xl px-4 py-6">
 	<div class="mb-6">
 		<h1 class="text-2xl font-semibold text-gray-900">System Administration</h1>
 		<p class="mt-1 text-sm text-gray-500">

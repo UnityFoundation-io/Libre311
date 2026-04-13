@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/svelte';
 import ServiceRequestUpdate from './ServiceRequestUpdate.svelte';
 import { useLibre311Service } from '$lib/context/Libre311Context';
 import { useJurisdiction } from '$lib/context/JurisdictionContext';
-import { writable, type Readable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type {
 	Libre311Service,
 	JurisdictionConfig,
@@ -50,9 +50,7 @@ describe('ServiceRequestUpdate', () => {
 		vi.mocked(useLibre311Service).mockReturnValue(
 			mockLibre311Service as unknown as Libre311Service
 		);
-		vi.mocked(useJurisdiction).mockReturnValue(
-			mockJurisdictionStore as unknown as Readable<JurisdictionConfig>
-		);
+		vi.mocked(useJurisdiction).mockReturnValue(mockJurisdictionStore);
 	});
 
 	it('should show project selection when project_feature is not DISABLED', () => {

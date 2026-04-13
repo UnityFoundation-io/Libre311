@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import ProjectEditor from './ProjectEditor.svelte';
 import { useLibre311Service } from '$lib/context/Libre311Context';
 import { useJurisdiction } from '$lib/context/JurisdictionContext';
-import { writable, type Readable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { Libre311Service, JurisdictionConfig, Project } from '$lib/services/Libre311/Libre311';
 
 vi.mock('$lib/context/Libre311Context', () => ({
@@ -39,16 +39,14 @@ describe('ProjectEditor', () => {
 			[1, 0],
 			[0, 0]
 		]
-	});
+	} as JurisdictionConfig);
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(useLibre311Service).mockReturnValue(
 			mockLibre311Service as unknown as Libre311Service
 		);
-		vi.mocked(useJurisdiction).mockReturnValue(
-			mockJurisdictionStore as unknown as Readable<JurisdictionConfig>
-		);
+		vi.mocked(useJurisdiction).mockReturnValue(mockJurisdictionStore);
 	});
 
 	it('should render create mode by default', () => {

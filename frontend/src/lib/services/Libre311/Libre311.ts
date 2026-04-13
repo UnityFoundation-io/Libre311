@@ -729,7 +729,8 @@ const ROUTES = {
 		`/jurisdiction-admin/projects?jurisdiction_id=${params.jurisdiction_id}`,
 	patchProject: (id: number, params: HasJurisdictionId) =>
 		`/jurisdiction-admin/projects/${id}?jurisdiction_id=${params.jurisdiction_id}`,
-	patchJurisdiction2: (jurisdictionId: string) => `/tenant-admin/jurisdictions/${jurisdictionId}?jurisdiction_id=${jurisdictionId}`,
+	patchJurisdiction2: (jurisdictionId: string) =>
+		`/tenant-admin/jurisdictions/${jurisdictionId}?jurisdiction_id=${jurisdictionId}`,
 	patchJurisdiction: (params: HasJurisdictionId, tenant_id: number) =>
 		`/tenant-admin/jurisdictions/${params.jurisdiction_id}?tenant_id=${tenant_id}`,
 	postForgotPassword: '/forgot-password',
@@ -895,10 +896,7 @@ export class Libre311ServiceImpl implements Libre311Service {
 	}
 
 	async updateJurisdiction(params: UpdateJurisdictionParams): Promise<void> {
-		await this.axiosInstance.patch<unknown>(
-			ROUTES.patchJurisdiction2(this.jurisdictionId),
-			params
-		);
+		await this.axiosInstance.patch<unknown>(ROUTES.patchJurisdiction2(this.jurisdictionId), params);
 	}
 
 	async updatePolicyContent(params: UpdatePolicyContentParams): Promise<void> {
