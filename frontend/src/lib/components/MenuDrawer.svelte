@@ -120,6 +120,16 @@
 							<Menu.Item.Icon slot="icon" data={documentTextIcon} fill="none" />
 						</Menu.Item>
 					</AuthGuard>
+					<AuthGuard requires={['LIBRE311_ADMIN_EDIT-SYSTEM']}>
+						<Menu.Item
+							key="system-admin"
+							label="System Administration"
+							href="/admin/system"
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={documentTextIcon} fill="none" />
+						</Menu.Item>
+					</AuthGuard>
 					<AuthGuard requires="is-anonymous">
 						<Menu.Item key="login" label="Login" href="/login" on:click={handleClose}>
 							<Menu.Item.Icon slot="icon" data={user} fill="none" />
