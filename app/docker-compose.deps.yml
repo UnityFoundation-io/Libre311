@@ -11,6 +11,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: test
       MYSQL_DATABASE: libre311
+    configs:
+      - source: mysql-init
+        target: /docker-entrypoint-initdb.d/01-create-databases.sql
     healthcheck:
       test:
         ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptest"]
@@ -84,6 +87,11 @@ services:
         EOF
         # After writing the file, start Nginx
         nginx -g 'daemon off;'
+
+configs:
+  mysql-init:
+    content: |
+      CREATE DATABASE IF NOT EXISTS unity_auth;
 
 networks:
   default:

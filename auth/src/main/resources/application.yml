@@ -1,0 +1,36 @@
+micronaut:
+  application:
+    name: unity-iam
+  security:
+    endpoints:
+      logout:
+        path: /api/logout
+        get-allowed: true
+      login:
+        path: /api/login
+      introspection:
+        path: /api/token_info
+    intercept-url-map:
+      - pattern: /api/login
+        http-method: POST
+        access:
+          - isAnonymous()
+    authentication: bearer
+  server:
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowed-origins-regex: ${LIBRE311_UI_BASE_URL}
+datasources:
+  default:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    db-type: mysql
+flyway:
+  datasources:
+    default:
+      enabled: true
+
+unity:
+  auth:
+    internal-token: ${UNITY_AUTH_INTERNAL_TOKEN}

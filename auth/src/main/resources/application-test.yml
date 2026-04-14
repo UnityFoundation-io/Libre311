@@ -1,0 +1,28 @@
+micronaut:
+  application:
+    name: unity-iam
+  server:
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowed-origins-regex: '^http:\/\/(.*?)localhost:3000$'
+  security:
+    authentication: bearer
+    enabled: true
+    token:
+      enabled: true
+      jwt:
+        enabled: true
+        signatures:
+          jwks:
+            unity:
+              url: http://localhost:8080/keys
+datasources:
+  default:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    db-type: mysql
+flyway:
+  datasources:
+    default:
+      enabled: true
