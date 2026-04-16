@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Secured("INTERNAL_SERVICE")
-@Controller("/api/password-reset")
+@Controller("/password-reset")
 public class PasswordResetController {
 
     private final UserRepo userRepo;

@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Secured("USER")
-@Controller("/api/users")
+@Controller("/users")
 public class UserController {
 
     private final UserRepo userRepo;

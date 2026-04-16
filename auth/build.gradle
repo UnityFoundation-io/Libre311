@@ -73,6 +73,7 @@ micronaut {
         annotations("io.unityfoundation.*")
     }
     testResources {
+	enabled = System.getenv("MICRONAUT_TEST_RESOURCES_ENABLED") == "false" ? false : true
         additionalModules.add("jdbc-mysql")
     }
     aot {
@@ -85,4 +86,8 @@ micronaut {
         optimizeNetty = true
         configurationProperties.put("micronaut.security.jwks.enabled", "false")
     }
+}
+
+tasks.withType(io.micronaut.gradle.testresources.StartTestResourcesService).configureEach {
+    useClassDataSharing = false
 }

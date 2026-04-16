@@ -4,19 +4,20 @@ micronaut:
   security:
     endpoints:
       logout:
-        path: /api/logout
+        path: /logout
         get-allowed: true
       login:
-        path: /api/login
+        path: /login
       introspection:
-        path: /api/token_info
+        path: /token_info
     intercept-url-map:
-      - pattern: /api/login
+      - pattern: /login
         http-method: POST
         access:
           - isAnonymous()
     authentication: bearer
   server:
+    context-path: /auth
     cors:
       enabled: true
       configurations:

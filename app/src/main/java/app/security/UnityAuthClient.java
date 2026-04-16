@@ -26,7 +26,7 @@ import io.micronaut.http.client.annotation.Client;
 
 import static io.micronaut.context.env.Environment.TEST;
 
-@Client(id = "auth", path = "api/")
+@Client(id = "auth")
 @Requires(notEnv = TEST)
 public interface UnityAuthClient {
     @Post( "/hasPermission")
