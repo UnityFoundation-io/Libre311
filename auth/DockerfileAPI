@@ -1,0 +1,33 @@
+# Stage 1: Build with Gradle
+FROM gradle:9-jdk25 AS builder
+WORKDIR /workspace
+
+ARG CLOUD_DB=false
+ENV UNITYAUTH_CLOUD_DB=${CLOUD_DB}
+
+# Copy Gradle config files
+COPY auth/gradle.properties auth/settings.gradle ./
+
+# Download Gradle
+RUN gradle --version --no-daemon
+
+COPY --chown=gradle:gradle ./auth .
+
+RUN gradle buildLayers --no-daemon
+
+# Stage 2: Create the final image
+FROM eclipse-temurin:25-jre
+
+WORKDIR /home/app
+
+# Micronaut 4.x layer structure
+COPY --from=builder /workspace/build/docker/main/layers/libs /home/app/libs
+COPY --from=builder /workspace/build/docker/main/layers/resources /home/app/resources
+COPY --from=builder /workspace/build/docker/main/layers/app/application.jar /home/app/application.jar
+
+RUN useradd -u 8877 unity
+# Change to non-root privilege
+USER unity
+
+EXPOSE 9090
+ENTRYPOINT ["java", "-jar", "/home/app/application.jar"]

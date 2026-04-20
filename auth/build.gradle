@@ -26,20 +26,18 @@ dependencies {
     implementation("at.favre.lib:bcrypt:0.10.2")
     compileOnly("io.micronaut:micronaut-http-client")
     runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("org.yaml:snakeyaml")
+
+    Boolean cloudDb = Boolean.parseBoolean(System.getenv("UNITYAUTH_CLOUD_DB"))
     runtimeOnly("mysql:mysql-connector-java")
     runtimeOnly("org.flywaydb:flyway-mysql")
-    runtimeOnly("org.yaml:snakeyaml")
+    if (cloudDb) {
+        runtimeOnly('com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2')
+    }
     testImplementation("io.micronaut:micronaut-http-client")
 
     aotPlugins platform("io.micronaut.platform:micronaut-platform:${micronautVersion}")
     aotPlugins("io.micronaut.security:micronaut-security-aot")
-
-    String databaseSelection = System.getenv("UNITYAUTH_DATABASE_DEPENDENCY")
-    if (databaseSelection != null) {
-        databaseSelection.split(',').each { part ->
-            runtimeOnly(part)
-        }
-    }
 }
 
 application {
@@ -47,8 +45,8 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 run {
     systemProperties([
@@ -56,14 +54,6 @@ run {
     ])
 }
 graalvmNative.toolchainDetection = false
-
-tasks.withType(io.micronaut.gradle.docker.MicronautDockerfile).configureEach {
-    useCopyLink = false
-}
-
-tasks.withType(io.micronaut.gradle.docker.NativeImageDockerfile).configureEach {
-    useCopyLink = false
-}
 
 micronaut {
     runtime("netty")
@@ -90,4 +80,8 @@ micronaut {
 
 tasks.withType(io.micronaut.gradle.testresources.StartTestResourcesService).configureEach {
     useClassDataSharing = false
+}
+
+tasks.named('shadowJar') {
+    zip64 = true
 }
