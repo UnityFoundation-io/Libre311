@@ -23,7 +23,7 @@
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 
 	const libre311 = useLibre311Service();
-	const { projects: allProjectsStore, fetchProjectsAdmin } = useLibre311Context();
+	const { projects: allProjectsStore, fetchProjectsAdmin, user } = useLibre311Context();
 
 	let project: Project | undefined;
 	let showCloseModal = false;
@@ -114,13 +114,20 @@
 	$: canReopen = project && project.status === 'CLOSED' && new Date(project.end_date) > new Date();
 
 	$: canClose = project && project.status === 'OPEN';
+
+	$: isAdmin = !!$user?.permissions.some((p) =>
+		['LIBRE311_ADMIN_VIEW-SYSTEM', 'LIBRE311_ADMIN_VIEW-TENANT', 'LIBRE311_ADMIN_VIEW-SUBTENANT'].includes(p)
+	);
 </script>
 
 <AuthGuard
 	requires={[
 		'LIBRE311_ADMIN_VIEW-TENANT',
 		'LIBRE311_ADMIN_VIEW-SYSTEM',
-		'LIBRE311_ADMIN_VIEW-SUBTENANT'
+		'LIBRE311_ADMIN_VIEW-SUBTENANT',
+		'LIBRE311_REQUEST_VIEW-SYSTEM',
+		'LIBRE311_REQUEST_VIEW-TENANT',
+		'LIBRE311_REQUEST_VIEW-SUBTENANT'
 	]}
 >
 	<div class="flex h-full flex-col">
@@ -131,21 +138,23 @@
 						<a href="/projects" class="text-sm text-primary hover:underline">← All Projects</a>
 					</div>
 					<div class="flex gap-2">
-						{#if canReopen}
-							<Button variant="ghost" on:click={() => (showReopenModal = true)}>
-								<Button.Leading data={arrowPath} slot="leading" />
-								Reopen Project
+						{#if isAdmin}
+							{#if canReopen}
+								<Button variant="ghost" on:click={() => (showReopenModal = true)}>
+									<Button.Leading data={arrowPath} slot="leading" />
+									Reopen Project
+								</Button>
+							{/if}
+							{#if canClose}
+								<Button variant="danger" on:click={() => (showCloseModal = true)}
+									>Close Project</Button
+								>
+							{/if}
+							<Button variant="ghost" on:click={() => goto(`/projects/${project?.id}/edit`)}>
+								<Button.Leading data={pencilIcon} slot="leading" />
+								Edit Project
 							</Button>
 						{/if}
-						{#if canClose}
-							<Button variant="danger" on:click={() => (showCloseModal = true)}
-								>Close Project</Button
-							>
-						{/if}
-						<Button variant="ghost" on:click={() => goto(`/projects/${project?.id}/edit`)}>
-							<Button.Leading data={pencilIcon} slot="leading" />
-							Edit Project
-						</Button>
 					</div>
 				</div>
 				<h1 class="text-2xl font-bold">{project.name}</h1>

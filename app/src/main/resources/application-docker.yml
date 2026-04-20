@@ -1,13 +1,4 @@
 ---
-# NOTE: In the Docker environment, micronaut.http.services.auth.url is used by both
-# the libre311-api service to get user permission (see PermissionsController.java) and
-# the browser on host (it is returned to the browser by the frontend).
-# So the setup must be so that this URL is resolved correctly by both of them.
-# For example, if it is set to http://unity-auth-api:9090, the host must be able
-# to access the unity-auth-api service from port 9090 on host, and the libre311-api
-# service also must be able to access unity-auth-api using port 9090 on its container.
-# This means the container for unity-auth-api must bind port 9090 on host to port 9090
-# on the container.
 micronaut:
   http:
     services:
@@ -21,7 +12,7 @@ micronaut:
         signatures:
           jwks:
             unity:
-              url: ${AUTH_JWKS:`http://unity-auth-api:9090/keys`}
+              url: ${AUTH_JWKS:`http://unity-auth-api:9090/auth/keys`}
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:3000/?login-failed=true

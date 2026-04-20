@@ -57,11 +57,11 @@ public class TenantAdminController {
         return jurisdictionService.setJurisdictionRemoteHosts(jurisdictionId, remoteHosts);
     }
 
-    @Patch(uris = {"/jurisdictions/{jurisdictionId}{?tenant_id}", "/jurisdictions/{jurisdictionId}.json{?tenant_id}"})
+    @Patch(uris = {"/jurisdictions/{jurisdictionId}{?jurisdiction_id}", "/jurisdictions/{jurisdictionId}.json{?jurisdiction_id}"})
     @ExecuteOn(TaskExecutors.IO)
-    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT})
+    @RequiresPermissions({LIBRE311_ADMIN_EDIT_SYSTEM, LIBRE311_ADMIN_EDIT_TENANT, LIBRE311_ADMIN_EDIT_SUBTENANT})
     public JurisdictionDTO updateJurisdictionJson(String jurisdictionId, @Valid @Body PatchJurisdictionDTO requestDTO,
-                                             @Nullable @QueryValue("tenant_id") Long tenant_id) {
+                                             @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
         return jurisdictionService.updateJurisdiction(jurisdictionId, requestDTO);
     }
 }

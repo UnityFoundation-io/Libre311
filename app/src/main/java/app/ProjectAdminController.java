@@ -43,7 +43,8 @@ public class ProjectAdminController {
 
     @Get(uris = { "{?jurisdiction_id}", ".json{?jurisdiction_id}" })
     @ExecuteOn(TaskExecutors.IO)
-    @RequiresPermissions({LIBRE311_ADMIN_VIEW_SYSTEM, LIBRE311_ADMIN_VIEW_TENANT, LIBRE311_ADMIN_VIEW_SUBTENANT})
+    @RequiresPermissions({LIBRE311_ADMIN_VIEW_SYSTEM, LIBRE311_ADMIN_VIEW_TENANT, LIBRE311_ADMIN_VIEW_SUBTENANT,
+        LIBRE311_REQUEST_VIEW_SYSTEM, LIBRE311_REQUEST_VIEW_TENANT, LIBRE311_REQUEST_VIEW_SUBTENANT})
     public List<ProjectDTO> index(@Nullable @QueryValue("jurisdiction_id") String jurisdictionId) {
         return projectService.getProjects(jurisdictionId);
     }

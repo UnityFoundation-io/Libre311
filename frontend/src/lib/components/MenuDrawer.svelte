@@ -93,7 +93,18 @@
 						>
 							<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
 						</Menu.Item>
-						{#if $jurisdiction.project_feature && $jurisdiction.project_feature !== 'DISABLED'}
+					</AuthGuard>
+					{#if $jurisdiction.project_feature && $jurisdiction.project_feature !== 'DISABLED'}
+						<AuthGuard
+							requires={[
+								'LIBRE311_ADMIN_EDIT-SYSTEM',
+								'LIBRE311_ADMIN_EDIT-TENANT',
+								'LIBRE311_ADMIN_EDIT-SUBTENANT',
+								'LIBRE311_REQUEST_VIEW-SYSTEM',
+								'LIBRE311_REQUEST_VIEW-TENANT',
+								'LIBRE311_REQUEST_VIEW-SUBTENANT'
+							]}
+						>
 							<Menu.Item
 								key="projects"
 								label="Project Management"
@@ -102,8 +113,8 @@
 							>
 								<Menu.Item.Icon slot="icon" data={pencilIcon} fill="none" />
 							</Menu.Item>
-						{/if}
-					</AuthGuard>
+						</AuthGuard>
+					{/if}
 					<AuthGuard
 						requires={[
 							'LIBRE311_ADMIN_EDIT-SYSTEM',
@@ -120,7 +131,13 @@
 							<Menu.Item.Icon slot="icon" data={documentTextIcon} fill="none" />
 						</Menu.Item>
 					</AuthGuard>
-					<AuthGuard requires={['LIBRE311_ADMIN_EDIT-SYSTEM']}>
+					<AuthGuard
+						requires={[
+							'LIBRE311_ADMIN_EDIT-SYSTEM',
+							'LIBRE311_ADMIN_EDIT-TENANT',
+							'LIBRE311_ADMIN_EDIT-SUBTENANT'
+						]}
+					>
 						<Menu.Item
 							key="system-admin"
 							label="System Administration"

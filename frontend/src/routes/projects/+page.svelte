@@ -71,7 +71,10 @@
 	requires={[
 		'LIBRE311_ADMIN_VIEW-TENANT',
 		'LIBRE311_ADMIN_VIEW-SYSTEM',
-		'LIBRE311_ADMIN_VIEW-SUBTENANT'
+		'LIBRE311_ADMIN_VIEW-SUBTENANT',
+		'LIBRE311_REQUEST_VIEW-SYSTEM',
+		'LIBRE311_REQUEST_VIEW-TENANT',
+		'LIBRE311_REQUEST_VIEW-SUBTENANT'
 	]}
 >
 	<div class="p-6">
@@ -99,10 +102,12 @@
 						></span>
 					</button>
 				</label>
-				<Button variant="primary" on:click={() => goto('/projects/create')}>
-					<Button.Leading data={plusCircleIcon} slot="leading" />
-					Create Project
-				</Button>
+				{#if isAdmin}
+					<Button variant="primary" on:click={() => goto('/projects/create')}>
+						<Button.Leading data={plusCircleIcon} slot="leading" />
+						Create Project
+					</Button>
+				{/if}
 			</div>
 		</div>
 
