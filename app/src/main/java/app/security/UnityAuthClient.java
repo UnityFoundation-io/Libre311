@@ -26,24 +26,24 @@ import io.micronaut.http.client.annotation.Client;
 
 import static io.micronaut.context.env.Environment.TEST;
 
-@Client(id = "auth", path = "api/")
+@Client(id = "auth")
 @Requires(notEnv = TEST)
 public interface UnityAuthClient {
-    @Post( "/hasPermission")
+    @Post("/auth/hasPermission")
     HttpResponse<HasPermissionResponse> hasPermission(@Body HasPermissionRequest requestDTO,
                                                       @Header("Authorization") String authorizationHeader);
 
-    @Post("/principal/permissions")
+    @Post("/auth/principal/permissions")
     HttpResponse<UserPermissionsResponse> getUserPermissions(
         @Body UnityAuthUserPermissionsRequest requestDTO,
         @Header("Authorization") String authorizationHeader);
 
-    @Post("/password-reset/generate")
+    @Post("/auth/password-reset/generate")
     HttpResponse<GenerateTokenResponse> generateToken(
             @Body GenerateTokenRequest request,
             @Header("X-Unity-Auth-Internal") String internalToken);
 
-    @Post("/password-reset/reset")
+    @Post("/auth/password-reset/reset")
     HttpResponse<?> resetPassword(@Body ResetPasswordRequest request,
                                   @Header("X-Unity-Auth-Internal") String internalToken);
 }

@@ -59,7 +59,7 @@ public class JurisdictionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(JurisdictionService.class);
 
-    @Property(name = "micronaut.http.services.auth.url")
+    @Property(name = "app.auth-base-url")
     protected String authUrl;
 
     private final JurisdictionRepository jurisdictionRepository;

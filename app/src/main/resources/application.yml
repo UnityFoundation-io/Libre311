@@ -100,6 +100,7 @@ unity:
 app:
   service-id: ${LIBRE311_SERVICE_ID}
   base-url: ${APP_BASE_URL}
+  auth-base-url: /auth
 
   discovery:
     changeset: ${LIBRE311_DISCOVERY_CHANGESET_DATETIME:`2012-09-14T08:00:00-07:00`}

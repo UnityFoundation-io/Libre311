@@ -266,7 +266,7 @@ public class RootControllerTest {
 
     private void addValuesToAttribute(ServiceDefinitionAttribute serviceDefinitionAttribute, Set<String> values) {
         values.forEach(s -> serviceDefinitionAttribute.addAttributeValue(
-                attributeValueRepository.save(new AttributeValue(sidewalkMultiValueAttr, s))
+                attributeValueRepository.save(new AttributeValue(serviceDefinitionAttribute, s))
         ));
     }
 
@@ -377,9 +377,12 @@ public class RootControllerTest {
 
         ServiceRequestDTO serviceRequestDTO = serviceRequestDTOS[0];
         assertFalse(serviceRequestDTO.getSelectedValues().isEmpty());
-        ServiceDefinitionAttributeDTO serviceDefinitionAttributeDTO = serviceRequestDTO.getSelectedValues().get(0);
-        assertNotNull(serviceDefinitionAttributeDTO.getValues());
-        assertFalse(serviceDefinitionAttributeDTO.getValues().isEmpty());
+        ServiceDefinitionAttributeDTO multiValueAttrDTO = serviceRequestDTO.getSelectedValues().stream()
+            .filter(a -> a.getId().equals(sidewalkMultiValueAttr.getId()))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("Multi-value attribute not found in response"));
+        assertNotNull(multiValueAttrDTO.getValues());
+        assertFalse(multiValueAttrDTO.getValues().isEmpty());
     }
 
     @Test
@@ -689,8 +692,8 @@ public class RootControllerTest {
         JurisdictionDTO infoResponse = response.getBody().get();
         assertEquals("1", infoResponse.getJurisdictionId());
         assertEquals("jurisdiction1", infoResponse.getName());
-        // from application-test.yml's property `micronaut.http.services.auth.urls`
-        assertEquals("http://localhost:8080", infoResponse.getUnityAuthUrl());
+        // hardcoded in application.yml as the frontend-facing relative path prefix
+        assertEquals("/auth", infoResponse.getUnityAuthUrl());
         assertNotNull(infoResponse.getBounds());
         assertTrue(infoResponse.getBounds().length > 0);
     }

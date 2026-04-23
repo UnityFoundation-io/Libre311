@@ -16,7 +16,7 @@ micronaut:
         signatures:
           jwks:
             unity:
-              url: ${AUTH_JWKS:`http://localhost:9090/keys`}
+              url: ${AUTH_JWKS:`http://localhost:9090/auth/keys`}
     redirect:
       login-success: http://localhost:3000
       login-failure: http://localhost:3000/?login-failed=true

@@ -1,0 +1,87 @@
+plugins {
+    id("com.gradleup.shadow") version "8.3.9"
+    id("io.micronaut.application") version "4.6.1"
+    id("io.micronaut.test-resources") version "4.6.1"
+    id("io.micronaut.aot") version "4.6.1"
+}
+
+version = "0.1"
+group = "io.unityfoundation"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor("io.micronaut.data:micronaut-data-processor")
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    annotationProcessor("io.micronaut.security:micronaut-security-annotations")
+    annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.data:micronaut-data-jdbc")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+    implementation("io.micronaut.flyway:micronaut-flyway")
+    implementation("io.micronaut.serde:micronaut-serde-jackson")
+    implementation("io.micronaut.reactor:micronaut-reactor")
+    implementation("at.favre.lib:bcrypt:0.10.2")
+    compileOnly("io.micronaut:micronaut-http-client")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("org.yaml:snakeyaml")
+
+    Boolean cloudDb = Boolean.parseBoolean(System.getenv("UNITYAUTH_CLOUD_DB"))
+    runtimeOnly("mysql:mysql-connector-java")
+    runtimeOnly("org.flywaydb:flyway-mysql")
+    if (cloudDb) {
+        runtimeOnly('com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.2')
+    }
+    testImplementation("io.micronaut:micronaut-http-client")
+
+    aotPlugins platform("io.micronaut.platform:micronaut-platform:${micronautVersion}")
+    aotPlugins("io.micronaut.security:micronaut-security-aot")
+}
+
+application {
+    mainClass.set("io.unityfoundation.Application")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+run {
+    systemProperties([
+            'micronaut.environments': 'local'
+    ])
+}
+graalvmNative.toolchainDetection = false
+
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("io.unityfoundation.*")
+    }
+    testResources {
+	enabled = !gradle.startParameter.taskNames.any{it.endsWith(":run")}
+        additionalModules.add("jdbc-mysql")
+    }
+    aot {
+        optimizeServiceLoading = false
+        convertYamlToJava = false
+        precomputeOperations = true
+        cacheEnvironment = true
+        optimizeClassLoading = true
+        deduceEnvironment = true
+        optimizeNetty = true
+        configurationProperties.put("micronaut.security.jwks.enabled", "false")
+    }
+}
+
+tasks.withType(io.micronaut.gradle.testresources.StartTestResourcesService).configureEach {
+    useClassDataSharing = false
+}
+
+tasks.named('shadowJar') {
+    zip64 = true
+}

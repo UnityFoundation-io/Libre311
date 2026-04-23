@@ -11,7 +11,11 @@ export default defineConfig({
 	server: {
 		port: 3000,
 		host: true,
-		allowedHosts: ['stlma.localhost', 'lomocomo.localhost']
+		allowedHosts: ['stlma.localhost', 'lomocomo.localhost'],
+		proxy: {
+			'/api': 'http://localhost:8080',
+			'/auth': 'http://localhost:9090'
+		}
 	},
 	optimizeDeps: {
 		include: [
