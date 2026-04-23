@@ -9,8 +9,15 @@
 	const jurisdiction = useJurisdiction();
 
 	$: if ($user !== undefined) {
-		if (!$user?.permissions.some((p) =>
-			['LIBRE311_ADMIN_EDIT-SYSTEM', 'LIBRE311_ADMIN_EDIT-TENANT', 'LIBRE311_ADMIN_EDIT-SUBTENANT'].includes(p))) {
+		if (
+			!$user?.permissions.some((p) =>
+				[
+					'LIBRE311_ADMIN_EDIT-SYSTEM',
+					'LIBRE311_ADMIN_EDIT-TENANT',
+					'LIBRE311_ADMIN_EDIT-SUBTENANT'
+				].includes(p)
+			)
+		) {
 			goto('/');
 		}
 	}

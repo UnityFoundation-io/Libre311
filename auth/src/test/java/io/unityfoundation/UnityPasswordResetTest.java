@@ -34,7 +34,7 @@ public class UnityPasswordResetTest {
     @Test
     void testPasswordResetFlow() {
         // 1. Generate token
-        HttpRequest<?> generateRequest = HttpRequest.POST("/api/password-reset/generate",
+        HttpRequest<?> generateRequest = HttpRequest.POST("/password-reset/generate",
                 new PasswordResetController.GenerateTokenRequest("person1@test.io"))
                 .header("X-Unity-Auth-Internal", "test-secret");
 
@@ -46,7 +46,7 @@ public class UnityPasswordResetTest {
         assertNotNull(token);
 
         // 2. Reset password
-        HttpRequest<?> resetRequest = HttpRequest.POST("/api/password-reset/reset",
+        HttpRequest<?> resetRequest = HttpRequest.POST("/password-reset/reset",
                 new PasswordResetController.ResetPasswordRequest(token, "new-secure-password"))
                 .header("X-Unity-Auth-Internal", "test-secret");
 
@@ -60,7 +60,7 @@ public class UnityPasswordResetTest {
 
     @Test
     void testGenerateTokenInvalidSecret() {
-        HttpRequest<?> generateRequest = HttpRequest.POST("/api/password-reset/generate",
+        HttpRequest<?> generateRequest = HttpRequest.POST("/password-reset/generate",
                 new PasswordResetController.GenerateTokenRequest("person1@test.io"))
                 .header("X-Unity-Auth-Internal", "wrong-secret");
 
@@ -72,7 +72,7 @@ public class UnityPasswordResetTest {
 
     @Test
     void testResetWithInvalidToken() {
-        HttpRequest<?> resetRequest = HttpRequest.POST("/api/password-reset/reset",
+        HttpRequest<?> resetRequest = HttpRequest.POST("/password-reset/reset",
                 new PasswordResetController.ResetPasswordRequest("invalid-token", "new-password"))
                 .header("X-Unity-Auth-Internal", "test-secret");
 
@@ -84,7 +84,7 @@ public class UnityPasswordResetTest {
 
     @Test
     void testResetWithInvalidSecret() {
-        HttpRequest<?> resetRequest = HttpRequest.POST("/api/password-reset/reset",
+        HttpRequest<?> resetRequest = HttpRequest.POST("/password-reset/reset",
                 new PasswordResetController.ResetPasswordRequest("any-token", "new-password"))
                 .header("X-Unity-Auth-Internal", "wrong-secret");
 

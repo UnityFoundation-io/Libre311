@@ -116,7 +116,11 @@
 	$: canClose = project && project.status === 'OPEN';
 
 	$: isAdmin = !!$user?.permissions.some((p) =>
-		['LIBRE311_ADMIN_VIEW-SYSTEM', 'LIBRE311_ADMIN_VIEW-TENANT', 'LIBRE311_ADMIN_VIEW-SUBTENANT'].includes(p)
+		[
+			'LIBRE311_ADMIN_VIEW-SYSTEM',
+			'LIBRE311_ADMIN_VIEW-TENANT',
+			'LIBRE311_ADMIN_VIEW-SUBTENANT'
+		].includes(p)
 	);
 </script>
 
