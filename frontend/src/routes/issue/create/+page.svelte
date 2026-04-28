@@ -61,18 +61,22 @@
 	}
 
 	let centerPos: PointTuple = getStartingCenterPos();
+	let locationFailed = false;
 
-	$: mapBounds = createCreationMapBounds($projectsStore, project);
+	$: mapBounds = createCreationMapBounds($projectsStore, project, locationFailed);
 
 	function createCreationMapBounds(
 		projects: Project[],
-		selectedProject: Project | undefined
-	): L.LatLngTuple[] {
+		selectedProject: Project | undefined,
+		locationFailed: boolean
+	): L.LatLngTuple[] | undefined {
 		if (selectedProject) {
 			return selectedProject.bounds as L.LatLngTuple[];
 		}
-
-		return libre311.getJurisdictionConfig().bounds;
+		if (locationFailed) {
+			return libre311.getJurisdictionConfig().bounds;
+		}
+		return undefined;
 	}
 
 	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
@@ -95,6 +99,10 @@
 		const changedParams = e.detail;
 		params = { ...params, ...changedParams };
 		goto(linkResolver.createIssuePageNext($page.url));
+	}
+
+	function handleLocationError() {
+		locationFailed = true;
 	}
 
 	function boundsChanged(e: CustomEvent<L.LatLngBounds>) {
@@ -220,6 +228,7 @@
 			bounds={mapBounds}
 			locateOpts={{ setView: true, enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
+			on:locationerror={handleLocationError}
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
 			{#if $jurisdictionStore.project_feature && $jurisdictionStore.project_feature !== 'DISABLED'}
