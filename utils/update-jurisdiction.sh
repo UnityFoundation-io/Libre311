@@ -135,7 +135,7 @@ get_jwt_token() {
 
   # Call UnityAuth to get JWT
   response=$(curl -s -X POST \
-    "${AUTH_BASE_URL}/api/login" \
+    "${AUTH_BASE_URL}/auth/login" \
     -H "Content-Type: application/json" \
     -d "{\"username\":\"$username\",\"password\":\"$password\"}")
 
