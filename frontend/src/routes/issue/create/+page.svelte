@@ -101,6 +101,15 @@
 		goto(linkResolver.createIssuePageNext($page.url));
 	}
 
+	function handleLocationFound(e: CustomEvent<L.LatLng>) {
+		const { lat, lng } = e.detail;
+		const turfPoint = turf.point([lat, lng]);
+		const boundsPoly = turf.polygon([libre311.getJurisdictionConfig().bounds]);
+		if (!turf.booleanPointInPolygon(turfPoint, boundsPoly)) {
+			locationFailed = true;
+		}
+	}
+
 	function handleLocationError() {
 		locationFailed = true;
 	}
@@ -226,8 +235,9 @@
 			controlFactories={[mapCenterControlFactory]}
 			disabled={step !== 0}
 			bounds={mapBounds}
-			locateOpts={{ setView: true, enableHighAccuracy: true }}
+			locateOpts={{ enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
+			on:locationfound={handleLocationFound}
 			on:locationerror={handleLocationError}
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
