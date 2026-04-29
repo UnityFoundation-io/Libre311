@@ -293,7 +293,6 @@ content to your use case.
 - `LIBRE311_JDBC_DRIVER` - JDBC driver class
 - `LIBRE311_JDBC_USER` - Database username
 - `LIBRE311_JDBC_PASSWORD` - Database password
-- `LIBRE311_AUTO_SCHEMA_GEN` - Schema generation mode (defaults to `validate`; use `update` during initial setup)
 
 **Object Storage** (optional — only required when using GCP image uploads):
 - `GCP_PROJECT_ID` - The GCP project ID
