@@ -70,12 +70,12 @@
 			>
 		</div>
 
-		<div class="m-4">
-			<!-- eslint-disable-next-line svelte/valid-compile -->
-			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"
-				>{messages['login']['create_account']}</a
-			>
-		</div>
+		<!--		<div class="m-4">-->
+		<!--			&lt;!&ndash; eslint-disable-next-line svelte/valid-compile &ndash;&gt;-->
+		<!--			<a class="inline-block min-h-[24px] text-sm" href="javascript:void(0);"-->
+		<!--				>{messages['login']['create_account']}</a-->
+		<!--			>-->
+		<!--		</div>-->
 	</Card>
 </div>
 

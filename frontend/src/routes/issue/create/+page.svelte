@@ -61,18 +61,22 @@
 	}
 
 	let centerPos: PointTuple = getStartingCenterPos();
+	let locationFailed = false;
 
-	$: mapBounds = createCreationMapBounds($projectsStore, project);
+	$: mapBounds = createCreationMapBounds($projectsStore, project, locationFailed);
 
 	function createCreationMapBounds(
 		projects: Project[],
-		selectedProject: Project | undefined
-	): L.LatLngTuple[] {
+		selectedProject: Project | undefined,
+		locationFailed: boolean
+	): L.LatLngTuple[] | undefined {
 		if (selectedProject) {
 			return selectedProject.bounds as L.LatLngTuple[];
 		}
-
-		return libre311.getJurisdictionConfig().bounds;
+		if (locationFailed) {
+			return libre311.getJurisdictionConfig().bounds;
+		}
+		return undefined;
 	}
 
 	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
@@ -95,6 +99,19 @@
 		const changedParams = e.detail;
 		params = { ...params, ...changedParams };
 		goto(linkResolver.createIssuePageNext($page.url));
+	}
+
+	function handleLocationFound(e: CustomEvent<L.LatLng>) {
+		const { lat, lng } = e.detail;
+		const turfPoint = turf.point([lat, lng]);
+		const boundsPoly = turf.polygon([libre311.getJurisdictionConfig().bounds]);
+		if (!turf.booleanPointInPolygon(turfPoint, boundsPoly)) {
+			locationFailed = true;
+		}
+	}
+
+	function handleLocationError() {
+		locationFailed = true;
 	}
 
 	function boundsChanged(e: CustomEvent<L.LatLngBounds>) {
@@ -218,8 +235,10 @@
 			controlFactories={[mapCenterControlFactory]}
 			disabled={step !== 0}
 			bounds={mapBounds}
-			locateOpts={{ setView: true, enableHighAccuracy: true }}
+			locateOpts={{ enableHighAccuracy: true }}
 			on:boundsChanged={boundsChanged}
+			on:locationfound={handleLocationFound}
+			on:locationerror={handleLocationError}
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
 			{#if $jurisdictionStore.project_feature && $jurisdictionStore.project_feature !== 'DISABLED'}

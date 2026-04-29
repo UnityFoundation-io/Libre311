@@ -24,7 +24,7 @@ INSERT IGNORE INTO remote_hosts (id, name, jurisdiction_id)
 VALUES (1, 'localhost', 'stlma');
 
 -- make the app user 'stl_subtenant_admin@example.com' an admin for the stlma jurisdiction
-INSERT IGNORE INTO jurisdiction_user (id, user_id, jurisdiction_id, isUserAdmin)
+INSERT IGNORE INTO jurisdiction_user (id, user_id, jurisdiction_id, is_user_admin)
 VALUES (1, 1, 'stlma', TRUE);
 
 -- Stl subtenant jurisdiction admin

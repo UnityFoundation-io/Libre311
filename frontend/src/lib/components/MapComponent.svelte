@@ -1,6 +1,8 @@
 <script lang="ts" context="module">
 	export type Events = {
 		boundsChanged: L.LatLngBounds;
+		locationfound: L.LatLng;
+		locationerror: void;
 	};
 
 	type ControlFactory = (opts: L.ControlOptions) => L.Control;
@@ -41,6 +43,10 @@
 		});
 		map.on('locationfound', function (e) {
 			map.setView(e.latlng, 16);
+			dispatch('locationfound', e.latlng);
+		});
+		map.on('locationerror', function () {
+			dispatch('locationerror');
 		});
 
 		controlFactories.forEach((factory) => factory(controlOps).addTo(map));
