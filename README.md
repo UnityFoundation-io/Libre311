@@ -18,7 +18,7 @@ Libre311 is an open-source web application for managing municipal service reques
 | Backend API | Java 25 / Micronaut 4.x |
 | Frontend | SvelteKit / TypeScript / Tailwind CSS |
 | Database | MySQL or PostgreSQL |
-| Authentication | OAuth via UnityAuth service |
+| Authentication | [UnityAuth](https://github.com/UnityFoundation-io/UnityAuth) (vendored, adapted) |
 | Maps | Leaflet with Nominatim geocoding |
 
 ## Prerequisites
@@ -35,11 +35,7 @@ Libre311 is an open-source web application for managing municipal service reques
 
 ### Required Services
 
-**UnityAuth** - Libre311 uses [UnityAuth](https://github.com/UnityFoundation-io/UnityAuth) for authentication and authorization. You must have UnityAuth running before starting Libre311.
-
-1. Clone the UnityAuth repository
-2. Follow its setup instructions to run locally or via Docker
-3. Note the UnityAuth URL for configuring Libre311
+**UnityAuth** - Libre311 uses [UnityAuth](https://github.com/UnityFoundation-io/UnityAuth) for authentication and authorization. The `auth` Gradle subproject is a vendored and adapted fork of UnityAuth, integrated directly into this repository. It runs as a separate process alongside the main API and shares the same database server (in its own `unity_auth` schema).
 
 ### Optional Services
 
@@ -56,14 +52,21 @@ Libre311 is an open-source web application for managing municipal service reques
    # Edit setenv.sh with your configuration (database, auth URLs, etc.)
    ```
 
-2. **Start the API server** (from project root)
+2. **Start the auth service** (from project root, in a dedicated terminal)
+   ```shell
+   source setenv.sh
+   ./gradlew auth:run
+   ```
+   Auth service will be available at http://localhost:9090/auth
+
+3. **Start the API server** (in a new terminal)
    ```shell
    source setenv.sh
    ./gradlew app:run
    ```
    API will be available at http://localhost:8080
 
-3. **Start the frontend** (in a new terminal)
+4. **Start the frontend** (in a new terminal)
    ```shell
    source setenv.sh
    cd frontend
@@ -98,7 +101,7 @@ See [app/README.md](app/README.md) and [frontend/README.md](frontend/README.md) 
 | **Web App UI** | SvelteKit application served independently or by the API |
 | **Web API** | Micronaut REST API (horizontally scalable) |
 | **Database** | MySQL or PostgreSQL with spatial extensions |
-| **Auth Provider** | UnityAuth service for OAuth/JWT authentication |
+| **Auth Provider** | UnityAuth (vendored as `auth/` subproject) for OAuth/JWT authentication |
 | **Geocoding Service** | Nominatim (default) for reverse geocoding |
 | **Object Storage** | GCP, AWS, or Azure for user-uploaded images |
 
@@ -116,6 +119,13 @@ Libre311/
 │       ├── service/                  # Business logic layer
 │       ├── security/                 # OAuth/JWT authentication
 │       └── geocode/                  # Geocoding provider abstraction
+│
+├── auth/                         # Auth service (vendored fork of UnityAuth)
+│   └── src/main/java/io/unityfoundation/auth/
+│       ├── AuthController.java       # Login/logout/token endpoints
+│       ├── UserController.java       # User management
+│       ├── PermissionsService.java   # Permission checks
+│       └── entities/                 # JPA entities (User, Role, Tenant, etc.)
 │
 ├── frontend/                     # Frontend UI (SvelteKit)
 │   └── src/
@@ -298,9 +308,10 @@ The following environment variables should be set to configure the application:
 - `MICRONAUT_SECURITY_REDIRECT_LOGIN_FAILURE`
 - `MICRONAUT_SECURITY_REDIRECT_LOGOUT`
 
-**Authentication (UnityAuth):**
-- `AUTH_BASE_URL` - UnityAuth service base URL
-- `AUTH_JWKS` - UnityAuth JWKS endpoint for JWT validation
+**Authentication:**
+- `AUTH_BASE_URL` - Auth service base URL (defaults to `http://localhost:9090/auth` for local dev)
+- `AUTH_JWKS` - Auth service JWKS endpoint for JWT validation
+- `UNITY_AUTH_INTERNAL_TOKEN` - Shared secret for internal API calls between the app and auth service
 
 **Geocoding (optional, has sensible defaults):**
 - `NOMINATIM_URL` - Geocoding service URL (default: `https://nominatim.openstreetmap.org`)
