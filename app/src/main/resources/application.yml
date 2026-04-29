@@ -84,7 +84,7 @@ jpa:
         dialect: org.hibernate.dialect.MySQLDialect
         database-platform: org.hibernate.dialect.MySQLDialect
         hbm2ddl:
-          auto: ${LIBRE311_AUTO_SCHEMA_GEN:update}
+          auto: ${LIBRE311_AUTO_SCHEMA_GEN:validate}
 #        show_sql: true
 #        format_sql: true
 #        use_sql_comments: true
