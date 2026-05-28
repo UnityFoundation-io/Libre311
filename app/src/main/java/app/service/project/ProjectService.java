@@ -95,7 +95,16 @@ public class ProjectService {
         project.setEndDate(dto.getEndDate());
         project.setJurisdiction(jurisdiction);
 
-        return new ProjectDTO(projectRepository.save(project));
+        project = projectRepository.save(project);
+        project.setSlug(generateSlug(project.getName(), project.getId()));
+        return new ProjectDTO(projectRepository.update(project));
+    }
+
+    private static String generateSlug(String name, Long id) {
+        String base = name.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "-");
+        return id + "-" + base;
     }
 
     @Transactional
