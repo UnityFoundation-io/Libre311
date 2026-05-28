@@ -142,12 +142,12 @@ export class LinkResolver {
 		let currentStep = this.createIssuePageGetCurrentStep(url);
 		const searchParams = this.copySearchParams(url.searchParams);
 		searchParams.set('step', (++currentStep).toString());
-		return `/issue/create?${searchParams.toString()}`;
+		return `${url.pathname}?${searchParams.toString()}`;
 	}
 	createIssuePagePrevious(url: URL) {
 		let currentStep = this.createIssuePageGetCurrentStep(url);
 		const searchParams = this.copySearchParams(url.searchParams);
 		searchParams.set('step', (--currentStep).toString());
-		return `/issue/create?${searchParams.toString()}`;
+		return `${url.pathname}?${searchParams.toString()}`;
 	}
 }

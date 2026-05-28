@@ -550,6 +550,7 @@ export type UpdateJurisdictionParams = {
 	terms_of_use_content?: string;
 	privacy_policy_content?: string;
 	project_feature?: ProjectFeature;
+	photo_voice_service_code?: number;
 };
 
 const JurisdictionConfigSchema = z
@@ -561,6 +562,7 @@ const JurisdictionConfigSchema = z
 		primary_color: z.string().optional(),
 		primary_hover_color: z.string().optional(),
 		project_feature: ProjectFeatureSchema.optional().default('DISABLED'),
+		photo_voice_service_code: z.number().optional().nullable(),
 		tenant_id: z.number()
 	})
 	.merge(HasJurisdictionIdSchema);

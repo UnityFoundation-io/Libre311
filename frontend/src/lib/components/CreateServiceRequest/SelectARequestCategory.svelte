@@ -18,6 +18,7 @@
 	import type { CreateServiceRequestUIParams } from './shared';
 	import messages from '$media/messages.json';
 	import { setUpAlertRole } from '$lib/utils/functions';
+	import { SYSTEM_RESERVED_GROUP_NAME } from '$lib/constants/photoVoice';
 
 	export let params: Partial<CreateServiceRequestUIParams>;
 
@@ -36,10 +37,11 @@
 	onMount(fetchServiceList);
 
 	function fetchServiceList() {
-		libre311
-			.getServiceList()
-			.then((res) => {
-				serviceList = asAsyncSuccess(res);
+		Promise.all([libre311.getServiceList(), libre311.getGroupList()])
+			.then(([services, groups]) => {
+				const reservedId = groups.find((g) => g.name === SYSTEM_RESERVED_GROUP_NAME)?.id;
+				const filtered = services.filter((s) => s.group_id !== reservedId);
+				serviceList = asAsyncSuccess(filtered);
 			})
 			.catch((err) => (serviceList = asAsyncFailure(err)));
 	}

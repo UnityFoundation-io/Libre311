@@ -4,15 +4,15 @@
 	import MapComponent from '$lib/components/MapComponent.svelte';
 	import ContactInformation from '$lib/components/CreateServiceRequest/ContactInformation.svelte';
 	import ReviewServiceRequest from '$lib/components/CreateServiceRequest/ReviewServiceRequest.svelte';
+	import PhotoVoiceDetailsForm from '$lib/components/CreateServiceRequest/PhotoVoiceDetailsForm.svelte';
 
 	import WaypointOpen from '$lib/assets/waypoint-open.png';
-	import type { CreateServiceRequestParams, Project } from '$lib/services/Libre311/Libre311';
+	import type { CreateServiceRequestParams, Service } from '$lib/services/Libre311/Libre311';
 	import { iconPositionOpts } from '$lib/utils/functions';
 
 	import L, { type PointTuple } from 'leaflet';
 	import MapMarker from '$lib/components/MapMarker.svelte';
 	import MapBoundaryPolygon from '$lib/components/MapBoundaryPolygon.svelte';
-	import ProjectBoundary from '$lib/components/ProjectBoundary.svelte';
 	import { KEYBOARD_PAN_DELTA_FINE } from '$lib/constants/map';
 	import type { ComponentType } from 'svelte';
 	import {
@@ -20,75 +20,59 @@
 		type CreateServiceRequestUIParams
 	} from '$lib/components/CreateServiceRequest/shared';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { createDraftStore } from '$lib/services/DraftStore';
 	import MapGeosearch from '$lib/components/MapGeosearch.svelte';
 	import type { ComponentEvents } from 'svelte';
 	import { useLibre311Context, useLibre311Service } from '$lib/context/Libre311Context';
-	import { useProjectsStore } from '$lib/context/ServiceRequestsContext';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import Breakpoint from '$lib/components/Breakpoint.svelte';
 	import { Button } from 'stwui';
 	import { page } from '$app/stores';
-	import ServiceRequestDetailsForm from '$lib/components/CreateServiceRequest/ServiceRequestDetailsForm.svelte';
 	import CreateServiceRequestLayout from '$lib/components/CreateServiceRequest/CreateServiceRequestLayout.svelte';
 	import { mapCenterControlFactory } from '$lib/components/MapCenterControl';
-	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
-	import messages from '$media/messages.json';
 	import * as turf from '@turf/turf';
+	import { onMount } from 'svelte';
+	import messages from '$media/messages.json';
 
 	const libre311 = useLibre311Service();
 	const libre311Context = useLibre311Context();
 	const linkResolver = libre311Context.linkResolver;
-	const draftStore = createDraftStore();
-	let draftLoaded = false;
-	let maxStep = 0;
-	let showRestoreModal = false;
-	let pendingDraft: Awaited<ReturnType<typeof draftStore.load>> = null;
-
 	const alertError = libre311Context.alertError;
 	const isOnline = libre311Context.networkStatus.isOnline;
-	const projectsStore = useProjectsStore();
 	const jurisdictionStore = useJurisdiction();
 
 	let params: Partial<CreateServiceRequestUIParams> = {};
 	let geosearchJustFired = false;
-	$: project = $projectsStore.find((p) => p.slug === $page.url.searchParams.get('project_slug'));
-
-	$: if (project) {
-		params.project_id = project.id;
-		params.project_slug = project.slug;
-	}
+	let photoVoiceService: Service | undefined;
+	let serviceLoading = true;
 
 	let centerPos: PointTuple = getStartingCenterPos();
 	let locationFailed = false;
 
-	$: mapBounds = createCreationMapBounds($projectsStore, project, locationFailed);
-
-	function createCreationMapBounds(
-		projects: Project[],
-		selectedProject: Project | undefined,
-		locationFailed: boolean
-	): L.LatLngTuple[] | undefined {
-		if (selectedProject) {
-			return selectedProject.bounds as L.LatLngTuple[];
-		}
-		if (locationFailed) {
-			return libre311.getJurisdictionConfig().bounds;
-		}
-		return undefined;
-	}
-
 	$: step = linkResolver.createIssuePageGetCurrentStep($page.url);
+	$: mapBounds = locationFailed ? libre311.getJurisdictionConfig().bounds : undefined;
 
 	const icon = L.icon({
 		iconUrl: WaypointOpen,
 		...iconPositionOpts(128 / 169, 45, 'bottom-center')
 	});
+
 	const componentMap: Map<CreateServiceRequestSteps, ComponentType> = new Map();
 	componentMap.set(CreateServiceRequestSteps.PHOTO, UploadFile);
-	componentMap.set(CreateServiceRequestSteps.DETAILS, ServiceRequestDetailsForm);
 	componentMap.set(CreateServiceRequestSteps.CONTACT_INFO, ContactInformation);
+
+	onMount(async () => {
+		try {
+			const photoVoiceCode = $jurisdictionStore.photo_voice_service_code;
+			if (photoVoiceCode) {
+				const services = await libre311.getServiceList();
+				photoVoiceService = services.find((s) => s.service_code === photoVoiceCode);
+			}
+		} catch (err) {
+			alertError(err);
+		} finally {
+			serviceLoading = false;
+		}
+	});
 
 	function getStartingCenterPos(): PointTuple {
 		const center = L.latLngBounds(libre311.getJurisdictionConfig().bounds).getCenter();
@@ -96,8 +80,7 @@
 	}
 
 	function handleChange(e: CustomEvent<Partial<CreateServiceRequestParams>>) {
-		const changedParams = e.detail;
-		params = { ...params, ...changedParams };
+		params = { ...params, ...e.detail };
 		goto(linkResolver.createIssuePageNext($page.url));
 	}
 
@@ -150,79 +133,49 @@
 		params.address_string = location.label;
 	}
 
-	function isCreateServiceRequestUIParams(
+	function isPhotoVoiceUIParams(
 		partial: Partial<CreateServiceRequestUIParams>
 	): partial is CreateServiceRequestUIParams {
 		return !!(partial?.address_string && partial?.attributeMap && partial?.service);
 	}
 
-	async function applyDraft() {
-		if (!pendingDraft) return;
-		maxStep = pendingDraft.step;
-		params = { ...params, ...pendingDraft.params };
-		if (pendingDraft.params.lat && pendingDraft.params.long) {
-			centerPos = [Number(pendingDraft.params.lat), Number(pendingDraft.params.long)];
-		}
-		if (maxStep > CreateServiceRequestSteps.LOCATION) {
-			const searchParams = new URLSearchParams($page.url.searchParams);
-			searchParams.set('step', String(maxStep));
-			if (pendingDraft.params.project_slug) {
-				searchParams.set('project_slug', pendingDraft.params.project_slug);
-			}
-			await goto(`/issue/create?${searchParams.toString()}`);
-		}
-	}
-
-	async function handleRestoreConfirm() {
-		showRestoreModal = false;
-		await applyDraft();
-		pendingDraft = null;
-		draftLoaded = true;
-	}
-
-	async function clearDraftAndCancel() {
-		await draftStore.clear();
+	async function cancel() {
 		await goto(linkResolver.issuesMap($page.url));
 	}
-
-	async function handleRestoreDecline() {
-		showRestoreModal = false;
-		await draftStore.clear();
-		pendingDraft = null;
-		const searchParams = new URLSearchParams($page.url.searchParams);
-		searchParams.set('step', '0');
-		await goto(`/issue/create?${searchParams.toString()}`);
-		draftLoaded = true;
-	}
-
-	onMount(async () => {
-		const draft = await draftStore.load();
-		if (draft) {
-			pendingDraft = draft;
-			showRestoreModal = true;
-		} else {
-			draftLoaded = true;
-		}
-	});
-
-	$: if (step > maxStep) maxStep = step;
-	$: if (draftLoaded && params.lat) draftStore.save(maxStep, params);
 </script>
 
 <CreateServiceRequestLayout {step}>
 	<div slot="side-bar" class="h-full">
-		{#if project}
-			<div class="absolute mb-4 w-full border-b-2 border-info bg-info/10 px-4 py-2">
-				<div class="text-sm font-bold">Project Mode: {project.name}</div>
-				<div class="text-xs">Submitting a request for this specific project.</div>
-			</div>
-		{/if}
-		<div class="mx-4 h-full pb-2 pt-16">
-			<h3 class="ml-4 text-base">{messages['serviceRequest']['create']}</h3>
-			{#if step === CreateServiceRequestSteps.LOCATION}
-				<SelectLocation on:confirmLocation={confirmLocation} on:cancel={clearDraftAndCancel} />
-			{:else if step === CreateServiceRequestSteps.REVIEW && isCreateServiceRequestUIParams(params)}
-				<ReviewServiceRequest {params} on:submitted={() => draftStore.clear()} />
+		<div class="mx-4 h-full pb-2 pt-4">
+			<h3 class="ml-4 text-lg font-semibold">{messages['photoVoice']['create']}</h3>
+			{#if serviceLoading}
+				<p class="mt-4 text-sm text-gray-500">Loading...</p>
+			{:else if !photoVoiceService}
+				<p class="mt-4 text-sm text-gray-500">
+					Photo Voice is not currently enabled. An administrator must enable it from System
+					Administration.
+				</p>
+			{:else if step === CreateServiceRequestSteps.LOCATION}
+				<SelectLocation on:confirmLocation={confirmLocation} on:cancel={cancel} />
+			{:else if step === CreateServiceRequestSteps.DETAILS}
+				<PhotoVoiceDetailsForm
+					{params}
+					service={photoVoiceService}
+					on:stepChange={handleChange}
+				/>
+			{:else if step === CreateServiceRequestSteps.REVIEW}
+				{#if isPhotoVoiceUIParams(params)}
+					<ReviewServiceRequest
+					{params}
+					title={messages['photoVoice']['review_title']}
+					submitLabel={messages['photoVoice']['button_submit']}
+					on:submitted={() => {}}
+				/>
+				{:else}
+					<p class="mt-4 text-sm text-gray-500">
+						Something went wrong. <button class="underline" on:click={cancel}>Start over</button>.
+					</p>
+				{/if}
 			{:else}
 				<svelte:component this={componentMap.get(step)} {params} on:stepChange={handleChange} />
 			{/if}
@@ -242,11 +195,6 @@
 			on:locationerror={handleLocationError}
 		>
 			<MapBoundaryPolygon bounds={libre311.getJurisdictionConfig().bounds} />
-			{#if $jurisdictionStore.project_feature && $jurisdictionStore.project_feature !== 'DISABLED'}
-				{#each $projectsStore.filter((p) => p.status === 'OPEN') as project (project.id)}
-					<ProjectBoundary {project} interactive={false} />
-				{/each}
-			{/if}
 			<MapMarker latLng={centerPos} options={{ icon, keyboard: false }} />
 			{#if step === CreateServiceRequestSteps.LOCATION && $isOnline}
 				<MapGeosearch on:geosearch={handleGeosearch} />
@@ -257,20 +205,9 @@
 				class="display absolute inset-x-0 bottom-6 flex justify-center gap-2"
 				slot="is-mobile-or-tablet"
 			>
-				<Button type="primary" on:click={clearDraftAndCancel}>Cancel</Button>
+				<Button type="primary" on:click={cancel}>Cancel</Button>
 				<Button on:click={confirmLocation} type="primary">Select Location</Button>
 			</div>
 		</Breakpoint>
 	</div>
 </CreateServiceRequestLayout>
-
-<ConfirmationModal
-	open={showRestoreModal}
-	title="Resume Previous Request?"
-	message="We found a saved draft. Would you like to continue where you left off?"
-	cancelLabel="No, Start Over"
-	confirmLabel="Yes, Resume"
-	cancelType="default"
-	handleClose={handleRestoreDecline}
-	handleConfirm={handleRestoreConfirm}
-/>

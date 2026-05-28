@@ -79,6 +79,11 @@
 			"back": "Back"
 		}
 	},
+	"photoVoice": {
+		"create": "Submit Experience",
+		"review_title": "Experience Review",
+		"button_submit": "Submit Experience"
+	},
 	"reviewServiceRequest": {
 		"title": "Service Request Review",
 		"button_edit": "Edit",

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { useLibre311Service } from '$lib/context/Libre311Context';
+	import { SYSTEM_RESERVED_GROUP_NAME } from '$lib/constants/photoVoice';
 	import type { Service, ServiceDefinitionAttribute, Group } from '$lib/services/Libre311/Libre311';
 	import type {
 		GroupWithServices,
@@ -91,11 +92,13 @@
 			]);
 
 			// Combine groups with their services
-			groups = groupList.map((group) => ({
-				...group,
-				services: serviceList.filter((s) => s.group_id === group.id),
-				serviceCount: serviceList.filter((s) => s.group_id === group.id).length
-			}));
+			groups = groupList
+				.filter((group) => group.name !== SYSTEM_RESERVED_GROUP_NAME)
+				.map((group) => ({
+					...group,
+					services: serviceList.filter((s) => s.group_id === group.id),
+					serviceCount: serviceList.filter((s) => s.group_id === group.id).length
+				}));
 
 			// Expand first group by default if available
 			if (groups.length > 0) {
