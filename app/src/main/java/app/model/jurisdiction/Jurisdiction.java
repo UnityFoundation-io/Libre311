@@ -71,6 +71,9 @@ public class Jurisdiction {
     @NotNull
     private ProjectFeature projectFeature = ProjectFeature.DISABLED;
 
+    @Nullable
+    private Long photoVoiceServiceCode;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
@@ -214,6 +217,14 @@ public class Jurisdiction {
 
     public void setProjectFeature(ProjectFeature projectFeature) {
         this.projectFeature = projectFeature;
+    }
+
+    public Long getPhotoVoiceServiceCode() {
+        return photoVoiceServiceCode;
+    }
+
+    public void setPhotoVoiceServiceCode(Long photoVoiceServiceCode) {
+        this.photoVoiceServiceCode = photoVoiceServiceCode;
     }
 
 }

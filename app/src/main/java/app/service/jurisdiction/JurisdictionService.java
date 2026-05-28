@@ -188,6 +188,11 @@ public class JurisdictionService {
         if (jurisdictionDTO.getClosedRequestDaysVisibleAdmin() != null) {
             jurisdiction.setClosedRequestDaysVisibleAdmin(jurisdictionDTO.getClosedRequestDaysVisibleAdmin());
         }
+        if (jurisdictionDTO.getPhotoVoiceServiceCode() != null) {
+            jurisdiction.setPhotoVoiceServiceCode(
+                jurisdictionDTO.getPhotoVoiceServiceCode().equals(0L) ? null : jurisdictionDTO.getPhotoVoiceServiceCode()
+            );
+        }
     }
 
     public JurisdictionDTO setJurisdictionRemoteHosts(String jurisdictionId, Set<String> remoteHosts) {

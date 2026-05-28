@@ -69,6 +69,18 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
     }
 
     @Transactional
+    default Page<ServiceRequest> findAllByNullProject(String jurisdictionId, List<Long> serviceCodes,
+                                                      List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
+                                                      Instant startDate, Instant endDate, Instant closedRequestCutoffDate, Pageable pageable) {
+
+        QuerySpecification<ServiceRequest> specification = getServiceRequestSpecification(jurisdictionId, serviceCodes,
+                status, priority, startDate, endDate, null, closedRequestCutoffDate)
+                .and(Specifications.projectIsNull());
+
+        return findAll(specification, pageable);
+    }
+
+    @Transactional
     default List<ServiceRequest> findAllBy(String jurisdictionId, List<Long> serviceCodes,
                                            List<ServiceRequestStatus> status, List<ServiceRequestPriority> priority,
                                            Instant startDate, Instant endDate, Long projectId, Sort sort) {
@@ -172,6 +184,10 @@ public interface ServiceRequestRepository extends PageableRepository<ServiceRequ
         // projectId
         public static QuerySpecification<ServiceRequest> projectIdEqual(Long projectId) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(ServiceRequest_.project).get("id"), projectId);
+        }
+
+        public static QuerySpecification<ServiceRequest> projectIsNull() {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.isNull(root.get(ServiceRequest_.project));
         }
 
         /**
