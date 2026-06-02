@@ -266,7 +266,7 @@
 
 <ConfirmationModal
 	open={showRestoreModal}
-	title="Resume Previous Request?"
+	title="Resume Previous Report?"
 	message="We found a saved draft. Would you like to continue where you left off?"
 	cancelLabel="No, Start Over"
 	confirmLabel="Yes, Resume"

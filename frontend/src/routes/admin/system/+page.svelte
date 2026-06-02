@@ -212,9 +212,16 @@
 
 	let savedFeature: ProjectFeature = $jurisdiction.project_feature ?? 'DISABLED';
 	let selectedFeature: ProjectFeature = savedFeature;
+	let savedShowProjectBoundaries: boolean = $jurisdiction.show_project_boundaries ?? true;
+	let showProjectBoundaries: boolean = savedShowProjectBoundaries;
+	let savedShowExitProjectMode: boolean = $jurisdiction.show_exit_project_mode ?? true;
+	let showExitProjectMode: boolean = savedShowExitProjectMode;
 	let isSaving = false;
 
-	$: isDirty = selectedFeature !== savedFeature;
+	$: isDirty =
+		selectedFeature !== savedFeature ||
+		showProjectBoundaries !== savedShowProjectBoundaries ||
+		showExitProjectMode !== savedShowExitProjectMode;
 
 	const featureOptions: { value: ProjectFeature; label: string; description: string }[] = [
 		{
@@ -241,15 +248,20 @@
 		try {
 			await service.updateJurisdiction({
 				name: $jurisdiction.name,
-				project_feature: selectedFeature
+				project_feature: selectedFeature,
+				show_project_boundaries: showProjectBoundaries,
+				show_exit_project_mode: showExitProjectMode
 			});
 			savedFeature = selectedFeature;
-			jurisdiction.update((j) => ({ ...j, project_feature: selectedFeature }));
-			alert({
-				type: 'success',
-				title: 'Setting saved.',
-				description: 'Project feature setting has been updated.'
-			});
+			savedShowProjectBoundaries = showProjectBoundaries;
+			savedShowExitProjectMode = showExitProjectMode;
+			jurisdiction.update((j) => ({
+				...j,
+				project_feature: selectedFeature,
+				show_project_boundaries: showProjectBoundaries,
+				show_exit_project_mode: showExitProjectMode
+			}));
+			alert({ type: 'success', title: 'Setting saved.', description: 'Project settings have been updated.' });
 		} catch (err) {
 			alertError(err);
 		} finally {
@@ -259,6 +271,8 @@
 
 	function handleCancel() {
 		selectedFeature = savedFeature;
+		showProjectBoundaries = savedShowProjectBoundaries;
+		showExitProjectMode = savedShowExitProjectMode;
 	}
 </script>
 
@@ -309,6 +323,41 @@
 				</div>
 			</fieldset>
 		</div>
+
+		{#if selectedFeature !== 'DISABLED'}
+			<div class="space-y-1 border-t border-gray-200 px-6 py-4">
+				<div class="flex items-center justify-between py-2">
+					<div>
+						<span class="block text-sm font-medium text-gray-900">Show project boundaries on map</span>
+						<span class="block text-sm text-gray-500">Open project boundaries are visible to all users on the map when outside of a project.</span>
+					</div>
+					<button
+						type="button"
+						role="switch"
+						aria-checked={showProjectBoundaries}
+						class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {showProjectBoundaries ? 'bg-blue-600' : 'bg-gray-200'}"
+						on:click={() => (showProjectBoundaries = !showProjectBoundaries)}
+					>
+						<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {showProjectBoundaries ? 'translate-x-5' : 'translate-x-0'}" />
+					</button>
+				</div>
+				<div class="flex items-center justify-between py-2">
+					<div>
+						<span class="block text-sm font-medium text-gray-900">Show "Exit Project Mode"</span>
+						<span class="block text-sm text-gray-500">Users in project mode see a menu item to return to the main map.</span>
+					</div>
+					<button
+						type="button"
+						role="switch"
+						aria-checked={showExitProjectMode}
+						class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {showExitProjectMode ? 'bg-blue-600' : 'bg-gray-200'}"
+						on:click={() => (showExitProjectMode = !showExitProjectMode)}
+					>
+						<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {showExitProjectMode ? 'translate-x-5' : 'translate-x-0'}" />
+					</button>
+				</div>
+			</div>
+		{/if}
 
 		<div class="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4">
 			<button

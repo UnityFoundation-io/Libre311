@@ -3,6 +3,7 @@
 	import PlusCircleIcon from './Svg/outline/PlusCircleIcon.svelte';
 	import type { Maybe } from '$lib/utils/types';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
+	import messages from '$media/messages.json';
 
 	export let projectSlug: Maybe<string> = undefined;
 
@@ -20,12 +21,12 @@
 				<div slot="leading">
 					<PlusCircleIcon />
 				</div>
-				New Request
+				{messages['map']['button_new_submission']}
 			</Button>
 		{/if}
 		{#if showLogPoint}
 			<Button type="primary" href="/photo-voice/create" class="whitespace-nowrap">
-				Log Point
+				{messages['map']['button_submit_story']}
 			</Button>
 		{/if}
 	</div>

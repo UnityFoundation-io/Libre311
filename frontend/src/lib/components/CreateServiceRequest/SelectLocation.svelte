@@ -12,7 +12,7 @@
 <div class="flex h-full w-full flex-col items-center justify-between">
 	<div></div>
 	<div class="grid grid-rows-2 gap-3">
-		<h4>Select the location of the Request</h4>
+		<h4>Select a location</h4>
 		<Button type="primary" on:click={() => dispatch('confirmLocation')}>Confirm Location</Button>
 		<CancelButton on:cancel={() => dispatch('cancel')} />
 	</div>

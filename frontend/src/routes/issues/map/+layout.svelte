@@ -173,7 +173,7 @@
 			bounds={mapBounds}
 			{flyToTarget}
 		>
-			{#if $jurisdiction.project_feature && $jurisdiction.project_feature !== 'DISABLED'}
+			{#if $jurisdiction.project_feature && $jurisdiction.project_feature !== 'DISABLED' && $jurisdiction.show_project_boundaries !== false}
 				{#each $projectsStore.filter((p) => p.status === 'OPEN') as project (project.id)}
 					<ProjectBoundary {project} />
 				{/each}

@@ -105,7 +105,7 @@
 	<Select
 		disabled
 		name="select-request-type"
-		placeholder="Loading Request Types..."
+		placeholder="Loading Issue Types..."
 		on:change={issueTypeChange}
 		options={[]}
 		class="relative mx-8 my-4"
@@ -117,7 +117,7 @@
 	<Select
 		disabled
 		name="select-request-type"
-		placeholder="Failed to Load Request Types"
+		placeholder="Failed to Load Issue Types"
 		on:change={issueTypeChange}
 		options={[]}
 		class="relative mx-8 my-4"

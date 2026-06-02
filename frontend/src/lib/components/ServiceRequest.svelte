@@ -329,8 +329,8 @@
 
 <ConfirmationModal
 	open={showDeleteModal}
-	title="Delete Service Request"
-	message="Are you sure you would like to delete this request?"
+	title="Delete Submission"
+	message="Are you sure you would like to delete this submission?"
 	handleClose={() => (showDeleteModal = false)}
 	handleConfirm={confirmDelete}
 	loading={isDeleting}

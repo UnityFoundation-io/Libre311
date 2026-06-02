@@ -33,7 +33,7 @@
 		{ column: 'end_date', label: 'End Date', class: 'w-1/6', placement: 'left' },
 		{ column: 'closed_date', label: 'Closed Date', class: 'w-1/6', placement: 'left' },
 		{ column: 'status', label: 'Status', class: 'w-1/6', placement: 'left' },
-		{ column: 'request_count', label: 'Requests', class: 'w-1/12', placement: 'left' }
+		{ column: 'request_count', label: 'Submissions', class: 'w-1/12', placement: 'left' }
 	];
 
 	let showAllClosed = false;

@@ -63,7 +63,7 @@
 				return;
 			}
 			if (asyncAttributeInputMap.type !== 'success') {
-				requestSelectError = 'Failed to retrieve Request Types';
+				requestSelectError = 'Failed to retrieve Issue Types';
 				return;
 			}
 
