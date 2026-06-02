@@ -26,6 +26,9 @@
 		{/if}
 		{#if showLogPoint}
 			<Button type="primary" href="/photo-voice/create" class="whitespace-nowrap">
+				<div slot="leading">
+					<PlusCircleIcon />
+				</div>
 				{messages['map']['button_submit_story']}
 			</Button>
 		{/if}
