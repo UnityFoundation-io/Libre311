@@ -74,6 +74,10 @@ public class Jurisdiction {
     @Nullable
     private Long photoVoiceServiceCode;
 
+    private boolean showProjectBoundaries = true;
+
+    private boolean showExitProjectMode = true;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "jurisdiction")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RemoteHost> remoteHosts = new HashSet<>();
@@ -225,6 +229,22 @@ public class Jurisdiction {
 
     public void setPhotoVoiceServiceCode(Long photoVoiceServiceCode) {
         this.photoVoiceServiceCode = photoVoiceServiceCode;
+    }
+
+    public boolean isShowProjectBoundaries() {
+        return showProjectBoundaries;
+    }
+
+    public void setShowProjectBoundaries(boolean showProjectBoundaries) {
+        this.showProjectBoundaries = showProjectBoundaries;
+    }
+
+    public boolean isShowExitProjectMode() {
+        return showExitProjectMode;
+    }
+
+    public void setShowExitProjectMode(boolean showExitProjectMode) {
+        this.showExitProjectMode = showExitProjectMode;
     }
 
 }

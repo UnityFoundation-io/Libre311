@@ -95,16 +95,16 @@ public class ProjectService {
         project.setEndDate(dto.getEndDate());
         project.setJurisdiction(jurisdiction);
 
-        project = projectRepository.save(project);
-        project.setSlug(generateSlug(project.getName(), project.getId()));
-        return new ProjectDTO(projectRepository.update(project));
+        project.setSlug(generateUniqueSlug(dto.getName(), jurisdictionId));
+        return new ProjectDTO(projectRepository.save(project));
     }
 
-    private static String generateSlug(String name, Long id) {
+    private String generateUniqueSlug(String name, String jurisdictionId) {
         String base = name.toLowerCase()
                 .replaceAll("[^a-z0-9\\s]", "")
                 .replaceAll("\\s+", "-");
-        return id + "-" + base;
+        long count = projectRepository.countSlugStartingWith(jurisdictionId, base + "%");
+        return count == 0 ? base : base + "-" + count;
     }
 
     @Transactional

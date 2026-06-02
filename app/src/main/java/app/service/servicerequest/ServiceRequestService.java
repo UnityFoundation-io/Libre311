@@ -187,7 +187,8 @@ public class ServiceRequestService {
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
 
         Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
-        if (jurisdiction.getProjectFeature() != ProjectFeature.DISABLED) {
+        boolean isPhotoVoice = service.getId().equals(jurisdiction.getPhotoVoiceServiceCode());
+        if (jurisdiction.getProjectFeature() != ProjectFeature.DISABLED && !isPhotoVoice) {
             if (serviceRequestDTO.getProjectId() != null) {
                 Project project = projectRepository.findByIdAndJurisdictionId(serviceRequestDTO.getProjectId(), jurisdictionId)
                         .orElseThrow(() -> new InvalidServiceRequestException("Project not found"));
@@ -196,8 +197,7 @@ public class ServiceRequestService {
                 Optional<Project> project = projectService.findProjectForLocationAndTime(serviceRequest.getLocation(), Instant.now(), jurisdictionId);
                 if (project.isPresent()) {
                     serviceRequest.setProject(project.get());
-                } else if (jurisdiction.getProjectFeature() == ProjectFeature.REQUIRED
-                        && !service.getId().equals(jurisdiction.getPhotoVoiceServiceCode())) {
+                } else if (jurisdiction.getProjectFeature() == ProjectFeature.REQUIRED) {
                     throw new InvalidServiceRequestException("The service request does not fall within any active project boundaries, and a project is required for this jurisdiction.");
                 }
             }
