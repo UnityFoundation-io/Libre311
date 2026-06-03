@@ -70,7 +70,12 @@
 				<p class="my-3 whitespace-pre-wrap text-sm text-gray-600">{service.description}</p>
 			{/if}
 
-			<TextArea bind:value={answer} name="photo-voice-answer" placeholder="Your response..." class="relative my-4">
+			<TextArea
+				bind:value={answer}
+				name="photo-voice-answer"
+				placeholder="Your response..."
+				class="relative my-4"
+			>
 				<TextArea.Label slot="label">
 					<strong class="text-base">{questionAttribute.description}</strong>
 				</TextArea.Label>

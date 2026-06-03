@@ -4,7 +4,11 @@
 	import { useLibre311Context } from '$lib/context/Libre311Context';
 	import { useJurisdiction } from '$lib/context/JurisdictionContext';
 	import SaveButton from '$lib/components/ServiceDefinitionEditor/Shared/SaveButton.svelte';
-	import type { ProjectFeature, Service, ServiceDefinitionAttribute } from '$lib/services/Libre311/Libre311';
+	import type {
+		ProjectFeature,
+		Service,
+		ServiceDefinitionAttribute
+	} from '$lib/services/Libre311/Libre311';
 	import { PHOTO_VOICE_SERVICE_NAME, SYSTEM_RESERVED_GROUP_NAME } from '$lib/constants/photoVoice';
 
 	const { service, alertError, alert, user } = useLibre311Context();
@@ -162,7 +166,9 @@
 	async function saveQuestion() {
 		if (!photoVoiceService) return;
 		if (!photoVoiceAttribute) {
-			alertError(new Error('Question attribute not found. Try disabling and re-enabling Photo Voice.'));
+			alertError(
+				new Error('Question attribute not found. Try disabling and re-enabling Photo Voice.')
+			);
 			return;
 		}
 		pvSavingQuestion = true;
@@ -261,7 +267,11 @@
 				show_project_boundaries: showProjectBoundaries,
 				show_exit_project_mode: showExitProjectMode
 			}));
-			alert({ type: 'success', title: 'Setting saved.', description: 'Project settings have been updated.' });
+			alert({
+				type: 'success',
+				title: 'Setting saved.',
+				description: 'Project settings have been updated.'
+			});
 		} catch (err) {
 			alertError(err);
 		} finally {
@@ -328,32 +338,51 @@
 			<div class="space-y-1 border-t border-gray-200 px-6 py-4">
 				<div class="flex items-center justify-between py-2">
 					<div>
-						<span class="block text-sm font-medium text-gray-900">Show project boundaries on map</span>
-						<span class="block text-sm text-gray-500">Open project boundaries are visible to all users on the map when outside of a project.</span>
+						<span class="block text-sm font-medium text-gray-900"
+							>Show project boundaries on map</span
+						>
+						<span class="block text-sm text-gray-500"
+							>Open project boundaries are visible to all users on the map when outside of a
+							project.</span
+						>
 					</div>
 					<button
 						type="button"
 						role="switch"
 						aria-checked={showProjectBoundaries}
-						class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {showProjectBoundaries ? 'bg-blue-600' : 'bg-gray-200'}"
+						class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {showProjectBoundaries
+							? 'bg-blue-600'
+							: 'bg-gray-200'}"
 						on:click={() => (showProjectBoundaries = !showProjectBoundaries)}
 					>
-						<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {showProjectBoundaries ? 'translate-x-5' : 'translate-x-0'}" />
+						<span
+							class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {showProjectBoundaries
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						/>
 					</button>
 				</div>
 				<div class="flex items-center justify-between py-2">
 					<div>
 						<span class="block text-sm font-medium text-gray-900">Show "Exit Project Mode"</span>
-						<span class="block text-sm text-gray-500">Users in project mode see a menu item to return to the main map.</span>
+						<span class="block text-sm text-gray-500"
+							>Users in project mode see a menu item to return to the main map.</span
+						>
 					</div>
 					<button
 						type="button"
 						role="switch"
 						aria-checked={showExitProjectMode}
-						class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {showExitProjectMode ? 'bg-blue-600' : 'bg-gray-200'}"
+						class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {showExitProjectMode
+							? 'bg-blue-600'
+							: 'bg-gray-200'}"
 						on:click={() => (showExitProjectMode = !showExitProjectMode)}
 					>
-						<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {showExitProjectMode ? 'translate-x-5' : 'translate-x-0'}" />
+						<span
+							class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {showExitProjectMode
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						/>
 					</button>
 				</div>
 			</div>
@@ -390,9 +419,7 @@
 			<div class="space-y-5 px-6 py-4">
 				<div>
 					<label for="pv-name" class="block text-sm font-medium text-gray-700">Name</label>
-					<p class="mb-1 text-xs text-gray-500">
-						Shown in service request lists and submissions.
-					</p>
+					<p class="mb-1 text-xs text-gray-500">Shown in service request lists and submissions.</p>
 					<input
 						id="pv-name"
 						type="text"

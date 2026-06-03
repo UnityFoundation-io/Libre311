@@ -158,19 +158,15 @@
 			{:else if step === CreateServiceRequestSteps.LOCATION}
 				<SelectLocation on:confirmLocation={confirmLocation} on:cancel={cancel} />
 			{:else if step === CreateServiceRequestSteps.DETAILS}
-				<PhotoVoiceDetailsForm
-					{params}
-					service={photoVoiceService}
-					on:stepChange={handleChange}
-				/>
+				<PhotoVoiceDetailsForm {params} service={photoVoiceService} on:stepChange={handleChange} />
 			{:else if step === CreateServiceRequestSteps.REVIEW}
 				{#if isPhotoVoiceUIParams(params)}
 					<ReviewServiceRequest
-					{params}
-					title={messages['photoVoice']['review_title']}
-					submitLabel={messages['photoVoice']['button_submit']}
-					on:submitted={() => {}}
-				/>
+						{params}
+						title={messages['photoVoice']['review_title']}
+						submitLabel={messages['photoVoice']['button_submit']}
+						on:submitted={() => {}}
+					/>
 				{:else}
 					<p class="mt-4 text-sm text-gray-500">
 						Something went wrong. <button class="underline" on:click={cancel}>Start over</button>.
