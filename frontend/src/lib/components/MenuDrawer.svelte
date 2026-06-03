@@ -48,7 +48,12 @@
 			<Drawer.Content slot="content">
 				<Menu>
 					{#if bothAvailable}
-						<Menu.Item key="create" label="New Submission" href="javascript:void(0)" on:click={openCreateModal}>
+						<Menu.Item
+							key="create"
+							label="New Submission"
+							href="javascript:void(0)"
+							on:click={openCreateModal}
+						>
 							<Menu.Item.Icon slot="icon" data={plusCircleIcon} fill="none" />
 						</Menu.Item>
 					{:else if showRegular}
