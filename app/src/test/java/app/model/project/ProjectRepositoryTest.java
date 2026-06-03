@@ -58,13 +58,14 @@ public class ProjectRepositoryTest {
 
         Project project = new Project();
         project.setName("Test Project");
+        project.setSlug("test-project");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(bounds));
-        
+
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         project.setStartDate(now.minus(1, ChronoUnit.DAYS));
         project.setEndDate(now.plus(1, ChronoUnit.DAYS));
-        
+
         projectRepository.save(project);
 
         // Point at (5,5) should be inside
@@ -88,13 +89,14 @@ public class ProjectRepositoryTest {
 
         Project project = new Project();
         project.setName("Test Project");
+        project.setSlug("test-project");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(bounds));
-        
+
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         project.setStartDate(now.minus(1, ChronoUnit.DAYS));
         project.setEndDate(now.plus(1, ChronoUnit.DAYS));
-        
+
         projectRepository.save(project);
 
         // Point at (15,15) should be outside
@@ -117,6 +119,7 @@ public class ProjectRepositoryTest {
 
         Project project1 = new Project();
         project1.setName("Project 1");
+        project1.setSlug("project-1");
         project1.setJurisdiction(jurisdiction);
         project1.setBoundary(geometryFactory.createPolygon(bounds));
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
@@ -126,6 +129,7 @@ public class ProjectRepositoryTest {
 
         Project project2 = new Project();
         project2.setName("Project 2");
+        project2.setSlug("project-2");
         project2.setJurisdiction(jurisdiction);
         project2.setBoundary(geometryFactory.createPolygon(bounds));
         project2.setStartDate(now.minus(1, ChronoUnit.DAYS));
@@ -152,6 +156,7 @@ public class ProjectRepositoryTest {
 
         Project project = new Project();
         project.setName("Boundary Project");
+        project.setSlug("boundary-project");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(bounds));
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
@@ -171,6 +176,7 @@ public class ProjectRepositoryTest {
         Double[][] bounds = { {0.0, 0.0}, {0.0, 10.0}, {10.0, 10.0}, {10.0, 0.0}, {0.0, 0.0} };
         Project project = new Project();
         project.setName("Timed Project");
+        project.setSlug("timed-project");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(bounds));
         

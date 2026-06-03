@@ -37,6 +37,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     Optional<Project> findBySlugAndJurisdictionId(String slug, String jurisdictionId);
 
+    @Query("SELECT count(p) FROM Project p WHERE p.jurisdiction.id = :jurisdictionId AND p.slug LIKE :slugPrefix")
+    long countSlugStartingWith(String jurisdictionId, String slugPrefix);
+
     @Query("FROM Project p WHERE p.jurisdiction.id = :jurisdictionId AND p.startDate <= :time AND p.endDate >= :time AND intersects(p.boundary, :location) = true")
     Optional<Project> findProjectForLocationAndTime(String jurisdictionId, Point location, Instant time);
 }

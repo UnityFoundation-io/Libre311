@@ -63,6 +63,15 @@ public class JurisdictionDTO {
     @JsonProperty("project_feature")
     private app.model.jurisdiction.ProjectFeature projectFeature;
 
+    @JsonProperty("photo_voice_service_code")
+    private Long photoVoiceServiceCode;
+
+    @JsonProperty("show_project_boundaries")
+    private boolean showProjectBoundaries;
+
+    @JsonProperty("show_exit_project_mode")
+    private boolean showExitProjectMode;
+
     @JsonProperty("closed_request_days_visible_user")
     private Integer closedRequestDaysVisibleUser;
 
@@ -92,6 +101,9 @@ public class JurisdictionDTO {
         this.projectFeature = jurisdiction.getProjectFeature();
         this.closedRequestDaysVisibleUser = jurisdiction.getClosedRequestDaysVisibleUser();
         this.closedRequestDaysVisibleAdmin = jurisdiction.getClosedRequestDaysVisibleAdmin();
+        this.photoVoiceServiceCode = jurisdiction.getPhotoVoiceServiceCode();
+        this.showProjectBoundaries = jurisdiction.isShowProjectBoundaries();
+        this.showExitProjectMode = jurisdiction.isShowExitProjectMode();
     }
 
     public JurisdictionDTO(Jurisdiction jurisdiction, JurisdictionBoundary boundary) {
@@ -222,5 +234,29 @@ public class JurisdictionDTO {
 
     public void setClosedRequestDaysVisibleAdmin(Integer closedRequestDaysVisibleAdmin) {
         this.closedRequestDaysVisibleAdmin = closedRequestDaysVisibleAdmin;
+    }
+
+    public Long getPhotoVoiceServiceCode() {
+        return photoVoiceServiceCode;
+    }
+
+    public void setPhotoVoiceServiceCode(Long photoVoiceServiceCode) {
+        this.photoVoiceServiceCode = photoVoiceServiceCode;
+    }
+
+    public boolean isShowProjectBoundaries() {
+        return showProjectBoundaries;
+    }
+
+    public void setShowProjectBoundaries(boolean showProjectBoundaries) {
+        this.showProjectBoundaries = showProjectBoundaries;
+    }
+
+    public boolean isShowExitProjectMode() {
+        return showExitProjectMode;
+    }
+
+    public void setShowExitProjectMode(boolean showExitProjectMode) {
+        this.showExitProjectMode = showExitProjectMode;
     }
 }

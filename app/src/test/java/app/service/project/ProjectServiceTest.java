@@ -103,6 +103,7 @@ public class ProjectServiceTest {
     void testUpdateProject() {
         Project project = new Project();
         project.setName("Old Name");
+        project.setSlug("old-name");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(new LibreGeometryFactory().createPolygon(new Double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0}}));
         project.setStartDate(Instant.now());
@@ -134,6 +135,7 @@ public class ProjectServiceTest {
     void testGetProjects() {
         Project p1 = new Project();
         p1.setName("P1");
+        p1.setSlug("p1");
         p1.setJurisdiction(jurisdiction);
         p1.setBoundary(new LibreGeometryFactory().createPolygon(new Double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0}}));
         p1.setStartDate(Instant.now());

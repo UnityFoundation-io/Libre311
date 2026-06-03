@@ -106,6 +106,7 @@ public class ProjectAdminControllerTest {
         
         Project project = new Project();
         project.setName("Test Project");
+        project.setSlug("test-project");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(new Double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0}}));
         project.setStartDate(Instant.now());
@@ -147,6 +148,7 @@ public class ProjectAdminControllerTest {
 
         Project project = new Project();
         project.setName("Old Name");
+        project.setSlug("old-name");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(new Double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0}}));
         project.setStartDate(Instant.now());

@@ -22,6 +22,7 @@ import app.model.jurisdiction.*;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpStatus;
 import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,6 +134,7 @@ public class JurisdictionService {
         return new JurisdictionDTO(savedJurisdiction, savedBoundary);
     }
 
+    @Transactional
     public JurisdictionDTO updateJurisdiction(String jurisdictionId, PatchJurisdictionDTO requestDTO) {
         Optional<Jurisdiction> jurisdictionOptional = jurisdictionRepository.findById(jurisdictionId);
 
@@ -187,6 +189,17 @@ public class JurisdictionService {
         }
         if (jurisdictionDTO.getClosedRequestDaysVisibleAdmin() != null) {
             jurisdiction.setClosedRequestDaysVisibleAdmin(jurisdictionDTO.getClosedRequestDaysVisibleAdmin());
+        }
+        if (jurisdictionDTO.getPhotoVoiceServiceCode() != null) {
+            jurisdiction.setPhotoVoiceServiceCode(
+                jurisdictionDTO.getPhotoVoiceServiceCode().equals(0L) ? null : jurisdictionDTO.getPhotoVoiceServiceCode()
+            );
+        }
+        if (jurisdictionDTO.getShowProjectBoundaries() != null) {
+            jurisdiction.setShowProjectBoundaries(jurisdictionDTO.getShowProjectBoundaries());
+        }
+        if (jurisdictionDTO.getShowExitProjectMode() != null) {
+            jurisdiction.setShowExitProjectMode(jurisdictionDTO.getShowExitProjectMode());
         }
     }
 

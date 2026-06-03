@@ -168,7 +168,7 @@
 			<slot />
 		</div>
 		<div slot="table" class="relative flex h-full flex-col text-center">
-			<h3 class="text-base">Service Requests</h3>
+			<h3 class="text-base">Submissions</h3>
 			<div
 				class="m-1 flex items-center justify-between rounded-md border-t-[1px] border-border shadow-md"
 			>
@@ -235,7 +235,7 @@
 										<Select
 											bind:value={selectedServiceCodes}
 											name="select-1"
-											placeholder="Request Type"
+											placeholder="Issue Type"
 											multiple
 											options={selectOptions}
 										>

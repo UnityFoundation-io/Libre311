@@ -28,6 +28,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 24.x
+      - name: Pin npm version
+        run: npm install -g npm@11.6.1
       # install dependencies
       - name: Install Dependencies
         run: npm ci

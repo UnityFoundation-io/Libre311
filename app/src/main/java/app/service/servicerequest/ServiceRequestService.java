@@ -187,7 +187,8 @@ public class ServiceRequestService {
         ServiceRequest serviceRequest = transformDtoToServiceRequest(serviceRequestDTO, service);
 
         Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
-        if (jurisdiction.getProjectFeature() != ProjectFeature.DISABLED) {
+        boolean isPhotoVoice = service.getId().equals(jurisdiction.getPhotoVoiceServiceCode());
+        if (jurisdiction.getProjectFeature() != ProjectFeature.DISABLED && !isPhotoVoice) {
             if (serviceRequestDTO.getProjectId() != null) {
                 Project project = projectRepository.findByIdAndJurisdictionId(serviceRequestDTO.getProjectId(), jurisdictionId)
                         .orElseThrow(() -> new InvalidServiceRequestException("Project not found"));
@@ -521,11 +522,13 @@ public class ServiceRequestService {
 
         // Get the visibility days from jurisdiction config
         Jurisdiction jurisdiction = jurisdictionRepository.findByJurisdictionId(jurisdictionId);
+
         int closedRequestDaysVisible = canViewSensitive
                 ? jurisdiction.getClosedRequestDaysVisibleAdmin()
                 : jurisdiction.getClosedRequestDaysVisibleUser();
 
-        Page<ServiceRequest> page = getServiceRequestPage(requestDTO, jurisdictionId, closedRequestDaysVisible);
+        boolean onlyNullProject = jurisdiction.getProjectFeature() == ProjectFeature.REQUIRED && requestDTO.getProjectId() == null;
+        Page<ServiceRequest> page = getServiceRequestPage(requestDTO, jurisdictionId, closedRequestDaysVisible, onlyNullProject);
         Page<ServiceRequestDTO> dtoPage = page.map(mapper);
 
         if (canViewSensitive && !dtoPage.getContent().isEmpty()) {
@@ -541,7 +544,7 @@ public class ServiceRequestService {
         return dtoPage;
     }
 
-    private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId, int closedRequestDaysVisible) {
+    private Page<ServiceRequest> getServiceRequestPage(GetServiceRequestsDTO requestDTO, String jurisdictionId, int closedRequestDaysVisible, boolean onlyNullProject) {
         String serviceRequestIds = requestDTO.getId();
         List<Long> serviceCodes = requestDTO.getServiceCodes();
         List<ServiceRequestStatus> statuses = requestDTO.getStatuses();
@@ -562,6 +565,10 @@ public class ServiceRequestService {
 
         // Calculate the cutoff date for closed requests visibility
         Instant closedRequestCutoffDate = Instant.now().minus(closedRequestDaysVisible, ChronoUnit.DAYS);
+
+        if (onlyNullProject) {
+            return serviceRequestRepository.findAllByNullProject(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, closedRequestCutoffDate, pageable);
+        }
 
         return serviceRequestRepository.findAllBy(jurisdictionId, serviceCodes, statuses, priorities, startDate, endDate, projectId, closedRequestCutoffDate, pageable);
     }

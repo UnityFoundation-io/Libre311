@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { useLibre311Context } from '$lib/context/Libre311Context';
-	import { Drawer, Menu, Portal } from 'stwui';
+	import { Button, Drawer, Menu, Modal, Portal } from 'stwui';
 	import { fade } from 'svelte/transition';
 
 	import { mapIcon } from './Svg/outline/mapIcon';
@@ -22,6 +22,17 @@
 	const linkResolver = useLibre311Context().linkResolver;
 	const jurisdiction = useJurisdiction();
 	const selectedProjectSlug = useSelectedProjectSlugStore();
+
+	let showCreateModal = false;
+
+	$: showRegular = !($jurisdiction.project_feature === 'REQUIRED' && !$selectedProjectSlug);
+	$: showPhotoVoice = !!$jurisdiction.photo_voice_service_code && !$selectedProjectSlug;
+	$: bothAvailable = showRegular && showPhotoVoice;
+
+	function openCreateModal() {
+		handleClose();
+		showCreateModal = true;
+	}
 </script>
 
 <Portal>
@@ -36,14 +47,34 @@
 			/>
 			<Drawer.Content slot="content">
 				<Menu>
-					<Menu.Item
-						key="create"
-						label="Create Service Request"
-						href={linkResolver.issueCreate($page.url)}
-						on:click={handleClose}
-					>
-						<Menu.Item.Icon slot="icon" data={plusCircleIcon} fill="none" />
-					</Menu.Item>
+					{#if bothAvailable}
+						<Menu.Item
+							key="create"
+							label="New Submission"
+							href="javascript:void(0)"
+							on:click={openCreateModal}
+						>
+							<Menu.Item.Icon slot="icon" data={plusCircleIcon} fill="none" />
+						</Menu.Item>
+					{:else if showRegular}
+						<Menu.Item
+							key="create"
+							label="Report an Issue"
+							href={linkResolver.issueCreate($page.url)}
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={plusCircleIcon} fill="none" />
+						</Menu.Item>
+					{:else if showPhotoVoice}
+						<Menu.Item
+							key="create"
+							label="Submit Story"
+							href="/photo-voice/create"
+							on:click={handleClose}
+						>
+							<Menu.Item.Icon slot="icon" data={plusCircleIcon} fill="none" />
+						</Menu.Item>
+					{/if}
 					<AuthGuard
 						requires={[
 							'LIBRE311_REQUEST_VIEW-TENANT',
@@ -53,7 +84,7 @@
 					>
 						<Menu.Item
 							key="table"
-							label="Service Request Table"
+							label="Submissions Table"
 							href={linkResolver.issuesTable($page.url)}
 							on:click={handleClose}
 						>
@@ -68,7 +99,7 @@
 					>
 						<Menu.Item.Icon slot="icon" data={mapIcon} fill="none" />
 					</Menu.Item>
-					{#if $selectedProjectSlug}
+					{#if $selectedProjectSlug && $jurisdiction.show_exit_project_mode !== false}
 						<Menu.Item
 							key="exit-project"
 							label="Exit Project Mode"
@@ -155,5 +186,27 @@
 				</Menu>
 			</Drawer.Content>
 		</Drawer>
+	{/if}
+
+	{#if showCreateModal}
+		<Modal handleClose={() => (showCreateModal = false)}>
+			<Modal.Content slot="content">
+				<Modal.Content.Header slot="header">What would you like to submit?</Modal.Content.Header>
+				<Modal.Content.Body slot="body">
+					<div class="flex flex-col gap-3 p-4">
+						<Button
+							type="primary"
+							href={linkResolver.issueCreate($page.url)}
+							on:click={() => (showCreateModal = false)}
+						>
+							Report an Issue
+						</Button>
+						<Button href="/photo-voice/create" on:click={() => (showCreateModal = false)}>
+							Submit Story
+						</Button>
+					</div>
+				</Modal.Content.Body>
+			</Modal.Content>
+		</Modal>
 	{/if}
 </Portal>

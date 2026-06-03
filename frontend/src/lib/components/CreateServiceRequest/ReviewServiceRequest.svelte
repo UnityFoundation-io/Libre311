@@ -23,6 +23,8 @@
 	const dispatch = createEventDispatcher<{ submitted: void }>();
 
 	export let params: CreateServiceRequestUIParams;
+	export let title: string = messages['reviewServiceRequest']['title'];
+	export let submitLabel: string = messages['reviewServiceRequest']['button_submit'];
 
 	let imageData: string | undefined;
 	let submittingServiceRequest: boolean = false;
@@ -100,7 +102,7 @@
 <div class="flex h-full items-center justify-center">
 	<div class="flex h-full w-full flex-col">
 		<div class="mt-4 flex-grow">
-			<h1 class="text-lg">{messages['reviewServiceRequest']['title']}</h1>
+			<h1 class="text-lg">{title}</h1>
 
 			<div class="my-2">
 				<div class="flow-root">
@@ -162,9 +164,7 @@
 		<PolicyAcknowledgment />
 
 		<StepControls on:click={submitServiceReq} loading={submittingServiceRequest}>
-			<svelte:fragment slot="submit-text"
-				>{messages['reviewServiceRequest']['button_submit']}</svelte:fragment
-			>
+			<svelte:fragment slot="submit-text">{submitLabel}</svelte:fragment>
 		</StepControls>
 	</div>
 </div>

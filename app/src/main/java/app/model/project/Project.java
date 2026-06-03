@@ -35,7 +35,7 @@ public class Project {
     @NotNull
     private String name;
 
-    @Column(insertable = false, updatable = false)
+    @Column(updatable = false)
     private String slug;
 
     @Nullable

@@ -28,21 +28,21 @@
 		"citizen_comments": "Citizen Comments"
 	},
 	"sidebar": {
-		"title": "Service Requests"
+		"title": "Submissions"
 	},
 	"serviceRequest": {
-		"request_id": "Request ID",
+		"request_id": "Submission ID",
 		"description": "Description",
 		"address": "Address",
-		"detail": "Service Request Detail",
-		"update": "Service Request Update",
-		"create": "Service Request Create",
+		"detail": "Submission Detail",
+		"update": "Submission Update",
+		"create": "Create Submission",
 		"agency_contact": "Agency Contact",
 		"agency_contact_email": "Agency Contact Email",
 		"agency_name": "agency name",
 		"citizen_contact": "Citizen Contact",
 		"expected_datetime": "Expected Completion",
-		"request_type": "Request Type",
+		"request_type": "Issue Type",
 		"service_name": "Service Name",
 		"service_notice": "Recommended Solution",
 		"service_notice_placeholder": "proposed service",
@@ -79,10 +79,19 @@
 			"back": "Back"
 		}
 	},
+	"photoVoice": {
+		"create": "Submit Experience",
+		"review_title": "Experience Review",
+		"button_submit": "Submit Experience"
+	},
+	"map": {
+		"button_new_submission": "Report an Issue",
+		"button_submit_story": "Submit Story"
+	},
 	"reviewServiceRequest": {
-		"title": "Service Request Review",
+		"title": "Submission Review",
 		"button_edit": "Edit",
-		"button_submit": "Submit Request"
+		"button_submit": "Submit"
 	},
 	"updateServiceRequest": {
 		"button_back": "Close",

@@ -58,6 +58,15 @@ public class PatchJurisdictionDTO {
     @JsonProperty("project_feature")
     private app.model.jurisdiction.ProjectFeature projectFeature;
 
+    @JsonProperty("photo_voice_service_code")
+    private Long photoVoiceServiceCode;
+
+    @JsonProperty("show_project_boundaries")
+    private Boolean showProjectBoundaries;
+
+    @JsonProperty("show_exit_project_mode")
+    private Boolean showExitProjectMode;
+
     @JsonProperty("closed_request_days_visible_user")
     private Integer closedRequestDaysVisibleUser;
 
@@ -153,5 +162,29 @@ public class PatchJurisdictionDTO {
 
     public void setClosedRequestDaysVisibleAdmin(Integer closedRequestDaysVisibleAdmin) {
         this.closedRequestDaysVisibleAdmin = closedRequestDaysVisibleAdmin;
+    }
+
+    public Long getPhotoVoiceServiceCode() {
+        return photoVoiceServiceCode;
+    }
+
+    public void setPhotoVoiceServiceCode(Long photoVoiceServiceCode) {
+        this.photoVoiceServiceCode = photoVoiceServiceCode;
+    }
+
+    public Boolean getShowProjectBoundaries() {
+        return showProjectBoundaries;
+    }
+
+    public void setShowProjectBoundaries(Boolean showProjectBoundaries) {
+        this.showProjectBoundaries = showProjectBoundaries;
+    }
+
+    public Boolean getShowExitProjectMode() {
+        return showExitProjectMode;
+    }
+
+    public void setShowExitProjectMode(Boolean showExitProjectMode) {
+        this.showExitProjectMode = showExitProjectMode;
     }
 }

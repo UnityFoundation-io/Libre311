@@ -185,6 +185,18 @@
 							{project.status}
 						</span>
 					</span>
+					{#if project.slug}
+						<span
+							><strong>URL:</strong>
+							<a
+								href="{$page.url.origin}/issues/map/project/{project.slug}"
+								class="text-primary hover:underline"
+								target="_blank"
+							>
+								{$page.url.origin}/issues/map/project/{project.slug}
+							</a>
+						</span>
+					{/if}
 				</div>
 			</div>
 		{/if}

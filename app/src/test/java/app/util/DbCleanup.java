@@ -17,6 +17,7 @@ package app.util;
 import app.model.jurisdiction.JurisdictionBoundaryRepository;
 import app.model.jurisdiction.JurisdictionRepository;
 import app.model.jurisdictionuser.JurisdictionUserRepository;
+import app.model.project.ProjectRepository;
 import app.model.service.ServiceRepository;
 import app.model.service.group.ServiceGroupRepository;
 import app.model.servicedefinition.AttributeValueRepository;
@@ -57,16 +58,20 @@ public class DbCleanup {
     @Inject
     public JurisdictionUserRepository jurisdictionUserRepository;
 
+    @Inject
+    public ProjectRepository projectRepository;
+
     @Transactional
     public void cleanupAll(){
         userRepository.deleteAll();
         jurisdictionUserRepository.deleteAll();
         attributeValueRepository.deleteAll();
         serviceDefinitionAttributeRepository.deleteAll();
+        serviceRequestRepository.deleteAll();
+        projectRepository.deleteAll();
         serviceRepository.deleteAll();
         serviceGroupRepository.deleteAll();
         jurisdictionRepository.deleteAll();
-        serviceRequestRepository.deleteAll();
     }
 
     @Transactional
