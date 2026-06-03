@@ -90,6 +90,7 @@ public class ProjectFeatureTest {
         Double[][] projectBounds = { {10.0, 10.0}, {10.0, 20.0}, {20.0, 20.0}, {20.0, 10.0}, {10.0, 10.0} };
         Project project = new Project();
         project.setName("Test Project");
+        project.setSlug("test-project");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(projectBounds));
         Instant now = Instant.now();

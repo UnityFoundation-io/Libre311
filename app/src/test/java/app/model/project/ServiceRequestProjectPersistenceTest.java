@@ -79,6 +79,7 @@ class ServiceRequestProjectPersistenceTest {
         Double[][] bounds = {{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0}};
         project = new Project();
         project.setName("Test Project");
+        project.setSlug("test-project");
         project.setJurisdiction(jurisdiction);
         project.setBoundary(geometryFactory.createPolygon(bounds));
         project.setStartDate(Instant.now());
