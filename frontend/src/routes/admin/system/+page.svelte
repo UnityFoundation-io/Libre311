@@ -55,9 +55,8 @@
 	onMount(async () => {
 		try {
 			const photoVoiceCode = $jurisdiction.photo_voice_service_code;
-			const services = await service.getServiceList();
 			photoVoiceService = photoVoiceCode
-				? services.find((s) => s.service_code === photoVoiceCode)
+				? await service.getService({ service_code: photoVoiceCode })
 				: undefined;
 			if (photoVoiceService) {
 				nameText = photoVoiceService.service_name;

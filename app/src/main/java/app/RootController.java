@@ -126,6 +126,15 @@ public class RootController {
         return HttpResponse.ok(xmlMapper.writeValueAsString(serviceList));
     }
 
+    @Get("/services/{serviceCode}/details{?jurisdiction_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ExecuteOn(TaskExecutors.IO)
+    public ServiceDTO getServiceJson(Long serviceCode,
+                                     @Nullable @QueryValue("jurisdiction_id") String jurisdiction_id) {
+
+        return serviceService.findService(serviceCode, jurisdiction_id);
+    }
+
     @Get(uris = {"/services/{serviceCode}{?jurisdiction_id}", "/services/{serviceCode}.json{?jurisdiction_id}"})
     @Produces(MediaType.APPLICATION_JSON)
     @ExecuteOn(TaskExecutors.IO)
