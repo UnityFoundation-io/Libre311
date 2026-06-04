@@ -38,6 +38,7 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import app.service.SystemReservedGroupInitializer;
 import jakarta.transaction.Transactional;
 import java.util.Comparator;
 import java.util.List;
@@ -97,7 +98,16 @@ public class ServiceService {
     public List<ServiceDTO> findAll(String jurisdictionId) {
         List<Service> servicePage = serviceRepository.findAllByJurisdictionIdOrderByOrderPosition(jurisdictionId);
 
-        return servicePage.stream().map(this::toServiceDTO).collect(Collectors.toList());
+        return servicePage.stream()
+            .filter(s -> !SystemReservedGroupInitializer.SYSTEM_RESERVED.equals(s.getServiceGroup().getName()))
+            .map(this::toServiceDTO)
+            .collect(Collectors.toList());
+    }
+
+    public ServiceDTO findService(Long serviceCode, String jurisdictionId) {
+        return serviceRepository.findById(serviceCode)
+            .map(this::toServiceDTO)
+            .orElseThrow(() -> new ServiceNotFoundException(serviceCode, jurisdictionId));
     }
 
     public ServiceDefinitionDTO getServiceDefinition(Long serviceCode, String jurisdictionId) {

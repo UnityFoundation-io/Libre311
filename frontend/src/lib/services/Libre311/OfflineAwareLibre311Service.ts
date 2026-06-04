@@ -95,6 +95,10 @@ export class OfflineAwareLibre311Service implements Libre311Service {
 		return this.wrapped.getServiceList();
 	}
 
+	getService(params: HasServiceCode): Promise<Service> {
+		return this.wrapped.getService(params);
+	}
+
 	getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition> {
 		return this.wrapped.getServiceDefinition(params);
 	}

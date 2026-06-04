@@ -26,7 +26,7 @@ import jakarta.transaction.Transactional;
 @Singleton
 public class SystemReservedGroupInitializer {
 
-    static final String SYSTEM_RESERVED = "System Reserved";
+    public static final String SYSTEM_RESERVED = "System Reserved";
 
     private final JurisdictionRepository jurisdictionRepository;
     private final ServiceGroupRepository serviceGroupRepository;

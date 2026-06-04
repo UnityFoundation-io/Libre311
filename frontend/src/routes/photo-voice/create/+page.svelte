@@ -64,8 +64,7 @@
 		try {
 			const photoVoiceCode = $jurisdictionStore.photo_voice_service_code;
 			if (photoVoiceCode) {
-				const services = await libre311.getServiceList();
-				photoVoiceService = services.find((s) => s.service_code === photoVoiceCode);
+				photoVoiceService = await libre311.getService({ service_code: photoVoiceCode });
 			}
 		} catch (err) {
 			alertError(err);

@@ -633,6 +633,7 @@ type UpdateAttributesOrderParams = {
 } & HasServiceCode;
 export interface Libre311Service extends Open311Service {
 	getJurisdictionConfig(): JurisdictionConfig;
+	getService(params: HasServiceCode): Promise<Service>;
 	reverseGeocode(coords: L.PointTuple): Promise<ReverseGeocodeResponse>;
 	uploadImage(file: File): Promise<string>;
 	setAuthInfo(authInfo: UnityAuthLoginResponse | undefined): void;
@@ -683,6 +684,8 @@ const ROUTES = {
 	getJurisdictionConfig: '/config',
 	getServiceList: (params: HasJurisdictionId) =>
 		`/services?jurisdiction_id=${params.jurisdiction_id}`,
+	getService: (params: HasJurisdictionId & HasServiceCode) =>
+		`/services/${params.service_code}/details?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceDefinition: (params: HasJurisdictionId & HasServiceCode) =>
 		`/services/${params.service_code}?jurisdiction_id=${params.jurisdiction_id}`,
 	getServiceRequests: (qParams: URLSearchParams) => `/requests?${qParams.toString()}`,
@@ -980,6 +983,13 @@ export class Libre311ServiceImpl implements Libre311Service {
 		} else {
 			throw new Error('Failed to get service list');
 		}
+	}
+
+	async getService(params: HasServiceCode): Promise<Service> {
+		const res = await this.axiosInstance.get<unknown>(
+			ROUTES.getService({ ...params, jurisdiction_id: this.jurisdictionId })
+		);
+		return ServiceSchema.parse(res.data);
 	}
 
 	async getServiceDefinition(params: HasServiceCode): Promise<ServiceDefinition> {
