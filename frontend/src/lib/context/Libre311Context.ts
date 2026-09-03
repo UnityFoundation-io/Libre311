@@ -17,6 +17,7 @@ import {
 	recaptchaServiceFactory,
 	type RecaptchaServiceProps
 } from '$lib/services/RecaptchaService';
+import type { CartoServiceProps } from '$lib/services/CartoService';
 import { writable, type Readable, type Writable } from 'svelte/store';
 import type { Libre311Alert } from './Libre311AlertStore';
 import {
@@ -50,12 +51,14 @@ export type Libre311Context = {
 	offlineQueue: OfflineQueue;
 	syncSignal: Readable<number>;
 	sessionExpired: Writable<boolean>;
+	cartoServiceProps: CartoServiceProps;
 } & Libre311Alert;
 
 export type Libre311ContextProviderProps = {
 	libreServiceProps: Omit<Libre311ServiceProps, 'recaptchaService'>;
 	unityAuthServiceProps: Omit<UnityAuthServiceProps, 'userPermissionsResolver'>;
 	recaptchaServiceProps: RecaptchaServiceProps;
+	cartoServiceProps: CartoServiceProps;
 	mode: Mode;
 };
 
