@@ -22,6 +22,7 @@
 	import { getJurisdictionConfig, type JurisdictionConfig } from '$lib/services/Libre311/Libre311';
 	import { getModeFromEnv, type Mode } from '$lib/services/mode';
 	import { loadRecaptchaProps } from '$lib/services/RecaptchaService';
+	import { loadCartoProps } from '$lib/services/CartoService';
 	import User from '$lib/components/User.svelte';
 
 	let contextProviderProps: AsyncResult<Libre311ContextProviderProps> = ASYNC_IN_PROGRESS;
@@ -37,8 +38,9 @@
 			const mode: Mode = getModeFromEnv(import.meta.env);
 			const libreBaseURL = String(import.meta.env.VITE_BACKEND_URL ?? '') || '/api';
 
-			const [recaptchaServiceProps, jurisdictionConfig] = await Promise.all([
+			const [recaptchaServiceProps, cartoServiceProps, jurisdictionConfig] = await Promise.all([
 				loadRecaptchaProps(mode),
+				loadCartoProps(mode),
 				getJurisdictionConfig(libreBaseURL)
 			]);
 
@@ -49,6 +51,7 @@
 					jurisdictionConfig
 				},
 				recaptchaServiceProps,
+				cartoServiceProps,
 				unityAuthServiceProps: { baseURL: jurisdictionConfig.auth_base_url }
 			};
 
